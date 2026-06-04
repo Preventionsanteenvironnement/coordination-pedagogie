@@ -91,33 +91,33 @@ header.hero p {
 }
 .search-wrap input::placeholder { color: var(--text-soft); }
 
-.filters {
+/* ---------- Fil d'Ariane ---------- */
+.breadcrumb {
+  max-width: 1100px;
+  margin: 26px auto 0;
+  padding: 0 22px;
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  justify-content: center;
-  margin: 18px 0 0;
+  flex-wrap: wrap;
+  min-height: 22px;
 }
-.chip {
-  border: 1px solid var(--line);
-  background: var(--bg-card);
+.breadcrumb .crumb {
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: .92rem;
   color: var(--text-soft);
-  border-radius: 999px;
-  padding: 7px 15px;
-  font-size: .9rem;
   cursor: pointer;
-  transition: .15s;
-  white-space: nowrap;
+  padding: 4px 2px;
+  transition: color .15s;
 }
-.chip:hover { border-color: var(--accent); color: var(--accent); }
-.chip.active {
-  background: var(--chip-accent, var(--accent));
-  border-color: var(--chip-accent, var(--accent));
-  color: #fff;
-}
+.breadcrumb .crumb:hover { color: var(--accent); }
+.breadcrumb .crumb:last-child { color: var(--text); font-weight: 600; cursor: default; }
+.breadcrumb .sep { color: var(--text-soft); opacity: .55; }
 
 /* ---------- Sections thématiques ---------- */
-main { max-width: 1100px; margin: 0 auto; padding: 40px 20px 80px; }
+main { max-width: 1100px; margin: 0 auto; padding: 22px 20px 60px; }
 
 .theme {
   margin-top: 44px;
@@ -166,6 +166,20 @@ main { max-width: 1100px; margin: 0 auto; padding: 40px 20px 80px; }
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 18px;
+  animation: rise .35s ease both;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) { .grid { animation: none; } }
+
+/* Carte-dossier (bouton) : mêmes styles que .card */
+.card.branch {
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
 }
 .card {
   position: relative;

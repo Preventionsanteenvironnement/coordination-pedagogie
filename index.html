@@ -12,106 +12,114 @@
     <div class="hero-inner">
       <span class="kicker">Espace interne</span>
       <h1 id="site-titre">Coordination &amp; Pédagogie</h1>
-      <p id="site-soustitre" hidden></p>
     </div>
   </header>
 
   <div class="toolbar">
     <div class="search-wrap">
-      <input type="search" id="recherche" placeholder="Rechercher une ressource…"
-             aria-label="Rechercher une ressource" />
+      <input type="search" id="recherche" placeholder="Rechercher…"
+             aria-label="Rechercher" />
     </div>
-    <div class="filters" id="filtres"></div>
   </div>
 
-  <main id="contenu"></main>
+  <nav class="breadcrumb" id="fil" aria-label="Fil d'Ariane"></nav>
+
+  <main>
+    <div class="grid" id="grille"></div>
+  </main>
 
   <footer>
-    <div>Espace réservé aux enseignants et aux collègues.</div>
+    <div>Espace réservé à l'équipe pédagogique.</div>
     <span class="rgpd">Aucun nom d'élève ni d'établissement n'est publié sur cet espace.</span>
   </footer>
 
   <script src="data.js"></script>
   <script>
-    const contenu = document.getElementById('contenu');
-    const filtres = document.getElementById('filtres');
+    const grille = document.getElementById('grille');
+    const fil = document.getElementById('fil');
     const recherche = document.getElementById('recherche');
-    const soustitre = document.getElementById('site-soustitre');
 
     document.getElementById('site-titre').textContent = SITE.titre;
     document.title = SITE.titre;
-    if (SITE.sousTitre) { soustitre.textContent = SITE.sousTitre; soustitre.hidden = false; }
 
-    let themeActif = 'tous';
-    let texteRecherche = '';
+    let path = [];   // pile de dossiers ouverts (du plus haut au plus profond)
+    let q = '';
 
-    // --- Filtres (puces) ---
-    function construireFiltres() {
-      const puces = [{ id: 'tous', nom: 'Tout' }, ...THEMATIQUES];
-      filtres.innerHTML = puces.map(t =>
-        `<button class="chip${t.id === themeActif ? ' active' : ''}" data-id="${t.id}"
-                 style="--chip-accent:${t.couleur || 'var(--accent)'}">${t.nom}</button>`).join('');
-      filtres.querySelectorAll('.chip').forEach(b =>
+    const enfantsCourants = () =>
+      path.length ? (path[path.length - 1].enfants || []) : THEMATIQUES;
+    const couleurTheme = () =>
+      path.length ? (path[0].couleur || 'var(--accent)') : null;
+    const nom = n => n.nom || n.titre;
+
+    // --- Fil d'Ariane ---
+    function rendreFil() {
+      if (!path.length) { fil.innerHTML = ''; return; }
+      let html = '<button class="crumb" data-i="-1">Accueil</button>';
+      path.forEach((n, i) => {
+        html += '<span class="sep" aria-hidden="true">›</span>';
+        html += `<button class="crumb" data-i="${i}">${nom(n)}</button>`;
+      });
+      fil.innerHTML = html;
+      fil.querySelectorAll('.crumb').forEach(b =>
         b.addEventListener('click', () => {
-          themeActif = b.dataset.id;
-          construireFiltres();
-          rendu();
+          path = path.slice(0, +b.dataset.i + 1);
+          q = ''; recherche.value = '';
+          rendre();
         }));
     }
 
-    // --- Carte ---
-    function carteHTML(item, couleur) {
-      const externe = /^https?:\/\//.test(item.lien);
-      const cible = externe ? ' target="_blank" rel="noopener"' : '';
-      const badge = item.badge ? `<span class="badge">${item.badge}</span>` : '';
-      return `
-        <a class="card" href="${item.lien}"${cible} style="--card-accent:${couleur}">
-          ${badge}
-          <h3>${item.titre}</h3>
-          <p>${item.desc || ''}</p>
-          <div class="meta">
-            <span class="type-tag">${item.type || 'Lien'}</span>
-            <span class="arrow" aria-hidden="true">→</span>
-          </div>
-        </a>`;
+    // --- Rendu d'un palier ---
+    function rendre() {
+      rendreFil();
+      const couleur = couleurTheme();
+      let items = enfantsCourants();
+      if (q) items = items.filter(n =>
+        (nom(n) + ' ' + (n.desc || '')).toLowerCase().includes(q));
+
+      if (!items.length) {
+        grille.innerHTML =
+          `<div class="empty">${q ? 'Aucun résultat.' : 'Rien pour l’instant.'}</div>`;
+        return;
+      }
+
+      grille.innerHTML = items.map((n, idx) => {
+        const c = couleur || n.couleur || 'var(--accent)';
+        const badge = n.badge ? `<span class="badge">${n.badge}</span>` : '';
+        if (n.enfants) {
+          const k = n.enfants.length;
+          const compte = k ? `${k} élément${k > 1 ? 's' : ''}` : 'À compléter';
+          return `
+            <button class="card branch" data-idx="${idx}" style="--card-accent:${c}">
+              ${badge}
+              <h3>${nom(n)}</h3>
+              <p>${n.desc || ''}</p>
+              <div class="meta"><span class="type-tag">${compte}</span>
+                <span class="arrow" aria-hidden="true">→</span></div>
+            </button>`;
+        }
+        const externe = /^https?:\/\//.test(n.lien);
+        const cible = externe ? ' target="_blank" rel="noopener"' : '';
+        return `
+          <a class="card" href="${n.lien}"${cible} style="--card-accent:${c}">
+            ${badge}
+            <h3>${n.titre}</h3>
+            <p>${n.desc || ''}</p>
+            <div class="meta"><span class="type-tag">${n.type || 'Lien'}</span>
+              <span class="arrow" aria-hidden="true">→</span></div>
+          </a>`;
+      }).join('');
+
+      grille.querySelectorAll('.branch').forEach(b =>
+        b.addEventListener('click', () => {
+          path.push(items[+b.dataset.idx]);
+          q = ''; recherche.value = '';
+          rendre();
+        }));
     }
 
-    // --- Rendu principal ---
-    function rendu() {
-      const q = texteRecherche.trim().toLowerCase();
-      let html = '';
-      let total = 0;
+    recherche.addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); rendre(); });
 
-      THEMATIQUES.forEach(theme => {
-        if (themeActif !== 'tous' && themeActif !== theme.id) return;
-        const items = theme.items.filter(it => {
-          if (!q) return true;
-          return (it.titre + ' ' + (it.desc || '')).toLowerCase().includes(q);
-        });
-        if (!items.length) return;
-        total += items.length;
-        html += `
-          <section class="theme" id="${theme.id}" style="--theme-accent:${theme.couleur || 'var(--accent)'}">
-            <div class="theme-head">
-              <span class="dot" aria-hidden="true"></span>
-              <h2>${theme.nom}</h2>
-              <span class="count">${items.length}</span>
-            </div>
-            <div class="grid">
-              ${items.map(it => carteHTML(it, theme.couleur || 'var(--accent)')).join('')}
-            </div>
-          </section>`;
-      });
-
-      contenu.innerHTML = total
-        ? html
-        : `<div class="empty">Aucune ressource ne correspond à votre recherche.</div>`;
-    }
-
-    recherche.addEventListener('input', e => { texteRecherche = e.target.value; rendu(); });
-
-    construireFiltres();
-    rendu();
+    rendre();
   </script>
 </body>
 </html>
