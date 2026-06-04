@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Coordination &amp; Pédagogie</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <h1 id="site-titre">Coordination &amp; Pédagogie</h1>
+    <p id="site-soustitre">Espace de ressources pour les enseignants.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span aria-hidden="true">🔍</span>
+      <input type="search" id="recherche" placeholder="Rechercher une ressource…"
+             aria-label="Rechercher une ressource" />
+    </div>
+    <div class="filters" id="filtres"></div>
+  </div>
+
+  <main id="contenu"></main>
+
+  <footer>
+    <div>Espace réservé aux enseignants et aux collègues — accès libre, contenu professionnel.</div>
+    <span class="rgpd">🔒 Aucun nom d'élève ni d'établissement n'est publié sur cet espace (conformité RGPD).</span>
+  </footer>
+
+  <script src="data.js"></script>
+  <script>
+    const contenu = document.getElementById('contenu');
+    const filtres = document.getElementById('filtres');
+    const recherche = document.getElementById('recherche');
+
+    document.getElementById('site-titre').textContent = SITE.titre;
+    document.getElementById('site-soustitre').textContent = SITE.sousTitre;
+    document.title = SITE.titre;
+
+    let themeActif = 'tous';
+    let texteRecherche = '';
+
+    // --- Filtres (puces) ---
+    function construireFiltres() {
+      const puces = [{ id: 'tous', nom: 'Tout', icone: '✦' }, ...THEMATIQUES];
+      filtres.innerHTML = puces.map(t =>
+        `<button class="chip${t.id === themeActif ? ' active' : ''}" data-id="${t.id}">
+           ${t.icone ? t.icone + ' ' : ''}${t.nom}
+         </button>`).join('');
+      filtres.querySelectorAll('.chip').forEach(b =>
+        b.addEventListener('click', () => {
+          themeActif = b.dataset.id;
+          construireFiltres();
+          rendu();
+        }));
+    }
+
+    // --- Carte ---
+    function carteHTML(item, couleur) {
+      const externe = /^https?:\/\//.test(item.lien);
+      const cible = externe ? ' target="_blank" rel="noopener"' : '';
+      const badge = item.badge ? `<span class="badge">${item.badge}</span>` : '';
+      return `
+        <a class="card" href="${item.lien}"${cible} style="--card-accent:${couleur}">
+          ${badge}
+          <h3>${item.titre}</h3>
+          <p>${item.desc || ''}</p>
+          <div class="meta">
+            <span class="type-tag">${item.type || 'Lien'}</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </div>
+        </a>`;
+    }
+
+    // --- Rendu principal ---
+    function rendu() {
+      const q = texteRecherche.trim().toLowerCase();
+      let html = '';
+      let total = 0;
+
+      THEMATIQUES.forEach(theme => {
+        if (themeActif !== 'tous' && themeActif !== theme.id) return;
+        const items = theme.items.filter(it => {
+          if (!q) return true;
+          return (it.titre + ' ' + (it.desc || '')).toLowerCase().includes(q);
+        });
+        if (!items.length) return;
+        total += items.length;
+        html += `
+          <section class="theme" id="${theme.id}">
+            <div class="theme-head">
+              <span class="icone">${theme.icone || '📁'}</span>
+              <h2>${theme.nom}</h2>
+              <span class="count">${items.length}</span>
+            </div>
+            <div class="grid">
+              ${items.map(it => carteHTML(it, theme.couleur || 'var(--accent)')).join('')}
+            </div>
+          </section>`;
+      });
+
+      contenu.innerHTML = total
+        ? html
+        : `<div class="empty">Aucune ressource ne correspond à votre recherche.</div>`;
+    }
+
+    recherche.addEventListener('input', e => { texteRecherche = e.target.value; rendu(); });
+
+    construireFiltres();
+    rendu();
+  </script>
+</body>
+</html>
