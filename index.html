@@ -79,8 +79,13 @@
         (nom(n) + ' ' + (n.desc || '')).toLowerCase().includes(q));
 
       if (!items.length) {
-        grille.innerHTML =
-          `<div class="empty">${q ? 'Aucun résultat.' : 'Rien pour l’instant.'}</div>`;
+        grille.innerHTML = q
+          ? `<div class="empty">Aucun résultat.</div>`
+          : `<div class="panneau">
+               <span class="panneau-pic" aria-hidden="true"></span>
+               <strong>En cours de préparation</strong>
+               <span>Cette rubrique sera bientôt disponible.</span>
+             </div>`;
         return;
       }
 
@@ -88,15 +93,12 @@
         const c = couleur || n.couleur || 'var(--accent)';
         const badge = n.badge ? `<span class="badge">${n.badge}</span>` : '';
         if (n.enfants) {
-          const k = n.enfants.length;
-          const compte = k ? `${k} élément${k > 1 ? 's' : ''}` : 'À compléter';
           return `
             <button class="card branch" data-idx="${idx}" style="--card-accent:${c}">
               ${badge}
               <h3>${nom(n)}</h3>
               <p>${n.desc || ''}</p>
-              <div class="meta"><span class="type-tag">${compte}</span>
-                <span class="arrow" aria-hidden="true">→</span></div>
+              <div class="meta"><span class="arrow" aria-hidden="true">→</span></div>
             </button>`;
         }
         const externe = /^https?:\/\//.test(n.lien);
