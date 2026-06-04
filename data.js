@@ -31,15 +31,9 @@ const THEMATIQUES = [
         enfants: [
           {
             titre: "Projet d'établissement 2026-2030",
-            desc: "Présentation complète : axes, indicateurs, mise en œuvre.",
+            desc: "Présentation complète (axes, indicateurs, mise en œuvre) — téléchargement PDF possible depuis la page.",
             lien: "https://preventionsanteenvironnement.github.io/projetdetablissement/",
             type: "Page",
-          },
-          {
-            titre: "Projet d'établissement 2026-2030 (PDF)",
-            desc: "Le document complet à télécharger.",
-            lien: "https://preventionsanteenvironnement.github.io/projetdetablissement/projet-2026-2030.pdf",
-            type: "PDF",
           },
         ],
       },
