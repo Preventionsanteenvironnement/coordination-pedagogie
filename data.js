@@ -56,12 +56,6 @@ const THEMATIQUES = [
         lien: "https://preventionsanteenvironnement.github.io/cadre-reglementaire-pfmp/",
         type: "Outil",
       },
-      {
-        titre: "Répartition équitable des référents",
-        desc: "Répartir les suivis PFMP entre enseignants selon la méthode MELEC (heures, ratio, écarts). Aide à la décision en équipe.",
-        lien: "https://preventionsanteenvironnement.github.io/repartition-referents-pfmp/",
-        type: "Outil",
-      },
     ],
   },
   {
