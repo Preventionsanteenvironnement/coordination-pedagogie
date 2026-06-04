@@ -37,29 +37,30 @@ const THEMATIQUES = [
           },
         ],
       },
+    ],
+  },
+  {
+    id: "pfmp",
+    nom: "PFMP",
+    couleur: "#c0392b",
+    enfants: [
       {
-        titre: "PFMP — Périodes de formation en milieu professionnel",
-        desc: "Trois outils pour comprendre, sécuriser et organiser les PFMP.",
-        enfants: [
-          {
-            titre: "Convention & procédure expliquées",
-            desc: "La convention, la pré-convention, la procédure interne et le handicap, expliquées article par article. Qui fait quoi, checklist avant signature, « que faire si… ».",
-            lien: "https://preventionsanteenvironnement.github.io/pfmp-convention-procedure/",
-            type: "Outil",
-          },
-          {
-            titre: "Cadre réglementaire des PFMP",
-            desc: "Les textes officiels (Code de l'éducation, circulaire, allocation, horaires selon l'âge) avec la source exacte. « Selon ma formation » : CAP / Bac Pro.",
-            lien: "https://preventionsanteenvironnement.github.io/cadre-reglementaire-pfmp/",
-            type: "Outil",
-          },
-          {
-            titre: "Répartition équitable des référents",
-            desc: "Répartir les suivis PFMP entre enseignants selon la méthode MELEC (heures, ratio, écarts). Aide à la décision en équipe.",
-            lien: "https://preventionsanteenvironnement.github.io/repartition-referents-pfmp/",
-            type: "Outil",
-          },
-        ],
+        titre: "Convention & procédure expliquées",
+        desc: "La convention, la pré-convention, la procédure interne et le handicap, expliquées article par article. Qui fait quoi, checklist avant signature, « que faire si… ».",
+        lien: "https://preventionsanteenvironnement.github.io/pfmp-convention-procedure/",
+        type: "Outil",
+      },
+      {
+        titre: "Cadre réglementaire des PFMP",
+        desc: "Les textes officiels (Code de l'éducation, circulaire, allocation, horaires selon l'âge) avec la source exacte. « Selon ma formation » : CAP / Bac Pro.",
+        lien: "https://preventionsanteenvironnement.github.io/cadre-reglementaire-pfmp/",
+        type: "Outil",
+      },
+      {
+        titre: "Répartition équitable des référents",
+        desc: "Répartir les suivis PFMP entre enseignants selon la méthode MELEC (heures, ratio, écarts). Aide à la décision en équipe.",
+        lien: "https://preventionsanteenvironnement.github.io/repartition-referents-pfmp/",
+        type: "Outil",
       },
     ],
   },
