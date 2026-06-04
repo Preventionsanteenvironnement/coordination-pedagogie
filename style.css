@@ -264,11 +264,19 @@ footer {
   border-top: 1px solid var(--line);
 }
 footer .rgpd {
-  display: inline-block;
+  display: block;
   margin-top: 8px;
   font-size: .76rem;
   opacity: .8;
 }
+footer .guide-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: .78rem;
+  color: var(--accent);
+  text-decoration: none;
+}
+footer .guide-link:hover { text-decoration: underline; }
 
 @media (max-width: 520px) {
   header.hero { padding: 40px 18px 50px; }
