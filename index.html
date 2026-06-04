@@ -9,13 +9,15 @@
 </head>
 <body>
   <header class="hero">
-    <h1 id="site-titre">Coordination &amp; Pédagogie</h1>
-    <p id="site-soustitre">Espace de ressources pour les enseignants.</p>
+    <div class="hero-inner">
+      <span class="kicker">Espace interne</span>
+      <h1 id="site-titre">Coordination &amp; Pédagogie</h1>
+      <p id="site-soustitre" hidden></p>
+    </div>
   </header>
 
   <div class="toolbar">
     <div class="search-wrap">
-      <span aria-hidden="true">🔍</span>
       <input type="search" id="recherche" placeholder="Rechercher une ressource…"
              aria-label="Rechercher une ressource" />
     </div>
@@ -25,8 +27,8 @@
   <main id="contenu"></main>
 
   <footer>
-    <div>Espace réservé aux enseignants et aux collègues — accès libre, contenu professionnel.</div>
-    <span class="rgpd">🔒 Aucun nom d'élève ni d'établissement n'est publié sur cet espace (conformité RGPD).</span>
+    <div>Espace réservé aux enseignants et aux collègues.</div>
+    <span class="rgpd">Aucun nom d'élève ni d'établissement n'est publié sur cet espace.</span>
   </footer>
 
   <script src="data.js"></script>
@@ -34,21 +36,21 @@
     const contenu = document.getElementById('contenu');
     const filtres = document.getElementById('filtres');
     const recherche = document.getElementById('recherche');
+    const soustitre = document.getElementById('site-soustitre');
 
     document.getElementById('site-titre').textContent = SITE.titre;
-    document.getElementById('site-soustitre').textContent = SITE.sousTitre;
     document.title = SITE.titre;
+    if (SITE.sousTitre) { soustitre.textContent = SITE.sousTitre; soustitre.hidden = false; }
 
     let themeActif = 'tous';
     let texteRecherche = '';
 
     // --- Filtres (puces) ---
     function construireFiltres() {
-      const puces = [{ id: 'tous', nom: 'Tout', icone: '✦' }, ...THEMATIQUES];
+      const puces = [{ id: 'tous', nom: 'Tout' }, ...THEMATIQUES];
       filtres.innerHTML = puces.map(t =>
-        `<button class="chip${t.id === themeActif ? ' active' : ''}" data-id="${t.id}">
-           ${t.icone ? t.icone + ' ' : ''}${t.nom}
-         </button>`).join('');
+        `<button class="chip${t.id === themeActif ? ' active' : ''}" data-id="${t.id}"
+                 style="--chip-accent:${t.couleur || 'var(--accent)'}">${t.nom}</button>`).join('');
       filtres.querySelectorAll('.chip').forEach(b =>
         b.addEventListener('click', () => {
           themeActif = b.dataset.id;
@@ -89,9 +91,9 @@
         if (!items.length) return;
         total += items.length;
         html += `
-          <section class="theme" id="${theme.id}">
+          <section class="theme" id="${theme.id}" style="--theme-accent:${theme.couleur || 'var(--accent)'}">
             <div class="theme-head">
-              <span class="icone">${theme.icone || '📁'}</span>
+              <span class="dot" aria-hidden="true"></span>
               <h2>${theme.nom}</h2>
               <span class="count">${items.length}</span>
             </div>

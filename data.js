@@ -19,14 +19,13 @@
 
 const SITE = {
   titre: "Coordination & Pédagogie",
-  sousTitre: "Espace de ressources pour les enseignants — administratif, pédagogie, références.",
+  sousTitre: "",
 };
 
 const THEMATIQUES = [
   {
     id: "administratif",
     nom: "Vie d'établissement & administratif",
-    icone: "🏛️",
     couleur: "#3b6ea5",
     items: [
       {
@@ -46,13 +45,12 @@ const THEMATIQUES = [
   },
   {
     id: "pedagogie",
-    nom: "Pédagogie & cas d'étude",
-    icone: "🎓",
+    nom: "Pédagogie",
     couleur: "#5a8a3c",
     items: [
       {
         titre: "Étude de situation (modèle)",
-        desc: "Trame d'EDS anonymisée — sans nom d'élève ni d'établissement.",
+        desc: "Trame anonymisée — sans nom d'élève ni d'établissement.",
         lien: "#",
         type: "Word",
         badge: "À venir",
@@ -62,7 +60,6 @@ const THEMATIQUES = [
   {
     id: "references",
     nom: "Référentiels & textes officiels",
-    icone: "📚",
     couleur: "#9a5ba5",
     items: [
       {
@@ -76,16 +73,9 @@ const THEMATIQUES = [
   },
   {
     id: "ressources",
-    nom: "Ressources & outils en ligne",
-    icone: "🔗",
+    nom: "Compétences psychosociales",
     couleur: "#c97a2b",
     items: [
-      {
-        titre: "Espace de ressources PSE (mapse.fr)",
-        desc: "Le site élève de cours, exercices et flashcards.",
-        lien: "https://mapse.fr",
-        type: "Page",
-      },
       {
         titre: "Compétences psychosociales (CPS)",
         desc: "Site de ressources sur les CPS.",
