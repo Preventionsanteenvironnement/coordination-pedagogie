@@ -9,10 +9,11 @@
 </head>
 <body>
   <header class="hero">
-    <div class="hero-inner">
+    <button class="hero-inner" id="accueil" title="Revenir à l'accueil" aria-label="Revenir à l'accueil">
       <span class="kicker">Espace interne</span>
       <h1 id="site-titre">Coordination &amp; Pédagogie</h1>
-    </div>
+      <span class="home-hint">Cliquer pour revenir à l'accueil</span>
+    </button>
   </header>
 
   <div class="toolbar">
@@ -46,6 +47,13 @@
 
     let path = [];   // pile de dossiers ouverts (du plus haut au plus profond)
     let q = '';
+
+    // Retour à l'accueil — toujours accessible (titre cliquable)
+    document.getElementById('accueil').addEventListener('click', () => {
+      path = []; q = ''; recherche.value = '';
+      rendre();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
     const enfantsCourants = () =>
       path.length ? (path[path.length - 1].enfants || []) : THEMATIQUES;

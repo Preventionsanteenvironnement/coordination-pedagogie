@@ -40,7 +40,31 @@ header.hero {
   padding: 64px 24px 72px;
   text-align: center;
 }
-.hero-inner { max-width: 720px; margin: 0 auto; }
+.hero-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+.home-hint {
+  display: block;
+  margin-top: 12px;
+  font-size: .74rem;
+  letter-spacing: .04em;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.hero-inner:hover .home-hint,
+.hero-inner:focus-visible .home-hint { opacity: .8; }
+@media (hover: none) {
+  .home-hint { opacity: .65; }   /* sur mobile/tablette, indice toujours visible */
+}
 .kicker {
   display: inline-block;
   font-size: .72rem;
