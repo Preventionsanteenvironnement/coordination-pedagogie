@@ -7,204 +7,336 @@
   <title>Trouver un créneau — Coordination &amp; Pédagogie</title>
   <style>
     :root{
-      --bg:#f4f6f9; --bg-card:#fff; --text:#1f2733; --text-soft:#5b6675;
-      --line:#e3e8ef; --accent:#3b6ea5;
-      --oui:#3c8a4e; --oui-bg:#e7f4ea;
-      --sibesoin:#c79019; --sibesoin-bg:#fbf3e0;
-      --non:#c0533f; --non-bg:#f8e8e4;
-      --shadow:0 1px 3px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
-      --radius:16px;
+      --bg:#eef2f6; --bg-2:#f7f9fb; --card:#fff; --text:#1c2530; --soft:#5d6b7b;
+      --line:#e2e8ef; --line-2:#eef2f6;
+      --accent:#2f8f83; --accent-d:#26756b; --accent-soft:#e2f1ef;
+      --oui:#2f8f5e; --oui-bg:#e6f5ec; --oui-line:#bfe6cd;
+      --sib:#c8920f; --sib-bg:#fbf2dc; --sib-line:#ecd9a3;
+      --non:#cf5a45; --non-bg:#f9e9e5; --non-line:#f1c9bf;
+      --gold:#caa53d; --gold-bg:#f8f1da;
+      --shadow:0 1px 2px rgba(16,24,40,.05), 0 10px 30px rgba(16,24,40,.07);
+      --shadow-lg:0 8px 40px rgba(16,24,40,.14);
+      --r:18px; --r-sm:11px;
     }
     @media (prefers-color-scheme: dark){
       :root{
-        --bg:#0f141b; --bg-card:#181f29; --text:#e7ecf3; --text-soft:#9aa6b6;
-        --line:#283341; --accent:#5a90c8;
-        --oui:#5cb371; --oui-bg:#16301d;
-        --sibesoin:#d7a843; --sibesoin-bg:#332a12;
-        --non:#d8715c; --non-bg:#331d18;
-        --shadow:0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+        --bg:#0e131a; --bg-2:#141b24; --card:#171f29; --text:#e8edf3; --soft:#9aa7b6;
+        --line:#283341; --line-2:#1f2733;
+        --accent:#4cb3a4; --accent-d:#3c958a; --accent-soft:#15302c;
+        --oui:#52b878; --oui-bg:#13301f; --oui-line:#1f5235;
+        --sib:#d6ab4a; --sib-bg:#332a12; --sib-line:#574716;
+        --non:#dd7560; --non-bg:#331d18; --non-line:#5a2f25;
+        --gold:#d8bb5e; --gold-bg:#2e2814;
+        --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 34px rgba(0,0,0,.4);
+        --shadow-lg:0 10px 50px rgba(0,0,0,.55);
       }
     }
     *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
     body{
       margin:0; background:var(--bg); color:var(--text); line-height:1.55;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      -webkit-font-smoothing:antialiased;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
+    /* ---------- hero ---------- */
     header.hero{
-      background:linear-gradient(135deg,#34618f 0%,#4f7d37 100%);
-      color:#fff; padding:40px 24px 46px; text-align:center;
+      background:radial-gradient(120% 140% at 0% 0%, #36a294 0%, #2f8f83 42%, #3f7d4e 100%);
+      color:#fff; padding:46px 22px 54px; text-align:center; position:relative; overflow:hidden;
     }
-    header.hero .kicker{
-      display:block; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; opacity:.85;
+    header.hero::after{
+      content:""; position:absolute; inset:auto -10% -60% -10%; height:120px;
+      background:var(--bg); border-radius:50% 50% 0 0 / 100% 100% 0 0;
     }
-    header.hero h1{ margin:.25em 0 0; font-size:1.7rem; }
-    header.hero p{ margin:.4em 0 0; opacity:.9; font-size:.95rem; }
-    main{ max-width:920px; margin:0 auto; padding:24px 18px 64px; }
+    .hero-in{ max-width:760px; margin:0 auto; position:relative; z-index:1; }
+    .kicker{ display:inline-block; font-size:.7rem; letter-spacing:.18em; text-transform:uppercase;
+      opacity:.92; background:rgba(255,255,255,.16); padding:5px 12px; border-radius:999px; }
+    header.hero h1{ margin:.4em 0 .12em; font-size:clamp(1.5rem,4.5vw,2.1rem); font-weight:800; letter-spacing:-.01em; }
+    header.hero p{ margin:0; opacity:.94; font-size:.98rem; }
+    main{ max-width:880px; margin:0 auto; padding:8px 16px 80px; }
+    /* ---------- cartes ---------- */
     .card{
-      background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius);
-      box-shadow:var(--shadow); padding:22px; margin-bottom:20px;
+      background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+      box-shadow:var(--shadow); padding:24px; margin:18px 0;
+      animation:rise .45s cubic-bezier(.2,.7,.3,1) both;
     }
-    h2{ font-size:1.15rem; margin:.1em 0 .6em; }
-    label{ display:block; font-weight:600; font-size:.9rem; margin:14px 0 5px; }
-    .hint{ color:var(--text-soft); font-size:.82rem; font-weight:400; }
-    input[type=text]{
-      width:100%; padding:11px 13px; font:inherit; color:var(--text);
-      background:var(--bg); border:1px solid var(--line); border-radius:10px;
+    @keyframes rise{ from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none} }
+    .card.tight{ padding:18px 22px; }
+    h2{ font-size:1.12rem; margin:0 0 4px; display:flex; align-items:center; gap:10px; }
+    h2 .step{ display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%;
+      background:var(--accent-soft); color:var(--accent); font-size:.85rem; font-weight:800; }
+    .sub{ color:var(--soft); font-size:.9rem; margin:0 0 16px; }
+    label{ display:block; font-weight:650; font-size:.88rem; margin:15px 0 6px; }
+    label .hint{ color:var(--soft); font-weight:400; }
+    .field{ position:relative; }
+    input[type=text], input[type=time], input[type=date], select, textarea{
+      width:100%; padding:12px 13px; font:inherit; color:var(--text);
+      background:var(--bg-2); border:1.5px solid var(--line); border-radius:var(--r-sm); transition:.15s;
     }
-    input[type=text]:focus{ outline:2px solid var(--accent); outline-offset:1px; }
-    button{ font:inherit; cursor:pointer; }
-    .btn{
-      display:inline-flex; align-items:center; gap:7px; padding:11px 18px; border-radius:10px;
-      border:1px solid var(--accent); background:var(--accent); color:#fff; font-weight:600;
-    }
-    .btn.secondary{ background:transparent; color:var(--accent); }
-    .btn.ghost{ background:transparent; border-color:var(--line); color:var(--text-soft); font-weight:500; }
-    .btn.danger{ border-color:var(--non); color:var(--non); background:transparent; }
-    .btn:disabled{ opacity:.5; cursor:not-allowed; }
-    .row{ display:flex; gap:8px; align-items:center; }
-    .creneaux-list{ list-style:none; padding:0; margin:8px 0 0; display:flex; flex-direction:column; gap:8px; }
-    .creneaux-list li{
-      display:flex; align-items:center; gap:10px; background:var(--bg);
-      border:1px solid var(--line); border-radius:10px; padding:8px 10px 8px 14px;
-    }
-    .creneaux-list li .lab{ flex:1; }
-    .creneaux-list li .num{ color:var(--text-soft); font-size:.8rem; min-width:1.4em; }
-    .x{ border:none; background:none; color:var(--non); font-size:1.1rem; padding:2px 8px; border-radius:8px; }
-    .x:hover{ background:var(--non-bg); }
-    .add-row{ display:flex; gap:8px; margin-top:10px; }
-    .add-row input{ flex:1; }
-    .examples{ font-size:.82rem; color:var(--text-soft); margin-top:8px; }
-    .actions{ margin-top:22px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-    .share{
-      background:var(--oui-bg); border:1px solid var(--oui); border-radius:12px;
-      padding:14px 16px; margin-bottom:20px; font-size:.92rem;
-    }
-    .share code{ word-break:break-all; }
-    .rgpd{
-      display:flex; gap:10px; align-items:flex-start; font-size:.82rem; color:var(--text-soft);
-      background:var(--bg); border:1px dashed var(--line); border-radius:12px; padding:12px 14px; margin-top:16px;
-    }
-    /* ---- grille de résultats ---- */
-    .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    table{ border-collapse:collapse; width:100%; min-width:480px; }
-    th,td{ border:1px solid var(--line); padding:9px 8px; text-align:center; font-size:.88rem; }
-    th.who,td.who{ text-align:left; position:sticky; left:0; background:var(--bg-card); z-index:1; min-width:120px; }
-    thead th{ background:var(--bg); font-weight:600; vertical-align:bottom; }
-    .cell-oui{ background:var(--oui-bg); color:var(--oui); font-weight:700; }
-    .cell-sibesoin{ background:var(--sibesoin-bg); color:var(--sibesoin); font-weight:700; }
-    .cell-non{ background:var(--non-bg); color:var(--non); }
-    tfoot td{ font-weight:700; background:var(--bg); }
-    .best{ outline:3px solid var(--oui); outline-offset:-3px; }
-    .best-tag{ display:inline-block; font-size:.7rem; background:var(--oui); color:#fff; border-radius:6px; padding:1px 6px; margin-left:6px; vertical-align:middle; }
-    /* ---- choix de vote ---- */
-    .vote-line{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:10px 0; border-bottom:1px solid var(--line); }
-    .vote-line .vl-lab{ flex:1; min-width:160px; font-weight:600; }
-    .seg{ display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-    .seg button{ border:none; background:var(--bg-card); color:var(--text-soft); padding:8px 12px; font-size:.85rem; }
-    .seg button+button{ border-left:1px solid var(--line); }
+    textarea{ resize:vertical; min-height:64px; }
+    input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:560px){ .grid2{ grid-template-columns:1fr; } }
+    button{ font:inherit; cursor:pointer; border:none; }
+    .btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 20px;
+      border-radius:var(--r-sm); background:var(--accent); color:#fff; font-weight:700; transition:.16s;
+      box-shadow:0 2px 8px rgba(47,143,131,.28); }
+    .btn:hover{ background:var(--accent-d); transform:translateY(-1px); box-shadow:0 6px 16px rgba(47,143,131,.32); }
+    .btn:active{ transform:translateY(0); }
+    .btn.big{ padding:15px 26px; font-size:1.02rem; width:100%; }
+    .btn.sec{ background:var(--accent-soft); color:var(--accent); box-shadow:none; }
+    .btn.sec:hover{ background:var(--accent-soft); filter:brightness(.97); }
+    .btn.ghost{ background:transparent; border:1.5px solid var(--line); color:var(--soft); box-shadow:none; }
+    .btn.ghost:hover{ border-color:var(--accent); color:var(--accent); background:transparent; }
+    .btn.danger{ background:transparent; border:1.5px solid var(--non-line); color:var(--non); box-shadow:none; }
+    .btn.danger:hover{ background:var(--non-bg); }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+    .muted{ color:var(--soft); font-size:.86rem; }
+    /* ---------- générateur de créneaux ---------- */
+    .builder{ background:var(--bg-2); border:1px solid var(--line); border-radius:var(--r-sm); padding:16px; }
+    .builder .line{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1.1fr; gap:10px; align-items:end; }
+    @media(max-width:620px){ .builder .line{ grid-template-columns:1fr 1fr; } }
+    .builder .mini{ font-size:.78rem; font-weight:650; color:var(--soft); margin:0 0 5px; }
+    .gen-preview{ font-size:.82rem; color:var(--accent); margin-top:10px; min-height:1.2em; font-weight:600; }
+    .sepor{ display:flex; align-items:center; gap:12px; color:var(--soft); font-size:.8rem; margin:16px 0; }
+    .sepor::before, .sepor::after{ content:""; flex:1; height:1px; background:var(--line); }
+    .freeadd{ display:flex; gap:9px; }
+    .freeadd input{ flex:1; }
+    /* aperçu des créneaux, groupés par jour */
+    #apercu{ margin-top:18px; }
+    .daygroup{ margin-top:14px; }
+    .daygroup-h{ font-size:.82rem; font-weight:750; color:var(--accent);      display:flex; align-items:center; gap:7px; margin-bottom:8px; }
+    .daygroup-h::before{ content:"📅"; font-size:.9rem; }
+    .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+    .chip{ display:inline-flex; align-items:center; gap:8px; background:var(--card); border:1.5px solid var(--line);
+      border-radius:999px; padding:7px 8px 7px 14px; font-size:.86rem; font-weight:600; animation:pop .2s ease; }
+    @keyframes pop{ from{transform:scale(.8); opacity:0} to{transform:none; opacity:1} }
+    .chip .rm{ display:grid; place-items:center; width:22px; height:22px; border-radius:50%;
+      background:var(--non-bg); color:var(--non); font-size:.9rem; line-height:1; }
+    .chip .rm:hover{ background:var(--non); color:#fff; }
+    .empty-hint{ color:var(--soft); font-size:.88rem; font-style:italic; padding:8px 0; }
+    /* ---------- bandeau partage ---------- */
+    .share{ background:linear-gradient(135deg,var(--accent-soft),var(--bg-2)); border:1.5px solid var(--accent-soft);
+      border-radius:var(--r); padding:18px 20px; margin:18px 0; }
+    .share .lab{ font-weight:750; font-size:.92rem; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .share-row{ display:flex; gap:9px; align-items:stretch; }
+    .share-row input{ flex:1; font-size:.84rem; }
+    .banner{ border-radius:var(--r-sm); padding:13px 17px; margin-bottom:16px; font-weight:650; display:flex; gap:10px; align-items:center; }
+    .banner.gold{ background:var(--gold-bg); color:var(--gold); border:1.5px solid var(--gold); }
+    .banner.closed{ background:var(--sib-bg); color:var(--sib); border:1.5px solid var(--sib-line); }
+    .meta-row{ display:flex; flex-wrap:wrap; gap:8px 16px; margin:2px 0 4px; }
+    .meta-row .m{ display:inline-flex; align-items:center; gap:7px; font-size:.9rem; color:var(--soft); }
+    .meta-row .m b{ color:var(--text); font-weight:650; }
+    /* ---------- formulaire de vote ---------- */
+    .id-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:560px){ .id-row{ grid-template-columns:1fr; } }
+    .vote-day-h{ font-size:.8rem; font-weight:750; color:var(--accent); text-transform:capitalize; margin:18px 0 6px; }
+    .vline{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:11px 0; border-bottom:1px solid var(--line-2); }
+    .vline .vl{ flex:1; min-width:150px; font-weight:600; }
+    .seg{ display:inline-flex; border:1.5px solid var(--line); border-radius:var(--r-sm); overflow:hidden; background:var(--card); }
+    .seg button{ background:transparent; color:var(--soft); padding:9px 14px; font-size:.85rem; font-weight:650; transition:.13s; }
+    .seg button+button{ border-left:1.5px solid var(--line); }
+    .seg button:hover{ background:var(--bg-2); }
     .seg button[aria-pressed=true][data-v=oui]{ background:var(--oui); color:#fff; }
-    .seg button[aria-pressed=true][data-v=sibesoin]{ background:var(--sibesoin); color:#fff; }
+    .seg button[aria-pressed=true][data-v=sib]{ background:var(--sib); color:#fff; }
     .seg button[aria-pressed=true][data-v=non]{ background:var(--non); color:#fff; }
-    .muted{ color:var(--text-soft); font-size:.86rem; }
-    .toast{
-      position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
-      background:var(--text); color:var(--bg); padding:10px 18px; border-radius:999px; font-size:.86rem;
-      opacity:0; transition:.25s; pointer-events:none; z-index:50;
-    }
+    .vote-tools{ display:flex; justify-content:flex-end; margin-top:6px; }
+    /* ---------- grille de résultats ---------- */
+    .legend{ display:flex; gap:14px; flex-wrap:wrap; margin:0 0 14px; font-size:.82rem; color:var(--soft); }
+    .legend span{ display:inline-flex; align-items:center; gap:6px; }
+    .dot{ width:13px; height:13px; border-radius:4px; display:inline-block; }
+    .dot.o{ background:var(--oui); } .dot.s{ background:var(--sib); } .dot.n{ background:var(--non); }
+    .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--line); border-radius:var(--r-sm); }
+    table{ border-collapse:collapse; width:100%; min-width:520px; font-size:.88rem; }
+    th,td{ border-bottom:1px solid var(--line-2); border-right:1px solid var(--line-2); padding:10px 9px; text-align:center; }
+    th:last-child,td:last-child{ border-right:none; }
+    thead th{ background:var(--bg-2); font-weight:700; }
+    th.day{ font-size:.78rem; color:var(--accent); text-transform:capitalize; border-bottom:1.5px solid var(--line); }
+    th.slot{ font-weight:650; white-space:nowrap; }
+    th.who, td.who{ text-align:left; position:sticky; left:0; background:var(--card); z-index:2; min-width:118px; font-weight:600; }
+    thead th.who{ background:var(--bg-2); }
+    td.c-oui{ background:var(--oui-bg); color:var(--oui); font-weight:800; }
+    td.c-sib{ background:var(--sib-bg); color:var(--sib); font-weight:800; }
+    td.c-non{ background:var(--non-bg); color:var(--non); }
+    tfoot td{ font-weight:800; background:var(--bg-2); }
+    col.best, .col-best{ }
+    .best-col{ box-shadow:inset 0 0 0 2px var(--oui); }
+    .ret-col{ box-shadow:inset 0 0 0 2px var(--gold); background:var(--gold-bg)!important; }
+    .crown{ font-size:.92rem; }
+    .who-rm{ display:inline-grid; place-items:center; width:19px; height:19px; border-radius:50%; background:var(--non-bg); color:var(--non); font-size:.78rem; margin-left:5px; vertical-align:middle; }
+    .who-rm:hover{ background:var(--non); color:#fff; }
+    .retain-btn{ font-size:.72rem; padding:3px 8px; border-radius:7px; background:var(--gold-bg); color:var(--gold); border:1px solid var(--gold); margin-top:5px; font-weight:700; display:block; width:100%; }
+    .retain-btn:hover{ background:var(--gold); color:#fff; }
+    .best-summary{ margin-top:14px; font-size:.96rem; }
+    /* ---------- toast ---------- */
+    .toast{ position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(24px);
+      background:var(--text); color:var(--bg); padding:11px 20px; border-radius:999px; font-size:.88rem; font-weight:600;
+      opacity:0; transition:.28s cubic-bezier(.2,.7,.3,1); pointer-events:none; z-index:60; box-shadow:var(--shadow-lg); }
     .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-    .back{ display:inline-block; margin-top:18px; color:var(--text-soft); font-size:.85rem; text-decoration:none; }
+    .rgpd{ display:flex; gap:11px; align-items:flex-start; font-size:.82rem; color:var(--soft);
+      background:var(--bg-2); border:1px dashed var(--line); border-radius:var(--r-sm); padding:13px 15px; margin-top:18px; }
+    .back{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; color:var(--soft); font-size:.86rem; text-decoration:none; padding:8px 0; }
     .back:hover{ color:var(--accent); }
     .hidden{ display:none !important; }
-    .closed-banner{ background:var(--sibesoin-bg); color:var(--sibesoin); border:1px solid var(--sibesoin); border-radius:12px; padding:12px 16px; margin-bottom:18px; font-weight:600; }
+    .center{ text-align:center; }
   </style>
 </head>
 <body>
   <header class="hero">
-    <span class="kicker">Coordination &amp; Pédagogie</span>
-    <h1 id="hero-titre">Trouver un créneau</h1>
-    <p id="hero-sous">Proposez des créneaux, chacun coche ses disponibilités.</p>
+    <div class="hero-in">
+      <span class="kicker">Coordination &amp; Pédagogie</span>
+      <h1 id="hero-titre">Trouver un créneau</h1>
+      <p id="hero-sous">Proposez des créneaux, chacun coche — le bon moment ressort tout seul.</p>
+    </div>
   </header>
 
   <main>
-    <!-- ============ VUE CRÉATION ============ -->
-    <section id="vue-creer" class="card hidden">
-      <h2>Nouveau sondage de disponibilités</h2>
-      <label for="f-titre">Intitulé <span class="hint">— ex. « Réunion équipe PSE », « Conseil de classe 2nde »</span></label>
-      <input type="text" id="f-titre" placeholder="Intitulé de la réunion ou du rendez-vous" maxlength="120" />
+    <!-- ============================ VUE CRÉATION ============================ -->
+    <section id="vue-creer" class="hidden">
+      <section class="card">
+        <h2><span class="step">1</span> L'essentiel</h2>
+        <p class="sub">De quoi s'agit-il&nbsp;? Le titre suffit pour démarrer.</p>
+        <label for="f-titre">Intitulé <span class="hint">— ex. «&nbsp;Réunion équipe PSE&nbsp;»</span></label>
+        <input type="text" id="f-titre" placeholder="Réunion, conseil de classe, rendez-vous…" maxlength="120" />
+        <div class="grid2">
+          <div>
+            <label for="f-lieu">Lieu <span class="hint">— facultatif</span></label>
+            <input type="text" id="f-lieu" placeholder="Salle B12, visio, CDI…" maxlength="80" />
+          </div>
+          <div>
+            <label for="f-orga">Vos initiales <span class="hint">— pour signer</span></label>
+            <input type="text" id="f-orga" placeholder="ex. B.D." maxlength="24" />
+          </div>
+        </div>
+        <label for="f-deadline">Date limite pour répondre <span class="hint">— facultatif</span></label>
+        <input type="date" id="f-deadline" />
+      </section>
 
-      <label for="f-orga">Vos initiales <span class="hint">— facultatif, pour signer l'invitation</span></label>
-      <input type="text" id="f-orga" placeholder="ex. B.D." maxlength="24" />
+      <section class="card">
+        <h2><span class="step">2</span> Les créneaux</h2>
+        <p class="sub">Le générateur découpe une plage en créneaux d'un clic. Vous pouvez aussi ajouter du texte libre.</p>
+        <div class="builder">
+          <div class="line">
+            <div>
+              <p class="mini">Jour</p>
+              <input type="date" id="b-date" />
+            </div>
+            <div>
+              <p class="mini">De</p>
+              <input type="time" id="b-de" value="08:00" step="300" />
+            </div>
+            <div>
+              <p class="mini">À</p>
+              <input type="time" id="b-a" value="09:00" step="300" />
+            </div>
+            <div>
+              <p class="mini">Découpage</p>
+              <select id="b-pas">
+                <option value="0">Plage entière</option>
+                <option value="15">par 15 min</option>
+                <option value="30" selected>par 30 min</option>
+                <option value="45">par 45 min</option>
+                <option value="60">par 1 h</option>
+              </select>
+            </div>
+          </div>
+          <div class="gen-preview" id="b-preview"></div>
+          <div style="margin-top:12px">
+            <button class="btn sec" id="b-add" type="button">＋ Ajouter ces créneaux</button>
+          </div>
+        </div>
 
-      <label>Créneaux proposés <span class="hint">— ajoutez-en autant que vous voulez</span></label>
-      <ul class="creneaux-list" id="creneaux-list"></ul>
-      <div class="add-row">
-        <input type="text" id="f-creneau" placeholder="ex. Lundi 16/06 – 17h" maxlength="80" />
-        <button class="btn secondary" id="btn-add-creneau" type="button">Ajouter</button>
-      </div>
-      <div class="examples">Astuce : un créneau = une colonne. Tapez puis « Entrée » pour enchaîner.</div>
+        <div class="sepor">ou un moment décrit librement</div>
+        <div class="freeadd">
+          <input type="text" id="b-free" placeholder="ex. Lundi après-midi, pendant la pause méridienne…" maxlength="80" />
+          <button class="btn ghost" id="b-addfree" type="button">Ajouter</button>
+        </div>
 
-      <div class="actions">
-        <button class="btn" id="btn-creer" type="button">Créer le sondage</button>
-        <span class="muted" id="creer-msg"></span>
-      </div>
+        <div id="apercu">
+          <p class="empty-hint" id="apercu-empty">Aucun créneau pour l'instant — ajoutez-en au moins deux ci-dessus.</p>
+        </div>
+      </section>
 
-      <div class="rgpd">
-        <span aria-hidden="true">🔒</span>
-        <span><strong>RGPD.</strong> Aucun nom complet, aucun email. Les participants s'identifient par leurs <strong>initiales</strong> ou leur <strong>matière</strong>. Espace interne, non indexé.</span>
-      </div>
+      <section class="card tight">
+        <button class="btn big" id="btn-creer" type="button">Créer le sondage et obtenir le lien →</button>
+        <p class="muted center" id="creer-msg" style="margin:10px 0 0"></p>
+        <div class="rgpd">
+          <span aria-hidden="true">🔒</span>
+          <span><strong>RGPD.</strong> Aucun nom complet, aucun email. Les participants s'identifient par leurs <strong>initiales</strong> (et leur matière s'ils veulent). Espace interne, non indexé.</span>
+        </div>
+      </section>
     </section>
 
-    <!-- ============ VUE SONDAGE (vote + résultats) ============ -->
+    <!-- ============================ VUE SONDAGE ============================ -->
     <section id="vue-sondage" class="hidden">
-      <div id="closed-banner" class="closed-banner hidden">🔒 Sondage clôturé — le vote n'est plus possible, voici les résultats.</div>
-
       <div class="share" id="share-box">
-        <strong>Lien à partager avec l'équipe :</strong><br />
-        <code id="share-url"></code>
-        <div class="actions" style="margin-top:10px">
-          <button class="btn secondary" id="btn-copy" type="button">Copier le lien</button>
+        <div class="lab">🔗 Lien à partager avec l'équipe</div>
+        <div class="share-row">
+          <input type="text" id="share-url" readonly />
+          <button class="btn" id="btn-copy" type="button">Copier</button>
         </div>
+        <p class="muted" style="margin:8px 0 0">Collez-le dans un mail. Chacun ouvre, coche, c'est tout.</p>
       </div>
 
-      <!-- formulaire de vote -->
+      <div id="ret-banner" class="banner gold hidden"></div>
+      <div id="closed-banner" class="banner closed hidden">🔒 Sondage clôturé — voici les résultats.</div>
+
+      <!-- vote -->
       <section class="card" id="vote-card">
-        <h2 id="sondage-titre">…</h2>
-        <p class="muted" id="sondage-orga"></p>
-        <label for="v-nom">Vos initiales ou votre matière <span class="hint">— ex. « B.D. » ou « Maths »</span></label>
-        <input type="text" id="v-nom" placeholder="ex. B.D." maxlength="24" />
-        <div id="vote-lignes" style="margin-top:14px"></div>
-        <div class="actions">
-          <button class="btn" id="btn-voter" type="button">Enregistrer ma disponibilité</button>
-          <span class="muted" id="vote-msg"></span>
+        <h2 id="s-titre">…</h2>
+        <div class="meta-row" id="s-meta"></div>
+        <div class="id-row" style="margin-top:14px">
+          <div>
+            <label for="v-init">Vos initiales <span class="hint">— requis</span></label>
+            <input type="text" id="v-init" placeholder="ex. B.D." maxlength="16" />
+          </div>
+          <div>
+            <label for="v-mat">Matière <span class="hint">— facultatif</span></label>
+            <input type="text" id="v-mat" list="matieres" placeholder="ex. Maths" maxlength="28" />
+            <datalist id="matieres">
+              <option>Français</option><option>Mathématiques</option><option>Histoire-Géo</option>
+              <option>Anglais</option><option>Espagnol</option><option>EPS</option><option>PSE</option>
+              <option>Arts appliqués</option><option>Éco-gestion</option><option>Sciences physiques</option>
+              <option>Enseignement pro</option><option>Documentation</option><option>Vie scolaire</option><option>Direction</option>
+            </datalist>
+          </div>
+        </div>
+        <div id="vote-lignes" style="margin-top:8px"></div>
+        <div class="vote-tools"><button class="btn ghost" id="btn-tout-oui" type="button">✓ Je suis dispo partout</button></div>
+        <label for="v-com" style="margin-top:14px">Un mot&nbsp;? <span class="hint">— facultatif</span></label>
+        <textarea id="v-com" placeholder="ex. Plutôt en fin de semaine pour moi." maxlength="200"></textarea>
+        <div style="margin-top:16px">
+          <button class="btn big" id="btn-voter" type="button">Enregistrer ma disponibilité</button>
+          <p class="muted center" id="vote-msg" style="margin:9px 0 0"></p>
         </div>
       </section>
 
       <!-- résultats -->
       <section class="card">
-        <h2>Résultats <span class="muted" id="res-count"></span></h2>
-        <div class="table-wrap">
-          <table id="res-table">
-            <thead></thead>
-            <tbody></tbody>
-            <tfoot></tfoot>
-          </table>
+        <h2>📊 Résultats <span class="muted" id="res-count" style="font-weight:400"></span></h2>
+        <div class="legend">
+          <span><i class="dot o"></i> Disponible</span>
+          <span><i class="dot s"></i> Si besoin</span>
+          <span><i class="dot n"></i> Pas dispo</span>
         </div>
-        <p class="muted" id="res-best" style="margin-top:12px"></p>
+        <div class="table-wrap">
+          <table id="res-table"><thead></thead><tbody></tbody><tfoot></tfoot></table>
+        </div>
+        <p class="best-summary" id="res-best"></p>
       </section>
 
-      <!-- zone admin (créateur) -->
+      <!-- admin -->
       <section class="card hidden" id="admin-card">
-        <h2>Gestion <span class="hint">(visible par vous, créateur)</span></h2>
-        <div class="actions">
+        <h2>⚙️ Gestion <span class="hint" style="font-weight:400">— vous, l'organisateur·rice</span></h2>
+        <p class="sub">Cliquez «&nbsp;Retenir&nbsp;» sous une colonne pour figer le choix final. Ce panneau n'apparaît que sur votre appareil.</p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn ghost" id="btn-clear-ret" type="button">Annuler le choix retenu</button>
           <button class="btn ghost" id="btn-close" type="button">Clôturer le vote</button>
           <button class="btn ghost" id="btn-reopen" type="button">Rouvrir le vote</button>
           <button class="btn danger" id="btn-delete" type="button">Supprimer le sondage</button>
         </div>
-        <p class="muted" style="margin-top:10px">Ce panneau n'apparaît que sur l'appareil qui a créé le sondage.</p>
       </section>
 
-      <a class="back" href="?">← Créer un autre sondage</a>
+      <a class="back" href="?">＋ Créer un autre sondage</a>
     </section>
   </main>
 
@@ -214,10 +346,10 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import {
       getFirestore, collection, addDoc, setDoc, updateDoc, deleteDoc, doc,
-      getDoc, getDocs, onSnapshot, serverTimestamp
+      getDocs, onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // ── Firebase : projet PSE existant, collection DÉDIÉE et séparée des données élèves ──
+    // ── Firebase : projet PSE existant, collection DÉDIÉE, séparée des données élèves ──
     const firebaseConfig = {
       apiKey: "AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",
       authDomain: "devoirs-pse.firebaseapp.com",
@@ -237,76 +369,100 @@
     const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     let toastT;
-    function toast(msg){
-      const t = $("toast"); t.textContent = msg; t.classList.add("show");
-      clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 1900);
-    }
-    // mémoire locale : admin par sondage + identifiant de ma réponse
+    function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show");
+      clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2000); }
     const lsAdmin = id => "coordreu_admin_" + id;
     const lsResp  = id => "coordreu_resp_" + id;
+
+    // format heure "08:00" -> "8h", "08:15" -> "8h15"
+    const fmtH = t => { if(!t) return ""; const [h,m]=t.split(":"); return (+m===0)?`${+h}h`:`${+h}h${m}`; };
+    // format jour "2026-06-16" -> "Lundi 16 juin"
+    function fmtJour(d){ if(!d) return ""; const dt=new Date(d+"T00:00:00"); if(isNaN(dt)) return d;
+      const s=dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}); return s.charAt(0).toUpperCase()+s.slice(1); }
+    const toMin = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
+    const toStr = v => `${String(Math.floor(v/60)).padStart(2,"0")}:${String(v%60).padStart(2,"0")}`;
 
     // ====================================================================
     //  VUE CRÉATION
     // ====================================================================
     function initCreer(){
       $("vue-creer").classList.remove("hidden");
-      $("hero-sous").textContent = "Proposez des créneaux, chacun coche ses disponibilités.";
+      const creneaux = []; // {id, dateStr, jour, heure, startMin}
 
-      const creneaux = []; // [{id,label}]
-      const listEl = $("creneaux-list");
-      const input = $("f-creneau");
-
-      function render(){
-        listEl.innerHTML = creneaux.map((c, i) => `
-          <li data-id="${c.id}">
-            <span class="num">${i + 1}.</span>
-            <span class="lab">${esc(c.label)}</span>
-            <button class="x" type="button" title="Retirer" aria-label="Retirer">✕</button>
-          </li>`).join("");
-        listEl.querySelectorAll(".x").forEach(b =>
-          b.addEventListener("click", () => {
-            const id = b.closest("li").dataset.id;
-            const k = creneaux.findIndex(c => c.id === id);
-            if (k > -1) creneaux.splice(k, 1);
-            render();
-          }));
+      // — aperçu groupé par jour —
+      function renderApercu(){
+        const box = $("apercu");
+        if(!creneaux.length){ box.innerHTML = `<p class="empty-hint" id="apercu-empty">Aucun créneau pour l'instant — ajoutez-en au moins deux ci-dessus.</p>`; return; }
+        const sorted = [...creneaux].sort((a,b)=>(a.dateStr||"9999").localeCompare(b.dateStr||"9999") || (a.startMin??1e9)-(b.startMin??1e9));
+        const groups = {};
+        sorted.forEach(c => { const k=c.jour||"Autres moments"; (groups[k]=groups[k]||[]).push(c); });
+        box.innerHTML = Object.entries(groups).map(([jour,items]) => `
+          <div class="daygroup">
+            <div class="daygroup-h">${esc(jour)}</div>
+            <div class="chips">${items.map(c=>`
+              <span class="chip" data-id="${c.id}">${esc(c.heure)}<button class="rm" type="button" aria-label="Retirer">✕</button></span>`).join("")}</div>
+          </div>`).join("");
+        box.querySelectorAll(".chip .rm").forEach(b => b.addEventListener("click", () => {
+          const id=b.closest(".chip").dataset.id; const k=creneaux.findIndex(c=>c.id===id);
+          if(k>-1) creneaux.splice(k,1); renderApercu();
+        }));
       }
-      function addCreneau(){
-        const v = input.value.trim();
-        if (!v) return;
-        creneaux.push({ id: "c" + uid().slice(0, 8), label: v });
-        input.value = "";
-        input.focus();
-        render();
-      }
-      $("btn-add-creneau").addEventListener("click", addCreneau);
-      input.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); addCreneau(); } });
 
-      $("btn-creer").addEventListener("click", async () => {
-        const titre = $("f-titre").value.trim();
-        if (!titre) { toast("Donnez un intitulé."); $("f-titre").focus(); return; }
-        if (creneaux.length < 2) { toast("Ajoutez au moins 2 créneaux."); input.focus(); return; }
-        const btn = $("btn-creer"); btn.disabled = true; $("creer-msg").textContent = "Création…";
-        const adminKey = uid();
-        try {
-          const ref = await addDoc(collection(db, COL), {
-            titre,
-            organisateur: $("f-orga").value.trim() || "",
-            creneaux,
-            adminKey,
-            closed: false,
-            createdAt: serverTimestamp()
-          });
-          localStorage.setItem(lsAdmin(ref.id), adminKey);
-          location.search = "?id=" + ref.id;
-        } catch (e) {
-          console.error(e);
-          $("creer-msg").textContent = "Erreur réseau. Réessayez.";
-          btn.disabled = false;
-        }
+      function addCreneau(dateStr, heure, startMin){
+        // évite les doublons exacts
+        if(creneaux.some(c => c.dateStr===dateStr && c.heure===heure)) return false;
+        creneaux.push({ id:"c"+uid().slice(0,8), dateStr:dateStr||"", jour:fmtJour(dateStr), heure, startMin: startMin??null });
+        return true;
+      }
+
+      // — aperçu du générateur —
+      function genPreview(){
+        const de=$("b-de").value, a=$("b-a").value, pas=+$("b-pas").value;
+        if(!de||!a||toMin(a)<=toMin(de)){ $("b-preview").textContent=""; return null; }
+        if(pas===0){ const lbl=`${fmtH(de)}–${fmtH(a)}`; $("b-preview").textContent=`→ 1 créneau : ${lbl}`; return [{heure:lbl,start:toMin(de)}]; }
+        const out=[]; for(let x=toMin(de); x<toMin(a); x+=pas){ const e=Math.min(x+pas,toMin(a)); out.push({heure:`${fmtH(toStr(x))}–${fmtH(toStr(e))}`,start:x}); }
+        $("b-preview").textContent=`→ ${out.length} créneau${out.length>1?"x":""} : ${out.slice(0,3).map(o=>o.heure).join(", ")}${out.length>3?"…":""}`;
+        return out;
+      }
+      ["b-de","b-a","b-pas"].forEach(id => $(id).addEventListener("input", genPreview));
+
+      $("b-add").addEventListener("click", () => {
+        const slots = genPreview();
+        if(!slots){ toast("Vérifiez les heures (l'heure de fin doit suivre le début)."); return; }
+        const dateStr=$("b-date").value; let n=0;
+        slots.forEach(s => { if(addCreneau(dateStr, s.heure, s.start)) n++; });
+        renderApercu();
+        toast(n? `${n} créneau${n>1?"x ajoutés":" ajouté"}` : "Ces créneaux sont déjà dans la liste.");
       });
 
-      render();
+      function addFree(){
+        const v=$("b-free").value.trim(); if(!v) return;
+        if(addCreneau("", v, null)){ $("b-free").value=""; renderApercu(); }
+        else toast("Déjà dans la liste.");
+      }
+      $("b-addfree").addEventListener("click", addFree);
+      $("b-free").addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); addFree(); } });
+
+      $("btn-creer").addEventListener("click", async () => {
+        const titre=$("f-titre").value.trim();
+        if(!titre){ toast("Donnez un intitulé."); $("f-titre").focus(); return; }
+        if(creneaux.length<2){ toast("Ajoutez au moins 2 créneaux."); return; }
+        const btn=$("btn-creer"); btn.disabled=true; $("creer-msg").textContent="Création…";
+        const adminKey=uid();
+        const sorted=[...creneaux].sort((a,b)=>(a.dateStr||"9999").localeCompare(b.dateStr||"9999") || (a.startMin??1e9)-(b.startMin??1e9));
+        try{
+          const ref=await addDoc(collection(db,COL),{
+            titre, lieu:$("f-lieu").value.trim()||"", organisateur:$("f-orga").value.trim()||"",
+            deadline:$("f-deadline").value||"",
+            creneaux: sorted.map(c=>({id:c.id, jour:c.jour, heure:c.heure})),
+            adminKey, closed:false, retenu:"", createdAt:serverTimestamp()
+          });
+          localStorage.setItem(lsAdmin(ref.id), adminKey);
+          location.search="?id="+ref.id;
+        }catch(e){ console.error(e); $("creer-msg").textContent="Erreur réseau — réessayez."; btn.disabled=false; }
+      });
+
+      genPreview(); renderApercu();
     }
 
     // ====================================================================
@@ -314,190 +470,180 @@
     // ====================================================================
     function initSondage(){
       $("vue-sondage").classList.remove("hidden");
-      $("hero-titre").textContent = "Disponibilités";
-      $("hero-sous").textContent = "Indiquez vos créneaux possibles ci-dessous.";
+      $("hero-titre").textContent="Vos disponibilités";
+      $("hero-sous").textContent="Cochez les créneaux qui vous vont. C'est anonyme et ça prend 20 secondes.";
 
-      const url = location.origin + location.pathname + "?id=" + pollId;
-      $("share-url").textContent = url;
+      const url=location.origin+location.pathname+"?id="+pollId;
+      $("share-url").value=url;
       $("btn-copy").addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(url); toast("Lien copié ✓"); }
-        catch { toast("Copie impossible — sélectionnez le lien."); }
+        try{ await navigator.clipboard.writeText(url); toast("Lien copié ✓"); $("btn-copy").textContent="Copié ✓"; }
+        catch{ $("share-url").select(); toast("Sélectionnez puis copiez le lien."); }
       });
 
-      const pollRef = doc(db, COL, pollId);
-      const isAdmin = () => localStorage.getItem(lsAdmin(pollId)) || params.get("admin");
+      const pollRef=doc(db,COL,pollId);
+      const isAdmin=()=>localStorage.getItem(lsAdmin(pollId))||params.get("admin");
+      let poll=null, reponses=[];
+      let myChoix={}, dirty=false;
+      let myRespId=localStorage.getItem(lsResp(pollId))||null;
 
-      let poll = null;          // données du sondage
-      let myChoix = {};         // {creneauId: 'oui'|'sibesoin'|'non'}
-      let myRespId = localStorage.getItem(lsResp(pollId)) || null;
-      let reponses = [];        // [{id, nom, choix}]
-
-      // -- rendu du formulaire de vote --
+      // — formulaire de vote, groupé par jour —
       function renderVoteForm(){
-        const closed = poll.closed;
-        $("vote-card").classList.toggle("hidden", closed);
-        $("closed-banner").classList.toggle("hidden", !closed);
-        if (closed) return;
-        $("vote-lignes").innerHTML = poll.creneaux.map(c => `
-          <div class="vote-line" data-id="${c.id}">
-            <span class="vl-lab">${esc(c.label)}</span>
-            <span class="seg" role="group" aria-label="${esc(c.label)}">
-              <button type="button" data-v="oui">Oui</button>
-              <button type="button" data-v="sibesoin">Si besoin</button>
-              <button type="button" data-v="non">Non</button>
-            </span>
-          </div>`).join("");
-        $("vote-lignes").querySelectorAll(".vote-line").forEach(line => {
-          const id = line.dataset.id;
+        $("vote-card").classList.toggle("hidden", poll.closed);
+        $("closed-banner").classList.toggle("hidden", !poll.closed);
+        if(poll.closed) return;
+        const groups={};
+        poll.creneaux.forEach(c => { const k=c.jour||"Autres moments"; (groups[k]=groups[k]||[]).push(c); });
+        $("vote-lignes").innerHTML = Object.entries(groups).map(([jour,items]) => `
+          <div class="vote-day-h">${esc(jour)}</div>
+          ${items.map(c=>`
+            <div class="vline" data-id="${c.id}">
+              <span class="vl">${esc(c.heure)}</span>
+              <span class="seg" role="group">
+                <button type="button" data-v="oui">Oui</button>
+                <button type="button" data-v="sib">Si besoin</button>
+                <button type="button" data-v="non">Non</button>
+              </span>
+            </div>`).join("")}`).join("");
+        $("vote-lignes").querySelectorAll(".vline").forEach(line => {
+          const id=line.dataset.id;
           line.querySelectorAll(".seg button").forEach(b => {
-            b.setAttribute("aria-pressed", myChoix[id] === b.dataset.v ? "true" : "false");
+            b.setAttribute("aria-pressed", myChoix[id]===b.dataset.v ? "true":"false");
             b.addEventListener("click", () => {
-              myChoix[id] = b.dataset.v;
-              line.querySelectorAll(".seg button").forEach(x =>
-                x.setAttribute("aria-pressed", x.dataset.v === b.dataset.v ? "true" : "false"));
+              dirty=true; myChoix[id]=b.dataset.v;
+              line.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x.dataset.v===b.dataset.v?"true":"false"));
             });
           });
         });
       }
+      $("btn-tout-oui").addEventListener("click", () => {
+        dirty=true; poll.creneaux.forEach(c=>myChoix[c.id]="oui"); renderVoteForm();
+      });
 
       $("btn-voter").addEventListener("click", async () => {
-        const nom = $("v-nom").value.trim();
-        if (!nom) { toast("Indiquez vos initiales ou votre matière."); $("v-nom").focus(); return; }
-        if (!Object.keys(myChoix).length) { toast("Cochez au moins un créneau."); return; }
-        const btn = $("btn-voter"); btn.disabled = true; $("vote-msg").textContent = "Enregistrement…";
-        try {
-          const data = { nom, choix: myChoix, updatedAt: serverTimestamp() };
-          if (myRespId) {
-            await setDoc(doc(db, COL, pollId, "reponses", myRespId), data);
-          } else {
-            myRespId = uid();
-            await setDoc(doc(db, COL, pollId, "reponses", myRespId), data);
-            localStorage.setItem(lsResp(pollId), myRespId);
-          }
-          $("vote-msg").textContent = "Enregistré ✓";
+        const init=$("v-init").value.trim();
+        if(!init){ toast("Indiquez vos initiales."); $("v-init").focus(); return; }
+        if(!Object.keys(myChoix).length){ toast("Cochez au moins un créneau."); return; }
+        const btn=$("btn-voter"); btn.disabled=true; $("vote-msg").textContent="Enregistrement…";
+        try{
+          const data={ initiales:init, matiere:$("v-mat").value.trim()||"", commentaire:$("v-com").value.trim()||"",
+            choix:myChoix, updatedAt:serverTimestamp() };
+          if(!myRespId){ myRespId=uid(); localStorage.setItem(lsResp(pollId), myRespId); }
+          await setDoc(doc(db,COL,pollId,"reponses",myRespId), data);
+          dirty=false; $("vote-msg").textContent="Enregistré ✓ — vous pouvez modifier à tout moment.";
           toast("Disponibilités enregistrées ✓");
-        } catch (e) {
-          console.error(e);
-          $("vote-msg").textContent = "Erreur réseau. Réessayez.";
-        }
-        btn.disabled = false;
+        }catch(e){ console.error(e); $("vote-msg").textContent="Erreur réseau — réessayez."; }
+        btn.disabled=false;
       });
 
-      // -- rendu de la grille de résultats --
+      // — résultats —
       function renderResults(){
-        const cr = poll.creneaux;
-        const thead = $("res-table").querySelector("thead");
-        const tbody = $("res-table").querySelector("tbody");
-        const tfoot = $("res-table").querySelector("tfoot");
+        const cr=poll.creneaux;
+        const thead=$("res-table").querySelector("thead"), tbody=$("res-table").querySelector("tbody"), tfoot=$("res-table").querySelector("tfoot");
+        // scores
+        const score={}, oui={};
+        cr.forEach(c=>{score[c.id]=0; oui[c.id]=0;});
+        reponses.forEach(r=>cr.forEach(c=>{ const v=r.choix?.[c.id];
+          if(v==="oui"){score[c.id]+=2; oui[c.id]++;} else if(v==="sib"){score[c.id]+=1;} }));
+        const maxS=Math.max(0,...cr.map(c=>score[c.id]));
+        const bestIds=cr.filter(c=>score[c.id]===maxS && maxS>0).map(c=>c.id);
 
-        // scores par créneau
-        const score = {}, ouiCount = {};
-        cr.forEach(c => { score[c.id] = 0; ouiCount[c.id] = 0; });
-        reponses.forEach(r => cr.forEach(c => {
-          const v = r.choix?.[c.id];
-          if (v === "oui") { score[c.id] += 2; ouiCount[c.id]++; }
-          else if (v === "sibesoin") { score[c.id] += 1; }
-        }));
-        const maxScore = Math.max(0, ...cr.map(c => score[c.id]));
-        const bestIds = cr.filter(c => score[c.id] === maxScore && maxScore > 0).map(c => c.id);
+        // en-tête à deux niveaux (jour / heure)
+        const dayRow=[], slotRow=[];
+        let i=0;
+        while(i<cr.length){ const jour=cr[i].jour||"Autres moments"; let j=i;
+          while(j<cr.length && (cr[j].jour||"Autres moments")===jour) j++;
+          dayRow.push(`<th class="day" colspan="${j-i}">${esc(jour)}</th>`); i=j; }
+        cr.forEach(c=>{ const cls=c.id===poll.retenu?"ret-col":(bestIds.includes(c.id)?"best-col":"");
+          slotRow.push(`<th class="slot ${cls}">${esc(c.heure)}${c.id===poll.retenu?' <span class="crown">📌</span>':(bestIds.includes(c.id)?' <span class="crown">👑</span>':"")}${isAdmin()&&!poll.closed?`<button class="retain-btn" data-ret="${c.id}">Retenir</button>`:""}</th>`); });
+        thead.innerHTML = `<tr><th class="who" rowspan="2">Participant·e</th>${dayRow.join("")}</tr><tr>${slotRow.join("")}</tr>`;
 
-        thead.innerHTML = "<tr><th class='who'>Participant·e</th>" +
-          cr.map(c => `<th class="${bestIds.includes(c.id) ? "best" : ""}">${esc(c.label)}</th>`).join("") + "</tr>";
+        tbody.innerHTML = reponses.length ? reponses.map(r=>{
+          const mine=r.id===myRespId;
+          const who = esc(r.initiales)+(r.matiere?` <span class="muted">· ${esc(r.matiere)}</span>`:"")+(mine?' <span class="muted">(vous)</span>':"")+(isAdmin()?` <button class="who-rm" data-del="${r.id}" title="Retirer">✕</button>`:"");
+          return `<tr><td class="who">${who}</td>${cr.map(c=>{ const v=r.choix?.[c.id];
+            const rc=c.id===poll.retenu?"ret-col":(bestIds.includes(c.id)?"best-col":"");
+            if(v==="oui") return `<td class="c-oui ${rc}">✓</td>`;
+            if(v==="sib") return `<td class="c-sib ${rc}">~</td>`;
+            if(v==="non") return `<td class="c-non ${rc}">✕</td>`;
+            return `<td class="${rc}"></td>`; }).join("")}</tr>`;
+        }).join("") : `<tr><td class="who muted" colspan="${cr.length+1}">Aucune réponse pour l'instant.</td></tr>`;
 
-        tbody.innerHTML = reponses.length
-          ? reponses.map(r => {
-              const mine = r.id === myRespId;
-              return "<tr><td class='who'>" + esc(r.nom) + (mine ? " <span class='muted'>(vous)</span>" : "") +
-                (isAdmin() ? ` <button class="x btn-del-resp" data-id="${r.id}" title="Retirer">✕</button>` : "") + "</td>" +
-                cr.map(c => {
-                  const v = r.choix?.[c.id];
-                  if (v === "oui") return "<td class='cell-oui'>✓</td>";
-                  if (v === "sibesoin") return "<td class='cell-sibesoin'>~</td>";
-                  if (v === "non") return "<td class='cell-non'>✕</td>";
-                  return "<td></td>";
-                }).join("") + "</tr>";
-            }).join("")
-          : `<tr><td class="who muted" colspan="${cr.length + 1}">Aucune réponse pour l'instant.</td></tr>`;
+        tfoot.innerHTML = `<tr><td class="who">Disponibles</td>${cr.map(c=>{ const rc=c.id===poll.retenu?"ret-col":(bestIds.includes(c.id)?"best-col":"");
+          return `<td class="${rc}">${oui[c.id]}</td>`; }).join("")}</tr>`;
 
-        tfoot.innerHTML = "<tr><td class='who'>Disponibles</td>" +
-          cr.map(c => `<td class="${bestIds.includes(c.id) ? "best" : ""}">${ouiCount[c.id]}${bestIds.includes(c.id) ? "<span class='best-tag'>top</span>" : ""}</td>`).join("") + "</tr>";
-
-        if (isAdmin()) {
-          tbody.querySelectorAll(".btn-del-resp").forEach(b =>
-            b.addEventListener("click", async () => {
-              if (!confirm("Retirer cette réponse ?")) return;
-              await deleteDoc(doc(db, COL, pollId, "reponses", b.dataset.id));
-            }));
+        // actions admin (retenir / supprimer réponse)
+        if(isAdmin()){
+          thead.querySelectorAll(".retain-btn").forEach(b=>b.addEventListener("click", async ()=>{ await updateDoc(pollRef,{retenu:b.dataset.ret}); toast("Créneau retenu 📌"); }));
+          tbody.querySelectorAll(".who-rm").forEach(b=>b.addEventListener("click", async ()=>{ if(confirm("Retirer cette réponse ?")) await deleteDoc(doc(db,COL,pollId,"reponses",b.dataset.del)); }));
         }
 
-        $("res-count").textContent = `· ${reponses.length} réponse${reponses.length > 1 ? "s" : ""}`;
-        if (bestIds.length && reponses.length){
-          const labels = cr.filter(c => bestIds.includes(c.id)).map(c => c.label);
-          $("res-best").innerHTML = "🟢 Meilleur créneau : <strong>" + labels.map(esc).join("</strong>, <strong>") + "</strong>.";
-        } else {
-          $("res-best").textContent = "";
-        }
+        $("res-count").textContent = `· ${reponses.length} réponse${reponses.length>1?"s":""}`;
+        const bestC = cr.find(c=>bestIds.includes(c.id));
+        $("res-best").innerHTML = (bestC && reponses.length)
+          ? `👑 <strong>Meilleur créneau :</strong> ${esc((bestC.jour?bestC.jour+" · ":"")+bestC.heure)} — <strong>${oui[bestC.id]}</strong> disponible${oui[bestC.id]>1?"s":""}${bestIds.length>1?` <span class="muted">(${bestIds.length} créneaux à égalité)</span>`:""}.`
+          : "";
       }
 
-      // -- panneau admin (branché une seule fois, au premier snapshot) --
+      // — bandeau « retenu » + admin —
+      function renderBanners(){
+        const rc=poll.creneaux.find(c=>c.id===poll.retenu);
+        const b=$("ret-banner");
+        if(rc){ b.classList.remove("hidden"); b.innerHTML=`📌 <span><strong>Créneau retenu :</strong> ${esc((rc.jour?rc.jour+" · ":"")+rc.heure)}${poll.lieu?` — ${esc(poll.lieu)}`:""}</span>`; }
+        else b.classList.add("hidden");
+      }
+      let adminReady=false;
       function setupAdmin(){
-        if (!isAdmin() || $("admin-card").dataset.ready) return;
-        $("admin-card").dataset.ready = "1";
+        if(!isAdmin()||adminReady) return; adminReady=true;
         $("admin-card").classList.remove("hidden");
-        $("btn-close").addEventListener("click", async () => { await updateDoc(pollRef, { closed: true }); toast("Vote clôturé."); });
-        $("btn-reopen").addEventListener("click", async () => { await updateDoc(pollRef, { closed: false }); toast("Vote rouvert."); });
-        $("btn-delete").addEventListener("click", async () => {
-          if (!confirm("Supprimer définitivement ce sondage et toutes les réponses ?")) return;
-          const snap = await getDocs(collection(db, COL, pollId, "reponses"));
-          await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
-          await deleteDoc(pollRef);
-          localStorage.removeItem(lsAdmin(pollId));
-          toast("Sondage supprimé.");
-          setTimeout(() => location.search = "?", 700);
+        $("btn-clear-ret").addEventListener("click", async ()=>{ await updateDoc(pollRef,{retenu:""}); toast("Choix annulé."); });
+        $("btn-close").addEventListener("click", async ()=>{ await updateDoc(pollRef,{closed:true}); toast("Vote clôturé."); });
+        $("btn-reopen").addEventListener("click", async ()=>{ await updateDoc(pollRef,{closed:false}); toast("Vote rouvert."); });
+        $("btn-delete").addEventListener("click", async ()=>{
+          if(!confirm("Supprimer définitivement ce sondage et toutes les réponses ?")) return;
+          const snap=await getDocs(collection(db,COL,pollId,"reponses"));
+          await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));
+          await deleteDoc(pollRef); localStorage.removeItem(lsAdmin(pollId));
+          toast("Sondage supprimé."); setTimeout(()=>location.search="?",700);
         });
       }
-      function refreshAdminBtns(){
-        if (!isAdmin()) return;
+      function refreshAdminBtns(){ if(!isAdmin()) return;
         $("btn-close").classList.toggle("hidden", poll.closed);
-        $("btn-reopen").classList.toggle("hidden", !poll.closed);
+        $("btn-reopen").classList.toggle("hidden", !poll.closed); }
+
+      // — méta (lieu, organisateur, date limite) —
+      function renderMeta(){
+        const m=[];
+        if(poll.lieu) m.push(`<span class="m">📍 <b>${esc(poll.lieu)}</b></span>`);
+        if(poll.organisateur) m.push(`<span class="m">✍️ Proposé par <b>${esc(poll.organisateur)}</b></span>`);
+        if(poll.deadline){ const dl=fmtJour(poll.deadline); if(dl) m.push(`<span class="m">⏳ Réponse avant <b>${esc(dl)}</b></span>`); }
+        $("s-meta").innerHTML=m.join("");
       }
 
-      // -- écoute en temps réel du sondage --
+      // — écoute du sondage —
       onSnapshot(pollRef, snap => {
-        if (!snap.exists()) {
-          $("vue-sondage").innerHTML = `<div class="card"><h2>Sondage introuvable</h2>
-            <p class="muted">Ce sondage a peut-être été supprimé.</p>
-            <a class="btn secondary" href="?">Créer un sondage</a></div>`;
-          return;
-        }
-        poll = snap.data();
-        $("sondage-titre").textContent = poll.titre || "Sondage";
-        $("sondage-orga").textContent = poll.organisateur ? "Proposé par " + poll.organisateur : "";
-        setupAdmin();
-        refreshAdminBtns();
-        renderVoteForm();
-        renderResults();
+        if(!snap.exists()){ $("vue-sondage").innerHTML=`<div class="card center"><h2>Sondage introuvable</h2><p class="muted">Il a peut-être été supprimé.</p><a class="btn" href="?">Créer un sondage</a></div>`; return; }
+        poll=snap.data();
+        $("s-titre").textContent=poll.titre||"Sondage";
+        renderMeta(); setupAdmin(); refreshAdminBtns(); renderBanners(); renderVoteForm(); renderResults();
       });
 
-      // -- écoute en temps réel des réponses --
-      onSnapshot(collection(db, COL, pollId, "reponses"), snap => {
-        reponses = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        reponses.sort((a, b) => (a.nom || "").localeCompare(b.nom || "", "fr"));
-        // pré-remplir mon vote si je reviens
-        if (myRespId) {
-          const mine = reponses.find(r => r.id === myRespId);
-          if (mine) {
-            myChoix = { ...mine.choix };
-            if (!$("v-nom").value) $("v-nom").value = mine.nom || "";
-            if (poll) renderVoteForm();
-          }
+      // — écoute des réponses —
+      onSnapshot(collection(db,COL,pollId,"reponses"), snap => {
+        reponses=snap.docs.map(d=>({id:d.id,...d.data()}));
+        reponses.sort((a,b)=>(a.initiales||"").localeCompare(b.initiales||"","fr"));
+        if(myRespId && !dirty){
+          const mine=reponses.find(r=>r.id===myRespId);
+          if(mine){ myChoix={...mine.choix};
+            if(!$("v-init").value) $("v-init").value=mine.initiales||"";
+            if(!$("v-mat").value) $("v-mat").value=mine.matiere||"";
+            if(!$("v-com").value) $("v-com").value=mine.commentaire||"";
+            if(poll) renderVoteForm(); }
         }
-        if (poll) renderResults();
+        if(poll) renderResults();
       });
     }
 
-    // ── routage ──
-    if (pollId) initSondage(); else initCreer();
+    if(pollId) initSondage(); else initCreer();
   </script>
 </body>
 </html>
