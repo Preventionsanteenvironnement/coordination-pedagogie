@@ -127,6 +127,13 @@
     .banner{ border-radius:var(--r-sm); padding:13px 17px; margin-bottom:16px; font-weight:650; display:flex; gap:10px; align-items:center; }
     .banner.gold{ background:var(--gold-bg); color:var(--gold); border:1.5px solid var(--gold); }
     .banner.closed{ background:var(--sib-bg); color:var(--sib); border:1.5px solid var(--sib-line); }
+    .statut{ display:inline-flex; align-items:center; gap:7px; font-size:.8rem; font-weight:750; padding:6px 14px; border-radius:999px; }
+    .statut.open{ background:var(--oui-bg); color:var(--oui); border:1px solid var(--oui-line); }
+    .statut.ret{ background:var(--gold-bg); color:var(--gold); border:1px solid var(--gold); }
+    .statut.closed{ background:var(--sib-bg); color:var(--sib); border:1px solid var(--sib-line); }
+    .ordrejour{ background:var(--bg-2); border:1px solid var(--line); border-left:3px solid var(--accent);
+      border-radius:var(--r-sm); padding:13px 16px; margin-top:14px; font-size:.92rem; white-space:pre-wrap; }
+    .ordrejour b{ display:block; color:var(--accent); font-size:.74rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
     .live{ display:inline-flex; align-items:center; gap:7px; font-size:.82rem; color:var(--oui); font-weight:650; }
     .live .pulse{ width:9px; height:9px; border-radius:50%; background:var(--oui); box-shadow:0 0 0 0 var(--oui); animation:pulse 1.8s infinite; }
     @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(47,143,94,.5)} 70%{box-shadow:0 0 0 8px rgba(47,143,94,0)} 100%{box-shadow:0 0 0 0 rgba(47,143,94,0)} }
@@ -215,6 +222,11 @@
         </div>
         <label for="f-deadline">Date limite pour répondre <span class="hint">— facultatif</span></label>
         <input type="date" id="f-deadline" />
+        <label for="f-ordre">Ordre du jour <span class="hint">— facultatif, un point par ligne</span></label>
+        <textarea id="f-ordre" placeholder="ex.
+Retards 2nde AGOrA
+PFMP
+Préparation conseil de classe" maxlength="1500"></textarea>
       </section>
 
       <section class="card">
@@ -280,12 +292,21 @@
         <p class="muted" style="margin:8px 0 0">Collez-le dans un mail. Chacun ouvre, coche, c'est tout — et voit les réponses des autres en direct.</p>
       </div>
 
+      <div id="statut-bar" style="margin:0 0 14px"></div>
       <div id="ret-banner" class="banner gold hidden"></div>
       <div id="closed-banner" class="banner closed hidden">🔒 Sondage clôturé — voici les résultats.</div>
+
+      <section class="card hidden" id="final-card">
+        <h2>✉️ Message prêt à envoyer</h2>
+        <p class="sub">Le créneau est retenu — copiez ce récapitulatif dans Pronote, un mail ou le groupe de l'équipe.</p>
+        <textarea id="final-text" readonly style="min-height:160px"></textarea>
+        <div style="margin-top:12px"><button class="btn" id="btn-copy-final" type="button">Copier le message</button></div>
+      </section>
 
       <section class="card" id="vote-card">
         <h2 id="s-titre">…</h2>
         <div class="meta-row" id="s-meta"></div>
+        <div id="s-ordre" class="ordrejour hidden"></div>
         <div class="id-row" style="margin-top:14px">
           <div>
             <label for="v-init">Vos initiales <span class="hint">— requis</span></label>
@@ -488,7 +509,7 @@
         try{
           const ref=await addDoc(collection(db,COL),{
             titre, lieu:$("f-lieu").value.trim()||"", organisateur:$("f-orga").value.trim()||"",
-            deadline:$("f-deadline").value||"", openAdd,
+            deadline:$("f-deadline").value||"", ordreJour:$("f-ordre").value.trim()||"", openAdd,
             creneaux: sortCr(creneaux).map(c=>({id:c.id,jour:c.jour,heure:c.heure,dateStr:c.dateStr,startMin:c.startMin})),
             adminKey, closed:false, retenu:"", createdAt:serverTimestamp()
           });
@@ -512,6 +533,10 @@
       $("btn-copy").addEventListener("click", async ()=>{
         try{ await navigator.clipboard.writeText(url); toast("Lien copié ✓"); $("btn-copy").textContent="Copié ✓"; }
         catch{ $("share-url").select(); toast("Sélectionnez puis copiez le lien."); }
+      });
+      $("btn-copy-final").addEventListener("click", async ()=>{
+        try{ await navigator.clipboard.writeText($("final-text").value); toast("Message copié ✓"); $("btn-copy-final").textContent="Copié ✓"; setTimeout(()=>$("btn-copy-final").textContent="Copier le message",2000); }
+        catch{ $("final-text").select(); toast("Sélectionnez puis copiez le message."); }
       });
 
       const pollRef=doc(db,COL,pollId);
@@ -634,12 +659,34 @@
         if(poll.deadline){ const dl=fmtJour(poll.deadline); if(dl) m.push(`<span class="m">⏳ Réponse avant <b>${esc(dl)}</b></span>`); }
         if(poll.openAdd) m.push(`<span class="m">🤝 <b>Chacun peut proposer des créneaux</b></span>`);
         $("s-meta").innerHTML=m.join(""); }
+      function renderStatut(){ const el=$("statut-bar"); let cls,txt;
+        if(poll.closed){ cls="closed"; txt="🔒 Clôturé"; }
+        else if(poll.retenu){ cls="ret"; txt="📌 Créneau retenu"; }
+        else { cls="open"; txt="🟢 Ouvert aux réponses"; }
+        el.innerHTML=`<span class="statut ${cls}">${txt}</span>`; }
+      function renderOrdre(){ const el=$("s-ordre");
+        if(poll.ordreJour){ el.classList.remove("hidden"); el.innerHTML=`<b>🗒️ Ordre du jour</b>${esc(poll.ordreJour)}`; }
+        else el.classList.add("hidden"); }
+      function renderFinal(){ const card=$("final-card"); const rc=poll.creneaux.find(c=>c.id===poll.retenu);
+        if(!rc){ card.classList.add("hidden"); return; }
+        card.classList.remove("hidden");
+        const lab=r=>r.initiales+(r.matiere?` (${r.matiere})`:"");
+        const oui=reponses.filter(r=>r.choix?.[poll.retenu]==="oui").map(lab);
+        const sib=reponses.filter(r=>r.choix?.[poll.retenu]==="sib").map(lab);
+        let t=`Bonjour,\n\nRéunion : ${poll.titre}\n📅 ${(rc.jour?rc.jour+" · ":"")}${rc.heure}\n`;
+        if(poll.lieu) t+=`📍 ${poll.lieu}\n`;
+        if(poll.ordreJour) t+=`\n🗒️ Ordre du jour :\n${poll.ordreJour}\n`;
+        if(oui.length) t+=`\n✅ Disponibles : ${oui.join(", ")}\n`;
+        if(sib.length) t+=`◐ Sous réserve : ${sib.join(", ")}\n`;
+        t+=`\nMerci à toutes et tous.`;
+        if(poll.organisateur) t+=`\n${poll.organisateur}`;
+        $("final-text").value=t; }
 
       onSnapshot(pollRef, snap=>{
         if(!snap.exists()){ $("vue-sondage").innerHTML=`<div class="card center"><h2>Sondage introuvable</h2><p class="muted">Il a peut-être été supprimé.</p><a class="btn" href="?">Créer un sondage</a></div>`; return; }
         poll=snap.data(); poll.creneaux=poll.creneaux||[];
         $("s-titre").textContent=poll.titre||"Sondage";
-        renderMeta(); setupAdmin(); refreshAdminBtns(); setupOpenAdd(); renderBanners(); renderVoteForm(); renderResults();
+        renderMeta(); renderStatut(); renderOrdre(); setupAdmin(); refreshAdminBtns(); setupOpenAdd(); renderBanners(); renderVoteForm(); renderResults(); renderFinal();
       });
       onSnapshot(collection(db,COL,pollId,"reponses"), snap=>{
         reponses=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -650,7 +697,7 @@
             if(!$("v-mat").value) $("v-mat").value=mine.matiere||"";
             if(!$("v-com").value) $("v-com").value=mine.commentaire||"";
             if(poll) renderVoteForm(); } }
-        if(poll) renderResults();
+        if(poll){ renderResults(); renderFinal(); }
       });
     }
 
