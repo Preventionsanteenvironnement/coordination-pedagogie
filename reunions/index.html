@@ -105,6 +105,11 @@
     .daygroup-h{ font-size:.82rem; font-weight:750; color:var(--accent);
       display:flex; align-items:center; gap:7px; margin-bottom:8px; }
     .daygroup-h::before{ content:"📅"; font-size:.9rem; }
+    .daygroup-h.clickable{ cursor:pointer; }
+    .daygroup-h.clickable:hover{ text-decoration:underline; }
+    .daygroup-h.clickable::after{ content:"✏️ modifier"; font-size:.7rem; font-weight:500; color:var(--soft); opacity:.7; }
+    .builder-tip{ font-size:.85rem; color:var(--accent); font-weight:650; margin:12px 0 0; }
+    .apercu-title{ font-size:.82rem; font-weight:750; color:var(--text); margin:20px 0 4px; }
     .chips{ display:flex; flex-wrap:wrap; gap:8px; }
     .chip{ display:inline-flex; align-items:center; gap:8px; background:var(--card); border:1.5px solid var(--line);
       border-radius:999px; padding:7px 8px 7px 14px; font-size:.86rem; font-weight:600; animation:pop .2s ease; }
@@ -214,24 +219,25 @@
 
       <section class="card">
         <h2><span class="step">2</span> Les créneaux</h2>
-        <p class="sub">Choisissez un jour dans le calendrier, puis <strong>cliquez les heures</strong>. Vous pouvez en sélectionner plusieurs et changer de jour autant que vous voulez. Aucune saisie.</p>
+        <p class="sub">Choisissez un jour, <strong>cliquez les heures</strong> qui vous intéressent — puis changez de jour pour en proposer d'autres (mardi, mercredi…). Vous pouvez <strong>mélanger les durées</strong> dans une même journée (30 min le matin, 1 h l'après-midi). Aucune saisie.</p>
         <div class="builder">
           <div class="builder-top">
             <div>
-              <p class="mini">📅 Jour</p>
+              <p class="mini">📅 Jour <span class="hint" style="font-weight:400">— changez-le pour ajouter d'autres jours</span></p>
               <input type="date" id="b-date" />
             </div>
             <div>
-              <p class="mini">Format des créneaux</p>
+              <p class="mini">Durée d'un créneau <span class="hint" style="font-weight:400">— modifiable à tout moment</span></p>
               <select id="b-format">
-                <option value="30r">Tranches de 30 min — 8h–8h30, 8h30–9h…</option>
-                <option value="60r">Tranches d'1 h — 8h–9h, 9h–10h…</option>
-                <option value="15r">Tranches de 15 min</option>
+                <option value="30r">30 min — 8h–8h30, 8h30–9h…</option>
+                <option value="60r">1 h — 8h–9h, 9h–10h…</option>
+                <option value="15r">15 min</option>
                 <option value="pt">Moments précis — 8h, 8h30, 9h…</option>
               </select>
             </div>
           </div>
           <div class="palette" id="palette"><p class="palette-hint">Choisissez d'abord un jour ci-dessus.</p></div>
+          <p class="builder-tip" id="builder-tip"></p>
         </div>
 
         <div class="sepor">ou un moment décrit librement</div>
@@ -247,6 +253,7 @@
           </span>
         </label>
 
+        <p class="apercu-title hidden" id="apercu-title">📋 Vos jours &amp; créneaux <span class="hint" style="font-weight:400">— cliquez un jour pour le modifier, ✕ pour retirer un créneau</span></p>
         <div id="apercu">
           <p class="empty-hint">Aucun créneau pour l'instant — cliquez des heures ci-dessus (au moins deux), ou cochez le mode collaboratif.</p>
         </div>
@@ -428,16 +435,20 @@
       formatEl.addEventListener("change", render);
       return render;
     }
-    function renderApercu(box, list, onChange, emptyMsg){
+    function renderApercu(box, list, onChange, emptyMsg, onDayClick){
       if(!list.length){ box.innerHTML=`<p class="empty-hint">${emptyMsg}</p>`; return; }
       const groups={}; sortCr(list).forEach(c=>{ const k=c.jour||"Autres moments"; (groups[k]=groups[k]||[]).push(c); });
-      box.innerHTML = Object.entries(groups).map(([jour,items])=>`
-        <div class="daygroup"><div class="daygroup-h">${esc(jour)}</div>
-        <div class="chips">${items.map(c=>`<span class="chip" data-id="${c.id}">${esc(c.heure)}<button class="rm" type="button" aria-label="Retirer">✕</button></span>`).join("")}</div></div>`).join("");
+      box.innerHTML = Object.entries(groups).map(([jour,items])=>{
+        const ds=items[0].dateStr||"";
+        const attrs=(onDayClick && ds) ? `class="daygroup-h clickable" data-date="${ds}" title="Cliquer pour revenir modifier ce jour"` : `class="daygroup-h"`;
+        return `<div class="daygroup"><div ${attrs}>${esc(jour)} <span class="muted" style="font-weight:400">· ${items.length}</span></div>
+        <div class="chips">${items.map(c=>`<span class="chip" data-id="${c.id}">${esc(c.heure)}<button class="rm" type="button" aria-label="Retirer">✕</button></span>`).join("")}</div></div>`;
+      }).join("");
       box.querySelectorAll(".chip .rm").forEach(b=>b.addEventListener("click",()=>{
         const id=b.closest(".chip").dataset.id; const i=list.findIndex(c=>c.id===id);
         if(i>-1) list.splice(i,1); onChange();
       }));
+      if(onDayClick) box.querySelectorAll(".daygroup-h.clickable").forEach(h=>h.addEventListener("click",()=>onDayClick(h.dataset.date)));
     }
 
     // ====================================================================
@@ -446,8 +457,19 @@
     function initCreer(){
       $("vue-creer").classList.remove("hidden");
       const creneaux=[];
+      function pickDay(ds){ const d=$("b-date"); d.value=ds; d.dispatchEvent(new Event("input")); document.querySelector(".builder").scrollIntoView({block:"center"}); }
+      function updateTip(){
+        const tip=$("builder-tip");
+        const days=[...new Set(creneaux.filter(c=>c.dateStr).map(c=>c.dateStr))];
+        $("apercu-title").classList.toggle("hidden", !creneaux.length);
+        if(!creneaux.length){ tip.textContent=""; return; }
+        const jrs = days.length, nb = creneaux.length;
+        tip.innerHTML = `✅ <strong>${nb}</strong> créneau${nb>1?"x":""} sur <strong>${jrs||"—"}</strong> jour${jrs>1?"s":""}. `
+          + (jrs<2 ? `Changez de jour ci-dessus pour proposer mardi, mercredi… ` : ``)
+          + `Vous pouvez aussi changer la durée pour mélanger (ex. 1 h l'après-midi).`;
+      }
       const refresh = ()=>{ renderPalette(); renderApercu($("apercu"), creneaux, refresh,
-        "Aucun créneau pour l'instant — cliquez des heures ci-dessus (au moins deux), ou cochez le mode collaboratif."); };
+        "Aucun créneau pour l'instant — cliquez des heures ci-dessus (au moins deux), ou cochez le mode collaboratif.", pickDay); updateTip(); };
       const renderPalette = makeBuilder($("b-date"), $("b-format"), $("palette"), ()=>creneaux, refresh);
 
       function addFree(){ const v=$("b-free").value.trim(); if(!v) return;
