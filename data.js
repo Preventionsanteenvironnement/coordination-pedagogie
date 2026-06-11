@@ -21,6 +21,15 @@ const SITE = {
 
 const THEMATIQUES = [
   {
+    id: "reunions",
+    titre: "Réunions & disponibilités",
+    desc: "Proposez des créneaux, l'équipe coche ses dispos, le meilleur moment ressort tout seul.",
+    lien: "reunions/",
+    type: "Outil",
+    couleur: "#2f8f83",
+    badge: "Nouveau",
+  },
+  {
     id: "administratif",
     nom: "Vie d'établissement & administratif",
     couleur: "#3b6ea5",
