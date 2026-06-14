@@ -625,3 +625,30 @@ remap(FLASHCARDS.pfmp); remap(QUIZ.pfmp);
   (window.SCENARIOS || []).forEach(function (sc) { sc.s = fix(sc.s); });
   delete SOURCES["convention-type"]; delete SOURCES["convention-horaires"]; delete SOURCES["conv-accident"];
 })();
+
+/* ===== ACTEURS : qui fait quoi (rôles officiels) ===== */
+// Enrichir la circulaire avec la coordination DDFPT (texte officiel).
+if (SOURCES["circulaire-2016"]) {
+  SOURCES["circulaire-2016"].texte += "\n\nCoordination (DDFPT) : « La recherche des organismes d'accueil est menée sous la responsabilité de l'équipe pédagogique, coordonnée par le directeur ou la directrice délégué(e) aux formations technologiques et professionnelles. » Les équipes, sous cette coordination, « déterminent ensemble les durées et les dates de chaque période ».";
+}
+SECTIONS.pfmp.themes.push({
+  titre: "Acteurs : qui fait quoi", icone: "🧑‍💼", notions: [
+    { t: "CHEF D'ÉTABLISSEMENT — responsable de l'organisation générale des PFMP : recherche de lieux, désignation des enseignants référents, conventionnement ; présente le dispositif et la convention-type au conseil d'administration.", s: ["circulaire-2016"] },
+    { t: "CHEF D'ÉTABLISSEMENT — ordonnateur de l'allocation : il valide la décision d'attribution et les états liquidatifs (ApLyPro) transmis à l'ASP pour paiement.", s: ["fiche-allocation-circuit"] },
+    { t: "DDFPT — coordonne les équipes pédagogiques : recherche des organismes d'accueil, détermination des durées et des dates des périodes. C'est un rôle d'organisation/coordination, pas de signataire réglementaire.", s: ["circulaire-2016"] },
+    { t: "ENSEIGNANT RÉFÉRENT — assure le suivi pédagogique individuel ; s'assure à plusieurs reprises, auprès du tuteur, du bon déroulement et du respect des stipulations de la convention. Maximum 16 élèves par référent.", s: ["L124-1", "L124-2", "D124-3"] },
+    { t: "TUTEUR — désigné par l'organisme d'accueil ; chargé de l'accueil et de l'accompagnement de l'élève ; garant des stipulations pédagogiques ; signale à l'établissement les retards, absences et incidents.", s: ["L124-9", "circulaire-2016"] },
+    { t: "⚠️ PROFESSEUR PRINCIPAL — AUCUN rôle défini par les textes officiels au titre des PFMP. La figure réglementaire du suivi, c'est l'enseignant référent (art. L124-1 et L124-2). La coordination « PP » relève de l'organisation interne de l'établissement, pas de la loi.", s: ["L124-1", "L124-2"] },
+    { t: "ORGANISME D'ACCUEIL — ne peut pas utiliser la PFMP comme un emploi ; désigne un tuteur ; respecte les conditions de présence et de sécurité ; délivre l'attestation de stage.", s: ["L124-7", "L124-9", "L124-14", "D124-9"] },
+    { t: "ÉLÈVE — réalise des missions conformes au projet pédagogique ; évalue la qualité de l'accueil (sans effet sur le diplôme).", s: ["L124-1", "L124-4"] }
+  ]
+});
+FLASHCARDS.pfmp.push(
+  { q: "Qui assure le suivi pédagogique de l'élève en PFMP ?", r: "L'enseignant référent (pas le professeur principal).", s: ["L124-1", "L124-2"] },
+  { q: "Le professeur principal a-t-il un rôle réglementaire en PFMP ?", r: "Non : les textes ne lui en donnent aucun. La figure officielle est le référent.", s: ["L124-1", "L124-2"] },
+  { q: "Qui est responsable de l'organisation générale des PFMP ?", r: "Le chef d'établissement.", s: ["circulaire-2016"] }
+);
+QUIZ.pfmp.push(
+  { q: "La figure réglementaire du suivi de l'élève en PFMP, c'est…", o: ["le professeur principal", "l'enseignant référent", "le DDFPT"], c: 1, s: ["L124-1", "L124-2"] },
+  { q: "Le rôle du DDFPT est…", o: ["de signer la convention à la place du chef", "de coordonner l'organisation (lieux, dates)"], c: 1, s: ["circulaire-2016"] }
+);
