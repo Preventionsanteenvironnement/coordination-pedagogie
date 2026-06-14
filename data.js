@@ -61,14 +61,8 @@ const THEMATIQUES = [
       },
       {
         titre: "Convention & procédure expliquées",
-        desc: "La convention, la pré-convention, la procédure interne et le handicap, expliquées article par article. Qui fait quoi, checklist avant signature, « que faire si… ».",
+        desc: "La convention de l'établissement et la procédure interne, expliquées article par article (propre au lycée — peut évoluer).",
         lien: "https://preventionsanteenvironnement.github.io/pfmp-convention-procedure/",
-        type: "Outil",
-      },
-      {
-        titre: "Cadre réglementaire des PFMP",
-        desc: "Les textes officiels (Code de l'éducation, circulaire, allocation, horaires selon l'âge) avec la source exacte. « Selon ma formation » : CAP / Bac Pro.",
-        lien: "https://preventionsanteenvironnement.github.io/cadre-reglementaire-pfmp/",
         type: "Outil",
       },
     ],

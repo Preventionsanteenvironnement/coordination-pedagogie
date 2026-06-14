@@ -39,7 +39,7 @@ function render() {
   const back = page !== "accueil";
   $("#hdrBack").style.display = back ? "flex" : "none";
   $("#hdrTitle").textContent = page === "theme" ? sec.themes[themeIdx].titre : (TITLES[page] || "Guide PFMP");
-  $("#secPill").textContent = sec.icone + " " + (section === "pfmp" ? "Cadre PFMP" : "Convention");
+  $("#secPill").style.display = "none";
   const showSearch = SEARCHABLE.includes(page);
   $("#searchWrap").style.display = showSearch ? "block" : "none";
   // tabs
@@ -56,11 +56,8 @@ function viewAccueil() {
   const tiles = [["themes", "📂", "Thèmes", "Notions par thème, avec sources"], ["flash", "🃏", "Flashcards", "Réviser en s'amusant"],
     ["quiz", "🧠", "Quiz", "Teste-toi (QCM + score)"], ["scenarios", "🆘", "Que faire si…", "Les situations-pièges"], ["glossaire", "📖", "Glossaire", "Tous les sigles"]];
   return `
-    <p class="hello">Choisis ta partie :</p>
-    <div class="sec-cards">
-      ${Object.entries(window.SECTIONS).map(([id, s]) => `<button class="sec-card ${id === section ? "active" : ""}" data-sec="${id}">
-        <span class="sec-ic">${s.icone}</span><strong>${esc(s.label)}</strong><small>${esc(s.intro)}</small></button>`).join("")}
-    </div>
+    <div class="home-banner"><span>📚</span><div><strong>PFMP — cadre réglementaire officiel</strong>
+      <small>Uniquement la loi (Code de l'éducation, code du travail, circulaires, décrets). La convention de l'établissement est un espace séparé.</small></div></div>
     <p class="hello">Que veux-tu faire ?</p>
     <div class="tile-grid">
       ${tiles.map(([p, ic, t, d]) => `<button class="tile" data-go="${p}"><span>${ic}</span><strong>${t}</strong><small>${d}</small></button>`).join("")}
@@ -180,7 +177,6 @@ document.addEventListener("click", e => {
   const qn = e.target.closest("[data-qnext]"); if (qn) { quizIdx++; quizSel = null; return render(); }
   const qr = e.target.closest("[data-quizrestart]"); if (qr) { quizIdx = 0; quizScore = 0; quizSel = null; return render(); }
   if (e.target.closest("#hdrBack")) { page = (page === "theme") ? "themes" : "accueil"; query = ""; if ($("#search")) $("#search").value = ""; return render(); }
-  if (e.target.closest("#secPill")) { section = section === "pfmp" ? "convention" : "pfmp"; themeIdx = 0; quizIdx = 0; quizScore = 0; quizSel = null; return render(); }
   if (e.target.closest("#backdrop")) return closeSource();
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSource(); });

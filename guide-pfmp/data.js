@@ -255,10 +255,34 @@ Object.assign(SOURCES, {
     texte: `« Chaque période au moins égale à sept heures de présence, consécutives ou non, est considérée comme équivalente à un jour et chaque période au moins égale à vingt-deux jours de présence, consécutifs ou non, est considérée comme équivalente à un mois. »`
   },
   "conv-accident": {
-    type: "convention", ref: "Convention de stage, art. 13 (accident du travail)",
-    origine: "Convention-type de PFMP (annexée à la circulaire n°2016-053). Application des art. L412-8 et R412-4 du code de la sécurité sociale.",
-    url: "https://www.education.gouv.fr/bo/16/Hebdo13/MENE1608407C.htm",
-    texte: `« En application de l'article L. 412-8 du code de la sécurité sociale, l'élève bénéficie de la législation sur les accidents du travail. […] l'obligation de déclaration d'accident incombe à l'entreprise d'accueil. Celle-ci adressera à la CPAM compétente une lettre recommandée avec accusé de réception, dans les 48 heures suivant l'accident. […] L'entreprise fait parvenir, sans délai, une copie de la déclaration au chef d'établissement. »`
+    type: "loi", ref: "Code de la sécurité sociale, art. L412-8 et R412-4",
+    origine: "Accidents du travail des élèves et étudiants. La déclaration incombe à l'entreprise d'accueil (rappelé par la convention-type, art. 13).",
+    url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000033712591",
+    texte: `En application de l'article L. 412-8 du code de la sécurité sociale, l'élève bénéficie de la législation sur les accidents du travail. L'obligation de déclaration d'accident incombe à l'entreprise d'accueil, qui adresse à la CPAM compétente une lettre recommandée avec accusé de réception dans les 48 heures suivant l'accident, et fait parvenir sans délai une copie de la déclaration au chef d'établissement (art. R412-4).`
+  },
+  "CT-L3162-1": {
+    type: "loi", ref: "Code du travail, art. L3162-1",
+    origine: "Durée du travail des jeunes travailleurs de moins de 18 ans.",
+    url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037385958",
+    texte: `« Les jeunes travailleurs ne peuvent être employés à un travail effectif excédant huit heures par jour et trente-cinq heures par semaine. »\n(Des dérogations limitées sont possibles, par décret ou sur autorisation de l'inspection du travail.)\nCette durée maximale (8 h/jour, 35 h/sem) s'applique à TOUS les moins de 18 ans, sans distinction d'âge.`
+  },
+  "CT-L3162-3": {
+    type: "loi", ref: "Code du travail, art. L3162-3",
+    origine: "Pause des jeunes travailleurs de moins de 18 ans.",
+    url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902788",
+    texte: `« Aucune période de travail effectif ininterrompue ne peut excéder une durée maximale de quatre heures et demie. Lorsque le temps de travail quotidien est supérieur à quatre heures et demie, les jeunes travailleurs bénéficient d'un temps de pause d'au moins trente minutes consécutives. »`
+  },
+  "CT-L3163": {
+    type: "loi", ref: "Code du travail, art. L3163-1 et L3163-2",
+    origine: "Travail de nuit des jeunes travailleurs de moins de 18 ans.",
+    url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902789",
+    texte: `Art. L3163-1 — Est considéré comme travail de nuit : 1° Pour les jeunes de seize à dix-huit ans, tout travail entre vingt-deux heures et six heures ; 2° Pour les jeunes de moins de seize ans, tout travail entre vingt heures et six heures.\n\nArt. L3163-2 — « Le travail de nuit est interdit pour les jeunes travailleurs. » (dérogations très limitées, par l'inspection du travail, pour certains secteurs définis par décret.)`
+  },
+  "CT-L3164": {
+    type: "loi", ref: "Code du travail, art. L3164-1 et L3164-2",
+    origine: "Repos quotidien et hebdomadaire des jeunes travailleurs de moins de 18 ans.",
+    url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902793",
+    texte: `Art. L3164-1 — « La durée minimale du repos quotidien ne peut être inférieure à douze heures consécutives. Cette durée minimale est portée à quatorze heures consécutives s'ils sont âgés de moins de seize ans. »\n\nArt. L3164-2 — Les jeunes travailleurs bénéficient de deux jours de repos consécutifs par semaine.`
   },
   "decret-2013-915": {
     type: "reglement", ref: "Décret n°2013-915 du 11 octobre 2013",
@@ -304,9 +328,12 @@ const SECTIONS = {
       ]},
       { titre: "Horaires & âge", icone: "🕐", notions: [
         { t: "La présence de l'élève suit les règles des salariés : durées maximales, travail de nuit, repos, jours fériés ; les tâches dangereuses sont interdites.", s: ["L124-14"] },
-        { t: "Mineur : 8 h/jour et 35 h/semaine maximum ; pause de 30 min au-delà de 4 h 30 ; repos quotidien 14 h (< 16 ans) ou 12 h (16-18).", s: ["convention-horaires"] },
-        { t: "Travail de nuit interdit : 20 h-6 h pour les moins de 16 ans, 22 h-6 h pour les 16-18 ans — non dérogeable.", s: ["convention-horaires"] },
-        { t: "Élève majeur : travail de nuit possible seulement s'il est nommément désigné par le chef d'établissement.", s: ["convention-horaires"] },
+        { t: "Durée maximale (tous les moins de 18 ans, SANS distinction d'âge) : 8 heures par jour et 35 heures par semaine.", s: ["CT-L3162-1"] },
+        { t: "Pause : au-delà de 4 h 30 de travail, au moins 30 minutes consécutives ; aucune période ininterrompue ne peut dépasser 4 h 30.", s: ["CT-L3162-3"] },
+        { t: "Repos quotidien (distinction selon l'âge) : 14 heures consécutives pour les moins de 16 ans, 12 heures pour les 16-18 ans.", s: ["CT-L3164"] },
+        { t: "Repos hebdomadaire : 2 jours consécutifs.", s: ["CT-L3164"] },
+        { t: "Travail de nuit interdit (distinction selon l'âge) : moins de 16 ans → entre 20 h et 6 h ; 16-18 ans → entre 22 h et 6 h.", s: ["CT-L3163"] },
+        { t: "Élève majeur : les protections propres aux mineurs ne s'appliquent pas ; il suit les règles générales du temps de travail.", s: ["L124-14"] },
         { t: "Le nombre de stagiaires accueillis simultanément dans un organisme est encadré ; l'autorité académique le fixe pour les PFMP.", s: ["L124-8"] }
       ]},
       { titre: "Documents", icone: "📄", notions: [
@@ -544,3 +571,57 @@ const GLOSSAIRE = [
 ];
 
 if (typeof window !== "undefined") { window.QUIZ = QUIZ; window.GLOSSAIRE = GLOSSAIRE; }
+
+/* ===== REFONTE « 100% OFFICIEL » : sources code du travail + nettoyage ===== */
+Object.assign(SOURCES, {
+  "CT-L3162-1": { type: "loi", ref: "Code du travail, art. L3162-1", origine: "Durée du travail des jeunes de moins de 18 ans.", url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037385958", texte: "« Les jeunes travailleurs ne peuvent être employés à un travail effectif excédant huit heures par jour et trente-cinq heures par semaine. » (Des dérogations limitées sont possibles, par décret ou par l'inspecteur du travail, sans dépasser la durée applicable aux adultes de l'établissement.)" },
+  "CT-L3162-3": { type: "loi", ref: "Code du travail, art. L3162-3", origine: "Pause des jeunes travailleurs.", url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902788", texte: "« Aucune période de travail effectif ininterrompue ne peut excéder, pour les jeunes travailleurs, une durée maximale de quatre heures et demie. Lorsque le temps de travail quotidien est supérieur à quatre heures et demie, les jeunes travailleurs bénéficient d'un temps de pause d'au moins trente minutes consécutives. »" },
+  "CT-L3163-1": { type: "loi", ref: "Code du travail, art. L3163-1", origine: "Définition du travail de nuit des jeunes.", url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902789", texte: "« Pour l'application du présent chapitre, est considéré comme travail de nuit :\n1° Pour les jeunes travailleurs de plus de seize ans et de moins de dix-huit ans, tout travail entre 22 heures et 6 heures ;\n2° Pour les jeunes travailleurs de moins de seize ans, tout travail entre 20 heures et 6 heures. »" },
+  "CT-L3163-2": { type: "loi", ref: "Code du travail, art. L3163-2", origine: "Interdiction du travail de nuit des jeunes.", url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902790", texte: "« Le travail de nuit est interdit pour les jeunes travailleurs. » (Des dérogations très encadrées existent pour certains secteurs ; jamais entre minuit et 4 heures, sauf urgence.)" },
+  "CT-L3164-1": { type: "loi", ref: "Code du travail, art. L3164-1", origine: "Repos quotidien des jeunes travailleurs.", url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006902793", texte: "La durée minimale du repos quotidien des jeunes travailleurs ne peut être inférieure à douze heures consécutives. Cette durée est portée à quatorze heures consécutives pour les jeunes de moins de seize ans." },
+  "CT-L3164-2": { type: "loi", ref: "Code du travail, art. L3164-2", origine: "Repos hebdomadaire des jeunes travailleurs.", url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000036262892", texte: "Les jeunes travailleurs bénéficient de deux jours de repos consécutifs par semaine." },
+  "CSS-accident": { type: "loi", ref: "Code de la sécurité sociale, art. L412-8 et R412-4", origine: "Couverture accidents du travail des élèves en PFMP et modalités de déclaration.", url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006073189/", texte: "L'élève bénéficie de la législation sur les accidents du travail (art. L. 412-8). En cas d'accident, la déclaration incombe à l'organisme d'accueil, qui l'adresse à la CPAM dans les 48 heures (art. R. 412-4) et en informe l'établissement." }
+});
+
+// 1) Le guide devient mono-domaine : on retire la convention (espace séparé).
+delete SECTIONS.convention; delete FLASHCARDS.convention; delete QUIZ.convention;
+SECTIONS.pfmp.label = "PFMP — Cadre réglementaire (officiel)";
+SECTIONS.pfmp.intro = "Uniquement le droit officiel : Code de l'éducation, code du travail, circulaires et décrets. (La convention de l'établissement est un espace distinct.)";
+
+// 2) Refonte du thème Horaires/âge → sourcé sur le CODE DU TRAVAIL, précis par âge.
+(function () {
+  var t = SECTIONS.pfmp.themes.find(function (x) { return x.titre === "Horaires & âge"; });
+  if (!t) return;
+  t.titre = "Horaires & travail des mineurs"; t.icone = "🕐";
+  t.notions = [
+    { t: "Durée maximale : 8 heures par jour et 35 heures par semaine — pour TOUS les jeunes de moins de 18 ans. Sur la durée quotidienne, il n'y a pas de distinction selon l'âge.", s: ["CT-L3162-1"] },
+    { t: "Pause : aucune période de travail ininterrompue ne peut dépasser 4 h 30 ; au-delà, pause d'au moins 30 minutes consécutives.", s: ["CT-L3162-3"] },
+    { t: "Repos quotidien : au moins 12 heures consécutives — porté à 14 heures pour les moins de 16 ans.", s: ["CT-L3164-1"] },
+    { t: "Repos hebdomadaire : 2 jours consécutifs.", s: ["CT-L3164-2"] },
+    { t: "Travail de nuit interdit pour les jeunes. Est « de nuit » : 22 h-6 h pour les 16-18 ans ; 20 h-6 h pour les moins de 16 ans.", s: ["CT-L3163-2", "CT-L3163-1"] },
+    { t: "Pendant la PFMP, la présence de l'élève suit aussi les règles applicables aux salariés (durées, repos, jours fériés) ; tâches dangereuses interdites.", s: ["L124-14"] },
+    { t: "Ces règles viennent du code du travail et s'imposent : la convention de l'établissement ne fait que les reprendre — c'est l'occasion de vérifier qu'elle les reprend correctement.", s: ["CT-L3162-1", "CT-L3164-1"] }
+  ];
+})();
+
+// 3) Re-sourcer le chiffre « 48 h accident » sur le code de la sécurité sociale.
+(function () {
+  var t = SECTIONS.pfmp.themes.find(function (x) { return x.titre === "Chiffres clés"; });
+  if (!t) return;
+  t.notions.forEach(function (n) { if (/48 heures/.test(n.t)) n.s = ["CSS-accident"]; });
+})();
+
+// 4) Corriger les flashcards/quiz qui citaient la convention → code du travail.
+function remap(arr) { (arr || []).forEach(function (c) { c.s = (c.s || []).map(function (id) { return id === "convention-horaires" ? "CT-L3163-1" : id === "conv-accident" ? "CSS-accident" : id; }); }); }
+remap(FLASHCARDS.pfmp); remap(QUIZ.pfmp);
+
+/* 5) Remap GLOBAL : aucune source « convention » dans le guide officiel. */
+(function () {
+  var M = { "convention-horaires": "CT-L3162-1", "conv-accident": "CSS-accident", "convention-type": "circulaire-2016" };
+  function fix(s) { return [...new Set((s || []).map(function (id) { return M[id] || id; }))]; }
+  SECTIONS.pfmp.themes.forEach(function (t) { t.notions.forEach(function (n) { n.s = fix(n.s); }); });
+  (FLASHCARDS.pfmp || []).forEach(function (c) { c.s = fix(c.s); });
+  (QUIZ.pfmp || []).forEach(function (q) { q.s = fix(q.s); });
+  (window.SCENARIOS || []).forEach(function (sc) { sc.s = fix(sc.s); });
+  delete SOURCES["convention-type"]; delete SOURCES["convention-horaires"]; delete SOURCES["conv-accident"];
+})();

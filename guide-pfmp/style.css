@@ -159,3 +159,10 @@ mark { background: #ffe39a; color: inherit; border-radius: 3px; padding: 0 1px; 
   .drawer.open { transform: translateX(0); }
   .sec-cards, .tile-grid, .theme-grid { grid-template-columns: 1fr 1fr 1fr; }
 }
+
+/* Bandeau d'accueil (mono-domaine officiel) */
+.home-banner { display: flex; gap: 13px; align-items: flex-start; background: var(--brand-soft);
+  border: 1px solid #c9d8f3; border-radius: 15px; padding: 15px 17px; margin-bottom: 18px; }
+.home-banner span { font-size: 26px; }
+.home-banner strong { display: block; color: var(--brand); font-size: 15.5px; }
+.home-banner small { color: #3a4a66; font-size: 13px; line-height: 1.4; }
