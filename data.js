@@ -68,10 +68,30 @@ const THEMATIQUES = [
     ],
   },
   {
+    id: "acteurs",
+    nom: "Acteurs",
+    couleur: "#0e7c66",
+    enfants: [
+      {
+        titre: "Le DDFPT — rôle & missions",
+        desc: "Directeur délégué aux formations professionnelles et technologiques : statut, 4 missions, PFMP & bureau des entreprises, sécurité, lettre de mission, rémunération — d'après la circulaire n°2016-137 et les textes officiels.",
+        lien: "acteurs/ddfpt/",
+        type: "Guide",
+      },
+    ],
+  },
+  {
     id: "pedagogie",
     nom: "Pédagogie",
     couleur: "#5a8a3c",
-    enfants: [],
+    enfants: [
+      {
+        titre: "École inclusive — guide de formation",
+        desc: "Cadre & dispositifs (PPS, PAP, PAI, PPRE, MDPH, ULIS, AESH), comprendre les troubles (TSA, TDAH, dys…), public, pédagogie adaptée et supports. Par thèmes, avec flashcards, quiz et glossaire.",
+        lien: "pedagogie/ecole-inclusive/",
+        type: "Guide",
+      },
+    ],
   },
   {
     id: "references",
