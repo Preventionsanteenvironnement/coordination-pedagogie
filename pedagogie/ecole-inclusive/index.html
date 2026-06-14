@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#5a8a3c">
+    <title>École inclusive — guide de formation</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="hdr-row">
+        <button id="hdrBack" class="hdr-back" aria-label="Retour">‹</button>
+        <h1 id="hdrTitle">École inclusive</h1>
+        <button id="secPill" class="sec-pill"></button>
+      </div>
+      <div id="searchWrap" class="search-wrap">
+        <input id="search" class="search" type="search" placeholder="Rechercher (PPS, autisme, dys, AESH…)">
+      </div>
+    </header>
+
+    <main class="workspace"><div id="view"></div></main>
+
+    <nav id="tabbar" class="tabbar"></nav>
+
+    <aside id="drawer" class="drawer"></aside>
+    <div id="backdrop" class="backdrop"></div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
