@@ -54,6 +54,12 @@ const THEMATIQUES = [
     couleur: "#c0392b",
     enfants: [
       {
+        titre: "Guide PFMP — devenir incollable",
+        desc: "Le guide didactique mobile : cadre réglementaire + convention, par thèmes, avec flashcards, quiz, glossaire et « que faire si… ». Chaque réponse cite sa source officielle.",
+        lien: "https://preventionsanteenvironnement.github.io/guide-pfmp/",
+        type: "Guide",
+      },
+      {
         titre: "Convention & procédure expliquées",
         desc: "La convention, la pré-convention, la procédure interne et le handicap, expliquées article par article. Qui fait quoi, checklist avant signature, « que faire si… ».",
         lien: "https://preventionsanteenvironnement.github.io/pfmp-convention-procedure/",
