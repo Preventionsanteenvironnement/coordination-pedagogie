@@ -55,7 +55,7 @@ const THEMATIQUES = [
     enfants: [
       {
         titre: "Guide PFMP — devenir incollable",
-        desc: "Le guide didactique mobile : cadre réglementaire + convention, par thèmes, avec flashcards, quiz, glossaire et « que faire si… ». Chaque réponse cite sa source officielle.",
+        desc: "Le cadre réglementaire OFFICIEL des PFMP, didactique et mobile : par thèmes (durée, allocation, horaires selon l'âge…), avec flashcards, quiz, glossaire et « que faire si… ». Uniquement la loi (Code de l'éducation, code du travail, circulaires) — chaque réponse cite sa source exacte.",
         lien: "guide-pfmp/",
         type: "Guide",
       },
