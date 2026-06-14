@@ -56,7 +56,7 @@ const THEMATIQUES = [
       {
         titre: "Guide PFMP — devenir incollable",
         desc: "Le guide didactique mobile : cadre réglementaire + convention, par thèmes, avec flashcards, quiz, glossaire et « que faire si… ». Chaque réponse cite sa source officielle.",
-        lien: "https://preventionsanteenvironnement.github.io/guide-pfmp/",
+        lien: "guide-pfmp/",
         type: "Guide",
       },
       {
