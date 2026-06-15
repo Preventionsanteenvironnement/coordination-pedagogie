@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1f4ea8">
+<title>Observation GEVA-Sco — grille enseignant</title>
+<style>
+:root{--bg:#eef2f8;--surface:#fff;--ink:#18202e;--muted:#5c6577;--line:#dfe5ef;--brand:#1f4ea8;--brand-soft:#e7eefb;
+--A:#1d8a52;--B:#3f8ad6;--C:#b9710a;--D:#c0392b;--SO:#8a93a5;--radius:15px;--shadow:0 1px 2px rgba(20,30,55,.06),0 10px 26px rgba(20,30,55,.07)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 -apple-system,"Segoe UI",system-ui,sans-serif;padding-bottom:90px}
+h1,h2,h3{margin:0}button{font:inherit;cursor:pointer}
+.app-header{background:var(--surface);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top,0)) 16px 10px;position:sticky;top:0;z-index:20}
+.app-header h1{font-size:18px;color:var(--brand)}
+.app-header p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.bar{height:6px;background:var(--line);border-radius:6px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#5a82de);transition:width .25s}
+.wrap{max-width:640px;margin:0 auto;padding:18px 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+label{display:block;font-weight:600;margin-bottom:6px}
+input,select,textarea{width:100%;border:2px solid var(--line);border-radius:11px;padding:12px 13px;font-size:16px;background:#fbfcff;font-family:inherit}
+input:focus,select,textarea:focus{outline:none;border-color:var(--brand)}
+input#code{text-transform:uppercase;font-weight:700;letter-spacing:.05em}
+.muted{color:var(--muted);font-size:14px}
+.dom-h{font-size:19px;margin:4px 0 4px}
+.dom-sub{color:var(--muted);font-size:13.5px;margin-bottom:14px}
+.item{border-top:1px solid var(--line);padding:14px 0}
+.item:first-child{border-top:none}
+.item .q{font-weight:600;margin-bottom:9px}
+.cot{display:flex;gap:6px;flex-wrap:wrap}
+.cot button{flex:1;min-width:54px;border:2px solid var(--line);background:#fff;border-radius:11px;padding:11px 4px;font-weight:700;font-size:15px;color:var(--ink)}
+.cot button small{display:block;font-size:9.5px;font-weight:600;color:var(--muted);margin-top:2px}
+.cot button.sel[data-v=A]{background:#e6f6ee;border-color:var(--A);color:var(--A)}
+.cot button.sel[data-v=B]{background:#e7f1fb;border-color:var(--B);color:var(--B)}
+.cot button.sel[data-v=C]{background:#fcefda;border-color:var(--C);color:var(--C)}
+.cot button.sel[data-v=D]{background:#fbe7e4;border-color:var(--D);color:var(--D)}
+.cot button.sel[data-v=SO]{background:#eef1f6;border-color:var(--SO);color:var(--SO)}
+.cot button.sel small{color:inherit}
+.cmt{margin-top:10px}
+.cmt textarea{min-height:60px}
+.req{color:var(--D);font-size:12.5px;font-weight:600}
+.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);
+padding:10px 16px calc(10px + env(safe-area-inset-bottom,0));display:flex;gap:10px;z-index:25}
+.btn{flex:1;border:2px solid var(--line);background:#fff;border-radius:12px;padding:14px 10px;font-weight:700;font-size:16px;color:var(--ink)}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);flex:2}
+.btn:disabled{opacity:.5}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+.legend b{color:var(--ink)}
+.big{font-size:34px;text-align:center;margin:6px 0}
+.center{text-align:center}
+.pill{display:inline-block;background:var(--brand-soft);color:var(--brand);border-radius:20px;padding:4px 12px;font-weight:700;font-size:13px}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:11px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left}
+th{background:#f6f9fd;font-size:11.5px;text-transform:uppercase;color:var(--muted)}
+.tag{font-weight:700}.tag.A{color:var(--A)}.tag.B{color:var(--B)}.tag.C{color:var(--C)}.tag.D{color:var(--D)}.tag.SO{color:var(--SO)}
+a.link{color:var(--brand);font-weight:600;text-decoration:none}
+.rgpd{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <h1>Observation des activités — GEVA-Sco</h1>
+  <p id="hp">Grille à remplir par chaque enseignant · anonyme (matière + code élève)</p>
+  <div class="bar" id="barWrap" style="display:none"><i id="bar" style="width:0%"></i></div>
+</header>
+<main class="wrap"><div id="view"></div></main>
+<nav class="navbar" id="nav" style="display:none"></nav>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where, orderBy }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",
+  authDomain: "devoirs-pse.firebaseapp.com",
+  projectId: "devoirs-pse",
+  storageBucket: "devoirs-pse.firebasestorage.app",
+  messagingSenderId: "614730413904",
+  appId: "1:614730413904:web:a5dd478af5de30f6bede55"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const COL = "coordination_gevasco";
+
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const esc = v => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2000);}
+
+const MATIERES = ["Français","Histoire-géo-EMC","Mathématiques","Sciences physiques et chimiques","Anglais","Espagnol",
+"EPS","Arts appliqués","PSE","Enseignement professionnel (éco-gestion / AGORA)","Enseignement professionnel (MELEC)",
+"Économie-droit","Co-intervention","Documentation (CDI)","Autre"];
+
+const COTATIONS = [["A","seul, sans difficulté"],["B","difficultés/aide ponctuelles"],["C","difficultés/aide régulières"],["D","non réalisée"],["SO","sans objet"]];
+
+const DOMAINES = [
+  { titre:"Tâches générales & relation à autrui", icone:"🧭", items:[
+    "S'orienter dans le temps","S'orienter dans l'espace","Fixer son attention","Mémoriser","Gérer sa sécurité",
+    "Respecter les règles de vie","Avoir des relations avec autrui conformes aux règles sociales","Maîtriser son comportement dans ses relations avec autrui"]},
+  { titre:"Mobilité & manipulation", icone:"🚶", items:[
+    "Faire ses transferts","Se déplacer à l'intérieur, à l'extérieur (activités scolaires)","Utiliser les transports en commun","Avoir des activités de motricité fine"]},
+  { titre:"Entretien personnel", icone:"🧼", items:[
+    "Assurer l'élimination et utiliser les toilettes","S'habiller / se déshabiller","Prendre ses repas (manger, boire)","Prendre soin de sa santé"]},
+  { titre:"Communication", icone:"💬", items:[
+    "Parler","Comprendre la parole en face à face","Comprendre une phrase simple","Produire et recevoir des messages non verbaux"]},
+  { titre:"Tâches en lien avec la scolarité", icone:"📚", items:[
+    "Lire","Écrire","Calculer","Organiser son travail","Contrôler son travail","Accepter des consignes","Suivre des consignes",
+    "S'installer dans la classe","Utiliser des supports pédagogiques","Utiliser du matériel adapté à son handicap","Prendre des notes (quel que soit le support)","Participer à des sorties scolaires"]}
+];
+const key = (d,i)=>"d"+d+"_i"+i;
+
+// ----- État -----
+let step = -1;                 // -1 = accueil ; 0 = identité ; 1..N = domaines ; N+1 = évolutions/envoi
+let data = { eleveCode:(params.get("eleve")||"").toUpperCase(), classe:params.get("classe")||"", matiere:"", reponses:{}, obstacles:{}, evolutions:"" };
+const TOTAL = DOMAINES.length + 2; // identité + domaines + final
+
+function render(){
+  const vue = params.get("vue");
+  if(vue==="resultats"){ return renderResultats(); }
+  $("barWrap").style.display = step>=0 ? "block":"none";
+  if(step>=0){ const pct=Math.round((step/(TOTAL-1))*100); $("bar").style.width=pct+"%"; }
+  if(step===-1) return renderAccueil();
+  if(step===0) return renderIdentite();
+  if(step>=1 && step<=DOMAINES.length) return renderDomaine(step-1);
+  return renderFinal();
+}
+
+function renderAccueil(){
+  $("nav").style.display="none"; $("barWrap").style.display="none";
+  $("view").innerHTML = `
+    <div class="card">
+      <p class="pill">Équipe de suivi (ESS) · GEVA-Sco</p>
+      <h2 style="margin:12px 0 8px;font-size:20px">Grille d'observation des activités de l'élève</h2>
+      <p class="muted">Le professeur principal vous a transmis un <b>code élève</b>. Indiquez votre <b>matière</b>, puis cochez la grille : c'est rapide. Vos réponses sont regroupées pour l'équipe de suivi.</p>
+      <div class="legend">${COTATIONS.map(c=>`<span><b>${c[0]}</b> ${c[1]}</span>`).join(" · ")}</div>
+      <p class="muted" style="margin-top:12px">Cotation officielle : <b>C</b> et <b>D</b> demandent un court commentaire (obstacles).</p>
+      <p class="rgpd">🔒 Anonyme &amp; RGPD : on n'indique <b>ni votre nom</b> (seulement la matière), <b>ni le nom de l'élève</b> (seulement son code). Aucune donnée nominative.</p>
+    </div>
+    <div class="navbar" style="position:static;border:none;background:none;padding:0">
+      <button class="btn primary" id="start">Commencer la grille →</button>
+    </div>`;
+  $("start").onclick=()=>{ step=0; render(); };
+}
+
+function renderIdentite(){
+  navButtons("← Accueil", "Continuer →", ()=>{step=-1;render();}, ()=>{
+    data.eleveCode=$("code").value.trim().toUpperCase(); data.matiere=$("mat").value;
+    if(!data.eleveCode){ toast("Indiquez le code de l'élève."); return; }
+    if(!data.matiere){ toast("Choisissez votre matière."); return; }
+    step=1; render();
+  });
+  $("view").innerHTML=`
+    <div class="card">
+      <div class="dom-h">1 · Identité</div>
+      <p class="dom-sub">Sans nom : uniquement le code de l'élève et votre matière.</p>
+      <label for="code">Code de l'élève (donné par le PP)</label>
+      <input id="code" placeholder="ex. RX62" value="${esc(data.eleveCode)}" autocomplete="off">
+      ${data.classe?`<p class="muted" style="margin-top:6px">Classe : ${esc(data.classe)}</p>`:""}
+      <label for="mat" style="margin-top:16px">Votre matière</label>
+      <select id="mat"><option value="">— choisir —</option>${MATIERES.map(m=>`<option ${m===data.matiere?"selected":""}>${esc(m)}</option>`).join("")}</select>
+    </div>`;
+}
+
+function renderDomaine(d){
+  const dom=DOMAINES[d];
+  navButtons("← Retour", (d===DOMAINES.length-1?"Dernière étape →":"Suivant →"), ()=>{step--;render();}, ()=>{
+    // exiger commentaire si C ou D
+    for(let i=0;i<dom.items.length;i++){ const k=key(d,i); const v=data.reponses[k];
+      if((v==="C"||v==="D") && !(data.obstacles[k]||"").trim()){ toast("Commentaire requis pour les cases C/D."); const el=$("cmt_"+k); if(el){el.focus();} return; } }
+    step++; render();
+  });
+  $("view").innerHTML=`
+    <div class="card">
+      <div class="dom-h">${dom.icone} ${esc(dom.titre)}</div>
+      <p class="dom-sub">Domaine ${d+1}/${DOMAINES.length} · au regard de l'autonomie d'un élève du même âge</p>
+      ${dom.items.map((it,i)=>{const k=key(d,i);const v=data.reponses[k];
+        return `<div class="item">
+          <div class="q">${esc(it)}</div>
+          <div class="cot">${COTATIONS.map(c=>`<button data-k="${k}" data-v="${c[0]}" class="${v===c[0]?"sel":""}">${c[0]}<small>${c[0]==="SO"?"s.o.":""}</small></button>`).join("")}</div>
+          <div class="cmt" id="cmtwrap_${k}" style="display:${(v==="C"||v==="D")?"block":"none"}">
+            <label class="req">Obstacles / précisions (obligatoire pour C et D)</label>
+            <textarea id="cmt_${k}" data-k="${k}" placeholder="Ce qui fait obstacle, le contexte…">${esc(data.obstacles[k]||"")}</textarea>
+          </div>
+        </div>`;}).join("")}
+    </div>`;
+  $("view").querySelectorAll(".cot button").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k,v=b.dataset.v; data.reponses[k]=v;
+    $("view").querySelectorAll(`.cot button[data-k="${k}"]`).forEach(x=>x.classList.toggle("sel",x.dataset.v===v));
+    $("cmtwrap_"+k).style.display=(v==="C"||v==="D")?"block":"none";
+  });
+  $("view").querySelectorAll("textarea[data-k]").forEach(t=>t.oninput=()=>{data.obstacles[t.dataset.k]=t.value;});
+}
+
+function renderFinal(){
+  let n=0,counts={A:0,B:0,C:0,D:0,SO:0,vide:0};
+  DOMAINES.forEach((dom,d)=>dom.items.forEach((it,i)=>{n++;const v=data.reponses[key(d,i)];counts[v||"vide"]++;}));
+  navButtons("← Retour", "✓ Envoyer", ()=>{step--;render();}, submit);
+  $("view").innerHTML=`
+    <div class="card">
+      <div class="dom-h">Évolutions & perspectives</div>
+      <p class="dom-sub">Optionnel — observations, points d'appui, projet professionnel.</p>
+      <textarea id="evo" placeholder="Évolutions observées, points d'appui, perspectives…">${esc(data.evolutions)}</textarea>
+    </div>
+    <div class="card">
+      <h3 style="font-size:16px;margin-bottom:8px">Récapitulatif</h3>
+      <p class="muted">Élève <b>${esc(data.eleveCode)}</b> · matière <b>${esc(data.matiere)}</b></p>
+      <div class="legend" style="margin-top:8px">
+        <span class="tag A">A : ${counts.A}</span><span class="tag B">B : ${counts.B}</span>
+        <span class="tag C">C : ${counts.C}</span><span class="tag D">D : ${counts.D}</span>
+        <span class="tag SO">SO : ${counts.SO}</span>${counts.vide?`<span>· non renseignés : ${counts.vide}</span>`:""}
+      </div>
+    </div>`;
+  $("evo").oninput=e=>data.evolutions=e.target.value;
+}
+
+async function submit(){
+  const btn=$("act2"); btn.disabled=true; btn.textContent="Envoi…";
+  try{
+    await addDoc(collection(db,COL),{
+      eleveCode:data.eleveCode, classe:data.classe||"", matiere:data.matiere,
+      reponses:data.reponses, obstacles:data.obstacles, evolutions:data.evolutions||"",
+      createdAt:serverTimestamp()
+    });
+    step=-2; renderDone();
+  }catch(e){ btn.disabled=false; btn.textContent="✓ Envoyer"; toast("Erreur d'envoi. Réessayez."); console.error(e); }
+}
+
+function renderDone(){
+  $("nav").style.display="none"; $("barWrap").style.display="none";
+  $("view").innerHTML=`
+    <div class="card center">
+      <div class="big">✅</div>
+      <h2 style="font-size:20px">Merci !</h2>
+      <p class="muted">Votre observation pour l'élève <b>${esc(data.eleveCode)}</b> (${esc(data.matiere)}) a bien été enregistrée.</p>
+      <div class="navbar" style="position:static;border:none;background:none;padding:14px 0 0">
+        <button class="btn" id="again">Remplir pour un autre élève</button>
+      </div>
+    </div>`;
+  $("again").onclick=()=>{ const mat=data.matiere; data={eleveCode:"",classe:"",matiere:mat,reponses:{},obstacles:{},evolutions:""}; step=0; render(); };
+}
+
+function navButtons(left,right,onLeft,onRight){
+  const nav=$("nav"); nav.style.display="flex";
+  nav.innerHTML=`<button class="btn" id="act1">${left}</button><button class="btn primary" id="act2">${right}</button>`;
+  $("act1").onclick=onLeft; $("act2").onclick=onRight;
+}
+
+// ----- Résultats (PP) -----
+async function renderResultats(){
+  $("nav").style.display="none"; $("barWrap").style.display="none";
+  $("hp").textContent="Espace enseignant principal · résultats agrégés";
+  $("view").innerHTML=`<div class="card"><p class="muted">Chargement des réponses…</p></div>`;
+  let docs=[];
+  try{ const snap=await getDocs(collection(db,COL)); docs=snap.docs.map(d=>d.data()); }
+  catch(e){ $("view").innerHTML=`<div class="card"><p>Impossible de charger les résultats. Vérifiez la connexion et les règles Firestore.</p></div>`; return; }
+  // grouper par élève
+  const byEleve={}; docs.forEach(r=>{ (byEleve[r.eleveCode]=byEleve[r.eleveCode]||[]).push(r); });
+  const codes=Object.keys(byEleve).sort();
+  const filt=(params.get("eleve")||"").toUpperCase();
+  const list = filt ? codes.filter(c=>c===filt) : codes;
+  let html=`<div class="card"><h2 style="font-size:19px">Résultats GEVA-Sco</h2>
+    <p class="muted">${docs.length} réponse(s) · ${codes.length} élève(s). Données anonymisées (code + matière).</p>
+    <p style="margin-top:8px"><a class="link" id="csv">⬇︎ Exporter en CSV</a></p></div>`;
+  if(!list.length){ html+=`<div class="card"><p class="muted">Aucune réponse${filt?` pour ${esc(filt)}`:""} pour l'instant.</p></div>`; }
+  list.forEach(code=>{
+    const reps=byEleve[code];
+    html+=`<div class="card"><h3 style="font-size:17px;color:var(--brand)">Élève ${esc(code)} <span class="muted" style="font-weight:400">· ${reps.length} matière(s)</span></h3>
+      <div class="legend" style="margin:6px 0 10px">${reps.map(r=>`<span class="pill">${esc(r.matiere)}</span>`).join("")}</div>
+      <div style="overflow-x:auto"><table><thead><tr><th>Activité</th>${reps.map(r=>`<th>${esc((r.matiere||"?").slice(0,10))}</th>`).join("")}</tr></thead><tbody>`;
+    DOMAINES.forEach((dom,d)=>{
+      html+=`<tr><td colspan="${reps.length+1}" style="background:#f0f3f9;font-weight:700">${dom.icone} ${esc(dom.titre)}</td></tr>`;
+      dom.items.forEach((it,i)=>{const k=key(d,i);
+        html+=`<tr><td>${esc(it)}</td>${reps.map(r=>{const v=r.reponses?.[k]||"";return `<td class="tag ${v}">${v||"·"}</td>`;}).join("")}</tr>`;});
+    });
+    html+=`</tbody></table></div>`;
+    // commentaires C/D
+    const cmts=[]; reps.forEach(r=>Object.entries(r.obstacles||{}).forEach(([k,t])=>{if(t&&t.trim())cmts.push(`<b>${esc(r.matiere)}</b> — ${esc(t)}`);}));
+    if(cmts.length) html+=`<div class="rgpd" style="border-top:1px dashed var(--line)"><b>Obstacles signalés :</b><br>${cmts.join("<br>")}</div>`;
+    const evos=reps.filter(r=>r.evolutions&&r.evolutions.trim()).map(r=>`<b>${esc(r.matiere)}</b> — ${esc(r.evolutions)}`);
+    if(evos.length) html+=`<div class="rgpd"><b>Évolutions / perspectives :</b><br>${evos.join("<br>")}</div>`;
+    html+=`</div>`;
+  });
+  $("view").innerHTML=html;
+  const csvBtn=$("csv"); if(csvBtn) csvBtn.onclick=()=>exportCsv(docs);
+}
+function exportCsv(docs){
+  const head=["code_eleve","matiere"]; DOMAINES.forEach((dom,d)=>dom.items.forEach((it,i)=>head.push(it)));
+  head.push("evolutions");
+  const rows=[head];
+  docs.forEach(r=>{ const row=[r.eleveCode,r.matiere]; DOMAINES.forEach((dom,d)=>dom.items.forEach((it,i)=>row.push(r.reponses?.[key(d,i)]||""))); row.push((r.evolutions||"").replace(/\n/g," ")); rows.push(row); });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n");
+  const blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="gevasco_observations.csv";a.click();
+}
+
+render();
+</script>
+</body>
+</html>

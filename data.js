@@ -91,6 +91,13 @@ const THEMATIQUES = [
         lien: "pedagogie/ecole-inclusive/",
         type: "Guide",
       },
+      {
+        titre: "Grille d'observation GEVA-Sco (ESS)",
+        desc: "Formulaire à remplir par chaque enseignant pour l'équipe de suivi : observation des activités de l'élève (cotation A/B/C/D). Anonyme — matière au lieu du nom, code élève au lieu du nom. Rapide, mobile ; les réponses sont regroupées pour le professeur principal.",
+        lien: "gevasco/",
+        type: "Outil",
+        badge: "Nouveau",
+      },
     ],
   },
   {
