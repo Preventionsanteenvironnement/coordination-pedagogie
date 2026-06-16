@@ -4,241 +4,388 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
-  <title>Proposition de rendez-vous</title>
+  <title>Rendez-vous PFMP</title>
   <style>
-    :root {
-      --bg1: #2f7d6b; --bg2: #356a93;
-      --ink: #1c2530; --soft: #69757f; --line: #e7ecf1;
-      --accent: #2f7d6b; --card: #ffffff;
-      --ok: #2f9e6b;
-      --shadow: 0 10px 40px rgba(20,40,55,.18);
+    :root{
+      --bg1:#2f7d6b; --bg2:#356a93;
+      --ink:#1c2530; --soft:#69757f; --line:#e7ecf1;
+      --accent:#2f7d6b; --card:#ffffff; --ok:#2f9e6b;
+      --shadow:0 10px 40px rgba(20,40,55,.18);
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: var(--ink);
-      background: linear-gradient(150deg, var(--bg1), var(--bg2));
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 28px 16px 48px;
-      -webkit-font-smoothing: antialiased;
+    *{box-sizing:border-box;}
+    html,body{margin:0;}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink); background:linear-gradient(150deg,var(--bg1),var(--bg2));
+      min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
+      padding:28px 16px 48px; -webkit-font-smoothing:antialiased;
     }
-    .sheet {
-      width: 100%;
-      max-width: 460px;
-      background: var(--card);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      animation: pop .5s cubic-bezier(.16,.84,.44,1) both;
+    .sheet{
+      width:100%; max-width:480px; background:var(--card); border-radius:22px;
+      box-shadow:var(--shadow); overflow:hidden;
+      animation:pop .5s cubic-bezier(.16,.84,.44,1) both;
     }
-    @keyframes pop { from { opacity:0; transform: translateY(16px) scale(.98);} to {opacity:1; transform:none;} }
+    @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98);}to{opacity:1;transform:none;}}
 
-    /* En-tête */
-    .top {
-      background: linear-gradient(150deg, var(--bg1), var(--bg2));
-      color: #fff;
-      padding: 26px 24px 24px;
-    }
-    .top .label {
-      font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; opacity: .85;
-    }
-    .who { display: flex; align-items: center; gap: 13px; margin-top: 14px; }
-    .avatar {
-      width: 46px; height: 46px; border-radius: 50%;
-      background: rgba(255,255,255,.22);
-      display: grid; place-items: center;
-      font-weight: 700; font-size: 1rem; flex: none;
-    }
-    .who .name { font-weight: 650; font-size: 1.02rem; }
-    .who .role { font-size: .82rem; opacity: .85; }
+    .top{ background:linear-gradient(150deg,var(--bg1),var(--bg2)); color:#fff; padding:26px 24px 24px; }
+    .top .label{ font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; opacity:.85; }
+    .who{ display:flex; align-items:center; gap:13px; margin-top:14px; }
+    .avatar{ width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,.22);
+      display:grid; place-items:center; font-weight:700; font-size:1rem; flex:none; }
+    .who .name{ font-weight:650; font-size:1.02rem; }
+    .who .role{ font-size:.82rem; opacity:.85; }
+    .top h1{ margin:0; font-size:1.35rem; }
 
-    /* Corps */
-    .body { padding: 22px 24px 26px; }
-    .intro { font-size: .98rem; line-height: 1.5; margin: 0 0 18px; }
-    .intro strong { color: var(--accent); }
+    .body{ padding:22px 24px 26px; }
+    .intro{ font-size:.98rem; line-height:1.5; margin:0 0 18px; }
+    .intro strong{ color:var(--accent); }
 
-    .recap {
-      display: grid; gap: 1px;
-      background: var(--line);
-      border: 1px solid var(--line);
-      border-radius: 14px; overflow: hidden;
-      margin-bottom: 22px;
-    }
-    .recap .row { background: #fff; display: flex; gap: 10px; padding: 11px 14px; font-size: .9rem; }
-    .recap .k { color: var(--soft); min-width: 92px; }
-    .recap .v { font-weight: 550; }
+    .recap{ display:grid; gap:1px; background:var(--line); border:1px solid var(--line);
+      border-radius:14px; overflow:hidden; margin-bottom:22px; }
+    .recap .row{ background:#fff; display:flex; gap:10px; padding:11px 14px; font-size:.9rem; }
+    .recap .k{ color:var(--soft); min-width:92px; }
+    .recap .v{ font-weight:550; }
 
-    .ask { font-weight: 650; font-size: 1rem; margin: 0 0 12px; }
+    .ask{ font-weight:650; font-size:1rem; margin:0 0 12px; }
 
-    .slots { display: grid; gap: 10px; }
-    .slot {
-      display: flex; align-items: center; gap: 14px;
-      width: 100%; text-align: left;
-      background: #fff; border: 1.5px solid var(--line);
-      border-radius: 14px; padding: 14px 16px;
-      cursor: pointer; font: inherit; color: inherit;
-      transition: border-color .15s, box-shadow .15s, transform .1s;
-    }
-    .slot:hover { border-color: var(--accent); }
-    .slot:active { transform: scale(.99); }
-    .slot.sel { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(47,125,107,.14); }
-    .slot .cal {
-      width: 46px; height: 46px; border-radius: 11px; flex: none;
-      background: rgba(47,125,107,.1); color: var(--accent);
-      display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
-    }
-    .slot .cal .d { font-size: 1.15rem; font-weight: 700; }
-    .slot .cal .m { font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
-    .slot .txt .day { display: block; font-weight: 600; }
-    .slot .txt .hr { display: block; font-size: .85rem; color: var(--soft); margin-top: 2px; }
-    .slot .tick {
-      margin-left: auto; width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid var(--line); flex: none; position: relative; transition: .15s;
-    }
-    .slot.sel .tick { border-color: var(--accent); background: var(--accent); }
-    .slot.sel .tick::after {
-      content: ""; position: absolute; left: 7px; top: 3px;
-      width: 6px; height: 11px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg);
-    }
+    .slots{ display:grid; gap:10px; }
+    .slot{ display:flex; align-items:center; gap:14px; width:100%; text-align:left;
+      background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:14px 16px;
+      cursor:pointer; font:inherit; color:inherit; transition:border-color .15s,box-shadow .15s,transform .1s; }
+    .slot:hover{ border-color:var(--accent); }
+    .slot:active{ transform:scale(.99); }
+    .slot.sel{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,125,107,.14); }
+    .slot.win{ border-color:var(--ok); box-shadow:0 0 0 3px rgba(47,158,107,.16); }
+    .slot .cal{ width:46px; height:46px; border-radius:11px; flex:none; background:rgba(47,125,107,.1);
+      color:var(--accent); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
+    .slot .cal .d{ font-size:1.15rem; font-weight:700; }
+    .slot .cal .m{ font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+    .slot .txt .day{ display:block; font-weight:600; }
+    .slot .txt .hr{ display:block; font-size:.85rem; color:var(--soft); margin-top:2px; }
+    .slot .tick{ margin-left:auto; width:24px; height:24px; border-radius:50%; border:2px solid var(--line);
+      flex:none; position:relative; transition:.15s; }
+    .slot.sel .tick{ border-color:var(--accent); background:var(--accent); }
+    .slot.sel .tick::after, .slot.win .tick::after{ content:""; position:absolute; left:7px; top:3px;
+      width:6px; height:11px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+    .slot.win .tick{ border-color:var(--ok); background:var(--ok); }
 
-    .none { font-size: .85rem; color: var(--soft); margin: 14px 0 0; }
-    .cta {
-      width: 100%; margin-top: 22px;
-      background: var(--accent); color: #fff; border: none;
-      border-radius: 14px; padding: 15px; font: inherit; font-weight: 650; font-size: 1rem;
-      cursor: pointer; transition: opacity .15s, transform .1s;
-    }
-    .cta:disabled { opacity: .4; cursor: not-allowed; }
-    .cta:not(:disabled):active { transform: scale(.99); }
+    .field{ margin-bottom:14px; }
+    .field label{ display:block; font-size:.82rem; font-weight:600; color:var(--soft); margin-bottom:6px; }
+    .field input, .field select{ width:100%; font:inherit; padding:11px 13px; border:1.5px solid var(--line);
+      border-radius:12px; background:#fff; color:var(--ink); }
+    .field .hint{ font-size:.74rem; color:var(--soft); margin-top:5px; }
+    .two{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
-    .foot { text-align: center; font-size: .76rem; color: var(--soft); padding: 0 24px 22px; }
+    .cre-list{ display:grid; gap:8px; margin:8px 0 4px; }
+    .cre-item{ display:flex; align-items:center; gap:10px; background:rgba(47,125,107,.07);
+      border:1px solid var(--line); border-radius:11px; padding:9px 12px; font-size:.9rem; }
+    .cre-item .x{ margin-left:auto; border:none; background:none; color:var(--soft); cursor:pointer; font-size:1.1rem; }
+    .cre-add{ display:grid; grid-template-columns:1.3fr 1fr 1fr auto; gap:8px; align-items:end; }
+    .cre-add .mini label{ font-size:.72rem; }
+    .cre-add input{ padding:9px 10px; }
+    .addbtn{ background:rgba(47,125,107,.12); color:var(--accent); border:none; border-radius:11px;
+      padding:11px 12px; font:inherit; font-weight:650; cursor:pointer; }
 
-    /* Confirmation */
-    .done { padding: 48px 28px 44px; text-align: center; display: none; }
-    .done.show { display: block; animation: pop .45s ease both; }
-    .check {
-      width: 76px; height: 76px; border-radius: 50%; margin: 0 auto 18px;
-      background: rgba(47,158,107,.12); display: grid; place-items: center;
-    }
-    .check svg { width: 38px; height: 38px; }
-    .check .path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: draw .5s .15s forwards ease; }
-    @keyframes draw { to { stroke-dashoffset: 0; } }
-    .done h2 { margin: 0 0 8px; font-size: 1.3rem; }
-    .done p { margin: 0; color: var(--soft); line-height: 1.5; }
-    .done .picked {
-      display: inline-block; margin-top: 18px; padding: 12px 18px;
-      background: rgba(47,125,107,.1); color: var(--accent);
-      border-radius: 12px; font-weight: 650;
-    }
+    .cta{ width:100%; margin-top:18px; background:var(--accent); color:#fff; border:none; border-radius:14px;
+      padding:15px; font:inherit; font-weight:650; font-size:1rem; cursor:pointer; transition:opacity .15s,transform .1s; }
+    .cta:disabled{ opacity:.4; cursor:not-allowed; }
+    .cta:not(:disabled):active{ transform:scale(.99); }
+    .ghost{ background:rgba(47,125,107,.1); color:var(--accent); }
 
-    .demo {
-      position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,.55); color: #fff; font-size: .7rem;
-      padding: 5px 12px; border-radius: 999px; letter-spacing: .04em;
-    }
+    .link-box{ display:flex; gap:8px; margin-top:10px; }
+    .link-box input{ flex:1; font:inherit; font-size:.82rem; padding:11px 12px; border:1.5px solid var(--line);
+      border-radius:11px; background:#f7f9fb; color:var(--ink); }
+    .copy{ background:var(--accent); color:#fff; border:none; border-radius:11px; padding:0 16px; font-weight:650; cursor:pointer; }
+
+    .status{ display:inline-flex; align-items:center; gap:7px; font-size:.85rem; font-weight:650;
+      padding:6px 12px; border-radius:999px; }
+    .status.wait{ background:rgba(232,163,61,.16); color:#9a6a12; }
+    .status.ok{ background:rgba(47,158,107,.14); color:#1f7a4d; }
+    .dot{ width:8px; height:8px; border-radius:50%; background:currentColor; }
+
+    .foot{ text-align:center; font-size:.76rem; color:var(--soft); padding:0 24px 22px; }
+
+    .done{ padding:48px 28px 44px; text-align:center; }
+    .check{ width:76px; height:76px; border-radius:50%; margin:0 auto 18px; background:rgba(47,158,107,.12);
+      display:grid; place-items:center; }
+    .check svg{ width:38px; height:38px; }
+    .check .path{ stroke-dasharray:40; stroke-dashoffset:40; animation:draw .5s .15s forwards ease; }
+    @keyframes draw{ to{ stroke-dashoffset:0; } }
+    .done h2{ margin:0 0 8px; font-size:1.3rem; }
+    .done p{ margin:0; color:var(--soft); line-height:1.5; }
+    .picked{ display:inline-block; margin-top:18px; padding:12px 18px; background:rgba(47,125,107,.1);
+      color:var(--accent); border-radius:12px; font-weight:650; }
+
+    .center{ padding:46px 24px; text-align:center; color:var(--soft); }
+    .spin{ width:30px; height:30px; border:3px solid var(--line); border-top-color:var(--accent);
+      border-radius:50%; margin:0 auto 14px; animation:rot .8s linear infinite; }
+    @keyframes rot{ to{ transform:rotate(360deg); } }
+    .toast{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+      background:#1c2530; color:#fff; padding:11px 18px; border-radius:10px; font-size:.86rem;
+      opacity:0; pointer-events:none; transition:.25s; }
+    .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+    .hidden{ display:none !important; }
   </style>
 </head>
 <body>
-  <div class="demo">Aperçu — données d'exemple</div>
-
   <div class="sheet">
-    <!-- Vue choix -->
-    <div id="vueChoix">
-      <div class="top">
-        <div class="label">Suivi de période en entreprise</div>
-        <div class="who">
-          <div class="avatar" id="ini">—</div>
-          <div>
-            <div class="name" id="ens">—</div>
-            <div class="role">Enseignant référent</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="body">
-        <p class="intro">Bonjour, <strong id="tut">—</strong>.<br>
-          Je souhaite convenir d'un rendez-vous avec vous pour le suivi de l'élève en stage.
-          Merci de choisir le créneau qui vous convient le mieux.</p>
-
-        <div class="recap" id="recap"></div>
-
-        <p class="ask">Vos créneaux disponibles</p>
-        <div class="slots" id="slots"></div>
-
-        <button class="cta" id="valider" disabled>Confirmer ce créneau</button>
-      </div>
-      <div class="foot">Aucune inscription nécessaire — votre choix est transmis directement à l'enseignant.</div>
-    </div>
-
-    <!-- Vue confirmation -->
-    <div class="done" id="vueDone">
-      <div class="check">
-        <svg viewBox="0 0 52 52"><path class="path" fill="none" stroke="#2f9e6b" stroke-width="5"
-          stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg>
-      </div>
-      <h2>C'est noté, merci !</h2>
-      <p>Votre disponibilité a bien été transmise à l'enseignant.<br>Vous pouvez fermer cette page.</p>
-      <div class="picked" id="pickedTxt"></div>
-    </div>
+    <div id="app"><div class="center"><div class="spin"></div>Chargement…</div></div>
   </div>
+  <div class="toast" id="toast"></div>
 
-  <script>
-    // --- Données d'exemple (seront fournies par le lien + Firestore) ---
-    const RDV = {
-      enseignant: "M. Martin",
-      tuteur: "Mme Bernard",
-      entreprise: "Centre social Les Tilleuls",
-      eleve: "L. M.",
-      classe: "2de Bac Pro ASSP",
-      type: "Visite sur site",
-      creneaux: [
-        { jour: "Mardi 24 juin",    heure: "9 h 00 – 9 h 45",   d: "24", m: "juin" },
-        { jour: "Mercredi 25 juin", heure: "14 h 00 – 14 h 45", d: "25", m: "juin" },
-        { jour: "Jeudi 26 juin",    heure: "10 h 30 – 11 h 15", d: "26", m: "juin" },
-      ],
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, onSnapshot, serverTimestamp }
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",
+      authDomain: "devoirs-pse.firebaseapp.com",
+      projectId: "devoirs-pse",
+      storageBucket: "devoirs-pse.firebasestorage.app",
+      messagingSenderId: "614730413904",
+      appId: "1:614730413904:web:a5dd478af5de30f6bede55"
     };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const COL = "coordination_rdv";
 
-    const initiales = s => s.replace(/[^A-Za-zÀ-ÿ ]/g,'').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    document.getElementById('ini').textContent = initiales(RDV.enseignant);
-    document.getElementById('ens').textContent = RDV.enseignant;
-    document.getElementById('tut').textContent = RDV.tuteur;
+    const app$ = document.getElementById("app");
+    const params = new URLSearchParams(location.search);
+    const rid = params.get("r");
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    const lsAdmin = id => "coordrdv_admin_" + id;
+    let toastT;
+    function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show");
+      clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1900); }
+    const initiales = s => String(s||"").replace(/[^A-Za-zÀ-ÿ ]/g,"").split(/\s+/).filter(Boolean)
+      .map(w=>w[0]).join("").slice(0,2).toUpperCase() || "•";
 
-    document.getElementById('recap').innerHTML = [
-      ['Structure', RDV.entreprise],
-      ['Élève', RDV.eleve + ' — ' + RDV.classe],
-      ['Type', RDV.type],
-    ].map(([k,v]) => `<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+    const MOIS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+    function libelle(dateStr){ const dt=new Date(dateStr+"T00:00:00"); if(isNaN(dt)) return {jour:dateStr,d:"",m:""};
+      const j=dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+      return { jour:j.charAt(0).toUpperCase()+j.slice(1), d:String(dt.getDate()), m:MOIS[dt.getMonth()] }; }
 
-    let choisi = null;
-    const slots = document.getElementById('slots');
-    const valider = document.getElementById('valider');
+    // ===================================================================
+    //  ROUTAGE
+    // ===================================================================
+    (async function(){
+      if(!rid){ return vueCreation(); }
+      // charger le rendez-vous
+      let snap;
+      try { snap = await getDoc(doc(db, COL, rid)); }
+      catch(e){ return erreur("Impossible de charger ce rendez-vous."); }
+      if(!snap.exists()) return erreur("Ce lien de rendez-vous n'existe pas ou a expiré.");
+      const data = snap.data();
+      if(localStorage.getItem(lsAdmin(rid))) return vueGestion(rid, data);
+      return vueTuteur(rid, data);
+    })();
 
-    slots.innerHTML = RDV.creneaux.map((c,i) => `
-      <button class="slot" data-i="${i}">
-        <span class="cal"><span class="d">${c.d}</span><span class="m">${c.m}</span></span>
-        <span class="txt"><span class="day">${c.jour}</span><span class="hr">${c.heure}</span></span>
-        <span class="tick" aria-hidden="true"></span>
-      </button>`).join('');
+    function erreur(msg){
+      app$.innerHTML = `<div class="center"><p style="font-size:1.05rem;color:var(--ink)">${esc(msg)}</p></div>`;
+    }
 
-    slots.querySelectorAll('.slot').forEach(b => b.addEventListener('click', () => {
-      slots.querySelectorAll('.slot').forEach(s => s.classList.remove('sel'));
-      b.classList.add('sel');
-      choisi = +b.dataset.i;
-      valider.disabled = false;
-    }));
+    // ===================================================================
+    //  1) CRÉATION (enseignant)
+    // ===================================================================
+    function vueCreation(){
+      app$.innerHTML = `
+        <div class="top"><div class="label">Espace de gestion</div><h1>Nouveau rendez-vous PFMP</h1></div>
+        <div class="body">
+          <div class="field"><label>Votre nom (enseignant)</label>
+            <input id="f-ens" placeholder="ex. M. Martin"></div>
+          <div class="field"><label>Nom du tuteur / de la tutrice</label>
+            <input id="f-tut" placeholder="ex. Mme Bernard"></div>
+          <div class="field"><label>Structure / entreprise</label>
+            <input id="f-ent" placeholder="ex. Centre social Les Tilleuls"></div>
+          <div class="two">
+            <div class="field"><label>Élève (initiales)</label>
+              <input id="f-ele" placeholder="ex. L. M." maxlength="8">
+              <div class="hint">Initiales uniquement — jamais le nom complet.</div></div>
+            <div class="field"><label>Classe</label>
+              <input id="f-cla" placeholder="ex. 2de Bac Pro ASSP"></div>
+          </div>
+          <div class="field"><label>Type de rendez-vous</label>
+            <select id="f-typ">
+              <option>Visite sur site</option><option>Entretien téléphonique</option>
+              <option>Visioconférence</option><option>Bilan de fin de PFMP</option>
+            </select></div>
 
-    valider.addEventListener('click', () => {
-      const c = RDV.creneaux[choisi];
-      document.getElementById('pickedTxt').textContent = c.jour + ' · ' + c.heure;
-      document.getElementById('vueChoix').style.display = 'none';
-      document.getElementById('vueDone').classList.add('show');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      // TODO : ici, enregistrement de la réponse dans Firestore
-    });
+          <div class="field"><label>Créneaux proposés</label>
+            <div class="cre-list" id="cre-list"></div>
+            <div class="cre-add">
+              <div class="mini"><label>Jour</label><input type="date" id="c-date"></div>
+              <div class="mini"><label>Début</label><input type="time" id="c-deb" value="09:00"></div>
+              <div class="mini"><label>Fin</label><input type="time" id="c-fin" value="09:45"></div>
+              <button class="addbtn" id="c-add" type="button">+</button>
+            </div>
+            <div class="hint">Ajoutez 2 à 4 créneaux. La tutrice en choisira un.</div>
+          </div>
+
+          <button class="cta" id="creer" disabled>Créer le rendez-vous et obtenir le lien</button>
+        </div>
+        <div class="foot">Le lien public ne contient ni nom d'élève complet, ni nom d'établissement.</div>`;
+
+      const creneaux = [];
+      const listEl = document.getElementById("cre-list");
+      function renderList(){
+        listEl.innerHTML = creneaux.map((c,i)=>`
+          <div class="cre-item"><span>${esc(c.jour)} · ${esc(c.heure)}</span>
+            <button class="x" data-i="${i}" type="button" aria-label="Retirer">×</button></div>`).join("");
+        listEl.querySelectorAll(".x").forEach(b=>b.onclick=()=>{ creneaux.splice(+b.dataset.i,1); renderList(); valide(); });
+      }
+      document.getElementById("c-add").onclick = ()=>{
+        const date=document.getElementById("c-date").value;
+        const deb=document.getElementById("c-deb").value, fin=document.getElementById("c-fin").value;
+        if(!date){ toast("Choisissez un jour."); return; }
+        const L=libelle(date);
+        const fmt=t=>{ const [h,m]=t.split(":"); return (+m===0)?`${+h} h`:`${+h} h ${m}`; };
+        const heure = fin ? `${fmt(deb)} – ${fmt(fin)}` : fmt(deb);
+        creneaux.push({ jour:L.jour, heure, d:L.d, m:L.m });
+        renderList(); valide();
+      };
+      const fields = ["f-ens","f-tut","f-ent"].map(id=>document.getElementById(id));
+      function valide(){
+        const ok = fields.every(f=>f.value.trim()) && creneaux.length>=1;
+        document.getElementById("creer").disabled = !ok;
+      }
+      fields.forEach(f=>f.addEventListener("input",valide));
+
+      document.getElementById("creer").onclick = async ()=>{
+        const btn=document.getElementById("creer"); btn.disabled=true; btn.textContent="Création…";
+        const payload = {
+          enseignant: document.getElementById("f-ens").value.trim(),
+          tuteur: document.getElementById("f-tut").value.trim(),
+          entreprise: document.getElementById("f-ent").value.trim(),
+          eleve: document.getElementById("f-ele").value.trim(),
+          classe: document.getElementById("f-cla").value.trim(),
+          type: document.getElementById("f-typ").value,
+          creneaux, choix:null, statut:"attente", createdAt: serverTimestamp()
+        };
+        try{
+          const ref = await addDoc(collection(db,COL), payload);
+          localStorage.setItem(lsAdmin(ref.id),"1");
+          location.search = "?r="+ref.id;
+        }catch(e){
+          btn.disabled=false; btn.textContent="Créer le rendez-vous et obtenir le lien";
+          toast("Erreur à l'enregistrement. Réessayez.");
+        }
+      };
+    }
+
+    // ===================================================================
+    //  2) VUE TUTEUR (lien public)
+    // ===================================================================
+    function vueTuteur(id, d){
+      if(d.statut==="repondu" && d.choix!=null){
+        return confirmation(d.creneaux[d.choix], "Vous avez déjà répondu — merci !");
+      }
+      app$.innerHTML = `
+        <div class="top">
+          <div class="label">Suivi de période en entreprise</div>
+          <div class="who"><div class="avatar">${esc(initiales(d.enseignant))}</div>
+            <div><div class="name">${esc(d.enseignant)}</div><div class="role">Enseignant référent</div></div></div>
+        </div>
+        <div class="body">
+          <p class="intro">Bonjour, <strong>${esc(d.tuteur)}</strong>.<br>
+            Je souhaite convenir d'un rendez-vous avec vous pour le suivi de l'élève en stage.
+            Merci de choisir le créneau qui vous convient le mieux.</p>
+          <div class="recap">
+            <div class="row"><span class="k">Structure</span><span class="v">${esc(d.entreprise)}</span></div>
+            ${d.eleve?`<div class="row"><span class="k">Élève</span><span class="v">${esc(d.eleve)}${d.classe?" — "+esc(d.classe):""}</span></div>`:""}
+            <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div>
+          </div>
+          <p class="ask">Vos créneaux disponibles</p>
+          <div class="slots" id="slots">${d.creneaux.map((c,i)=>`
+            <button class="slot" data-i="${i}">
+              <span class="cal"><span class="d">${esc(c.d)}</span><span class="m">${esc(c.m)}</span></span>
+              <span class="txt"><span class="day">${esc(c.jour)}</span><span class="hr">${esc(c.heure)}</span></span>
+              <span class="tick" aria-hidden="true"></span>
+            </button>`).join("")}</div>
+          <button class="cta" id="ok" disabled>Confirmer ce créneau</button>
+        </div>
+        <div class="foot">Aucune inscription nécessaire — votre choix est transmis directement à l'enseignant.</div>`;
+
+      let choisi=null;
+      const slots=document.getElementById("slots"), ok=document.getElementById("ok");
+      slots.querySelectorAll(".slot").forEach(b=>b.onclick=()=>{
+        slots.querySelectorAll(".slot").forEach(s=>s.classList.remove("sel"));
+        b.classList.add("sel"); choisi=+b.dataset.i; ok.disabled=false;
+      });
+      ok.onclick = async ()=>{
+        ok.disabled=true; ok.textContent="Envoi…";
+        try{
+          await updateDoc(doc(db,COL,id), { choix:choisi, statut:"repondu", respondedAt:serverTimestamp() });
+          confirmation(d.creneaux[choisi], "Votre disponibilité a bien été transmise à l'enseignant.");
+        }catch(e){ ok.disabled=false; ok.textContent="Confirmer ce créneau"; toast("Erreur d'envoi. Réessayez."); }
+      };
+    }
+
+    function confirmation(c, msg){
+      app$.innerHTML = `
+        <div class="done">
+          <div class="check"><svg viewBox="0 0 52 52"><path class="path" fill="none" stroke="#2f9e6b"
+            stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg></div>
+          <h2>C'est noté, merci !</h2>
+          <p>${esc(msg)}<br>Vous pouvez fermer cette page.</p>
+          ${c?`<div class="picked">${esc(c.jour)} · ${esc(c.heure)}</div>`:""}
+        </div>`;
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
+    // ===================================================================
+    //  3) VUE GESTION (enseignant créateur)
+    // ===================================================================
+    function vueGestion(id, d0){
+      const url = location.origin + location.pathname + "?r=" + id;
+      function render(d){
+        const repondu = d.statut==="repondu" && d.choix!=null;
+        app$.innerHTML = `
+          <div class="top">
+            <div class="label">Espace de gestion · rendez-vous</div>
+            <h1>${esc(d.entreprise)}</h1>
+          </div>
+          <div class="body">
+            <div class="recap">
+              <div class="row"><span class="k">Tuteur</span><span class="v">${esc(d.tuteur)}</span></div>
+              ${d.eleve?`<div class="row"><span class="k">Élève</span><span class="v">${esc(d.eleve)}${d.classe?" — "+esc(d.classe):""}</span></div>`:""}
+              <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div>
+            </div>
+
+            <p class="ask">Lien à envoyer à la tutrice</p>
+            <div class="link-box">
+              <input id="lien" readonly value="${esc(url)}">
+              <button class="copy" id="copy">Copier</button>
+            </div>
+            <div class="field" style="margin-top:6px"><div class="hint">Envoyez ce lien par mail ou SMS. La tutrice n'a aucun compte à créer.</div></div>
+
+            <p class="ask" style="margin-top:18px">Réponse</p>
+            <div style="margin-bottom:14px">
+              ${repondu
+                ? `<span class="status ok"><span class="dot"></span>Créneau confirmé</span>`
+                : `<span class="status wait"><span class="dot"></span>En attente de réponse</span>`}
+            </div>
+            <div class="slots">${d.creneaux.map((c,i)=>`
+              <div class="slot ${repondu&&i===d.choix?"win":""}">
+                <span class="cal"><span class="d">${esc(c.d)}</span><span class="m">${esc(c.m)}</span></span>
+                <span class="txt"><span class="day">${esc(c.jour)}</span><span class="hr">${esc(c.heure)}</span></span>
+                <span class="tick" aria-hidden="true"></span>
+              </div>`).join("")}</div>
+
+            <button class="cta ghost" id="nouveau" style="margin-top:18px">Créer un autre rendez-vous</button>
+          </div>
+          <div class="foot">Cette page se met à jour automatiquement dès que la tutrice répond.</div>`;
+
+        document.getElementById("copy").onclick = async ()=>{
+          try{ await navigator.clipboard.writeText(url); toast("Lien copié !"); }
+          catch(e){ document.getElementById("lien").select(); document.execCommand("copy"); toast("Lien copié !"); }
+        };
+        document.getElementById("nouveau").onclick = ()=>{ location.search=""; };
+      }
+      render(d0);
+      // mise à jour en direct
+      onSnapshot(doc(db,COL,id), s=>{ if(s.exists()) render(s.data()); });
+    }
   </script>
 </body>
 </html>
