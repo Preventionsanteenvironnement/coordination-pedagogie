@@ -14,143 +14,106 @@
     }
     *{box-sizing:border-box;}
     html,body{margin:0;}
-    body{
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-      color:var(--ink); background:linear-gradient(150deg,var(--bg1),var(--bg2));
-      min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
-      padding:24px 16px 48px; -webkit-font-smoothing:antialiased;
-    }
+    body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--ink); background:linear-gradient(150deg,var(--bg1),var(--bg2)); min-height:100vh;
+      display:flex; align-items:flex-start; justify-content:center; padding:24px 16px 48px; -webkit-font-smoothing:antialiased; }
     .sheet{ width:100%; max-width:480px; background:var(--card); border-radius:22px;
       box-shadow:var(--shadow); overflow:hidden; animation:pop .45s cubic-bezier(.16,.84,.44,1) both; }
     @keyframes pop{from{opacity:0;transform:translateY(14px) scale(.985);}to{opacity:1;transform:none;}}
 
     .top{ background:linear-gradient(150deg,var(--bg1),var(--bg2)); color:#fff; padding:18px 22px 22px; }
-    .back{ display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.16);
-      color:#fff; border:none; border-radius:999px; padding:7px 14px 7px 11px; font:inherit; font-size:.82rem;
-      cursor:pointer; text-decoration:none; margin-bottom:14px; }
+    .top.invit{ background:linear-gradient(150deg,#b06f2b,#9a4f8f); }
+    .back{ display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.16); color:#fff; border:none;
+      border-radius:999px; padding:7px 14px 7px 11px; font:inherit; font-size:.82rem; cursor:pointer; text-decoration:none; margin-bottom:14px; }
     .back:hover{ background:rgba(255,255,255,.26); }
     .top .label{ font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; opacity:.85; }
     .top h1{ margin:4px 0 0; font-size:1.3rem; }
     .who{ display:flex; align-items:center; gap:13px; margin-top:12px; }
-    .avatar{ width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,.22);
-      display:grid; place-items:center; font-weight:700; font-size:1rem; flex:none; }
-    .who .name{ font-weight:650; font-size:1.02rem; }
-    .who .role{ font-size:.82rem; opacity:.85; }
+    .avatar{ width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,.22); display:grid; place-items:center; font-weight:700; font-size:1rem; flex:none; }
+    .who .name{ font-weight:650; font-size:1.02rem; } .who .role{ font-size:.82rem; opacity:.85; }
 
     .body{ padding:22px 22px 26px; }
-    .intro{ font-size:.97rem; line-height:1.5; margin:0 0 18px; }
-    .intro strong{ color:var(--accent); }
+    .intro{ font-size:.97rem; line-height:1.5; margin:0 0 18px; } .intro strong{ color:var(--accent); }
 
-    .recap{ display:grid; gap:1px; background:var(--line); border:1px solid var(--line);
-      border-radius:14px; overflow:hidden; margin-bottom:20px; }
+    .recap{ display:grid; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; margin-bottom:20px; }
     .recap .row{ background:#fff; display:flex; gap:10px; padding:11px 14px; font-size:.9rem; }
-    .recap .k{ color:var(--soft); min-width:84px; }
-    .recap .v{ font-weight:550; }
+    .recap .k{ color:var(--soft); min-width:84px; } .recap .v{ font-weight:550; }
 
     .ask{ font-weight:650; font-size:1rem; margin:0 0 6px; }
     .sub{ font-size:.82rem; color:var(--soft); margin:0 0 12px; }
 
     .field{ margin-bottom:14px; }
     .field label{ display:block; font-size:.82rem; font-weight:600; color:var(--soft); margin-bottom:6px; }
-    .field input, .field select{ width:100%; font:inherit; padding:11px 13px; border:1.5px solid var(--line);
-      border-radius:12px; background:#fff; color:var(--ink); }
+    .field input, .field select, .field textarea{ width:100%; font:inherit; padding:11px 13px; border:1.5px solid var(--line); border-radius:12px; background:#fff; color:var(--ink); }
+    .field textarea{ min-height:96px; resize:vertical; line-height:1.45; }
     .field .hint{ font-size:.74rem; color:var(--soft); margin-top:5px; }
     .two{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .three{ display:grid; grid-template-columns:1.25fr 1fr 1fr; gap:8px; align-items:end; }
 
-    /* segmented (durée, type rapides, contact) */
     .seg{ display:flex; flex-wrap:wrap; gap:8px; }
-    .seg button{ border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:11px;
-      padding:9px 14px; font:inherit; font-size:.9rem; cursor:pointer; transition:.13s; }
-    .seg button:hover{ border-color:var(--accent); }
-    .seg button.on{ border-color:var(--accent); background:var(--accent); color:#fff; }
+    .seg button{ border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:11px; padding:9px 14px; font:inherit; font-size:.9rem; cursor:pointer; transition:.13s; }
+    .seg button:hover{ border-color:var(--accent); } .seg button.on{ border-color:var(--accent); background:var(--accent); color:#fff; }
 
     .jour-list{ display:grid; gap:8px; margin:8px 0 4px; }
-    .jour-item{ background:rgba(47,125,107,.07); border:1px solid var(--line); border-radius:11px;
-      padding:10px 12px; font-size:.9rem; display:flex; align-items:center; gap:10px; }
+    .jour-item{ background:#fff; border:1px solid var(--line); border-left:5px solid var(--jc,#999); border-radius:11px; padding:10px 12px; font-size:.9rem; display:flex; align-items:center; gap:10px; }
     .jour-item .meta2{ font-size:.78rem; color:var(--soft); }
     .jour-item .x{ margin-left:auto; border:none; background:none; color:var(--soft); cursor:pointer; font-size:1.15rem; }
-    .addbtn{ width:100%; background:rgba(47,125,107,.12); color:var(--accent); border:none; border-radius:11px;
-      padding:12px; font:inherit; font-weight:650; cursor:pointer; margin-top:8px; }
+    .addbtn{ width:100%; background:rgba(47,125,107,.12); color:var(--accent); border:none; border-radius:11px; padding:12px; font:inherit; font-weight:650; cursor:pointer; margin-top:8px; }
 
-    /* Jour + créneaux (tuteur) */
-    .day{ border:1px solid var(--line); border-radius:16px; padding:13px 15px; margin-bottom:13px; }
+    .day{ border:1px solid var(--line); border-left:5px solid var(--jc,var(--accent)); border-radius:16px; padding:13px 15px; margin-bottom:13px; }
     .day-h{ display:flex; align-items:center; gap:12px; margin-bottom:11px; }
-    .day-h .cal{ width:44px; height:44px; border-radius:11px; flex:none; background:rgba(47,125,107,.1);
-      color:var(--accent); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
-    .day-h .cal .d{ font-size:1.1rem; font-weight:700; }
-    .day-h .cal .m{ font-size:.6rem; text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
-    .day-h .lbl{ font-weight:650; }
-    .day-h .win{ font-size:.8rem; color:var(--soft); margin-top:2px; }
+    .day-h .cal{ width:44px; height:44px; border-radius:11px; flex:none; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
+    .day-h .cal .d{ font-size:1.1rem; font-weight:700; } .day-h .cal .m{ font-size:.6rem; text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+    .day-h .lbl{ font-weight:650; } .day-h .win{ font-size:.8rem; color:var(--soft); margin-top:2px; }
     .chips{ display:flex; flex-wrap:wrap; gap:8px; }
-    .chip{ position:relative; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:11px;
-      padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; transition:.12s; }
-    .chip:hover{ border-color:var(--accent); }
-    .chip.on{ color:#fff; border-color:transparent; }
-    .chip .rk{ position:absolute; top:-8px; right:-8px; width:21px; height:21px; border-radius:50%;
-      background:#fff; color:var(--ink); font-size:.72rem; font-weight:700; display:grid; place-items:center;
-      box-shadow:0 1px 4px rgba(0,0,0,.18); border:2px solid currentColor; }
-
+    .chip{ position:relative; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:11px; padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; transition:.12s; }
+    .chip:hover{ border-color:var(--accent); } .chip.on{ color:#fff; border-color:transparent; }
+    .chip .rk{ position:absolute; top:-8px; right:-8px; width:21px; height:21px; border-radius:50%; background:#fff; color:var(--ink); font-size:.72rem; font-weight:700; display:grid; place-items:center; box-shadow:0 1px 4px rgba(0,0,0,.18); border:2px solid currentColor; }
     .legend{ display:flex; flex-wrap:wrap; gap:10px; margin:2px 0 14px; font-size:.78rem; color:var(--soft); }
-    .legend span{ display:inline-flex; align-items:center; gap:6px; }
-    .legend i{ width:12px; height:12px; border-radius:4px; display:inline-block; }
+    .legend span{ display:inline-flex; align-items:center; gap:6px; } .legend i{ width:12px; height:12px; border-radius:4px; display:inline-block; }
 
-    .cta{ width:100%; margin-top:18px; background:var(--accent); color:#fff; border:none; border-radius:14px;
-      padding:15px; font:inherit; font-weight:650; font-size:1rem; cursor:pointer; transition:opacity .15s,transform .1s; }
-    .cta:disabled{ opacity:.4; cursor:not-allowed; }
-    .cta:not(:disabled):active{ transform:scale(.99); }
+    .cta{ width:100%; margin-top:18px; background:var(--accent); color:#fff; border:none; border-radius:14px; padding:15px; font:inherit; font-weight:650; font-size:1rem; cursor:pointer; transition:opacity .15s,transform .1s; }
+    .cta:disabled{ opacity:.4; cursor:not-allowed; } .cta:not(:disabled):active{ transform:scale(.99); }
     .ghost{ background:rgba(47,125,107,.1); color:var(--accent); }
 
     .link-box{ display:flex; gap:8px; margin-top:8px; }
-    .link-box input{ flex:1; font:inherit; font-size:.82rem; padding:11px 12px; border:1.5px solid var(--line);
-      border-radius:11px; background:#f7f9fb; color:var(--ink); }
+    .link-box input{ flex:1; font:inherit; font-size:.82rem; padding:11px 12px; border:1.5px solid var(--line); border-radius:11px; background:#f7f9fb; color:var(--ink); }
     .copy{ background:var(--accent); color:#fff; border:none; border-radius:11px; padding:0 16px; font-weight:650; cursor:pointer; }
 
-    .status{ display:inline-flex; align-items:center; gap:7px; font-size:.85rem; font-weight:650;
-      padding:6px 12px; border-radius:999px; }
+    .status{ display:inline-flex; align-items:center; gap:7px; font-size:.85rem; font-weight:650; padding:6px 12px; border-radius:999px; }
     .status.wait{ background:rgba(232,163,61,.16); color:#9a6a12; }
     .status.rep{ background:rgba(47,128,181,.14); color:#1f5e88; }
     .status.ok{ background:rgba(47,158,107,.14); color:#1f7a4d; }
     .pin{ width:8px; height:8px; border-radius:50%; background:currentColor; }
 
-    /* cartes de préférence (côté enseignant) */
-    .pref{ display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:14px;
-      padding:12px 14px; margin-bottom:9px; cursor:pointer; transition:.13s; background:#fff; width:100%; text-align:left; font:inherit; }
-    .pref:hover{ border-color:var(--accent); }
-    .pref.chosen{ border-color:var(--ok); box-shadow:0 0 0 3px rgba(47,158,107,.16); }
-    .pref .rkb{ width:30px; height:30px; border-radius:8px; flex:none; color:#fff; font-weight:700;
-      display:grid; place-items:center; font-size:.9rem; }
-    .pref .pj{ font-weight:600; } .pref .ph{ font-size:.85rem; color:var(--soft); }
-    .pref .go{ margin-left:auto; font-size:.78rem; color:var(--accent); font-weight:650; }
+    .pref{ display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:9px; cursor:pointer; transition:.13s; background:#fff; width:100%; text-align:left; font:inherit; }
+    .pref:hover{ border-color:var(--accent); } .pref.chosen{ border-color:var(--ok); box-shadow:0 0 0 3px rgba(47,158,107,.16); }
+    .pref .rkb{ width:30px; height:30px; border-radius:8px; flex:none; color:#fff; font-weight:700; display:grid; place-items:center; font-size:.9rem; }
+    .pref .pj{ font-weight:600; } .pref .ph{ font-size:.85rem; color:var(--soft); } .pref .go{ margin-left:auto; font-size:.78rem; color:var(--accent); font-weight:650; }
 
     .foot{ text-align:center; font-size:.76rem; color:var(--soft); padding:0 22px 22px; }
 
-    .done{ padding:46px 26px 42px; text-align:center; }
-    .check{ width:74px; height:74px; border-radius:50%; margin:0 auto 16px; background:rgba(47,158,107,.12);
-      display:grid; place-items:center; }
+    .done{ padding:42px 26px 40px; text-align:center; }
+    .check{ width:74px; height:74px; border-radius:50%; margin:0 auto 16px; background:rgba(47,158,107,.12); display:grid; place-items:center; }
     .check svg{ width:36px; height:36px; }
     .check .path{ stroke-dasharray:40; stroke-dashoffset:40; animation:draw .5s .15s forwards ease; }
     @keyframes draw{ to{ stroke-dashoffset:0; } }
-    .done h2{ margin:0 0 8px; font-size:1.3rem; }
-    .done p{ margin:0 0 4px; color:var(--soft); line-height:1.5; }
+    .done h2{ margin:0 0 8px; font-size:1.34rem; } .done p{ margin:0 0 4px; color:var(--soft); line-height:1.5; }
     .reclist{ margin-top:16px; text-align:left; }
 
-    /* Suivi */
-    .item{ display:block; text-decoration:none; color:inherit; border:1px solid var(--line);
-      border-radius:14px; padding:13px 15px; margin-bottom:10px; transition:.13s; }
-    .item:hover{ border-color:var(--accent); }
-    .item.past{ opacity:.62; }
-    .item .l1{ display:flex; align-items:center; gap:10px; }
-    .item .ent{ font-weight:650; }
+    .invitcard{ padding:30px 24px 36px; text-align:center; }
+    .ribbon{ display:inline-block; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:#9a4f8f; background:rgba(154,79,143,.1); padding:6px 14px; border-radius:999px; margin-bottom:14px; }
+    .bigdate{ font-size:1.5rem; font-weight:700; margin:6px 0 2px; } .bightime{ font-size:1.05rem; color:var(--soft); margin-bottom:18px; }
+
+    .item{ display:block; text-decoration:none; color:inherit; border:1px solid var(--line); border-radius:14px; padding:13px 15px; margin-bottom:10px; transition:.13s; }
+    .item:hover{ border-color:var(--accent); } .item.past{ opacity:.62; }
+    .item .l1{ display:flex; align-items:center; gap:10px; } .item .ent{ font-weight:650; }
     .item .l2{ font-size:.83rem; color:var(--soft); margin-top:4px; }
 
     .center{ padding:44px 22px; text-align:center; color:var(--soft); }
-    .spin{ width:30px; height:30px; border:3px solid var(--line); border-top-color:var(--accent);
-      border-radius:50%; margin:0 auto 14px; animation:rot .8s linear infinite; }
+    .spin{ width:30px; height:30px; border:3px solid var(--line); border-top-color:var(--accent); border-radius:50%; margin:0 auto 14px; animation:rot .8s linear infinite; }
     @keyframes rot{ to{ transform:rotate(360deg); } }
-    .toast{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
-      background:#1c2530; color:#fff; padding:11px 18px; border-radius:10px; font-size:.86rem;
-      opacity:0; pointer-events:none; transition:.25s; z-index:9; }
+    .toast{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:#1c2530; color:#fff; padding:11px 18px; border-radius:10px; font-size:.86rem; opacity:0; pointer-events:none; transition:.25s; z-index:9; }
     .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
     .hidden{ display:none !important; }
   </style>
@@ -166,10 +129,8 @@
 
     const firebaseConfig = {
       apiKey: "AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",
-      authDomain: "devoirs-pse.firebaseapp.com",
-      projectId: "devoirs-pse",
-      storageBucket: "devoirs-pse.firebasestorage.app",
-      messagingSenderId: "614730413904",
+      authDomain: "devoirs-pse.firebaseapp.com", projectId: "devoirs-pse",
+      storageBucket: "devoirs-pse.firebasestorage.app", messagingSenderId: "614730413904",
       appId: "1:614730413904:web:a5dd478af5de30f6bede55"
     };
     const db = getFirestore(initializeApp(firebaseConfig));
@@ -182,9 +143,8 @@
     const lsAdmin = id => "coordrdv_admin_" + id;
     let toastT;
     const toast = m => { const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show");
-      clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1900); };
-    const initiales = s => String(s||"").replace(/[^A-Za-zÀ-ÿ ]/g,"").split(/\s+/).filter(Boolean)
-      .map(w=>w[0]).join("").slice(0,2).toUpperCase() || "•";
+      clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2200); };
+    const initiales = s => String(s||"").replace(/[^A-Za-zÀ-ÿ ]/g,"").split(/\s+/).filter(Boolean).map(w=>w[0]).join("").slice(0,2).toUpperCase() || "•";
 
     const MOIS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
     const fmtH = min => { const h=Math.floor(min/60), m=min%60; return m===0?`${h} h`:`${h} h ${String(m).padStart(2,"0")}`; };
@@ -192,17 +152,16 @@
     function libelle(dateStr){ const dt=new Date(dateStr+"T00:00:00"); if(isNaN(dt)) return {jour:dateStr,d:"",m:""};
       const j=dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
       return { jour:j.charAt(0).toUpperCase()+j.slice(1), d:String(dt.getDate()), m:MOIS[dt.getMonth()] }; }
-    const STEP = 15; // finesse des débuts de créneaux
-    const genCreneaux = (start,end,duree) => { const out=[];
-      for(let s=start; s+duree<=end; s+=STEP) out.push({ start:s, end:s+duree, label:`${fmtH(s)} – ${fmtH(s+duree)}` }); return out; };
+    const STEP = 15;
+    const genCreneaux = (start,end,duree) => { const out=[]; for(let s=start; s+duree<=end; s+=STEP) out.push({ start:s, end:s+duree, label:`${fmtH(s)} – ${fmtH(s+duree)}` }); return out; };
+    const dureeLabel = m => m%60===0 ? (m/60)+" h" : (m<60? m+" min" : Math.floor(m/60)+" h "+(m%60));
 
-    // priorité → couleur + intitulé
     const PRIO = [ {c:"#1f9d57",t:"1ᵉʳ choix"}, {c:"#2f80b5",t:"2ᵉ choix"}, {c:"#7a5cc0",t:"3ᵉ choix"}, {c:"#c77d2b",t:"4ᵉ choix"} ];
     const prio = r => PRIO[r-1] || { c:"#6b7785", t:r+"ᵉ choix" };
+    const DAYCOL = ["#3b6ea5","#5a8a3c","#9a5ba5","#c97a2b","#2f8f83","#c0392b","#5a6ea0"];
 
-    // ---- Agenda (.ics / Google) + envoi mail/SMS ----
-    const dtICS = (dateStr,min) => { const [Y,M,D]=dateStr.split("-");
-      return `${Y}${M}${D}T${pad(Math.floor(min/60))}${pad(min%60)}00`; };
+    // ---- Agenda + envoi ----
+    const dtICS = (dateStr,min) => { const [Y,M,D]=dateStr.split("-"); return `${Y}${M}${D}T${pad(Math.floor(min/60))}${pad(min%60)}00`; };
     const icsEsc = s => String(s||"").replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n");
     function icsHref(d){ const c=d.confirme; const ics=[
       "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//coordination-pedagogie//rdv//FR","BEGIN:VEVENT",
@@ -211,37 +170,49 @@
       "DESCRIPTION:"+icsEsc("Rendez-vous avec "+d.enseignant+(d.eleve?" (élève "+d.eleve+")":"")),
       "LOCATION:"+icsEsc(d.entreprise),"END:VEVENT","END:VCALENDAR"].join("\r\n");
       return "data:text/calendar;charset=utf-8,"+encodeURIComponent(ics); }
-    function gcalHref(d){ const c=d.confirme;
-      const u=new URL("https://calendar.google.com/calendar/render");
+    function gcalHref(d){ const c=d.confirme; const u=new URL("https://calendar.google.com/calendar/render");
       u.searchParams.set("action","TEMPLATE"); u.searchParams.set("text","Visite PFMP — "+d.entreprise);
       u.searchParams.set("dates",dtICS(c.dateStr,c.start)+"/"+dtICS(c.dateStr,c.end));
-      u.searchParams.set("details","Rendez-vous avec "+d.enseignant); u.searchParams.set("location",d.entreprise);
-      return u.toString(); }
-    function sendHref(d,url){ const c=d.confirme, ct=d.choix&&d.choix.contact;
-      const msg=`Bonjour ${d.tuteur}, je vous confirme notre rendez-vous de visite PFMP : ${c.jour} de ${c.label} (${d.entreprise}). Détails et ajout à votre agenda : ${url}`;
-      if(!ct) return null;
-      if(ct.mode==="email") return `mailto:${encodeURIComponent(ct.value)}?subject=${encodeURIComponent("Confirmation rendez-vous PFMP")}&body=${encodeURIComponent(msg)}`;
-      if(ct.mode==="sms")   return `sms:${ct.value}?body=${encodeURIComponent(msg)}`;
-      return null; }
+      u.searchParams.set("details","Rendez-vous avec "+d.enseignant); u.searchParams.set("location",d.entreprise); return u.toString(); }
+    function defaultMsg(d,url){ const c=d.confirme;
+      return `Bonjour ${d.tuteur},\n\nJe vous confirme notre rendez-vous pour la visite de PFMP :\n${c.jour}, de ${c.label}\nLieu : ${d.entreprise}\n\nVous pouvez voir la confirmation et l'ajouter à votre agenda ici :\n${url}\n\nBien cordialement,\n${d.enseignant}`; }
 
-    const erreur = msg => { app$.innerHTML = `<div class="center"><p style="font-size:1.05rem;color:var(--ink)">${esc(msg)}</p>
-      <a class="cta ghost" href="?suivi" style="display:inline-block;text-decoration:none;margin-top:14px">Mes rendez-vous</a></div>`; };
+    // ---- chargement robuste (1 nouvelle tentative) ----
+    async function getRdv(id){ try{ return await getDoc(doc(db,COL,id)); }
+      catch(e){ await new Promise(r=>setTimeout(r,700)); return await getDoc(doc(db,COL,id)); } }
 
-    // options d'heures pour les <select> (07:00 → 19:00, pas de 15 min)
+    // ===================================================================  ROUTAGE
+    async function router(){
+      if(params.has("suivi")) return vueSuivi();
+      if(!rid) return vueCreation();
+      let snap; try{ snap = await getRdv(rid); }
+      catch(e){ return erreur("Connexion impossible pour le moment. Vérifiez votre réseau puis rechargez la page.", true); }
+      if(!snap.exists()) return erreur("Ce lien de rendez-vous n'existe pas ou a été supprimé.");
+      const data = snap.data();
+      if(localStorage.getItem(lsAdmin(rid))) return vueGestion(rid, data);
+      return vueTuteur(rid, data);
+    }
+    const erreur = (msg,reload) => { app$.innerHTML = `<div class="center"><p style="font-size:1.05rem;color:var(--ink)">${esc(msg)}</p>
+      ${reload?`<button class="cta" onclick="location.reload()" style="max-width:220px;margin:14px auto 0">Recharger</button>`:""}</div>`; };
+
     const heureOptions = (sel) => { let o=""; for(let m=7*60;m<=19*60;m+=STEP){ const v=`${pad(Math.floor(m/60))}:${pad(m%60)}`;
       o+=`<option value="${v}"${v===sel?" selected":""}>${fmtH(m)}</option>`; } return o; };
     const toMin = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
+    const durOptions = (sel) => [15,30,45,60,75,90,105,120,150,180].map(m=>`<option value="${m}"${m===sel?" selected":""}>${dureeLabel(m)}</option>`).join("");
 
     // ===================================================================  1) CRÉATION
     function vueCreation(){
       app$.innerHTML = `
-        <div class="top">
-          <a class="back" href="../">← Portail</a>
-          <div class="label">PFMP · visite de stage</div><h1>Proposer une date au tuteur</h1>
-        </div>
+        <div class="top"><a class="back" href="../">← Portail</a>
+          <div class="label">PFMP · visite de stage</div><h1>Proposer une date au tuteur</h1></div>
         <div class="body">
           <div class="field"><label>Votre nom (enseignant)</label><input id="f-ens" placeholder="ex. M. Martin"></div>
           <div class="field"><label>Nom du tuteur / de la tutrice</label><input id="f-tut" placeholder="ex. Mme Bernard"></div>
+          <div class="two">
+            <div class="field"><label>E-mail du tuteur (si connu)</label><input id="f-temail" type="email" placeholder="facultatif"></div>
+            <div class="field"><label>Téléphone (si connu)</label><input id="f-ttel" type="tel" placeholder="facultatif"></div>
+          </div>
+          <div class="field hint" style="margin-top:-6px">Le tuteur pourra vérifier / corriger ces coordonnées.</div>
           <div class="field"><label>Structure / entreprise</label><input id="f-ent" placeholder="ex. Centre social Les Tilleuls"></div>
           <div class="two">
             <div class="field"><label>Élève (initiales)</label><input id="f-ele" placeholder="ex. L. M." maxlength="8">
@@ -257,18 +228,15 @@
               <button data-v="Bilan de fin de PFMP">Bilan PFMP</button>
               <button data-v="__autre">Autre…</button>
             </div>
-            <input id="f-typ-autre" class="hidden" placeholder="Précisez le type" style="margin-top:8px">
-          </div>
+            <input id="f-typ-autre" class="hidden" placeholder="Précisez le type" style="margin-top:8px"></div>
 
           <div class="field"><label>Durée du rendez-vous</label>
             <div class="seg" id="seg-dur">
-              <button data-v="30">30 min</button>
-              <button data-v="45" class="on">45 min</button>
-              <button data-v="60">1 h</button>
-              <button data-v="90">1 h 30</button>
-              <button data-v="120">2 h</button>
+              <button data-v="30">30 min</button><button data-v="45" class="on">45 min</button>
+              <button data-v="60">1 h</button><button data-v="90">1 h 30</button>
+              <button data-v="120">2 h</button><button data-v="__autre">Autre…</button>
             </div>
-          </div>
+            <select id="dur-sel" class="hidden" style="margin-top:8px">${durOptions(75)}</select></div>
 
           <div class="field"><label>Jours et plages que vous proposez</label>
             <div class="jour-list" id="jour-list"></div>
@@ -278,45 +246,37 @@
               <div class="field" style="margin:0"><label>À</label><select id="j-fin">${heureOptions("12:00")}</select></div>
             </div>
             <button class="addbtn" id="j-add" type="button">+ Ajouter ce jour</button>
-            <div class="hint">Proposez large : le tuteur choisira plusieurs créneaux et les classera par préférence.</div>
-          </div>
+            <div class="hint">Proposez large : le tuteur choisira plusieurs créneaux et les classera par préférence. Chaque jour a sa couleur.</div></div>
 
           <button class="cta" id="creer" disabled>Créer et obtenir le lien</button>
         </div>
         <div class="foot">Le lien ne contient ni nom d'élève complet, ni nom d'établissement.</div>`;
 
-      // type segmenté
       let type="Visite sur site";
       const segT=document.getElementById("seg-typ"), autre=document.getElementById("f-typ-autre");
-      segT.querySelectorAll("button").forEach(b=>b.onclick=()=>{
-        segT.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-        if(b.dataset.v==="__autre"){ autre.classList.remove("hidden"); autre.focus(); type=""; }
-        else { autre.classList.add("hidden"); type=b.dataset.v; } valide();
-      });
+      segT.querySelectorAll("button").forEach(b=>b.onclick=()=>{ segT.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+        if(b.dataset.v==="__autre"){ autre.classList.remove("hidden"); autre.focus(); type=autre.value.trim(); } else { autre.classList.add("hidden"); type=b.dataset.v; } valide(); });
       autre.addEventListener("input",()=>{ type=autre.value.trim(); valide(); });
 
-      // durée segmentée
       let duree=45;
-      const segD=document.getElementById("seg-dur");
-      segD.querySelectorAll("button").forEach(b=>b.onclick=()=>{
-        segD.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-        duree=+b.dataset.v; renderList();
-      });
+      const segD=document.getElementById("seg-dur"), durSel=document.getElementById("dur-sel");
+      segD.querySelectorAll("button").forEach(b=>b.onclick=()=>{ segD.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
+        if(b.dataset.v==="__autre"){ durSel.classList.remove("hidden"); duree=+durSel.value; } else { durSel.classList.add("hidden"); duree=+b.dataset.v; } renderList(); });
+      durSel.onchange=()=>{ duree=+durSel.value; renderList(); };
 
       const jours=[]; const listEl=document.getElementById("jour-list");
       function renderList(){
         listEl.innerHTML = jours.map((j,i)=>{ const n=genCreneaux(j.start,j.end,duree).length;
-          return `<div class="jour-item"><div><div>${esc(j.jour)}</div>
+          return `<div class="jour-item" style="--jc:${j.col}"><div><div>${esc(j.jour)}</div>
             <div class="meta2">${fmtH(j.start)} – ${fmtH(j.end)} · ${n} créneau${n>1?"x":""}</div></div>
             <button class="x" data-i="${i}" type="button" aria-label="Retirer">×</button></div>`; }).join("");
         listEl.querySelectorAll(".x").forEach(b=>b.onclick=()=>{ jours.splice(+b.dataset.i,1); renderList(); valide(); });
       }
       document.getElementById("j-add").onclick=()=>{
-        const date=document.getElementById("j-date").value;
-        if(!date){ toast("Choisissez un jour."); return; }
+        const date=document.getElementById("j-date").value; if(!date){ toast("Choisissez un jour."); return; }
         const start=toMin(document.getElementById("j-deb").value), end=toMin(document.getElementById("j-fin").value);
         if(end-start<duree){ toast("La plage est plus courte que la durée choisie."); return; }
-        const L=libelle(date); jours.push({dateStr:date,jour:L.jour,d:L.d,m:L.m,start,end});
+        const L=libelle(date); jours.push({dateStr:date,jour:L.jour,d:L.d,m:L.m,start,end,col:DAYCOL[jours.length%DAYCOL.length]});
         renderList(); valide();
       };
       const fields=["f-ens","f-tut","f-ent"].map(id=>document.getElementById(id));
@@ -325,171 +285,145 @@
 
       document.getElementById("creer").onclick=async()=>{
         const btn=document.getElementById("creer"); btn.disabled=true; btn.textContent="Création…";
-        const payload={ enseignant:document.getElementById("f-ens").value.trim(),
-          tuteur:document.getElementById("f-tut").value.trim(), entreprise:document.getElementById("f-ent").value.trim(),
-          eleve:document.getElementById("f-ele").value.trim(), classe:document.getElementById("f-cla").value.trim(),
-          type, duree, jours:jours.map(j=>({dateStr:j.dateStr,jour:j.jour,d:j.d,m:j.m,start:j.start,end:j.end})),
+        const payload={ enseignant:document.getElementById("f-ens").value.trim(), tuteur:document.getElementById("f-tut").value.trim(),
+          tuteurEmail:document.getElementById("f-temail").value.trim(), tuteurTel:document.getElementById("f-ttel").value.trim(),
+          entreprise:document.getElementById("f-ent").value.trim(), eleve:document.getElementById("f-ele").value.trim(),
+          classe:document.getElementById("f-cla").value.trim(), type, duree,
+          jours:jours.map(j=>({dateStr:j.dateStr,jour:j.jour,d:j.d,m:j.m,start:j.start,end:j.end,col:j.col})),
           choix:null, confirme:null, statut:"attente", createdAt:serverTimestamp() };
-        try{ const ref=await addDoc(collection(db,COL),payload);
-          localStorage.setItem(lsAdmin(ref.id),"1"); location.search="?r="+ref.id;
-        }catch(e){ btn.disabled=false; btn.textContent="Créer et obtenir le lien"; toast("Erreur à l'enregistrement. Réessayez."); }
+        try{ const ref=await addDoc(collection(db,COL),payload); localStorage.setItem(lsAdmin(ref.id),"1"); location.search="?r="+ref.id; }
+        catch(e){ btn.disabled=false; btn.textContent="Créer et obtenir le lien"; toast("Erreur à l'enregistrement. Réessayez."); }
       };
     }
 
     // ===================================================================  2) VUE TUTEUR
     function vueTuteur(id, d){
       if(d.confirme) return carteConfirmee(d);
-      if(d.statut!=="attente" && d.choix) return confirmation(d.choix, "Vos préférences sont bien transmises. L'enseignant va confirmer un créneau et vous recevrez la confirmation.");
+      if(d.statut!=="attente" && d.choix) return confirmation(d.choix, true);
       app$.innerHTML = `
-        <div class="top">
-          <div class="label">Visite de stage</div>
+        <div class="top"><div class="label">Visite de stage</div>
           <div class="who"><div class="avatar">${esc(initiales(d.enseignant))}</div>
-            <div><div class="name">${esc(d.enseignant)}</div><div class="role">Enseignant référent</div></div></div>
-        </div>
+            <div><div class="name">${esc(d.enseignant)}</div><div class="role">Enseignant référent</div></div></div></div>
         <div class="body">
           <p class="intro">Bonjour, <strong>${esc(d.tuteur)}</strong>.<br>
-            Pour le suivi de l'élève en stage (rendez-vous d'environ ${d.duree} min), indiquez les créneaux
-            qui vous conviennent <strong>en les classant par ordre de préférence</strong>.</p>
+            Pour le suivi de l'élève en stage (rendez-vous d'environ ${d.duree} min), indiquez les créneaux qui vous conviennent
+            <strong>en les classant par ordre de préférence</strong>.</p>
           <div class="recap">
             <div class="row"><span class="k">Structure</span><span class="v">${esc(d.entreprise)}</span></div>
             ${d.eleve?`<div class="row"><span class="k">Élève</span><span class="v">${esc(d.eleve)}${d.classe?" — "+esc(d.classe):""}</span></div>`:""}
-            <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div>
-          </div>
+            <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div></div>
           <p class="ask">Touchez vos créneaux par ordre de préférence</p>
-          <p class="sub">Le 1<sup>er</sup> que vous touchez est votre choix idéal. Touchez-en plusieurs ; re-touchez pour retirer.</p>
-          <div class="legend">
-            <span><i style="background:#1f9d57"></i>1ᵉʳ choix</span>
-            <span><i style="background:#2f80b5"></i>2ᵉ</span>
-            <span><i style="background:#7a5cc0"></i>3ᵉ</span>
-            <span><i style="background:#c77d2b"></i>4ᵉ+</span>
-          </div>
+          <p class="sub">Le 1<sup>er</sup> touché est votre choix idéal. Touchez-en plusieurs ; re-touchez pour retirer.</p>
+          <div class="legend"><span><i style="background:#1f9d57"></i>1ᵉʳ</span><span><i style="background:#2f80b5"></i>2ᵉ</span><span><i style="background:#7a5cc0"></i>3ᵉ</span><span><i style="background:#c77d2b"></i>4ᵉ+</span></div>
           <div id="jours"></div>
-
-          <p class="ask" style="margin-top:6px">Une confirmation ? (facultatif)</p>
+          <p class="ask" style="margin-top:6px">Recevoir la confirmation</p>
+          <p class="sub">L'enseignant vous confirmera un créneau. Comment souhaitez-vous être prévenu ?</p>
           <div class="seg" id="seg-contact">
-            <button data-m="none" class="on">Non merci</button>
-            <button data-m="email">Par e-mail</button>
-            <button data-m="sms">Par SMS</button>
+            <button data-m="email">Par e-mail</button><button data-m="sms">Par SMS</button><button data-m="none">Plus tard</button>
           </div>
           <input id="contact-val" class="hidden" style="margin-top:8px">
-
+          <div class="hint" id="contact-hint"></div>
           <button class="cta" id="ok" disabled>Envoyer mes préférences</button>
         </div>
         <div class="foot">Aucune inscription — vos préférences sont transmises directement à l'enseignant.</div>`;
 
-      const prefs=[]; // ordre = priorité
-      const wrap=document.getElementById("jours"), ok=document.getElementById("ok");
+      const prefs=[]; const wrap=document.getElementById("jours"), ok=document.getElementById("ok");
       const key=(ji,s)=>ji+"_"+s;
       function paint(){
         wrap.innerHTML = d.jours.map((j,ji)=>`
-          <div class="day">
-            <div class="day-h"><div class="cal"><span class="d">${esc(j.d)}</span><span class="m">${esc(j.m)}</span></div>
+          <div class="day" style="--jc:${j.col||'var(--accent)'}">
+            <div class="day-h"><div class="cal" style="background:${j.col||'var(--accent)'}"><span class="d">${esc(j.d)}</span><span class="m">${esc(j.m)}</span></div>
               <div><div class="lbl">${esc(j.jour)}</div><div class="win">de ${fmtH(j.start)} à ${fmtH(j.end)}</div></div></div>
-            <div class="chips">${genCreneaux(j.start,j.end,d.duree).map(c=>{
-              const r=prefs.findIndex(p=>p.key===key(ji,c.start));
-              const on=r>=0; const col=on?prio(r+1).c:"";
-              return `<button class="chip ${on?"on":""}" data-j="${ji}" data-s="${c.start}" data-e="${c.end}" data-l="${esc(c.label)}"
-                style="${on?`background:${col};box-shadow:0 0 0 1px ${col}`:""}">${esc(c.label)}
-                ${on?`<span class="rk" style="color:${col}">${r+1}</span>`:""}</button>`; }).join("")}</div>
+            <div class="chips">${genCreneaux(j.start,j.end,d.duree).map(c=>{ const r=prefs.findIndex(p=>p.key===key(ji,c.start)); const on=r>=0; const col=on?prio(r+1).c:"";
+              return `<button class="chip ${on?"on":""}" data-j="${ji}" data-s="${c.start}" data-e="${c.end}" data-l="${esc(c.label)}" style="${on?`background:${col};box-shadow:0 0 0 1px ${col}`:""}">${esc(c.label)}${on?`<span class="rk" style="color:${col}">${r+1}</span>`:""}</button>`; }).join("")}</div>
           </div>`).join("");
-        wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
-          const ji=+b.dataset.j, s=+b.dataset.s, k=key(ji,s);
-          const i=prefs.findIndex(p=>p.key===k);
-          if(i>=0) prefs.splice(i,1);
-          else { const j=d.jours[ji]; prefs.push({key:k, dateStr:j.dateStr, jour:j.jour, d:j.d, m:j.m,
-            start:s, end:+b.dataset.e, label:b.dataset.l }); }
-          paint(); ok.disabled=prefs.length===0;
-        });
+        wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{ const ji=+b.dataset.j, s=+b.dataset.s, k=key(ji,s); const i=prefs.findIndex(p=>p.key===k);
+          if(i>=0) prefs.splice(i,1); else { const j=d.jours[ji]; prefs.push({key:k,dateStr:j.dateStr,jour:j.jour,d:j.d,m:j.m,start:s,end:+b.dataset.e,label:b.dataset.l}); }
+          paint(); ok.disabled=prefs.length===0; });
       }
       paint();
 
-      // contact
-      let cmode="none";
-      const segC=document.getElementById("seg-contact"), cval=document.getElementById("contact-val");
-      segC.querySelectorAll("button").forEach(b=>b.onclick=()=>{
-        segC.querySelectorAll("button").forEach(x=>x.classList.remove("on")); b.classList.add("on");
-        cmode=b.dataset.m;
-        if(cmode==="none"){ cval.classList.add("hidden"); }
+      // contact pré-rempli selon ce que l'enseignant connaît
+      let cmode = d.tuteurEmail ? "email" : (d.tuteurTel ? "sms" : "none");
+      const segC=document.getElementById("seg-contact"), cval=document.getElementById("contact-val"), chint=document.getElementById("contact-hint");
+      function applyContact(){ segC.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x.dataset.m===cmode));
+        if(cmode==="none"){ cval.classList.add("hidden"); chint.textContent=""; }
         else { cval.classList.remove("hidden"); cval.type=cmode==="email"?"email":"tel";
-          cval.placeholder=cmode==="email"?"votre e-mail":"votre numéro"; cval.focus(); }
-      });
+          cval.placeholder=cmode==="email"?"votre e-mail":"votre numéro";
+          cval.value = cmode==="email" ? (d.tuteurEmail||"") : (d.tuteurTel||"");
+          chint.textContent="Vérifiez et corrigez si besoin."; } }
+      segC.querySelectorAll("button").forEach(b=>b.onclick=()=>{ cmode=b.dataset.m; applyContact(); if(cmode!=="none") cval.focus(); });
+      applyContact();
 
       ok.onclick=async()=>{ ok.disabled=true; ok.textContent="Envoi…";
         const choix={ prefs:prefs.map(({key,...p})=>p), contact:{mode:cmode, value:cmode==="none"?"":cval.value.trim()} };
-        try{ await updateDoc(doc(db,COL,id),{ choix, statut:"repondu", respondedAt:serverTimestamp() });
-          confirmation(choix, "Vos préférences ont bien été transmises à l'enseignant.");
-        }catch(e){ ok.disabled=false; ok.textContent="Envoyer mes préférences"; toast("Erreur d'envoi. Réessayez."); }
+        try{ await updateDoc(doc(db,COL,id),{ choix, statut:"repondu", respondedAt:serverTimestamp() }); confirmation(choix, false); }
+        catch(e){ ok.disabled=false; ok.textContent="Envoyer mes préférences"; toast("Erreur d'envoi. Réessayez."); }
       };
     }
 
-    function confirmation(choix, msg){
+    function confirmation(choix, deja){
       const prefs=choix.prefs||[];
       app$.innerHTML = `
         <div class="done">
-          <div class="check"><svg viewBox="0 0 52 52"><path class="path" fill="none" stroke="#2f9e6b"
-            stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg></div>
-          <h2>C'est noté, merci !</h2>
-          <p>${esc(msg)}<br>Vous pouvez fermer cette page.</p>
-          <div class="reclist">${prefs.map((p,i)=>{ const c=prio(i+1);
-            return `<div class="pref"><div class="rkb" style="background:${c.c}">${i+1}</div>
-              <div><div class="pj">${esc(p.jour)}</div><div class="ph">${esc(p.label)}</div></div></div>`; }).join("")}</div>
+          <div class="check"><svg viewBox="0 0 52 52"><path class="path" fill="none" stroke="#2f9e6b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg></div>
+          <h2>${deja?"Vos préférences sont déjà enregistrées":"C'est noté, merci !"}</h2>
+          <p>Vos préférences ont bien été transmises à l'enseignant.<br><strong>Vous recevrez une confirmation prochainement.</strong><br>Vous pouvez fermer cette page.</p>
+          <div class="reclist">${prefs.map((p,i)=>{ const c=prio(i+1); return `<div class="pref"><div class="rkb" style="background:${c.c}">${i+1}</div>
+            <div><div class="pj">${esc(p.jour)}</div><div class="ph">${esc(p.label)}</div></div></div>`; }).join("")}</div>
         </div>`;
       window.scrollTo({top:0,behavior:"smooth"});
     }
 
-    // ---- Carte de confirmation reçue par le tuteur ----
+    // ---- Carte d'invitation reçue par le tuteur ----
     function carteConfirmee(d){
       const c=d.confirme;
       app$.innerHTML = `
-        <div class="top"><div class="label">Visite de stage</div><h1>Rendez-vous confirmé</h1></div>
-        <div class="done" style="padding-top:30px">
-          <div class="check"><svg viewBox="0 0 52 52"><path class="path" fill="none" stroke="#2f9e6b"
-            stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg></div>
-          <h2>C'est confirmé !</h2>
-          <p>${esc(d.enseignant)} vous donne rendez-vous :</p>
-          <div class="picked" style="display:block;max-width:300px;margin:16px auto 18px">
-            <div style="font-size:1.06rem">${esc(c.jour)}</div>
-            <div style="opacity:.85">${esc(c.label)}</div></div>
+        <div class="top invit"><div class="label">Visite de stage</div><h1>Votre rendez-vous est confirmé</h1></div>
+        <div class="invitcard">
+          <span class="ribbon">Invitation</span>
+          <div class="check"><svg viewBox="0 0 52 52"><path class="path" fill="none" stroke="#2f9e6b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg></div>
+          <p style="margin:0 0 2px;color:var(--soft)">${esc(d.enseignant)} vous donne rendez-vous</p>
+          <div class="bigdate">${esc(c.jour)}</div>
+          <div class="bightime">${esc(c.label)}</div>
           <div class="recap" style="text-align:left;max-width:340px;margin:0 auto 20px">
             <div class="row"><span class="k">Structure</span><span class="v">${esc(d.entreprise)}</span></div>
-            <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div>
-          </div>
+            <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div></div>
           <a class="cta" href="${icsHref(d)}" download="rendez-vous-pfmp.ics" style="display:block;text-decoration:none">Ajouter à mon agenda</a>
           <a class="cta ghost" href="${gcalHref(d)}" target="_blank" rel="noopener" style="display:block;text-decoration:none;margin-top:10px">Ajouter à Google Agenda</a>
         </div>`;
       window.scrollTo({top:0,behavior:"smooth"});
     }
 
-    // ===================================================================  3) GESTION (1 RDV)
+    // ===================================================================  3) GESTION
     function vueGestion(id, d0){
       const url = location.origin + location.pathname + "?r=" + id;
       function render(d){
-        const prefs=(d.choix&&d.choix.prefs)||[];
-        const confirme=d.confirme;
+        const prefs=(d.choix&&d.choix.prefs)||[]; const confirme=d.confirme;
         let statutHtml, corps;
         if(confirme){
-          const ct=d.choix&&d.choix.contact;
-          const aContact = ct && ct.mode!=="none" && ct.value;
-          const send = sendHref(d,url);
+          const ct=d.choix&&d.choix.contact; const email=(ct&&ct.mode==="email"&&ct.value)||d.tuteurEmail||""; const tel=(ct&&ct.mode==="sms"&&ct.value)||d.tuteurTel||"";
           statutHtml=`<span class="status ok"><span class="pin"></span>Confirmé</span>`;
-          corps=`<div class="day"><div class="day-h">
-              <div class="cal"><span class="d">${esc(confirme.d)}</span><span class="m">${esc(confirme.m)}</span></div>
+          corps=`<div class="day" style="--jc:${confirme.col||'var(--ok)'}"><div class="day-h">
+              <div class="cal" style="background:${confirme.col||'var(--ok)'}"><span class="d">${esc(confirme.d)}</span><span class="m">${esc(confirme.m)}</span></div>
               <div><div class="lbl">${esc(confirme.jour)}</div><div class="win">${esc(confirme.label)}</div></div></div></div>
-            ${aContact?`<p class="ask" style="margin-top:16px">Prévenir la tutrice</p>
-              <div class="recap"><div class="row"><span class="k">${ct.mode==="email"?"E-mail":"Téléphone"}</span><span class="v">${esc(ct.value)}</span></div></div>`:""}
-            ${send?`<a class="cta" href="${send}" style="display:block;text-decoration:none">Envoyer la confirmation ${ct.mode==="email"?"par e-mail":"par SMS"}</a>`:""}
-            <button class="cta ${aContact?"ghost":""}" id="copyconf" style="margin-top:10px">Copier le lien de confirmation</button>
-            <a class="cta ghost" href="${icsHref(d)}" download="rendez-vous-pfmp.ics" style="display:block;text-decoration:none;margin-top:10px">Ajouter à mon agenda</a>
-            <button class="cta ghost" id="rouvrir" style="margin-top:10px">Changer de créneau</button>`;
+            ${(email||tel)?`<p class="ask" style="margin-top:16px">Prévenir la tutrice</p>
+              <div class="recap">${email?`<div class="row"><span class="k">E-mail</span><span class="v">${esc(email)}</span></div>`:""}${tel?`<div class="row"><span class="k">Téléphone</span><span class="v">${esc(tel)}</span></div>`:""}</div>`:""}
+            <p class="ask" style="margin-top:8px">Message de confirmation <span style="font-weight:400;color:var(--soft);font-size:.82rem">(modifiable)</span></p>
+            <div class="field"><textarea id="confmsg">${esc(defaultMsg(d,url))}</textarea></div>
+            ${email?`<button class="cta" id="send-mail">Envoyer par e-mail</button>`:""}
+            ${tel?`<button class="cta ${email?"ghost":""}" id="send-sms">Envoyer par SMS</button>`:""}
+            <button class="cta ghost" id="copymsg">Copier le message</button>
+            <button class="cta ghost" id="copyconf">Copier seulement le lien</button>
+            <a class="cta ghost" href="${icsHref(d)}" download="rendez-vous-pfmp.ics" style="display:block;text-decoration:none">Ajouter à mon agenda</a>
+            <button class="cta ghost" id="rouvrir">Changer de créneau</button>`;
         } else if(prefs.length){
           statutHtml=`<span class="status rep"><span class="pin"></span>La tutrice a répondu</span>`;
           corps=`<p class="sub">Ses préférences, classées. Touchez celle que vous retenez pour confirmer le rendez-vous.</p>
-            ${prefs.map((p,i)=>{ const c=prio(i+1); return `<button class="pref" data-i="${i}">
-              <div class="rkb" style="background:${c.c}">${i+1}</div>
-              <div><div class="pj">${esc(p.jour)}</div><div class="ph">${esc(p.label)} · ${c.t}</div></div>
-              <span class="go">Confirmer →</span></button>`; }).join("")}
-            ${d.choix.contact&&d.choix.contact.mode!=="none"&&d.choix.contact.value
-              ? `<p class="hint">Prévenir la tutrice (${d.choix.contact.mode==="email"?"e-mail":"SMS"}) : <strong>${esc(d.choix.contact.value)}</strong></p>`:""}`;
+            ${prefs.map((p,i)=>{ const c=prio(i+1); return `<button class="pref" data-i="${i}"><div class="rkb" style="background:${c.c}">${i+1}</div>
+              <div><div class="pj">${esc(p.jour)}</div><div class="ph">${esc(p.label)} · ${c.t}</div></div><span class="go">Confirmer →</span></button>`; }).join("")}
+            ${d.choix.contact&&d.choix.contact.mode!=="none"&&d.choix.contact.value?`<p class="hint">Contact laissé (${d.choix.contact.mode==="email"?"e-mail":"SMS"}) : <strong>${esc(d.choix.contact.value)}</strong></p>`:""}
+            <div class="link-box" style="margin-top:14px"><input id="lien" readonly value="${esc(url)}"><button class="copy" id="copy">Copier</button></div>`;
         } else {
           statutHtml=`<span class="status wait"><span class="pin"></span>En attente de réponse</span>`;
           corps=`<p class="ask">Lien à envoyer à la tutrice</p>
@@ -497,82 +431,59 @@
             <p class="hint" style="margin-top:6px">Par mail ou SMS. Aucun compte à créer pour elle. Cette page se met à jour dès qu'elle répond.</p>`;
         }
         app$.innerHTML = `
-          <div class="top"><a class="back" href="?suivi">← Mes rendez-vous</a>
-            <div class="label">Visite de stage</div><h1>${esc(d.entreprise)}</h1></div>
+          <div class="top"><a class="back" href="?suivi">← Mes rendez-vous</a><div class="label">Visite de stage</div><h1>${esc(d.entreprise)}</h1></div>
           <div class="body">
             <div class="recap">
               <div class="row"><span class="k">Tuteur</span><span class="v">${esc(d.tuteur)}</span></div>
               ${d.eleve?`<div class="row"><span class="k">Élève</span><span class="v">${esc(d.eleve)}${d.classe?" — "+esc(d.classe):""}</span></div>`:""}
-              <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)} · ${d.duree} min</span></div>
-            </div>
+              <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)} · ${d.duree} min</span></div></div>
             <div style="margin-bottom:14px">${statutHtml}</div>
             ${corps}
-            ${prefs.length&&!confirme?`<div class="link-box" style="margin-top:16px"><input id="lien" readonly value="${esc(url)}"><button class="copy" id="copy">Copier</button></div>`:""}
             <button class="cta ghost" id="nouveau" style="margin-top:16px">Créer un autre rendez-vous</button>
           </div>`;
 
-        const copyBtn=document.getElementById("copy");
-        if(copyBtn) copyBtn.onclick=async()=>{ try{ await navigator.clipboard.writeText(url); toast("Lien copié !"); }
-          catch(e){ document.getElementById("lien").select(); document.execCommand("copy"); toast("Lien copié !"); } };
-        const copyConf=document.getElementById("copyconf");
-        if(copyConf) copyConf.onclick=async()=>{ try{ await navigator.clipboard.writeText(url); toast("Lien de confirmation copié !"); }
-          catch(e){ toast("Copie impossible — lien : "+url); } };
-        document.getElementById("nouveau").onclick=()=>{ location.search=""; };
-        const rouvrir=document.getElementById("rouvrir");
-        if(rouvrir) rouvrir.onclick=async()=>{ await updateDoc(doc(db,COL,id),{confirme:null, statut:"repondu"}); };
-        app$.querySelectorAll(".pref[data-i]").forEach(b=>b.onclick=async()=>{
-          const p=prefs[+b.dataset.i];
-          await updateDoc(doc(db,COL,id),{ confirme:p, statut:"confirme", confirmedAt:serverTimestamp() });
-          toast("Rendez-vous confirmé !");
-        });
+        const bind=(id2,fn)=>{ const el=document.getElementById(id2); if(el) el.onclick=fn; };
+        const copyText=async(t,msg)=>{ try{ await navigator.clipboard.writeText(t); toast(msg); }catch(e){ toast("Copie impossible."); } };
+        bind("copy", ()=>copyText(url,"✓ Lien copié !"));
+        bind("copyconf", ()=>copyText(url,"✓ Lien copié !"));
+        bind("copymsg", ()=>copyText((document.getElementById("confmsg")||{}).value||url, "✓ Message copié !"));
+        bind("send-mail", ()=>{ const ct=d.choix&&d.choix.contact; const to=(ct&&ct.mode==="email"&&ct.value)||d.tuteurEmail||"";
+          const body=encodeURIComponent((document.getElementById("confmsg")||{}).value||"");
+          location.href=`mailto:${to}?subject=${encodeURIComponent("Confirmation rendez-vous PFMP")}&body=${body}`; });
+        bind("send-sms", ()=>{ const ct=d.choix&&d.choix.contact; const to=(ct&&ct.mode==="sms"&&ct.value)||d.tuteurTel||"";
+          const body=encodeURIComponent((document.getElementById("confmsg")||{}).value||"");
+          location.href=`sms:${to}?&body=${body}`; });
+        bind("nouveau", ()=>{ location.search=""; });
+        bind("rouvrir", async()=>{ await updateDoc(doc(db,COL,id),{confirme:null, statut:"repondu"}); });
+        app$.querySelectorAll(".pref[data-i]").forEach(b=>b.onclick=async()=>{ const p=prefs[+b.dataset.i];
+          await updateDoc(doc(db,COL,id),{ confirme:p, statut:"confirme", confirmedAt:serverTimestamp() }); toast("✓ Rendez-vous confirmé !"); });
       }
       render(d0);
       onSnapshot(doc(db,COL,id), s=>{ if(s.exists()) render(s.data()); });
     }
 
-    // ===================================================================  4) SUIVI (liste)
+    // ===================================================================  4) SUIVI
     async function vueSuivi(){
       const ids=Object.keys(localStorage).filter(k=>k.startsWith("coordrdv_admin_")).map(k=>k.slice("coordrdv_admin_".length));
-      app$.innerHTML=`
-        <div class="top"><a class="back" href="../">← Portail</a>
-          <div class="label">Espace de gestion</div><h1>Mes rendez-vous PFMP</h1></div>
+      app$.innerHTML=`<div class="top"><a class="back" href="../">← Portail</a><div class="label">Espace de gestion</div><h1>Mes rendez-vous PFMP</h1></div>
         <div class="body" id="liste"><div class="center"><div class="spin"></div>Chargement…</div></div>`;
       const liste=document.getElementById("liste");
-      if(!ids.length){ liste.innerHTML=`<p class="sub" style="font-size:.92rem">Aucun rendez-vous pour l'instant.</p>
-        <button class="cta" id="nouv">Créer un rendez-vous</button>`;
+      if(!ids.length){ liste.innerHTML=`<p class="sub" style="font-size:.92rem">Aucun rendez-vous pour l'instant.</p><button class="cta" id="nouv">Créer un rendez-vous</button>`;
         document.getElementById("nouv").onclick=()=>{ location.search=""; }; return; }
-      const docs=await Promise.all(ids.map(async id=>{ try{ const s=await getDoc(doc(db,COL,id));
-        return s.exists()?{id,...s.data()}:null; }catch(e){ return null; } }));
+      const docs=await Promise.all(ids.map(async id=>{ try{ const s=await getRdv(id); return s.exists()?{id,...s.data()}:null; }catch(e){ return null; } }));
       const today=new Date(); today.setHours(0,0,0,0);
       const items=docs.filter(Boolean).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-      liste.innerHTML=items.map(d=>{
-        let chip, past=false, info;
+      liste.innerHTML=items.map(d=>{ let chip,past=false,info;
         if(d.confirme){ const dt=new Date(d.confirme.dateStr+"T00:00:00"); past=dt<today;
-          chip=`<span class="status ok" style="margin-left:auto"><span class="pin"></span>${past?"Passé":"Confirmé"}</span>`;
-          info=`${esc(d.confirme.jour)} · ${esc(d.confirme.label)}`;
-        } else if(d.choix&&d.choix.prefs&&d.choix.prefs.length){
-          chip=`<span class="status rep" style="margin-left:auto"><span class="pin"></span>À confirmer</span>`;
-          info=`${d.choix.prefs.length} préférence${d.choix.prefs.length>1?"s":""} reçue${d.choix.prefs.length>1?"s":""}`;
-        } else { chip=`<span class="status wait" style="margin-left:auto"><span class="pin"></span>En attente</span>`;
-          info=`Lien envoyé — pas encore de réponse`; }
-        return `<a class="item ${past?"past":""}" href="?r=${d.id}">
-          <div class="l1"><span class="ent">${esc(d.entreprise)}</span>${chip}</div>
-          <div class="l2">${esc(d.tuteur)}${d.eleve?" · "+esc(d.eleve):""} — ${info}</div></a>`;
-      }).join("")+`<button class="cta" id="nouv" style="margin-top:8px">Créer un rendez-vous</button>`;
+          chip=`<span class="status ok" style="margin-left:auto"><span class="pin"></span>${past?"Passé":"Confirmé"}</span>`; info=`${esc(d.confirme.jour)} · ${esc(d.confirme.label)}`; }
+        else if(d.choix&&d.choix.prefs&&d.choix.prefs.length){ chip=`<span class="status rep" style="margin-left:auto"><span class="pin"></span>À confirmer</span>`; info=`${d.choix.prefs.length} préférence${d.choix.prefs.length>1?"s":""} reçue${d.choix.prefs.length>1?"s":""}`; }
+        else { chip=`<span class="status wait" style="margin-left:auto"><span class="pin"></span>En attente</span>`; info=`Lien envoyé — pas encore de réponse`; }
+        return `<a class="item ${past?"past":""}" href="?r=${d.id}"><div class="l1"><span class="ent">${esc(d.entreprise)}</span>${chip}</div>
+          <div class="l2">${esc(d.tuteur)}${d.eleve?" · "+esc(d.eleve):""} — ${info}</div></a>`; }).join("")+`<button class="cta" id="nouv" style="margin-top:8px">Créer un rendez-vous</button>`;
       document.getElementById("nouv").onclick=()=>{ location.search=""; };
     }
 
-    // ===================================================================  ROUTAGE (en dernier : toutes les constantes sont prêtes)
-    (async function(){
-      if(params.has("suivi")) return vueSuivi();
-      if(!rid) return vueCreation();
-      let snap; try { snap = await getDoc(doc(db, COL, rid)); }
-      catch(e){ return erreur("Impossible de charger ce rendez-vous."); }
-      if(!snap.exists()) return erreur("Ce lien de rendez-vous n'existe pas ou a expiré.");
-      const data = snap.data();
-      if(localStorage.getItem(lsAdmin(rid))) return vueGestion(rid, data);
-      return vueTuteur(rid, data);
-    })();
+    router();
   </script>
 </body>
 </html>
