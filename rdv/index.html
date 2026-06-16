@@ -200,6 +200,30 @@
     const PRIO = [ {c:"#1f9d57",t:"1ᵉʳ choix"}, {c:"#2f80b5",t:"2ᵉ choix"}, {c:"#7a5cc0",t:"3ᵉ choix"}, {c:"#c77d2b",t:"4ᵉ choix"} ];
     const prio = r => PRIO[r-1] || { c:"#6b7785", t:r+"ᵉ choix" };
 
+    // ---- Agenda (.ics / Google) + envoi mail/SMS ----
+    const dtICS = (dateStr,min) => { const [Y,M,D]=dateStr.split("-");
+      return `${Y}${M}${D}T${pad(Math.floor(min/60))}${pad(min%60)}00`; };
+    const icsEsc = s => String(s||"").replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n");
+    function icsHref(d){ const c=d.confirme; const ics=[
+      "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//coordination-pedagogie//rdv//FR","BEGIN:VEVENT",
+      "DTSTART:"+dtICS(c.dateStr,c.start),"DTEND:"+dtICS(c.dateStr,c.end),
+      "SUMMARY:"+icsEsc("Visite PFMP — "+d.entreprise),
+      "DESCRIPTION:"+icsEsc("Rendez-vous avec "+d.enseignant+(d.eleve?" (élève "+d.eleve+")":"")),
+      "LOCATION:"+icsEsc(d.entreprise),"END:VEVENT","END:VCALENDAR"].join("\r\n");
+      return "data:text/calendar;charset=utf-8,"+encodeURIComponent(ics); }
+    function gcalHref(d){ const c=d.confirme;
+      const u=new URL("https://calendar.google.com/calendar/render");
+      u.searchParams.set("action","TEMPLATE"); u.searchParams.set("text","Visite PFMP — "+d.entreprise);
+      u.searchParams.set("dates",dtICS(c.dateStr,c.start)+"/"+dtICS(c.dateStr,c.end));
+      u.searchParams.set("details","Rendez-vous avec "+d.enseignant); u.searchParams.set("location",d.entreprise);
+      return u.toString(); }
+    function sendHref(d,url){ const c=d.confirme, ct=d.choix&&d.choix.contact;
+      const msg=`Bonjour ${d.tuteur}, je vous confirme notre rendez-vous de visite PFMP : ${c.jour} de ${c.label} (${d.entreprise}). Détails et ajout à votre agenda : ${url}`;
+      if(!ct) return null;
+      if(ct.mode==="email") return `mailto:${encodeURIComponent(ct.value)}?subject=${encodeURIComponent("Confirmation rendez-vous PFMP")}&body=${encodeURIComponent(msg)}`;
+      if(ct.mode==="sms")   return `sms:${ct.value}?body=${encodeURIComponent(msg)}`;
+      return null; }
+
     const erreur = msg => { app$.innerHTML = `<div class="center"><p style="font-size:1.05rem;color:var(--ink)">${esc(msg)}</p>
       <a class="cta ghost" href="?suivi" style="display:inline-block;text-decoration:none;margin-top:14px">Mes rendez-vous</a></div>`; };
 
@@ -314,7 +338,8 @@
 
     // ===================================================================  2) VUE TUTEUR
     function vueTuteur(id, d){
-      if(d.statut!=="attente" && d.choix) return confirmation(d.choix, "Vous avez déjà répondu — merci !");
+      if(d.confirme) return carteConfirmee(d);
+      if(d.statut!=="attente" && d.choix) return confirmation(d.choix, "Vos préférences sont bien transmises. L'enseignant va confirmer un créneau et vous recevrez la confirmation.");
       app$.innerHTML = `
         <div class="top">
           <div class="label">Visite de stage</div>
@@ -412,6 +437,29 @@
       window.scrollTo({top:0,behavior:"smooth"});
     }
 
+    // ---- Carte de confirmation reçue par le tuteur ----
+    function carteConfirmee(d){
+      const c=d.confirme;
+      app$.innerHTML = `
+        <div class="top"><div class="label">Visite de stage</div><h1>Rendez-vous confirmé</h1></div>
+        <div class="done" style="padding-top:30px">
+          <div class="check"><svg viewBox="0 0 52 52"><path class="path" fill="none" stroke="#2f9e6b"
+            stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg></div>
+          <h2>C'est confirmé !</h2>
+          <p>${esc(d.enseignant)} vous donne rendez-vous :</p>
+          <div class="picked" style="display:block;max-width:300px;margin:16px auto 18px">
+            <div style="font-size:1.06rem">${esc(c.jour)}</div>
+            <div style="opacity:.85">${esc(c.label)}</div></div>
+          <div class="recap" style="text-align:left;max-width:340px;margin:0 auto 20px">
+            <div class="row"><span class="k">Structure</span><span class="v">${esc(d.entreprise)}</span></div>
+            <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div>
+          </div>
+          <a class="cta" href="${icsHref(d)}" download="rendez-vous-pfmp.ics" style="display:block;text-decoration:none">Ajouter à mon agenda</a>
+          <a class="cta ghost" href="${gcalHref(d)}" target="_blank" rel="noopener" style="display:block;text-decoration:none;margin-top:10px">Ajouter à Google Agenda</a>
+        </div>`;
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+
     // ===================================================================  3) GESTION (1 RDV)
     function vueGestion(id, d0){
       const url = location.origin + location.pathname + "?r=" + id;
@@ -420,11 +468,19 @@
         const confirme=d.confirme;
         let statutHtml, corps;
         if(confirme){
+          const ct=d.choix&&d.choix.contact;
+          const aContact = ct && ct.mode!=="none" && ct.value;
+          const send = sendHref(d,url);
           statutHtml=`<span class="status ok"><span class="pin"></span>Confirmé</span>`;
           corps=`<div class="day"><div class="day-h">
               <div class="cal"><span class="d">${esc(confirme.d)}</span><span class="m">${esc(confirme.m)}</span></div>
               <div><div class="lbl">${esc(confirme.jour)}</div><div class="win">${esc(confirme.label)}</div></div></div></div>
-            <button class="cta ghost" id="rouvrir" style="margin-top:8px">Changer de créneau</button>`;
+            ${aContact?`<p class="ask" style="margin-top:16px">Prévenir la tutrice</p>
+              <div class="recap"><div class="row"><span class="k">${ct.mode==="email"?"E-mail":"Téléphone"}</span><span class="v">${esc(ct.value)}</span></div></div>`:""}
+            ${send?`<a class="cta" href="${send}" style="display:block;text-decoration:none">Envoyer la confirmation ${ct.mode==="email"?"par e-mail":"par SMS"}</a>`:""}
+            <button class="cta ${aContact?"ghost":""}" id="copyconf" style="margin-top:10px">Copier le lien de confirmation</button>
+            <a class="cta ghost" href="${icsHref(d)}" download="rendez-vous-pfmp.ics" style="display:block;text-decoration:none;margin-top:10px">Ajouter à mon agenda</a>
+            <button class="cta ghost" id="rouvrir" style="margin-top:10px">Changer de créneau</button>`;
         } else if(prefs.length){
           statutHtml=`<span class="status rep"><span class="pin"></span>La tutrice a répondu</span>`;
           corps=`<p class="sub">Ses préférences, classées. Touchez celle que vous retenez pour confirmer le rendez-vous.</p>
@@ -458,6 +514,9 @@
         const copyBtn=document.getElementById("copy");
         if(copyBtn) copyBtn.onclick=async()=>{ try{ await navigator.clipboard.writeText(url); toast("Lien copié !"); }
           catch(e){ document.getElementById("lien").select(); document.execCommand("copy"); toast("Lien copié !"); } };
+        const copyConf=document.getElementById("copyconf");
+        if(copyConf) copyConf.onclick=async()=>{ try{ await navigator.clipboard.writeText(url); toast("Lien de confirmation copié !"); }
+          catch(e){ toast("Copie impossible — lien : "+url); } };
         document.getElementById("nouveau").onclick=()=>{ location.search=""; };
         const rouvrir=document.getElementById("rouvrir");
         if(rouvrir) rouvrir.onclick=async()=>{ await updateDoc(doc(db,COL,id),{confirme:null, statut:"repondu"}); };
