@@ -27,6 +27,15 @@
 
   <main>
     <div class="grid" id="grille"></div>
+
+    <section class="zone-gestion" id="zoneGestion" hidden>
+      <div class="zone-head">
+        <span class="zone-tag">Espace de gestion</span>
+        <span class="zone-line" aria-hidden="true"></span>
+      </div>
+      <p class="zone-sub">Outils réservés à l'équipe — créer et suivre les rendez-vous, consulter les résultats.</p>
+      <div class="grid" id="grilleOutils"></div>
+    </section>
   </main>
 
   <footer>
@@ -39,8 +48,24 @@
   <script src="data.js"></script>
   <script>
     const grille = document.getElementById('grille');
+    const grilleOutils = document.getElementById('grilleOutils');
+    const zoneGestion = document.getElementById('zoneGestion');
     const fil = document.getElementById('fil');
     const recherche = document.getElementById('recherche');
+
+    function rendreOutils() {
+      grilleOutils.innerHTML = OUTILS.map(o => {
+        const ext = /^https?:\/\//.test(o.lien);
+        const cible = ext ? ' target="_blank" rel="noopener"' : '';
+        return `
+          <a class="card outil" href="${o.lien}"${cible} style="--card-accent:${o.couleur || 'var(--accent)'}">
+            <h3>${o.titre}</h3>
+            <p>${o.desc || ''}</p>
+            <div class="meta"><span class="type-tag">${o.type || 'Outil'}</span>
+              <span class="arrow" aria-hidden="true">→</span></div>
+          </a>`;
+      }).join('');
+    }
 
     document.getElementById('site-titre').textContent = SITE.titre;
     document.title = SITE.titre;
@@ -81,6 +106,11 @@
     // --- Rendu d'un palier ---
     function rendre() {
       rendreFil();
+      // L'Espace de gestion n'apparaît qu'à l'accueil, hors recherche
+      const gestionVisible = !path.length && !q;
+      zoneGestion.hidden = !gestionVisible;
+      if (gestionVisible) rendreOutils();
+
       const couleur = couleurTheme();
       let items = enfantsCourants();
       if (q) items = items.filter(n =>

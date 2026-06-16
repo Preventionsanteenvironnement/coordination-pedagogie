@@ -128,3 +128,17 @@ const THEMATIQUES = [
     ],
   },
 ];
+
+/* =====================================================================
+   ESPACE DE GESTION — outils interactifs (on AGIT dedans).
+   Séparé des ressources ci-dessus. Réservé à l'équipe pédagogique.
+   ===================================================================== */
+const OUTILS = [
+  {
+    titre: "Rendez-vous PFMP",
+    desc: "Proposer des créneaux à un tuteur et recueillir sa réponse, sans qu'il ait de compte.",
+    lien: "rdv/",
+    type: "Outil",
+    couleur: "#2f7d6b",
+  },
+];
