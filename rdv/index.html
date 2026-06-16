@@ -75,6 +75,13 @@
     .cta{ width:100%; margin-top:18px; background:var(--accent); color:#fff; border:none; border-radius:14px; padding:15px; font:inherit; font-weight:650; font-size:1rem; cursor:pointer; transition:opacity .15s,transform .1s; }
     .cta:disabled{ opacity:.4; cursor:not-allowed; } .cta:not(:disabled):active{ transform:scale(.99); }
     .ghost{ background:rgba(47,125,107,.1); color:var(--accent); }
+    .danger{ background:rgba(192,57,43,.1); color:#b33124; }
+    .danger-solid{ background:#c0392b; color:#fff; }
+    .grp{ font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); font-weight:700; margin:18px 0 10px; }
+    .grp:first-child{ margin-top:0; }
+    .confirmbox{ border:1.5px solid rgba(192,57,43,.4); background:rgba(192,57,43,.05); border-radius:14px; padding:14px; margin-top:14px; }
+    .confirmbox p{ margin:0 0 10px; font-size:.9rem; } .confirmbox .row2{ display:flex; gap:8px; }
+    .confirmbox button{ flex:1; border:none; border-radius:11px; padding:12px; font:inherit; font-weight:650; cursor:pointer; }
 
     .link-box{ display:flex; gap:8px; margin-top:8px; }
     .link-box input{ flex:1; font:inherit; font-size:.82rem; padding:11px 12px; border:1.5px solid var(--line); border-radius:11px; background:#f7f9fb; color:var(--ink); }
@@ -124,7 +131,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, onSnapshot, serverTimestamp }
+    import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp }
       from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -440,6 +447,9 @@
             <div style="margin-bottom:14px">${statutHtml}</div>
             ${corps}
             <button class="cta ghost" id="nouveau" style="margin-top:16px">Créer un autre rendez-vous</button>
+            <button class="cta danger" id="suppr" style="margin-top:10px">Supprimer ce rendez-vous</button>
+            <div id="suppr-zone"></div>
+            <a class="cta ghost" href="../" style="display:block;text-decoration:none;margin-top:10px">← Retour au portail</a>
           </div>`;
 
         const bind=(id2,fn)=>{ const el=document.getElementById(id2); if(el) el.onclick=fn; };
@@ -455,6 +465,15 @@
           location.href=`sms:${to}?&body=${body}`; });
         bind("nouveau", ()=>{ location.search=""; });
         bind("rouvrir", async()=>{ await updateDoc(doc(db,COL,id),{confirme:null, statut:"repondu"}); });
+        bind("suppr", ()=>{ const z=document.getElementById("suppr-zone"); const b=document.getElementById("suppr");
+          b.style.display="none";
+          z.innerHTML=`<div class="confirmbox"><p>Supprimer définitivement ce rendez-vous ? Cette action est irréversible.</p>
+            <div class="row2"><button class="ghost" id="sa">Annuler</button><button class="danger-solid" id="sok">Oui, supprimer</button></div></div>`;
+          document.getElementById("sa").onclick=()=>{ z.innerHTML=""; b.style.display=""; };
+          document.getElementById("sok").onclick=async()=>{ document.getElementById("sok").textContent="Suppression…";
+            try{ await deleteDoc(doc(db,COL,id)); localStorage.removeItem(lsAdmin(id)); location.search="?suivi"; }
+            catch(e){ toast("Erreur lors de la suppression."); } };
+        });
         app$.querySelectorAll(".pref[data-i]").forEach(b=>b.onclick=async()=>{ const p=prefs[+b.dataset.i];
           await updateDoc(doc(db,COL,id),{ confirme:p, statut:"confirme", confirmedAt:serverTimestamp() }); toast("✓ Rendez-vous confirmé !"); });
       }
@@ -472,14 +491,22 @@
         document.getElementById("nouv").onclick=()=>{ location.search=""; }; return; }
       const docs=await Promise.all(ids.map(async id=>{ try{ const s=await getRdv(id); return s.exists()?{id,...s.data()}:null; }catch(e){ return null; } }));
       const today=new Date(); today.setHours(0,0,0,0);
-      const items=docs.filter(Boolean).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-      liste.innerHTML=items.map(d=>{ let chip,past=false,info;
-        if(d.confirme){ const dt=new Date(d.confirme.dateStr+"T00:00:00"); past=dt<today;
-          chip=`<span class="status ok" style="margin-left:auto"><span class="pin"></span>${past?"Passé":"Confirmé"}</span>`; info=`${esc(d.confirme.jour)} · ${esc(d.confirme.label)}`; }
+      const all=docs.filter(Boolean);
+      const isPast=d=>d.confirme && new Date(d.confirme.dateStr+"T00:00:00")<today;
+      const carte=d=>{ let chip,info; const past=isPast(d);
+        if(d.confirme){ chip=`<span class="status ok" style="margin-left:auto"><span class="pin"></span>${past?"Passé":"Confirmé"}</span>`; info=`${esc(d.confirme.jour)} · ${esc(d.confirme.label)}`; }
         else if(d.choix&&d.choix.prefs&&d.choix.prefs.length){ chip=`<span class="status rep" style="margin-left:auto"><span class="pin"></span>À confirmer</span>`; info=`${d.choix.prefs.length} préférence${d.choix.prefs.length>1?"s":""} reçue${d.choix.prefs.length>1?"s":""}`; }
         else { chip=`<span class="status wait" style="margin-left:auto"><span class="pin"></span>En attente</span>`; info=`Lien envoyé — pas encore de réponse`; }
         return `<a class="item ${past?"past":""}" href="?r=${d.id}"><div class="l1"><span class="ent">${esc(d.entreprise)}</span>${chip}</div>
-          <div class="l2">${esc(d.tuteur)}${d.eleve?" · "+esc(d.eleve):""} — ${info}</div></a>`; }).join("")+`<button class="cta" id="nouv" style="margin-top:8px">Créer un rendez-vous</button>`;
+          <div class="l2">${esc(d.tuteur)}${d.eleve?" · "+esc(d.eleve):""} — ${info}</div></a>`; };
+      // tri : à venir par date de RDV croissante puis création ; passés du plus récent au plus ancien
+      const sortKey=d=>d.confirme?new Date(d.confirme.dateStr).getTime():(1e15-(d.createdAt?.seconds||0));
+      const avenir=all.filter(d=>!isPast(d)).sort((a,b)=>sortKey(a)-sortKey(b));
+      const passes=all.filter(isPast).sort((a,b)=>new Date(b.confirme.dateStr)-new Date(a.confirme.dateStr));
+      liste.innerHTML =
+        (avenir.length?`<div class="grp">À venir & à traiter</div>`+avenir.map(carte).join(""):"")
+        + (passes.length?`<div class="grp">Passés</div>`+passes.map(carte).join(""):"")
+        + `<button class="cta" id="nouv" style="margin-top:12px">Créer un rendez-vous</button>`;
       document.getElementById("nouv").onclick=()=>{ location.search=""; };
     }
 
