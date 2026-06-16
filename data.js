@@ -56,6 +56,13 @@ const THEMATIQUES = [
         lien: "https://preventionsanteenvironnement.github.io/pfmp-convention-procedure/",
         type: "Outil",
       },
+      {
+        titre: "Visite de stage — proposer une date au tuteur",
+        desc: "Tu proposes des jours et des plages horaires ; le tuteur choisit le créneau qui l'arrange, sans rien écrire ni créer de compte. Les réponses arrivent dans l'Espace de gestion.",
+        lien: "rdv/",
+        type: "Outil",
+        badge: "Nouveau",
+      },
     ],
   },
   {
@@ -126,10 +133,10 @@ const THEMATIQUES = [
    ===================================================================== */
 const OUTILS = [
   {
-    titre: "Rendez-vous PFMP",
-    desc: "Proposer des créneaux à un tuteur et recueillir sa réponse, sans qu'il ait de compte.",
-    lien: "rdv/",
-    type: "Outil",
+    titre: "Rendez-vous PFMP — suivi",
+    desc: "Le tableau de tes visites de stage : qui a répondu, quel créneau a été choisi.",
+    lien: "rdv/?suivi",
+    type: "Suivi",
     couleur: "#2f7d6b",
   },
   {

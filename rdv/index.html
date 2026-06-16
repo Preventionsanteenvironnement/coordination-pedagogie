@@ -20,11 +20,8 @@
       min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
       padding:28px 16px 48px; -webkit-font-smoothing:antialiased;
     }
-    .sheet{
-      width:100%; max-width:480px; background:var(--card); border-radius:22px;
-      box-shadow:var(--shadow); overflow:hidden;
-      animation:pop .5s cubic-bezier(.16,.84,.44,1) both;
-    }
+    .sheet{ width:100%; max-width:480px; background:var(--card); border-radius:22px;
+      box-shadow:var(--shadow); overflow:hidden; animation:pop .5s cubic-bezier(.16,.84,.44,1) both; }
     @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.98);}to{opacity:1;transform:none;}}
 
     .top{ background:linear-gradient(150deg,var(--bg1),var(--bg2)); color:#fff; padding:26px 24px 24px; }
@@ -34,7 +31,7 @@
       display:grid; place-items:center; font-weight:700; font-size:1rem; flex:none; }
     .who .name{ font-weight:650; font-size:1.02rem; }
     .who .role{ font-size:.82rem; opacity:.85; }
-    .top h1{ margin:0; font-size:1.35rem; }
+    .top h1{ margin:0; font-size:1.32rem; }
 
     .body{ padding:22px 24px 26px; }
     .intro{ font-size:.98rem; line-height:1.5; margin:0 0 18px; }
@@ -48,26 +45,21 @@
 
     .ask{ font-weight:650; font-size:1rem; margin:0 0 12px; }
 
-    .slots{ display:grid; gap:10px; }
-    .slot{ display:flex; align-items:center; gap:14px; width:100%; text-align:left;
-      background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:14px 16px;
-      cursor:pointer; font:inherit; color:inherit; transition:border-color .15s,box-shadow .15s,transform .1s; }
-    .slot:hover{ border-color:var(--accent); }
-    .slot:active{ transform:scale(.99); }
-    .slot.sel{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,125,107,.14); }
-    .slot.win{ border-color:var(--ok); box-shadow:0 0 0 3px rgba(47,158,107,.16); }
-    .slot .cal{ width:46px; height:46px; border-radius:11px; flex:none; background:rgba(47,125,107,.1);
+    /* Jour (vue tuteur) */
+    .day{ border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+    .day-h{ display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .day-h .cal{ width:44px; height:44px; border-radius:11px; flex:none; background:rgba(47,125,107,.1);
       color:var(--accent); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
-    .slot .cal .d{ font-size:1.15rem; font-weight:700; }
-    .slot .cal .m{ font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
-    .slot .txt .day{ display:block; font-weight:600; }
-    .slot .txt .hr{ display:block; font-size:.85rem; color:var(--soft); margin-top:2px; }
-    .slot .tick{ margin-left:auto; width:24px; height:24px; border-radius:50%; border:2px solid var(--line);
-      flex:none; position:relative; transition:.15s; }
-    .slot.sel .tick{ border-color:var(--accent); background:var(--accent); }
-    .slot.sel .tick::after, .slot.win .tick::after{ content:""; position:absolute; left:7px; top:3px;
-      width:6px; height:11px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
-    .slot.win .tick{ border-color:var(--ok); background:var(--ok); }
+    .day-h .cal .d{ font-size:1.1rem; font-weight:700; }
+    .day-h .cal .m{ font-size:.6rem; text-transform:uppercase; letter-spacing:.05em; margin-top:2px; }
+    .day-h .lbl{ font-weight:650; }
+    .day-h .win{ font-size:.8rem; color:var(--soft); margin-top:2px; }
+    .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+    .chip{ border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:11px;
+      padding:9px 13px; font:inherit; font-size:.9rem; cursor:pointer; transition:.13s; }
+    .chip:hover{ border-color:var(--accent); }
+    .chip.sel{ border-color:var(--accent); background:var(--accent); color:#fff; }
+    .chip.win{ border-color:var(--ok); background:var(--ok); color:#fff; }
 
     .field{ margin-bottom:14px; }
     .field label{ display:block; font-size:.82rem; font-weight:600; color:var(--soft); margin-bottom:6px; }
@@ -75,16 +67,15 @@
       border-radius:12px; background:#fff; color:var(--ink); }
     .field .hint{ font-size:.74rem; color:var(--soft); margin-top:5px; }
     .two{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .three{ display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px; }
 
-    .cre-list{ display:grid; gap:8px; margin:8px 0 4px; }
-    .cre-item{ display:flex; align-items:center; gap:10px; background:rgba(47,125,107,.07);
-      border:1px solid var(--line); border-radius:11px; padding:9px 12px; font-size:.9rem; }
-    .cre-item .x{ margin-left:auto; border:none; background:none; color:var(--soft); cursor:pointer; font-size:1.1rem; }
-    .cre-add{ display:grid; grid-template-columns:1.3fr 1fr 1fr auto; gap:8px; align-items:end; }
-    .cre-add .mini label{ font-size:.72rem; }
-    .cre-add input{ padding:9px 10px; }
-    .addbtn{ background:rgba(47,125,107,.12); color:var(--accent); border:none; border-radius:11px;
-      padding:11px 12px; font:inherit; font-weight:650; cursor:pointer; }
+    .jour-list{ display:grid; gap:8px; margin:8px 0 4px; }
+    .jour-item{ background:rgba(47,125,107,.07); border:1px solid var(--line); border-radius:11px;
+      padding:10px 12px; font-size:.9rem; display:flex; align-items:center; gap:10px; }
+    .jour-item .meta2{ font-size:.78rem; color:var(--soft); }
+    .jour-item .x{ margin-left:auto; border:none; background:none; color:var(--soft); cursor:pointer; font-size:1.15rem; }
+    .addbtn{ width:100%; background:rgba(47,125,107,.12); color:var(--accent); border:none; border-radius:11px;
+      padding:12px; font:inherit; font-weight:650; cursor:pointer; margin-top:6px; }
 
     .cta{ width:100%; margin-top:18px; background:var(--accent); color:#fff; border:none; border-radius:14px;
       padding:15px; font:inherit; font-weight:650; font-size:1rem; cursor:pointer; transition:opacity .15s,transform .1s; }
@@ -101,7 +92,7 @@
       padding:6px 12px; border-radius:999px; }
     .status.wait{ background:rgba(232,163,61,.16); color:#9a6a12; }
     .status.ok{ background:rgba(47,158,107,.14); color:#1f7a4d; }
-    .dot{ width:8px; height:8px; border-radius:50%; background:currentColor; }
+    .pin{ width:8px; height:8px; border-radius:50%; background:currentColor; }
 
     .foot{ text-align:center; font-size:.76rem; color:var(--soft); padding:0 24px 22px; }
 
@@ -116,6 +107,14 @@
     .picked{ display:inline-block; margin-top:18px; padding:12px 18px; background:rgba(47,125,107,.1);
       color:var(--accent); border-radius:12px; font-weight:650; }
 
+    /* Suivi */
+    .item{ display:block; text-decoration:none; color:inherit; border:1px solid var(--line);
+      border-radius:14px; padding:14px 16px; margin-bottom:10px; transition:.13s; }
+    .item:hover{ border-color:var(--accent); }
+    .item .l1{ display:flex; align-items:center; gap:10px; }
+    .item .ent{ font-weight:650; }
+    .item .l2{ font-size:.84rem; color:var(--soft); margin-top:4px; }
+
     .center{ padding:46px 24px; text-align:center; color:var(--soft); }
     .spin{ width:30px; height:30px; border:3px solid var(--line); border-top-color:var(--accent);
       border-radius:50%; margin:0 auto 14px; animation:rot .8s linear infinite; }
@@ -124,13 +123,10 @@
       background:#1c2530; color:#fff; padding:11px 18px; border-radius:10px; font-size:.86rem;
       opacity:0; pointer-events:none; transition:.25s; }
     .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-    .hidden{ display:none !important; }
   </style>
 </head>
 <body>
-  <div class="sheet">
-    <div id="app"><div class="center"><div class="spin"></div>Chargement…</div></div>
-  </div>
+  <div class="sheet"><div id="app"><div class="center"><div class="spin"></div>Chargement…</div></div></div>
   <div class="toast" id="toast"></div>
 
   <script type="module">
@@ -146,8 +142,7 @@
       messagingSenderId: "614730413904",
       appId: "1:614730413904:web:a5dd478af5de30f6bede55"
     };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(initializeApp(firebaseConfig));
     const COL = "coordination_rdv";
 
     const app$ = document.getElementById("app");
@@ -156,24 +151,27 @@
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     const lsAdmin = id => "coordrdv_admin_" + id;
     let toastT;
-    function toast(m){ const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show");
-      clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1900); }
+    const toast = m => { const t=document.getElementById("toast"); t.textContent=m; t.classList.add("show");
+      clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1900); };
     const initiales = s => String(s||"").replace(/[^A-Za-zÀ-ÿ ]/g,"").split(/\s+/).filter(Boolean)
       .map(w=>w[0]).join("").slice(0,2).toUpperCase() || "•";
 
     const MOIS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+    const fmtH = min => { const h=Math.floor(min/60), m=min%60; return m===0?`${h} h`:`${h} h ${String(m).padStart(2,"0")}`; };
+    const toMin = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
     function libelle(dateStr){ const dt=new Date(dateStr+"T00:00:00"); if(isNaN(dt)) return {jour:dateStr,d:"",m:""};
       const j=dt.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
       return { jour:j.charAt(0).toUpperCase()+j.slice(1), d:String(dt.getDate()), m:MOIS[dt.getMonth()] }; }
+    const STEP = 30; // pas de 30 min entre les débuts de créneaux
+    function genCreneaux(j){ const out=[];
+      for(let s=j.start; s+j.duree<=j.end; s+=STEP) out.push({ start:s, end:s+j.duree, label:`${fmtH(s)} – ${fmtH(s+j.duree)}` });
+      return out; }
 
-    // ===================================================================
-    //  ROUTAGE
-    // ===================================================================
+    // ===================================================================  ROUTAGE
     (async function(){
-      if(!rid){ return vueCreation(); }
-      // charger le rendez-vous
-      let snap;
-      try { snap = await getDoc(doc(db, COL, rid)); }
+      if(params.has("suivi")) return vueSuivi();
+      if(!rid) return vueCreation();
+      let snap; try { snap = await getDoc(doc(db, COL, rid)); }
       catch(e){ return erreur("Impossible de charger ce rendez-vous."); }
       if(!snap.exists()) return erreur("Ce lien de rendez-vous n'existe pas ou a expiré.");
       const data = snap.data();
@@ -181,142 +179,133 @@
       return vueTuteur(rid, data);
     })();
 
-    function erreur(msg){
-      app$.innerHTML = `<div class="center"><p style="font-size:1.05rem;color:var(--ink)">${esc(msg)}</p></div>`;
-    }
+    const erreur = msg => { app$.innerHTML = `<div class="center"><p style="font-size:1.05rem;color:var(--ink)">${esc(msg)}</p></div>`; };
 
-    // ===================================================================
-    //  1) CRÉATION (enseignant)
-    // ===================================================================
+    // ===================================================================  1) CRÉATION
     function vueCreation(){
       app$.innerHTML = `
-        <div class="top"><div class="label">Espace de gestion</div><h1>Nouveau rendez-vous PFMP</h1></div>
+        <div class="top"><div class="label">PFMP · visite de stage</div><h1>Proposer une date au tuteur</h1></div>
         <div class="body">
-          <div class="field"><label>Votre nom (enseignant)</label>
-            <input id="f-ens" placeholder="ex. M. Martin"></div>
-          <div class="field"><label>Nom du tuteur / de la tutrice</label>
-            <input id="f-tut" placeholder="ex. Mme Bernard"></div>
-          <div class="field"><label>Structure / entreprise</label>
-            <input id="f-ent" placeholder="ex. Centre social Les Tilleuls"></div>
+          <div class="field"><label>Votre nom (enseignant)</label><input id="f-ens" placeholder="ex. M. Martin"></div>
+          <div class="field"><label>Nom du tuteur / de la tutrice</label><input id="f-tut" placeholder="ex. Mme Bernard"></div>
+          <div class="field"><label>Structure / entreprise</label><input id="f-ent" placeholder="ex. Centre social Les Tilleuls"></div>
           <div class="two">
-            <div class="field"><label>Élève (initiales)</label>
-              <input id="f-ele" placeholder="ex. L. M." maxlength="8">
-              <div class="hint">Initiales uniquement — jamais le nom complet.</div></div>
-            <div class="field"><label>Classe</label>
-              <input id="f-cla" placeholder="ex. 2de Bac Pro ASSP"></div>
+            <div class="field"><label>Élève (initiales)</label><input id="f-ele" placeholder="ex. L. M." maxlength="8">
+              <div class="hint">Initiales uniquement.</div></div>
+            <div class="field"><label>Classe</label><input id="f-cla" placeholder="ex. 2de Bac Pro ASSP"></div>
           </div>
-          <div class="field"><label>Type de rendez-vous</label>
-            <select id="f-typ">
+          <div class="two">
+            <div class="field"><label>Type</label><select id="f-typ">
               <option>Visite sur site</option><option>Entretien téléphonique</option>
-              <option>Visioconférence</option><option>Bilan de fin de PFMP</option>
-            </select></div>
-
-          <div class="field"><label>Créneaux proposés</label>
-            <div class="cre-list" id="cre-list"></div>
-            <div class="cre-add">
-              <div class="mini"><label>Jour</label><input type="date" id="c-date"></div>
-              <div class="mini"><label>Début</label><input type="time" id="c-deb" value="09:00"></div>
-              <div class="mini"><label>Fin</label><input type="time" id="c-fin" value="09:45"></div>
-              <button class="addbtn" id="c-add" type="button">+</button>
-            </div>
-            <div class="hint">Ajoutez 2 à 4 créneaux. La tutrice en choisira un.</div>
+              <option>Visioconférence</option><option>Bilan de fin de PFMP</option></select></div>
+            <div class="field"><label>Durée du rendez-vous</label><select id="f-dur">
+              <option value="30">30 min</option><option value="45" selected>45 min</option>
+              <option value="60">1 h</option></select></div>
           </div>
 
-          <button class="cta" id="creer" disabled>Créer le rendez-vous et obtenir le lien</button>
-        </div>
-        <div class="foot">Le lien public ne contient ni nom d'élève complet, ni nom d'établissement.</div>`;
+          <div class="field"><label>Jours et plages que vous proposez</label>
+            <div class="jour-list" id="jour-list"></div>
+            <div class="three">
+              <div class="field" style="margin:0"><label>Jour</label><input type="date" id="j-date"></div>
+              <div class="field" style="margin:0"><label>De</label><input type="time" id="j-deb" value="09:00"></div>
+              <div class="field" style="margin:0"><label>À</label><input type="time" id="j-fin" value="12:00"></div>
+            </div>
+            <button class="addbtn" id="j-add" type="button">+ Ajouter ce jour</button>
+            <div class="hint" id="j-hint">Le tuteur verra des créneaux de la durée choisie, à cliquer.</div>
+          </div>
 
-      const creneaux = [];
-      const listEl = document.getElementById("cre-list");
+          <button class="cta" id="creer" disabled>Créer et obtenir le lien</button>
+        </div>
+        <div class="foot">Le lien ne contient ni nom d'élève complet, ni nom d'établissement.</div>`;
+
+      const jours = [];
+      const listEl = document.getElementById("jour-list");
+      const dur = () => +document.getElementById("f-dur").value;
       function renderList(){
-        listEl.innerHTML = creneaux.map((c,i)=>`
-          <div class="cre-item"><span>${esc(c.jour)} · ${esc(c.heure)}</span>
-            <button class="x" data-i="${i}" type="button" aria-label="Retirer">×</button></div>`).join("");
-        listEl.querySelectorAll(".x").forEach(b=>b.onclick=()=>{ creneaux.splice(+b.dataset.i,1); renderList(); valide(); });
+        listEl.innerHTML = jours.map((j,i)=>{
+          const n = genCreneaux({start:j.start,end:j.end,duree:dur()}).length;
+          return `<div class="jour-item"><div><div>${esc(j.jour)}</div>
+            <div class="meta2">${fmtH(j.start)} – ${fmtH(j.end)} · ${n} créneau${n>1?"x":""}</div></div>
+            <button class="x" data-i="${i}" type="button" aria-label="Retirer">×</button></div>`;
+        }).join("");
+        listEl.querySelectorAll(".x").forEach(b=>b.onclick=()=>{ jours.splice(+b.dataset.i,1); renderList(); valide(); });
       }
-      document.getElementById("c-add").onclick = ()=>{
-        const date=document.getElementById("c-date").value;
-        const deb=document.getElementById("c-deb").value, fin=document.getElementById("c-fin").value;
+      document.getElementById("f-dur").onchange = renderList;
+      document.getElementById("j-add").onclick = ()=>{
+        const date=document.getElementById("j-date").value;
+        const deb=document.getElementById("j-deb").value, fin=document.getElementById("j-fin").value;
         if(!date){ toast("Choisissez un jour."); return; }
+        const start=toMin(deb), end=toMin(fin);
+        if(end-start < dur()){ toast("La plage est plus courte que la durée du rendez-vous."); return; }
         const L=libelle(date);
-        const fmt=t=>{ const [h,m]=t.split(":"); return (+m===0)?`${+h} h`:`${+h} h ${m}`; };
-        const heure = fin ? `${fmt(deb)} – ${fmt(fin)}` : fmt(deb);
-        creneaux.push({ jour:L.jour, heure, d:L.d, m:L.m });
+        jours.push({ dateStr:date, jour:L.jour, d:L.d, m:L.m, start, end });
         renderList(); valide();
       };
       const fields = ["f-ens","f-tut","f-ent"].map(id=>document.getElementById(id));
-      function valide(){
-        const ok = fields.every(f=>f.value.trim()) && creneaux.length>=1;
-        document.getElementById("creer").disabled = !ok;
-      }
+      function valide(){ document.getElementById("creer").disabled = !(fields.every(f=>f.value.trim()) && jours.length>=1); }
       fields.forEach(f=>f.addEventListener("input",valide));
 
       document.getElementById("creer").onclick = async ()=>{
         const btn=document.getElementById("creer"); btn.disabled=true; btn.textContent="Création…";
+        const duree=dur();
         const payload = {
-          enseignant: document.getElementById("f-ens").value.trim(),
-          tuteur: document.getElementById("f-tut").value.trim(),
-          entreprise: document.getElementById("f-ent").value.trim(),
-          eleve: document.getElementById("f-ele").value.trim(),
-          classe: document.getElementById("f-cla").value.trim(),
-          type: document.getElementById("f-typ").value,
-          creneaux, choix:null, statut:"attente", createdAt: serverTimestamp()
+          enseignant:document.getElementById("f-ens").value.trim(),
+          tuteur:document.getElementById("f-tut").value.trim(),
+          entreprise:document.getElementById("f-ent").value.trim(),
+          eleve:document.getElementById("f-ele").value.trim(),
+          classe:document.getElementById("f-cla").value.trim(),
+          type:document.getElementById("f-typ").value, duree,
+          jours: jours.map(j=>({dateStr:j.dateStr,jour:j.jour,d:j.d,m:j.m,start:j.start,end:j.end})),
+          choix:null, statut:"attente", createdAt:serverTimestamp()
         };
-        try{
-          const ref = await addDoc(collection(db,COL), payload);
-          localStorage.setItem(lsAdmin(ref.id),"1");
-          location.search = "?r="+ref.id;
-        }catch(e){
-          btn.disabled=false; btn.textContent="Créer le rendez-vous et obtenir le lien";
-          toast("Erreur à l'enregistrement. Réessayez.");
-        }
+        try{ const ref=await addDoc(collection(db,COL),payload);
+          localStorage.setItem(lsAdmin(ref.id),"1"); location.search="?r="+ref.id;
+        }catch(e){ btn.disabled=false; btn.textContent="Créer et obtenir le lien"; toast("Erreur à l'enregistrement. Réessayez."); }
       };
     }
 
-    // ===================================================================
-    //  2) VUE TUTEUR (lien public)
-    // ===================================================================
+    // ===================================================================  2) VUE TUTEUR
     function vueTuteur(id, d){
-      if(d.statut==="repondu" && d.choix!=null){
-        return confirmation(d.creneaux[d.choix], "Vous avez déjà répondu — merci !");
-      }
+      if(d.statut==="repondu" && d.choix) return confirmation(d.choix, "Vous avez déjà répondu — merci !");
       app$.innerHTML = `
         <div class="top">
-          <div class="label">Suivi de période en entreprise</div>
+          <div class="label">Visite de stage</div>
           <div class="who"><div class="avatar">${esc(initiales(d.enseignant))}</div>
             <div><div class="name">${esc(d.enseignant)}</div><div class="role">Enseignant référent</div></div></div>
         </div>
         <div class="body">
           <p class="intro">Bonjour, <strong>${esc(d.tuteur)}</strong>.<br>
-            Je souhaite convenir d'un rendez-vous avec vous pour le suivi de l'élève en stage.
-            Merci de choisir le créneau qui vous convient le mieux.</p>
+            Pour le suivi de l'élève en stage, choisissez simplement le créneau qui vous convient
+            (rendez-vous d'environ ${d.duree} min).</p>
           <div class="recap">
             <div class="row"><span class="k">Structure</span><span class="v">${esc(d.entreprise)}</span></div>
             ${d.eleve?`<div class="row"><span class="k">Élève</span><span class="v">${esc(d.eleve)}${d.classe?" — "+esc(d.classe):""}</span></div>`:""}
             <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div>
           </div>
-          <p class="ask">Vos créneaux disponibles</p>
-          <div class="slots" id="slots">${d.creneaux.map((c,i)=>`
-            <button class="slot" data-i="${i}">
-              <span class="cal"><span class="d">${esc(c.d)}</span><span class="m">${esc(c.m)}</span></span>
-              <span class="txt"><span class="day">${esc(c.jour)}</span><span class="hr">${esc(c.heure)}</span></span>
-              <span class="tick" aria-hidden="true"></span>
-            </button>`).join("")}</div>
+          <p class="ask">Choisissez votre créneau</p>
+          <div id="jours">${d.jours.map((j,ji)=>`
+            <div class="day">
+              <div class="day-h"><div class="cal"><span class="d">${esc(j.d)}</span><span class="m">${esc(j.m)}</span></div>
+                <div><div class="lbl">${esc(j.jour)}</div><div class="win">de ${fmtH(j.start)} à ${fmtH(j.end)}</div></div></div>
+              <div class="chips">${genCreneaux({start:j.start,end:j.end,duree:d.duree}).map(c=>`
+                <button class="chip" data-j="${ji}" data-s="${c.start}" data-e="${c.end}" data-l="${esc(c.label)}">${esc(c.label)}</button>`).join("")}</div>
+            </div>`).join("")}</div>
           <button class="cta" id="ok" disabled>Confirmer ce créneau</button>
         </div>
-        <div class="foot">Aucune inscription nécessaire — votre choix est transmis directement à l'enseignant.</div>`;
+        <div class="foot">Aucune inscription — votre choix est transmis directement à l'enseignant.</div>`;
 
-      let choisi=null;
-      const slots=document.getElementById("slots"), ok=document.getElementById("ok");
-      slots.querySelectorAll(".slot").forEach(b=>b.onclick=()=>{
-        slots.querySelectorAll(".slot").forEach(s=>s.classList.remove("sel"));
-        b.classList.add("sel"); choisi=+b.dataset.i; ok.disabled=false;
+      let choix=null;
+      const wrap=document.getElementById("jours"), ok=document.getElementById("ok");
+      wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+        wrap.querySelectorAll(".chip").forEach(c=>c.classList.remove("sel"));
+        b.classList.add("sel");
+        const ji=+b.dataset.j, j=d.jours[ji];
+        choix={ dateStr:j.dateStr, jour:j.jour, d:j.d, m:j.m, start:+b.dataset.s, end:+b.dataset.e, label:b.dataset.l };
+        ok.disabled=false;
       });
-      ok.onclick = async ()=>{
-        ok.disabled=true; ok.textContent="Envoi…";
-        try{
-          await updateDoc(doc(db,COL,id), { choix:choisi, statut:"repondu", respondedAt:serverTimestamp() });
-          confirmation(d.creneaux[choisi], "Votre disponibilité a bien été transmise à l'enseignant.");
+      ok.onclick = async ()=>{ ok.disabled=true; ok.textContent="Envoi…";
+        try{ await updateDoc(doc(db,COL,id),{ choix, statut:"repondu", respondedAt:serverTimestamp() });
+          confirmation(choix, "Votre disponibilité a bien été transmise à l'enseignant.");
         }catch(e){ ok.disabled=false; ok.textContent="Confirmer ce créneau"; toast("Erreur d'envoi. Réessayez."); }
       };
     }
@@ -328,63 +317,71 @@
             stroke-width="5" stroke-linecap="round" stroke-linejoin="round" d="M14 27 l8 8 l16 -18"/></svg></div>
           <h2>C'est noté, merci !</h2>
           <p>${esc(msg)}<br>Vous pouvez fermer cette page.</p>
-          ${c?`<div class="picked">${esc(c.jour)} · ${esc(c.heure)}</div>`:""}
+          ${c?`<div class="picked">${esc(c.jour)} · ${esc(c.label)}</div>`:""}
         </div>`;
       window.scrollTo({top:0,behavior:"smooth"});
     }
 
-    // ===================================================================
-    //  3) VUE GESTION (enseignant créateur)
-    // ===================================================================
+    // ===================================================================  3) GESTION (1 RDV)
     function vueGestion(id, d0){
       const url = location.origin + location.pathname + "?r=" + id;
       function render(d){
-        const repondu = d.statut==="repondu" && d.choix!=null;
+        const ok = d.statut==="repondu" && d.choix;
         app$.innerHTML = `
-          <div class="top">
-            <div class="label">Espace de gestion · rendez-vous</div>
-            <h1>${esc(d.entreprise)}</h1>
-          </div>
+          <div class="top"><div class="label">Suivi · visite de stage</div><h1>${esc(d.entreprise)}</h1></div>
           <div class="body">
             <div class="recap">
               <div class="row"><span class="k">Tuteur</span><span class="v">${esc(d.tuteur)}</span></div>
               ${d.eleve?`<div class="row"><span class="k">Élève</span><span class="v">${esc(d.eleve)}${d.classe?" — "+esc(d.classe):""}</span></div>`:""}
-              <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)}</span></div>
+              <div class="row"><span class="k">Type</span><span class="v">${esc(d.type)} · ${d.duree} min</span></div>
             </div>
-
             <p class="ask">Lien à envoyer à la tutrice</p>
-            <div class="link-box">
-              <input id="lien" readonly value="${esc(url)}">
-              <button class="copy" id="copy">Copier</button>
-            </div>
-            <div class="field" style="margin-top:6px"><div class="hint">Envoyez ce lien par mail ou SMS. La tutrice n'a aucun compte à créer.</div></div>
-
+            <div class="link-box"><input id="lien" readonly value="${esc(url)}"><button class="copy" id="copy">Copier</button></div>
+            <div class="hint" style="margin-top:6px">Par mail ou SMS. Aucun compte à créer pour elle.</div>
             <p class="ask" style="margin-top:18px">Réponse</p>
-            <div style="margin-bottom:14px">
-              ${repondu
-                ? `<span class="status ok"><span class="dot"></span>Créneau confirmé</span>`
-                : `<span class="status wait"><span class="dot"></span>En attente de réponse</span>`}
-            </div>
-            <div class="slots">${d.creneaux.map((c,i)=>`
-              <div class="slot ${repondu&&i===d.choix?"win":""}">
-                <span class="cal"><span class="d">${esc(c.d)}</span><span class="m">${esc(c.m)}</span></span>
-                <span class="txt"><span class="day">${esc(c.jour)}</span><span class="hr">${esc(c.heure)}</span></span>
-                <span class="tick" aria-hidden="true"></span>
-              </div>`).join("")}</div>
-
-            <button class="cta ghost" id="nouveau" style="margin-top:18px">Créer un autre rendez-vous</button>
-          </div>
-          <div class="foot">Cette page se met à jour automatiquement dès que la tutrice répond.</div>`;
-
+            <div style="margin-bottom:14px">${ok
+              ? `<span class="status ok"><span class="pin"></span>Créneau confirmé</span>`
+              : `<span class="status wait"><span class="pin"></span>En attente de réponse</span>`}</div>
+            ${ok?`<div class="day"><div class="day-h">
+                <div class="cal"><span class="d">${esc(d.choix.d)}</span><span class="m">${esc(d.choix.m)}</span></div>
+                <div><div class="lbl">${esc(d.choix.jour)}</div><div class="win">${esc(d.choix.label)}</div></div></div></div>`
+              : `<p class="hint">Cette page se met à jour automatiquement dès qu'elle répond.</p>`}
+            <button class="cta ghost" id="suivi" style="margin-top:14px">Voir tous mes rendez-vous</button>
+            <button class="cta ghost" id="nouveau" style="margin-top:10px">Créer un autre rendez-vous</button>
+          </div>`;
         document.getElementById("copy").onclick = async ()=>{
           try{ await navigator.clipboard.writeText(url); toast("Lien copié !"); }
-          catch(e){ document.getElementById("lien").select(); document.execCommand("copy"); toast("Lien copié !"); }
-        };
+          catch(e){ document.getElementById("lien").select(); document.execCommand("copy"); toast("Lien copié !"); } };
         document.getElementById("nouveau").onclick = ()=>{ location.search=""; };
+        document.getElementById("suivi").onclick = ()=>{ location.search="?suivi"; };
       }
       render(d0);
-      // mise à jour en direct
       onSnapshot(doc(db,COL,id), s=>{ if(s.exists()) render(s.data()); });
+    }
+
+    // ===================================================================  4) SUIVI (tableau)
+    async function vueSuivi(){
+      const ids = Object.keys(localStorage).filter(k=>k.startsWith("coordrdv_admin_")).map(k=>k.slice("coordrdv_admin_".length));
+      app$.innerHTML = `
+        <div class="top"><div class="label">Espace de gestion</div><h1>Mes rendez-vous PFMP</h1></div>
+        <div class="body" id="liste"><div class="center"><div class="spin"></div>Chargement…</div></div>`;
+      const liste = document.getElementById("liste");
+      if(!ids.length){
+        liste.innerHTML = `<p class="hint" style="font-size:.92rem">Aucun rendez-vous pour l'instant.</p>
+          <button class="cta" id="nouv">Créer un rendez-vous</button>`;
+        document.getElementById("nouv").onclick=()=>{ location.search=""; }; return;
+      }
+      const docs = await Promise.all(ids.map(async id=>{ try{ const s=await getDoc(doc(db,COL,id));
+        return s.exists()?{id,...s.data()}:null; }catch(e){ return null; } }));
+      const items = docs.filter(Boolean).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+      liste.innerHTML = items.map(d=>{ const ok=d.statut==="repondu"&&d.choix;
+        return `<a class="item" href="?r=${d.id}">
+          <div class="l1"><span class="ent">${esc(d.entreprise)}</span>
+            ${ok?`<span class="status ok" style="margin-left:auto"><span class="pin"></span>Confirmé</span>`
+                :`<span class="status wait" style="margin-left:auto"><span class="pin"></span>En attente</span>`}</div>
+          <div class="l2">${esc(d.tuteur)}${d.eleve?" · "+esc(d.eleve):""}${ok?" · "+esc(d.choix.jour)+" "+esc(d.choix.label):""}</div>
+        </a>`; }).join("") + `<button class="cta" id="nouv" style="margin-top:8px">Créer un rendez-vous</button>`;
+      document.getElementById("nouv").onclick=()=>{ location.search=""; };
     }
   </script>
 </body>
