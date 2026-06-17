@@ -13,7 +13,9 @@ function srcChips(ids) {
 }
 function render() {
   const home = page === "home";
-  $("#hdrBack").style.display = home ? "none" : "flex";
+  const back = $("#hdrBack");
+  back.style.display = "inline-flex";
+  back.textContent = home ? "‹ Portail" : "‹ Sommaire";
   $("#hdrTitle").textContent = home ? TITRE : window.SECTIONS[idx].titre;
   $("#view").innerHTML = home ? viewHome() : viewSection();
   window.scrollTo && window.scrollTo(0, 0);
@@ -48,7 +50,10 @@ function closeSource() { $("#drawer").classList.remove("open"); $("#backdrop").c
 document.addEventListener("click", e => {
   const sc = e.target.closest("[data-src]"); if (sc) return openSource(sc.dataset.src);
   const g = e.target.closest("[data-go]"); if (g) { idx = +g.dataset.go; page = "section"; return render(); }
-  if (e.target.closest("#hdrBack")) { page = "home"; return render(); }
+  if (e.target.closest("#hdrBack")) {
+    if (page === "section") { page = "home"; return render(); }
+    location.href = "../../"; return;
+  }
   if (e.target.closest("#backdrop")) return closeSource();
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSource(); });

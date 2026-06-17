@@ -36,8 +36,10 @@ const SEARCHABLE = ["themes", "scenarios", "glossaire"];
 function render() {
   const sec = window.SECTIONS[section];
   // header
-  const back = page !== "accueil";
-  $("#hdrBack").style.display = back ? "flex" : "none";
+  const onTop = page === "accueil";
+  const backBtn = $("#hdrBack");
+  backBtn.style.display = "inline-flex";
+  backBtn.textContent = onTop ? "‹ Portail" : "‹ Retour";
   $("#hdrTitle").textContent = page === "theme" ? sec.themes[themeIdx].titre : (TITLES[page] || "Guide PFMP");
   $("#secPill").style.display = "none";
   const showSearch = SEARCHABLE.includes(page);
@@ -176,7 +178,10 @@ document.addEventListener("click", e => {
   const qa = e.target.closest("[data-qa]"); if (qa) { quizSel = +qa.dataset.qa; if (quizSel === window.QUIZ[section][quizIdx].c) quizScore++; return render(); }
   const qn = e.target.closest("[data-qnext]"); if (qn) { quizIdx++; quizSel = null; return render(); }
   const qr = e.target.closest("[data-quizrestart]"); if (qr) { quizIdx = 0; quizScore = 0; quizSel = null; return render(); }
-  if (e.target.closest("#hdrBack")) { page = (page === "theme") ? "themes" : "accueil"; query = ""; if ($("#search")) $("#search").value = ""; return render(); }
+  if (e.target.closest("#hdrBack")) {
+    if (page === "accueil") { location.href = "../"; return; }
+    page = (page === "theme") ? "themes" : "accueil"; query = ""; if ($("#search")) $("#search").value = ""; return render();
+  }
   if (e.target.closest("#backdrop")) return closeSource();
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeSource(); });
