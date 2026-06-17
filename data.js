@@ -59,7 +59,7 @@ const THEMATIQUES = [
       {
         titre: "Visite de stage — proposer une date au tuteur",
         desc: "Tu proposes des jours et des plages horaires ; le tuteur choisit le créneau qui l'arrange, sans rien écrire ni créer de compte. Les réponses arrivent dans l'Espace de gestion.",
-        lien: "rdv/",
+        lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/",
         type: "Outil",
         badge: "Nouveau",
       },
@@ -135,7 +135,7 @@ const OUTILS = [
   {
     titre: "Rendez-vous PFMP — suivi",
     desc: "Le tableau de tes visites de stage : qui a répondu, quel créneau a été choisi.",
-    lien: "rdv/?suivi",
+    lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/?suivi",
     type: "Suivi",
     couleur: "#2f7d6b",
   },
