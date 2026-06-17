@@ -76,6 +76,13 @@ const THEMATIQUES = [
         lien: "acteurs/ddfpt/",
         type: "Guide",
       },
+      {
+        titre: "Le professeur principal — rôle & missions",
+        desc: "Désignation, coordination du suivi des élèves, lien général/pro & PFMP en lycée pro, élèves à besoins particuliers, vie de classe, orientation et posture — par thèmes, avec les textes officiels (circulaire n°2018-108).",
+        lien: "acteurs/prof-principal/",
+        type: "Guide",
+        badge: "Nouveau",
+      },
     ],
   },
   {
