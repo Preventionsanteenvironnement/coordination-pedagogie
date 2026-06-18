@@ -141,7 +141,7 @@ const THEMATIQUES = [
 const OUTILS = [
   {
     titre: "Rendez-vous PFMP — suivi",
-    desc: "Le tableau de tes visites de stage : qui a répondu, quel créneau a été choisi.",
+    desc: "Le tableau des visites de stage de l'équipe : qui a répondu, quel créneau a été choisi. Accessible depuis n'importe quel appareil.",
     lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/?suivi",
     type: "Suivi",
     couleur: "#2f7d6b",
