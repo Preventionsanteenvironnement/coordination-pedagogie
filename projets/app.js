@@ -90,6 +90,25 @@ const MODELES = [
   { t:"Action prévention / CPS", titre:"Action prévention — CPS", ctx:"Public lycée pro. Renforcer des compétences psychosociales dans des situations concrètes du quotidien scolaire." },
   { t:"Projet d'établissement", titre:"Axe du projet d'établissement", ctx:"Contribution d'équipe à un axe du projet d'établissement : état des lieux, priorités, actions." },
 ];
+const phaseColor = id => (PHASES.find(p=>p.etapes.includes(id))||{}).c || "var(--accent)";
+// Verbes vagues → verbes d'action (méthode Mager), pour le garde-fou
+const VAGUE = { "savoir":"énumérer, lister, nommer", "comprendre":"expliquer, reformuler, interpréter", "connaitre":"citer, définir, identifier", "apprecier":"comparer, classer, évaluer", "maitriser":"réaliser, exécuter, démontrer", "se sensibiliser":"repérer, détecter, analyser", "sensibiliser":"repérer, détecter, analyser", "prendre conscience":"décrire, distinguer, expliquer", "etre conscient":"décrire, signaler, recenser", "ameliorer":"un verbe d'action observable", "favoriser":"un verbe d'action observable", "developper":"un verbe d'action observable", "apprehender":"identifier, analyser, expliquer" };
+// Fiches concept (à la demande, pour adultes — référence, pas leçon)
+const CONCEPTS = {
+  constats:{ quoi:"Un fait observable et vérifiable d'une situation réelle, énoncé avant toute interprétation.", dist:["Un constat n'est pas un jugement","Le constat décrit un comportement précis ; le jugement qualifie la personne (« immature »). On reste sur le factuel."], ex:"« Plusieurs élèves rendent les devoirs avec plusieurs jours de retard » — pas « ils sont peu sérieux »." },
+  diagnostic:{ quoi:"L'interprétation des constats : de quoi sont-ils le signe, quels mécanismes sont en jeu.", dist:["Le diagnostic n'est pas le constat","Le constat décrit ; le diagnostic comprend le « pourquoi »."], ex:"Constat : des élèves ne sollicitent pas les adultes. Diagnostic : difficulté à repérer la bonne personne et à formuler une demande." },
+  problematique:{ quoi:"La question centrale, précise et traitable, que le projet prend en charge — et ce qu'il ne traitera pas.", dist:["Une problématique n'est pas une solution","« Comment aider à… ? » est une question ; « créer une permanence » est déjà une réponse."], ex:"« Comment permettre à un élève de repérer la bonne ressource et de formuler une demande avant que la situation ne s'aggrave ? »" },
+  finalite:{ quoi:"Le sens large, la direction visée. Non mesurable : c'est l'horizon du projet.", dist:["La finalité n'est pas l'objectif général","La finalité donne le cap ; l'objectif dit ce que l'élève saura faire."], ex:"« Favoriser l'accrochage scolaire et social des élèves »." },
+  obj_general:{ quoi:"La capacité globale visée chez l'élève — concrète, formulée de son côté (« être capable de… »).", dist:["L'objectif général n'est pas la finalité","Il se formule côté élève, pas côté intention de l'équipe."], ex:"« Être capable d'identifier une difficulté, repérer une ressource et préparer une action »." },
+  obj_op:{ quoi:"Un objectif observable et vérifiable. Méthode Mager : dans certaines conditions, l'élève sera capable d'une performance (verbe d'action), à un niveau donné (critère).", dist:["Un objectif n'est pas une description de cours","Il décrit ce que l'ÉLÈVE fait avec un verbe observable — pas ce que l'enseignant présente."], ex:"« À partir d'une fiche, l'élève formule par écrit une demande claire adressée au bon interlocuteur. »", formule:"[Conditions] + l'élève sera capable de [Performance] + [Critère]", verbes:[["Connaître","citer, nommer, lister, définir, identifier"],["Comprendre","expliquer, reformuler, illustrer, résumer"],["Appliquer","utiliser, réaliser, exécuter, résoudre, mesurer"],["Analyser","comparer, distinguer, relier, différencier"],["Évaluer","juger, argumenter, justifier, vérifier"],["Créer","concevoir, élaborer, proposer, planifier"]], src:"D'après R. Mager & la taxonomie de Bloom." },
+  actions:{ quoi:"Ce qu'on met concrètement en place pour atteindre un objectif.", dist:["Une action n'est pas un objectif","L'objectif est le résultat visé ; l'action est le moyen d'y parvenir."], ex:"Fiche « je prépare ma demande », carte des ressources du lycée." },
+  moyens:{ quoi:"Les ressources mobilisées : humaines, matérielles, partenaires, temps.", dist:["Un moyen n'est pas une action","Le moyen rend l'action possible (une salle, un référent) ; l'action est ce qu'on fait."], ex:"Salle dédiée, adulte référent, accès ENT, lien avec le CPE." },
+  miseoeuvre:{ quoi:"Le cadrage opérationnel : où, quand, combien de temps, à quelle fréquence, avec quelles échéances.", dist:["La mise en œuvre n'est pas les moyens","Les moyens : avec quoi. La mise en œuvre : où et quand."], ex:"Tous les mardis 13h-14h, salle B12, de la Toussaint à février, bilan à mi-parcours." },
+  cadre:{ quoi:"Les limites explicites du dispositif : ce qu'il ne fait pas.", dist:["Le cadre n'est pas les moyens","Le cadre dit ce qu'on s'interdit, pour protéger l'intention du projet."], ex:"Pas de sanction, pas de suivi psychologique, pas de remplacement du CPE." },
+  indicateurs:{ quoi:"Un signe observable ou mesurable qui renseigne sur l'atteinte d'un objectif.", dist:["Un indicateur n'est pas un objectif","L'objectif est le but ; l'indicateur est la trace qui permet de le suivre."], ex:"Nombre de demandes préparées ; nombre d'élèves repartis avec une action." },
+  evaluation:{ quoi:"Apprécier le projet sur trois niveaux : l'activité (a-t-elle eu lieu ?), les résultats immédiats, les effets.", dist:["Évaluer n'est pas juger","On apprécie à partir d'indicateurs et de bilans, pas d'impressions."], ex:"Bilan par période : usages, ressources identifiées, ajustements." },
+  vigilance:{ quoi:"Les risques anticipés qui pourraient détourner le projet de son intention.", dist:["La vigilance n'est pas le cadre","Le cadre pose des limites ; la vigilance surveille les dérives possibles."], ex:"Risque que l'espace devienne un refuge pour éviter le cours." },
+};
 const PALETTE = ["#534ab7","#0f6e56","#993c1d","#185fa5","#9a5f0a","#993556","#3c6e3c","#5a6b8c"];
 const colorFor = s => PALETTE[[...String(s||"?")].reduce((a,c)=>a+c.charCodeAt(0),0) % PALETTE.length];
 
@@ -120,7 +139,7 @@ function nudge(etapeId, txt){
   const t = norm(txt).trim(); if(!t) return null;
   if(etapeId==="constats"){ const jug=["immature","ingerable","faineant","paresseux","ne veulent rien","nul ","betes","insupportable","penible"]; if(jug.some(w=>t.includes(w))) return "Cela ressemble à un jugement. Décrivez plutôt un comportement observable."; }
   if(etapeId==="problematique"){ if(/^(creer|mettre en place|installer|ouvrir|monter|faire) (une|un|le|la|des|l')/.test(t)) return "Cela ressemble à une solution, pas à une problématique. Reformulez en question (« Comment… ? »)."; if(!txt.includes("?")) return "Une problématique se formule en question — pensez au « ? »."; }
-  if(etapeId==="obj_op"){ const flou=["comprendre","prendre conscience","ameliorer","favoriser","developper","sensibiliser","apprehender"]; const hit=flou.find(w=>t.includes(w)); if(hit) return `« ${hit} » est trop flou pour un objectif opérationnel. Préférez : identifier, repérer, formuler, préparer, réaliser.`; }
+  if(etapeId==="obj_op"){ for(const v of Object.keys(VAGUE)){ if(t.includes(v)) return `« ${v} » est trop vague pour un objectif — préférez : ${VAGUE[v]}.`; } }
   return null;
 }
 function synthese(){
@@ -228,8 +247,10 @@ function viewEtape(){
     : `<button class="btn-mini regroup-toggle" data-regroup>${ic("merge")} Regrouper</button>`) : "";
   const addZone=(RO||locked||regroup)?(locked?`<div class="locked-note">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
     `<div class="add-row">${avatar(ident?ident.initiales:"?")}<div style="flex:1"><textarea data-keep id="newContrib" rows="1" placeholder="${ident?"Ajouter votre "+e.nom.toLowerCase()+"…":"Identifiez-vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div></div><button class="send" id="sendContrib" aria-label="Ajouter">${ic("send")}</button></div>`;
-  return `<div class="etape-head"><div style="display:flex;align-items:center;gap:10px"><span class="et-ic">${ic(e.icon)}</span><div style="flex:1"><div class="eyebrow">Étape ${etapeIdx+1} / ${ETAPES.length}</div><h2>${esc(e.nom)}</h2></div>${lockBtn}</div>
-    <div class="et-q">${esc(e.q)}</div><div class="et-def">${esc(e.def)}</div><div class="et-aide">${ic("info")}<span>${esc(e.aide)}</span></div>${exemples}</div>
+  return `<div class="etape-head" style="--pc:${phaseColor(e.id)}"><div class="eh-top"><span class="et-ic ph">${ic(e.icon)}</span><div style="flex:1"><div class="eyebrow">Étape ${etapeIdx+1} / ${ETAPES.length}</div><h2>${esc(e.nom)}</h2></div>${lockBtn}</div>
+    <div class="et-q">${esc(e.q)}</div><div class="et-def">${esc(e.def)}</div>
+    <button class="concept-btn" data-concept="${e.id}">${ic("help")} Comprendre la notion</button>
+    <div class="et-aide">${ic("info")}<span>${esc(e.aide)}</span></div>${exemples}</div>
     ${contexte}${regroupBar}<div class="contribs">${cards}</div>${addZone}
     <div class="pager"><button class="pgr" data-etape="${(etapeIdx-1+ETAPES.length)%ETAPES.length}">${ic("back")}<span>${esc(ETAPES[(etapeIdx-1+ETAPES.length)%ETAPES.length].nom)}</span></button><button class="pgr next" data-etape="${(etapeIdx+1)%ETAPES.length}"><span>${esc(ETAPES[(etapeIdx+1)%ETAPES.length].nom)}</span>${ic("chev")}</button></div>`;
 }
@@ -280,6 +301,19 @@ function openNew(){
 function openEdit(cid){const c=contribs.find(x=>x.id===cid);if(!c)return;openSheet(`<div class="sheet-head"><h3>Modifier</h3><button class="x" data-close>${ic("x")}</button></div><div class="field"><textarea id="eTxt" rows="4">${esc(c.texte)}</textarea></div><div class="actions"><button class="btn primary" id="saveEdit">${ic("check")} Enregistrer</button></div>`);
   $("#saveEdit").onclick=async()=>{const v=$("#eTxt").value.trim();if(!v){toast("Texte vide.");return;}try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),{texte:v,editedAt:Date.now()});closeSheet();}catch(e){console.error(e);toast("Modification impossible.");}};}
 
+function openConcept(eid){
+  const c=CONCEPTS[eid]; if(!c) return; const e=ETM[eid]; const pc=phaseColor(eid);
+  openSheet(`<div class="concept" style="--pc:${pc}">
+    <div class="cc-head"><span class="cc-ic">${ic(e.icon)}</span><div class="cc-h-tx"><div class="cc-eyebrow">La notion</div><h3>${esc(e.nom)}</h3></div><button class="x" data-close>${ic("x")}</button></div>
+    <div class="cc-block"><div class="cc-lab">Ce que c'est</div><p>${esc(c.quoi)}</p></div>
+    ${c.dist?`<div class="cc-block cc-dist"><div class="cc-lab">${ic("alert")} À ne pas confondre</div><p><b>${esc(c.dist[0])}.</b> ${esc(c.dist[1])}</p></div>`:""}
+    ${c.ex?`<div class="cc-block"><div class="cc-lab">${ic("bolt")} Un exemple</div><p class="cc-ex">${esc(c.ex)}</p></div>`:""}
+    ${c.formule?`<div class="cc-block cc-formule"><div class="cc-lab">La formule</div><p>${esc(c.formule)}</p></div>`:""}
+    ${c.verbes?`<div class="cc-block"><div class="cc-lab">${ic("checklist")} Verbes d'action conseillés</div><div class="cc-verbes">${c.verbes.map(([n,v])=>`<div class="cc-vrow"><span class="cc-vn">${esc(n)}</span><span class="cc-vv">${esc(v)}</span></div>`).join("")}</div></div>`:""}
+    ${c.src?`<p class="cc-src">${esc(c.src)}</p>`:""}
+  </div>`);
+}
+
 /* ---------- Firestore ---------- */
 async function loadListe(){
   try{ const snap=await getDocs(collection(db,COL));
@@ -320,6 +354,7 @@ document.addEventListener("click", e=>{
   const op=e.target.closest("[data-open]");if(op) return openProjet(op.dataset.open);
   if(e.target.closest("[data-overview]")){view="overview";return render();}
   if(e.target.closest("[data-matrice]")){view="matrice";return render();}
+  const cc=e.target.closest("[data-concept]");if(cc) return openConcept(cc.dataset.concept);
   const sl=e.target.closest("[data-sel]");if(sl){const id=sl.dataset.sel;selected.has(id)?selected.delete(id):selected.add(id);return render();}
   if(e.target.closest("[data-regroup]")){regroup=!regroup;selected.clear();return render();}
   if(e.target.closest("[data-merge]")) return fusionner();
