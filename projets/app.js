@@ -89,6 +89,7 @@ const STATUTS = { brouillon:{l:"Brouillon",c:"#8b94a3"}, construction:{l:"En con
 const PST = { todo:{l:"À faire",c:"#8b94a3"}, doing:{l:"En cours",c:"#2f6cd6"}, done:{l:"Fait",c:"#0f8a76"} };
 const TYPES = [
   {id:"peda", l:"Pédagogique / élèves", pub:"l'élève"}, {id:"vie", l:"Vie scolaire", pub:"l'élève"},
+  {id:"familles", l:"Familles / café des parents", pub:"les familles"},
   {id:"prevention", l:"Prévention", pub:"le public"}, {id:"accomp", l:"Accompagnement", pub:"la personne accompagnée"},
   {id:"evenement", l:"Événement", pub:"le participant"}, {id:"partenariat", l:"Partenariat", pub:"le partenaire"},
   {id:"administratif", l:"Administratif / organisation", pub:"le public concerné"}, {id:"etablissement", l:"Projet d'établissement", pub:"le public concerné"}, {id:"autre", l:"Autre", pub:"le public concerné"},
@@ -99,6 +100,7 @@ const MODELES = [
   { t:"Action de prévention", titre:"Action de prévention — ", ctx:"Public concerné, thème (santé, sécurité, conduites à risque…), besoin observé.", type:"prevention" },
   { t:"Projet de classe / sortie", titre:"Projet de classe — ", ctx:"Classe(s) concernée(s), nature du projet (sortie, voyage, production…), intention visée.", type:"peda" },
   { t:"Projet citoyen / vie scolaire", titre:"Projet citoyen — ", ctx:"Public, dimension citoyenne ou de vie scolaire (entraide, médiation, engagement…), besoin.", type:"vie" },
+  { t:"Café des parents / familles", titre:"Café des parents — ", ctx:"Familles visées, thème (orientation, écrans, sommeil, scolarité…), besoin observé, format convivial d'échange.", type:"familles" },
   { t:"Dispositif d'accompagnement", titre:"Dispositif d'accompagnement — ", ctx:"Public, type d'accompagnement (accrochage, tutorat, espace ressource…), besoin.", type:"accomp" },
   { t:"Événement / organisation", titre:"", ctx:"Nature de l'événement ou de l'organisation, public visé, objectif.", type:"evenement" },
   { t:"Projet d'établissement", titre:"Axe du projet d'établissement", ctx:"Contribution d'équipe à un axe : état des lieux, priorités, actions.", type:"etablissement" },
@@ -148,7 +150,9 @@ const ofEt = id => sortC(contribs.filter(c=>c.etape===id && active(c)));
 const ofEtAll = id => sortC(contribs.filter(c=>c.etape===id));
 const isLocked = id => (projet?.locked||[]).includes(id);
 const base = location.origin + location.pathname;
-const pub = () => (TYPES.find(t=>t.id===projet?.type)||{}).pub || "l'élève";
+const pub = () => projet?.type==="perso" ? (projet?.typePub||"le public concerné") : ((TYPES.find(t=>t.id===projet?.type)||{}).pub || "l'élève");
+const typeLabel = () => projet?.type==="perso" ? (projet?.typeCustom||"Personnalisé") : (TYPES.find(t=>t.id===projet?.type)||{}).l;
+const nomEt = e => (e && projet?.etapeNoms && projet.etapeNoms[e.id]) || (e ? e.nom : "");
 const T = s => String(s==null?"":s).split("«PUB»").join(pub());
 const isRapide = () => projet?.mode==="rapide";
 const visIds = () => { const en=projet?.enabled; if(Array.isArray(en)&&en.length) return ETAPES.map(e=>e.id).filter(id=>en.includes(id)); return isRapide()?RAPIDE.slice():ETAPES.map(e=>e.id); };
@@ -195,7 +199,7 @@ function render(){
   const inProj = projet && view!=="liste";
   $("#backLabel").textContent = view==="liste" ? "Portail" : (view==="overview"?"Projets":"Projet");
   $("#title").textContent = inProj ? projet.titre : "Atelier projet";
-  $("#subtitle").textContent = inProj ? ({overview:"Vue d'ensemble",fiche:"Fiche projet",matrice:"Alignement",plan:"Plan d'action"}[view]||ETAPES[etapeIdx]?.nom) : "Construire à plusieurs mains";
+  $("#subtitle").textContent = inProj ? ({overview:"Vue d'ensemble",fiche:"Fiche projet",matrice:"Alignement",plan:"Plan d'action"}[view]||nomEt(ETAPES[etapeIdx])) : "Construire à plusieurs mains";
   const ib=$("#identBtn"); if(ident && !RO){ ib.hidden=false; ib.innerHTML=`${ic("user")} ${esc(ident.initiales)}`; } else ib.hidden=true;
   const fb=$("#ficheBtn"); fb.hidden = !(inProj && view!=="fiche"); fb.innerHTML=`${ic("file")} Fiche`;
   const showBar = inProj && view!=="overview";
@@ -210,7 +214,7 @@ function renderEtapeBar(){
   const filled = new Set(contribs.filter(active).map(c=>c.etape));
   const vis = new Set(visIdx());
   $("#etapebar").innerHTML = `<button class="estep" data-overview>${ic("grid")}Vue d'ensemble</button>` +
-    ETAPES.map((e,i)=>vis.has(i)?`<button class="estep ${view==="etape"&&i===etapeIdx?"active":""}" data-etape="${i}">${ic(e.icon)}${esc(e.nom)}${isLocked(e.id)?ic("lock"):(filled.has(e.id)?'<span class="dot"></span>':"")}</button>`:"").join("") +
+    ETAPES.map((e,i)=>vis.has(i)?`<button class="estep ${view==="etape"&&i===etapeIdx?"active":""}" data-etape="${i}">${ic(e.icon)}${esc(nomEt(e))}${isLocked(e.id)?ic("lock"):(filled.has(e.id)?'<span class="dot"></span>':"")}</button>`:"").join("") +
     `<button class="estep ${view==="plan"?"active":""}" data-plan>${ic("table")}Plan d'action</button>` +
     `<button class="estep ${view==="matrice"?"active":""}" data-matrice>${ic("columns")}Alignement</button>` +
     `<button class="estep fiche ${view==="fiche"?"active":""}" data-fiche>${ic("file")}Fiche</button>`;
@@ -222,9 +226,9 @@ function viewListe(){
     : `<button class="card ident-card" data-ident style="width:100%;cursor:pointer"><span class="ident-ava">${ic("user")}</span><div class="ic-tx" style="text-align:left"><strong>Qui êtes-vous ?</strong><small>Initiales + rôle (RGPD : pas de nom)</small></div><span class="btn-mini">Définir</span></button>`);
   const banner = fbError ? `<div class="banner">${ic("alert")}<span><b>Activation Firestore requise.</b> Publiez les règles de <code>coordination_projets</code>.</span></div>` : "";
   const list = projets.length ? `<div class="proj-list">${projets.map(p=>{const mat=Math.round((p._etapes/ETAPES.length)*100);const st=STATUTS[p.statut]||STATUTS.brouillon;const ty=TYPES.find(t=>t.id===p.type);
-    return `<button class="proj-card" data-open="${esc(p.id)}"><div style="display:flex;align-items:center;gap:8px"><h3 style="flex:1">${esc(p.titre)}</h3><span class="st-tag" style="--sc:${st.c}">${st.l}</span></div>${p.contexte?`<p>${esc(p.contexte)}</p>`:""}<div class="proj-meta">${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:""}<span>${ic("users")} ${p._contribs}</span><span class="mbar"><i style="width:${mat}%"></i></span><span>${mat}%</span></div></button>`;}).join("")}</div>`
+    return `<button class="proj-card" data-open="${esc(p.id)}"><div style="display:flex;align-items:center;gap:8px"><h3 style="flex:1">${esc(p.titre)}</h3><span class="st-tag" style="--sc:${st.c}">${st.l}</span></div>${p.contexte?`<p>${esc(p.contexte)}</p>`:""}<div class="proj-meta">${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:(p.type==="perso"&&p.typeCustom?`<span class="ty-tag">${esc(p.typeCustom)}</span>`:"")}<span>${ic("users")} ${p._contribs}</span><span class="mbar"><i style="width:${mat}%"></i></span><span>${mat}%</span></div></button>`;}).join("")}</div>`
     : `<div class="empty">Aucun projet pour l'instant.${RO?"":" Créez le premier ci-dessous."}</div>`;
-  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button>`}`;
+  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button><div class="liste-foot"><button class="lnk" id="impJson">${ic("file")} Importer un projet (JSON)</button></div>`}`;
 }
 
 function resRowHTML(r){
@@ -233,7 +237,7 @@ function resRowHTML(r){
   const title=r.url?`<a class="res-title" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${titleTxt} ${ic("external")}</a>`:`<span class="res-title plain">${titleTxt}</span>`;
   const todo=r.todo?`<button class="res-todo ${r.done?'done':''}" ${RO?'disabled':`data-res-todo="${r.id}"`}>${r.done?ic("check")+" Fait":"À traiter"}</button>`:"";
   const acts=RO?"":`<button class="res-act" data-res-edit="${r.id}" aria-label="Modifier">${ic("pencil")}</button><button class="res-act" data-res-del="${r.id}" aria-label="Supprimer">${ic("trash")}</button>`;
-  return `<div class="res-row ${r.done?'res-done':''}"><span class="res-ico" style="--rc:${t.c}">${ic(t.icon)}</span><div class="res-main">${title}${r.note?`<div class="res-note">${esc(r.note)}</div>`:""}<div class="res-tags">${et?`<span class="res-etape">${esc(et.nom)}</span>`:""}${r.initiales?`<span class="res-by">${esc(r.initiales)}</span>`:""}${todo}</div></div><div class="res-side">${acts}</div></div>`;
+  return `<div class="res-row ${r.done?'res-done':''}"><span class="res-ico" style="--rc:${t.c}">${ic(t.icon)}</span><div class="res-main">${title}${r.note?`<div class="res-note">${esc(r.note)}</div>`:""}<div class="res-tags">${et?`<span class="res-etape">${esc(nomEt(et))}</span>`:""}${r.initiales?`<span class="res-by">${esc(r.initiales)}</span>`:""}${todo}</div></div><div class="res-side">${acts}</div></div>`;
 }
 function resCard(){
   const list=curRes();
@@ -245,6 +249,12 @@ function resStrip(etapeId){
   if(!list.length&&RO) return "";
   return `<div class="res-strip"><div class="res-strip-h">${ic("clip")} Ressources utiles ici${RO?"":`<button class="btn-mini" data-res-add="${etapeId}" style="margin-left:auto">${ic("plus")} Ajouter</button>`}</div>${list.length?`<div class="res-list">${list.map(resRowHTML).join("")}</div>`:`<p class="muted" style="font-size:12.5px;margin:7px 0 0">Aucune ressource liée à cette étape pour l'instant.</p>`}</div>`;
 }
+function fmtDate(d){ if(!d) return "—"; try{ return new Date(d+"T00:00:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short",year:"numeric"}); }catch(_){ return d; } }
+function jalonsCard(){
+  const list=(projet.jalons||[]).slice().sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+  const items=list.map(j=>`<div class="jal-row"><span class="jal-date">${esc(fmtDate(j.date))}</span><span class="jal-label">${esc(j.label||"")}</span>${RO?"":`<button class="res-act" data-jal-del="${j.id}" aria-label="Supprimer">${ic("trash")}</button>`}</div>`).join("");
+  return `<div class="card jal-card"><div class="rep-h">${ic("calendar")} <b>Calendrier du projet</b>${list.length?`<span class="res-count">${list.length}</span>`:""}${RO?"":`<button class="btn-mini" data-jal-add style="margin-left:auto">${ic("plus")} Date</button>`}</div>${list.length?`<div class="jal-list">${items}</div>`:`<p class="muted" style="font-size:13px;margin:8px 0 0">Réunion de lancement, séances, bilan… les dates clés du projet.</p>`}${RO?"":`<a class="jal-poll" href="../reunions/" target="_blank" rel="noopener">${ic("users")} Trouver une date ensemble (sondage) ${ic("external")}</a>`}</div>`;
+}
 function reperesCard(){
   const r=projet.reperes||{}; const filled=REPERES.filter(f=>r[f.k]);
   const items=filled.map(f=>`<div class="rp-it"><span class="rp-l">${esc(f.l)}</span><span class="rp-v">${esc(r[f.k])}</span></div>`).join("");
@@ -255,7 +265,7 @@ function tlTimeline(){
   let lastPhase=null, html="";
   vis.forEach((i,pos)=>{ const e=ETAPES[i]; const ph=PHASES.find(p=>p.etapes.includes(e.id))||{c:"var(--accent)",nom:""}; const n=contribs.filter(c=>c.etape===e.id&&active(c)).length; const done=n>0; const isNext=i===firstTodo; const last=pos===vis.length-1; const lock=isLocked(e.id);
     if(ph.nom!==lastPhase){ html+=`<div class="tl-phase" style="--pc:${ph.c}">${esc(ph.nom)}</div>`; lastPhase=ph.nom; }
-    html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${ph.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":'<span class="tl-line"></span>'}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(e.nom)}</span>${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
+    html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${ph.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":'<span class="tl-line"></span>'}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(nomEt(e))}</span>${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
   return `<div class="tl">${html}</div>`;
 }
 function viewOverview(){
@@ -264,19 +274,21 @@ function viewOverview(){
   const pct=Math.round(done/Math.max(vis.length,1)*100);
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
   const firstTodo=vis.find(i=>!contribs.some(c=>c.etape===ETAPES[i].id && active(c)));
-  const stRow = RO ? `<span class="st-tag" style="--sc:${st.c}">${st.l}</span>${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:""}` :
+  const stRow = RO ? `<span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}` :
     `<div class="st-row">${Object.entries(STATUTS).map(([k,v])=>`<button class="st-pick ${projet.statut===k||(!projet.statut&&k==="brouillon")?"on":""}" style="--sc:${v.c}" data-statut="${k}">${v.l}</button>`).join("")}</div>
-     <div class="st-row" style="margin-top:7px">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}</div>`;
+     <div class="st-row" style="margin-top:7px">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}<button class="ty-pick ${projet.type==="perso"?"on":""}" data-type-custom>${ic("pencil")} ${projet.type==="perso"&&projet.typeCustom?esc(projet.typeCustom):"Autre type…"}</button></div>`;
   const syn=synthese();
   return `<div id="onlineInline">${onlineStrip()}</div>
     <div class="ov-head"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ov-meta"><div class="ov-titre">${esc(projet.titre)}</div>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}<div style="margin-top:9px">${stRow}</div></div></div>
     ${reperesCard()}
+    ${jalonsCard()}
     ${resCard()}
-    ${firstTodo!=null&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(ETAPES[firstTodo].nom)}</button>`:""}
+    ${firstTodo!=null&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(nomEt(ETAPES[firstTodo]))}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("toggle")} ${vis.length} étape(s)</button>`}</div>
     ${tlTimeline()}
     ${syn?`<div class="sec-title">${ic("wand")} Synthèse automatique</div><div class="card syn-card">${esc(syn)}</div>`:""}
-    <div class="fiche-actions" style="margin-top:16px"><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>`;
+    <div class="fiche-actions" style="margin-top:16px"><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
+    <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button>`}</div>`;
 }
 
 function viewEtape(){
@@ -284,7 +296,7 @@ function viewEtape(){
   const isLink = e.id==="actions"||e.id==="indicateurs"; const objs=ofEt("obj_op");
   const exemples=(e.ok||e.non)?`<div class="exemples">${e.ok?`<div class="ex ok">${ic("check")}<span><b>À préférer —</b> ${esc(e.ok)}</span></div>`:""}${e.non?`<div class="ex non">${ic("x")}<span><b>À éviter —</b> ${esc(e.non)}</span></div>`:""}</div>`:"";
   let contexte="";
-  { const prevI=visIdx().filter(i=>i<etapeIdx).pop(); if(prevI!=null){ const prev=ETAPES[prevI]; const pl=ofEt(prev.id); const body=pl.length?`<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:`<p class="vide">Rien encore à l'étape « ${esc(prev.nom)} ».</p>`; contexte=`<details class="context" open><summary>${ic(prev.icon)} S'appuie sur : ${esc(prev.nom)}</summary><div class="ctx-body">${body}</div></details>`; } }
+  { const prevI=visIdx().filter(i=>i<etapeIdx).pop(); if(prevI!=null){ const prev=ETAPES[prevI]; const pl=ofEt(prev.id); const body=pl.length?`<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:`<p class="vide">Rien encore à l'étape « ${esc(nomEt(prev))} ».</p>`; contexte=`<details class="context" open><summary>${ic(prev.icon)} S'appuie sur : ${esc(nomEt(prev))}</summary><div class="ctx-body">${body}</div></details>`; } }
   const card=c=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
     const linkSel = isLink && !regroup ? `<div class="link-sel">${ic("link")}<select data-link="${esc(c.id)}"><option value="">↳ Sert un objectif…</option>${objs.map(o=>`<option value="${esc(o.id)}" ${c.lien===o.id?"selected":""}>${esc(o.texte.slice(0,40))}</option>`).join("")}</select></div>` : "";
     return `<article class="contrib ${c.epingle?"top":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
@@ -299,8 +311,8 @@ function viewEtape(){
   const lockBtn=RO?"":`<button class="lock-btn ${locked?"on":""}" data-lock="${e.id}">${ic(locked?"lock":"unlock")} ${locked?"Verrouillée":"Verrouiller"}</button>`;
   const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup?`<div class="regroup-bar"><span>${selected.size} sélectionné(s)</span><button class="btn-mini" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="btn-mini" data-regroup>Annuler</button></div>`:`<button class="btn-mini regroup-toggle" data-regroup>${ic("merge")} Regrouper</button>`) : "";
   const addZone=(RO||locked||regroup)?(locked?`<div class="locked-note">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
-    `<div class="add-row top">${avatar(ident?ident.initiales:"?")}<div style="flex:1"><textarea data-keep id="newContrib" rows="1" placeholder="${ident?"Ajouter votre "+e.nom.toLowerCase()+"…":"Identifiez-vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div></div><button class="send" id="sendContrib" aria-label="Ajouter">${ic("send")}</button></div>`;
-  return `<div class="etape-head" style="--pc:${(PHASES.find(p=>p.etapes.includes(e.id))||{}).c||'var(--accent)'}"><div class="eh-top"><span class="et-ic ph">${ic(e.icon)}</span><div style="flex:1"><div class="eyebrow">Étape ${visIdx().indexOf(etapeIdx)+1} / ${visIdx().length}</div><h2>${esc(e.nom)}</h2></div>${lockBtn}</div>
+    `<div class="add-row top">${avatar(ident?ident.initiales:"?")}<div style="flex:1"><textarea data-keep id="newContrib" rows="1" placeholder="${ident?"Ajouter votre "+nomEt(e).toLowerCase()+"…":"Identifiez-vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div></div><button class="send" id="sendContrib" aria-label="Ajouter">${ic("send")}</button></div>`;
+  return `<div class="etape-head" style="--pc:${(PHASES.find(p=>p.etapes.includes(e.id))||{}).c||'var(--accent)'}"><div class="eh-top"><span class="et-ic ph">${ic(e.icon)}</span><div style="flex:1"><div class="eyebrow">Étape ${visIdx().indexOf(etapeIdx)+1} / ${visIdx().length}</div><h2>${esc(nomEt(e))}</h2></div>${lockBtn}</div>
     <div class="et-q">${esc(T(e.q))}</div><div class="et-def">${esc(T(e.def))}</div>
     <button class="concept-btn" data-concept="${e.id}">${ic("help")} Comprendre la notion</button>
     <div class="et-aide">${ic("info")}<span>${esc(T(e.aide))}</span></div>${exemples}</div>
@@ -341,19 +353,21 @@ function ficheBodyHTML(){
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
   const acts=ofEt("actions").filter(a=>a.resp||a.ech||a.pst);
   const _r=projet.reperes||{}; const _rf=REPERES.filter(f=>_r[f.k]); const _res=curRes();
-  const toc=[]; if(syn) toc.push("Résumé"); if(_rf.length) toc.push("Repères"); ETAPES.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((ETAPES.length+1)+". Plan d'action"); if(_res.length) toc.push("Ressources & références");
-  const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:""}</div><div class="dc-meta">${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
+  const _jal=(projet.jalons||[]).slice().sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+  const toc=[]; if(syn) toc.push("Résumé"); if(_rf.length) toc.push("Repères"); if(_jal.length) toc.push("Calendrier"); ETAPES.forEach((e,i)=>toc.push((i+1)+". "+nomEt(e))); if(acts.length) toc.push((ETAPES.length+1)+". Plan d'action"); if(_res.length) toc.push("Ressources & références");
+  const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}</div><div class="dc-meta">${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
   const tocHtml=`<div class="doc-toc"><h2>Sommaire</h2><ol class="toc-list">${toc.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`;
   const resume=syn?`<section class="doc-resume"><h2>Résumé</h2><p>${esc(syn)}</p></section>`:"";
   let num=0;
   const sections=ETAPES.map(e=>{ num++; const items=sortC(byEt[e.id]||[]); let body;
     if(!items.length) body=`<p class="vide">À compléter.</p>`;
     else { const ep=items.filter(c=>c.epingle), au=items.filter(c=>!c.epingle); body=ep.map(c=>`<div class="retenu">${esc(c.texte)}</div>`).join("")+(au.length?`<ul>${au.map(c=>`<li>${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:""); }
-    return `<section><h2><span class="sn">${num}.</span> ${esc(e.nom)}</h2>${body}</section>`;}).join("");
+    return `<section><h2><span class="sn">${num}.</span> ${esc(nomEt(e))}</h2>${body}</section>`;}).join("");
   const plan=acts.length?`<section><h2><span class="sn">${++num}.</span> Plan d'action</h2><table class="doc-pl"><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
   const repSec=_rf.length?`<section class="doc-rep"><h2>Repères</h2><table class="doc-pl"><tr><th>Repère</th><th>Valeur</th></tr>${_rf.map(f=>`<tr><td>${esc(f.l)}</td><td>${esc(_r[f.k])}</td></tr>`).join("")}</table></section>`:"";
-  const resAnnex=_res.length?`<section class="doc-res"><h2>Ressources &amp; références</h2><ul class="doc-res-list">${_res.map(r=>{const t=RTM[r.type]||RTYPES[0];return `<li><b>${esc(r.titre||r.url||"Sans titre")}</b> <span class="dr-type">${esc(t.l)}</span>${ETM[r.etape]?` <span class="dr-et">— ${esc(ETM[r.etape].nom)}</span>`:""}${r.url?`<br><a href="${esc(r.url)}">${esc(r.url)}</a>`:""}${r.note?`<br><span class="dr-note">${esc(r.note)}</span>`:""}</li>`;}).join("")}</ul></section>`:"";
-  return cover+tocHtml+resume+repSec+sections+plan+resAnnex;
+  const jalSec=_jal.length?`<section class="doc-jal"><h2>Calendrier</h2><table class="doc-pl"><tr><th>Date</th><th>Étape / jalon</th></tr>${_jal.map(j=>`<tr><td>${esc(fmtDate(j.date))}</td><td>${esc(j.label||"")}</td></tr>`).join("")}</table></section>`:"";
+  const resAnnex=_res.length?`<section class="doc-res"><h2>Ressources &amp; références</h2><ul class="doc-res-list">${_res.map(r=>{const t=RTM[r.type]||RTYPES[0];return `<li><b>${esc(r.titre||r.url||"Sans titre")}</b> <span class="dr-type">${esc(t.l)}</span>${ETM[r.etape]?` <span class="dr-et">— ${esc(nomEt(ETM[r.etape]))}</span>`:""}${r.url?`<br><a href="${esc(r.url)}">${esc(r.url)}</a>`:""}${r.note?`<br><span class="dr-note">${esc(r.note)}</span>`:""}</li>`;}).join("")}</ul></section>`:"";
+  return cover+tocHtml+resume+repSec+jalSec+sections+plan+resAnnex;
 }
 function viewFiche(){ return `<div class="fiche-actions"><button class="btn" data-overview>${ic("back")} Vue d'ensemble</button><button class="btn" id="word">${ic("word")} Word</button><button class="btn primary" id="print">${ic("printer")} Imprimer / PDF</button></div><div class="doc">${ficheBodyHTML()}</div>`; }
 function exportWord(){
@@ -376,6 +390,26 @@ function openIdent(){
   let role=ident?ident.role:""; $("#iRoles").querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{role=b.dataset.role;$("#iRoles").querySelectorAll(".role-chip").forEach(x=>x.classList.toggle("sel",x===b));});
   $("#saveIdent").onclick=()=>{const ini=$("#iIni").value.trim().toUpperCase();if(!ini){toast("Indiquez vos initiales.");return;}if(!role){toast("Choisissez votre rôle.");return;}ident={initiales:ini,role};localStorage.setItem("projets_ident_v1",JSON.stringify(ident));closeSheet();render();beat();toast("Identité enregistrée",true);};
 }
+function exportJSON(){
+  if(!projet) return;
+  const data={ _format:"atelier-projet", _v:1, exportedAt:dateFr(),
+    project:{ titre:projet.titre||"", contexte:projet.contexte||"", type:projet.type||"peda", typeCustom:projet.typeCustom||"", statut:projet.statut||"brouillon", reperes:projet.reperes||{}, ressources:projet.ressources||[], jalons:projet.jalons||[], enabled:projet.enabled||null, etapeNoms:projet.etapeNoms||{}, locked:projet.locked||[] },
+    contributions:contribs.map(c=>({ etape:c.etape, texte:c.texte, initiales:c.initiales, role:c.role, epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo" })) };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="projet-"+String(projet.titre||"sans-titre").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".json";
+  a.click(); URL.revokeObjectURL(a.href); toast("Sauvegarde JSON téléchargée",true);
+}
+function importJSON(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
+  inp.onchange=async()=>{ const f=inp.files&&inp.files[0]; if(!f) return;
+    try{ const data=JSON.parse(await f.text()); const p=data.project||data; if(!p||typeof p!=="object"){toast("Fichier non reconnu.");return;}
+      const ref=await addDoc(collection(db,COL),{ titre:(p.titre||"Projet importé")+" (importé)", contexte:p.contexte||"", type:p.type||"peda", typeCustom:p.typeCustom||"", statut:p.statut||"brouillon", reperes:p.reperes||{}, ressources:p.ressources||[], jalons:p.jalons||[], enabled:Array.isArray(p.enabled)?p.enabled:null, etapeNoms:p.etapeNoms||{}, locked:p.locked||[], createdAt:serverTimestamp() });
+      for(const c of (data.contributions||[])){ await addDoc(collection(db,COL,ref.id,"contributions"),{ etape:c.etape||"constats", texte:c.texte||"", initiales:c.initiales||"", role:c.role||"", epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo", createdAt:serverTimestamp() }); }
+      toast("Projet importé",true); openProjet(ref.id);
+    }catch(e){ console.error(e); toast("Import impossible (fichier invalide)."); } };
+  inp.click();
+}
 function openNew(){
   let m=MODELES[0], type=m.type;
   openSheet(`<div class="sheet-head"><h3>Nouveau projet</h3><button class="x" data-close>${ic("x")}</button></div><div class="field"><label>Partir d'un modèle</label><div class="roles" id="mods">${MODELES.map((x,i)=>`<button type="button" class="role-chip ${i===0?"sel":""}" data-mod="${i}">${esc(x.t)}</button>`).join("")}</div></div><div class="field"><label>Type de projet <span class="muted" style="font-weight:400">(adapte le vocabulaire)</span></label><div class="roles" id="tys">${TYPES.map(t=>`<button type="button" class="role-chip ${t.id===type?"sel":""}" data-ty="${t.id}">${esc(t.l)}</button>`).join("")}</div></div><div class="field"><label for="pTit">Titre</label><input id="pTit" placeholder="ex. Action de prévention"></div><div class="field"><label for="pCtx">Contexte (optionnel)</label><textarea id="pCtx" placeholder="Le public, le besoin observé…"></textarea></div><div class="actions"><button class="btn primary" id="createP">${ic("plus")} Créer le projet</button></div>`);
@@ -388,7 +422,7 @@ function openEdit(cid){const c=contribs.find(x=>x.id===cid);if(!c)return;openShe
   $("#saveEdit").onclick=async()=>{const v=$("#eTxt").value.trim();if(!v){toast("Texte vide.");return;}try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),{texte:v,editedAt:Date.now()});closeSheet();saved();}catch(e){console.error(e);toast("Modification impossible.");}};}
 function openConcept(eid){
   const c=CONCEPTS[eid]; if(!c) return; const e=ETM[eid]; const pc=(PHASES.find(p=>p.etapes.includes(eid))||{}).c||"var(--accent)";
-  openSheet(`<div class="concept" style="--pc:${pc}"><div class="cc-head"><span class="cc-ic">${ic(e.icon)}</span><div class="cc-h-tx"><div class="cc-eyebrow">La notion</div><h3>${esc(e.nom)}</h3></div><button class="x" data-close>${ic("x")}</button></div>
+  openSheet(`<div class="concept" style="--pc:${pc}"><div class="cc-head"><span class="cc-ic">${ic(e.icon)}</span><div class="cc-h-tx"><div class="cc-eyebrow">La notion</div><h3>${esc(nomEt(e))}</h3></div><button class="x" data-close>${ic("x")}</button></div>
     <div class="cc-block"><div class="cc-lab">Ce que c'est</div><p>${esc(T(c.quoi))}</p></div>
     ${c.dist?`<div class="cc-block cc-dist"><div class="cc-lab">${ic("alert")} À ne pas confondre</div><p><b>${esc(c.dist[0])}.</b> ${esc(T(c.dist[1]))}</p></div>`:""}
     ${c.ex?`<div class="cc-block"><div class="cc-lab">${ic("bolt")} Un exemple</div><p class="cc-ex">${esc(T(c.ex))}</p></div>`:""}
@@ -404,10 +438,19 @@ function openReperes(){
   openSheet(`<div class="sheet-head"><h3>Repères du projet</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 12px">Les paramètres concrets : quand, où, combien.</p>${REPERES.map(f=>`<div class="field"><label for="rp_${f.k}">${esc(f.l)}</label><input id="rp_${f.k}" type="${f.t||'text'}" placeholder="${esc(f.ph||'')}" value="${esc(r[f.k]||'')}"></div>`).join("")}<div class="actions"><button class="btn primary" id="saveRep">${ic("check")} Enregistrer</button></div>`);
   $("#saveRep").onclick=async()=>{const obj={};REPERES.forEach(f=>obj[f.k]=$("#rp_"+f.k).value.trim());try{await updateDoc(doc(db,COL,projet.id),{reperes:obj});closeSheet();saved();}catch(e){console.error(e);toast("Action impossible.");}};
 }
+function openJalon(){
+  openSheet(`<div class="sheet-head"><h3>Ajouter une date</h3><button class="x" data-close>${ic("x")}</button></div><div class="field"><label for="jDate">Date</label><input id="jDate" type="date"></div><div class="field"><label for="jLabel">Intitulé</label><input id="jLabel" type="text" placeholder="ex. Réunion de lancement"></div><div class="actions"><button class="btn primary" id="jSave">${ic("check")} Ajouter</button></div>`);
+  $("#jSave").onclick=async()=>{const date=$("#jDate").value;const label=$("#jLabel").value.trim();if(!date&&!label){toast("Indiquez une date et un intitulé.");return;}const arr=(projet.jalons||[]).slice();arr.push({id:"j"+Date.now().toString(36),date,label:label||"(sans intitulé)"});try{await updateDoc(doc(db,COL,projet.id),{jalons:arr});closeSheet();saved();}catch(e){console.error(e);toast("Action impossible.");}};
+}
+async function delJalon(id){ try{await updateDoc(doc(db,COL,projet.id),{jalons:(projet.jalons||[]).filter(j=>j.id!==id)});saved();}catch(e){console.error(e);toast("Action impossible.");} }
 function openPerso(){
   let sel=new Set(visIds());
-  const draw=()=>{const el=$("#persoList");if(!el)return;el.innerHTML=ETAPES.map(e=>`<button class="perso-row ${sel.has(e.id)?'on':''}" data-toggle="${e.id}"><span class="pr-chk">${sel.has(e.id)?ic('check'):''}</span><span class="pr-ic">${ic(e.icon)}</span><span class="pr-n">${esc(e.nom)}</span></button>`).join("");el.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{const id=b.dataset.toggle;if(sel.has(id)){if(sel.size>1)sel.delete(id);else return toast("Au moins une étape.");}else sel.add(id);draw();});};
-  openSheet(`<div class="sheet-head"><h3>Étapes du projet</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 10px">Cochez les étapes à inclure — adaptez le cadre à votre projet.</p><div class="st-row" style="margin-bottom:10px"><button class="btn-mini" id="pAll">Toutes</button><button class="btn-mini" id="pRap">Essentiel (6)</button></div><div class="perso-list" id="persoList"></div><div class="actions"><button class="btn primary" id="pSave">${ic("check")} Appliquer</button></div>`);
+  let noms=Object.assign({}, projet.etapeNoms||{});
+  const draw=()=>{const el=$("#persoList");if(!el)return;
+    el.innerHTML=ETAPES.map(e=>`<div class="perso-row ${sel.has(e.id)?'on':''}"><button class="pr-toggle" data-toggle="${e.id}"><span class="pr-chk">${sel.has(e.id)?ic('check'):''}</span><span class="pr-ic">${ic(e.icon)}</span><span class="pr-n">${esc(noms[e.id]||e.nom)}${noms[e.id]?'':''}</span></button><button class="pr-edit" data-rn="${e.id}" aria-label="Renommer">${ic('pencil')}</button></div>`).join("");
+    el.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{const id=b.dataset.toggle;if(sel.has(id)){if(sel.size>1)sel.delete(id);else return toast("Au moins une étape.");}else sel.add(id);draw();});
+    el.querySelectorAll("[data-rn]").forEach(b=>b.onclick=async()=>{const id=b.dataset.rn;const base=ETM[id].nom;const v=prompt("Renommer l'étape (vide = nom d'origine) :",noms[id]||base);if(v===null)return;const nv=v.trim();if(nv&&nv!==base)noms[id]=nv;else delete noms[id];try{await updateDoc(doc(db,COL,projet.id),{etapeNoms:noms});saved();}catch(err){console.error(err);toast("Action impossible.");}draw();});};
+  openSheet(`<div class="sheet-head"><h3>Étapes du projet</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 10px">Cochez les étapes à inclure, ou <b>renommez-les</b> (crayon) — adaptez le cadre à votre projet.</p><div class="st-row" style="margin-bottom:10px"><button class="btn-mini" id="pAll">Toutes</button><button class="btn-mini" id="pRap">Essentiel (6)</button></div><div class="perso-list" id="persoList"></div><div class="actions"><button class="btn primary" id="pSave">${ic("check")} Appliquer</button></div>`);
   $("#pAll").onclick=()=>{sel=new Set(ETAPES.map(e=>e.id));draw();};
   $("#pRap").onclick=()=>{sel=new Set(RAPIDE);draw();};
   $("#pSave").onclick=async()=>{const ids=ETAPES.map(e=>e.id).filter(id=>sel.has(id));try{await updateDoc(doc(db,COL,projet.id),{enabled:ids});closeSheet();saved();}catch(e){console.error(e);toast("Action impossible.");}};
@@ -422,7 +465,7 @@ async function toggleResTodo(id){ await saveRes(curRes().map(r=>r.id===id?{...r,
 function openRessource(existing, presetEtape){
   const r=existing||{type:"lien", etape:presetEtape||"", todo:false};
   const typeChips=RTYPES.map(t=>`<button type="button" class="rt-pick ${r.type===t.id?'on':''}" data-rtype="${t.id}" style="--rc:${t.c}"><span class="rt-ic">${ic(t.icon)}</span>${esc(t.l)}</button>`).join("");
-  const etOpts=`<option value="">— Aucune étape précise —</option>`+ETAPES.map(e=>`<option value="${e.id}" ${r.etape===e.id?'selected':''}>${esc(e.nom)}</option>`).join("");
+  const etOpts=`<option value="">— Aucune étape précise —</option>`+ETAPES.map(e=>`<option value="${e.id}" ${r.etape===e.id?'selected':''}>${esc(nomEt(e))}</option>`).join("");
   openSheet(`<div class="sheet-head"><h3>${existing?"Modifier la ressource":"Ajouter une ressource"}</h3><button class="x" data-close>${ic("x")}</button></div>
     <div class="field"><label>Type</label><div class="rt-row">${typeChips}</div></div>
     <div class="field"><label for="rTitre">Titre</label><input id="rTitre" type="text" placeholder="ex. Padlet — recensement des besoins" value="${esc(r.titre||'')}"></div>
@@ -486,6 +529,8 @@ document.addEventListener("click", e=>{
   const cc=e.target.closest("[data-concept]");if(cc) return openConcept(cc.dataset.concept);
   if(e.target.closest("[data-reperes]")) return openReperes();
   if(e.target.closest("[data-perso]")) return openPerso();
+  if(e.target.closest("[data-jal-add]")) return openJalon();
+  const jd=e.target.closest("[data-jal-del]"); if(jd) return delJalon(jd.dataset.jalDel);
   const ra=e.target.closest("[data-res-add]"); if(ra){ if(!ident){toast("Identifiez-vous d'abord.");return openIdent();} return openRessource(null, ra.dataset.resAdd||""); }
   const rEd=e.target.closest("[data-res-edit]"); if(rEd){ const r=curRes().find(x=>x.id===rEd.dataset.resEdit); if(r) openRessource(r); return; }
   const rDl=e.target.closest("[data-res-del]"); if(rDl){ if(confirm("Supprimer cette ressource ?")) delRessource(rDl.dataset.resDel); return; }
@@ -503,11 +548,14 @@ document.addEventListener("click", e=>{
   const dl=e.target.closest("[data-del]");if(dl) return delContribution(dl.dataset.del);
   const cm=e.target.closest("[data-com]");if(cm){const inp=document.getElementById("com_"+cm.dataset.com);const v=inp?inp.value:"";if(inp)inp.value="";return addComment(cm.dataset.com,v);}
   const stt=e.target.closest("[data-statut]");if(stt) return setProj({statut:stt.dataset.statut});
+  if(e.target.closest("[data-type-custom]")){ const lbl=prompt("Nom du type de projet :", projet.typeCustom||""); if(lbl&&lbl.trim()) setProj({type:"perso", typeCustom:lbl.trim()}); return; }
   const ty=e.target.closest("[data-type]");if(ty) return setProj({type:ty.dataset.type});
   if(e.target.closest("[data-mode]")) return setProj({mode:isRapide()?"complet":"rapide"});
   const lk=e.target.closest("[data-lock]");if(lk) return toggleLock(lk.dataset.lock);
   if(e.target.closest("#print")) return window.print();
   if(e.target.closest("#word")) return exportWord();
+  if(e.target.closest("#expJson")) return exportJSON();
+  if(e.target.closest("#impJson")) return importJSON();
   if(e.target.closest("#share")){const url=base+"?p="+projet.id+"&ro=1";navigator.clipboard?.writeText(url).then(()=>toast("Lien lecture copié",true)).catch(()=>toast(url));return;}
   if(e.target.closest("[data-close]")||e.target.id==="overlay") return closeSheet();
   if(e.target.closest("#identBtn")) return openIdent();

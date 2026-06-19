@@ -407,7 +407,11 @@ table.pl td{vertical-align:middle}
 .perso-row.on .pr-chk{background:var(--accent);border-color:var(--accent)}
 .pr-chk .i{font-size:14px;stroke-width:2.6}
 .pr-ic{color:var(--muted)}.perso-row.on .pr-ic{color:var(--accent)}.pr-ic .i{font-size:18px}
-.pr-n{font-size:14px;font-weight:500}
+.pr-n{font-size:14px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-toggle{display:flex;align-items:center;gap:10px;flex:1;min-width:0;border:none;background:none;padding:0;text-align:left;color:inherit}
+.pr-edit{width:30px;height:30px;border:none;background:none;color:var(--faint);border-radius:6px;display:flex;align-items:center;justify-content:center;flex:none}
+.pr-edit:hover{background:var(--surface);color:var(--accent)}
+.pr-edit .i{font-size:15px}
 
 /* Ressources du projet */
 .res-card{margin-bottom:14px}
@@ -449,6 +453,22 @@ table.pl td{vertical-align:middle}
 .dr-type{font-size:11.5px;color:var(--muted);background:var(--bg);border-radius:var(--r-pill);padding:1px 8px}
 .dr-et{font-size:12px;color:var(--faint)}
 .dr-note{font-size:12.5px;color:var(--muted)}
+
+/* Calendrier / jalons */
+.jal-card{margin-bottom:14px}
+.jal-list{display:flex;flex-direction:column;margin-top:8px}
+.jal-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-top:.5px solid var(--line)}
+.jal-row:first-child{border-top:none}
+.jal-date{font-size:12.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:var(--r-sm);padding:4px 10px;flex:none;min-width:120px;text-align:center;text-transform:capitalize}
+.jal-label{flex:1;font-size:14px;color:var(--ink)}
+.jal-poll{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-size:12.5px;color:var(--muted);text-decoration:none;padding-top:10px;border-top:.5px solid var(--line)}
+.jal-poll:hover{color:var(--accent)}
+.jal-poll .i{font-size:15px}
+.ov-foot{display:flex;justify-content:center;margin-top:14px}
+.liste-foot{display:flex;justify-content:center;margin-top:10px}
+.lnk{background:none;border:none;color:var(--faint);font-size:12.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:var(--r-sm)}
+.lnk:hover{color:var(--accent);background:var(--bg)}
+.lnk .i{font-size:15px}
 
 /* Impression de la fiche */
 @media print{
