@@ -4,76 +4,126 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#1f4ea8">
+<meta name="theme-color" content="#26365a">
 <title>Observation GEVA-Sco — grille enseignant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef2f8;--surface:#fff;--ink:#18202e;--muted:#5c6577;--line:#dfe5ef;--brand:#1f4ea8;--brand-soft:#e7eefb;
---A:#1d8a52;--B:#3f8ad6;--C:#b9710a;--D:#c0392b;--SO:#8a93a5;--radius:15px;--shadow:0 1px 2px rgba(20,30,55,.06),0 10px 26px rgba(20,30,55,.07)}
+:root{
+  --ink:#19212e;--muted:#5b6677;--faint:#8b94a3;--line:#e7ebf1;--line2:#d8deea;--bg:#f3f5f9;--surface:#fff;
+  --brand:#26365a;--accent:#2f6cd6;--accent-soft:#ecf2fc;
+  --A:#1d8a52;--A-soft:#e8f5ee;--B:#3f8ad6;--B-soft:#e9f1fb;--C:#b9710a;--C-soft:#fbf1e0;--D:#c0392b;--D-soft:#fbe9e7;--SO:#7a7f8a;--SO-soft:#eef0f3;
+  --r:16px;--r-sm:11px;--r-pill:999px;--sh:0 1px 2px rgba(20,30,50,.05),0 6px 22px rgba(20,30,50,.06);
+  --toph:calc(52px + env(safe-area-inset-top,0));
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 -apple-system,"Segoe UI",system-ui,sans-serif;padding-bottom:90px}
-h1,h2,h3{margin:0}button{font:inherit;cursor:pointer}
-.app-header{background:var(--surface);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top,0)) 16px 10px;position:sticky;top:0;z-index:20}
-.app-header h1{font-size:18px;color:var(--brand)}
-.app-header p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
-.bar{height:6px;background:var(--line);border-radius:6px;margin-top:10px;overflow:hidden}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#5a82de);transition:width .25s}
-.wrap{max-width:640px;margin:0 auto;padding:18px 16px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
-label{display:block;font-weight:600;margin-bottom:6px}
-input,select,textarea{width:100%;border:2px solid var(--line);border-radius:11px;padding:12px 13px;font-size:16px;background:#fbfcff;font-family:inherit}
-input:focus,select,textarea:focus{outline:none;border-color:var(--brand)}
-input#code{text-transform:uppercase;font-weight:700;letter-spacing:.05em}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.55;padding-bottom:88px;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em}
+button{font:inherit;cursor:pointer;color:inherit}
+.i{width:1em;height:1em;display:inline-block;vertical-align:-.13em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;height:var(--toph);padding:env(safe-area-inset-top,0) 14px 0;background:var(--brand);color:#fff}
+.topbar .tt{flex:1}
+.topbar h1{font-size:15.5px;font-weight:600}
+.topbar p{margin:0;font-size:11px;color:#c4cde0}
+.topbar .pp-link{color:#cdd8ef;font-size:12px;font-weight:500;text-decoration:none;white-space:nowrap}
+/* progress + legend */
+.bar{height:5px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.legendbar{position:sticky;top:var(--toph);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 14px;display:flex;flex-wrap:wrap;gap:5px 10px;font-size:12px;color:var(--muted)}
+.legendbar b{font-weight:700}
+.legendbar .sep{color:var(--line2)}
+.wrap{max-width:680px;margin:0 auto;padding:18px 15px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);margin-bottom:14px}
 .muted{color:var(--muted);font-size:14px}
-.dom-h{font-size:19px;margin:4px 0 4px}
-.dom-sub{color:var(--muted);font-size:13.5px;margin-bottom:14px}
-.item{border-top:1px solid var(--line);padding:14px 0}
-.item:first-child{border-top:none}
-.item .q{font-weight:600;margin-bottom:9px}
-.cot{display:flex;gap:6px;flex-wrap:wrap}
-.cot button{flex:1;min-width:54px;border:2px solid var(--line);background:#fff;border-radius:11px;padding:11px 4px;font-weight:700;font-size:15px;color:var(--ink)}
-.cot button small{display:block;font-size:9.5px;font-weight:600;color:var(--muted);margin-top:2px}
-.cot button.sel[data-v=A]{background:#e6f6ee;border-color:var(--A);color:var(--A)}
-.cot button.sel[data-v=B]{background:#e7f1fb;border-color:var(--B);color:var(--B)}
-.cot button.sel[data-v=C]{background:#fcefda;border-color:var(--C);color:var(--C)}
-.cot button.sel[data-v=D]{background:#fbe7e4;border-color:var(--D);color:var(--D)}
-.cot button.sel[data-v=SO]{background:#eef1f6;border-color:var(--SO);color:var(--SO)}
-.cot button.sel small{color:inherit}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);border-radius:var(--r-pill);padding:5px 13px;font-weight:600;font-size:12.5px}
+.dom-h{display:flex;align-items:center;gap:11px;margin-bottom:3px}
+.dom-h .dic{width:40px;height:40px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center}
+.dom-h .dic .i{font-size:21px}
+.dom-h h2{font-size:18px}
+.dom-sub{color:var(--muted);font-size:13px;margin:0 0 6px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:6px}
+input,select,textarea{width:100%;border:1.5px solid var(--line2);border-radius:var(--r-sm);padding:12px 13px;font-size:16px;background:#fbfcfe;font-family:inherit;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:#fff}
+input#code{text-transform:uppercase;font-weight:700;letter-spacing:.06em}
+textarea{min-height:64px;resize:vertical}
+/* item + cotation */
+.item{border-top:1px solid var(--line);padding:15px 0}
+.item:first-of-type{border-top:none;padding-top:6px}
+.item .q{font-weight:600;font-size:15px;margin-bottom:9px}
+.cot{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.cbtn{border:1.5px solid var(--line2);background:#fff;border-radius:var(--r-sm);padding:9px 3px 7px;text-align:center;transition:transform .05s}
+.cbtn:active{transform:scale(.96)}
+.cbtn .cl{display:block;font-size:16px;font-weight:700;line-height:1.1}
+.cbtn .ct{display:block;font-size:9.5px;font-weight:600;color:var(--muted);margin-top:1px}
+.cbtn.sel{color:#fff}
+.cbtn.sel .ct{color:rgba(255,255,255,.92)}
+.cbtn.sel[data-v=A]{background:var(--A);border-color:var(--A)}
+.cbtn.sel[data-v=B]{background:var(--B);border-color:var(--B)}
+.cbtn.sel[data-v=C]{background:var(--C);border-color:var(--C)}
+.cbtn.sel[data-v=D]{background:var(--D);border-color:var(--D)}
+.cbtn.sel[data-v=SO]{background:var(--SO);border-color:var(--SO)}
+.cot-exp{display:flex;align-items:center;gap:8px;margin-top:9px;border-radius:var(--r-sm);padding:9px 11px;font-size:13px;background:var(--bg);color:var(--faint)}
+.cot-exp .i{font-size:17px}
+.cot-exp b{font-weight:700}
+.cot-exp.v-A{background:var(--A-soft);color:#176b40}.cot-exp.v-B{background:var(--B-soft);color:#2a5f9c}
+.cot-exp.v-C{background:var(--C-soft);color:#8a5408}.cot-exp.v-D{background:var(--D-soft);color:#9c2c2c}.cot-exp.v-SO{background:var(--SO-soft);color:#5f636c}
 .cmt{margin-top:10px}
-.cmt textarea{min-height:60px}
 .req{color:var(--D);font-size:12.5px;font-weight:600}
-.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);
-padding:10px 16px calc(10px + env(safe-area-inset-bottom,0));display:flex;gap:10px;z-index:25}
-.btn{flex:1;border:2px solid var(--line);background:#fff;border-radius:12px;padding:14px 10px;font-weight:700;font-size:16px;color:var(--ink)}
-.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);flex:2}
+/* steps how-to */
+.how{display:flex;gap:12px;align-items:flex-start;padding:11px 0}
+.how:not(:last-child){border-bottom:1px solid var(--line)}
+.how .n{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.how .t{font-size:14px}.how .t b{font-weight:600}
+.rgpd{display:flex;gap:9px;font-size:12.5px;color:var(--muted);background:var(--bg);border-radius:var(--r-sm);padding:11px 12px;margin-top:12px}
+.rgpd .i{font-size:17px;color:var(--accent);flex:none}
+/* nav */
+.navbar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding:11px 15px calc(11px + env(safe-area-inset-bottom,0));display:flex;gap:10px;z-index:25}
+.btn{flex:1;border:1.5px solid var(--line2);background:#fff;border-radius:12px;padding:13px 10px;font-weight:600;font-size:15.5px;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn .i{font-size:18px}
+.btn.primary{background:var(--brand);color:#fff;border-color:var(--brand);flex:1.6}
 .btn:disabled{opacity:.5}
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted)}
-.legend b{color:var(--ink)}
-.big{font-size:34px;text-align:center;margin:6px 0}
-.center{text-align:center}
-.pill{display:inline-block;background:var(--brand-soft);color:var(--brand);border-radius:20px;padding:4px 12px;font-weight:700;font-size:13px}
-.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:11px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:11px;opacity:0;pointer-events:none;transition:.25s;z-index:60;font-size:14px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{border:1px solid var(--line);padding:6px 8px;text-align:left}
-th{background:#f6f9fd;font-size:11.5px;text-transform:uppercase;color:var(--muted)}
-.tag{font-weight:700}.tag.A{color:var(--A)}.tag.B{color:var(--B)}.tag.C{color:var(--C)}.tag.D{color:var(--D)}.tag.SO{color:var(--SO)}
-a.link{color:var(--brand);font-weight:600;text-decoration:none}
-.rgpd{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+.center{text-align:center}
+.big{width:58px;height:58px;border-radius:50%;background:var(--A-soft);color:var(--A);display:inline-flex;align-items:center;justify-content:center;margin:6px 0}
+.big .i{font-size:30px;stroke-width:2.2}
+/* résultats */
+.sum-bar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:8px 0 6px;background:var(--line)}
+.sum-bar span{display:block;height:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.ch{font-size:12px;font-weight:600;border-radius:var(--r-pill);padding:3px 10px;color:#fff}
+.ch.A{background:var(--A)}.ch.B{background:var(--B)}.ch.C{background:var(--C)}.ch.D{background:var(--D)}.ch.SO{background:var(--SO)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+th,td{border:1px solid var(--line);padding:6px 7px;text-align:left}
+th{background:#f6f8fc;font-size:11px;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.h{text-align:center;color:#fff;font-weight:700}
+td.h[data-v=A]{background:var(--A)}td.h[data-v=B]{background:var(--B)}td.h[data-v=C]{background:var(--C)}td.h[data-v=D]{background:var(--D)}td.h[data-v=SO]{background:var(--SO)}
+td.h.empty{background:#fff;color:var(--faint);font-weight:400}
+.domrow td{background:#eef1f6;font-weight:700;color:var(--brand);font-size:12px}
+.link{color:var(--accent);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.share{display:flex;gap:8px;margin-top:8px}
+.share input{flex:1}
+.note{border-top:1px dashed var(--line);margin-top:10px;padding-top:9px;font-size:12.5px;color:var(--muted)}
+.note b{color:var(--ink)}
+@media(min-width:560px){ .cbtn .ct{font-size:10.5px} }
 </style>
 </head>
 <body>
-<header class="app-header">
-  <h1>Observation des activités — GEVA-Sco</h1>
-  <p id="hp">Grille à remplir par chaque enseignant · anonyme (matière + code élève)</p>
-  <div class="bar" id="barWrap" style="display:none"><i id="bar" style="width:0%"></i></div>
+<header class="topbar">
+  <div class="tt"><h1 id="htitle">Observation GEVA-Sco</h1><p id="hp">Grille à remplir par chaque enseignant · anonyme</p></div>
+  <a class="pp-link" id="ppLink" href="?vue=resultats" style="display:none">Résultats →</a>
 </header>
+<div class="bar" id="barWrap" style="display:none"><i id="bar" style="width:0%"></i></div>
+<div class="legendbar" id="legend" style="display:none"></div>
 <main class="wrap"><div id="view"></div></main>
 <nav class="navbar" id="nav" style="display:none"></nav>
 <div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where, orderBy }
+import { getFirestore, collection, addDoc, getDocs, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -91,65 +141,104 @@ const COL = "coordination_gevasco";
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const esc = v => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2000);}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200);}
+
+const ICONS = {
+  users:`<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6.1"/><path d="M16.5 14.4a5.5 5.5 0 0 1 4 4.6"/>`,
+  walk:`<circle cx="13" cy="4.5" r="1.6"/><path d="M11 21l1.5-6-2-2-1 4"/><path d="M12.5 13l3 2 1.5 3"/><path d="M10.5 9l3-1 2.5 2.5 2 .8"/>`,
+  heart:`<path d="M12 20.5S4.5 16 4.5 10.3A3.6 3.6 0 0 1 12 8a3.6 3.6 0 0 1 7.5 2.3C19.5 16 12 20.5 12 20.5z"/>`,
+  message:`<path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4V6a1 1 0 0 1 1-1z"/>`,
+  book:`<path d="M6.5 4H18v16H6.5A1.5 1.5 0 0 1 5 18.5v-13A1.5 1.5 0 0 1 6.5 4z"/><path d="M9 4v16"/>`,
+  info:`<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".8" fill="currentColor" stroke="none"/>`,
+  check:`<circle cx="12" cy="12" r="9"/><path d="m8.3 12.2 2.6 2.6 4.8-5.2"/>`,
+  checkbig:`<path d="M5 12.5 10 17.5 19.5 7"/>`,
+  alert:`<path d="M12 4 2.5 20h19z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.4" r=".6" fill="currentColor" stroke="none"/>`,
+  pencil:`<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/>`,
+  send:`<path d="M4 12 20 4l-6 16-2.5-6.5z"/><path d="M11.5 13.5 20 4"/>`,
+  back:`<path d="m14 6-6 6 6 6"/>`,fwd:`<path d="m10 6 6 6-6 6"/>`,
+  lock:`<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>`,
+  copy:`<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>`,
+  link:`<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>`,
+  download:`<path d="M12 4v11"/><path d="m7.5 11 4.5 4.5 4.5-4.5"/><path d="M5 20h14"/>`,
+  chart:`<path d="M5 20V10M12 20V4M19 20v-7"/>`,
+};
+const ic = n => ICONS[n] ? `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>` : "";
 
 const MATIERES = ["Français","Histoire-géo-EMC","Mathématiques","Sciences physiques et chimiques","Anglais","Espagnol",
 "EPS","Arts appliqués","PSE","Enseignement professionnel (éco-gestion / AGORA)","Enseignement professionnel (MELEC)",
 "Économie-droit","Co-intervention","Documentation (CDI)","Autre"];
 
-const COTATIONS = [["A","seul, sans difficulté"],["B","difficultés/aide ponctuelles"],["C","difficultés/aide régulières"],["D","non réalisée"],["SO","sans objet"]];
+// code, court (sous le bouton), long (explication), legende
+const COT = [
+  {v:"A",court:"seul",long:"réalisé seul, sans difficulté.",leg:"seul"},
+  {v:"B",court:"aide ±",long:"difficultés ou besoin d'aide ponctuels.",leg:"aide ponctuelle"},
+  {v:"C",court:"aide ++",long:"difficultés ou besoin d'aide de façon régulière.",leg:"aide régulière"},
+  {v:"D",court:"non",long:"activité non réalisée.",leg:"non réalisée"},
+  {v:"SO",court:"s.o.",long:"sans objet pour votre matière.",leg:"sans objet"},
+];
+const COTMAP = Object.fromEntries(COT.map(c=>[c.v,c]));
 
 const DOMAINES = [
-  { titre:"Tâches générales & relation à autrui", icone:"🧭", items:[
+  { titre:"Tâches générales & relation à autrui", icon:"users", items:[
     "S'orienter dans le temps","S'orienter dans l'espace","Fixer son attention","Mémoriser","Gérer sa sécurité",
     "Respecter les règles de vie","Avoir des relations avec autrui conformes aux règles sociales","Maîtriser son comportement dans ses relations avec autrui"]},
-  { titre:"Mobilité & manipulation", icone:"🚶", items:[
+  { titre:"Mobilité & manipulation", icon:"walk", items:[
     "Faire ses transferts","Se déplacer à l'intérieur, à l'extérieur (activités scolaires)","Utiliser les transports en commun","Avoir des activités de motricité fine"]},
-  { titre:"Entretien personnel", icone:"🧼", items:[
+  { titre:"Entretien personnel", icon:"heart", items:[
     "Assurer l'élimination et utiliser les toilettes","S'habiller / se déshabiller","Prendre ses repas (manger, boire)","Prendre soin de sa santé"]},
-  { titre:"Communication", icone:"💬", items:[
+  { titre:"Communication", icon:"message", items:[
     "Parler","Comprendre la parole en face à face","Comprendre une phrase simple","Produire et recevoir des messages non verbaux"]},
-  { titre:"Tâches en lien avec la scolarité", icone:"📚", items:[
+  { titre:"Tâches en lien avec la scolarité", icon:"book", items:[
     "Lire","Écrire","Calculer","Organiser son travail","Contrôler son travail","Accepter des consignes","Suivre des consignes",
     "S'installer dans la classe","Utiliser des supports pédagogiques","Utiliser du matériel adapté à son handicap","Prendre des notes (quel que soit le support)","Participer à des sorties scolaires"]}
 ];
 const key = (d,i)=>"d"+d+"_i"+i;
 
-// ----- État -----
-let step = -1;                 // -1 = accueil ; 0 = identité ; 1..N = domaines ; N+1 = évolutions/envoi
+let step = -1;
 let data = { eleveCode:(params.get("eleve")||"").toUpperCase(), classe:params.get("classe")||"", matiere:"", reponses:{}, obstacles:{}, evolutions:"" };
-const TOTAL = DOMAINES.length + 2; // identité + domaines + final
+const TOTAL = DOMAINES.length + 2;
+
+function setChrome({bar=false,legend=false,nav=false,pp=false}={}){
+  $("barWrap").style.display=bar?"block":"none";
+  $("legend").style.display=legend?"flex":"none";
+  $("nav").style.display=nav?"flex":"none";
+  $("ppLink").style.display=pp?"inline":"none";
+  if(legend) $("legend").innerHTML = COT.map((c,j)=>`<span><b style="color:var(--${c.v})">${c.v}</b> ${c.leg}</span>`).join('<span class="sep">·</span>');
+}
 
 function render(){
-  const vue = params.get("vue");
-  if(vue==="resultats"){ return renderResultats(); }
-  $("barWrap").style.display = step>=0 ? "block":"none";
-  if(step>=0){ const pct=Math.round((step/(TOTAL-1))*100); $("bar").style.width=pct+"%"; }
+  if(params.get("vue")==="resultats"){ return renderResultats(); }
+  if(step>=0 && step<TOTAL){ const pct=Math.round((step/(TOTAL-1))*100); $("bar").style.width=pct+"%"; }
   if(step===-1) return renderAccueil();
   if(step===0) return renderIdentite();
   if(step>=1 && step<=DOMAINES.length) return renderDomaine(step-1);
-  return renderFinal();
+  if(step===TOTAL-1) return renderFinal();
+  return renderDone();
 }
 
 function renderAccueil(){
-  $("nav").style.display="none"; $("barWrap").style.display="none";
-  $("view").innerHTML = `
+  setChrome({pp:true});
+  $("view").innerHTML=`
     <div class="card">
-      <p class="pill">Équipe de suivi (ESS) · GEVA-Sco</p>
-      <h2 style="margin:12px 0 8px;font-size:20px">Grille d'observation des activités de l'élève</h2>
-      <p class="muted">Le professeur principal vous a transmis un <b>code élève</b>. Indiquez votre <b>matière</b>, puis cochez la grille : c'est rapide. Vos réponses sont regroupées pour l'équipe de suivi.</p>
-      <div class="legend">${COTATIONS.map(c=>`<span><b>${c[0]}</b> ${c[1]}</span>`).join(" · ")}</div>
-      <p class="muted" style="margin-top:12px">Cotation officielle : <b>C</b> et <b>D</b> demandent un court commentaire (obstacles).</p>
-      <p class="rgpd">🔒 Anonyme &amp; RGPD : on n'indique <b>ni votre nom</b> (seulement la matière), <b>ni le nom de l'élève</b> (seulement son code). Aucune donnée nominative.</p>
+      <span class="pill">${ic("users")} Équipe de suivi (ESS)</span>
+      <h2 style="margin:13px 0 6px;font-size:21px">Grille d'observation des activités</h2>
+      <p class="muted">Le professeur principal vous a transmis un <b>code élève</b>. Indiquez votre matière, puis cochez la grille — chaque cotation s'explique d'elle-même.</p>
+      <div style="margin-top:14px">
+        <div class="how"><span class="n">1</span><span class="t"><b>Votre matière</b> et le code de l'élève (pas de nom).</span></div>
+        <div class="how"><span class="n">2</span><span class="t">Pour chaque activité, touchez <b>A · B · C · D · SO</b> — le sens s'affiche aussitôt.</span></div>
+        <div class="how"><span class="n">3</span><span class="t">Vous envoyez : vos réponses rejoignent <b>la vue d'ensemble</b> de l'équipe.</span></div>
+      </div>
+      <div class="rgpd">${ic("lock")}<span><b>Anonyme &amp; RGPD :</b> ni votre nom (seulement la matière), ni le nom de l'élève (seulement son code). Le commentaire est demandé pour les cotations C et D.</span></div>
     </div>
     <div class="navbar" style="position:static;border:none;background:none;padding:0">
-      <button class="btn primary" id="start">Commencer la grille →</button>
+      <button class="btn primary" id="start">Commencer la grille ${ic("fwd")}</button>
     </div>`;
   $("start").onclick=()=>{ step=0; render(); };
 }
 
 function renderIdentite(){
-  navButtons("← Accueil", "Continuer →", ()=>{step=-1;render();}, ()=>{
+  setChrome({bar:true,nav:true});
+  navButtons(`${ic("back")} Accueil`, `Continuer ${ic("fwd")}`, ()=>{step=-1;render();}, ()=>{
     data.eleveCode=$("code").value.trim().toUpperCase(); data.matiere=$("mat").value;
     if(!data.eleveCode){ toast("Indiquez le code de l'élève."); return; }
     if(!data.matiere){ toast("Choisissez votre matière."); return; }
@@ -157,9 +246,9 @@ function renderIdentite(){
   });
   $("view").innerHTML=`
     <div class="card">
-      <div class="dom-h">1 · Identité</div>
-      <p class="dom-sub">Sans nom : uniquement le code de l'élève et votre matière.</p>
-      <label for="code">Code de l'élève (donné par le PP)</label>
+      <div class="dom-h"><span class="dic">${ic("pencil")}</span><div><h2>Identité</h2></div></div>
+      <p class="dom-sub">Sans nom : seulement le code de l'élève et votre matière.</p>
+      <label for="code">Code de l'élève (donné par le professeur principal)</label>
       <input id="code" placeholder="ex. RX62" value="${esc(data.eleveCode)}" autocomplete="off">
       ${data.classe?`<p class="muted" style="margin-top:6px">Classe : ${esc(data.classe)}</p>`:""}
       <label for="mat" style="margin-top:16px">Votre matière</label>
@@ -167,53 +256,61 @@ function renderIdentite(){
     </div>`;
 }
 
+function expHTML(v){
+  if(!v) return `<span>${ic("info")}</span><span style="color:var(--faint)">Touchez une lettre — son sens s'affiche ici.</span>`;
+  const c=COTMAP[v]; const icon = (v==="A")?"check":(v==="D")?"alert":"info";
+  return `${ic(icon)}<span><b>${v} —</b> ${c.long}</span>`;
+}
+
 function renderDomaine(d){
+  setChrome({bar:true,legend:true,nav:true});
   const dom=DOMAINES[d];
-  navButtons("← Retour", (d===DOMAINES.length-1?"Dernière étape →":"Suivant →"), ()=>{step--;render();}, ()=>{
-    // exiger commentaire si C ou D
+  navButtons(`${ic("back")} Retour`, (d===DOMAINES.length-1?`Dernière étape ${ic("fwd")}`:`Suivant ${ic("fwd")}`), ()=>{step--;render();}, ()=>{
     for(let i=0;i<dom.items.length;i++){ const k=key(d,i); const v=data.reponses[k];
-      if((v==="C"||v==="D") && !(data.obstacles[k]||"").trim()){ toast("Commentaire requis pour les cases C/D."); const el=$("cmt_"+k); if(el){el.focus();} return; } }
+      if((v==="C"||v==="D") && !(data.obstacles[k]||"").trim()){ toast("Un commentaire est demandé pour C et D."); const el=$("cmt_"+k); if(el){el.focus();el.scrollIntoView({block:"center",behavior:"smooth"});} return; } }
     step++; render();
   });
   $("view").innerHTML=`
     <div class="card">
-      <div class="dom-h">${dom.icone} ${esc(dom.titre)}</div>
+      <div class="dom-h"><span class="dic">${ic(dom.icon)}</span><div><h2>${esc(dom.titre)}</h2></div></div>
       <p class="dom-sub">Domaine ${d+1}/${DOMAINES.length} · au regard de l'autonomie d'un élève du même âge</p>
       ${dom.items.map((it,i)=>{const k=key(d,i);const v=data.reponses[k];
         return `<div class="item">
           <div class="q">${esc(it)}</div>
-          <div class="cot">${COTATIONS.map(c=>`<button data-k="${k}" data-v="${c[0]}" class="${v===c[0]?"sel":""}">${c[0]}<small>${c[0]==="SO"?"s.o.":""}</small></button>`).join("")}</div>
+          <div class="cot">${COT.map(c=>`<button class="cbtn ${v===c.v?"sel":""}" data-k="${k}" data-v="${c.v}"><span class="cl">${c.v}</span><span class="ct">${c.court}</span></button>`).join("")}</div>
+          <div class="cot-exp ${v?"v-"+v:""}" id="exp_${k}">${expHTML(v)}</div>
           <div class="cmt" id="cmtwrap_${k}" style="display:${(v==="C"||v==="D")?"block":"none"}">
-            <label class="req">Obstacles / précisions (obligatoire pour C et D)</label>
+            <label class="req">${ic("pencil")} Obstacles / précisions (demandé pour C et D)</label>
             <textarea id="cmt_${k}" data-k="${k}" placeholder="Ce qui fait obstacle, le contexte…">${esc(data.obstacles[k]||"")}</textarea>
           </div>
         </div>`;}).join("")}
     </div>`;
-  $("view").querySelectorAll(".cot button").forEach(b=>b.onclick=()=>{
+  $("view").querySelectorAll(".cbtn").forEach(b=>b.onclick=()=>{
     const k=b.dataset.k,v=b.dataset.v; data.reponses[k]=v;
-    $("view").querySelectorAll(`.cot button[data-k="${k}"]`).forEach(x=>x.classList.toggle("sel",x.dataset.v===v));
+    $("view").querySelectorAll(`.cbtn[data-k="${k}"]`).forEach(x=>x.classList.toggle("sel",x.dataset.v===v));
+    const exp=$("exp_"+k); exp.className="cot-exp v-"+v; exp.innerHTML=expHTML(v);
     $("cmtwrap_"+k).style.display=(v==="C"||v==="D")?"block":"none";
   });
   $("view").querySelectorAll("textarea[data-k]").forEach(t=>t.oninput=()=>{data.obstacles[t.dataset.k]=t.value;});
 }
 
 function renderFinal(){
-  let n=0,counts={A:0,B:0,C:0,D:0,SO:0,vide:0};
-  DOMAINES.forEach((dom,d)=>dom.items.forEach((it,i)=>{n++;const v=data.reponses[key(d,i)];counts[v||"vide"]++;}));
-  navButtons("← Retour", "✓ Envoyer", ()=>{step--;render();}, submit);
+  setChrome({bar:true,nav:true});
+  let counts={A:0,B:0,C:0,D:0,SO:0,vide:0};
+  DOMAINES.forEach((dom,d)=>dom.items.forEach((it,i)=>{const v=data.reponses[key(d,i)];counts[v||"vide"]++;}));
+  navButtons(`${ic("back")} Retour`, `Envoyer ${ic("send")}`, ()=>{step--;render();}, submit);
   $("view").innerHTML=`
     <div class="card">
-      <div class="dom-h">Évolutions & perspectives</div>
-      <p class="dom-sub">Optionnel — observations, points d'appui, projet professionnel.</p>
+      <div class="dom-h"><span class="dic">${ic("chart")}</span><div><h2>Évolutions &amp; perspectives</h2></div></div>
+      <p class="dom-sub">Optionnel — points d'appui, progrès, projet professionnel.</p>
       <textarea id="evo" placeholder="Évolutions observées, points d'appui, perspectives…">${esc(data.evolutions)}</textarea>
     </div>
     <div class="card">
-      <h3 style="font-size:16px;margin-bottom:8px">Récapitulatif</h3>
+      <h3 style="font-size:16px;margin-bottom:4px">Récapitulatif</h3>
       <p class="muted">Élève <b>${esc(data.eleveCode)}</b> · matière <b>${esc(data.matiere)}</b></p>
-      <div class="legend" style="margin-top:8px">
-        <span class="tag A">A : ${counts.A}</span><span class="tag B">B : ${counts.B}</span>
-        <span class="tag C">C : ${counts.C}</span><span class="tag D">D : ${counts.D}</span>
-        <span class="tag SO">SO : ${counts.SO}</span>${counts.vide?`<span>· non renseignés : ${counts.vide}</span>`:""}
+      <div class="chips" style="margin-top:10px">
+        ${["A","B","C","D","SO"].map(v=>`<span class="ch ${v}">${v} · ${counts[v]}</span>`).join("")}
+        ${counts.vide?`<span class="ch" style="background:var(--line);color:var(--muted)">non renseignés · ${counts.vide}</span>`:""}
       </div>
     </div>`;
   $("evo").oninput=e=>data.evolutions=e.target.value;
@@ -227,18 +324,18 @@ async function submit(){
       reponses:data.reponses, obstacles:data.obstacles, evolutions:data.evolutions||"",
       createdAt:serverTimestamp()
     });
-    step=-2; renderDone();
-  }catch(e){ btn.disabled=false; btn.textContent="✓ Envoyer"; toast("Erreur d'envoi. Réessayez."); console.error(e); }
+    step=TOTAL; render();
+  }catch(e){ btn.disabled=false; btn.innerHTML=`Envoyer ${ic("send")}`; toast("Erreur d'envoi. Réessayez."); console.error(e); }
 }
 
 function renderDone(){
-  $("nav").style.display="none"; $("barWrap").style.display="none";
+  setChrome({});
   $("view").innerHTML=`
     <div class="card center">
-      <div class="big">✅</div>
+      <div class="big">${ic("checkbig")}</div>
       <h2 style="font-size:20px">Merci !</h2>
-      <p class="muted">Votre observation pour l'élève <b>${esc(data.eleveCode)}</b> (${esc(data.matiere)}) a bien été enregistrée.</p>
-      <div class="navbar" style="position:static;border:none;background:none;padding:14px 0 0">
+      <p class="muted">Votre observation pour l'élève <b>${esc(data.eleveCode)}</b> (${esc(data.matiere)}) est enregistrée et rejoint la vue d'ensemble de l'équipe.</p>
+      <div class="navbar" style="position:static;border:none;background:none;padding:16px 0 0">
         <button class="btn" id="again">Remplir pour un autre élève</button>
       </div>
     </div>`;
@@ -251,42 +348,58 @@ function navButtons(left,right,onLeft,onRight){
   $("act1").onclick=onLeft; $("act2").onclick=onRight;
 }
 
-// ----- Résultats (PP) -----
+// ----- Résultats (professeur principal) -----
 async function renderResultats(){
-  $("nav").style.display="none"; $("barWrap").style.display="none";
-  $("hp").textContent="Espace enseignant principal · résultats agrégés";
+  setChrome({});
+  $("htitle").textContent="Vue d'ensemble GEVA-Sco";
+  $("hp").textContent="Espace professeur principal · réponses agrégées";
   $("view").innerHTML=`<div class="card"><p class="muted">Chargement des réponses…</p></div>`;
   let docs=[];
   try{ const snap=await getDocs(collection(db,COL)); docs=snap.docs.map(d=>d.data()); }
-  catch(e){ $("view").innerHTML=`<div class="card"><p>Impossible de charger les résultats. Vérifiez la connexion et les règles Firestore.</p></div>`; return; }
-  // grouper par élève
+  catch(e){ $("view").innerHTML=`<div class="card"><p>Impossible de charger les résultats. Vérifiez la connexion et les règles Firestore.</p></div>`; console.error(e); return; }
   const byEleve={}; docs.forEach(r=>{ (byEleve[r.eleveCode]=byEleve[r.eleveCode]||[]).push(r); });
   const codes=Object.keys(byEleve).sort();
   const filt=(params.get("eleve")||"").toUpperCase();
   const list = filt ? codes.filter(c=>c===filt) : codes;
-  let html=`<div class="card"><h2 style="font-size:19px">Résultats GEVA-Sco</h2>
-    <p class="muted">${docs.length} réponse(s) · ${codes.length} élève(s). Données anonymisées (code + matière).</p>
-    <p style="margin-top:8px"><a class="link" id="csv">⬇︎ Exporter en CSV</a></p></div>`;
+  const base = location.origin + location.pathname;
+
+  let html=`<div class="card">
+    <h2 style="font-size:19px">Réponses des enseignants</h2>
+    <p class="muted">${docs.length} réponse(s) · ${codes.length} élève(s). Anonymisé (code + matière).</p>
+    <label style="margin-top:14px">${ic("link")} Lien à transmettre aux enseignants</label>
+    <div class="share"><input id="genCode" placeholder="code élève (ex. RX62)" value="${esc(filt)}" style="text-transform:uppercase;font-weight:700"><button class="btn" id="genBtn" style="flex:none;padding:0 16px">${ic("copy")} Copier</button></div>
+    <p class="muted" id="genOut" style="margin-top:6px;word-break:break-all"></p>
+    <p style="margin-top:6px"><a class="link" id="csv">${ic("download")} Exporter en CSV</a></p>
+  </div>`;
   if(!list.length){ html+=`<div class="card"><p class="muted">Aucune réponse${filt?` pour ${esc(filt)}`:""} pour l'instant.</p></div>`; }
   list.forEach(code=>{
     const reps=byEleve[code];
-    html+=`<div class="card"><h3 style="font-size:17px;color:var(--brand)">Élève ${esc(code)} <span class="muted" style="font-weight:400">· ${reps.length} matière(s)</span></h3>
-      <div class="legend" style="margin:6px 0 10px">${reps.map(r=>`<span class="pill">${esc(r.matiere)}</span>`).join("")}</div>
-      <div style="overflow-x:auto"><table><thead><tr><th>Activité</th>${reps.map(r=>`<th>${esc((r.matiere||"?").slice(0,10))}</th>`).join("")}</tr></thead><tbody>`;
+    const tot={A:0,B:0,C:0,D:0,SO:0}; reps.forEach(r=>Object.values(r.reponses||{}).forEach(v=>{if(tot[v]!=null)tot[v]++;}));
+    const sum=Object.values(tot).reduce((a,b)=>a+b,0)||1;
+    html+=`<div class="card">
+      <h3 style="font-size:17px;color:var(--brand)">Élève ${esc(code)} <span class="muted" style="font-weight:400">· ${reps.length} matière(s)</span></h3>
+      <div class="sum-bar">${["A","B","C","D","SO"].map(v=>tot[v]?`<span style="width:${(tot[v]/sum*100).toFixed(1)}%;background:var(--${v})"></span>`:"").join("")}</div>
+      <div class="chips">${["A","B","C","D","SO"].map(v=>`<span class="ch ${v}">${v} · ${tot[v]}</span>`).join("")}</div>
+      <div style="overflow-x:auto;margin-top:12px"><table><thead><tr><th>Activité</th>${reps.map(r=>`<th>${esc((r.matiere||"?").slice(0,9))}</th>`).join("")}</tr></thead><tbody>`;
     DOMAINES.forEach((dom,d)=>{
-      html+=`<tr><td colspan="${reps.length+1}" style="background:#f0f3f9;font-weight:700">${dom.icone} ${esc(dom.titre)}</td></tr>`;
+      html+=`<tr class="domrow"><td colspan="${reps.length+1}">${esc(dom.titre)}</td></tr>`;
       dom.items.forEach((it,i)=>{const k=key(d,i);
-        html+=`<tr><td>${esc(it)}</td>${reps.map(r=>{const v=r.reponses?.[k]||"";return `<td class="tag ${v}">${v||"·"}</td>`;}).join("")}</tr>`;});
+        html+=`<tr><td>${esc(it)}</td>${reps.map(r=>{const v=r.reponses?.[k]||"";return v?`<td class="h" data-v="${v}">${v}</td>`:`<td class="h empty">·</td>`;}).join("")}</tr>`;});
     });
     html+=`</tbody></table></div>`;
-    // commentaires C/D
     const cmts=[]; reps.forEach(r=>Object.entries(r.obstacles||{}).forEach(([k,t])=>{if(t&&t.trim())cmts.push(`<b>${esc(r.matiere)}</b> — ${esc(t)}`);}));
-    if(cmts.length) html+=`<div class="rgpd" style="border-top:1px dashed var(--line)"><b>Obstacles signalés :</b><br>${cmts.join("<br>")}</div>`;
+    if(cmts.length) html+=`<div class="note"><b>Obstacles signalés :</b><br>${cmts.join("<br>")}</div>`;
     const evos=reps.filter(r=>r.evolutions&&r.evolutions.trim()).map(r=>`<b>${esc(r.matiere)}</b> — ${esc(r.evolutions)}`);
-    if(evos.length) html+=`<div class="rgpd"><b>Évolutions / perspectives :</b><br>${evos.join("<br>")}</div>`;
+    if(evos.length) html+=`<div class="note"><b>Évolutions / perspectives :</b><br>${evos.join("<br>")}</div>`;
     html+=`</div>`;
   });
   $("view").innerHTML=html;
+  const out=$("genOut"), gc=$("genCode");
+  const upd=()=>{ const c=gc.value.trim().toUpperCase(); out.textContent = c ? `${base}?eleve=${encodeURIComponent(c)}` : "Saisissez un code pour générer le lien."; };
+  gc.oninput=upd; upd();
+  $("genBtn").onclick=async()=>{ const c=gc.value.trim().toUpperCase(); if(!c){toast("Saisissez un code élève.");return;}
+    const url=`${base}?eleve=${encodeURIComponent(c)}`;
+    try{ await navigator.clipboard.writeText(url); toast("Lien copié ✓"); }catch(e){ out.textContent=url; toast("Copiez le lien ci-dessous."); } };
   const csvBtn=$("csv"); if(csvBtn) csvBtn.onclick=()=>exportCsv(docs);
 }
 function exportCsv(docs){
