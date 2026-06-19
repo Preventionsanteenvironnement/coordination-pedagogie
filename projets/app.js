@@ -59,7 +59,7 @@ const ICONS = {
 const ic = n => ICONS[n] ? `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>` : "";
 
 const ETAPES = [
-  { id:"constats", nom:"Constats", icon:"eye", q:"Qu'est-ce qu'on observe concrètement ?", def:"On part du réel : ce qu'on voit, sans interpréter ni juger. Un constat est observable et vérifiable.", aide:"Décrire un comportement précis dans une situation précise.", ok:"Certains élèves quittent le cours quand ils ne comprennent pas la consigne.", non:"Les élèves sont immatures, ingérables." },
+  { id:"constats", nom:"Constats", icon:"eye", q:"Qu'est-ce qu'on observe concrètement ?", def:"On part du réel : ce qu'on voit, sans interpréter ni juger. Un constat est observable et vérifiable.", aide:"Décrire un comportement précis dans une situation précise." },
   { id:"diagnostic", nom:"Diagnostic", icon:"stethoscope", q:"Qu'est-ce que ces constats révèlent comme besoin réel ?", def:"Le constat décrit ; le diagnostic comprend. On cherche les mécanismes derrière ce qu'on observe.", aide:"Relisez les constats ci-dessus et demandez : « de quoi est-ce le signe ? »." },
   { id:"problematique", nom:"Problématique", icon:"help", q:"Quel problème précis allons-nous traiter ?", def:"La question centrale du projet. Ni trop large, ni une solution déguisée.", aide:"Formulez une vraie question. Marquez d'un ★ celle que l'équipe retient." },
   { id:"finalite", nom:"Finalité", icon:"compass", q:"Pourquoi fait-on ce projet ? Le cap.", def:"Le sens large, la direction. Non mesurable — c'est l'horizon, pas l'objectif précis.", aide:"Ex. « Développer l'autonomie et la responsabilité »." },
@@ -147,7 +147,9 @@ const base = location.origin + location.pathname;
 const pub = () => (TYPES.find(t=>t.id===projet?.type)||{}).pub || "l'élève";
 const T = s => String(s==null?"":s).split("«PUB»").join(pub());
 const isRapide = () => projet?.mode==="rapide";
-const visIdx = () => { const set=new Set(isRapide()?RAPIDE:ETAPES.map(e=>e.id)); return ETAPES.map((e,i)=>i).filter(i=>set.has(ETAPES[i].id)); };
+const visIds = () => { const en=projet?.enabled; if(Array.isArray(en)&&en.length) return ETAPES.map(e=>e.id).filter(id=>en.includes(id)); return isRapide()?RAPIDE.slice():ETAPES.map(e=>e.id); };
+const visIdx = () => { const set=new Set(visIds()); return ETAPES.map((e,i)=>i).filter(i=>set.has(ETAPES[i].id)); };
+const REPERES = [ {k:"periode",l:"Période",ph:"ex. janvier → mars"}, {k:"debut",l:"Début",t:"date"}, {k:"fin",l:"Fin",t:"date"}, {k:"frequence",l:"Fréquence",ph:"ex. 1 fois / semaine"}, {k:"lieu",l:"Lieu",ph:"ex. salle B12"}, {k:"nbBenef",l:"Bénéficiaires",ph:"nombre",t:"number"}, {k:"nbEnc",l:"Encadrants",ph:"nombre",t:"number"} ];
 
 function nudge(etapeId, txt){
   const t = norm(txt).trim(); if(!t) return null;
@@ -218,27 +220,35 @@ function viewListe(){
   return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button>`}`;
 }
 
+function reperesCard(){
+  const r=projet.reperes||{}; const filled=REPERES.filter(f=>r[f.k]);
+  const items=filled.map(f=>`<div class="rp-it"><span class="rp-l">${esc(f.l)}</span><span class="rp-v">${esc(r[f.k])}</span></div>`).join("");
+  return `<div class="card rep-card"><div class="rep-h">${ic("calendar")} <b>Repères du projet</b>${RO?"":`<button class="btn-mini" data-reperes style="margin-left:auto">${filled.length?"Modifier":"Renseigner"}</button>`}</div>${filled.length?`<div class="rp-grid">${items}</div>`:`<p class="muted" style="font-size:13px;margin:8px 0 0">Période, dates, lieu, nombre de bénéficiaires et d'encadrants…</p>`}</div>`;
+}
+function tlTimeline(){
+  const vis=visIdx(); const firstTodo=vis.find(i=>!contribs.some(c=>c.etape===ETAPES[i].id&&active(c)));
+  let lastPhase=null, html="";
+  vis.forEach((i,pos)=>{ const e=ETAPES[i]; const ph=PHASES.find(p=>p.etapes.includes(e.id))||{c:"var(--accent)",nom:""}; const n=contribs.filter(c=>c.etape===e.id&&active(c)).length; const done=n>0; const isNext=i===firstTodo; const last=pos===vis.length-1; const lock=isLocked(e.id);
+    if(ph.nom!==lastPhase){ html+=`<div class="tl-phase" style="--pc:${ph.c}">${esc(ph.nom)}</div>`; lastPhase=ph.nom; }
+    html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${ph.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":'<span class="tl-line"></span>'}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(e.nom)}</span>${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
+  return `<div class="tl">${html}</div>`;
+}
 function viewOverview(){
   const vis=visIdx(); const visSet=new Set(vis.map(i=>ETAPES[i].id));
   const done=new Set(contribs.filter(active).map(c=>c.etape).filter(id=>visSet.has(id))).size;
-  const pct=Math.round(done/vis.length*100);
+  const pct=Math.round(done/Math.max(vis.length,1)*100);
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
   const firstTodo=vis.find(i=>!contribs.some(c=>c.etape===ETAPES[i].id && active(c)));
-  const phaseCards=PHASES.map(ph=>{ const eids=ph.etapes.filter(id=>visSet.has(id)); if(!eids.length) return "";
-    const chips=eids.map(eid=>{const e=ETM[eid];const i=ETAPES.findIndex(x=>x.id===eid);const n=contribs.filter(c=>c.etape===eid&&active(c)).length;const lock=isLocked(eid);
-      return `<button class="ov-chip ${n?"done":""}" style="--pc:${ph.c}" data-etape="${i}"><span class="ov-ic">${n?ic("check"):ic(e.icon)}</span><span class="ov-n">${esc(e.nom)}</span>${lock?`<span class="ov-lock">${ic("lock")}</span>`:n?`<span class="ov-ct">${n}</span>`:""}</button>`;}).join("");
-    const dn=eids.filter(eid=>contribs.some(c=>c.etape===eid&&active(c))).length;
-    return `<div class="ov-phase" style="--pc:${ph.c}"><div class="ov-ph-h"><span class="ov-ph-nom">${esc(ph.nom)}</span><span class="ov-ph-pct">${dn}/${eids.length}</span></div><div class="ov-chips">${chips}</div></div>`;}).join("");
   const stRow = RO ? `<span class="st-tag" style="--sc:${st.c}">${st.l}</span>${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:""}` :
     `<div class="st-row">${Object.entries(STATUTS).map(([k,v])=>`<button class="st-pick ${projet.statut===k||(!projet.statut&&k==="brouillon")?"on":""}" style="--sc:${v.c}" data-statut="${k}">${v.l}</button>`).join("")}</div>
      <div class="st-row" style="margin-top:7px">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}</div>`;
-  const modeRow = RO ? "" : `<button class="mode-btn" data-mode>${ic("toggle")} Mode : <b>${isRapide()?"rapide":"complet"}</b> — ${isRapide()?"6 étapes essentielles":"les 13 étapes"}</button>`;
   const syn=synthese();
   return `<div id="onlineInline">${onlineStrip()}</div>
     <div class="ov-head"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ov-meta"><div class="ov-titre">${esc(projet.titre)}</div>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}<div style="margin-top:9px">${stRow}</div></div></div>
-    ${modeRow}
+    ${reperesCard()}
     ${firstTodo!=null&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(ETAPES[firstTodo].nom)}</button>`:""}
-    <div class="sec-title">${ic("grid")} Les phases du projet</div><div class="ov-phases">${phaseCards}</div>
+    <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("toggle")} ${vis.length} étape(s)</button>`}</div>
+    ${tlTimeline()}
     ${syn?`<div class="sec-title">${ic("wand")} Synthèse automatique</div><div class="card syn-card">${esc(syn)}</div>`:""}
     <div class="fiche-actions" style="margin-top:16px"><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>`;
 }
@@ -248,8 +258,7 @@ function viewEtape(){
   const isLink = e.id==="actions"||e.id==="indicateurs"; const objs=ofEt("obj_op");
   const exemples=(e.ok||e.non)?`<div class="exemples">${e.ok?`<div class="ex ok">${ic("check")}<span><b>À préférer —</b> ${esc(e.ok)}</span></div>`:""}${e.non?`<div class="ex non">${ic("x")}<span><b>À éviter —</b> ${esc(e.non)}</span></div>`:""}</div>`:"";
   let contexte="";
-  if(etapeIdx===0){ if(projet.contexte) contexte=`<details class="context" open><summary>${ic("folder")} Le contexte du projet</summary><div class="ctx-body"><p>${esc(projet.contexte)}</p></div></details>`; }
-  else { const prevI=visIdx().filter(i=>i<etapeIdx).pop(); if(prevI!=null){ const prev=ETAPES[prevI]; const pl=ofEt(prev.id); const body=pl.length?`<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:`<p class="vide">Rien encore à l'étape « ${esc(prev.nom)} ».</p>`; contexte=`<details class="context" open><summary>${ic(prev.icon)} S'appuie sur : ${esc(prev.nom)}</summary><div class="ctx-body">${body}</div></details>`; } }
+  { const prevI=visIdx().filter(i=>i<etapeIdx).pop(); if(prevI!=null){ const prev=ETAPES[prevI]; const pl=ofEt(prev.id); const body=pl.length?`<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:`<p class="vide">Rien encore à l'étape « ${esc(prev.nom)} ».</p>`; contexte=`<details class="context" open><summary>${ic(prev.icon)} S'appuie sur : ${esc(prev.nom)}</summary><div class="ctx-body">${body}</div></details>`; } }
   const card=c=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
     const linkSel = isLink && !regroup ? `<div class="link-sel">${ic("link")}<select data-link="${esc(c.id)}"><option value="">↳ Sert un objectif…</option>${objs.map(o=>`<option value="${esc(o.id)}" ${c.lien===o.id?"selected":""}>${esc(o.texte.slice(0,40))}</option>`).join("")}</select></div>` : "";
     return `<article class="contrib ${c.epingle?"top":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
@@ -305,7 +314,8 @@ function ficheBodyHTML(){
   const conts=[...new Set(contribs.filter(active).map(c=>c.initiales).filter(Boolean))];
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
   const acts=ofEt("actions").filter(a=>a.resp||a.ech||a.pst);
-  const toc=[]; if(syn) toc.push("Résumé"); ETAPES.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((ETAPES.length+1)+". Plan d'action");
+  const _r=projet.reperes||{}; const _rf=REPERES.filter(f=>_r[f.k]);
+  const toc=[]; if(syn) toc.push("Résumé"); if(_rf.length) toc.push("Repères"); ETAPES.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((ETAPES.length+1)+". Plan d'action");
   const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:""}</div><div class="dc-meta">${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
   const tocHtml=`<div class="doc-toc"><h2>Sommaire</h2><ol class="toc-list">${toc.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`;
   const resume=syn?`<section class="doc-resume"><h2>Résumé</h2><p>${esc(syn)}</p></section>`:"";
@@ -315,7 +325,8 @@ function ficheBodyHTML(){
     else { const ep=items.filter(c=>c.epingle), au=items.filter(c=>!c.epingle); body=ep.map(c=>`<div class="retenu">${esc(c.texte)}</div>`).join("")+(au.length?`<ul>${au.map(c=>`<li>${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:""); }
     return `<section><h2><span class="sn">${num}.</span> ${esc(e.nom)}</h2>${body}</section>`;}).join("");
   const plan=acts.length?`<section><h2><span class="sn">${++num}.</span> Plan d'action</h2><table class="doc-pl"><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
-  return cover+tocHtml+resume+sections+plan;
+  const repSec=_rf.length?`<section class="doc-rep"><h2>Repères</h2><table class="doc-pl"><tr><th>Repère</th><th>Valeur</th></tr>${_rf.map(f=>`<tr><td>${esc(f.l)}</td><td>${esc(_r[f.k])}</td></tr>`).join("")}</table></section>`:"";
+  return cover+tocHtml+resume+repSec+sections+plan;
 }
 function viewFiche(){ return `<div class="fiche-actions"><button class="btn" data-overview>${ic("back")} Vue d'ensemble</button><button class="btn" id="word">${ic("word")} Word</button><button class="btn primary" id="print">${ic("printer")} Imprimer / PDF</button></div><div class="doc">${ficheBodyHTML()}</div>`; }
 function exportWord(){
@@ -360,6 +371,21 @@ function openConcept(eid){
 function openEcart(cid){ openSheet(`<div class="sheet-head"><h3>Écarter cette contribution</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 12px">Elle sortira de la fiche, mais restera consultable.</p><div class="field"><label for="eR">Raison (optionnel)</label><input id="eR" placeholder="ex. hors périmètre, redondant…"></div><div class="actions"><button class="btn primary" id="doEcart">${ic("ban")} Écarter</button></div>`);
   $("#doEcart").onclick=async()=>{try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),{ecarte:true,raison:$("#eR").value.trim()});closeSheet();saved();}catch(e){console.error(e);toast("Action impossible.");}};}
 
+function openReperes(){
+  const r=projet.reperes||{};
+  openSheet(`<div class="sheet-head"><h3>Repères du projet</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 12px">Les paramètres concrets : quand, où, combien.</p>${REPERES.map(f=>`<div class="field"><label for="rp_${f.k}">${esc(f.l)}</label><input id="rp_${f.k}" type="${f.t||'text'}" placeholder="${esc(f.ph||'')}" value="${esc(r[f.k]||'')}"></div>`).join("")}<div class="actions"><button class="btn primary" id="saveRep">${ic("check")} Enregistrer</button></div>`);
+  $("#saveRep").onclick=async()=>{const obj={};REPERES.forEach(f=>obj[f.k]=$("#rp_"+f.k).value.trim());try{await updateDoc(doc(db,COL,projet.id),{reperes:obj});closeSheet();saved();}catch(e){console.error(e);toast("Action impossible.");}};
+}
+function openPerso(){
+  let sel=new Set(visIds());
+  const draw=()=>{const el=$("#persoList");if(!el)return;el.innerHTML=ETAPES.map(e=>`<button class="perso-row ${sel.has(e.id)?'on':''}" data-toggle="${e.id}"><span class="pr-chk">${sel.has(e.id)?ic('check'):''}</span><span class="pr-ic">${ic(e.icon)}</span><span class="pr-n">${esc(e.nom)}</span></button>`).join("");el.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{const id=b.dataset.toggle;if(sel.has(id)){if(sel.size>1)sel.delete(id);else return toast("Au moins une étape.");}else sel.add(id);draw();});};
+  openSheet(`<div class="sheet-head"><h3>Étapes du projet</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 10px">Cochez les étapes à inclure — adaptez le cadre à votre projet.</p><div class="st-row" style="margin-bottom:10px"><button class="btn-mini" id="pAll">Toutes</button><button class="btn-mini" id="pRap">Essentiel (6)</button></div><div class="perso-list" id="persoList"></div><div class="actions"><button class="btn primary" id="pSave">${ic("check")} Appliquer</button></div>`);
+  $("#pAll").onclick=()=>{sel=new Set(ETAPES.map(e=>e.id));draw();};
+  $("#pRap").onclick=()=>{sel=new Set(RAPIDE);draw();};
+  $("#pSave").onclick=async()=>{const ids=ETAPES.map(e=>e.id).filter(id=>sel.has(id));try{await updateDoc(doc(db,COL,projet.id),{enabled:ids});closeSheet();saved();}catch(e){console.error(e);toast("Action impossible.");}};
+  draw();
+}
+
 /* ---------- Firestore ---------- */
 async function loadListe(){
   try{ const snap=await getDocs(collection(db,COL));
@@ -400,6 +426,8 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-matrice]")){view="matrice";return render();}
   if(e.target.closest("[data-plan]")){view="plan";return render();}
   const cc=e.target.closest("[data-concept]");if(cc) return openConcept(cc.dataset.concept);
+  if(e.target.closest("[data-reperes]")) return openReperes();
+  if(e.target.closest("[data-perso]")) return openPerso();
   const sl=e.target.closest("[data-sel]");if(sl){const id=sl.dataset.sel;selected.has(id)?selected.delete(id):selected.add(id);return render();}
   if(e.target.closest("[data-regroup]")){regroup=!regroup;selected.clear();return render();}
   if(e.target.closest("[data-merge]")) return fusionner();

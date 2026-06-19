@@ -307,6 +307,7 @@ table.mx td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align
   .concept-btn,.cc-dist{background:color-mix(in srgb,var(--pc) 16%,#0f141c)}
   .ty-pick,.mode-btn{background:var(--surface)}
   .pl-in,.pl-st{background:#10161f;color:var(--ink);border-color:var(--line2)}
+  .perso-row{background:var(--surface)}
 }
 
 /* En-tête d'étape coloré par phase + bouton concept */
@@ -369,6 +370,44 @@ table.pl td{vertical-align:middle}
 .ecart .ec-r{font-size:12px;color:var(--faint);font-style:italic;margin-top:3px}
 
 .toast.ok{background:var(--ok)}
+
+/* Repères du projet */
+.rep-card{margin-bottom:14px}
+.rep-h{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink)}
+.rep-h .i{font-size:18px;color:var(--accent)}.rep-h b{font-weight:600}
+.rp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-top:11px}
+.rp-it{background:var(--bg);border-radius:var(--r-sm);padding:9px 11px}
+.rp-l{display:block;font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.03em}
+.rp-v{display:block;font-size:14px;font-weight:500;margin-top:2px}
+
+/* Timeline du parcours */
+.tl{display:flex;flex-direction:column;margin:2px 0 4px}
+.tl-phase{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--pc);margin:10px 0 5px;padding-left:38px}
+.tl-phase:first-child{margin-top:0}
+.tl-item{display:flex;align-items:stretch;gap:12px;text-align:left;background:none;border:none;padding:0;width:100%}
+.tl-rail{position:relative;width:26px;flex:none;display:flex;flex-direction:column;align-items:center}
+.tl-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--pc);background:var(--surface);color:var(--pc);display:flex;align-items:center;justify-content:center;flex:none;margin-top:9px}
+.tl-dot .i{font-size:13px;stroke-width:2.6}
+.tl-item.done .tl-dot{background:var(--pc);color:#fff}
+.tl-line{flex:1;width:2px;background:var(--line2);margin:2px 0}
+.tl-body{flex:1;display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px;margin-bottom:8px;background:var(--surface);box-shadow:var(--sh)}
+.tl-item.next .tl-body{border-color:var(--pc);box-shadow:0 0 0 1px color-mix(in srgb,var(--pc) 22%,#fff),var(--sh)}
+.tl-ic{color:var(--pc);display:inline-flex}.tl-ic .i{font-size:18px}
+.tl-n{flex:1;font-size:14.5px;font-weight:500;color:var(--ink)}
+.tl-ct{font-size:11px;font-weight:700;color:#fff;background:var(--pc);border-radius:var(--r-pill);min-width:20px;text-align:center;padding:1px 7px}
+.tl-next{font-size:11px;font-weight:600;color:var(--pc);background:color-mix(in srgb,var(--pc) 12%,#fff);border-radius:var(--r-pill);padding:2px 9px;white-space:nowrap}
+.tl-lock{color:var(--faint)}.tl-lock .i{font-size:15px}
+.sec-title button{font-weight:600}
+
+/* Personnaliser les étapes */
+.perso-list{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow-y:auto}
+.perso-row{display:flex;align-items:center;gap:10px;border:1px solid var(--line2);background:#fff;border-radius:var(--r-sm);padding:9px 11px;text-align:left}
+.perso-row.on{border-color:var(--accent);background:var(--accent-soft)}
+.pr-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--line2);display:inline-flex;align-items:center;justify-content:center;flex:none;color:#fff}
+.perso-row.on .pr-chk{background:var(--accent);border-color:var(--accent)}
+.pr-chk .i{font-size:14px;stroke-width:2.6}
+.pr-ic{color:var(--muted)}.perso-row.on .pr-ic{color:var(--accent)}.pr-ic .i{font-size:18px}
+.pr-n{font-size:14px;font-weight:500}
 
 /* Impression de la fiche */
 @media print{
