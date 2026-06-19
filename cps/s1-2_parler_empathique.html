@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savoir Écouter et Parler de Façon Empathique - CPS Studio</title>
+    <style>
+        :root {
+            --primary: #6c5ce7; /* Violet inspiré du document */
+            --secondary: #00b894; /* Vert apaisant */
+            --accent: #e17055; /* Orange pour l'action */
+            --bg: #f5f6fa;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--secondary);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .highlight-box {
+            background-color: #eef2ff;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .analogy {
+            background-color: #fff8e1;
+            border: 1px dashed #f1c40f;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* Styles pour l'introspection */
+        .introspection-section {
+            background-color: #ffeaa7; /* Jaune clair chaud */
+            border: 2px solid #fdcb6e;
+        }
+
+        /* Elements interactifs */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background-color: #5649c0;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+
+        /* Quiz de reformulation */
+        .reformulation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .scenario-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        /* Glossaire */
+        .glossary-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .term {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>Savoir Écouter et Parler de Façon Empathique</h1>
+        <p style="text-align: center; font-style: italic;">Basé sur le référentiel CPS (Santé Publique France) - Tome 1</p>
+    </header>
+
+    <section class="card">
+        <h2>🔷 1. Comprendre la mécanique de l'empathie</h2>
+        <p>Selon les documents, la communication empathique ne s'improvise pas. Elle se structure en deux temps distincts et complémentaires :</p>
+        
+        <div class="highlight-box">
+            <strong>Phase 1 : La Compréhension Empathique (Écoute silencieuse)</strong><br>
+            C'est un processus interne qui repose sur 3 actions cognitives (mentales) :
+            <ol>
+                <li><strong>Attention :</strong> Se décentrer de soi pour se rendre totalement disponible.</li>
+                <li><strong>Perception :</strong> Accueillir le vécu de l'autre sans jugement (via le non-verbal).</li>
+                <li><strong>Représentation :</strong> Se questionner intérieurement : "Que vit-il ? Que ressent-il ?".</li>
+            </ol>
+        </div>
+
+        <div class="highlight-box">
+            <strong>Phase 2 : La Reformulation Empathique (Parole active)</strong><br>
+            C'est la mise en mots de ce que l'on a compris pour vérification. Elle peut être centrée sur :
+            <ul>
+                <li>L'essentiel</li>
+                <li>L'émotion</li>
+                <li>Les besoins</li>
+                <li>Le message (écho ou synonymes)</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <strong>💡 Analogie : Le Miroir Bienveillant</strong><br>
+            Imaginez que vous êtes un miroir. 
+            D'abord, vous devez être parfaitement propre et stable (<strong>Attention/Décentration</strong>) pour ne pas projeter votre propre image sur l'autre.
+            Ensuite, vous captez l'image de l'autre (<strong>Perception</strong>).
+            Enfin, vous renvoyez cette image fidèlement (<strong>Reformulation</strong>) pour que l'autre puisse se voir tel qu'il est, et non tel que vous voudriez qu'il soit.
+        </div>
+
+        <p><strong>Exemple professionnel :</strong><br>
+        Un enfant arrive en colère contre un adulte. Au lieu de dire "Tu ne devrais pas parler comme ça" (jugement), l'éducateur s'assoit à sa hauteur (perception), se demande "il se sent rejeté ?" (représentation) et dit : "Je vois que tu es très en colère et que tu as l'impression d'avoir été injustement traité" (reformulation).</p>
+    </section>
+
+    <section class="card introspection-section">
+        <h2>🔷 2. Introspection : La condition sine qua non</h2>
+        <p>Le document insiste : <em>"Si nous ne pouvons pas accueillir ni comprendre nos propres expériences internes... nous rencontrons d'importantes difficultés à comprendre celles des autres."</em></p>
+        
+        <h3>Exercice : Le check-up de l'Auto-empathie</h3>
+        <p>Avant d'interagir avec un usager, prenez un instant pour scanner votre état. Les documents appellent cela l'<strong>acceptation de sa propre expérience interne</strong>.</p>
+        
+        <p><strong>Essayez ceci maintenant :</strong></p>
+        <div style="background: white; padding: 15px; border-radius: 8px;">
+            <p>Identifiez une émotion forte récente au travail. Avez-vous réussi à :</p>
+            <form id="introspectionForm">
+                <label style="display:block; margin: 10px 0;">
+                    <input type="checkbox"> Identifier l'émotion exacte (ex: frustration, impuissance) ?
+                </label>
+                <label style="display:block; margin: 10px 0;">
+                    <input type="checkbox"> Accepter cette émotion sans vous juger ("J'ai le droit de ressentir ça") ?
+                </label>
+                <label style="display:block; margin: 10px 0;">
+                    <input type="checkbox"> Distinguer cette émotion de celle de l'autre (ne pas confondre votre stress avec celui de l'usager) ?
+                </label>
+            </form>
+            <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                <em>Analyse : Si vous ne cochez pas ces cases, vous risquez la "contagion émotionnelle" (être en détresse soi-même) plutôt que l'empathie, ou le rejet de l'autre.</em>
+            </p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>🔷 3. S'entraîner : Le Labo de l'Empathie</h2>
+        
+        <h3>Exercice A : Identifier le type de reformulation</h3>
+        <p>Voici des phrases prononcées par un professionnel après avoir écouté un jeune dire : <em>"J'en ai marre, personne ne m'écoute jamais dans ce groupe, je veux partir !"</em></p>
+        <p>Cliquez sur le type de reformulation qui correspond à la phrase du professionnel.</p>
+
+        <div id="quiz-reformulation">
+            <div class="scenario-box">
+                <p><strong>Professionnel :</strong> "Tu es en colère et découragé ?"</p>
+                <div>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'emotion')">Centrée sur l'émotion</button>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'message')">Centrée sur le message (écho)</button>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'besoin')">Centrée sur le besoin</button>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="scenario-box" style="margin-top: 15px;">
+                <p><strong>Professionnel :</strong> "Tu as besoin de considération et d'avoir ta place dans le groupe ?"</p>
+                <div>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'message')">Centrée sur le message</button>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'besoin')">Centrée sur le besoin</button>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'essentiel')">Centrée sur l'essentiel</button>
+                </div>
+                <div class="feedback"></div>
+            </div>
+
+            <div class="scenario-box" style="margin-top: 15px;">
+                <p><strong>Professionnel :</strong> "Tu veux partir ?"</p>
+                <div>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'emotion')">Centrée sur l'émotion</button>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'besoin')">Centrée sur le besoin</button>
+                    <button class="btn btn-outline" onclick="checkRef(this, 'echo')">Centrée sur le message (Écho)</button>
+                </div>
+                <div class="feedback"></div>
+            </div>
+        </div>
+
+        <hr style="margin: 30px 0; border-top: 1px dashed #ccc;">
+
+        <h3>Exercice B : Les 3 Actions Mentales</h3>
+        <p>Remettez de l'ordre dans le processus cognitif de l'écoute silencieuse. Sélectionnez l'action qui correspond à la définition affichée.</p>
+        
+        <div style="background: #f0f7ff; padding: 20px; border-radius: 8px; text-align: center;">
+            <p id="action-def" style="font-weight: bold; font-size: 1.1em;">"Je me décentre de moi-même, je mets mes jugements de côté et je me rends totalement disponible."</p>
+            <div id="action-buttons">
+                <button class="btn" onclick="checkAction('attention')">1. Attention</button>
+                <button class="btn" onclick="checkAction('perception')">2. Perception</button>
+                <button class="btn" onclick="checkAction('representation')">3. Représentation</button>
+            </div>
+            <div id="action-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>🔷 4. Accompagnement : L'effet miroir</h2>
+        <p>Une fois l'introspection réalisée et la technique maîtrisée, voici comment cela aide le public (selon le tableau 13 et le texte) :</p>
+        <ul>
+            <li><strong>Hétéro-régulation vers Auto-régulation :</strong> En apaisant l'enfant par votre empathie (hétéro-régulation), vous lui apprenez à terme à le faire seul.</li>
+            <li><strong>Validation :</strong> En utilisant des questions ouvertes (<em>"Qu'en penses-tu ?", "De quoi aurais-tu besoin ?"</em>), vous aidez l'autre à explorer son propre vécu.</li>
+            <li><strong>Clé :</strong> Laissez toujours à l'autre le temps de valider ou corriger votre reformulation. C'est lui l'expert de son vécu.</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>🔷 5. Validation des acquis</h2>
+        <p>Testons votre compréhension globale des documents.</p>
+
+        <div class="scenario-box">
+            <p><strong>Question 1 :</strong> Quelle est la différence fondamentale entre l'empathie et la contagion émotionnelle selon le texte ?</p>
+            <button class="choice-btn" style="display:block; width:100%; margin:5px 0; padding:10px;" onclick="validateFinal(this, false)">Il n'y en a pas, il faut ressentir la même chose que l'autre.</button>
+            <button class="choice-btn" style="display:block; width:100%; margin:5px 0; padding:10px;" onclick="validateFinal(this, true)">L'empathie perçoit l'émotion comme appartenant à l'autre, sans la porter soi-même.</button>
+            <div class="final-feedback feedback"></div>
+        </div>
+
+        <div class="scenario-box" style="margin-top: 15px;">
+            <p><strong>Question 2 :</strong> Que permet la "co-régulation" (ou hétéro-régulation) basée sur l'empathie de l'adulte ?</p>
+            <button class="choice-btn" style="display:block; width:100%; margin:5px 0; padding:10px;" onclick="validateFinal2(this, true)">Elle permet à l'enfant de développer, à terme, ses propres capacités d'autorégulation.</button>
+            <button class="choice-btn" style="display:block; width:100%; margin:5px 0; padding:10px;" onclick="validateFinal2(this, false)">Elle rend l'enfant dépendant de l'adulte pour toujours.</button>
+            <div class="final-feedback2 feedback"></div>
+        </div>
+    </section>
+
+    <section class="card" style="background-color: #f8f9fa; border-left: 5px solid #34495e;">
+        <h2>🔷 Glossaire</h2>
+        <div class="glossary-item">
+            <span class="term">Décentration (Action mentale 1) :</span>
+            Retirer son attention de ses propres pensées/préoccupations pour la réorienter totalement vers l'autre.
+        </div>
+        <div class="glossary-item">
+            <span class="term">Hétéro-régulation (ou Co-régulation) :</span>
+            Capacité de l'adulte à apaiser les émotions de l'enfant par son empathie, précurseur de l'autorégulation de l'enfant.
+        </div>
+        <div class="glossary-item">
+            <span class="term">Auto-empathie :</span>
+            Capacité à accueillir et comprendre ses propres expériences internes (condition nécessaire pour l'empathie envers autrui).
+        </div>
+        <div class="glossary-item">
+            <span class="term">Reformulation écho :</span>
+            Type de reformulation centrée sur le message qui consiste à répéter les mots exacts (ou gestes) de l'interlocuteur.
+        </div>
+        <div class="glossary-item">
+            <span class="term">Reformulation synonyme :</span>
+            Type de reformulation utilisant des mots proches de ceux de l'interlocuteur pour valider le sens.
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // --- Logique Exercice A (Reformulation) ---
+    function checkRef(btn, type) {
+        const parent = btn.parentElement.parentElement;
+        const feedback = parent.querySelector('.feedback');
+        
+        // Réinitialiser les styles
+        const allBtns = parent.querySelectorAll('button');
+        allBtns.forEach(b => b.style.backgroundColor = 'transparent');
+        allBtns.forEach(b => b.style.color = 'var(--primary)');
+
+        // Logique de réponse
+        let isCorrect = false;
+        let message = "";
+
+        // Scénario 1 : "Tu es en colère..."
+        if (parent.querySelector('p').innerText.includes("en colère")) {
+            if (type === 'emotion') {
+                isCorrect = true;
+                message = "✅ Exact ! 'Colère' et 'découragé' sont des émotions.";
+            } else {
+                message = "❌ Non. Ici, on nomme le ressenti affectif (colère).";
+            }
+        }
+        // Scénario 2 : "Tu as besoin..."
+        else if (parent.querySelector('p').innerText.includes("besoin de considération")) {
+            if (type === 'besoin') {
+                isCorrect = true;
+                message = "✅ Bravo ! La phrase explicite le manque ou l'attente (considération).";
+            } else {
+                message = "❌ Regardez bien : le mot 'besoin' est littéralement utilisé.";
+            }
+        }
+        // Scénario 3 : "Tu veux partir ?"
+        else if (parent.querySelector('p').innerText.includes("Tu veux partir")) {
+            if (type === 'echo') {
+                isCorrect = true;
+                message = "✅ Correct ! C'est une reformulation 'écho' (répétition des mots de l'enfant).";
+            } else {
+                message = "❌ C'est une répétition simple des mots entendus, donc un 'écho' (centré sur le message).";
+            }
+        }
+
+        feedback.style.display = 'block';
+        feedback.className = isCorrect ? 'feedback success' : 'feedback error';
+        feedback.innerText = message;
+        
+        if(isCorrect) {
+            btn.style.backgroundColor = '#d4edda';
+            btn.style.color = '#155724';
+        } else {
+            btn.style.backgroundColor = '#f8d7da';
+            btn.style.color = '#721c24';
+        }
+    }
+
+    // --- Logique Exercice B (Actions Mentales) ---
+    let currentStep = 1;
+    const defs = [
+        { text: "Je me décentre de moi-même, je mets mes jugements de côté et je me rends totalement disponible.", answer: 'attention', feedback: "✅ C'est bien l'Action 1 : Attention (Porter toute son attention).", next: "J'accueille le non-verbal (regard, posture) avec intérêt, sans interférer." },
+        { text: "J'accueille le non-verbal (regard, posture) avec intérêt, sans interférer.", answer: 'perception', feedback: "✅ C'est l'Action 2 : Percevoir (l'expérience interne de l'autre).", next: "Je me demande intérieurement : 'Qu'est-ce qu'il vit ? Qu'est-ce qu'il pense ?'" },
+        { text: "Je me demande intérieurement : 'Qu'est-ce qu'il vit ? Qu'est-ce qu'il pense ?'", answer: 'representation', feedback: "✅ C'est l'Action 3 : Se représenter (l'expérience vécue par l'autre).", next: "Bravo ! Vous avez reconstitué le cycle de l'écoute silencieuse." }
+    ];
+
+    function checkAction(selectedAction) {
+        const feedbackEl = document.getElementById('action-feedback');
+        const defText = document.getElementById('action-def');
+        const btns = document.getElementById('action-buttons');
+
+        if (currentStep > 3) return;
+
+        if (selectedAction === defs[currentStep-1].answer) {
+            feedbackEl.style.display = 'block';
+            feedbackEl.className = 'feedback success';
+            feedbackEl.innerText = defs[currentStep-1].feedback;
+            
+            if (currentStep < 3) {
+                setTimeout(() => {
+                    currentStep++;
+                    defText.innerText = defs[currentStep-1].text; // Affiche la déf suivante
+                    feedbackEl.style.display = 'none';
+                }, 2000);
+            } else {
+                btns.innerHTML = "<strong>Cycle complété ! 🎉</strong>";
+            }
+        } else {
+            feedbackEl.style.display = 'block';
+            feedbackEl.className = 'feedback error';
+            feedbackEl.innerText = "❌ Ce n'est pas cette action qui correspond à cette définition. Réessayez.";
+        }
+    }
+
+    // --- Logique Validation Finale ---
+    function validateFinal(btn, isCorrect) {
+        const feedback = btn.parentElement.querySelector('.final-feedback');
+        feedback.style.display = 'block';
+        if(isCorrect) {
+            feedback.className = 'feedback success';
+            feedback.innerHTML = "✅ <strong>Exact.</strong> Le document précise bien : <em>'percevoir ses émotions (telles que lui appartenant) mais ne pas les porter... afin de ne pas être moi-même en détresse'</em>.";
+        } else {
+            feedback.className = 'feedback error';
+            feedback.innerText = "❌ Faux. Si vous ressentez la même chose, c'est de la contagion, pas de l'empathie.";
+        }
+    }
+
+    function validateFinal2(btn, isCorrect) {
+        const feedback = btn.parentElement.querySelector('.final-feedback2');
+        feedback.style.display = 'block';
+        if(isCorrect) {
+            feedback.className = 'feedback success';
+            feedback.innerHTML = "✅ <strong>Exact.</strong> L'hétéro-régulation (par l'adulte) est le tremplin vers l'autorégulation (par l'enfant).";
+        } else {
+            feedback.className = 'feedback error';
+            feedback.innerText = "❌ Faux. Le but explicite mentionné dans le texte est de permettre à l'enfant de développer ses propres capacités.";
+        }
+    }
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

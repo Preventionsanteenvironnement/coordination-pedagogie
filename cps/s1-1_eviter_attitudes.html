@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio - Les Obstacles à la Communication (S1.1)</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --info: #3498db;
+            --warning: #f1c40f;
+            --light: #ecf0f1;
+            --text: #333;
+            --card-bg: #ffffff;
+            --radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary);
+        }
+
+        h1 {
+            text-align: center;
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            border-left: 5px solid var(--info);
+            padding-left: 10px;
+            margin-top: 40px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .highlight {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--info);
+            margin: 15px 0;
+        }
+
+        .analogy {
+            background-color: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            font-style: italic;
+        }
+
+        /* Introspection Section */
+        .introspection-box {
+            background-color: #fdf2f2;
+            border: 2px dashed #e74c3c;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin: 20px 0;
+        }
+
+        .introspection-question {
+            font-weight: bold;
+            color: #c0392b;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: var(--radius);
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Game Styles */
+        .game-area {
+            background: var(--light);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary);
+        }
+
+        .example-context {
+            font-weight: normal;
+            font-style: italic;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, opacity 0.2s;
+            font-size: 0.95em;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .btn-comprehension { background-color: #3498db; color: white; }
+        .btn-consideration { background-color: #9b59b6; color: white; }
+        
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--radius);
+            display: none;
+            text-align: left;
+        }
+
+        .feedback-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .feedback-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            width: 0%;
+            height: 10px;
+            background-color: var(--success);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        /* Quiz Final */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            text-align: left;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .quiz-option:hover { background-color: #f0f0f0; }
+        .quiz-option.selected { background-color: var(--primary); color: white; }
+
+        /* Glossary */
+        dl { display: grid; grid-template-columns: 1fr 3fr; gap: 10px; }
+        dt { font-weight: bold; color: var(--primary); }
+        dd { margin: 0; margin-bottom: 10px; }
+
+        @media (max-width: 600px) {
+            dl { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Identifier et Lever les Obstacles à la Communication</h1>
+    <p style="text-align: center; font-style: italic;">Basé sur le référentiel CPS (S1.1) - Santé Publique France</p>
+
+    <section>
+        <h2>1. Compréhension de la notion</h2>
+        
+        <p>La communication n'est pas un simple échange de données. Elle représente la <strong>« dimension interactive de la relation »</strong>. Pour être efficace et positive, elle doit satisfaire un double enjeu :</p>
+        
+        <div class="highlight">
+            <ul>
+                <li><strong>L'enjeu informatif :</strong> Assurer une bonne compréhension du message (contenu verbal et non verbal).</li>
+                <li><strong>L'enjeu psychologique :</strong> Assurer la reconnaissance et la valorisation de l'autre (relation authentique et respectueuse).</li>
+            </ul>
+        </div>
+
+        <p>Malheureusement, notre cerveau a tendance à utiliser un <strong>« biais de négativité »</strong>, nous focalisant sur ce qui dysfonctionne (reproches, focus sur le négatif) plutôt que sur le positif. Cela crée des obstacles qui détériorent le message ou la relation.</p>
+
+        <div class="analogy">
+            <strong>💡 L'analogie du signal radio :</strong><br>
+            Imaginez que vous écoutez votre émission préférée.
+            <ul>
+                <li>Les <strong>obstacles à la compréhension</strong> sont comme des grésillements ou des interférences : le son passe mal, le message est haché ou incompréhensible.</li>
+                <li>Les <strong>obstacles à la considération</strong> sont comme si l'animateur radio vous insultait ou vous ignorait : même si le son est clair, vous avez envie d'éteindre le poste car la relation est désagréable.</li>
+            </ul>
+        </div>
+
+        <p><strong>Exemple professionnel :</strong><br>
+        Lors d'une réunion d'équipe, un éducateur croise les bras et soupire en levant les yeux au ciel pendant qu'un collègue parle (<em>comportement non verbal, obstacle à la considération</em>). Puis, il prend la parole pour dire : « De toute façon, on ne fait pas toujours ce qu'on veut » (<em>phrase impersonnelle/cliché, obstacle à la compréhension</em>).</p>
+    </section>
+
+    <section>
+        <h2>2. Introspection du professionnel</h2>
+        <p>Les compétences psychosociales ne s'apprennent pas par cœur, elles se vivent. Avant d'accompagner les autres, il est indispensable de repérer ses propres freins.</p>
+        
+        <div class="introspection-box">
+            <h3>🔍 Miroir, mon beau miroir...</h3>
+            <p>Le document souligne que nous utilisons parfois des tournures complexes, des mots dévalorisants ou que nous nous focalisons sur ce qui dérange (biais de négativité), souvent sans nous en rendre compte.</p>
+            
+            <div class="introspection-question">Exercice d'auto-observation :</div>
+            <p>Pensez à une interaction tendue récente (avec un collègue, un usager, un proche). Essayez d'identifier si vous avez utilisé l'un de ces comportements :</p>
+            <ul>
+                <li>Avez-vous généralisé ? (ex: "Tu fais <em>toujours</em> ça")</li>
+                <li>Avez-vous fait autre chose en écoutant ? (ex: regarder un écran)</li>
+                <li>Avez-vous utilisé l'ironie ou un ton méprisant ?</li>
+            </ul>
+            
+            <label for="self-reflection">Notez ici une habitude de communication (verbale ou non-verbale) que vous aimeriez changer :</label>
+            <textarea id="self-reflection" placeholder="Exemple : J'ai tendance à couper la parole quand je pense avoir compris, ou à faire des sermons..."></textarea>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. Entraînement : Le Trieur d'Obstacles</h2>
+        <p>Pour communiquer efficacement, il faut savoir repérer rapidement ce qui bloque. Dans cet exercice, des situations issues du quotidien professionnel vont s'afficher. À vous de déterminer si elles nuisent principalement à la <strong>Compréhension du message</strong> ou à la <strong>Considération de l'autre</strong>.</p>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="card" id="cardContent">
+                Chargement...
+            </div>
+            
+            <p style="font-size: 0.9em; margin-bottom: 20px;">Quel est l'impact principal de ce comportement ?</p>
+
+            <div class="btn-group">
+                <button class="btn btn-comprehension" onclick="checkAnswer('comprehension')">Bloque la COMPRÉHENSION<br><small>(Message flou, trop long...)</small></button>
+                <button class="btn btn-consideration" onclick="checkAnswer('consideration')">Bloque la CONSIDÉRATION<br><small>(Relation, respect, estime...)</small></button>
+            </div>
+
+            <div id="feedback" class="feedback-area"></div>
+            <button id="nextBtn" class="btn" style="background:#2c3e50; color:white; margin-top:15px; display:none;" onclick="nextCard()">Suivant</button>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Accompagnement du public</h2>
+        <p>Une fois ce travail fait sur vous-même, vous pouvez accompagner votre public (élèves, usagers) :</p>
+        <ul>
+            <li><strong>Par le modélage :</strong> En adoptant une communication claire et bienveillante, vous offrez un modèle positif (neurones miroirs).</li>
+            <li><strong>Par la prise de conscience :</strong> Aidez-les à repérer leur propre "biais de négativité". Invitez-les à reformuler une "attaque" (obstacle à la considération) en une demande claire (facilitateur de compréhension).</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Quiz de Validation</h2>
+        <div id="quiz-container">
+            <div class="quiz-item">
+                <p><strong>1. Selon le tableau des obstacles, dire « Pourquoi frappes-tu toujours tes copains ? » est :</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Une demande inappropriée.</button>
+                <button class="quiz-option" onclick="checkQuiz(this, true)">Une généralisation (Verbal / Compréhension).</button>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Une menace.</button>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>2. Quel est l'enjeu "psychologique" de la communication défini dans le texte ?</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this, true)">La reconnaissance et la valorisation de l'autre.</button>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Transmettre une information précise.</button>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Imposer ses valeurs.</button>
+                <div class="quiz-feedback"></div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>3. Croiser les bras en disant "je t'écoute" est classé comme :</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Une intention relationnelle de domination.</button>
+                <button class="quiz-option" onclick="checkQuiz(this, true)">Un comportement non verbal opposé au verbal (Compréhension).</button>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Un manque d'attention (Considération).</button>
+                <div class="quiz-feedback"></div>
+            </div>
+            
+            <div class="quiz-item">
+                <p><strong>4. Le "biais de négativité" consiste à :</strong></p>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Toujours dire non aux demandes.</button>
+                <button class="quiz-option" onclick="checkQuiz(this, true)">Se focaliser sur ce qui dysfonctionne (attention, mémoire, prédiction).</button>
+                <button class="quiz-option" onclick="checkQuiz(this, false)">Avoir une mauvaise estime de soi.</button>
+                <div class="quiz-feedback"></div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>📚 Glossaire des notions travaillées</h2>
+        <dl>
+            <dt>Enjeu Informatif</dt>
+            <dd>Dimension de la communication visant la bonne compréhension du message entre émetteur et récepteur.</dd>
+
+            <dt>Enjeu Psychologique</dt>
+            <dd>Dimension de la communication visant la reconnaissance, la valorisation de l'autre et le maintien d'une relation authentique.</dd>
+
+            <dt>Biais de négativité</dt>
+            <dd>Tendance naturelle du cerveau à focaliser l'attention, la réflexion et la mémorisation sur les aspects négatifs ou ce qui dysfonctionne.</dd>
+
+            <dt>Intention relationnelle</dt>
+            <dd>Objectif plus ou moins conscient que l'on cherche à atteindre par l'interaction (ex: dominer, imposer, rejeter) au-delà des mots prononcés.</dd>
+
+            <dt>Généralisation</dt>
+            <dd>Obstacle verbal à la compréhension consistant à utiliser des termes absolus (toujours, jamais) qui figent la réalité.</dd>
+
+            <dt>Injonction paradoxale</dt>
+            <dd>(Illustré par l'exercice) Comportement non-verbal qui contredit le message verbal (ex: dire "je t'écoute" en regardant ailleurs).</dd>
+        </dl>
+    </section>
+
+</div>
+
+<script>
+    // DATA based STRICTLY on Table 10 S1.1 (a)
+    const cards = [
+        {
+            text: "« Si j'ai préparé tout ce matériel, ce n'est pas pour rien ! »",
+            context: "Phrase ambiguë",
+            type: "comprehension",
+            explanation: "C'est un obstacle verbal à la compréhension (phrase ambiguë). Le message n'est pas clair."
+        },
+        {
+            text: "« Tu es un incapable. »",
+            context: "Critiques et jugements",
+            type: "consideration",
+            explanation: "C'est un obstacle verbal à la considération. Il s'agit d'un jugement qui dévalorise l'autre."
+        },
+        {
+            text: "Tapoter sur un bureau, griffonner, manipuler son téléphone...",
+            context: "Activités parasites",
+            type: "comprehension",
+            explanation: "C'est un obstacle non verbal à la compréhension (activité parasite). Cela brouille l'écoute et la réception du message."
+        },
+        {
+            text: "Adopter un ton ironique ou méprisant.",
+            context: "Comportement non verbal",
+            type: "consideration",
+            explanation: "C'est un obstacle non verbal à la considération. Le ton attaque l'estime de l'autre."
+        },
+        {
+            text: "« Pourquoi frappes-tu TOUJOURS tes copains ? »",
+            context: "Généralisation",
+            type: "comprehension",
+            explanation: "C'est une généralisation (verbal / compréhension). L'usage de 'toujours' empêche une analyse précise des faits."
+        },
+        {
+            text: "Chercher à garder les informations pour soi.",
+            context: "Intention relationnelle",
+            type: "comprehension",
+            explanation: "C'est une intention qui nuit à la compréhension (rétention d'information)."
+        },
+        {
+            text: "« (Mais non), ce n'est pas grave, va jouer avec quelqu'un d'autre. »",
+            context: "Nier ou minimiser ce que l'autre ressent",
+            type: "consideration",
+            explanation: "C'est un obstacle à la considération. On nie l'émotion de l'enfant (tristesse/plainte)."
+        },
+        {
+            text: "Chercher à dominer l'autre, à asseoir son pouvoir.",
+            context: "Intention relationnelle",
+            type: "consideration",
+            explanation: "C'est une intention qui nuit directement à la considération et à l'égalité dans la relation."
+        },
+        {
+            text: "Les bras croisés en disant « je t'écoute ».",
+            context: "Contradiction verbal/non-verbal",
+            type: "comprehension",
+            explanation: "Le corps dit le contraire des mots. C'est un obstacle non verbal à la compréhension (incohérence)."
+        },
+        {
+            text: "« Je ne veux plus de bruit » (au lieu de : je veux du calme).",
+            context: "Affirmation sous forme négative",
+            type: "comprehension",
+            explanation: "Le cerveau traite mal la négation. C'est un obstacle à la compréhension immédiate de la consigne."
+        }
+    ];
+
+    let currentCard = 0;
+    
+    function initGame() {
+        showCard();
+    }
+
+    function showCard() {
+        if (currentCard >= cards.length) {
+            document.getElementById('gameArea').innerHTML = '<h3>🎉 Exercice terminé !</h3><p>Vous avez passé en revue les principaux obstacles du tableau. Passez maintenant au quiz final.</p>';
+            document.getElementById('progressBar').style.width = '100%';
+            return;
+        }
+
+        const card = cards[currentCard];
+        document.getElementById('cardContent').innerHTML = `
+            <div>
+                ${card.text}<br>
+                <span class="example-context">[${card.context}]</span>
+            </div>
+        `;
+        
+        // Reset UI
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('feedback').className = 'feedback-area';
+        document.getElementById('nextBtn').style.display = 'none';
+        
+        // Update progress
+        const progress = (currentCard / cards.length) * 100;
+        document.getElementById('progressBar').style.width = `${progress}%`;
+    }
+
+    function checkAnswer(userChoice) {
+        const card = cards[currentCard];
+        const feedbackEl = document.getElementById('feedback');
+        
+        feedbackEl.style.display = 'block';
+        
+        if (userChoice === card.type) {
+            feedbackEl.innerHTML = `<strong>✅ Correct !</strong> ${card.explanation}`;
+            feedbackEl.classList.add('feedback-correct');
+            feedbackEl.classList.remove('feedback-incorrect');
+        } else {
+            feedbackEl.innerHTML = `<strong>❌ Pas tout à fait.</strong> ${card.explanation}`;
+            feedbackEl.classList.add('feedback-incorrect');
+            feedbackEl.classList.remove('feedback-correct');
+        }
+
+        document.getElementById('nextBtn').style.display = 'inline-block';
+    }
+
+    function nextCard() {
+        currentCard++;
+        showCard();
+    }
+
+    // Quiz Logic
+    function checkQuiz(btn, isCorrect) {
+        const parent = btn.parentElement;
+        const feedback = parent.querySelector('.quiz-feedback');
+        
+        // Disable all buttons in this question
+        const allBtns = parent.querySelectorAll('.quiz-option');
+        allBtns.forEach(b => b.disabled = true);
+
+        if (isCorrect) {
+            btn.style.backgroundColor = '#d4edda';
+            btn.style.borderColor = '#c3e6cb';
+            feedback.innerHTML = "<strong>Exact !</strong> C'est bien la définition ou l'exemple présent dans le document.";
+            feedback.style.color = "#155724";
+        } else {
+            btn.style.backgroundColor = '#f8d7da';
+            btn.style.borderColor = '#f5c6cb';
+            feedback.innerHTML = "<strong>Faux.</strong> Relisez bien les catégories du tableau ou le texte introductif.";
+            feedback.style.color = "#721c24";
+        }
+    }
+
+    // Start
+    initGame();
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

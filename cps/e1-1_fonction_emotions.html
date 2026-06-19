@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio : La Fonction des Émotions</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22; /* Orange pour l'alerte/action */
+            --success: #27ae60;
+            --danger: #c0392b;
+            --bg: #f4f6f7;
+            --card-bg: #ffffff;
+            --text: #333;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #34495e);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 { margin: 0; font-size: 2rem; }
+        header p { opacity: 0.9; margin-top: 0.5rem; font-style: italic; }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        section {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--accent);
+        }
+
+        h2 { color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+        h3 { color: var(--accent); margin-top: 1.5rem; }
+
+        .analogy-box {
+            background-color: #eaf2f8;
+            border-left: 4px solid #3498db;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .important-note {
+            background-color: #fef9e7;
+            border-left: 4px solid #f1c40f;
+            padding: 1rem;
+            font-style: italic;
+        }
+
+        /* Introspection Styles */
+        .introspection-area {
+            background-color: #fff3e0;
+            border: 1px solid #ffe0b2;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            min-height: 80px;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        /* Interactive Dashboard Styles */
+        .dashboard-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 2rem 0;
+            background: #222;
+            padding: 20px;
+            border-radius: 15px;
+            border: 4px solid #555;
+        }
+
+        .light-bulb {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #444;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-align: center;
+            user-select: none;
+        }
+
+        .light-bulb.red-active {
+            background-color: #ff3333;
+            box-shadow: 0 0 20px #ff3333;
+            border-color: #fff;
+        }
+        
+        .light-bulb.green-active {
+            background-color: #33ff33;
+            box-shadow: 0 0 20px #33ff33;
+            border-color: #fff;
+            color: #000;
+        }
+
+        .dashboard-feedback {
+            text-align: center;
+            font-weight: bold;
+            min-height: 60px;
+            padding: 10px;
+            background: #eee;
+            border-radius: 8px;
+        }
+
+        /* Vocabulary Cleaner Game */
+        .vocab-game {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .bad-term {
+            text-decoration: line-through;
+            color: var(--danger);
+            margin-right: 10px;
+        }
+        .good-term {
+            color: var(--success);
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .reveal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Quiz Styles */
+        .quiz-option {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .quiz-option:hover { background: #e9ecef; }
+        .feedback-msg {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+
+        /* Glossary */
+        dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; }
+        dt { font-weight: bold; color: var(--primary); }
+        dd { margin: 0; }
+
+        @media (max-width: 600px) {
+            dl { grid-template-columns: 1fr; }
+            .dashboard-container { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>La Fonction des Émotions</h1>
+    <p>Messagers, Guides et Moteurs de l'Action</p>
+</header>
+
+<main>
+
+    <section>
+        <h2>1. Comprendre : À quoi servent les émotions ?</h2>
+        
+        <p>Il est courant de penser que les émotions, surtout celles qui sont désagréables, sont des problèmes à éliminer. Pourtant, la recherche scientifique actuelle confirme qu'elles sont <strong>indispensables à notre survie et à notre équilibre psychologique (homéostasie)</strong>.</p>
+
+        <h3>Les Émotions comme Messagers</h3>
+        <p>Les émotions ne sont pas des obstacles à la raison, mais des <strong>informations</strong>. Elles nous signalent l'état de nos besoins psychologiques.</p>
+        
+        <div class="analogy-box">
+            <h4>🚗 Analogie : Le Tableau de Bord</h4>
+            <p>Imaginez votre corps comme le cockpit d'une voiture :</p>
+            <ul>
+                <li><strong>Voyant Vert (Émotion Agréable) :</strong> Le système fonctionne bien. Le besoin est satisfait. Le cerveau libère de l'énergie pour avancer et explorer.</li>
+                <li><strong>Voyant Rouge (Émotion Désagréable) :</strong> Alerte ! Un besoin important n'est pas satisfait (frustration, danger). Le système capte toute votre attention pour résoudre le problème.</li>
+            </ul>
+            <p><strong>La leçon :</strong> Essayer de supprimer une émotion désagréable (évitement émotionnel) revient à débrancher le câble d'alimentation du voyant d'alerte. On gagne un "calme" artificiel, mais on devient aveugle aux dangers et aux besoins vitaux.</p>
+        </div>
+
+        <h3>Le moteur de l'action : "E-movere"</h3>
+        <p>L'étymologie latine <em>e-movere</em> signifie "mettre en mouvement". L'émotion contient une impulsion qui nous pousse à agir pour rétablir l'équilibre.</p>
+        <ul>
+            <li>La <strong>peur</strong> nous pousse à fuir pour nous protéger.</li>
+            <li>La <strong>colère</strong> nous pousse à nous défendre ou attaquer pour restaurer notre intégrité.</li>
+        </ul>
+
+        <h3>Exemple Professionnel</h3>
+        <p>Une enseignante ressent de l'agacement (voyant rouge) face à un élève. Si elle considère cette émotion comme "négative" ou "honteuse", elle va essayer de la cacher (évitement). L'information ("j'ai besoin de respect ou de calme") est perdue, et l'émotion risque de s'accumuler jusqu'à l'explosion. Si elle accepte le signal, elle peut agir : "Je ressens de l'agacement, j'ai besoin de calme, je vais demander le silence."</p>
+    </section>
+
+    <section class="introspection-area">
+        <h2>2. Introspection du Professionnel</h2>
+        <p><strong>Principe CPS :</strong> Avant d'accompagner les autres, il faut savoir lire son propre tableau de bord.</p>
+
+        <p><em>Pensez à une situation professionnelle récente où vous avez ressenti une émotion désagréable (colère, peur, tristesse, frustration).</em></p>
+
+        <label for="reflection1"><strong>1. Le Signal :</strong> Si c'était un voyant sur un tableau de bord, quelle couleur/forme aurait-il eu ? Avez-vous tenté de "couper le fil" (ignorer, minimiser) ou avez-vous regardé le signal ?</label>
+        <textarea id="reflection1" placeholder="Je décris ma réaction face au signal..."></textarea>
+
+        <label for="reflection2" style="display:block; margin-top:15px;"><strong>2. L'Impulsion (E-movere) :</strong> Vers quelle action cette émotion vous poussait-elle instinctivement ? (ex: crier, partir, pleurer...)</label>
+        <textarea id="reflection2" placeholder="Mon corps voulait..."></textarea>
+    </section>
+
+    <section>
+        <h2>3. Pratique : Nettoyer ses représentations</h2>
+
+        <h3>Exercice A : Le Tableau de Bord Intérieur</h3>
+        <p>Cliquez sur les voyants pour découvrir la fonction du message. Comprenez la mécanique de l'équilibre.</p>
+
+        <div class="dashboard-container">
+            <div style="text-align:center">
+                <div id="light-green" class="light-bulb" onclick="activateLight('green')">JOIE</div>
+                <small>Voyant Vert</small>
+            </div>
+            <div style="text-align:center">
+                <div id="light-red" class="light-bulb" onclick="activateLight('red')">COLÈRE</div>
+                <small>Voyant Rouge</small>
+            </div>
+            <div style="text-align:center">
+                <div id="light-off" class="light-bulb" style="background:#000; color:#555;" onclick="activateLight('off')">OFF</div>
+                <small>Câble coupé</small>
+            </div>
+        </div>
+        <div id="dashboard-msg" class="dashboard-feedback">
+            Cliquez sur un voyant pour voir ce qu'il dit à votre organisme.
+        </div>
+
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ddd;">
+
+        <h3>Exercice B : Changer de vocabulaire</h3>
+        <p>Les mots façonnent notre pensée. Utiliser des termes comme "négatif" incite notre cerveau à rejeter l'émotion. Corrigez les phrases suivantes pour adopter une posture scientifique et bienveillante.</p>
+
+        <div class="vocab-game">
+            <div style="background: white; padding: 15px; border: 1px solid #eee; border-radius: 8px;">
+                <p><strong>Phrase reçue :</strong> "Il ne faut pas être triste, c'est une émotion <span class="bad-term">négative</span>."</p>
+                <button class="reveal-btn" onclick="revealCorrection(1)">Reformuler</button>
+                <p id="corr1" class="good-term">"La tristesse est une émotion <u>désagréable</u> mais utile, elle signale un manque."</p>
+            </div>
+
+            <div style="background: white; padding: 15px; border: 1px solid #eee; border-radius: 8px;">
+                <p><strong>Phrase reçue :</strong> "Les émotions sont <span class="bad-term">l'ennemi de la raison</span>."</p>
+                <button class="reveal-btn" onclick="revealCorrection(2)">Reformuler</button>
+                <p id="corr2" class="good-term">"Émotions et cognitions sont <u>interreliées</u> et collaborent pour décider."</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Vers l'accompagnement</h2>
+        <p>Une fois que vous avez accepté vos propres "voyants rouges", vous pouvez aider votre public :</p>
+        <ul>
+            <li><strong>Ne dites pas :</strong> "Ce n'est rien, ne pleure pas" (tentative de couper le voyant).</li>
+            <li><strong>Dites plutôt :</strong> "Je vois que ton voyant rouge s'allume. Qu'est-ce qu'il essaie de te dire ? De quoi as-tu besoin ?"</li>
+            <li>Aidez-les à comprendre que l'émotion n'est pas "méchante" (négative), mais qu'elle est parfois difficile à vivre (désagréable).</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Quiz de Validation</h2>
+        
+        <div id="quiz-container">
+            <div class="quiz-item">
+                <p><strong>1. Selon l'analogie du tableau de bord, que représente une émotion désagréable (colère, peur...) ?</strong></p>
+                <label class="quiz-option">
+                    <input type="radio" name="q1" value="wrong"> Une panne du moteur qu'il faut ignorer.
+                </label>
+                <label class="quiz-option">
+                    <input type="radio" name="q1" value="correct"> Un voyant d'alerte signalant un besoin insatisfait.
+                </label>
+                <label class="quiz-option">
+                    <input type="radio" name="q1" value="wrong"> Une preuve de faiblesse rationnelle.
+                </label>
+                <div id="fb1" class="feedback-msg"></div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>2. Que signifie l'étymologie "e-movere" ?</strong></p>
+                <label class="quiz-option">
+                    <input type="radio" name="q2" value="wrong"> Émouvoir l'âme.
+                </label>
+                <label class="quiz-option">
+                    <input type="radio" name="q2" value="correct"> Mettre en mouvement (pousser à l'action).
+                </label>
+                <label class="quiz-option">
+                    <input type="radio" name="q2" value="wrong"> Perturber la raison.
+                </label>
+                <div id="fb2" class="feedback-msg"></div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>3. Pourquoi est-il recommandé de remplacer le terme "négatif" par "désagréable" ?</strong></p>
+                <label class="quiz-option">
+                    <input type="radio" name="q3" value="wrong"> C'est juste une question de politesse.
+                </label>
+                <label class="quiz-option">
+                    <input type="radio" name="q3" value="wrong"> Parce qu'il n'existe pas de vraies émotions difficiles.
+                </label>
+                <label class="quiz-option">
+                    <input type="radio" name="q3" value="correct"> Car "négatif" implique une nocivité et favorise le rejet/l'évitement de l'émotion.
+                </label>
+                <div id="fb3" class="feedback-msg"></div>
+            </div>
+            
+            <button onclick="validateQuiz()" style="background:var(--primary); color:white; padding:10px 20px; border:none; border-radius:5px; margin-top:20px; cursor:pointer; font-size:1rem;">Valider mes réponses</button>
+        </div>
+    </section>
+
+    <section>
+        <h2>Glossaire des notions clés</h2>
+        <dl>
+            <dt>Fonction informative</dt>
+            <dd>Rôle premier de l'émotion qui agit comme un messager ou un guide pour nous informer de l'état de nos besoins psychologiques.</dd>
+            
+            <dt>E-movere</dt>
+            <dd>Origine latine du mot émotion signifiant "mettre en mouvement". Souligne que l'émotion contient une impulsion à agir pour s'adapter.</dd>
+            
+            <dt>Homéostasie psychologique</dt>
+            <dd>État d'équilibre interne. Les émotions nous poussent à agir pour retrouver ou maintenir cet équilibre (survie et bien-être).</dd>
+            
+            <dt>Évitement émotionnel</dt>
+            <dd>Mécanisme (souvent non conscient) consistant à refuser ou fuir les émotions désagréables. Cela coupe l'accès à l'information sur nos besoins.</dd>
+            
+            <dt>Valence (Agréable/Désagréable)</dt>
+            <dd>Termes à privilégier par rapport à "Positif/Négatif". Ils décrivent la qualité du ressenti sans juger l'utilité de l'émotion.</dd>
+        </dl>
+    </section>
+
+</main>
+
+<script>
+    // --- DASHBOARD INTERACTION ---
+    function activateLight(type) {
+        // Reset
+        document.getElementById('light-green').classList.remove('green-active');
+        document.getElementById('light-red').classList.remove('red-active');
+        const msgBox = document.getElementById('dashboard-msg');
+
+        if (type === 'green') {
+            document.getElementById('light-green').classList.add('green-active');
+            msgBox.innerHTML = "<span style='color:green'><strong>Besoin SATISFAIT.</strong></span> Le cerveau dit : 'C'est bon, continue, investis de l'énergie, ouvre-toi aux autres !'";
+            msgBox.style.borderLeft = "5px solid #27ae60";
+        } else if (type === 'red') {
+            document.getElementById('light-red').classList.add('red-active');
+            msgBox.innerHTML = "<span style='color:red'><strong>Besoin NON-SATISFAIT.</strong></span> Le cerveau dit : 'Alerte ! Quelque chose ne va pas (danger, frustration). Agis pour rétablir l'équilibre !'";
+            msgBox.style.borderLeft = "5px solid #c0392b";
+        } else if (type === 'off') {
+            msgBox.innerHTML = "<strong>Système aveugle.</strong> En coupant l'émotion (évitement), vous ne souffrez plus sur le moment, mais vous ne voyez plus les dangers ni vos besoins. Risque d'accumulation.";
+            msgBox.style.borderLeft = "5px solid #333";
+        }
+    }
+
+    // --- VOCABULARY REVEAL ---
+    function revealCorrection(id) {
+        document.getElementById('corr' + id).style.opacity = '1';
+    }
+
+    // --- QUIZ VALIDATION ---
+    function validateQuiz() {
+        // Question 1
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const fb1 = document.getElementById('fb1');
+        if (q1 && q1.value === 'correct') {
+            fb1.innerHTML = "<strong>Correct !</strong> Exactement, c'est un signal utile pour maintenir l'équilibre.";
+            fb1.className = "feedback-msg success";
+        } else {
+            fb1.innerHTML = "<strong>Incorrect.</strong> L'émotion n'est ni une panne ni une faiblesse, c'est une information vitale (le voyant).";
+            fb1.className = "feedback-msg error";
+        }
+        fb1.style.display = 'block';
+
+        // Question 2
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const fb2 = document.getElementById('fb2');
+        if (q2 && q2.value === 'correct') {
+            fb2.innerHTML = "<strong>Correct !</strong> L'émotion prépare le corps à l'action (fuir, combattre, s'approcher).";
+            fb2.className = "feedback-msg success";
+        } else {
+            fb2.innerHTML = "<strong>Incorrect.</strong> <em>E-movere</em> signifie littéralement 'mettre en mouvement' vers l'extérieur.";
+            fb2.className = "feedback-msg error";
+        }
+        fb2.style.display = 'block';
+
+        // Question 3
+        const q3 = document.querySelector('input[name="q3"]:checked');
+        const fb3 = document.getElementById('fb3');
+        if (q3 && q3.value === 'correct') {
+            fb3.innerHTML = "<strong>Correct !</strong> Le mot 'négatif' est un jugement qui nous pousse à l'évitement émotionnel.";
+            fb3.className = "feedback-msg success";
+        } else {
+            fb3.innerHTML = "<strong>Incorrect.</strong> Les mots ont un poids. Qualifier une émotion de 'négative' entraîne souvent son rejet, ce qui est contre-productif.";
+            fb3.className = "feedback-msg error";
+        }
+        fb3.style.display = 'block';
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

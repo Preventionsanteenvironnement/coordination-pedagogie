@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bilan compétences CPS — Version accessible</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 30px 24px;
+    line-height: 1.65;
+    color: #1f2937;
+    background: #fff;
+  }
+  h1 { color: #4a148c; font-size: 1.8em; border-bottom: 3px solid #8e24aa; padding-bottom: 12px; }
+  h2 { color: #6a1b9a; font-size: 1.3em; margin-top: 32px; }
+  .lead { font-size: 1.08em; background: #f3e5f5; padding: 18px 22px; border-radius: 12px; border-left: 5px solid #8e24aa; }
+  ol { padding-left: 28px; }
+  ol li { margin-bottom: 12px; }
+  .btn-download {
+    display: inline-block;
+    background: linear-gradient(135deg, #4a148c, #8e24aa);
+    color: #fff !important;
+    padding: 16px 28px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 1.05em;
+    box-shadow: 0 4px 15px rgba(74,20,140,0.25);
+    margin: 12px 0;
+  }
+  .btn-download:hover, .btn-download:focus { background: #6a1b9a; }
+  .btn-secondary {
+    display: inline-block;
+    background: #fff;
+    color: #6a1b9a !important;
+    border: 2px solid #8e24aa;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1em;
+    margin: 8px 8px 8px 0;
+  }
+  .btn-secondary:hover, .btn-secondary:focus { background: #f3e5f5; }
+  .info-box {
+    background: #fff8e1; padding: 16px 20px; border-radius: 10px;
+    border-left: 4px solid #f9a825; margin: 20px 0;
+  }
+  .access-box {
+    background: #e3f2fd; padding: 16px 20px; border-radius: 10px;
+    border-left: 4px solid #1976d2; margin: 20px 0;
+  }
+  a { color: #6a1b9a; }
+  a:focus { outline: 3px solid #ffd54f; outline-offset: 2px; }
+  code { background: #f3e5f5; padding: 2px 6px; border-radius: 4px; font-size: 0.94em; }
+</style>
+</head>
+<body>
+
+<h1>📋 Bilan compétences psychosociales</h1>
+<p class="lead">Page d'accueil du sondage CPS — accessible aux élèves qui utilisent une <strong>machine braille</strong> ou un <strong>lecteur d'écran</strong>, et version standard interactive pour les autres.</p>
+
+<h2>🌐 Version interactive (téléphone ou ordinateur)</h2>
+<p>Pour la majorité des élèves : sondage en ligne, anonyme, avec smileys, étoiles et boutons.</p>
+<p><a class="btn-secondary" href="/cps/sondage/">🌐 Ouvrir le sondage interactif</a></p>
+
+<h2>📄 Version accessible (texte brut)</h2>
+<p>Pour les élèves qui utilisent une <strong>machine braille</strong>, un <strong>lecteur d'écran</strong>, ou qui préfèrent répondre sur papier.</p>
+<p>Le questionnaire est fourni en fichier Word, <strong>directement remis par l'enseignant</strong> (en main propre, par e-mail ou sur clé USB). Il n'est pas téléchargeable en ligne. Toutes les questions sont en <strong>texte brut</strong>, sans tableau, sans image.</p>
+<p style="background:#f3e5f5; padding:14px 18px; border-radius:10px; border-left:5px solid #8e24aa;"><strong>👉 Demande-le à ton enseignant.</strong> Le fichier s'appelle <code>Bilan_competences_accessible.docx</code>.</p>
+
+<div class="access-box">
+<strong>♿ Caractéristiques d'accessibilité :</strong>
+<ul>
+  <li>Texte brut, police Arial 14 pts, marges généreuses</li>
+  <li>Aucun tableau, aucune image, aucun graphisme</li>
+  <li>Structure linéaire (les sections se suivent dans l'ordre)</li>
+  <li>Toutes les questions et réponses sont numérotées clairement</li>
+  <li>Ne nécessite ni clavier de tabulation ni interaction souris</li>
+  <li>Compatible avec les machines braille, VoiceOver, NVDA, JAWS</li>
+</ul>
+</div>
+
+<h2>🔄 Workflow pour l'enseignant</h2>
+<ol>
+  <li><strong>Distribuer</strong> le fichier Word à l'élève (par mail, USB, ou impression).</li>
+  <li>L'élève remplit le questionnaire sur sa machine braille ou son outil habituel.</li>
+  <li>L'élève renvoie ses réponses (fichier texte, e-mail, dictée…).</li>
+  <li>L'enseignant ouvre la <strong>dernière page</strong> du Word (« Instructions pour le professeur ») et y trouve un <strong>prompt prêt à copier</strong> dans une IA (Claude, ChatGPT…).</li>
+  <li>L'IA convertit les réponses en JSON.</li>
+  <li>L'enseignant va dans le <strong>Cockpit PSE → Sondage CPS</strong> et clique sur <code>📥 Importer une réponse (JSON)</code>, colle le JSON, valide.</li>
+  <li>La réponse de l'élève est intégrée aux statistiques de la classe, comme s'il avait répondu en ligne.</li>
+</ol>
+
+<div class="info-box">
+<strong>ℹ️ Anonymat :</strong> les réponses sont enregistrées sans nom ni identifiant. Seule la classe (TBP1/TBP2/TBP3) est conservée pour les statistiques.
+</div>
+
+<h2>🆘 Aide</h2>
+<p>Si tu as un problème pour télécharger ou ouvrir le fichier Word, contacte ton enseignant qui te le remettra en main propre.</p>
+
+<p style="margin-top: 40px; font-size: 0.9em; color: #888;">Document préparé dans le cadre du parcours éducatif de santé — Référentiel CPS Santé publique France 2025.</p>
+
+</body>
+</html>

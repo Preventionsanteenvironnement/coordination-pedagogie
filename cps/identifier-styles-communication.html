@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche Pédagogique - Les Comportements de Communication</title>
+    <style>
+        :root {
+            --color-primary: #0056b3;
+            --color-secondary: #007bff;
+            --color-assertive: #28a745;
+            --color-aggressive: #dc3545;
+            --color-passive: #ffc107;
+            --color-passive-aggressive: #fd7e14;
+            --color-text: #333;
+            --color-bg: #f8f9fa;
+            --color-border: #dee2e6;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--color-primary);
+        }
+
+        h1 {
+            border-bottom: 3px solid var(--color-secondary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .accordion-item {
+            margin-bottom: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .accordion-button {
+            background-color: var(--color-primary);
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .accordion-button:hover {
+            background-color: #004494;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            background-color: #fff;
+            display: none;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .key-concept {
+            font-style: italic;
+            color: var(--color-secondary);
+            font-weight: bold;
+        }
+
+        .analogy, .pro-example {
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 4px solid var(--color-secondary);
+            background-color: #e9f7ff;
+            border-radius: 4px;
+        }
+        
+        /* Styles spécifiques aux types de communication */
+        .type-aggressif { border-left-color: var(--color-aggressive); background-color: #fce7e8; }
+        .type-assertif { border-left-color: var(--color-assertive); background-color: #e9fbe9; }
+        .type-passif { border-left-color: var(--color-passive); background-color: #fff8e1; }
+        .type-passif-aggressif { border-left-color: var(--color-passive-aggressive); background-color: #ffefe1; }
+        .communication-box {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        /* Styles pour l'Introspection */
+        .introspection-reminder {
+            background-color: #ffe0b2;
+            padding: 15px;
+            border: 2px dashed var(--color-passive-aggressive);
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Styles pour les Exercices */
+        .exercise-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background-color: #f1f1f1;
+        }
+
+        .quiz-option {
+            display: block;
+            margin: 8px 0;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .quiz-option:hover {
+            background-color: #e2e6ea;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .correct { background-color: #d4edda; color: #155724; }
+        .incorrect { background-color: #f8d7da; color: #721c24; }
+
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 3px solid var(--color-assertive);
+            background-color: #f0fdf4;
+        }
+        
+        .type-mapping-box {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .type-mapping-item {
+            width: 45%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            cursor: grab;
+            text-align: center;
+        }
+
+        .drop-zone {
+            width: 45%;
+            padding: 20px;
+            border: 2px dashed var(--color-secondary);
+            border-radius: 6px;
+            text-align: center;
+            margin-top: 20px;
+            min-height: 80px;
+        }
+
+        .type-mapping-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .type-mapping-source { width: 45%; }
+        .type-mapping-target { width: 45%; }
+
+        .dragged { opacity: 0.5; }
+
+        /* Glossaire */
+        .glossary-term {
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-top: 10px;
+        }
+
+        .final-validation-section {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Comprendre les Styles de Comportements de Communication</h1>
+    <hr>
+
+    <div class="accordion-item">
+        <button class="accordion-button" onclick="toggleAccordion(this)">
+            1. Compréhension de la Notion
+            <span>&#9660;</span>
+        </button>
+        <div class="accordion-content">
+            <h2>Qu'est-ce que le Comportement de Communication ?</h2>
+            <p>Le <span class="key-concept">Comportement de Communication</span> est une <span class="key-concept">construction psychologique</span> qui englobe la manière dont une personne exprime ses <span class="key-concept">sentiments, besoins et pensées</span>. C'est un substitut à une communication plus directe et ouverte, souvent exprimé par des <span class="key-concept">messages indirects</span> et des <span class="key-concept">effets de comportement</span> (verbaux et non verbaux). Tout <span class="key-concept">comportement</span> (ou son absence attendue, comme le fait de ne pas faire la vaisselle) peut être considéré comme communicatif s'il transmet un message. C'est une <span class="key-concept">variation de différences individuelles</span> : certaines personnes y recourent plus que d'autres.</p>
+            <p>Il existe <strong>quatre types</strong> principaux de comportements de communication : <strong>Agressif</strong>, <strong>Assertif</strong>, <strong>Passif</strong> et <strong>Passif-Agressif</strong>.</p>
+            
+            <h3>Types de Comportement de Communication</h3>
+            <div class="communication-box type-assertif">
+                <h4>Assertif (Définit en détail dans l'extrait)</h4>
+                <p>Capacité d'exprimer ses désirs et sentiments de manière <strong>appropriée, claire et directe</strong>, tout en <strong>respectant</strong> les droits et opinions des autres. C'est une approche d'<strong>écoute active</strong> visant le compromis et le maintien de la relation. Elle est considérée comme le style le <strong>moins utilisé</strong> et le plus bénéfique (gagnant/gagnant).</p>
+            </div>
+            <div class="communication-box type-aggressif">
+                <h4>Agressif</h4>
+                <p>Acte de colère imprévu visant à <strong>blesser ou endommager</strong>. Crée des conflits en s'engageant dans des <strong>attaques personnelles</strong> et des humiliations. Utilise l'intimidation, crée une situation <strong>gagnant-perdant</strong> (au détriment des autres). Souvent associé à un manque d'empathie et à la recherche de pouvoir/contrôle.</p>
+            </div>
+            <div class="communication-box type-passif">
+                <h4>Passif</h4>
+                <p>Ne pas exprimer ses pensées/sentiments, faire passer ses besoins en dernier pour <strong>éviter les conflits</strong> et tenter de plaire aux autres. Intériorise l'inconfort, souvent lié à une <strong>faible estime de soi</strong> et à la croyance que ses besoins n'ont pas d'importance. Peut mener à une <strong>explosion</strong> après accumulation.</p>
+            </div>
+            <div class="communication-box type-passif-aggressif">
+                <h4>Passif-Agressif</h4>
+                <p>Semble passif, mais exprime sa colère de manière <strong>indirecte</strong> (procrastination, oubli, inefficacité intentionnelle, sarcasme, commérages). Maintient un état d'impuissance, ce qui entretient l'agression passive. Ne résout pas les problèmes de manière directe.</p>
+            </div>
+
+            <div class="analogy">
+                <h3>Analogie du Quotidien : Le Restaurant</h3>
+                <p>Imaginez que vous receviez un plat froid au restaurant :</p>
+                <ul>
+                    <li><strong>Passif</strong> : Vous ne dites rien, vous mangez froid et vous vous sentez frustré en silence.</li>
+                    <li><strong>Agressif</strong> : Vous interpellez le serveur en criant, l'humiliez et exigez un nouveau plat immédiatement.</li>
+                    <li><strong>Passif-Agressif</strong> : Vous laissez le plat de côté, soupirant bruyamment, et en faisant des commentaires sarcastiques à votre voisin sur la qualité du service, en espérant que le serveur entende.</li>
+                    <li><strong>Assertif</strong> : Vous appelez calmement le serveur et dites : <strong>« Je constate que mon plat est froid, et j'aimerais qu'il soit réchauffé pour que je puisse en profiter pleinement. »</strong> (Utilisation du "Je" et expression directe du besoin avec respect).</li>
+                </ul>
+            </div>
+
+            <div class="pro-example">
+                <h3>Exemple Professionnel : Réunion d'Équipe</h3>
+                <p>Lors d'une réunion, un professionnel (éducateur, formateur) est en désaccord avec une nouvelle procédure décidée par son responsable :</p>
+                <ul>
+                    <li><strong>Passif</strong> : Il hoche la tête, dit "oui" mais ne mettra pas la procédure en place correctement, ou se plaint à ses collègues après coup.</li>
+                    <li><strong>Agressif</strong> : Il coupe la parole au responsable, critique ouvertement la décision en la qualifiant de stupide et attaque la compétence du responsable.</li>
+                    <li><strong>Passif-Agressif</strong> : Il accepte la procédure en réunion, puis "oublie" systématiquement d'envoyer les documents nécessaires pour la mettre en œuvre, ou la sabote subtilement.</li>
+                    <li><strong>Assertif</strong> : Il attend la fin de l'explication et dit : <strong>« J'entends l'intérêt de cette nouvelle procédure, mais j'aimerais partager ma préoccupation concernant son impact sur le temps que j'ai avec les usagers. J'aimerais que nous discutions ensemble d'un ajustement possible. »</strong> (Utilisation du "Je", expression du sentiment/besoin, et proposition de négociation).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="accordion-item">
+        <button class="accordion-button" onclick="toggleAccordion(this)">
+            2. Introspection du Professionnel : D'abord Soi → Ensuite le Public
+            <span>&#9660;</span>
+        </button>
+        <div class="accordion-content">
+            <div class="introspection-reminder">
+                Les CPS ne peuvent pas être transmises sans être vécues et intégrées personnellement. <strong>D'abord soi → ensuite le public.</strong>
+            </div>
+            
+            <h3>Auto-positionnement : Mon Style Dominant</h3>
+            <p>Réfléchissez aux situations de désaccord ou de tension. Comment réagissez-vous <strong>instinctivement</strong> ?</p>
+            <div id="introspection-slider-container">
+                <label for="slider-aggressif">Tendance Agressive (Imposer mes besoins, gagner) :</label>
+                <input type="range" id="slider-aggressif" min="0" max="10" value="5" oninput="updateStyleScore('aggressif', this.value)">
+                <span id="score-aggressif">5/10</span>
+                
+                <label for="slider-passif">Tendance Passive (Éviter le conflit, céder) :</label>
+                <input type="range" id="slider-passif" min="0" max="10" value="5" oninput="updateStyleScore('passif', this.value)">
+                <span id="score-passif">5/10</span>
+
+                <label for="slider-passif-aggressif">Tendance Passif-Agressive (Bouder, saboter subtilement) :</label>
+                <input type="range" id="slider-passif-aggressif" min="0" max="10" value="5" oninput="updateStyleScore('passif-aggressif', this.value)">
+                <span id="score-passif-aggressif">5/10</span>
+
+                <label for="slider-assertif">Tendance Assertive (Exprimer clairement et respecter) :</label>
+                <input type="range" id="slider-assertif" min="0" max="10" value="5" oninput="updateStyleScore('assertif', this.value)">
+                <span id="score-assertif">5/10</span>
+            </div>
+            
+            <script>
+                function updateStyleScore(style, value) {
+                    document.getElementById(`score-${style}`).textContent = `${value}/10`;
+                }
+            </script>
+
+            <h3>Introspection Guidée : Mon Vécu</h3>
+            <p>Décrivez une situation récente (personnelle ou professionnelle) où vous n'avez pas réussi à être pleinement <strong>Assertif</strong>. Quel style avez-vous utilisé à la place ? Quelles étaient vos <strong>réactions internes</strong> (colère, anxiété, frustration, ressentiment) ?</p>
+            <textarea id="introspection-text" placeholder="Notez vos réflexions ici..."></textarea>
+            <p><em>L'analyse de vos propres comportements (verbaux et non verbaux) est la première étape pour développer la <span class="key-concept">conscience de soi</span> nécessaire à l'Assertivité.</em></p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="accordion-item">
+        <button class="accordion-button" onclick="toggleAccordion(this)">
+            3. Exercices Interactifs sur les Comportements
+            <span>&#9660;</span>
+        </button>
+        <div class="accordion-content exercise-section">
+            
+            <h3>Exercice 1 : Association Glisser-Déposer (Caractéristiques du style)</h3>
+            <p>Associez les <strong>comportements non verbaux</strong> ou attitudes aux types de communication correspondants.</p>
+            <div class="type-mapping-container">
+                <div class="type-mapping-source">
+                    <h4>Comportements à Classer :</h4>
+                    <div class="type-mapping-item" draggable="true" id="item-froncements" data-type="Agressif">Froncements de sourcils et regard critique</div>
+                    <div class="type-mapping-item" draggable="true" id="item-posture" data-type="Assertif">Posture droite, langage corporel ouvert</div>
+                    <div class="type-mapping-item" draggable="true" id="item-agitation" data-type="Passif">Agitation et évitement du contact visuel</div>
+                    <div class="type-mapping-item" draggable="true" id="item-posture-asym" data-type="Passif-Agressif">Posture asymétrique, amical à l'excès pour cacher la colère</div>
+                </div>
+                
+                <div class="type-mapping-target">
+                    <h4>Zones de Dépôt :</h4>
+                    <div class="drop-zone type-aggressif" id="drop-aggressif" data-accept="Agressif">Style <strong>Agressif</strong></div>
+                    <div class="drop-zone type-assertif" id="drop-assertif" data-accept="Assertif">Style <strong>Assertif</strong></div>
+                    <div class="drop-zone type-passif" id="drop-passif" data-accept="Passif">Style <strong>Passif</strong></div>
+                    <div class="drop-zone type-passive-aggressif" id="drop-passive-aggressif" data-accept="Passif-Agressif">Style <strong>Passif-Agressif</strong></div>
+                </div>
+            </div>
+            <button onclick="checkMapping()">Vérifier les Associations</button>
+            <div id="mapping-feedback" class="feedback"></div>
+
+            <script>
+                // Drag and Drop Logic
+                const items = document.querySelectorAll('.type-mapping-item');
+                const dropZones = document.querySelectorAll('.drop-zone');
+
+                items.forEach(item => {
+                    item.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', e.target.id);
+                        setTimeout(() => e.target.classList.add('dragged'), 0);
+                    });
+                    item.addEventListener('dragend', (e) => {
+                        e.target.classList.remove('dragged');
+                    });
+                });
+
+                dropZones.forEach(zone => {
+                    zone.addEventListener('dragover', (e) => {
+                        e.preventDefault(); // Nécessaire pour permettre le drop
+                        zone.style.backgroundColor = '#d0e0ff';
+                    });
+
+                    zone.addEventListener('dragleave', (e) => {
+                        zone.style.backgroundColor = '';
+                    });
+
+                    zone.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        zone.style.backgroundColor = '';
+                        const id = e.dataTransfer.getData('text/plain');
+                        const draggableElement = document.getElementById(id);
+                        const dropZone = e.target.closest('.drop-zone'); // Assure qu'on drop sur la zone
+                        const acceptedType = dropZone.getAttribute('data-accept');
+                        
+                        if (draggableElement.getAttribute('data-type') === acceptedType) {
+                            dropZone.appendChild(draggableElement);
+                            draggableElement.setAttribute('draggable', 'false'); // Désactiver après le drop
+                        } else {
+                            // Feedback visuel temporaire pour erreur
+                            dropZone.style.backgroundColor = '#f8d7da';
+                            setTimeout(() => dropZone.style.backgroundColor = '', 500);
+                        }
+                    });
+                });
+
+                function checkMapping() {
+                    let allCorrect = true;
+                    dropZones.forEach(zone => {
+                        const itemsInZone = zone.querySelectorAll('.type-mapping-item');
+                        itemsInZone.forEach(item => {
+                            if (item.getAttribute('data-type') !== zone.getAttribute('data-accept')) {
+                                allCorrect = false;
+                            }
+                        });
+                        if (itemsInZone.length === 0) {
+                            allCorrect = false; // Considérer comme faux si vide
+                        }
+                    });
+
+                    const feedbackDiv = document.getElementById('mapping-feedback');
+                    feedbackDiv.style.display = 'block';
+
+                    if (allCorrect && document.getElementById('drop-aggressif').children.length === 1 && document.getElementById('drop-assertif').children.length === 1 && document.getElementById('drop-passif').children.length === 1 && document.getElementById('drop-passive-aggressif').children.length === 1) {
+                        feedbackDiv.className = 'feedback correct';
+                        feedbackDiv.innerHTML = 'Bravo ! Toutes les associations sont correctes. Vous avez bien identifié les <strong>comportements non verbaux</strong> et <strong>attitudes</strong> associés à chaque style.';
+                    } else {
+                        feedbackDiv.className = 'feedback incorrect';
+                        feedbackDiv.innerHTML = 'Attention, certaines associations sont incorrectes ou incomplètes. Réessayez en vous basant sur la description des styles.';
+                    }
+                }
+            </script>
+            
+            <hr>
+
+            <h3>Exercice 2 : Mini-Scénario Assertif (Utilisation du "Je")</h3>
+            <p>Un collègue arrive systématiquement 10 minutes en retard à vos rendez-vous, ce qui vous fait perdre du temps. Choisissez l'affirmation la plus <strong>Assertive</strong> (utilisant la technique du « Je ») :</p>
+            <label class="quiz-option" for="scenario-q1-a">
+                <input type="radio" name="scenario-q1" id="scenario-q1-a" value="A">
+                A. "Tu es toujours en retard, tu ne respectes pas mon temps. Ça doit cesser immédiatement."
+            </label>
+            <label class="quiz-option" for="scenario-q1-b">
+                <input type="radio" name="scenario-q1" id="scenario-q1-b" value="B">
+                B. "Oh, ne vous inquiétez pas, ce n'est pas grave si vous êtes en retard. Je m'occupe de la première partie."
+            </label>
+            <label class="quiz-option" for="scenario-q1-c">
+                <input type="radio" name="scenario-q1" id="scenario-q1-c" value="C">
+                C. "Je me sens frustré(e) lorsque vous arrivez 10 minutes en retard à nos rendez-vous, car cela décale ma propre organisation. J'aimerais que nous nous assurions de commencer à l'heure."
+            </label>
+            <label class="quiz-option" for="scenario-q1-d">
+                <input type="radio" name="scenario-q1" id="scenario-q1-d" value="D">
+                D. (Se taire et soupirer bruyamment pour montrer son agacement)
+            </label>
+            <button onclick="checkScenarioQuiz()">Vérifier le Scénario</button>
+            <div id="scenario-feedback" class="feedback"></div>
+
+            <script>
+                function checkScenarioQuiz() {
+                    const selected = document.querySelector('input[name="scenario-q1"]:checked');
+                    const feedbackDiv = document.getElementById('scenario-feedback');
+                    feedbackDiv.style.display = 'block';
+                    
+                    if (!selected) {
+                        feedbackDiv.className = 'feedback incorrect';
+                        feedbackDiv.innerHTML = 'Veuillez sélectionner une option.';
+                        return;
+                    }
+
+                    if (selected.value === 'C') {
+                        feedbackDiv.className = 'feedback correct';
+                        feedbackDiv.innerHTML = 'Correct ! L\'option C est la plus <strong>Assertive</strong> : elle utilise le <strong>« Je »</strong> pour exprimer le sentiment et le besoin sans accuser l\'autre (évitant l\'agression ou la passivité).';
+                    } else if (selected.value === 'A') {
+                        feedbackDiv.className = 'feedback incorrect';
+                        feedbackDiv.innerHTML = 'Incorrect. L\'option A est <strong>Agressive</strong> : elle utilise le <strong>« Tu »</strong> accusateur et menace. (Type Agressif)';
+                    } else if (selected.value === 'B') {
+                        feedbackDiv.className = 'feedback incorrect';
+                        feedbackDiv.innerHTML = 'Incorrect. L\'option B est <strong>Passive</strong> : elle intériorise l\'inconfort et fait passer les besoins de l\'autre en premier. (Type Passif)';
+                    } else if (selected.value === 'D') {
+                        feedbackDiv.className = 'feedback incorrect';
+                        feedbackDiv.innerHTML = 'Incorrect. L\'option D est <strong>Passif-Agressive</strong> : elle exprime l\'agacement de manière indirecte (comportement non verbal) sans aborder le problème. (Type Passif-Agressif)';
+                    }
+                }
+            </script>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="accordion-item">
+        <button class="accordion-button" onclick="toggleAccordion(this)">
+            4. Accompagnement d’un Public (Après l'Expérimentation Personnelle)
+            <span>&#9660;</span>
+        </button>
+        <div class="accordion-content">
+            <p>Une fois que vous avez exploré et pratiqué l'Assertivité sur vous-même, vous pouvez accompagner un public (élèves, jeunes, usagers) à développer leurs propres <strong>Comportements de Communication</strong> :</p>
+            <ul>
+                <li><strong>Éducation aux 4 Styles :</strong> Aider le public à identifier s'ils sont <strong>Passifs</strong>, <strong>Agressifs</strong>, <strong>Passifs-Agressifs</strong> ou <strong>Assertifs</strong> dans différentes situations. Utiliser des mises en situation simples (ex. : prêter un objet) pour qu'ils observent leurs réactions et celles des autres.</li>
+                <li><strong>Travail sur le « Je » :</strong> Enseigner la structure de phrase assertive (ex. : « Quand [fait], je me sens [émotion], et j'aimerais [besoin] ») pour aider à exprimer les sentiments et besoins de manière non accusatoire.</li>
+                <li><strong>Rôle de l'Écoute Active :</strong> Montrer comment l'<strong>Assertivité</strong> inclut d'être <strong>ouvert à entendre les opinions des autres</strong> et de s'engager dans la <strong>négociation</strong> et le <strong>compromis</strong> plutôt que de chercher une situation gagnant-perdant ou d'éviter le conflit.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div class="final-validation-section">
+        <h2>5. Validation Finale : Mini-Quiz de Synthèse</h2>
+        <p>Quelle est l'une des techniques essentielles pour développer une <strong>communication assertive</strong> et quel style de communication vise à <strong>éviter activement la confrontation</strong> et à <strong>intérioriser l'inconfort</strong> ?</p>
+        
+        <label class="quiz-option" for="final-quiz-a">
+            <input type="radio" name="final-quiz" id="final-quiz-a" value="A">
+            A. La gestion des émotions et le style Agressif.
+        </label>
+        <label class="quiz-option" for="final-quiz-b">
+            <input type="radio" name="final-quiz" id="final-quiz-b" value="B">
+            B. L'écoute active et le style Passif.
+        </label>
+        <label class="quiz-option" for="final-quiz-c">
+            <input type="radio" name="final-quiz" id="final-quiz-c" value="C">
+            C. L'humiliation et le style Passif-Agressif.
+        </label>
+        <label class="quiz-option" for="final-quiz-d">
+            <input type="radio" name="final-quiz" id="final-quiz-d" value="D">
+            D. L'utilisation du « Tu » accusateur et le style Assertif.
+        </label>
+        
+        <button onclick="checkFinalQuiz()">Valider ma Réponse</button>
+        <div id="final-feedback" class="feedback"></div>
+        
+        <script>
+            function checkFinalQuiz() {
+                const selected = document.querySelector('input[name="final-quiz"]:checked');
+                const feedbackDiv = document.getElementById('final-feedback');
+                feedbackDiv.style.display = 'block';
+
+                if (!selected) {
+                    feedbackDiv.className = 'feedback incorrect';
+                    feedbackDiv.innerHTML = 'Veuillez sélectionner une option.';
+                    return;
+                }
+
+                if (selected.value === 'B') {
+                    feedbackDiv.className = 'feedback correct';
+                    feedbackDiv.innerHTML = 'Bravo ! Réponse Correcte : L\'<strong>Écoute Active</strong> est une technique cruciale pour l\'<strong>Assertivité</strong> (favorisant la compréhension mutuelle et le respect), et le style <strong>Passif</strong> correspond bien à l\'attitude d\'<strong>éviter activement la confrontation</strong> et d\'<strong>intérioriser l\'inconfort</strong> pour ne pas faire de vague (vu dans le glossaire et l\'exercice 2).';
+                    feedbackDiv.innerHTML += '<div class="explanation"><ul><li><strong>Écoute Active :</strong> Mentionnée comme technique pour l\'Assertivité, elle est vitale pour entendre les opinions des autres sans les critiquer.</li><li><strong>Style Passif :</strong> Se caractérise par l\'évitement du conflit et l\'intériorisation de l\'inconfort pour tenter de rendre les autres heureux.</li></ul></div>';
+                } else {
+                    feedbackDiv.className = 'feedback incorrect';
+                    feedbackDiv.innerHTML = 'Réponse Incorrecte. Voici la correction expliquée :';
+                    feedbackDiv.innerHTML += '<div class="explanation"><ul><li>L\'<strong>Assertivité</strong> s\'appuie sur des techniques comme l\'<strong>Écoute Active</strong>, l\'<strong>utilisation du « Je »</strong> ou la <strong>gestion des émotions</strong>.</li><li>Le style qui <strong>évite la confrontation</strong> et <strong>intériorise l\'inconfort</strong> pour éviter les problèmes est le style <strong>Passif</strong>.</li></ul><p>Les autres options contiennent des éléments contradictoires (ex. : l\'agressivité n\'évite pas la confrontation ; l\'humiliation n\'est pas une technique assertive ; le « Tu » accusateur est agressif).</p></div>';
+                }
+            }
+            
+            function toggleAccordion(button) {
+                const content = button.nextElementSibling;
+                const span = button.querySelector('span');
+                
+                content.classList.toggle('active');
+                if (content.classList.contains('active')) {
+                    span.innerHTML = '&#9650;'; // Flèche vers le haut
+                } else {
+                    span.innerHTML = '&#9660;'; // Flèche vers le bas
+                }
+            }
+
+            // Ouvrir la première section par défaut
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelector('.accordion-button').click();
+            });
+        </script>
+    </div>
+
+    <hr>
+    
+    <div class="glossaire">
+        <h2>Glossaire Final</h2>
+        <p>Clarification des termes mobilisés dans cette fiche pédagogique.</p>
+        
+        <div class="glossary-term">Comportement de Communication</div>
+        <p>Manière indirecte (souvent non verbale ou par des messages indirects) d'exprimer ses sentiments, besoins et pensées, servant de substitut à une communication directe. C'est une variation de différences individuelles.</p>
+
+        <div class="glossary-term">Assertif (Style Assertif)</div>
+        <p>Style de communication direct, respectueux, qui permet d'exprimer clairement ses sentiments et besoins tout en respectant les droits et opinions des autres. Vise le compromis et le maintien de relations équilibrées. Le style le moins utilisé.</p>
+        
+        <div class="glossary-term">Agressif (Style Agressif)</div>
+        <p>Style de communication basé sur l'intimidation et les attaques personnelles, visant à imposer ses idées et à créer une situation gagnant-perdant (aux dépens des autres). Souvent associé à la colère et à un fort sentiment d'insuffisance.</p>
+        
+        <div class="glossary-term">Passif (Style Passif)</div>
+        <p>Style de communication où l'individu évite activement la confrontation et intériorise son inconfort. Il fait passer ses besoins en dernier pour tenter de plaire aux autres, souvent lié à une faible estime de soi.</p>
+        
+        <div class="glossary-term">Passif-Agressif (Style Passif-Agressif)</div>
+        <p>Style de communication où l'individu semble passif en apparence, mais exprime sa colère et sa frustration de manière indirecte (ex. : sarcasme, oublis, sabotage subtil). Ne résout pas les problèmes de manière constructive.</p>
+        
+        <div class="glossary-term">Utilisation du « Je »</div>
+        <p>Technique essentielle de la communication assertive consistant à exprimer ses pensées, sentiments et besoins en utilisant des phrases en « Je » (« Je me sens... », « J'aimerais... »). Cela permet de prendre la responsabilité de ses émotions sans accuser l'autre.</p>
+
+        <div class="glossary-term">Écoute Active</div>
+        <p>Technique clé de la communication assertive. Elle implique de prêter une attention totale à l'interlocuteur, de reformuler et de poser des questions pour comprendre véritablement les opinions et préoccupations de l'autre, favorisant ainsi un échange respectueux.</p>
+    </div>
+
+</div>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</body>
+</html>

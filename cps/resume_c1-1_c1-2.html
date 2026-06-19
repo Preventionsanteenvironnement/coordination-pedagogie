@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthèse CPS : Connaissance de Soi et Empowerment</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --empowerment: #8e44ad; /* Violet pour le pouvoir d'agir */
+            --wellbeing: #27ae60; /* Vert pour le bien-être */
+            --bg-light: #f4f6f7;
+            --text: #34495e;
+            --white: #ffffff;
+            --radius: 10px;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #ecf0f1;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            border-bottom: 3px solid var(--empowerment);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-top: 40px;
+            border-left: 5px solid var(--empowerment);
+            padding-left: 15px;
+            font-size: 1.4rem;
+        }
+
+        .highlight-box {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--primary);
+            margin: 20px 0;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            padding: 20px;
+            border-radius: var(--radius);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .card-empowerment {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+        }
+
+        .card-wellbeing {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .card h3 { margin-top: 0; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; }
+
+        /* INTROSPECTION */
+        .introspection-section {
+            background: #fff5e6;
+            border: 2px dashed #f39c12;
+            padding: 25px;
+            border-radius: var(--radius);
+        }
+
+        .badge {
+            background: #f39c12;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        /* INTERACTIVE EXERCISE */
+        .exercise-container {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .sort-area {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .draggable-item {
+            background: var(--primary);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.9rem;
+        }
+
+        .drop-zones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            border-radius: var(--radius);
+            min-height: 150px;
+            transition: background 0.3s;
+        }
+
+        .drop-zone.empower { border-color: var(--empowerment); background: #f4ecf7; }
+        .drop-zone.wellbeing { border-color: var(--wellbeing); background: #e9f7ef; }
+        
+        .drop-zone h4 { margin-top: 0; pointer-events: none;}
+
+        /* QUIZ STYLES UPDATED */
+        .quiz-item {
+            margin-bottom: 25px;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 20px;
+        }
+
+        .quiz-option {
+            padding: 12px;
+            background: #f8f9fa;
+            margin: 8px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #eee;
+        }
+        .quiz-option:hover { background: #e2e6ea; }
+
+        .quiz-option.correct { 
+            background: #d4edda !important; 
+            border-color: #c3e6cb; 
+            color: #155724; 
+            font-weight: bold;
+        }
+        .quiz-option.incorrect { 
+            background: #f8d7da !important; 
+            border-color: #f5c6cb; 
+            color: #721c24; 
+            opacity: 0.7;
+        }
+
+        .feedback-box {
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .glossary {
+            margin-top: 50px;
+            background: #fafafa;
+            padding: 20px;
+            border-radius: var(--radius);
+            font-size: 0.9em;
+        }
+        .glossary dt { color: var(--primary); font-weight: bold; margin-top: 10px; }
+
+        @media (max-width: 600px) {
+            .drop-zones { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CPS SYNTHÈSE : Connaissance de Soi & Pouvoir d'Agir</h1>
+
+    <h2>1. Comprendre les Enjeux</h2>
+    
+    <div class="highlight-box">
+        <p>Accroître sa connaissance de soi ne sert pas uniquement à "se connaître", mais vise deux finalités majeures pour le professionnel et son public : développer le <strong>pouvoir d'agir (empowerment)</strong> et le <strong>bien-être psychologique</strong>.</p>
+    </div>
+
+    <div class="concept-grid">
+        <div class="card card-empowerment">
+            <h3>🚀 L'Empowerment</h3>
+            <p>Le pouvoir d'agir est renforcé par deux mécanismes clés :</p>
+            <ul>
+                <li><strong>Connaître les limites de l'Image de soi :</strong> Comprendre que nos comportements sont pilotés par des images mentales construites socialement.</li>
+                <li><strong>Défusionner et penser critique :</strong> Se différencier de ses pensées ("Je ne suis pas mes pensées") pour retrouver le choix d'observer et de questionner nos représentations.</li>
+            </ul>
+        </div>
+
+        <div class="card card-wellbeing">
+            <h3>🌱 Le Bien-être & la Créativité</h3>
+            <p>Ces états sont favorisés par :</p>
+            <ul>
+                <li><strong>L'Acceptation Expérientielle :</strong> Accueillir volontairement ses états internes (émotions, volitions) sans lutter.</li>
+                <li><strong>Réduire l'évitement :</strong> Diminuer la lutte contre soi-même libère de l'énergie pour répondre de façon ajustée à ses besoins psychologiques.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="highlight-box" style="background: #e8f4f8; border-color: #3498db;">
+        <h3>Les 2 conditions fondamentales</h3>
+        <p>Le renforcement de la connaissance de soi s'appuie sur :</p>
+        <ol>
+            <li><strong>Le Soi Sujet (AADA) :</strong> Mobiliser ses capacités d'Attention, d'Analyse, de Décision et d'Action.</li>
+            <li><strong>L'Acceptation de l'Internalisation :</strong> Reconnaître que notre identité est largement construite par les autres (famille, culture) et non "innée" ou totalement "libre". Accepter ce conditionnement est la première étape pour s'en libérer.</li>
+        </ol>
+    </div>
+
+    <h2>2. Introspection du Professionnel</h2>
+    
+    <div class="introspection-section">
+        <span class="badge">Étape Obligatoire</span>
+        <p><strong>Questionner sa propre "Internalisation"</strong></p>
+        <p>Le document souligne que <em>"notre identité est largement dépendante de nos interactions sociales"</em> et que nous avons tendance à croire, à tort, que nous sommes totalement autonomes dans nos pensées.</p>
+        
+        <p><strong>Exercice :</strong> Identifiez une "vérité" sur vous-même qui vient en réalité de votre histoire sociale ou professionnelle (ex: "Je dois toujours être fort", "Un bon pro ne montre pas ses émotions").</p>
+        <textarea rows="2" placeholder="J'ai internalisé l'idée que..."></textarea>
+        
+        <p><strong>Impact :</strong> En quoi cette représentation limite-t-elle votre <em>pouvoir d'agir</em> aujourd'hui ?</p>
+        <textarea rows="2" placeholder="Cela m'empêche de... ou m'oblige à..."></textarea>
+    </div>
+
+    <h2>3. Pratique : Trier les Effets</h2>
+    <p>Associez chaque mécanisme ou concept à son <strong>effet principal</strong> selon le référentiel.</p>
+
+    <div class="exercise-container">
+        <div class="sort-area" id="sort-source"></div>
+
+        <div class="drop-zones">
+            <div class="drop-zone empower" id="zone-empower" onclick="handleZoneClick('empower')">
+                <h4 style="color:#8e44ad">Vers l'EMPOWERMENT<br>(Pouvoir d'agir)</h4>
+                <div class="zone-content"></div>
+            </div>
+            <div class="drop-zone wellbeing" id="zone-wellbeing" onclick="handleZoneClick('wellbeing')">
+                <h4 style="color:#27ae60">Vers le BIEN-ÊTRE<br>(Régulation & Créativité)</h4>
+                <div class="zone-content"></div>
+            </div>
+        </div>
+        <p id="feedback-sort" style="font-weight: bold; min-height: 25px; margin-top:10px;"></p>
+        <button onclick="resetSort()" style="padding: 8px 16px; border:none; background:var(--primary); color:white; border-radius:4px; cursor:pointer;">Réinitialiser</button>
+    </div>
+
+    <h2>4. Accompagnement : La posture CPS</h2>
+    <div class="highlight-box">
+        <p>Pour accompagner le public, gardez à l'esprit la logique globale :</p>
+        <ul>
+            <li><strong>Ne pas chercher à "réparer" l'image de soi</strong> directement, mais apprendre à la <em>questionner</em> (Esprit critique).</li>
+            <li><strong>Encourager l'observation (Soi sujet)</strong> plutôt que le jugement.</li>
+            <li><strong>Viser l'autonomie (Empowerment) :</strong> Aider l'autre à comprendre qu'il a internalisé des étiquettes ("je suis nul", "je suis méchant") et qu'il peut choisir de ne plus agir en fonction d'elles.</li>
+        </ul>
+    </div>
+
+    <h2>5. Quiz de Validation</h2>
+    <div id="quiz-container">
+        
+        <div class="quiz-item">
+            <p><strong>1. Selon le référentiel, qu'est-ce qui est nécessaire pour renforcer notre force de décision ?</strong></p>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">Ignorer l'influence des autres.</div>
+            <div class="quiz-option" onclick="checkQuiz(this, true, 'q1')">Accepter que notre Soi est largement construit et conditionné par les autres (internalisation).</div>
+            
+            <div id="feedback-q1" class="feedback-box">
+                <strong>Réponse correcte.</strong><br>
+                Paradoxalement, la liberté commence par reconnaître nos conditionnements. Le texte indique que les représentations des autres (feed-back) deviennent les nôtres par <em>internalisation</em>. Ignorer cela, c'est rester aveugle à ce qui nous pilote.
+            </div>
+        </div>
+        
+        <div class="quiz-item">
+            <p><strong>2. Que permet l'acceptation expérientielle (accueillir ses états internes) ?</strong></p>
+            <div class="quiz-option" onclick="checkQuiz(this, true, 'q2')">De mieux réguler ses besoins et d'éviter les conduites à risques.</div>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">De supprimer définitivement les émotions négatives.</div>
+            
+            <div id="feedback-q2" class="feedback-box">
+                <strong>Exact !</strong><br>
+                L'acceptation permet de sortir de la lutte énergivore (évitement). Elle ne supprime pas l'émotion, mais permet d'y répondre de façon adaptée, favorisant le bien-être et réduisant les comportements rigides ou dangereux.
+            </div>
+        </div>
+
+        <div class="quiz-item">
+            <p><strong>3. Quel acronyme désigne les capacités cognitives du Soi Sujet ?</strong></p>
+            <div class="quiz-option" onclick="checkQuiz(this, true, 'q3')">AADA (Attention, Analyse, Décision, Action).</div>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">SOS (Silence, Observation, Solution).</div>
+            
+            <div id="feedback-q3" class="feedback-box">
+                <strong>Correct.</strong><br>
+                AADA représente les 4 fonctions clés du Soi Sujet : Attention (perception), Analyse (mémoire/pensée), Décision (choix), Action (verbale/comportementale).
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="glossary">
+        <h3>📚 Glossaire de synthèse</h3>
+        <dl>
+            <dt>Empowerment (Pouvoir d'agir)</dt>
+            <dd>Capacité à penser de façon critique et à agir, renforcée par la prise de recul sur l'image de soi et la défusion cognitive.</dd>
+            
+            <dt>Acceptation expérientielle</dt>
+            <dd>Attitude d'ouverture aux états internes (émotions, volitions) favorisant le bien-être et évitant les cercles vicieux de lutte.</dd>
+            
+            <dt>Internalisation</dt>
+            <dd>Processus par lequel les représentations externes (sociales, familiales) deviennent nos propres représentations internes. En prendre conscience est une condition de la liberté.</dd>
+            
+            <dt>Soi Sujet (AADA)</dt>
+            <dd>Le pilote conscient (Attention, Analyse, Décision, Action) qui permet de réguler le Soi interne et de questionner l'Image de soi.</dd>
+        </dl>
+    </div>
+</div>
+
+<script>
+    /* --- DATA FOR SORTING GAME --- */
+    const sortItems = [
+        { text: "Questionner l'image de soi", target: "empower" },
+        { text: "Diminuer l'évitement expérientiel", target: "wellbeing" },
+        { text: "Défusionner avec ses pensées", target: "empower" },
+        { text: "Reconnaître ses états internes", target: "wellbeing" },
+        { text: "Penser de façon critique", target: "empower" },
+        { text: "Répondre à ses besoins psychologiques", target: "wellbeing" }
+    ];
+
+    let currentSelection = null;
+
+    function initSort() {
+        const container = document.getElementById('sort-source');
+        const z1 = document.querySelector('#zone-empower .zone-content');
+        const z2 = document.querySelector('#zone-wellbeing .zone-content');
+        
+        container.innerHTML = '';
+        z1.innerHTML = '';
+        z2.innerHTML = '';
+        document.getElementById('feedback-sort').innerText = '';
+
+        sortItems.sort(() => Math.random() - 0.5).forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'draggable-item';
+            el.innerText = item.text;
+            el.dataset.target = item.target;
+            el.onclick = () => selectItem(el);
+            container.appendChild(el);
+        });
+    }
+
+    function selectItem(el) {
+        if (currentSelection) {
+            currentSelection.style.background = "var(--primary)";
+        }
+        currentSelection = el;
+        el.style.background = "#e67e22"; // Highlight
+        document.getElementById('feedback-sort').innerText = "Élément sélectionné. Cliquez sur une zone (Empowerment ou Bien-être).";
+    }
+
+    function handleZoneClick(zoneType) {
+        if (!currentSelection) return;
+        
+        const feedback = document.getElementById('feedback-sort');
+        const correctTarget = currentSelection.dataset.target;
+
+        if (correctTarget === zoneType) {
+            const targetZone = document.querySelector(`#zone-${zoneType} .zone-content`);
+            targetZone.appendChild(currentSelection);
+            currentSelection.style.background = (zoneType === 'empower') ? '#8e44ad' : '#27ae60';
+            currentSelection.onclick = null; // Lock
+            currentSelection = null;
+            feedback.innerText = "Correct !";
+            feedback.style.color = "#27ae60";
+        } else {
+            feedback.innerText = "Non, cet élément relève de l'autre catégorie (selon le document).";
+            feedback.style.color = "#c0392b";
+        }
+
+        if (document.getElementById('sort-source').children.length === 0) {
+            feedback.innerText = "Bravo ! Vous avez reconstitué la logique du référentiel.";
+        }
+    }
+
+    function resetSort() { initSort(); }
+
+    /* --- QUIZ LOGIC CORRIGÉE --- */
+    function checkQuiz(element, isCorrect, feedbackId) {
+        const parent = element.parentElement;
+        const options = parent.getElementsByClassName('quiz-option');
+        const feedbackEl = document.getElementById('feedback-' + feedbackId);
+        
+        // 1. Désactiver les clics multiples
+        for(let opt of options) {
+            opt.onclick = null;
+            opt.style.cursor = 'default';
+            opt.style.opacity = '0.6';
+        }
+        element.style.opacity = '1';
+
+        // 2. Gestion visuelle
+        if (isCorrect) {
+            element.classList.add('correct');
+            feedbackEl.style.backgroundColor = '#d4edda'; // Vert clair
+            feedbackEl.style.color = '#155724';
+        } else {
+            element.classList.add('incorrect');
+            feedbackEl.style.backgroundColor = '#f8d7da'; // Rouge clair
+            feedbackEl.style.color = '#721c24';
+            
+            // Montrer la bonne réponse
+            for(let opt of options) {
+                if (opt.outerHTML.includes("true")) {
+                    opt.classList.add('correct');
+                    opt.style.opacity = '1';
+                }
+            }
+        }
+
+        // 3. Afficher le feedback
+        feedbackEl.style.display = 'block';
+    }
+
+    // Init
+    window.onload = initSort;
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

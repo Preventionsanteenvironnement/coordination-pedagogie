@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche CPS : Connaître ses Valeurs Personnelles</title>
+    <style>
+        :root {
+            --primary: #2c3e50;       /* Bleu nuit */
+            --secondary: #34495e;     /* Gris bleuté */
+            --accent: #27ae60;        /* Vert émeraude (Action/Valeur) */
+            --highlight: #f39c12;     /* Orange (Lumière/Phare) */
+            --bg: #fdfdfd;
+            --text: #333;
+            --card-bg: #ffffff;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 { margin: 0; font-size: 1.8rem; }
+        header p { opacity: 0.9; font-style: italic; margin-top: 0.5rem; }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        section {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--accent);
+        }
+
+        h2 { color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+        h3 { color: var(--accent); margin-top: 1.5rem; }
+
+        /* Highlight Boxes */
+        .box-concept {
+            background-color: #eafaf1;
+            border-left: 4px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .box-analogy {
+            background-color: #fef9e7;
+            border-left: 4px solid var(--highlight);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .introspection-banner {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 2rem;
+            border: 2px solid var(--accent);
+        }
+
+        /* Interactive Elements */
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-choice { background-color: #ecf0f1; color: var(--primary); border: 1px solid #bdc3c7; }
+        .btn-choice:hover { background-color: #dfe6e9; }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .feedback.success { background-color: #d5f5e3; color: #1e8449; border: 1px solid #a9dfbf; }
+        .feedback.error { background-color: #fadbd8; color: #922b21; border: 1px solid #e6b0aa; }
+
+        /* Sorting Game */
+        .sort-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .sort-item {
+            background: white;
+            border: 2px solid var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Glossary */
+        dl { margin-top: 1rem; }
+        dt { font-weight: bold; color: var(--primary); margin-top: 1rem; }
+        dd { margin-left: 0; margin-bottom: 0.5rem; color: #555; }
+
+        footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 3rem;
+            padding-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>CPS SYNTHÈSE : Connaître ses Valeurs Personnelles</h1>
+    <p>Des boussoles pour orienter ses actions et choisir des buts concordants</p>
+</header>
+
+<main>
+
+    <section>
+        <h2>1. Comprendre la notion</h2>
+        <p>Les <strong>valeurs personnelles</strong> sont des directions de vie verbalement construites, globales, désirées et librement choisies. Contrairement aux besoins psychologiques qui sont une expérience corporelle et immédiate, les valeurs renvoient à un <strong>idéal mentalisé et symbolique</strong>.</p>
+        
+        <p>Elles ne se limitent pas à la morale (bien/mal), mais englobent tout ce qui est valorisé symboliquement par l'individu. Elles sont essentielles pour donner du sens, de la cohérence et soutenir la motivation autodéterminée.</p>
+
+        <div class="box-analogy">
+            <h3>⚓ Analogie : La Boussole et le Phare</h3>
+            <p>Le document utilise deux images fortes:</p>
+            <ul>
+                <li><strong>La Boussole :</strong> Vos valeurs sont des points de repère stables qui constituent un contre-balancement aux pensées et émotions toujours changeantes (la météo marine).</li>
+                <li><strong>Le Phare :</strong> Elles éclairent la possible route à suivre pour placer vos actions.</li>
+            </ul>
+        </div>
+
+        <div class="box-concept">
+            <h3>🛑 Distinction Importante : Besoin vs Valeur</h3>
+            <p><strong>Exemple professionnel :</strong></p>
+            <ul>
+                <li><em>Ressenti :</em> "Je me sens oppressé, j'ai la boule au ventre" → Signal d'un <strong>Besoin</strong> frustré (ex: sécurité, calme).</li>
+                <li><em>Pensée :</em> "Il est crucial pour moi d'agir avec justice et équité dans ce dossier" → Expression d'une <strong>Valeur</strong> (Morale/Éthique).</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <div class="introspection-banner">
+            <h3>🧘 Introspection du Professionnel</h3>
+            <p>Les valeurs doivent être <strong>librement choisies</strong> pour être opérantes. <br>Avant d'accompagner, clarifiez votre propre boussole.</p>
+        </div>
+
+        <p>Il arrive que nos valeurs individuelles entrent en conflit avec les valeurs collectives de notre environnement (travail, société).</p>
+
+        <p><strong>Exercice de réflexion :</strong></p>
+        <p>Identifiez une situation professionnelle récente où vous avez ressenti un malaise. Était-ce dû à un conflit de valeurs (ex: vos valeurs de solidarité heurtées par une culture de compétition/réussite) ?</p>
+        
+        <textarea placeholder="Décrivez brièvement ce conflit de valeurs ici pour vous-même..." rows="4"></textarea>
+
+        <p><em>Rappel du texte :</em> "Mes valeurs individuelles peuvent entrer en conflit en moi avec ces valeurs collectives qui sont devenues miennes au fil du temps."</p>
+    </section>
+
+    <section>
+        <h2>3. Mise en pratique interactive</h2>
+
+        <h3>Exercice A : Identifier le type de valeur</h3>
+        <p>Le texte distingue plusieurs types de valeurs collectives. Saurez-vous les reconnaître ?</p>
+        <p><em>Cliquez sur la catégorie correspondant à la définition ou l'exemple proposé.</em></p>
+
+        <div id="quiz-container" style="text-align: center;">
+            <div id="question-text" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; padding: 10px; background: #eee; border-radius: 8px;">
+                Chargement...
+            </div>
+            <div class="btn-group" style="justify-content: center;">
+                <button class="btn-choice" onclick="checkCategory('moral')">Valeurs Morales / Éthiques</button>
+                <button class="btn-choice" onclick="checkCategory('civique')">Valeurs Civiques</button>
+                <button class="btn-choice" onclick="checkCategory('realisation')">Valeurs de Réalisation</button>
+            </div>
+            <div id="category-feedback" class="feedback"></div>
+        </div>
+
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+
+        <h3>Exercice B : La Mécanique des Valeurs</h3>
+        <p>Reconstituez la phrase logique basée sur le texte (cliquez sur les segments dans l'ordre).</p>
+        
+        <div id="sentence-builder" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 15px;">
+            <button class="btn-primary" id="seg1" onclick="addToSentence(this, 'Les valeurs sont des choix')">Les valeurs sont des choix</button>
+            <button class="btn-primary" id="seg3" onclick="addToSentence(this, 'pour se diriger vers')">pour se diriger vers</button>
+            <button class="btn-primary" id="seg2" onclick="addToSentence(this, 'non déterminées par autrui')">non déterminées par autrui</button>
+            <button class="btn-primary" id="seg4" onclick="addToSentence(this, 'la vie à laquelle on aspire')">la vie à laquelle on aspire</button>
+        </div>
+
+        <div id="result-area" style="min-height: 40px; border-bottom: 2px dashed #ccc; padding: 10px; font-style: italic; color: var(--primary);">
+            Votre phrase : 
+        </div>
+        <button onclick="resetSentence()" style="margin-top: 10px; font-size: 0.8rem; background: transparent; color: #7f8c8d; border: 1px solid #ccc;">Réinitialiser</button>
+        <div id="sentence-feedback" class="feedback"></div>
+    </section>
+
+    <section>
+        <h2>4. Accompagner le public</h2>
+        <p>Une fois vos valeurs clarifiées, comment utiliser cette notion avec votre public ?</p>
+        <ul>
+            <li><strong>Ne pas imposer :</strong> Les valeurs doivent être "librement choisies" par l'individu. Si elles sont imposées, elles ne génèrent pas de motivation autodéterminée.</li>
+            <li><strong>Lier aux actions :</strong> Aidez la personne à voir si ses actions actuelles ("actions engagées") sont en accord avec ses valeurs déclarées.</li>
+            <li><strong>Distinguer du collectif :</strong> Aidez à faire le tri entre ce qui vient d'eux (valeurs individuelles) et ce qu'ils croient devoir penser pour plaire au groupe (valeurs collectives internalisées).</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Validation des acquis</h2>
+        <p><strong>Question de synthèse :</strong></p>
+        <p>Quelle est la différence fondamentale entre un besoin psychologique et une valeur personnelle selon le texte ?</p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn-choice" onclick="validateFinal(this, false)">C'est la même chose, les termes sont synonymes.</button>
+            <button class="btn-choice" onclick="validateFinal(this, true)">Le besoin est une expérience corporelle/sensible, la valeur est une construction mentale/symbolique.</button>
+            <button class="btn-choice" onclick="validateFinal(this, false)">Les valeurs sont innées et biologiques, alors que les besoins sont culturels.</button>
+        </div>
+
+        <div id="final-feedback" class="feedback"></div>
+    </section>
+
+    <section>
+        <h2>Glossaire</h2>
+        <dl>
+            <dt>Valeurs personnelles</dt>
+            <dd>Directions de vie verbalement construites, globales, désirées et librement choisies. Elles agissent comme des boussoles pour orienter les actions.</dd>
+
+            <dt>Valeurs morales ou éthiques</dt>
+            <dd>Renvoient aux notions de justice, d'équité, de bien vs mal, et à l'adoption de comportements favorables au bien commun.</dd>
+
+            <dt>Valeurs civiques</dt>
+            <dd>Liées au respect de l'environnement social et naturel, et à la participation responsable à la vie de la communauté.</dd>
+
+            <dt>Valeurs de réalisation</dt>
+            <dd>Liées à la réussite, la capacité à accomplir des actions efficacement, à atteindre ses buts et à différer les plaisirs immédiats.</dd>
+
+            <dt>Valeurs individuelles vs Collectives</dt>
+            <dd>Les valeurs collectives (portées par le groupe) doivent être internalisées et choisies individuellement pour devenir des moteurs d'action authentiques.</dd>
+        </dl>
+    </section>
+
+</main>
+
+<footer>
+    <p>CPS Studio - Fiche pédagogique interactive<br>Basé exclusivement sur l'extrait : "Connaître ses valeurs personnelles pour choisir des buts personnels concordants"</p>
+</footer>
+
+<script>
+    // --- EXERCICE A: CATÉGORIES ---
+    const questions = [
+        { text: "Respect de l'environnement social et naturel", type: "civique" },
+        { text: "Notions de justice, d'équité, distinction Bien/Mal", type: "moral" },
+        { text: "Capacité à agir efficacement et atteindre ses buts", type: "realisation" },
+        { text: "Participation productive à la vie de la communauté", type: "civique" },
+        { text: "Capacité de différer les plaisirs immédiats pour réussir", type: "realisation" }
+    ];
+
+    let currentQ = 0;
+
+    function loadQuestion() {
+        if (currentQ < questions.length) {
+            document.getElementById('question-text').innerText = questions[currentQ].text;
+            document.getElementById('category-feedback').style.display = 'none';
+        } else {
+            document.getElementById('question-text').innerText = "Exercice terminé ! Bravo.";
+            document.getElementById('question-text').style.backgroundColor = "#d5f5e3";
+            document.querySelector('.btn-group').style.display = 'none';
+        }
+    }
+
+    function checkCategory(selectedType) {
+        const correctType = questions[currentQ].type;
+        const feedback = document.getElementById('category-feedback');
+        feedback.style.display = 'block';
+
+        if (selectedType === correctType) {
+            feedback.className = "feedback success";
+            feedback.innerHTML = "<strong>Correct !</strong>";
+            setTimeout(() => {
+                currentQ++;
+                loadQuestion();
+            }, 1000);
+        } else {
+            feedback.className = "feedback error";
+            feedback.innerHTML = "<strong>Incorrect.</strong> Réessayez.";
+        }
+    }
+
+    // --- EXERCICE B: PHRASE BUILDER ---
+    let sentenceOrder = [];
+    const correctOrder = ["Les valeurs sont des choix", "non déterminées par autrui", "pour se diriger vers", "la vie à laquelle on aspire"];
+
+    function addToSentence(btn, text) {
+        sentenceOrder.push(text);
+        document.getElementById('result-area').innerText += text + " ";
+        btn.style.display = 'none';
+        
+        if (sentenceOrder.length === 4) {
+            checkSentence();
+        }
+    }
+
+    function resetSentence() {
+        sentenceOrder = [];
+        document.getElementById('result-area').innerText = "Votre phrase : ";
+        document.getElementById('sentence-feedback').style.display = 'none';
+        // Show all buttons again
+        document.querySelectorAll('#sentence-builder button').forEach(b => b.style.display = 'inline-block');
+    }
+
+    function checkSentence() {
+        const feedback = document.getElementById('sentence-feedback');
+        feedback.style.display = 'block';
+        
+        // Compare arrays
+        const isCorrect = JSON.stringify(sentenceOrder) === JSON.stringify(correctOrder);
+
+        if (isCorrect) {
+            feedback.className = "feedback success";
+            feedback.innerHTML = "<strong>Parfait !</strong> Cette définition souligne l'importance de l'autodétermination.";
+        } else {
+            feedback.className = "feedback error";
+            feedback.innerHTML = "<strong>Pas tout à fait.</strong> L'ordre logique est : Choix -> Autonomie (non autrui) -> Direction -> Aspiration.";
+        }
+    }
+
+    // --- FINAL VALIDATION ---
+    function validateFinal(btn, isCorrect) {
+        const feedback = document.getElementById('final-feedback');
+        feedback.style.display = 'block';
+        
+        // Reset buttons
+        const allBtns = btn.parentElement.querySelectorAll('button');
+        allBtns.forEach(b => {
+            b.style.opacity = '0.5';
+            b.disabled = true;
+        });
+        btn.style.opacity = '1';
+
+        if (isCorrect) {
+            feedback.className = "feedback success";
+            feedback.innerHTML = "<strong>Exact !</strong> Le texte précise bien que les besoins s'ancrent dans une expérience corporelle, tandis que les valeurs proviennent d'une élaboration mentale.";
+        } else {
+            feedback.className = "feedback error";
+            feedback.innerHTML = "<strong>Faux.</strong> Relisez la section 'Comprendre'. La distinction corps/esprit (expérience sensible vs idéal mentalisé) est centrale.";
+        }
+    }
+
+    // Init
+    loadQuestion();
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savoir écouter de façon empathique - CPS Studio</title>
+    <style>
+        :root {
+            --primary: #2c3e50; /* Bleu nuit professionnel */
+            --accent: #27ae60; /* Vert pédagogique */
+            --highlight: #e67e22; /* Orange pour l'action */
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --soft-purple: #9b59b6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .introspection-header {
+            background-color: #e8f5e9;
+            border-left: 5px solid var(--accent);
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .concept-box {
+            background-color: #f1f2f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid var(--soft-purple);
+        }
+
+        /* Styles pour l'exercice interactif */
+        .scenario-step {
+            display: none;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .scenario-step.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        .choice-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .choice-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .feedback-area {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Quiz styles */
+        .quiz-option {
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .quiz-option.selected {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .action-tag {
+            display: inline-block;
+            background: var(--soft-purple);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-validate {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .glossary-term {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Savoir Écouter de Façon Empathique</h1>
+    <p style="text-align: center; font-style: italic; color: #666;">Basé sur le référentiel CPS (Santé Publique France)</p>
+
+    <section class="card">
+        <h2>🔷 1. Comprendre la notion</h2>
+        <p>L'écoute empathique n'est pas une écoute passive. C'est une compétence active qui vise la <strong>compréhension empathique</strong> de l'autre. Elle s'appuie sur une <strong>écoute silencieuse</strong> et trois actions mentales cognitives précises.</p>
+        
+        <div class="concept-box">
+            <strong>Les 3 Actions Mentales de l'Écoutant :</strong>
+            <ol>
+                <li><strong>Porter son attention :</strong> Se décentrer de soi (oublier ses tâches, ses pensées) pour se rendre totalement disponible.</li>
+                <li><strong>Percevoir :</strong> Accueillir le vécu de l'autre sans interférence (sans juger, sans chercher de solution immédiate), en utilisant le non-verbal (regard, posture).</li>
+                <li><strong>Se représenter :</strong> Se poser des questions internes pour construire une image mentale de ce que l'autre vit (ses pensées, ses émotions, ses besoins).</li>
+            </ol>
+        </div>
+
+        <p><strong>💡 Analogie : Le Projecteur de Cinéma</strong><br>
+        Imaginez que votre attention est un projecteur. Habituellement, la lumière éclaire un peu partout (vos soucis, le bruit ambiant, votre téléphone). Écouter de façon empathique, c'est <strong>éteindre toutes les autres lumières</strong> pour braquer le projecteur uniquement sur l'écran (l'autre personne). Plus rien d'autre n'existe dans la salle.</p>
+
+        <p><strong>Exemple professionnel :</strong><br>
+        Un éducateur est occupé à rédiger un rapport. Un enfant arrive, contrarié par un conflit avec un autre adulte.
+        <br><em>Réaction empathique :</em> L'éducateur <strong>arrête</strong> d'écrire (Action 1), se tourne vers l'enfant, se met à sa hauteur (Action 2), et se demande intérieurement "Que ressent-il vraiment au-delà de sa colère ?" (Action 3), au lieu de penser "Qui a raison ?" ou "J'ai pas le temps".</p>
+    </section>
+
+    <section class="card" style="border-left: 5px solid var(--highlight);">
+        <h2>🔷 2. Introspection du professionnel</h2>
+        <div class="introspection-header">
+            <strong>⚠️ D'abord SOI, ensuite l'AUTRE</strong><br>
+            Le document précise : <em>"Il est bien important de faire la différence entre mes propres ressentis et ce que ressent l'autre."</em>
+        </div>
+        
+        <p>Avant d'essayer d'écouter un usager, prenez un instant pour scanner votre propre disponibilité.</p>
+
+        <h3>Exercice : Le "Check-up" de mes interférences</h3>
+        <p>Pensez à une situation récente où vous avez eu du mal à écouter. Cochez les "bruits" qui étaient présents en vous (les interférences mentionnées dans le texte) :</p>
+
+        <div style="background: #fdfdfd; padding: 15px; border: 1px dashed #ccc; border-radius: 8px;">
+            <label style="display:block; margin: 8px 0;"><input type="checkbox"> Mes propres jugements ("Il exagère...")</label>
+            <label style="display:block; margin: 8px 0;"><input type="checkbox"> Mes préoccupations ("Je dois finir ce dossier...")</label>
+            <label style="display:block; margin: 8px 0;"><input type="checkbox"> Mes envies/solutions ("Il devrait faire ça...")</label>
+            <label style="display:block; margin: 8px 0;"><input type="checkbox"> Mes propres émotions ("Ça m'énerve qu'il soit triste")</label>
+            <label style="display:block; margin: 8px 0;"><input type="checkbox"> La recherche de qui a tort ou raison</label>
+        </div>
+        
+        <p style="font-size: 0.9em; margin-top: 10px; color: #555;">
+            <em>Analyse :</em> Plus vous cochez de cases, moins vous étiez en capacité de "Percevoir" et "Se représenter" le vécu de l'autre. L'écoute empathique exige de mettre ces éléments "en pause".
+        </p>
+    </section>
+
+    <section class="card">
+        <h2>🔷 3. S'entraîner : Simulateur d'Écoute</h2>
+        <p>Mettez en pratique les <strong>3 actions mentales</strong> à travers ce scénario tiré du document.</p>
+        <p><strong>Situation :</strong> Un enfant vient vous voir. Il semble agité. Il a un problème avec un autre adulte.</p>
+
+        <div id="step1" class="scenario-step active">
+            <span class="action-tag">Action Mentale 1 : ATTENTION</span>
+            <h3>Quelle est votre première réaction ?</h3>
+            <button class="choice-btn" onclick="playScenario(1, false)">Je continue à ranger mes affaires tout en lui disant "Je t'écoute".</button>
+            <button class="choice-btn" onclick="playScenario(1, true)">J'arrête mon travail, je laisse tomber mes préoccupations et je lui consacre toute mon attention.</button>
+            <div id="feedback1" class="feedback-area"></div>
+        </div>
+
+        <div id="step2" class="scenario-step">
+            <span class="action-tag">Action Mentale 2 : PERCEVOIR</span>
+            <h3>Comment vous positionnez-vous (verbal et non-verbal) ?</h3>
+            <button class="choice-btn" onclick="playScenario(2, true)">Je m'assois à sa hauteur, je le regarde avec bienveillance et j'accueille ses dires sans interférer.</button>
+            <button class="choice-btn" onclick="playScenario(2, false)">Je reste debout, je croise les bras et je fronce les sourcils car je ne suis pas d'accord avec ce qu'il dit sur mon collègue.</button>
+            <div id="feedback2" class="feedback-area"></div>
+        </div>
+
+        <div id="step3" class="scenario-step">
+            <span class="action-tag">Action Mentale 3 : SE REPRÉSENTER</span>
+            <h3>Que se passe-t-il dans votre tête (Dialogue interne) ?</h3>
+            <button class="choice-btn" onclick="playScenario(3, false)">"Est-ce que l'autre adulte a vraiment fait ça ? Qui a raison dans cette histoire ?"</button>
+            <button class="choice-btn" onclick="playScenario(3, true)">"Qu'est-ce qu'il vit en ce moment ? Quelles sont ses émotions et ses besoins derrière cette agitation ?"</button>
+            <div id="feedback3" class="feedback-area"></div>
+        </div>
+
+        <div id="step4" class="scenario-step">
+            <span class="action-tag">Action Finale : FACILITATION</span>
+            <h3>Vous avez compris son vécu. Que dites-vous ?</h3>
+            <button class="choice-btn" onclick="playScenario(4, true)">"Veux-tu me raconter ce qui se passe ? Qu'est-ce que tu ressens ?" (Question ouverte)</button>
+            <button class="choice-btn" onclick="playScenario(4, false)">"Tu ne devrais pas parler comme ça des adultes." (Jugement/Moralisation)</button>
+            <div id="feedback4" class="feedback-area"></div>
+        </div>
+
+        <button id="resetBtn" style="display:none; margin-top: 20px;" class="btn-validate" onclick="resetScenario()">Recommencer le scénario</button>
+    </section>
+
+    <section class="card">
+        <h2>🔷 4. Accompagnement (Post-Introspection)</h2>
+        <p>Une fois que vous êtes "décentré" de vous-même, vous pouvez aider l'autre à s'exprimer.</p>
+        <p>Le document suggère d'utiliser l'<strong>écoute silencieuse</strong> (présence physique et psychologique soutenante) et des <strong>questions ouvertes</strong> pour inviter l'autre à "expliciter son expérience interne".</p>
+        <ul>
+            <li><em>"Veux-tu me raconter..."</em></li>
+            <li><em>"Qu'est-ce que tu ressens ?"</em></li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>🔷 5. Validation des acquis</h2>
+        <p>Vérifions si les notions clés du document sont intégrées.</p>
+
+        <div id="quiz-container">
+            <p><strong>1. Pour se "représenter" l'expérience de l'autre (Action 3), quelle question l'écoutant doit-il se poser ?</strong></p>
+            <div class="quiz-option" onclick="selectOption(1, 'a', this)">a) Qui a raison et qui a tort dans cette situation ?</div>
+            <div class="quiz-option" onclick="selectOption(1, 'b', this)">b) Qu'est-ce qu'il est en train de vivre, de penser et de ressentir ?</div>
+            <div class="quiz-option" onclick="selectOption(1, 'c', this)">c) Quelle solution je peux lui donner immédiatement ?</div>
+
+            <p><strong>2. Quelle est la différence entre l'empathie et la contagion émotionnelle selon le texte ?</strong></p>
+            <div class="quiz-option" onclick="selectOption(2, 'a', this)">a) Je dois vivre l'émotion totalement à l'intérieur de moi comme si c'était la mienne.</div>
+            <div class="quiz-option" onclick="selectOption(2, 'b', this)">b) Je perçois ses émotions comme lui appartenant, sans les porter moi-même, pour rester disponible.</div>
+            <div class="quiz-option" onclick="selectOption(2, 'c', this)">c) Il n'y a pas de différence, il faut pleurer avec l'autre.</div>
+
+            <button class="btn-validate" onclick="validateQuiz()">Valider mes réponses</button>
+            <div id="quiz-feedback" class="feedback-area"></div>
+        </div>
+    </section>
+
+    <section class="card" style="background-color: #fcfcfc; border-left: 5px solid #95a5a6;">
+        <h2>🔷 Glossaire des notions travaillées</h2>
+        <ul style="padding-left: 20px;">
+            <li><span class="glossary-term">Action Mentale (Cognitive) :</span> Effort conscient de l'esprit pour traiter l'information (ici : Attention, Perception, Représentation).</li>
+            <li><span class="glossary-term">Décentration :</span> Capacité à mettre de côté ses propres préoccupations, pensées et jugements pour se focaliser sur l'autre.</li>
+            <li><span class="glossary-term">Perception empathique :</span> Accueillir le vécu de l'autre sans interférence, en s'appuyant notamment sur le non-verbal.</li>
+            <li><span class="glossary-term">Interférences :</span> Parasites internes de l'écoutant (jugements, besoins personnels, recherche de solution) qui empêchent l'écoute.</li>
+            <li><span class="glossary-term">Questions ouvertes :</span> Questions qui ne nécessitent pas un simple oui/non, permettant à l'autre d'explorer et décrire son vécu ("Qu'est-ce que tu ressens ?").</li>
+        </ul>
+    </section>
+</div>
+
+<script>
+    // SCENARIO LOGIC
+    function playScenario(step, isCorrect) {
+        const feedbackEl = document.getElementById(`feedback${step}`);
+        const nextStep = document.getElementById(`step${step + 1}`);
+        const resetBtn = document.getElementById('resetBtn');
+
+        feedbackEl.style.display = 'block';
+
+        if (isCorrect) {
+            feedbackEl.className = 'feedback-area feedback-success';
+            
+            // Textes spécifiques de correction basés sur le document
+            if(step === 1) {
+                feedbackEl.innerHTML = "<strong>✅ Bravo !</strong> C'est l'Action Mentale 1. Le texte précise qu'il faut se <em>« rendre totalement disponible »</em> et <em>« arrêter son travail »</em>.";
+            } else if (step === 2) {
+                feedbackEl.innerHTML = "<strong>✅ Exact.</strong> C'est l'Action Mentale 2 (Percevoir). Le texte mentionne l'importance du non-verbal : <em>« se mettre au même niveau »</em>, <em>« regard bienveillant »</em> et <em>« accueillir sans interférer »</em>.";
+            } else if (step === 3) {
+                feedbackEl.innerHTML = "<strong>✅ C'est cela.</strong> C'est l'Action Mentale 3 (Se représenter). Vous cherchez à comprendre ses idées, ses émotions et ses besoins, sans chercher <em>« qui a raison ou qui a tort »</em>.";
+            } else if (step === 4) {
+                feedbackEl.innerHTML = "<strong>✅ Parfait.</strong> Pour faciliter l'expression, le document recommande <em>« une écoute silencieuse et des questions ouvertes »</em>.";
+                resetBtn.style.display = 'block';
+            }
+
+            // Show next step after delay
+            if (nextStep) {
+                setTimeout(() => {
+                    nextStep.classList.add('active');
+                    nextStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 1500);
+            }
+
+        } else {
+            feedbackEl.className = 'feedback-area feedback-error';
+            feedbackEl.innerHTML = "<strong>❌ Pas tout à fait.</strong> Cette réaction indique que vous n'êtes pas décentré(e). Vos propres jugements ou tâches interfèrent avec la capacité à accueillir le vécu de l'autre.";
+        }
+    }
+
+    function resetScenario() {
+        // Reset UI
+        for(let i=1; i<=4; i++) {
+            document.getElementById(`feedback${i}`).style.display = 'none';
+            if(i > 1) document.getElementById(`step${i}`).classList.remove('active');
+        }
+        document.getElementById('resetBtn').style.display = 'none';
+        document.getElementById('step1').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // QUIZ LOGIC
+    let userAnswers = {1: null, 2: null};
+
+    function selectOption(questionNum, answer, element) {
+        // Remove selected class from siblings
+        const options = element.parentElement.querySelectorAll('.quiz-option');
+        options.forEach(opt => opt.classList.remove('selected'));
+        
+        // Add selected class to click
+        element.classList.add('selected');
+        userAnswers[questionNum] = answer;
+    }
+
+    function validateQuiz() {
+        const feedback = document.getElementById('quiz-feedback');
+        feedback.style.display = 'block';
+
+        if (!userAnswers[1] || !userAnswers[2]) {
+            feedback.className = 'feedback-area feedback-error';
+            feedback.innerHTML = "Merci de répondre aux deux questions avant de valider.";
+            return;
+        }
+
+        let score = 0;
+        let msg = "";
+
+        // Correction Q1
+        if (userAnswers[1] === 'b') {
+            score++;
+            msg += "<p><strong>Question 1 : ✅ Correct.</strong> L'écoutant se demande : <em>« qu'est-ce que la personne est en train de vivre ? quelles sont ses idées, ses émotions, ses besoins ? »</em></p>";
+        } else {
+            msg += "<p><strong>Question 1 : ❌ Incorrect.</strong> Chercher une solution ou un coupable sont des interférences. L'objectif est de se représenter le vécu interne de l'autre.</p>";
+        }
+
+        // Correction Q2
+        if (userAnswers[2] === 'b') {
+            score++;
+            msg += "<p><strong>Question 2 : ✅ Correct.</strong> Le texte est clair : <em>« percevoir ses émotions (telles que lui appartenant) mais ne pas les porter... afin de ne pas être moi-même en détresse »</em>.</p>";
+        } else {
+            msg += "<p><strong>Question 2 : ❌ Incorrect.</strong> L'empathie n'est pas la contagion. Si vous vivez l'émotion <em>« totalement à l'intérieur de vous »</em>, vous n'êtes plus disponible pour l'autre.</p>";
+        }
+
+        feedback.className = score === 2 ? 'feedback-area feedback-success' : 'feedback-area feedback-error';
+        feedback.innerHTML = `<strong>Résultat : ${score}/2</strong><br>` + msg;
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio : Observer et Accueillir</title>
+    <style>
+        :root {
+            --primary: #457B9D; /* Bleu apaisant */
+            --secondary: #1D3557; /* Bleu profond */
+            --accent: #A8DADC; /* Bleu clair */
+            --alert: #E63946; /* Rouge doux */
+            --success: #2A9D8F; /* Vert */
+            --bg: #F1FAEE;
+            --text: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--secondary);
+            color: white;
+            padding: 2rem;
+            border-radius: 0 0 15px 15px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 1.6rem; }
+        h2 { color: var(--secondary); border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; margin-top: 2rem;}
+        h3 { color: var(--primary); margin-top: 1.5rem; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Boîtes de mise en valeur */
+        .concept-box {
+            background-color: #e3f2fd;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .analogy-box {
+            background-color: #fff3e0;
+            border-left: 5px solid #ffb74d;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        /* Section Introspection */
+        .introspection-section {
+            background: linear-gradient(135deg, #1D3557 0%, #457B9D 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+        .introspection-section h2, .introspection-section h3 { color: white; border-color: white; }
+        
+        .badge-mandatory {
+            background: var(--alert);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        /* Éléments Interactifs */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            margin: 5px;
+            display: inline-block;
+        }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        
+        /* Jeu de tri */
+        .sort-game-container {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed var(--accent);
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        
+        .stimulus-card {
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: bold;
+            font-size: 1.2rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-weight: bold;
+        }
+        .feedback.success { background-color: #d1e7dd; color: #0f5132; }
+        .feedback.error { background-color: #f8d7da; color: #842029; }
+
+        /* Glossaire */
+        dl { display: grid; grid-template-columns: max-content auto; gap: 15px; }
+        dt { font-weight: bold; color: var(--secondary); text-decoration: underline var(--accent); }
+        dd { margin: 0; }
+
+        @media (max-width: 600px) {
+            dl { grid-template-columns: 1fr; }
+            .btn { width: 100%; margin: 5px 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <h1>Observer et Accueillir</h1>
+        <p>Compétence : Pleine attention à l'expérience sensible présente</p>
+    </div>
+</header>
+
+<div class="container">
+
+    <section id="comprendre">
+        <h2>1. Comprendre la notion</h2>
+        
+        <div class="card">
+            <p>Une fois notre attention dirigée volontairement, l'étape suivante consiste à <strong>accueillir complètement</strong> ce qui est observé. Il s'agit de percevoir ce qui est présent, "ici et maintenant", dans sa forme brute.</p>
+            
+            <div class="concept-box">
+                <strong>Les 3 "Sans" de l'observateur neutre :</strong>
+                <ul>
+                    <li><strong>Sans analyser :</strong> Ne pas chercher le "pourquoi" ou le "comment".</li>
+                    <li><strong>Sans interpréter :</strong> Ne pas ajouter de sens ou d'histoire à ce qui est vécu.</li>
+                    <li><strong>Sans modifier :</strong> Ne pas chercher à changer, arrêter ou fuir l'expérience, même si elle est désagréable.</li>
+                </ul>
+            </div>
+
+            <div class="analogy-box">
+                <h3>📷 Analogie : La caméra vs Le monteur vidéo</h3>
+                <p>Imaginez deux modes de fonctionnement :</p>
+                <ul>
+                    <li><strong>Le Monteur (Analyse/Modification) :</strong> Il coupe les scènes ennuyeuses, ajoute de la musique triste pour influencer l'émotion, zoome sur les défauts, et critique la lumière.</li>
+                    <li><strong>La Caméra (L'Observateur Neutre) :</strong> Elle enregistre la scène telle qu'elle est. Elle ne juge pas si la scène est "bonne" ou "mauvaise". Elle capte simplement la lumière et le son bruts, avec ouverture et précision.</li>
+                </ul>
+                <p>La compétence visée est d'être la caméra.</p>
+            </div>
+
+            <p><strong>Exemple professionnel (Éducation/Social) :</strong><br>
+            Un usager ou un élève se met à crier.</p>
+            <ul>
+                <li><em>Réaction habituelle (Interférence) :</em> "Il me manque de respect" (interprétation), "Il faut qu'il se taise tout de suite" (volonté de modifier).</li>
+                <li><em>Pleine attention (Accueil) :</em> "Je perçois un son fort (sa voix), je sens une tension dans mes épaules (monde interne), je vois son visage rougir (monde externe)." -> J'observe les faits bruts avant d'agir.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="introspection" class="introspection-section">
+        <div class="badge-mandatory">Étape obligatoire</div>
+        <h2>2. Introspection du professionnel</h2>
+        <p><strong>D'abord soi, ensuite le public.</strong><br>
+        Le texte précise que même si nous sommes affectés par ce que le monde nous renvoie, la pleine attention aide à demeurer un observateur neutre. Cela demande de l'entraînement.</p>
+        
+        <div class="card" style="color: var(--text);">
+            <h3>Exercice : La minute brute</h3>
+            <p>Fermez les yeux pendant 30 secondes. Laissez venir une sensation (bruit, démangeaison, pensée, émotion).</p>
+            <p>Votre mission : <strong>Ne rien faire.</strong></p>
+            <ul>
+                <li>Si ça gratte : ne grattez pas. Observez le picotement.</li>
+                <li>Si une pensée dit "C'est stupide" : n'argumentez pas. Observez la pensée passer.</li>
+                <li>Si un bruit dérange : ne soupirez pas. Écoutez la vibration du son.</li>
+            </ul>
+            
+            <label for="introspection-input"><strong>Qu'avez-vous observé SANS le modifier ?</strong></label>
+            <textarea id="introspection-input" rows="3" placeholder="Ex: J'ai senti une tension dans la mâchoire. J'ai eu envie de bouger mais je suis resté immobile à observer la tension..."></textarea>
+        </div>
+    </section>
+
+    <section id="activite">
+        <h2>3. Entraînement : Le Tri de l'Observateur</h2>
+        <p>Pour pratiquer cette compétence, il faut savoir distinguer l'<strong>expérience brute</strong> (ce qui se passe réellement) de l'<strong>interférence</strong> (jugement, analyse, modification).</p>
+
+        <div class="card">
+            <div class="sort-game-container">
+                <p>Classez l'affirmation suivante :</p>
+                <div id="game-card" class="stimulus-card">
+                    Cliquez sur "Démarrer"
+                </div>
+                
+                <div id="game-controls" style="display:none;">
+                    <button class="btn" onclick="playTurn('brut')">Expérience Brute (Observation)</button>
+                    <button class="btn" style="background-color: var(--alert);" onclick="playTurn('interference')">Interférence (Jugement/Analyse)</button>
+                </div>
+                
+                <button id="start-btn" class="btn" onclick="startGame()">Démarrer l'exercice</button>
+                <div id="game-feedback" class="feedback"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="accompagnement">
+        <h2>4. Accompagner le public</h2>
+        <div class="card">
+            <p>Une fois cette posture expérimentée, vous pouvez aider un élève ou un usager à revenir à l'expérience présente lorsqu'il est submergé.</p>
+            <p><strong>Guidance type :</strong></p>
+            <blockquote>
+                "Tu me dis que c'est 'insupportable' (Jugement). Peux-tu me décrire ce que tu sens dans ton corps, juste là, maintenant, sans essayer de le chasser ?" (Retour à l'expérience brute et accueil bienveillant).
+            </blockquote>
+        </div>
+    </section>
+
+    <section id="validation">
+        <h2>5. Validation des acquis</h2>
+        <div class="card">
+            <h3>Quiz de synthèse</h3>
+            <form id="quiz-form" onsubmit="return validateQuiz(event)">
+                
+                <p><strong>1. Quelle est l'attitude requise pour observer l'expérience sensible ?</strong></p>
+                <label><input type="radio" name="q1" value="wrong"> Une attitude critique et analytique.</label><br>
+                <label><input type="radio" name="q1" value="correct"> Une attitude d'ouverture et d'accueil bienveillant.</label><br>
+                <label><input type="radio" name="q1" value="wrong"> Une attitude de contrôle et de correction.</label>
+
+                <p><strong>2. Selon le texte, que signifie "accueillir sans modifier" ?</strong></p>
+                <label><input type="radio" name="q2" value="correct"> Observer l'expérience brute telle qu'elle se déroule, sans interférence.</label><br>
+                <label><input type="radio" name="q2" value="wrong"> Changer rapidement ses pensées négatives en pensées positives.</label><br>
+                <label><input type="radio" name="q2" value="wrong"> Ignorer complètement ce qui se passe.</label>
+
+                <p><strong>3. Peut-on être en "pleine attention" si on est affecté émotionnellement ?</strong></p>
+                <label><input type="radio" name="q3" value="wrong"> Non, il faut être un robot sans émotion.</label><br>
+                <label><input type="radio" name="q3" value="correct"> Oui, on peut demeurer un observateur neutre même si on est affecté.</label>
+
+                <br><br>
+                <button type="submit" class="btn">Vérifier mes réponses</button>
+            </form>
+            <div id="quiz-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section id="glossaire">
+        <h2>Glossaire des notions mobilisées</h2>
+        <div class="card">
+            <dl>
+                <dt>Expérience sensible présente</dt>
+                <dd>Ce qui est perçu ici et maintenant, construit à partir du monde externe (sens) ou du monde interne (pensées, émotions, corps).</dd>
+
+                <dt>Expérience brute</dt>
+                <dd>L'événement tel qu'il se déroule dans l'instant, avant toute tentative d'analyse ou d'étiquetage mental.</dd>
+
+                <dt>Interférence</dt>
+                <dd>Action d'analyser, d'interpréter ou de tenter de modifier l'expérience en cours au lieu de simplement l'observer.</dd>
+
+                <dt>Observateur neutre</dt>
+                <dd>Posture consistant à accueillir ce qui est présent avec bienveillance, sans jugement, même lorsque l'on est affecté par la situation.</dd>
+            </dl>
+        </div>
+    </section>
+
+    <footer style="text-align: center; margin-top: 50px; padding: 20px; font-size: 0.8rem; color: #777;">
+        Fiche générée par CPS Studio sur la base de l'extrait "Observer et accueillir...".
+    </footer>
+
+</div>
+
+<script>
+    // --- JEU DE TRI ---
+    const items = [
+        { text: "Je sens une boule dans mon ventre.", type: "brut", explanation: "C'est une observation factuelle d'une sensation interne (Interoception)." },
+        { text: "C'est insupportable, ça doit s'arrêter !", type: "interference", explanation: "C'est un refus de l'expérience et une volonté de la modifier." },
+        { text: "J'entends un bruit strident.", type: "brut", explanation: "C'est une observation factuelle d'une stimulation externe (Audition)." },
+        { text: "Il fait ça exprès pour m'énerver.", type: "interference", explanation: "C'est une interprétation des intentions de l'autre (Analyse)." },
+        { text: "Je remarque que j'ai des pensées tristes.", type: "brut", explanation: "C'est l'observation de la présence de pensées (Cognition), sans forcément les croire." }
+    ];
+
+    let currentIndex = 0;
+
+    function startGame() {
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('game-controls').style.display = 'block';
+        showItem();
+    }
+
+    function showItem() {
+        if (currentIndex < items.length) {
+            document.getElementById('game-card').textContent = items[currentIndex].text;
+            document.getElementById('game-feedback').style.display = 'none';
+        } else {
+            endGame();
+        }
+    }
+
+    function playTurn(userChoice) {
+        const item = items[currentIndex];
+        const feedbackEl = document.getElementById('game-feedback');
+        
+        if (userChoice === item.type) {
+            feedbackEl.className = "feedback success";
+            feedbackEl.innerHTML = "<strong>Correct !</strong> " + item.explanation;
+        } else {
+            feedbackEl.className = "feedback error";
+            feedbackEl.innerHTML = "<strong>Erreur.</strong> " + item.explanation;
+        }
+        
+        feedbackEl.style.display = 'block';
+        currentIndex++;
+        
+        if (currentIndex < items.length) {
+            setTimeout(showItem, 2500);
+        } else {
+            setTimeout(endGame, 2500);
+        }
+    }
+
+    function endGame() {
+        document.getElementById('game-card').textContent = "Exercice terminé !";
+        document.getElementById('game-controls').style.display = 'none';
+        document.getElementById('game-feedback').className = "feedback success";
+        document.getElementById('game-feedback').innerHTML = "Bravo, vous commencez à différencier l'observation brute de l'interprétation mentale.";
+        document.getElementById('game-feedback').style.display = 'block';
+    }
+
+    // --- QUIZ FINAL ---
+    function validateQuiz(e) {
+        e.preventDefault();
+        const feedback = document.getElementById('quiz-feedback');
+        let score = 0;
+        
+        // Réponses attendues
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const q3 = document.querySelector('input[name="q3"]:checked');
+
+        if (!q1 || !q2 || !q3) {
+            feedback.className = "feedback error";
+            feedback.textContent = "Merci de répondre à toutes les questions.";
+            feedback.style.display = 'block';
+            return;
+        }
+
+        if (q1.value === 'correct') score++;
+        if (q2.value === 'correct') score++;
+        if (q3.value === 'correct') score++;
+
+        if (score === 3) {
+            feedback.className = "feedback success";
+            feedback.innerHTML = "<strong>3/3 Excellent !</strong> Vous avez saisi l'essence de l'observation neutre : accueillir sans juger ni modifier.";
+        } else {
+            feedback.className = "feedback error";
+            feedback.innerHTML = `<strong>Score : ${score}/3.</strong><br>Rappel : L'objectif est d'observer l'expérience brute avec bienveillance, sans chercher à analyser ou modifier, même si c'est désagréable.`;
+        }
+        feedback.style.display = 'block';
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

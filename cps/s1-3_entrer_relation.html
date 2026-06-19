@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche CPS : Savoir entrer en relation</title>
+    <style>
+        :root {
+            --primary: #00695c; /* Teal foncé pour le sérieux et l'équilibre */
+            --secondary: #4db6ac;
+            --accent: #ff7043; /* Orange pour le dynamisme relationnel */
+            --light: #e0f2f1;
+            --text: #263238;
+            --white: #ffffff;
+            --success: #66bb6a;
+            --error: #ef5350;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 2rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; letter-spacing: 0.5px; }
+        h2 { color: var(--primary); border-left: 5px solid var(--accent); padding-left: 1rem; margin-top: 2.5rem; }
+        h3 { color: #004d40; margin-top: 1.5rem; font-weight: 600; }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Cards & Sections */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        
+        .card:hover { transform: translateY(-2px); }
+
+        .analogy {
+            background-color: #fff3e0;
+            border: 1px solid #ffe0b2;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: var(--primary);
+            background-color: var(--light);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        /* Introspection Section */
+        .introspection-box {
+            background-color: #e8eaf6;
+            border: 2px dashed #5c6bc0;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--primary);
+        }
+
+        /* Interactive Elements - Drag & Drop */
+        .drag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            min-height: 50px;
+            padding: 15px;
+            background: #eceff1;
+            border-radius: 8px;
+        }
+
+        .draggable {
+            background: var(--white);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: grab;
+            font-weight: 500;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .draggable:active { cursor: grabbing; }
+
+        .drop-zone {
+            border: 2px dashed var(--secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            min-height: 100px;
+            background-color: #fbfbfb;
+            position: relative;
+        }
+        
+        .drop-zone h4 { margin-top: 0; color: var(--secondary); }
+        .drop-zone.hover { background-color: var(--light); border-style: solid; }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-weight: 500;
+        }
+        .feedback.correct { background-color: #dcedc8; color: #2e7d32; border: 1px solid #a5d6a7; display: block; }
+        .feedback.incorrect { background-color: #ffcdd2; color: #c62828; border: 1px solid #ef9a9a; display: block; }
+
+        /* Quiz Styles */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: var(--white);
+            border: 1px solid #cfd8dc;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .quiz-option:hover { background: var(--light); border-color: var(--primary); }
+
+        .glossary-term {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #263238;
+            color: #b0bec5;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Compétence Sociale : Entrer en Relation</h1>
+    <p>Initier, Construire et Adapter ses interactions</p>
+</header>
+
+<div class="container">
+
+    <section>
+        <h2>1. Comprendre la notion</h2>
+        <div class="card">
+            <h3>Une compétence en trois dimensions</h3>
+            <p>Selon le référentiel, développer des relations de qualité ne se résume pas à être "sympa". Cela implique une architecture complexe reposant sur trois piliers :</p>
+            <ul>
+                <li><strong>Initier et construire :</strong> Savoir se présenter, engager le dialogue, poser des questions et montrer son intérêt pour construire des échanges respectueux.</li>
+                <li><strong>S'inscrire dans la durée :</strong> Aller au-delà de l'instant pour nouer des amitiés durables, accepter les différences et satisfaire les <span class="highlight">besoins affectifs</span> fondamentaux (affection, amour).</li>
+                <li><strong>S'adapter au contexte (Agilité sociale) :</strong> Le cerveau doit analyser l'environnement pour ajuster le comportement. Cela signifie observer les normes, comprendre les hiérarchies, et parfois mettre ses propres intérêts en retrait pour s'adapter à la situation.</li>
+            </ul>
+        </div>
+
+        <div class="card analogy">
+            <h3>💡 Analogie : Le Navigateur Social</h3>
+            <p>Imaginez que vous êtes un navigateur en mer.</p>
+            <ul>
+                <li><strong>Initier :</strong> C'est savoir quitter le port et lancer son bateau (engager la conversation).</li>
+                <li><strong>La durée :</strong> C'est savoir entretenir le bateau sur le long terme pour qu'il ne coule pas (satisfaire les besoins affectifs, accepter les différences de l'équipage).</li>
+                <li><strong>L'adaptation contextuelle :</strong> C'est savoir lire la météo (indices contextuels) et les cartes (normes sociales). On ne navigue pas de la même façon par temps calme ou en pleine tempête. Le navigateur analyse sans cesse pour ajuster ses voiles (comportements).</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Exemple professionnel</h3>
+            <p><strong>Contexte :</strong> Un éducateur ou un travailleur social lors d'une synthèse.</p>
+            <p>Il doit d'abord <strong>saluer et se présenter</strong> clairement aux partenaires qu'il ne connait pas (Initier). Durant la réunion, il doit <strong>observer les hiérarchies</strong> présentes (qui préside ? qui décide ?) pour intervenir au bon moment (Adaptation). Enfin, il s'efforce de maintenir un lien de confiance avec la famille présente, même en cas de désaccord, pour préserver le travail sur le <strong>long terme</strong> (Durée). </p>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Introspection du professionnel</h2>
+        <div class="introspection-box">
+            <p>⚠️ <strong>Avant d'accompagner les autres :</strong> Le texte souligne que l'adaptation sociale fait appel à des processus cognitifs complexes (analyse, planification, pour et contre). Exercez ces processus sur vous-même.</p>
+            
+            <h3>Auto-analyse : Mon agilité contextuelle</h3>
+            <p>Pensez à une interaction professionnelle récente qui a été difficile ou "bizarre". Positionnez-vous sur ces échelles basées sur le texte :</p>
+
+            <div class="slider-container">
+                <label><strong>Observation des indices :</strong> Ai-je agi par automatisme ou ai-je analysé le contexte ?</label><br>
+                <small>Réponse invariante (Automatisme)</small>
+                <input type="range" min="0" max="10" value="5" id="slider1">
+                <small>Analyse fine des stimuli</small>
+            </div>
+
+            <div class="slider-container">
+                <label><strong>Gestion des intérêts :</strong> Ai-je su mettre mes intérêts en retrait si la situation l'exigeait ?</label><br>
+                <small>J'ai imposé mon intérêt</small>
+                <input type="range" min="0" max="10" value="5" id="slider2">
+                <small>J'ai adapté selon le contexte</small>
+            </div>
+            
+            <p><em>Réflexion :</em> Si vous êtes proche de "Réponse invariante", le texte indique que vous risquez de ne pas répondre de manière appropriée aux situations sociales variées.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. S'entraîner (Mise en pratique)</h2>
+
+        <div class="card">
+            <h3>Exercice 1 : Les mécanismes de la relation</h3>
+            <p>Le texte distingue clairement l'initiation, la durée (besoins) et l'adaptation au contexte. Classez ces actions dans la bonne catégorie.</p>
+
+            <div class="drag-container" id="source-container">
+                <div class="draggable" draggable="true" data-category="initier">Se présenter à un inconnu</div>
+                <div class="draggable" draggable="true" data-category="adapter">Observer les hiérarchies sociales</div>
+                <div class="draggable" draggable="true" data-category="duree">Satisfaire le besoin d'affection</div>
+                <div class="draggable" draggable="true" data-category="initier">Poser des questions pour dialoguer</div>
+                <div class="draggable" draggable="true" data-category="adapter">Mettre ses intérêts en retrait selon la situation</div>
+                <div class="draggable" draggable="true" data-category="duree">Accepter les différences de l'autre</div>
+            </div>
+
+            <div class="drop-zone" data-target="initier" ondragover="allowDrop(event)" ondrop="drop(event)">
+                <h4>1. Initier & Construire l'échange</h4>
+                <small>(Interactions cordiales, respectueuses)</small>
+            </div>
+            
+            <div class="drop-zone" data-target="duree" ondragover="allowDrop(event)" ondrop="drop(event)">
+                <h4>2. Relations dans la durée</h4>
+                <small>(Besoins affectifs, amitiés durables)</small>
+            </div>
+
+            <div class="drop-zone" data-target="adapter" ondragover="allowDrop(event)" ondrop="drop(event)">
+                <h4>3. S'adapter au contexte (Situation sociale)</h4>
+                <small>(Normes, hiérarchies, analyse des indices)</small>
+            </div>
+
+            <div id="drag-feedback" class="feedback"></div>
+        </div>
+
+        <div class="card">
+            <h3>Exercice 2 : L'analyse cognitive de la situation</h3>
+            <p>Le texte explique que <em>"le cerveau humain ne se contente pas de répondre à un stimulus social de façon invariante"</em>. Il doit catégoriser et évaluer.</p>
+            <p><strong>Situation :</strong> Vous accompagnez un jeune lors d'un rendez-vous formel à la mairie. Le jeune se met à parler très fort et familièrement à l'élu, comme il le ferait avec vous au foyer.</p>
+            <p><strong>Quelle est l'analyse correcte du problème selon les termes du texte ?</strong></p>
+
+            <div id="scenario-options">
+                <button class="quiz-option" onclick="checkScenario(1)">Le jeune est simplement malpoli et manque d'éducation.</button>
+                <button class="quiz-option" onclick="checkScenario(2)">Le jeune n'a pas su "catégoriser" la situation ni identifier les "hiérarchies sociales" pour ajuster son mode de communication.</button>
+                <button class="quiz-option" onclick="checkScenario(3)">Le jeune cherche à satisfaire son besoin affectif d'attention.</button>
+            </div>
+            <div id="scenario-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Accompagner un public</h2>
+        <div class="card" style="border-left-color: var(--secondary);">
+            <h3>Soutenir le développement cognitif</h3>
+            <p>Le texte précise que les processus permettant cette adaptation (prise de perspective, analyse des indices contextuels, planification) se développent <strong>jusque dans l'adolescence</strong>.</p>
+            <p><strong>Piste d'action :</strong> Pour aider un jeune, ne lui dites pas juste "tiens-toi bien". Aidez-le à décoder l'environnement :</p>
+            <ul>
+                <li>"Quels sont les indices ici ?" (Lieu, personnes présentes).</li>
+                <li>"Quelles sont les normes ou la hiérarchie dans cette pièce ?"</li>
+                <li>"Quels sont les 'pour et les contre' de ce comportement ici ?"</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h2>5. Validation des acquis</h2>
+        <div class="card">
+            <p>Vérifiez votre maîtrise des notions clés extraites du document.</p>
+            
+            <div id="final-quiz">
+                <div class="quiz-item" id="q1">
+                    <p><strong>1. Pour développer des relations de qualité, il ne suffit pas d'être gentil. Que faut-il aussi savoir faire selon le contexte ?</strong></p>
+                    <button class="quiz-option" onclick="validateQuiz(1, 'a')">A. Il faut toujours dire la vérité, peu importe la situation.</button>
+                    <button class="quiz-option" onclick="validateQuiz(1, 'b')">B. Il faut observer les comportements d'autrui et naviguer au sein des normes sociales et hiérarchies.</button>
+                    <button class="quiz-option" onclick="validateQuiz(1, 'c')">C. Il faut toujours mettre ses propres intérêts en avant pour se faire respecter.</button>
+                    <div class="feedback" id="fb-q1"></div>
+                </div>
+                
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+                <div class="quiz-item" id="q2">
+                    <p><strong>2. Quelle dimension est essentielle pour construire des relations "dans la durée" ?</strong></p>
+                    <button class="quiz-option" onclick="validateQuiz(2, 'a')">A. La satisfaction des besoins affectifs et l'acceptation des différences.</button>
+                    <button class="quiz-option" onclick="validateQuiz(2, 'b')">B. La capacité à se présenter correctement.</button>
+                    <button class="quiz-option" onclick="validateQuiz(2, 'c')">C. La planification et le raisonnement logique.</button>
+                    <div class="feedback" id="fb-q2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Glossaire des notions travaillées</h2>
+        <div class="card" style="background-color: #f1f8e9;">
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Hiérarchies sociales :</span> Structures de pouvoir ou de statut présentes dans un groupe qu'il est nécessaire d'identifier pour ajuster son comportement.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Indices contextuels :</span> Signaux (environnement, personnes, ambiance) que le cerveau analyse pour comprendre comment agir dans une situation donnée.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Besoins affectifs :</span> Besoins psychologiques fondamentaux (amour, affection) dont la satisfaction permet de construire des relations dans la durée.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Processus cognitifs :</span> Mécanismes mentaux (catégorisation, interprétation, évaluation) permettant de ne pas répondre de façon invariante à un stimulus social.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Normes sociales :</span> Règles implicites ou explicites de comportement au sein d'un groupe, à l'intérieur desquelles l'individu doit apprendre à naviguer.
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p>Créé par CPS Studio - Basé exclusivement sur l'extrait "Savoir entrer en relation et développer des relations de qualité".</p>
+    </footer>
+
+</div>
+
+<script>
+    /* --- DRAG AND DROP LOGIC --- */
+    let draggedItem = null;
+    let correctSorts = 0;
+    const totalItems = 6;
+
+    // Add event listeners for desktop drag
+    document.querySelectorAll('.draggable').forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+            draggedItem = this;
+            setTimeout(() => this.style.opacity = '0.5', 0);
+        });
+        item.addEventListener('dragend', function() {
+            this.style.opacity = '1';
+            draggedItem = null;
+        });
+        
+        // Mobile click support
+        item.addEventListener('click', function() {
+            if(this.parentElement.classList.contains('drag-container')) {
+                if(draggedItem) draggedItem.style.borderColor = 'var(--primary)'; // reset prev
+                draggedItem = this;
+                this.style.borderColor = 'var(--accent)';
+                this.style.borderWidth = '2px';
+            }
+        });
+    });
+
+    function allowDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('hover');
+    }
+
+    function drop(e) {
+        e.preventDefault();
+        const dropZone = e.currentTarget;
+        dropZone.classList.remove('hover');
+
+        if (!draggedItem) return;
+
+        const itemCategory = draggedItem.getAttribute('data-category');
+        const zoneTarget = dropZone.getAttribute('data-target');
+
+        // Logic check
+        if (itemCategory === zoneTarget) {
+            dropZone.appendChild(draggedItem);
+            draggedItem.style.borderColor = 'transparent';
+            draggedItem.style.backgroundColor = '#e8f5e9'; // Greenish bg
+            draggedItem.style.cursor = 'default';
+            draggedItem.draggable = false;
+            draggedItem = null; // Reset
+            
+            correctSorts++;
+            checkDragCompletion();
+        } else {
+            const feedback = document.getElementById('drag-feedback');
+            feedback.className = 'feedback incorrect';
+            feedback.innerHTML = "Ce n'est pas la bonne catégorie. Relisez les indices !";
+            setTimeout(() => { feedback.style.display = 'none'; }, 2000);
+            
+            // Reset mobile selection style
+            if(draggedItem) {
+                draggedItem.style.borderColor = 'var(--primary)';
+                draggedItem.style.borderWidth = '1px';
+                draggedItem = null;
+            }
+        }
+    }
+
+    function checkDragCompletion() {
+        if (correctSorts === totalItems) {
+            const feedback = document.getElementById('drag-feedback');
+            feedback.className = 'feedback correct';
+            feedback.innerHTML = "<strong>Bravo !</strong> Vous avez bien identifié les trois piliers : l'initiation, la durée (besoins) et l'adaptation au contexte.";
+        }
+    }
+
+    // Add click listener to drop zones for mobile "tap to move"
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('click', function(e) {
+            if(draggedItem) {
+                // Call drop logic manually
+                const event = { preventDefault: ()=>{}, currentTarget: this };
+                drop(event);
+            }
+        });
+    });
+
+    /* --- SCENARIO LOGIC --- */
+    function checkScenario(choice) {
+        const fb = document.getElementById('scenario-feedback');
+        
+        if (choice === 2) {
+            fb.className = 'feedback correct';
+            fb.innerHTML = "<strong>Exactement.</strong> Le texte insiste sur le fait que l'adaptation nécessite une analyse des <em>hiérarchies sociales</em> et des <em>normes</em>. Le problème ici est un défaut d'ajustement au contexte, pas un simple manque d'éducation.";
+        } else if (choice === 1) {
+            fb.className = 'feedback incorrect';
+            fb.innerHTML = "<strong>Trop simpliste.</strong> Dire qu'il est malpoli est un jugement. Le texte nous invite à analyser les processus cognitifs : il n'a pas su <em>catégoriser</em> le stimulus social pour adapter sa réponse.";
+        } else {
+            fb.className = 'feedback incorrect';
+            fb.innerHTML = "<strong>Hors sujet ici.</strong> Bien que les besoins affectifs soient mentionnés dans le texte pour les relations durables, ici le problème immédiat est l'incapacité à <em>interagir de manière appropriée selon la situation</em>.";
+        }
+    }
+
+    /* --- FINAL QUIZ LOGIC --- */
+    function validateQuiz(qNum, answer) {
+        const fb = document.getElementById('fb-q' + qNum);
+        
+        if (qNum === 1) {
+            if (answer === 'b') {
+                fb.className = 'feedback correct';
+                fb.innerHTML = "<strong>Correct !</strong> C'est le cœur de la compétence d'adaptation sociale décrite : observer, questionner les hiérarchies et naviguer dans les normes.";
+            } else if (answer === 'c') {
+                fb.className = 'feedback incorrect';
+                fb.innerHTML = "<strong>Faux.</strong> Le texte dit explicitement qu'il faut savoir mettre ses propres intérêts <em>en avant ou en retrait</em> selon le contexte, pas toujours en avant.";
+            } else {
+                fb.className = 'feedback incorrect';
+                fb.innerHTML = "<strong>Faux.</strong> Cette notion de vérité absolue n'est pas abordée. L'accent est mis sur l'adaptation et les modes de communication ajustés.";
+            }
+        }
+        
+        if (qNum === 2) {
+            if (answer === 'a') {
+                fb.className = 'feedback correct';
+                fb.innerHTML = "<strong>Très bien.</strong> Le texte lie explicitement la construction de relations dans la durée à la satisfaction des besoins psychologiques (affection, amour) et à l'acceptation des différences.";
+            } else {
+                fb.className = 'feedback incorrect';
+                fb.innerHTML = "<strong>Non.</strong> Se présenter (B) concerne l'initiation de la relation. La planification (C) concerne l'adaptation contextuelle.";
+            }
+        }
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

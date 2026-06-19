@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio - Rôle et Limites de l'Image de Soi</title>
+    <style>
+        :root {
+            --primary: #2980b9; /* Bleu psychologie */
+            --secondary: #27ae60; /* Vert développement */
+            --accent: #e67e22; /* Orange attention */
+            --text: #2c3e50;
+            --bg: #ecf0f1;
+            --card-bg: #ffffff;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), #3498db);
+            color: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0; font-size: 2rem; }
+        .subtitle { font-style: italic; opacity: 0.9; margin-top: 10px; display: block; }
+
+        /* Section Styling */
+        section {
+            background: var(--card-bg);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+        }
+
+        h2 { color: var(--primary); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        h3 { color: var(--secondary); margin-top: 20px; }
+
+        /* Introspection Zone */
+        .introspection {
+            background-color: #f9fbe7;
+            border-left-color: var(--secondary);
+            border: 2px solid var(--secondary);
+        }
+
+        .introspection-warning {
+            background: #ffebee;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px dashed #c0392b;
+        }
+
+        .reflection-box {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        /* Interactive Elements */
+        .analogy-box {
+            background: #eaf2f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .analogy-icon { font-size: 2rem; }
+
+        /* Accordion */
+        .accordion {
+            background-color: #f1f1f1;
+            color: var(--text);
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .active, .accordion:hover { background-color: #ddd; }
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            display: none;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        /* Quiz & Drag Drop Styles */
+        .drop-zone {
+            border: 2px dashed #bdc3c7;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            min-height: 60px;
+            background: #fafafa;
+        }
+        .draggable {
+            background: var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 5px;
+            cursor: move;
+            font-size: 0.9em;
+        }
+        
+        .quiz-option {
+            display: block;
+            background: #f8f9fa;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover { background: #e9ecef; }
+        .quiz-option.correct { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .quiz-option.wrong { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        /* Glossary */
+        dl { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        dt { font-weight: bold; color: var(--primary); }
+        dd { margin: 0 0 10px 0; color: #555; font-size: 0.95em; }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            padding-top: 20px;
+        }
+
+        /* Slider for Gap Exercise */
+        .slider-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        input[type=range] {
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>L'Image de Soi : Rôle et Limites</h1>
+        <span class="subtitle">Comprendre le moteur invisible de nos comportements</span>
+    </header>
+
+    <section>
+        <h2>🔷 1. Comprendre la notion</h2>
+        <p>
+            L'Image de soi (ou concept de soi) est l'ensemble des représentations mentales que nous avons de nous-mêmes. 
+            Elle n'est pas la réalité, mais une construction qui englobe plusieurs domaines : l'apparence physique, les compétences (scolaires, professionnelles, sportives), etc.
+        </p>
+
+        <div class="analogy-box">
+            <span class="analogy-icon">💻</span>
+            <div>
+                <strong>L'Analogie du Programme Informatique :</strong>
+                <p>Imaginez que votre image de soi est un <em>programme d'ordinateur</em> ou un <em>filtre de couleur</em>. Vous ne voyez pas la réalité telle qu'elle est, mais telle qu'elle est "colorée" par vos croyances ("Je suis le rebelle", "Je suis l'intellectuel"). Ce programme dicte vos actions sans que vous vous en rendiez compte.</p>
+            </div>
+        </div>
+
+        <button class="accordion">Pourquoi est-ce si puissant ?</button>
+        <div class="panel">
+            <p>Ces représentations sont des déterminants majeurs de nos vies car :</p>
+            <ul>
+                <li><strong>Besoin de cohérence :</strong> Nous agissons pour confirmer notre vision de nous-mêmes (confirmation de soi). Si je pense être "timide", je vais me mettre en retrait pour valider cette croyance.</li>
+                <li><strong>Identification (Fusion cognitive) :</strong> Nous oublions que ce n'est qu'une image. Nous prenons ces pensées pour une réalité factuelle absolue.</li>
+            </ul>
+        </div>
+
+        <h3>Exemple professionnel</h3>
+        <p>Un travailleur social qui a intégré l'image de <em>"Celui qui sauve les autres"</em> (son programme interne) peut s'épuiser à vouloir tout résoudre pour ses usagers, non pas parce que c'est nécessaire, mais pour maintenir la cohérence avec son image de "Sauveur".</p>
+    </section>
+
+    <section class="introspection">
+        <h2>🔷 2. Introspection du Professionnel</h2>
+        
+        <div class="introspection-warning">
+            🛑 <strong>ÉTAPE OBLIGATOIRE</strong><br>
+            Les CPS ne s'apprennent pas, elles se vivent. Vous ne pouvez pas accompagner l'image de soi de l'autre sans avoir exploré la vôtre.
+        </div>
+
+        <h3>Exercice : Le Miroir des Étiquettes</h3>
+        <p>Le document explique que nous internalisons le regard des autres (parents, collègues, société) par <em>besoin d'affiliation</em> et d'<em>adaptation</em>. Cela crée des "étiquettes".</p>
+        
+        <p><strong>Identifiez une "étiquette" ou une image forte que vous portez professionnellement (ex: "L'expert", "Le conciliateur", "Le débordé").</strong></p>
+        <textarea class="reflection-box" placeholder="J'ai tendance à me définir comme..."></textarea>
+
+        <p><strong>Observez comment cette image "pilote" vos comportements. Que vous oblige-t-elle à faire pour maintenir cette cohérence ?</strong></p>
+        <textarea class="reflection-box" placeholder="Pour confirmer cette image, je me sens obligé de..."></textarea>
+
+        <p><em>Prenez un moment pour ressentir si cette image vous sert ou si elle crée une tension (écart avec vos besoins réels).</em></p>
+    </section>
+
+    <section>
+        <h2>🔷 3. Pratique Interactive : La Mécanique de l'Image</h2>
+        
+        <h3>Exercice A : L'Écart et le Malaise</h3>
+        <p>Le document mentionne que l'évaluation de soi se fait souvent par comparaison avec une norme ou un <strong>"Idéal de soi"</strong>. L'écart crée des émotions.</p>
+        
+        <div class="slider-container" style="background: #f4f4f4; padding: 20px; border-radius: 10px;">
+            <p>Imaginez une situation : Vous devez animer une réunion.</p>
+            <label for="gapSlider">Écart entre "Comment je me perçois" et "Mon Idéal (La norme de réussite)" :</label><br><br>
+            <input type="range" id="gapSlider" min="0" max="100" value="0" step="10">
+            <p><strong>État émotionnel résultant (selon le texte) :</strong> <span id="emotionResult" style="font-weight:bold; color:green;">Satisfaction / Estime de soi haute</span></p>
+        </div>
+
+        <h3>Exercice B : Sources vs Conséquences</h3>
+        <p>Classez les éléments suivants selon qu'ils sont à l'origine de la construction de l'image de soi (Sources/Internalisation) ou qu'ils en sont le résultat (Conséquences).</p>
+
+        <div id="drag-container">
+            <div id="item1" class="draggable" draggable="true">Feedback des parents</div>
+            <div id="item2" class="draggable" draggable="true">Choix vestimentaires</div>
+            <div id="item3" class="draggable" draggable="true">Culture & Religion</div>
+            <div id="item4" class="draggable" draggable="true">Sentiment de malaise</div>
+            <div id="item5" class="draggable" draggable="true">Besoin d'affiliation</div>
+        </div>
+
+        <div class="drop-zone" id="zone-source" data-type="source">
+            <strong>📥 Origine / Construction (Internalisation)</strong>
+        </div>
+        <div class="drop-zone" id="zone-consequence" data-type="consequence">
+            <strong>📤 Résultat / Comportement (Cohérence)</strong>
+        </div>
+        <p id="drag-feedback" class="feedback"></p>
+
+    </section>
+
+    <section>
+        <h2>🔷 4. Vers le Public</h2>
+        <p>Une fois ce travail fait sur vous, comment accompagner ?</p>
+        <ul>
+            <li><strong>Repérer la fusion :</strong> Aidez le public à voir la différence entre "Je suis nul" (Identification/Fusion) et "J'ai la pensée que je suis nul" (Image mentale).</li>
+            <li><strong>Les "Soi possibles" :</strong> Utilisez le concept d'<strong>Image de soi future</strong> (mentionné dans le texte) comme levier de motivation. Demandez : "Quel 'Soi' voulez-vous devenir ?" (le soi riche, le soi mince, etc.) pour créer une aspiration.</li>
+            <li><strong>Déconstruire la norme :</strong> Discutez des standards sociaux (Idéal de soi) qui créent inutilement des tensions et des malaises.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>🔷 5. Validation des acquis</h2>
+
+        <div class="quiz-container">
+            <p><strong>1. Qu'est-ce que "l'internalisation" décrite dans le document ?</strong></p>
+            <div class="quiz-option" onclick="checkAnswer(this, false)">Le fait de garder ses émotions à l'intérieur de soi.</div>
+            <div class="quiz-option" onclick="checkAnswer(this, true)">Le processus où les jugements extérieurs (famille, social) deviennent nos propres représentations.</div>
+            <div class="quiz-option" onclick="checkAnswer(this, false)">La capacité à méditer sur son image interne.</div>
+
+            <p><strong>2. Pourquoi cherchons-nous souvent à confirmer notre image de soi, même si elle est négative ?</strong></p>
+            <div class="quiz-option" onclick="checkAnswer(this, true)">Par besoin de cohérence et de confirmation de soi.</div>
+            <div class="quiz-option" onclick="checkAnswer(this, false)">Parce que nous aimons souffrir.</div>
+            <div class="quiz-option" onclick="checkAnswer(this, false)">C'est uniquement dû au hasard.</div>
+
+            <p><strong>3. Que se passe-t-il lorsqu'il y a un grand écart entre "Image de soi" et "Image de soi idéale" ?</strong></p>
+            <div class="quiz-option" onclick="checkAnswer(this, false)">Une identification totale.</div>
+            <div class="quiz-option" onclick="checkAnswer(this, true)">Une tension, un malaise et potentiellement des émotions désagréables.</div>
+        </div>
+    </section>
+
+    <section>
+        <h2>📚 Glossaire des notions abordées</h2>
+        <dl>
+            <dt>Image de soi (Concept de soi)</dt>
+            <dd>Ensemble des représentations mentales (croyances, idées, images) que l'individu a de lui-même.</dd>
+
+            <dt>Internalisation</dt>
+            <dd>Processus par lequel on transforme les modes de penser extérieurs (feedback social) en modes de penser internes.</dd>
+
+            <dt>Fusion cognitive / Identification</dt>
+            <dd>Tendance à croire que l'image mentale de soi EST la réalité factuelle.</dd>
+
+            <dt>Besoin de cohérence</dt>
+            <dd>Force psychologique qui nous pousse à agir de façon alignée avec notre image de soi pour la préserver.</dd>
+
+            <dt>Soi possibles (Image de soi future)</dt>
+            <dd>Concepts de ce que l'on veut devenir (espoir) ou de ce que l'on craint de devenir (peur). Facteur motivationnel majeur.</dd>
+            
+            <dt>Besoin d'affiliation</dt>
+            <dd>Désir de développer des relations harmonieuses et d'être intégré à son milieu social, moteur de l'internalisation.</dd>
+        </dl>
+    </section>
+
+    <footer>
+        <p>CPS Studio 2025 - Création réalisée à partir du référentiel (Fiches C1.3/C1.5 mentionnées)</p>
+    </footer>
+
+</div>
+
+<script>
+    // Accordion Logic
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+
+    // Slider Logic (Exercice A)
+    const slider = document.getElementById("gapSlider");
+    const output = document.getElementById("emotionResult");
+
+    slider.oninput = function() {
+        let val = this.value;
+        if (val < 30) {
+            output.innerHTML = "Satisfaction / Estime de soi préservée";
+            output.style.color = "#27ae60";
+        } else if (val < 70) {
+            output.innerHTML = "Tension modérée / Début d'autocritique";
+            output.style.color = "#f39c12";
+        } else {
+            output.innerHTML = "Malaise important / Émotions désagréables / Tensions fortes";
+            output.style.color = "#c0392b";
+        }
+    }
+
+    // Drag and Drop Logic (Exercice B - Simplified for mobile/desktop without complex libraries)
+    // Using click-to-select logic for better accessibility than pure drag-drop on mobile HTML
+    
+    let selectedItem = null;
+    const draggables = document.querySelectorAll('.draggable');
+    const zones = document.querySelectorAll('.drop-zone');
+    const feedback = document.getElementById('drag-feedback');
+
+    // Definition des réponses correctes
+    const answers = {
+        'item1': 'source',      // Feedback parents
+        'item2': 'consequence', // Choix vestimentaires
+        'item3': 'source',      // Culture
+        'item4': 'consequence', // Sentiment malaise
+        'item5': 'source'       // Besoin affiliation (moteur de l'internalisation)
+    };
+
+    draggables.forEach(item => {
+        item.addEventListener('click', function() {
+            if(this.classList.contains('placed')) return;
+            
+            // Reset others
+            draggables.forEach(d => d.style.border = 'none');
+            
+            selectedItem = this;
+            this.style.border = '2px solid #3498db';
+        });
+    });
+
+    zones.forEach(zone => {
+        zone.addEventListener('click', function() {
+            if (selectedItem) {
+                const type = this.getAttribute('data-type');
+                const itemId = selectedItem.id;
+
+                if (answers[itemId] === type) {
+                    this.appendChild(selectedItem);
+                    selectedItem.classList.add('placed');
+                    selectedItem.style.border = 'none';
+                    selectedItem.style.backgroundColor = '#27ae60';
+                    selectedItem = null;
+                    checkCompletion();
+                } else {
+                    selectedItem.style.backgroundColor = '#e74c3c';
+                    setTimeout(() => {
+                        selectedItem.style.backgroundColor = 'var(--primary)';
+                    }, 500);
+                    feedback.style.display = 'block';
+                    feedback.style.color = '#c0392b';
+                    feedback.innerText = "Ce n'est pas la bonne catégorie. Réessayez.";
+                }
+            }
+        });
+    });
+
+    function checkCompletion() {
+        const placed = document.querySelectorAll('.placed');
+        if (placed.length === 5) {
+            feedback.style.display = 'block';
+            feedback.style.color = '#27ae60';
+            feedback.innerHTML = "<strong>Bravo !</strong> Vous avez bien distingué ce qui construit l'image de soi (interne/passé) de ce qu'elle produit (externe/futur).";
+        } else {
+            feedback.style.display = 'none';
+        }
+    }
+
+    // Quiz Logic
+    function checkAnswer(element, isCorrect) {
+        // Reset colors in this question group
+        let siblings = element.parentElement.getElementsByClassName('quiz-option');
+        for(let s of siblings) {
+            s.classList.remove('correct', 'wrong');
+        }
+
+        if (isCorrect) {
+            element.classList.add('correct');
+            // Adding explanation based on text
+            let explanation = document.createElement('div');
+            explanation.className = 'feedback';
+            explanation.style.display = 'block';
+            explanation.style.color = '#155724';
+            explanation.innerText = "Exact ! C'est bien défini dans le document.";
+            if(!element.nextElementSibling || !element.nextElementSibling.classList.contains('feedback')) {
+                element.after(explanation);
+            }
+        } else {
+            element.classList.add('wrong');
+        }
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

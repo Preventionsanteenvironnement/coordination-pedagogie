@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Séance 3 : Mon Projet Post-Bac & Bilan – Seconde Bac Pro AGOrA</title>
+  <style>
+    /* --- STYLES GLOBAUX (Hérités des séances précédentes) --- */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6fb; color: #222;
+    }
+    .container {
+      max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px;
+    }
+
+    /* --- EN-TÊTE SPÉCIFIQUE SÉANCE 3 (Teintes Vert/Bleu Canard) --- */
+    header {
+      background: linear-gradient(135deg, #0f766e, #14b8a6);
+      color: #fff;
+      padding: 20px 24px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    }
+    header h1 { margin: 0 0 6px; font-size: 1.5rem; }
+    header h2 { margin: 0; font-weight: 400; font-size: 1.05rem; opacity: 0.95; }
+    .badge {
+      display: inline-block; margin-top: 10px; padding: 4px 10px;
+      border-radius: 999px; background: rgba(255,255,255,0.15); font-size: 0.8rem;
+    }
+
+    /* --- BARRE D'INFO & COMPTEUR --- */
+    .info-bar {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      background: #ffffff; border-radius: 12px; padding: 12px 16px;
+      margin-bottom: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .info-field { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; }
+    .info-field label { font-weight: 600; }
+    .info-field input[type="text"], .info-field input[type="date"] {
+      padding: 4px 6px; border-radius: 6px; border: 1px solid #c3c8d8;
+      font-size: 0.9rem; min-width: 120px;
+    }
+    
+    /* Style spécifique pour le compteur */
+    .visitor-counter {
+      margin-left: auto; /* Pousse le compteur à droite */
+      display: flex; align-items: center; gap: 6px;
+      background: #f0fdf4; padding: 4px 8px; border-radius: 6px; border: 1px solid #bbf7d0;
+    }
+    .visitor-counter img { height: 20px; vertical-align: middle; }
+
+    /* --- SECTIONS --- */
+    .section {
+      background: #ffffff; border-radius: 16px; padding: 18px 20px 20px;
+      margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid #ccfbf1; /* Bordure subtile verte */
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: 1.1rem; font-weight: 650; color: #0f766e;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title span.icon { font-size: 1.4rem; }
+    .section-subtitle { font-size: 0.85rem; color: #555; margin-bottom: 8px; }
+
+    /* --- CHIPS & INPUTS --- */
+    .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .chip {
+      padding: 4px 10px; border-radius: 999px; background: #f0fdfa;
+      font-size: 0.78rem; color: #0f766e; border: 1px solid #ccfbf1;
+      display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chip:hover { background: #ccfbf1; }
+    .chip.active { background: #0f766e; color: #fff; border-color: #0f766e; }
+
+    .field-block { margin-bottom: 18px; }
+    .field-block label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+    .field-block small { display: block; font-size: 0.78rem; color: #666; margin-bottom: 3px; }
+    
+    textarea {
+      width: 100%; min-height: 60px; resize: none; padding: 8px 9px;
+      border-radius: 8px; border: 1px solid #c7cedf; font-size: 0.9rem;
+      background: #fafbff; overflow-y: hidden;
+    }
+    textarea:focus { outline: none; border-color: #14b8a6; background: #ffffff; }
+    
+    input[type="range"] { width: 180px; accent-color: #0f766e; }
+    .range-label { font-size: 0.85rem; margin-left: 8px; font-weight: 600; color: #0f766e; }
+
+    /* --- DRAG & DROP (Réutilisé) --- */
+    .dnd-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; font-size: 0.82rem; }
+    .dnd-pool, .dnd-dropzone {
+      flex: 1 1 280px; min-height: 100px; border-radius: 10px;
+      border: 1px dashed #99f6e4; padding: 6px 8px; background: #f0fdfa;
+    }
+    .dnd-title { font-weight: 600; margin-bottom: 4px; font-size: 0.8rem; color: #0f766e; }
+    .dnd-item {
+      background: #ffffff; border: 1px solid #5eead4; border-radius: 999px;
+      padding: 3px 9px; display: inline-block; margin: 2px 3px;
+      cursor: move; user-select: none; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .dnd-dropzone.over { background: #ccfbf1; border-style: solid; }
+
+    /* --- CHECKLIST ACTIONS --- */
+    .action-check { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.9rem; }
+    
+    /* --- BOUTONS --- */
+    .actions-bar { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+    .btn {
+      border-radius: 999px; padding: 8px 14px; font-size: 0.88rem; font-weight: 600;
+      border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      color: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .btn-save { background: #1e88e5; }
+    .btn-save:hover { background: #1565c0; }
+    .btn-print { background: #0f766e; }
+    .btn-print:hover { background: #0d5f58; }
+
+    .aide-toggle {
+      border: none; background: #e0f2f1; color: #00695c;
+      font-size: 0.78rem; padding: 3px 8px; border-radius: 999px; cursor: pointer;
+    }
+    .aide-box {
+      margin-top: 6px; padding: 6px 8px; background: #e0f2f1;
+      border-radius: 10px; font-size: 0.78rem; color: #004d40; display: none;
+    }
+
+    .page-break { margin-top: 20px; border-top: 1px dashed #d0d5e5; padding-top: 16px; }
+
+    @media print {
+      body { background: #fff; }
+      .actions-bar, .aide-toggle, .chip-row { display: none !important; }
+      header, .section { box-shadow: none; border: none; }
+      .page-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <h1>Séance 3 : Mon Projet Post-Bac & Mon Bilan</h1>
+      <h2>Explorer l'après-AGOrA et valoriser mes compétences</h2>
+      <div class="badge">Classe : Seconde Bac Pro AGOrA</div>
+    </header>
+
+    <div class="info-bar">
+      <div class="info-field">
+        <label>Prénom :</label>
+        <input type="text" id="prenomEleve" placeholder="Ton prénom" />
+      </div>
+      <div class="info-field">
+        <label>Nom :</label>
+        <input type="text" id="nomEleve" placeholder="Ton nom" />
+      </div>
+      <div class="info-field">
+        <label>Date :</label>
+        <input type="date" id="dateTravail" />
+      </div>
+
+      <div class="visitor-counter">
+        <small>Vues :</small>
+        <img src="https://img.shields.io/badge/Compteur-Actif-blue?style=flat-square" alt="Compteur" />
+      </div>
+    </div>
+
+    <section class="section" id="partiePostBac">
+      <div class="section-header">
+        <div class="section-title"><span class="icon">🎓</span> Partie 1 – Mon Après-Bac</div>
+      </div>
+      <div class="section-subtitle">
+        Quelles sont les poursuites d'études possibles après mon Bac Pro AGOrA ?
+      </div>
+
+      <div class="field-block">
+        <label>1. Mon intention actuelle</label>
+        <small>Vers quoi penses-tu te diriger après le bac ? (Sélectionne une option)</small>
+        <div class="chip-row">
+          <div class="chip" onclick="selectSingleChip(this, 'intention')"><span>📚</span> Poursuivre mes études (BTS, BUT...)</div>
+          <div class="chip" onclick="selectSingleChip(this, 'intention')"><span>💼</span> Travailler directement</div>
+          <div class="chip" onclick="selectSingleChip(this, 'intention')"><span>🤷</span> Je ne sais pas encore</div>
+        </div>
+        <input type="hidden" id="intention" />
+      </div>
+
+      <div class="field-block">
+        <label>2. Les formations qui m'intéressent</label>
+        <small>Sélectionne les pistes que tu aimerais explorer (Multi-choix possible).</small>
+        <div class="chip-row">
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>🏢</span> BTS Gestion de la PME (GPME)</div>
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>🤝</span> BTS Support à l'Action Managériale (SAM)</div>
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>📊</span> BTS Comptabilité et Gestion (CG)</div>
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>🎥</span> BTS Audiovisuel (Gestion de Prod.)</div>
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>🎓</span> BUT GEA (Gestion Entreprises & Admin)</div>
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>🛍️</span> BUT Tech de Co (TC)</div>
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>🏛️</span> Licence AES ou Éco-Gestion</div>
+          <div class="chip" onclick="toggleChip(this, 'pistes')"><span>🧑‍💼</span> Emploi (Assistant de gestion/RH...)</div>
+        </div>
+        <input type="hidden" id="pistes" />
+      </div>
+
+      <div class="field-block">
+        <label for="motivationEtudes">3. Ma motivation pour les études longues</label>
+        <small>Te sens-tu prêt(e) à faire encore 2 ou 3 ans d'études après le bac ?</small>
+        <div class="info-field">
+          <input type="range" id="motivationEtudes" min="0" max="10" value="5" />
+          <span class="range-label" id="valeurMotivation">5 / 10</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="page-break"></div>
+
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="icon">🔍</span> Partie 2 – Bilan de mes Atouts AGOrA</div>
+      </div>
+      <div class="section-subtitle">
+        Quelles compétences professionnelles ai-je commencé à acquérir ?
+      </div>
+
+      <div class="field-block">
+        <label>4. Mes compétences acquises</label>
+        <small>Déplace les compétences du Bac Pro AGOrA dans la zone qui te correspond.</small>
+        
+        <div class="dnd-container">
+          <div class="dnd-pool" id="poolCompetences">
+            <div class="dnd-title">Compétences à trier</div>
+            <div class="dnd-item" draggable="true">Accueil physique et téléphonique</div>
+            <div class="dnd-item" draggable="true">Gestion administrative (courriers, mails)</div>
+            <div class="dnd-item" draggable="true">Utilisation de logiciels (Texteur, Tableur)</div>
+            <div class="dnd-item" draggable="true">Communication écrite (orthographe, style)</div>
+            <div class="dnd-item" draggable="true">Travaux comptables de base</div>
+            <div class="dnd-item" draggable="true">Travail en équipe / Projet</div>
+          </div>
+          
+          <div class="dnd-dropzone" data-zone="maitrise">
+            <div class="dnd-title">✅ Je me débrouille bien</div>
+          </div>
+          <div class="dnd-dropzone" data-zone="apprendre">
+            <div class="dnd-title">🚧 Je dois encore progresser</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <label for="lienMatiere">5. Mon lien Matière / Métier</label>
+        <small>Quelle matière professionnelle t'a le plus aidé à comprendre le monde du travail ? Pourquoi ?</small>
+        <textarea id="lienMatiere" placeholder="Exemple : J'aime l'Eco-Droit car je comprends mieux les règles de l'entreprise... ou La Gestion car c'est concret..."></textarea>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title"><span class="icon">🗺️</span> Partie 3 – Mes Prochaines Démarches</div>
+      </div>
+      <div class="section-subtitle">Passer à l'action pour mon avenir.</div>
+
+      <div class="field-block">
+        <label>6. Ma Check-list d'orientation</label>
+        <small>Coche ce que tu comptes faire prochainement.</small>
+        <div class="action-check">
+          <input type="checkbox" id="actJPO" />
+          <label for="actJPO">Aller à une Journée Portes Ouvertes (JPO) de lycée ou CFA.</label>
+        </div>
+        <div class="action-check">
+          <input type="checkbox" id="actStage" />
+          <label for="actStage">Poser des questions sur l'embauche pendant mon prochain stage.</label>
+        </div>
+        <div class="action-check">
+          <input type="checkbox" id="actRDV" />
+          <label for="actRDV">Prendre rendez-vous avec le Psy-EN ou le Prof Principal.</label>
+        </div>
+        <div class="action-check">
+          <input type="checkbox" id="actFiche" />
+          <label for="actFiche">Faire des recherches sur Internet (Onisep, Parcoursup).</label>
+        </div>
+      </div>
+
+      <div class="field-block">
+        <label for="metiersVises">7. Métiers ou Secteurs à explorer</label>
+        <small>Note ici 2 ou 3 métiers ou secteurs précis (ex: Immobilier, Secrétariat médical, Banque) sur lesquels tu vas te renseigner.</small>
+        <textarea id="metiersVises" placeholder="Je vais me renseigner sur..."></textarea>
+      </div>
+    </section>
+
+    <div class="page-break"></div>
+    <section class="section" style="border-color: #fcd34d;">
+      <div class="section-header">
+        <div class="section-title" style="color: #b45309;"><span class="icon">📝</span> Partie 4 – Ma Fiche de Suivi Personnel</div>
+      </div>
+      <div class="section-subtitle">Synthèse à conserver pour tes entretiens.</div>
+
+      <div class="field-block">
+        <label>Mes 3 points forts (Synthèse Séances 1, 2 & 3)</label>
+        <textarea id="syntheseForces" style="height: 80px;" placeholder="Ex: Je suis ponctuel, je maîtrise bien Word, je sais accueillir les clients..."></textarea>
+      </div>
+
+      <div class="field-block">
+        <label>Ce que je dois travailler en priorité</label>
+        <textarea id="syntheseBesoins" style="height: 80px;" placeholder="Ex: Améliorer mon orthographe, oser prendre la parole, trouver mon orientation..."></textarea>
+      </div>
+    </section>
+
+    <div class="actions-bar">
+      <button class="btn btn-print" type="button" onclick="imprimerBilan()">
+        🖨️ Imprimer mon Bilan Orientation
+      </button>
+      <button class="btn btn-save" type="button" onclick="enregistrerMonTravail()">
+        💾 Enregistrer mon travail
+      </button>
+    </div>
+
+    <footer>
+      Séance 3 : Mon Projet Post-Bac & Bilan – Seconde Bac Pro AGOrA
+    </footer>
+  </div>
+
+  <script>
+    // --- 1. Gestion des Curseurs ---
+    const slider = document.getElementById('motivationEtudes');
+    const label = document.getElementById('valeurMotivation');
+    if (slider && label) {
+      slider.addEventListener('input', function() { label.textContent = this.value + ' / 10'; });
+    }
+
+    // --- 2. Auto-Resize Textarea ---
+    function autoResize(el) {
+      el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px';
+    }
+    document.querySelectorAll('textarea').forEach(ta => {
+      autoResize(ta); ta.addEventListener('input', () => autoResize(ta));
+    });
+
+    // --- 3. Gestion des Chips (Unique & Multi) ---
+    // Sélection Unique (Intention)
+    function selectSingleChip(chip, inputId) {
+      const container = chip.parentElement;
+      container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      document.getElementById(inputId).value = chip.innerText;
+    }
+
+    // Sélection Multiple (Pistes)
+    function toggleChip(chip, inputId) {
+      chip.classList.toggle('active');
+      const input = document.getElementById(inputId);
+      let values = input.value ? input.value.split(' || ') : [];
+      const val = chip.innerText;
+      
+      if (chip.classList.contains('active')) {
+        if (!values.includes(val)) values.push(val);
+      } else {
+        values = values.filter(v => v !== val);
+      }
+      input.value = values.join(' || ');
+    }
+
+    // --- 4. Drag & Drop (Logique identique Séance 2) ---
+    let draggedItem = null;
+    function initDND() {
+      document.querySelectorAll('.dnd-item').forEach(item => {
+        item.addEventListener('dragstart', function(e) {
+          draggedItem = item; e.dataTransfer.effectAllowed = 'move'; item.style.opacity = '0.5';
+        });
+        item.addEventListener('dragend', function() {
+          item.style.opacity = '1'; draggedItem = null;
+        });
+      });
+      document.querySelectorAll('.dnd-dropzone, .dnd-pool').forEach(zone => {
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+        zone.addEventListener('drop', e => {
+          e.preventDefault(); zone.classList.remove('over');
+          if (draggedItem) zone.appendChild(draggedItem);
+        });
+      });
+    }
+    document.addEventListener('DOMContentLoaded', initDND);
+
+    // --- 5. Sauvegarde HTML ---
+    function enregistrerMonTravail() {
+      const prenom = document.getElementById('prenomEleve').value.trim();
+      if (!prenom) { alert("Merci d'indiquer ton prénom."); return; }
+
+      // Fixer les valeurs dans le DOM pour l'export
+      document.querySelectorAll('input').forEach(i => i.setAttribute('value', i.value));
+      document.querySelectorAll('textarea').forEach(t => t.textContent = t.value);
+      document.querySelectorAll('input[type="checkbox"]').forEach(c => {
+        if(c.checked) c.setAttribute('checked', 'checked'); else c.removeAttribute('checked');
+      });
+      // Sauvegarder état DND
+      document.querySelectorAll('.dnd-dropzone, .dnd-pool').forEach(zone => {
+        let content = "";
+        zone.querySelectorAll('.dnd-item').forEach(i => content += i.textContent + "|||");
+        zone.setAttribute('data-dnd-saved', content);
+      });
+
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], {type: "text/html"});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = "Seance3_Bilan_" + prenom + ".html";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    // Restauration au chargement (pour DND)
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.dnd-dropzone, .dnd-pool').forEach(zone => {
+        const saved = zone.getAttribute('data-dnd-saved');
+        if(saved) {
+          zone.innerHTML = zone.classList.contains('dnd-pool') ? '<div class="dnd-title">Compétences à trier</div>' : 
+                           (zone.dataset.zone === 'maitrise' ? '<div class="dnd-title">✅ Je me débrouille bien</div>' : '<div class="dnd-title">🚧 Je dois encore progresser</div>');
+          saved.split('|||').filter(t=>t).forEach(txt => {
+            const div = document.createElement('div');
+            div.className = 'dnd-item'; div.draggable = true; div.textContent = txt;
+            zone.appendChild(div);
+          });
+          initDND(); // Réattacher événements
+        }
+      });
+    });
+
+    // --- 6. Impression Simplifiée ---
+    function imprimerBilan() {
+      window.print(); 
+      // Note: Le CSS @media print gère déjà le masquage des boutons inutiles
+    }
+  </script>
+</body>
+</html>

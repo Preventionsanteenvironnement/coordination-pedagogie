@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio : Diriger son Attention</title>
+    <style>
+        :root {
+            --primary: #2A9D8F; /* Teal apaisant */
+            --secondary: #264653; /* Bleu nuit */
+            --accent: #E9C46A; /* Jaune doux */
+            --alert: #E76F51; /* Terra cotta */
+            --bg: #F4F9F9;
+            --text: #333;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: var(--secondary);
+            color: white;
+            padding: 2rem;
+            border-radius: 0 0 15px 15px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; margin-top: 2rem;}
+        h3 { color: var(--secondary); margin-top: 1.5rem; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .highlight-box {
+            background-color: #e8f6f5;
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .analogy-box {
+            background-color: #fff8e1;
+            border-left: 5px solid var(--accent);
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        /* Introspection Special Style */
+        .introspection-section {
+            background: linear-gradient(135deg, #264653 0%, #2a9d8f 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .introspection-section h2 { color: white; border-color: white; }
+        .warning-badge {
+            background: var(--alert);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        /* Interactive Elements */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.1s;
+            margin: 5px;
+        }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn:active { transform: translateY(0); }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            font-weight: bold;
+        }
+        .feedback.success { background-color: #d4edda; color: #155724; }
+        .feedback.error { background-color: #f8d7da; color: #721c24; }
+
+        /* Glossary */
+        dl { display: grid; grid-template-columns: max-content auto; gap: 10px; }
+        dt { font-weight: bold; color: var(--secondary); }
+        dd { margin: 0 0 10px 0; }
+
+        @media (max-width: 600px) {
+            .choice-grid { grid-template-columns: 1fr; }
+            dl { grid-template-columns: 1fr; }
+            dt { margin-top: 10px; text-decoration: underline; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <h1>Diriger Volontairement son Attention</h1>
+        <p>Compétence Cognitive C1.1 & C1.2 – Explorer l'expérience sensible présente</p>
+    </div>
+</header>
+
+<div class="container">
+
+    <section id="comprendre">
+        <h2>1. Comprendre la notion</h2>
+        
+        <div class="card">
+            <p><strong>L'attention</strong> est une aptitude mentale fondamentale. Elle agit comme un mécanisme de sélection qui permet à certaines informations d'atteindre notre conscience, tout en en ignorant d'autres.</p>
+            
+            <p>Le document source distingue deux modes de fonctionnement :</p>
+            <ul>
+                <li><strong>L'attention automatique :</strong> Involontaire, rapide, captée par des événements extérieurs (bruits, mouvements) ou intérieurs sans que nous l'ayons choisi. C'est le mode "par défaut", souvent une porte mal gardée.</li>
+                <li><strong>L'attention contrôlée :</strong> Volontaire, consciente. C'est la capacité d'orienter délibérément ses ressources cognitives vers un objet spécifique (interne ou externe).</li>
+            </ul>
+
+            <div class="analogy-box">
+                <h3>💡 Analogie du quotidien : Le projecteur de théâtre</h3>
+                <p>Imaginez que votre conscience est une scène de théâtre plongée dans le noir.</p>
+                <ul>
+                    <li><strong>Attention automatique :</strong> Un projecteur fou qui bouge tout seul dès qu'un bruit survient dans les coulisses ou qu'un spectateur éternue. Vous subissez l'éclairage.</li>
+                    <li><strong>Attention contrôlée :</strong> Vous prenez les commandes de la régie. Vous décidez délibérément de braquer le projecteur sur l'acteur principal (l'instant présent), même s'il y a du bruit ailleurs.</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h3>Exemple professionnel</h3>
+                <p>En réunion d'équipe (social/médico-social) :</p>
+                <ul>
+                    <li><em>Mode automatique :</em> Votre attention est captée par la notification de votre téléphone (stimulation externe) ou par votre agacement concernant le dossier précédent (stimulation interne/émotion). Vous n'écoutez plus.</li>
+                    <li><em>Mode contrôlé :</em> Vous remarquez cette distraction, et vous décidez consciemment de ramener votre attention sur les paroles de votre collègue (expérience sensorielle auditive).</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="introspection" class="introspection-section">
+        <div class="warning-badge">⚠️ ÉTAPE CRUCIALE</div>
+        <h2>2. Introspection du professionnel</h2>
+        <p><strong>D'abord soi, ensuite le public.</strong><br>
+        Les compétences psychosociales ne s'apprennent pas dans les livres, elles se vivent. Savoir être en "pleine attention" nécessite de pouvoir observer ce qui se passe au moment même où cela se produit.</p>
+        
+        <div class="card" style="color: var(--text);">
+            <h3>Exercice : Le scan de l'instant</h3>
+            <p>Prenez 30 secondes maintenant. Arrêtez votre lecture.</p>
+            <p>Essayez de distinguer les deux mondes décrits dans le référentiel :</p>
+            <ol>
+                <li><strong>Monde externe :</strong> Que perçoivent vos 5 sens ? (La luminosité de l'écran, le bruit de fond, le contact de la chaise).</li>
+                <li><strong>Monde interne (Le Soi interne) :</strong> Fermez les yeux. Qu'observez-vous ?
+                    <ul>
+                        <li>Une pensée ? (Cognition)</li>
+                        <li>Une émotion ?</li>
+                        <li>Une envie ? (Volition)</li>
+                        <li>Un battement de cœur ou une tension ? (Interoception)</li>
+                    </ul>
+                </li>
+            </ol>
+            <textarea placeholder="Notez ici une observation de votre monde interne (ex: Je sens une tension dans mes épaules)..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-family: inherit;" rows="3"></textarea>
+        </div>
+    </section>
+
+    <section id="activite">
+        <h2>3. Entraînement interactif</h2>
+        <p>Pour maîtriser l'attention contrôlée, il faut savoir identifier la source des stimulations. Exercez-vous à classer ces expériences selon les définitions du référentiel.</p>
+
+        <div class="card">
+            <h3>Exercice 1 : Le trieur de stimuli</h3>
+            <p>D'où vient l'information qui tente de capter votre attention ?</p>
+            
+            <div id="game-container" style="text-align: center;">
+                <div id="stimulus-display" style="font-size: 1.2rem; font-weight: bold; margin: 20px 0; min-height: 50px;">
+                    Appuyez sur "Commencer"
+                </div>
+                <div class="choice-grid" id="buttons-container" style="display:none;">
+                    <button class="btn" onclick="checkSort('externe')">Monde Externe (5 sens)</button>
+                    <button class="btn" onclick="checkSort('interne')">Monde Interne (Soi interne)</button>
+                </div>
+                <button id="start-btn" class="btn" onclick="startGame1()">Commencer</button>
+                <div id="feedback-game1" class="feedback"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Exercice 2 : Identifier les états du "Soi interne"</h3>
+            <p>Le référentiel divise le monde interne en plusieurs catégories. Associez l'expérience vécue à la bonne catégorie.</p>
+            
+            <div id="quiz-internal-container">
+                <p><strong>Situation :</strong> <span id="internal-situation">"J'ai soudainement très envie de manger du chocolat."</span></p>
+                <div class="choice-grid">
+                    <button class="btn" onclick="checkInternal('cognition')">Cognition (Pensée)</button>
+                    <button class="btn" onclick="checkInternal('emotion')">Émotion</button>
+                    <button class="btn" onclick="checkInternal('volition')">Volition (Envie/Besoin)</button>
+                    <button class="btn" onclick="checkInternal('interoception')">Interoception (Corps)</button>
+                </div>
+                <div id="feedback-internal" class="feedback"></div>
+                <button class="btn" style="margin-top:10px; background-color:var(--secondary); display:none;" id="next-internal" onclick="nextInternalQuestion()">Suivant</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="public">
+        <h2>4. Accompagner le public</h2>
+        <div class="card">
+            <p>Une fois que vous pratiquez cette distinction (Interne/Externe) pour vous-même, vous pouvez l'utiliser avec vos publics.</p>
+            <p><strong>Piste d'action :</strong> Inviter la personne à "observer directement ce qui se passe".</p>
+            <ul>
+                <li>Si la personne est submergée, aidez-la à identifier si la cause est une <em>stimulation externe</em> (bruit, agression) ou une <em>stimulation interne</em> (peur, souvenir).</li>
+                <li>Utilisez le vocabulaire précis : "Est-ce une pensée (cognition) ou une sensation dans ton corps (interoception) ?"</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="validation">
+        <h2>5. Validation des acquis</h2>
+        <div class="card">
+            <h3>Quiz de synthèse</h3>
+            <form id="final-quiz" onsubmit="return validateFinalQuiz(event)">
+                
+                <p><strong>1. Qu'est-ce que l'interoception selon le texte ?</strong></p>
+                <label><input type="radio" name="q1" value="a"> La capacité à entendre les sons extérieurs.</label><br>
+                <label><input type="radio" name="q1" value="b"> La capacité à percevoir les états internes du corps (faim, rythme cardiaque).</label><br>
+                <label><input type="radio" name="q1" value="c"> La capacité à contrôler ses pensées.</label>
+                
+                <p><strong>2. Si mon attention est dirigée par un bruit soudain dans la rue, c'est :</strong></p>
+                <label><input type="radio" name="q2" value="a"> Une attention automatique (involontaire).</label><br>
+                <label><input type="radio" name="q2" value="b"> Une attention contrôlée (volontaire).</label><br>
+                <label><input type="radio" name="q2" value="c"> Une volition.</label>
+
+                <p><strong>3. Les "volitions" font partie du monde interne. À quoi correspondent-elles ?</strong></p>
+                <label><input type="radio" name="q3" value="a"> Aux images mentales.</label><br>
+                <label><input type="radio" name="q3" value="b"> Aux sentiments et humeurs.</label><br>
+                <label><input type="radio" name="q3" value="c"> Aux impulsions, désirs et besoins.</label>
+
+                <br>
+                <button type="submit" class="btn">Valider mes réponses</button>
+            </form>
+            <div id="final-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section id="glossaire">
+        <h2>Glossaire des notions mobilisées</h2>
+        <div class="card">
+            <dl>
+                <dt>Attention automatique</dt>
+                <dd>Attention dirigée sans choix conscient, captée par des événements sensoriels ou internes, souvent à notre insu.</dd>
+
+                <dt>Attention contrôlée</dt>
+                <dd>Capacité d'orienter volontairement et consciemment ses ressources cognitives vers un objet spécifique.</dd>
+
+                <dt>Monde externe</dt>
+                <dd>Ce qui est perçu par l'intermédiaire des 5 sens (audition, vision, olfaction, toucher, goût).</dd>
+
+                <dt>Soi interne (Monde interne)</dt>
+                <dd>Ensemble des états psychiques intérieurs : cognitions, émotions, volitions et sensations corporelles.</dd>
+
+                <dt>Interoception</dt>
+                <dd>Capacité essentielle à percevoir les sensations venant de l'intérieur du corps (rythme cardiaque, faim, soif, bien-être physique).</dd>
+
+                <dt>Cognitions</dt>
+                <dd>Pensées, images mentales, discours intérieurs.</dd>
+
+                <dt>Volitions (ou Conations)</dt>
+                <dd>Impulsions, désirs, envies, besoins.</dd>
+            </dl>
+        </div>
+    </section>
+
+    <footer style="text-align: center; margin-top: 50px; padding: 20px; font-size: 0.8rem; color: #777;">
+        CPS Studio 2025 - Créé à partir de l'extrait référentiel fourni.
+    </footer>
+
+</div>
+
+<script>
+    /* --- LOGIQUE DU JEU 1 : TRIEUR --- */
+    const stimuli = [
+        { text: "Le bruit d'une sirène de pompier", type: "externe", explanation: "C'est une stimulation auditive du monde extérieur." },
+        { text: "La pensée 'je vais être en retard'", type: "interne", explanation: "C'est une cognition (discours intérieur)." },
+        { text: "L'odeur du café", type: "externe", explanation: "C'est une stimulation olfactive (monde physique environnant)." },
+        { text: "La sensation de soif", type: "interne", explanation: "C'est une sensation corporelle (interoception)." },
+        { text: "La vue d'un beau paysage", type: "externe", explanation: "C'est une stimulation visuelle." }
+    ];
+
+    let currentStimulusIndex = 0;
+
+    function startGame1() {
+        document.getElementById('start-btn').style.display = 'none';
+        document.getElementById('buttons-container').style.display = 'grid';
+        showStimulus();
+    }
+
+    function showStimulus() {
+        if (currentStimulusIndex < stimuli.length) {
+            document.getElementById('stimulus-display').textContent = stimuli[currentStimulusIndex].text;
+            document.getElementById('feedback-game1').style.display = 'none';
+        } else {
+            document.getElementById('stimulus-display').textContent = "Bravo ! Exercice terminé.";
+            document.getElementById('buttons-container').style.display = 'none';
+        }
+    }
+
+    function checkSort(userChoice) {
+        const currentItem = stimuli[currentStimulusIndex];
+        const feedbackEl = document.getElementById('feedback-game1');
+        
+        if (userChoice === currentItem.type) {
+            feedbackEl.textContent = "Correct ! " + currentItem.explanation;
+            feedbackEl.className = "feedback success";
+            feedbackEl.style.display = 'block';
+            currentStimulusIndex++;
+            setTimeout(showStimulus, 2000);
+        } else {
+            feedbackEl.textContent = "Erreur. Regardez bien : " + (currentItem.type === 'externe' ? "Cela vient de l'environnement (5 sens)." : "Cela vient de votre esprit ou corps.");
+            feedbackEl.className = "feedback error";
+            feedbackEl.style.display = 'block';
+        }
+    }
+
+    /* --- LOGIQUE DU JEU 2 : ÉTATS INTERNES --- */
+    const internalQuestions = [
+        { text: "J'ai terriblement envie de partir en vacances.", type: "volition", explanation: "C'est un désir/envie (volition/conation)." },
+        { text: "Mon cœur s'accélère.", type: "interoception", explanation: "C'est une perception de l'état du corps (interoception)." },
+        { text: "Je me dis que ce dossier est compliqué.", type: "cognition", explanation: "C'est une pensée/discours intérieur (cognition)." },
+        { text: "Je me sens triste et abattu.", type: "emotion", explanation: "C'est un affect/humeur (émotion)." }
+    ];
+
+    let currentInternalIndex = 0;
+
+    function checkInternal(userChoice) {
+        const currentQ = internalQuestions[currentInternalIndex];
+        const feedbackEl = document.getElementById('feedback-internal');
+        const nextBtn = document.getElementById('next-internal');
+
+        if (userChoice === currentQ.type) {
+            feedbackEl.textContent = "Exact ! " + currentQ.explanation;
+            feedbackEl.className = "feedback success";
+            feedbackEl.style.display = 'block';
+            nextBtn.style.display = 'inline-block';
+        } else {
+            feedbackEl.textContent = "Pas tout à fait. Essayez encore.";
+            feedbackEl.className = "feedback error";
+            feedbackEl.style.display = 'block';
+        }
+    }
+
+    function nextInternalQuestion() {
+        currentInternalIndex++;
+        const feedbackEl = document.getElementById('feedback-internal');
+        const nextBtn = document.getElementById('next-internal');
+        feedbackEl.style.display = 'none';
+        nextBtn.style.display = 'none';
+
+        if (currentInternalIndex < internalQuestions.length) {
+            document.getElementById('internal-situation').textContent = `"${internalQuestions[currentInternalIndex].text}"`;
+        } else {
+            document.getElementById('quiz-internal-container').innerHTML = "<p><strong>Exercice terminé !</strong> Vous savez maintenant distinguer les nuances de votre monde interne.</p>";
+        }
+    }
+
+    /* --- LOGIQUE DU QUIZ FINAL --- */
+    function validateFinalQuiz(event) {
+        event.preventDefault();
+        const feedbackEl = document.getElementById('final-feedback');
+        let score = 0;
+        let msg = "";
+
+        // Récupération des réponses
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const q3 = document.querySelector('input[name="q3"]:checked');
+
+        if (!q1 || !q2 || !q3) {
+            feedbackEl.textContent = "Veuillez répondre à toutes les questions.";
+            feedbackEl.className = "feedback error";
+            feedbackEl.style.display = 'block';
+            return false;
+        }
+
+        // Vérification Q1
+        if (q1.value === 'b') {
+            score++;
+        } else {
+            msg += "<br>• Q1 : L'interoception concerne les sensations internes du corps (cœur, faim...), pas l'extérieur.";
+        }
+
+        // Vérification Q2
+        if (q2.value === 'a') {
+            score++;
+        } else {
+            msg += "<br>• Q2 : Une attention captée par un bruit est 'automatique' car elle n'est pas choisie volontairement.";
+        }
+
+        // Vérification Q3
+        if (q3.value === 'c') {
+            score++;
+        } else {
+            msg += "<br>• Q3 : Les cognitions sont les pensées. Les volitions sont les désirs, envies et impulsions.";
+        }
+
+        if (score === 3) {
+            feedbackEl.innerHTML = "<strong>Parfait ! 3/3.</strong><br>Vous avez bien intégré les notions de types d'attention et les composantes de l'expérience sensible.";
+            feedbackEl.className = "feedback success";
+        } else {
+            feedbackEl.innerHTML = `<strong>Score : ${score}/3.</strong> Voici les corrections : ${msg}`;
+            feedbackEl.className = "feedback error";
+        }
+        feedbackEl.style.display = 'block';
+        return false;
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

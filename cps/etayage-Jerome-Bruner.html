@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P1 : L'Étayage & le Rapport au Savoir (J. Bruner)</title>
+    <style>
+        :root {
+            --primary: #1b5e20; --secondary: #388e3c; --accent: #f57f17;
+            --light: #f1f8e9; --text: #263238; --white: #ffffff;
+            --blue: #0277bd; --purple: #7b1fa2; --grey: #455a64;
+        }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: var(--text); background-color: #fcfcfc; margin: 0; padding: 0; }
+        header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 2.5rem 1rem; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); border-bottom: 3px solid var(--accent); padding-bottom: 8px; margin-top: 2.5rem; }
+        .container { max-width: 900px; margin: 0 auto; padding: 1.5rem; }
+        .card { background: var(--white); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 2rem; margin-bottom: 2rem; border-left: 8px solid var(--primary); }
+        
+        /* DRAG AND DROP */
+        .game-area { background: #eeeeee; padding: 25px; border-radius: 15px; text-align: center; margin: 20px 0; border: 1px solid #ddd; }
+        .drop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; }
+        .drop-zone { min-height: 110px; border: 2px dashed var(--secondary); border-radius: 10px; background: white; padding: 15px; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.9rem; }
+        .draggable { background: var(--primary); color: white; padding: 12px 18px; border-radius: 25px; cursor: grab; font-size: 0.85rem; margin: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
+        /* SCÉNARIOS */
+        .scenario-box { background: #fffde7; border: 2px solid #fff176; padding: 20px; border-radius: 12px; margin-top: 20px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .choice-btn { flex: 1; min-width: 250px; background: white; border: 2px solid var(--primary); padding: 14px; border-radius: 8px; cursor: pointer; font-weight: bold; color: var(--primary); transition: 0.3s; }
+        
+        .feedback { margin-top: 15px; padding: 15px; border-radius: 8px; display: none; font-weight: 500; border-left: 5px solid; }
+        .feedback.correct { background-color: #e8f5e9; border-color: #4caf50; color: #1b5e20; display: block; }
+        .feedback.incorrect { background-color: #ffebee; border-color: #f44336; color: #b71c1c; display: block; }
+
+        .savoir-box { background: #e3f2fd; border-left: 8px solid var(--blue); padding: 1.5rem; border-radius: 12px; margin: 1.5rem 0; }
+        .cua-card { background: #f3e5f5; border-left: 8px solid var(--purple); padding: 2rem; border-radius: 12px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>P1. Postures & Rapport au savoir</h1>
+    <p>Maîtriser l’Étayage : Guider l'élève vers l'appropriation du savoir</p>
+</header>
+
+<div class="container">
+
+    <section>
+        <h2>1. Définir l'Étayage (Bruner)</h2>
+        <div class="card">
+            <p>L’étayage est défini par Jérôme Bruner comme <strong>“l’ensemble des interactions d’assistance de l’adulte permettant à l’enfant d’apprendre à organiser ses conduites afin de pouvoir résoudre seul un problème qu’il ne savait pas résoudre au départ”</strong>.</p>
+            <p>L'expert soutient le novice pour qu'il s'approprie les savoirs. Mais attention : l'étayage n'est réussi que s'il aboutit au <strong>désétayage</strong> (le retrait progressif de l'aide).</p>
+        </div>
+    </section>
+
+    <div class="savoir-box">
+        <h3>💡 Impact sur le Rapport au Savoir</h3>
+        <p>Un étayage juste transforme la relation de l'élève au savoir :</p>
+        <ul>
+            <li><strong>Accessibilité :</strong> Le savoir ne semble plus "insurmontable".</li>
+            <li><strong>Droit à l'erreur :</strong> L'erreur devient une étape normale du travail.</li>
+            <li><strong>Sentiment de compétence :</strong> L'élève comprend <em>comment</em> il apprend, renforçant son engagement.</li>
+        </ul>
+    </div>
+
+    <section>
+        <h2>2. Activité : Les 6 fonctions d’étayage</h2>
+        <div class="game-area">
+            <div id="source-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 20px; background: white; border-radius: 10px; margin-bottom: 25px;">
+                <div class="draggable" draggable="true" id="d1" data-cat="enrolement">Engager l'élève et lui donner le goût du défi</div>
+                <div class="draggable" draggable="true" id="d2" data-cat="reduction">Simplifier la tâche en réduisant les étapes complexes</div>
+                <div class="draggable" draggable="true" id="d3" data-cat="maintien">Maintenir le cap sur le but final (en ajustant le chemin)</div>
+                <div class="draggable" draggable="true" id="d4" data-cat="signal">Faire repérer les indices clés et critères de réussite</div>
+                <div class="draggable" draggable="true" id="d5" data-cat="frustration">Dédramatiser l'échec pour garder l'élève mobilisé</div>
+                <div class="draggable" draggable="true" id="d6" data-cat="demonstration">Modéliser une solution pour qu'il puisse l'imiter</div>
+            </div>
+
+            <div class="drop-grid">
+                <div class="drop-zone" data-target="enrolement"><strong>🎯 Enrôlement</strong></div>
+                <div class="drop-zone" data-target="reduction"><strong>✂️ Réduction des degrés de liberté</strong></div>
+                <div class="drop-zone" data-target="maintien"><strong>🧭 Maintien de l'orientation</strong></div>
+                <div class="drop-zone" data-target="signal"><strong>💡 Signalisation (Indices clés)</strong></div>
+                <div class="drop-zone" data-target="frustration"><strong>❤️ Contrôle de la frustration</strong></div>
+                <div class="drop-zone" data-target="demonstration"><strong>👁️ Démonstration</strong></div>
+            </div>
+            <div id="drag-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. L'Art du Désétayage (Le retrait)</h2>
+        <div class="scenario-box">
+            <h3>Situation de transfert</h3>
+            <p>Un élève a réussi les deux premiers exercices avec votre aide. Il commence le troisième. Quelle est la posture la plus "didactique" ?</p>
+            <div class="btn-group">
+                <button class="choice-btn" onclick="checkScenario(3, 'A')">Je reste à côté de lui pour valider chaque étape du 3ème exercice.</button>
+                <button class="choice-btn" onclick="checkScenario(3, 'B')">Je lui fixe un contrat : "Fais cette partie seul, je reviens voir dans 5 minutes".</button>
+            </div>
+            <div id="fb-3" class="feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Étayage en situation hétérogène</h2>
+        <div class="scenario-box">
+            <h3>Dilemme : Gérer les rythmes</h3>
+            <p>Comment différencier efficacement sans "sur-étayer" les élèves fragiles ?</p>
+            <div class="btn-group">
+                <button class="choice-btn" onclick="checkScenario(2, 'A')">Je donne des exercices plus simples aux élèves en difficulté.</button>
+                <button class="choice-btn" onclick="checkScenario(2, 'B')">Je garde le même objectif mais je multiplie les supports (audio, visuels, aides).</button>
+            </div>
+            <div id="fb-2" class="feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>5. CUA : Anticiper pour moins étayer</h2>
+        <div class="cua-card">
+            <p><em>La Conception Universelle des Apprentissages (CUA) est une anticipation des obstacles qui réduit le besoin d’étayage individuel permanent.</em></p>
+            <ul>
+                <li><strong>Représentation :</strong> Offrir plusieurs entrées au savoir (voir, lire, entendre).</li>
+                <li><strong>Engagement :</strong> Proposer des choix dans les supports pour motiver.</li>
+            </ul>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // Logique Drag and Drop simplifiée
+    document.querySelectorAll('.draggable').forEach(d => {
+        d.addEventListener('dragstart', e => e.dataTransfer.setData("text", e.target.id));
+    });
+
+    document.querySelectorAll('.drop-zone').forEach(z => {
+        z.addEventListener('dragover', e => e.preventDefault());
+        z.addEventListener('drop', e => {
+            e.preventDefault();
+            const id = e.dataTransfer.getData("text");
+            const item = document.getElementById(id);
+            if (item.getAttribute('data-cat') === z.getAttribute('data-target')) {
+                z.appendChild(item);
+                item.style.background = "#4caf50";
+            }
+        });
+    });
+
+    function checkScenario(num, choice) {
+        const fb = document.getElementById(`fb-${num}`);
+        fb.style.display = "block";
+        if (num === 3) {
+            if (choice === 'B') {
+                fb.className = "feedback correct";
+                fb.innerHTML = "Bravo ! C'est le pivot de l'autonomie. Le retrait planifié permet à l'élève de tester ses forces seul.";
+            } else {
+                fb.className = "feedback incorrect";
+                fb.innerHTML = "Attention au sur-étayage. Si vous restez trop, l'élève développe une dépendance à l'adulte.";
+            }
+        }
+        if (num === 2) {
+            if (choice === 'B') {
+                fb.className = "feedback correct"; fb.innerHTML = "Exact. On ajuste le chemin (différenciation) sans jamais dévaluer l'objectif.";
+            } else {
+                fb.className = "feedback incorrect"; fb.innerHTML = "Réduire l'exigence finale affaiblit le rapport au savoir de l'élève.";
+            }
+        }
+    }
+</script>
+</body>
+</html>

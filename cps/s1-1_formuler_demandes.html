@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio - La Communication Efficace (S1.1 c)</title>
+    <style>
+        :root {
+            --primary: #4a148c; /* Violet profond (inspiré du doc) */
+            --secondary: #66bb6a; /* Vert (inspiré du doc) */
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #374151;
+            --accent: #ffb74d;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        header p {
+            margin-top: 10px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        section {
+            padding: 30px;
+            border-bottom: 1px solid #eee;
+        }
+
+        h2 {
+            color: var(--primary);
+            border-left: 5px solid var(--secondary);
+            padding-left: 15px;
+            margin-top: 0;
+        }
+
+        .highlight-box {
+            background-color: #e8f5e9;
+            border: 1px solid var(--secondary);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .analogy {
+            background-color: #fff3e0;
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            font-style: italic;
+        }
+
+        /* Introspection */
+        .introspection {
+            background-color: #f3e5f5;
+            border: 2px dashed var(--primary);
+            padding: 25px;
+            border-radius: var(--radius);
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        /* Game Styles */
+        .game-area {
+            text-align: center;
+            background: #fafafa;
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid #ddd;
+        }
+
+        .scenario-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .scenario-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #d32f2f; /* Rouge pour le mauvais exemple */
+            margin-bottom: 10px;
+        }
+
+        .scenario-context {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .btn-option {
+            background-color: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 15px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .btn-option:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--radius);
+            display: none;
+            text-align: left;
+        }
+        .feedback.success { background-color: #c8e6c9; color: #1b5e20; }
+        .feedback.error { background-color: #ffcdd2; color: #b71c1c; }
+
+        /* Quiz */
+        .quiz-item { margin-bottom: 20px; }
+        .quiz-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            margin: 5px 0;
+            background: #eee;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .quiz-btn:hover { background: #e0e0e0; }
+        .quiz-btn.correct { background: #a5d6a7; }
+        .quiz-btn.incorrect { background: #ef9a9a; }
+
+        /* Glossaire */
+        dl { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+        dt { font-weight: bold; color: var(--primary); }
+        
+        @media (min-width: 600px) {
+            .options-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Formuler des Demandes Claires et Ajustées</h1>
+        <p>S1.1 (c) - Communication Efficace</p>
+    </header>
+
+    <section>
+        <h2>1. Compréhension de la notion</h2>
+        <p>La <strong>communication efficace</strong> ne se résume pas à parler. Elle consiste à s'assurer que le message émis soit réellement compris par l'interlocuteur, tout en prenant soin de la relation. Pour formuler une demande qui a des chances d'aboutir, nous devons travailler sur deux axes simultanément :</p>
+        
+        <div class="highlight-box">
+            <ul>
+                <li><strong>La Clarté (Message) :</strong> Utiliser des phrases courtes, affirmatives, concrètes et s'impliquer personnellement ("je", "me").</li>
+                <li><strong>L'Ajustement (Contexte & Autre) :</strong> S'adapter à l'âge et à l'état émotionnel de l'autre, choisir le bon moment, et se placer à la bonne distance.</li>
+            </ul>
+        </div>
+
+        <div class="analogy">
+            <strong>📡 L'analogie du GPS :</strong><br>
+            Imaginez que vous donniez une adresse à un GPS.
+            <ul>
+                <li>Si vous dites "Roule pas trop vite vers là-bas" (Négatif, vague), le GPS ne comprendra pas. Il a besoin de "Tourne à droite rue des Lilas" (Affirmatif, concret).</li>
+                <li>Si vous tapez l'adresse pendant que le GPS est éteint ou en mise à jour (Mauvais moment, indisponibilité), l'information ne passera pas.</li>
+            </ul>
+        </div>
+
+        <p><strong>Exemple professionnel :</strong><br>
+        Au lieu de crier depuis le couloir « <em>On ne court pas !</em> » (Phrase négative, mauvaise distance, pas de contact visuel), le professionnel s'approche, se met à hauteur d'yeux, attend le silence et dit calmement : « <em>Je te demande de marcher doucement dans le couloir</em> » (Phrase affirmative, "je", concrète, ajustée).</p>
+    </section>
+
+    <section>
+        <h2>2. Introspection du professionnel</h2>
+        <div class="introspection">
+            <h3>🪞 Miroir, mon beau miroir...</h3>
+            <p>Le document précise que la communication efficace nécessite une <strong>adéquation entre la forme et le fond</strong> (congruence) et une <strong>absence de rapport de force</strong>. La parole est souvent utilisée comme un instrument de pouvoir pour dominer ou déstabiliser, au lieu de viser la coopération.</p>
+            
+            <p><strong>Prenez un temps pour vous observer :</strong></p>
+            <ul>
+                <li>Lors de votre dernière demande à un usager, cherchiez-vous à obtenir de la coopération ou de la soumission ?</li>
+                <li>Votre ton et votre visage étaient-ils "agréables" comme le préconise le référentiel, ou marqués par l'agacement ?</li>
+            </ul>
+
+            <label for="self-reflection">Notez ici une "phrase réflexe" (souvent négative ou vague) que vous utilisez souvent, et essayez de la reformuler selon les critères du tableau (Affirmative + Concrète + "Je") :</label>
+            <textarea id="self-reflection" placeholder="Exemple : Je dis souvent 'Arrête ton cinéma'. Reformulation : 'Je souhaite que tu me parles calmement.'"></textarea>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. Entraînement : Le Reformulateur Efficace</h2>
+        <p>Transformez les demandes inefficaces en communication efficace et positive, en respectant les critères de <strong>clarté</strong> et d'<strong>ajustement</strong> du référentiel.</p>
+
+        <div class="game-area" id="gameArea">
+            <div id="scenario-container">
+                </div>
+            <div id="feedback-display" class="feedback"></div>
+            <button id="next-btn" style="display:none; margin-top:15px; background:var(--secondary); color:white; border:none; padding:10px 20px; border-radius:20px; cursor:pointer;" onclick="nextScenario()">Situation Suivante</button>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Accompagnement du public</h2>
+        <p>Une fois que vous maîtrisez cette clarté pour vous-même :</p>
+        <ul>
+            <li><strong>Modélisation :</strong> En utilisant des phrases concrètes et calmes, vous aidez l'autre à structurer sa propre pensée.</li>
+            <li><strong>Sécurité :</strong> La clarté des demandes (savoir exactement ce qu'on attend de lui) et la cohérence (forme/fond) rassurent l'interlocuteur et diminuent son anxiété, favorisant ainsi la coopération plutôt que l'opposition.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Validation des acquis</h2>
+        <div id="quiz-container">
+            
+            <div class="quiz-item">
+                <p><strong>1. Parmi ces options, laquelle correspond à une "phrase concrète" et "affirmative" (Tableau 12) ?</strong></p>
+                <button class="quiz-btn" onclick="checkQuiz(this, false)">« Ne fais pas n'importe quoi. »</button>
+                <button class="quiz-btn" onclick="checkQuiz(this, true)">« Pose ton sac sur la chaise. »</button>
+                <button class="quiz-btn" onclick="checkQuiz(this, false)">« Sois sage. »</button>
+                <div class="feedback-quiz"></div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>2. Pour s'ajuster à l'interlocuteur, le comportement non-verbal doit inclure :</strong></p>
+                <button class="quiz-btn" onclick="checkQuiz(this, false)">Un volume de voix très fort pour montrer l'autorité.</button>
+                <button class="quiz-btn" onclick="checkQuiz(this, true)">De se tenir à la bonne distance et de tourner son attention vers lui.</button>
+                <button class="quiz-btn" onclick="checkQuiz(this, false)">De regarder ailleurs pour ne pas l'intimider.</button>
+                <div class="feedback-quiz"></div>
+            </div>
+
+            <div class="quiz-item">
+                <p><strong>3. Selon les "préalables", que faut-il éviter pour garantir une communication efficace et positive ?</strong></p>
+                <button class="quiz-btn" onclick="checkQuiz(this, true)">Le rapport de force, la domination et la manipulation.</button>
+                <button class="quiz-btn" onclick="checkQuiz(this, false)">L'utilisation du pronom "je".</button>
+                <button class="quiz-btn" onclick="checkQuiz(this, false)">L'expression des émotions.</button>
+                <div class="feedback-quiz"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <section>
+        <h2>📚 Glossaire</h2>
+        <dl>
+            <dt>Phrase concrète</dt>
+            <dd>Message verbal qui décrit une action précise et observable, évitant les concepts généraux (comme "être sage").</dd>
+
+            <dt>Adéquation forme/fond</dt>
+            <dd>Préalable à la communication où le comportement non-verbal (ton, visage) est en accord authentique avec le message verbal et le ressenti interne (congruence).</dd>
+
+            <dt>Implication personnelle</dt>
+            <dd>Fait d'utiliser les pronoms "je" ou "me" pour assumer sa demande, plutôt que des tournures impersonnelles ("il faut").</dd>
+
+            <dt>Ajustement au contexte</dt>
+            <dd>Capacité à adapter son vocabulaire, sa syntaxe, son moment de parole et sa distance physique aux caractéristiques et besoins de l'interlocuteur.</dd>
+        </dl>
+    </section>
+
+</div>
+
+<script>
+    /* SCÉNARIOS POUR L'EXERCICE INTERACTIF */
+    const scenarios = [
+        {
+            bad: "« Sois gentil et arrête de m'embêter ! »",
+            context: "Situation : Un enfant fait du bruit pendant que vous écrivez.",
+            options: [
+                {
+                    text: "« Tu es vraiment pénible aujourd'hui. »",
+                    correct: false,
+                    feedback: "Non, c'est un jugement (dévalorisation) et ce n'est pas une demande précise."
+                },
+                {
+                    text: "« Je veux que tu joues en silence le temps que je finisse ce mail. »",
+                    correct: true,
+                    feedback: "Bravo ! C'est une phrase affirmative, concrète, avec implication personnelle ('Je veux')."
+                },
+                {
+                    text: "« Ne fais pas de bruit. »",
+                    correct: false,
+                    feedback: "C'est mieux, mais c'est une forme négative. Le cerveau traite mieux l'affirmatif."
+                }
+            ]
+        },
+        {
+            bad: "« (Crié depuis l'autre pièce) : À table !!! »",
+            context: "Situation : C'est l'heure du repas.",
+            options: [
+                {
+                    text: "Aller voir la personne, se mettre à sa hauteur, et dire calmement : « C'est l'heure de manger ». ",
+                    correct: true,
+                    feedback: "Excellent. Vous avez ajusté la distance, le volume et l'attention (Tableau 12)."
+                },
+                {
+                    text: "« Si tu ne viens pas, tu ne manges pas ! »",
+                    correct: false,
+                    feedback: "C'est une menace et un rapport de force, ce que le document demande d'éviter."
+                }
+            ]
+        },
+        {
+            bad: "« Il faut que ce soit rangé. »",
+            context: "Situation : Salle en désordre.",
+            options: [
+                {
+                    text: "« C'est toujours le bazar ici. »",
+                    correct: false,
+                    feedback: "C'est une généralisation et un reproche, pas une demande claire."
+                },
+                {
+                    text: "« Je te demande de mettre les lego dans la boîte rouge. »",
+                    correct: true,
+                    feedback: "Parfait. Implication ('Je te demande') + Phrase concrète et simple."
+                }
+            ]
+        }
+    ];
+
+    let currentScenarioIndex = 0;
+
+    function loadScenario() {
+        if(currentScenarioIndex >= scenarios.length) {
+            document.getElementById('gameArea').innerHTML = '<h3>🎉 Exercice terminé !</h3><p>Vous avez pratiqué la reformulation claire et ajustée.</p>';
+            return;
+        }
+
+        const data = scenarios[currentScenarioIndex];
+        const container = document.getElementById('scenario-container');
+        const feedbackEl = document.getElementById('feedback-display');
+        const nextBtn = document.getElementById('next-btn');
+        
+        // Reset UI
+        feedbackEl.style.display = 'none';
+        feedbackEl.className = 'feedback';
+        nextBtn.style.display = 'none';
+
+        let html = `
+            <div class="scenario-card">
+                <div class="scenario-text">❌ Message inefficace : <br>${data.bad}</div>
+                <div class="scenario-context">${data.context}</div>
+                <p>Choisissez la meilleure reformulation (Efficace & Positive) :</p>
+                <div class="options-grid">
+        `;
+
+        data.options.forEach((opt, index) => {
+            html += `<button class="btn-option" onclick="checkAnswer(${index})">${opt.text}</button>`;
+        });
+
+        html += `</div></div>`;
+        container.innerHTML = html;
+    }
+
+    function checkAnswer(index) {
+        const data = scenarios[currentScenarioIndex];
+        const isCorrect = data.options[index].correct;
+        const feedbackEl = document.getElementById('feedback-display');
+        
+        feedbackEl.style.display = 'block';
+        feedbackEl.innerHTML = (isCorrect ? '<strong>✅ Correct !</strong> ' : '<strong>⚠️ À revoir.</strong> ') + data.options[index].feedback;
+        feedbackEl.className = 'feedback ' + (isCorrect ? 'success' : 'error');
+
+        if(isCorrect) {
+            document.getElementById('next-btn').style.display = 'inline-block';
+            // Disable buttons
+            const btns = document.querySelectorAll('.btn-option');
+            btns.forEach(b => b.disabled = true);
+        }
+    }
+
+    function nextScenario() {
+        currentScenarioIndex++;
+        loadScenario();
+    }
+
+    /* QUIZ LOGIC */
+    function checkQuiz(btn, isCorrect) {
+        const parent = btn.parentElement;
+        const feedback = parent.querySelector('.feedback-quiz');
+        
+        // Reset siblings
+        const allBtns = parent.querySelectorAll('.quiz-btn');
+        allBtns.forEach(b => {
+            b.disabled = true;
+            b.style.opacity = '0.6';
+        });
+
+        btn.style.opacity = '1';
+
+        if(isCorrect) {
+            btn.classList.add('correct');
+            feedback.innerHTML = "<strong>Exact !</strong> C'est conforme aux critères du tableau S1.1 (c).";
+            feedback.style.color = "var(--secondary)";
+        } else {
+            btn.classList.add('incorrect');
+            feedback.innerHTML = "<strong>Faux.</strong> Vérifiez les colonnes 'Messages clairs' ou 'Préalables'.";
+            feedback.style.color = "#d32f2f";
+        }
+    }
+
+    // Init
+    loadScenario();
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

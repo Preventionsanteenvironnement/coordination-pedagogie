@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio - Le Soi Sujet & la Méthode AADA</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22; /* Orange pour l'action/décision */
+            --info: #3498db; /* Bleu pour l'analyse */
+            --success: #27ae60;
+            --error: #c0392b;
+            --bg: #fdfbf7;
+            --card: #ffffff;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), #4ca1af);
+            color: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        header h1 { margin: 0; font-size: 1.8rem; }
+        header p { opacity: 0.9; margin-top: 10px; font-style: italic; }
+
+        /* Sections */
+        section {
+            background: var(--card);
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--accent);
+        }
+
+        h2 { color: var(--accent); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-top: 0; }
+        h3 { color: var(--info); margin-top: 20px; }
+
+        /* AADA Cards */
+        .aada-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .aada-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #eee;
+            transition: transform 0.2s;
+        }
+
+        .aada-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        .aada-letter { font-size: 2rem; font-weight: bold; color: var(--accent); display: block; margin-bottom: 5px; }
+        .aada-title { font-weight: bold; color: var(--primary); display: block; margin-bottom: 5px; }
+
+        /* Analogy */
+        .analogy {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            margin: 20px 0;
+        }
+
+        /* Introspection */
+        .introspection-zone {
+            background-color: #e8f6f3; /* Light green */
+            border: 1px solid #d1f2eb;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .introspection-warning {
+            color: #c0392b;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 15px;
+            border: 1px dashed #c0392b;
+            padding: 10px;
+            border-radius: 5px;
+            background: #fff;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
+        /* Interactive Game */
+        .game-container {
+            margin-top: 20px;
+        }
+
+        .sequence-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .step-item {
+            background: white;
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .step-item:hover { background: #f0f0f0; }
+        .step-item.selected { border-color: var(--info); background: #eaf2f8; }
+        
+        .step-number {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background: #ccc;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .step-item.selected .step-number { background: var(--info); }
+
+        /* Quiz Styling */
+        .quiz-item { margin-bottom: 25px; border-bottom: 1px dashed #eee; padding-bottom: 15px; }
+        .quiz-option {
+            padding: 12px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            background: #fff;
+        }
+        .quiz-option:hover { background: #f9f9f9; }
+        
+        .quiz-option.correct { background: #d4edda !important; border-color: #c3e6cb; color: #155724; font-weight: bold; }
+        .quiz-option.incorrect { background: #f8d7da !important; border-color: #f5c6cb; color: #721c24; opacity: 0.7; }
+
+        .feedback-box {
+            display: none;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
+        button.validate-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+        button.validate-btn:hover { background-color: #d35400; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Renforcer le Soi Sujet : La Méthode AADA</h1>
+        <p>Développer des actions conscientes et volontaires</p>
+    </header>
+
+    <section>
+        <h2>🔷 1. Comprendre le "Soi Sujet"</h2>
+        <p>Le <strong>Soi Sujet</strong> est la partie de nous-mêmes qui agit. C'est le "pilote" qui nous permet d'exercer une action volontaire, consciente et intentionnelle, qu'elle soit intrapsychique (réfléchir) ou comportementale (agir).</p>
+        
+        <p>Pour renforcer ce "pilote", le référentiel propose un modèle simplifié de 4 capacités cognitives majeures, résumé par l'acronyme <strong>AADA</strong> :</p>
+
+        <div class="aada-grid">
+            <div class="aada-card">
+                <span class="aada-letter">A</span>
+                <span class="aada-title">Attention</span>
+                <small>Observation de l'information présente (Fonctions réceptives)</small>
+            </div>
+            <div class="aada-card">
+                <span class="aada-letter">A</span>
+                <span class="aada-title">Analyse</span>
+                <small>Traitement via infos présentes + mémoire (Fonctions mnésiques & analytiques)</small>
+            </div>
+            <div class="aada-card">
+                <span class="aada-letter">D</span>
+                <span class="aada-title">Décision</span>
+                <small>Choix d'une réponse adaptée</small>
+            </div>
+            <div class="aada-card">
+                <span class="aada-letter">A</span>
+                <span class="aada-title">Action</span>
+                <small>Verbales ou comportementales (Fonctions expressives)</small>
+            </div>
+        </div>
+
+        <div class="analogy">
+            <h3>💡 L'Analogie du Commandant de Bord</h3>
+            <p>Imaginez que vous êtes dans le cockpit d'un avion :</p>
+            <ul>
+                <li><strong>Attention :</strong> Je regarde les instruments et la météo dehors.</li>
+                <li><strong>Analyse :</strong> Je compare avec mes connaissances de pilotage et mon plan de vol.</li>
+                <li><strong>Décision :</strong> Je choisis de contourner l'orage.</li>
+                <li><strong>Action :</strong> Je tourne le manche.</li>
+            </ul>
+            <p>Sans le Soi Sujet (le commandant), l'avion volerait en pilote automatique (habitudes, réflexes) sans conscience.</p>
+        </div>
+
+        <p><em>Exemple professionnel :</em> « J'ai <u>observé</u> et <u>analysé</u> les comportements des élèves puis j'ai <u>décidé</u> de <u>réaliser</u> un atelier sur la communication empathique ».</p>
+    </section>
+
+    <section>
+        <h2>🔷 2. Introspection du Professionnel</h2>
+        <div class="introspection-zone">
+            <div class="introspection-warning">
+                ⚠️ D'abord SOI, ensuite le public.<br>
+                Avant d'enseigner la prise de décision, analysez votre propre fonctionnement.
+            </div>
+            
+            <p>Pensez à une situation professionnelle récente un peu complexe (un conflit, un imprévu). Décomposez-la selon la grille AADA pour voir si vous avez agi en pleine conscience.</p>
+
+            <label><strong>1. Attention (Qu'avez-vous observé factuellement ?)</strong></label>
+            <textarea rows="2" placeholder="J'ai vu que... J'ai entendu..."></textarea>
+
+            <label><strong>2. Analyse (À quoi avez-vous pensé ? Quels souvenirs/connaissances avez-vous mobilisés ?)</strong></label>
+            <textarea rows="2" placeholder="J'ai fait le lien avec... Cela m'a rappelé..."></textarea>
+
+            <label><strong>3. Décision (Quel choix conscient avez-vous fait ?)</strong></label>
+            <textarea rows="2" placeholder="J'ai décidé de..."></textarea>
+
+            <label><strong>4. Action (Qu'avez-vous concrètement fait ou dit ?)</strong></label>
+            <textarea rows="2" placeholder="J'ai dit... J'ai fait..."></textarea>
+
+            <p style="font-size: 0.9em; color: #555;"><em>Notez que certaines étapes sont parfois "sautées" (réaction impulsive). C'est là que le renforcement du Soi Sujet est nécessaire.</em></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>🔷 3. Entraînement : Remettre de l'ordre</h2>
+        <p>Voici une situation en désordre. Cliquez sur les étapes dans l'ordre chronologique logique du processus <strong>AADA</strong>.</p>
+        
+        <div class="game-container">
+            <div id="game-status" style="margin-bottom: 10px; font-weight: bold; color: var(--info);">Cliquez sur la 1ère étape (Attention)...</div>
+            
+            <div class="sequence-steps">
+                <div class="step-item" id="step3" data-order="3" onclick="selectStep(this)">
+                    <span class="step-number">?</span>
+                    <strong>Décision :</strong> Je choisis de ne pas m'énerver et de reformuler ses propos.
+                </div>
+                <div class="step-item" id="step1" data-order="1" onclick="selectStep(this)">
+                    <span class="step-number">?</span>
+                    <strong>Attention :</strong> Je remarque que le parent d'élève a les sourcils froncés et parle fort.
+                </div>
+                <div class="step-item" id="step4" data-order="4" onclick="selectStep(this)">
+                    <span class="step-number">?</span>
+                    <strong>Action :</strong> Je lui dis calmement : "Je vois que vous êtes inquiet..."
+                </div>
+                <div class="step-item" id="step2" data-order="2" onclick="selectStep(this)">
+                    <span class="step-number">?</span>
+                    <strong>Analyse :</strong> Je comprends qu'il est en colère parce qu'il a peur pour les résultats de son fils.
+                </div>
+            </div>
+
+            <div id="game-feedback" class="feedback-box"></div>
+            <button class="validate-btn" onclick="resetGame()" style="display:none; margin-top:15px;" id="reset-btn">Recommencer</button>
+        </div>
+    </section>
+
+    <section>
+        <h2>🔷 4. Accompagner le public</h2>
+        <p>Le Soi Sujet est au cœur du développement de toutes les CPS. Selon la compétence visée, vous pouvez aider le public à renforcer une étape spécifique du AADA (voir tableau C1.1/C1.2) :</p>
+        <ul>
+            <li><strong>Pour l'empathie :</strong> Insister sur l'<strong>Attention</strong> (observer l'autre) et l'<strong>Analyse</strong> (comprendre son émotion).</li>
+            <li><strong>Pour la résolution de problèmes :</strong> Insister sur l'<strong>Analyse</strong> (info mémorisée) et la <strong>Décision</strong>.</li>
+            <li><strong>Pour la communication efficace :</strong> Travailler l'<strong>Action verbale</strong>.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>🔷 5. Validation des acquis</h2>
+        
+        <div class="quiz-item">
+            <p><strong>1. Que signifie l'acronyme AADA ?</strong></p>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">Action, Attention, Décision, Analyse</div>
+            <div class="quiz-option" onclick="checkQuiz(this, true, 'q1')">Attention, Analyse, Décision, Action</div>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">Attention, Apprentissage, Décision, Autonomie</div>
+            
+            <div id="feedback-q1" class="feedback-box">
+                <strong>Réponse : Attention, Analyse, Décision, Action.</strong><br>
+                C'est l'ordre logique des fonctions cognitives : on perçoit d'abord (Attention), on traite l'information (Analyse), on fait un choix (Décision) et on exécute (Action).
+            </div>
+        </div>
+
+        <div class="quiz-item">
+            <p><strong>2. Quelle est la fonction principale du Soi Sujet ?</strong></p>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">Stocker passivement les souvenirs.</div>
+            <div class="quiz-option" onclick="checkQuiz(this, true, 'q2')">Permettre l'action volontaire, consciente et l'autorégulation.</div>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">Ressentir uniquement des émotions.</div>
+
+            <div id="feedback-q2" class="feedback-box">
+                <strong>Correct !</strong><br>
+                Le Soi Sujet est le "pilote" ou l'acteur. Il permet de poser des actions intentionnelles (intrapsychiques ou comportementales) et de ne pas agir uniquement par automatisme.
+            </div>
+        </div>
+
+        <div class="quiz-item">
+            <p><strong>3. Dans la phase "Analyse", quelles informations utilise-t-on ?</strong></p>
+            <div class="quiz-option" onclick="checkQuiz(this, true, 'q3')">Les informations présentes (perçues) ET les informations mémorisées (expérience).</div>
+            <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">Uniquement ce que l'on voit à l'instant T.</div>
+
+            <div id="feedback-q3" class="feedback-box">
+                <strong>Exact.</strong><br>
+                L'analyse ne se base pas que sur ce qu'on voit (Attention). Elle croise l'information présente avec les "informations mémorisées" (apprentissages, expériences passées) pour donner du sens.
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>📚 Glossaire</h2>
+        <dl>
+            <dt>Soi Sujet (Agent)</dt>
+            <dd>Dimension du soi permettant d'exercer une action volontaire et consciente, de décider et de s'autoréguler.</dd>
+            
+            <dt>AADA</dt>
+            <dd>Modèle schématique des capacités cognitives du Soi Sujet : Attention, Analyse, Décision, Action.</dd>
+
+            <dt>Fonctions mnésiques</dt>
+            <dd>Capacités liées à la mémoire et l'apprentissage, permettant le stockage et le rappel de l'information (essentiel pour l'Analyse).</dd>
+
+            <dt>Fonctions expressives</dt>
+            <dd>Capacités à la base de toutes les actions verbales et comportementales (étape Action).</dd>
+        </dl>
+    </section>
+
+    <footer>
+        CPS Studio - Fiche réalisée à partir des extraits référentiels 2025.
+    </footer>
+</div>
+
+<script>
+    // --- GAME LOGIC ---
+    let currentStep = 1;
+    const totalSteps = 4;
+    const statusDiv = document.getElementById('game-status');
+    const feedbackDiv = document.getElementById('game-feedback');
+    const resetBtn = document.getElementById('reset-btn');
+
+    function selectStep(element) {
+        if (element.classList.contains('selected')) return; // Déjà cliqué
+
+        const clickedOrder = parseInt(element.getAttribute('data-order'));
+
+        if (clickedOrder === currentStep) {
+            // Correct order
+            element.classList.add('selected');
+            element.querySelector('.step-number').innerText = currentStep;
+            element.style.borderColor = 'var(--success)';
+            
+            if (currentStep < totalSteps) {
+                currentStep++;
+                const nextName = getStepName(currentStep);
+                statusDiv.innerText = "Bravo ! Maintenant, trouvez l'étape " + currentStep + " (" + nextName + ")...";
+                statusDiv.style.color = "var(--primary)";
+            } else {
+                statusDiv.innerText = "Séquence complétée !";
+                statusDiv.style.color = "var(--success)";
+                feedbackDiv.style.display = 'block';
+                feedbackDiv.style.backgroundColor = '#d4edda';
+                feedbackDiv.innerHTML = "<strong>Excellent !</strong> Vous avez reconstitué le fil logique du Soi Sujet : d'abord je perçois (Attention), je comprends (Analyse), je choisis (Décision) et j'agis (Action).";
+                resetBtn.style.display = 'inline-block';
+            }
+        } else {
+            // Wrong order
+            statusDiv.innerText = "Ce n'est pas la bonne étape. Cherchez l'étape " + currentStep + " (" + getStepName(currentStep) + ").";
+            statusDiv.style.color = "#c0392b";
+            element.style.backgroundColor = "#f8d7da";
+            setTimeout(() => {
+                element.style.backgroundColor = "white";
+            }, 500);
+        }
+    }
+
+    function getStepName(num) {
+        switch(num) {
+            case 1: return "Attention";
+            case 2: return "Analyse";
+            case 3: return "Décision";
+            case 4: return "Action";
+        }
+    }
+
+    function resetGame() {
+        currentStep = 1;
+        statusDiv.innerText = "Cliquez sur la 1ère étape (Attention)...";
+        statusDiv.style.color = "var(--info)";
+        feedbackDiv.style.display = 'none';
+        resetBtn.style.display = 'none';
+        document.querySelectorAll('.step-item').forEach(item => {
+            item.classList.remove('selected');
+            item.style.borderColor = '#ddd';
+            item.querySelector('.step-number').innerText = "?";
+            item.style.backgroundColor = 'white';
+        });
+    }
+
+    // --- QUIZ LOGIC (FIXED) ---
+    function checkQuiz(element, isCorrect, questionId) {
+        const parent = element.parentElement;
+        const options = parent.getElementsByClassName('quiz-option');
+        const feedbackEl = document.getElementById('feedback-' + questionId);
+        
+        // Disable other clicks in this group
+        for(let opt of options) {
+            opt.onclick = null;
+            opt.style.cursor = 'default';
+            opt.style.opacity = '0.6';
+        }
+        element.style.opacity = '1';
+
+        if (isCorrect) {
+            element.classList.add('correct');
+            feedbackEl.style.backgroundColor = '#d4edda'; // Green bg
+            feedbackEl.style.color = '#155724';
+        } else {
+            element.classList.add('incorrect');
+            feedbackEl.style.backgroundColor = '#f8d7da'; // Red bg
+            feedbackEl.style.color = '#721c24';
+            
+            // Highlight the correct one
+            for(let opt of options) {
+                if (opt.outerHTML.includes("true")) {
+                    opt.classList.add('correct');
+                    opt.style.opacity = '1';
+                }
+            }
+        }
+        
+        feedbackEl.style.display = 'block';
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

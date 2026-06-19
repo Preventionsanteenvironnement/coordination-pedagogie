@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sondage CPS — Mieux se connaître, mieux communiquer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #8e24aa; --c1d: #4a148c;
+    --c2: #1976d2; --c2d: #0d47a1;
+    --c3: #ec407a; --c3d: #ad1457;
+    --c4: #43a047; --c4d: #1b5e20;
+    --c5: #fb8c00; --c5d: #e65100;
+    --c6: #00897b; --c6d: #004d40;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Poppins', sans-serif;
+    max-width: 860px;
+    margin: 0 auto;
+    background: linear-gradient(180deg, #faf8ff 0%, #f0f4ff 100%);
+    color: #1f2937;
+    padding: 0 0 100px 0;
+    line-height: 1.55;
+  }
+
+  /* ====== HEADER ====== */
+  header {
+    background: linear-gradient(135deg, #4a148c 0%, #8e24aa 50%, #d4145a 100%);
+    color: #fff;
+    padding: 36px 22px 28px;
+    text-align: center;
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 6px 30px rgba(74,20,140,0.25);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: "";
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    bottom: -80px; left: -30px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  header h1 { margin: 0; font-size: 1.65em; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; position: relative; }
+  header .sous { font-family: 'Caveat', cursive; font-size: 1.35em; opacity: 0.95; margin-top: 6px; position: relative; }
+
+  /* ====== INTRO ====== */
+  .intro {
+    background: #fff;
+    padding: 26px 22px;
+    margin: 20px;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(74,20,140,0.08);
+    border-top: 5px solid #8e24aa;
+  }
+  .intro h2 { margin: 0 0 14px 0; color: #4a148c; font-size: 1.2em; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+  .intro h2 .emoji { font-size: 1.5em; }
+  .intro p { margin: 10px 0; font-size: 0.95em; }
+  .intro .keyword { background: linear-gradient(180deg, transparent 60%, #ffd54f 60%); font-weight: 600; padding: 0 3px; }
+  .badges-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .badge-info {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.82em;
+    font-weight: 600;
+  }
+  .badge-anon { background: #e8f5e9; color: #1b5e20; }
+  .badge-save { background: #e3f2fd; color: #0d47a1; }
+  .badge-time { background: #fff3e0; color: #e65100; }
+
+  /* ====== PROGRESS STICKY ====== */
+  .progress-bar-container {
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 12px 20px;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .dots { display: flex; gap: 4px; justify-content: center; margin-bottom: 6px; }
+  .dot {
+    width: 16px; height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    transition: all 0.3s;
+  }
+  .dot.done { background: linear-gradient(90deg, #8e24aa, #d4145a); }
+  .dot.active { background: #d4145a; transform: scaleY(1.4); }
+  .progress-text { text-align: center; font-size: 0.78em; color: #666; font-weight: 600; }
+  .saved-toast {
+    text-align: center; font-size: 0.72em; color: #2e7d32; margin-top: 2px;
+    font-family: 'Caveat', cursive; font-size: 0.95em; font-weight: 600;
+    opacity: 0; transition: opacity 0.5s;
+  }
+  .saved-toast.show { opacity: 1; }
+
+  /* ====== SECTION ====== */
+  .section {
+    background: #fff;
+    margin: 18px 20px;
+    padding: 26px 22px;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    border-left: 6px solid var(--accent, #8e24aa);
+    position: relative;
+    overflow: hidden;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .section-emoji {
+    font-size: 2.2em;
+    display: inline-block;
+    animation: bob 3s ease-in-out infinite;
+  }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  .section-tag {
+    display: inline-block;
+    background: var(--accent-soft, #f3e5f5);
+    color: var(--accent-dark, #4a148c);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .section-title {
+    color: var(--accent-dark, #4a148c);
+    font-size: 1.25em;
+    font-weight: 800;
+    margin: 4px 0 0;
+    line-height: 1.3;
+  }
+  .section-subtitle {
+    color: #6b7280;
+    font-size: 0.9em;
+    margin: 8px 0 18px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.15em;
+  }
+  .section.done::after {
+    content: "✓";
+    position: absolute;
+    top: 16px; right: 18px;
+    width: 30px; height: 30px;
+    background: #43a047;
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900;
+    animation: pop 0.4s ease-out;
+  }
+  @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* Couleurs par section (cycle) */
+  .section[data-section="1"], .section[data-section="7"], .section[data-section="13"] { --accent: var(--c1); --accent-dark: var(--c1d); --accent-soft: #f3e5f5; }
+  .section[data-section="2"], .section[data-section="8"], .section[data-section="14"] { --accent: var(--c2); --accent-dark: var(--c2d); --accent-soft: #e3f2fd; }
+  .section[data-section="3"], .section[data-section="9"], .section[data-section="15"] { --accent: var(--c3); --accent-dark: var(--c3d); --accent-soft: #fce4ec; }
+  .section[data-section="4"], .section[data-section="10"] { --accent: var(--c4); --accent-dark: var(--c4d); --accent-soft: #e8f5e9; }
+  .section[data-section="5"], .section[data-section="11"] { --accent: var(--c5); --accent-dark: var(--c5d); --accent-soft: #fff3e0; }
+  .section[data-section="6"], .section[data-section="12"] { --accent: var(--c6); --accent-dark: var(--c6d); --accent-soft: #e0f2f1; }
+
+  /* ====== QUESTION ====== */
+  .question { margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px dashed #eee; }
+  .question:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  .qlabel { font-weight: 500; margin-bottom: 12px; display: block; font-size: 0.98em; line-height: 1.4; }
+  .qlabel .num { color: var(--accent, #8e24aa); font-weight: 800; margin-right: 4px; }
+
+  .limite-chip {
+    display: inline-block;
+    background: #fff3e0; color: #e65100;
+    padding: 3px 10px; border-radius: 12px;
+    font-size: 0.78em; font-weight: 700;
+    margin-left: 6px;
+    transition: all 0.2s;
+  }
+  .limite-chip.full { background: #e8f5e9; color: #2e7d32; }
+
+  /* ====== SMILEY SCALE (section 1) ====== */
+  .smiley-scale {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .smiley-scale label {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 12px 6px;
+    background: #fafafa;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    text-align: center;
+    user-select: none;
+  }
+  .smiley-scale label .face { font-size: 1.9em; filter: grayscale(40%); transition: all 0.2s; }
+  .smiley-scale label .lib { font-size: 0.68em; color: #888; margin-top: 4px; font-weight: 600; }
+  .smiley-scale input[type="radio"] { display: none; }
+  .smiley-scale label:hover { background: var(--accent-soft); transform: translateY(-2px); }
+  .smiley-scale label:hover .face { filter: grayscale(0%); }
+  .smiley-scale label:has(input:checked) {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .smiley-scale label:has(input:checked) .face { filter: grayscale(0%) drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+  .smiley-scale label:has(input:checked) .lib { color: var(--accent-dark); }
+
+  /* ====== STAR SCALE (section 2) ====== */
+  .star-scale {
+    display: flex; gap: 4px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .star-scale label {
+    cursor: pointer;
+    font-size: 1.85em;
+    color: #d1d5db;
+    transition: all 0.15s;
+    padding: 4px 2px;
+    user-select: none;
+    line-height: 1;
+  }
+  .star-scale input[type="radio"] { display: none; }
+  .star-scale label:hover { transform: scale(1.15); color: #fbbf24; }
+  .star-scale label.lit { color: #fbbf24; }
+  .star-scale label.lit:hover { color: #f59e0b; }
+  .star-legend { font-size: 0.74em; color: #999; margin-left: 8px; font-family: 'Caveat', cursive; font-size: 1em; }
+
+  /* ====== CHIPS (cases à cocher façon pills) ====== */
+  .chip-cloud {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .chip-cloud label {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    background: #fafafa;
+    border-radius: 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    font-size: 0.92em;
+    user-select: none;
+    line-height: 1.3;
+  }
+  .chip-cloud label:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .chip-cloud input { display: none; }
+  .chip-cloud label:has(input:checked) {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent-dark);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+  .chip-cloud label.disabled { opacity: 0.4; cursor: not-allowed; }
+  .chip-cloud label.disabled:hover { background: #fafafa; border-color: transparent; transform: none; }
+
+  /* ====== CARDS VERTICALES (style situations vécues, section 4) ====== */
+  .card-list { display: grid; gap: 8px; }
+  .card-list label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #fafafa;
+    border-radius: 12px;
+    cursor: pointer;
+    border-left: 4px solid transparent;
+    transition: all 0.2s;
+    font-size: 0.93em;
+    line-height: 1.4;
+  }
+  .card-list label:hover {
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+    transform: translateX(2px);
+  }
+  .card-list input { margin-top: 2px; accent-color: var(--accent); transform: scale(1.25); flex-shrink: 0; }
+  .card-list label:has(input:checked) {
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ====== ATELIERS RANKING (section 5) ====== */
+  .vote-info {
+    background: linear-gradient(90deg, #fff3e0, #ffe0b2);
+    color: #e65100;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 0.9em;
+    margin-bottom: 16px;
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .vote-info.complete { background: linear-gradient(90deg, #e8f5e9, #c8e6c9); color: #1b5e20; }
+  .ateliers-grid { display: grid; gap: 10px; }
+  .atelier {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    background: #fafafa;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95em;
+  }
+  .atelier:hover { background: var(--accent-soft); transform: translateX(3px); }
+  .atelier.selected {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(251,140,0,0.2);
+  }
+  .atelier .rank {
+    width: 34px; height: 34px;
+    background: #ddd; color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1em;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .atelier.selected .rank {
+    background: linear-gradient(135deg, #fb8c00, #d4145a);
+    transform: scale(1.1);
+    box-shadow: 0 3px 8px rgba(212,20,90,0.3);
+  }
+  .atelier .label { flex: 1; }
+
+  /* ====== VISUAL CARDS (radio buttons) ====== */
+  .visual-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .visual-cards label {
+    padding: 14px 10px;
+    background: #fafafa;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .visual-cards label .vc-emoji { font-size: 1.6em; display: block; margin-bottom: 4px; }
+  .visual-cards label .vc-text { font-size: 0.85em; font-weight: 600; line-height: 1.3; }
+  .visual-cards input { display: none; }
+  .visual-cards label:hover { background: var(--accent-soft); transform: translateY(-2px); }
+  .visual-cards label:has(input:checked) {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent-dark);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: scale(1.03);
+  }
+
+  .visual-cards-vertical { grid-template-columns: 1fr; }
+  .visual-cards-vertical label { text-align: left; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+  .visual-cards-vertical label .vc-emoji { margin-bottom: 0; }
+
+  /* ====== TEXTAREA / CHAT BUBBLE ====== */
+  .chat-bubble {
+    background: var(--accent-soft);
+    padding: 14px 18px;
+    border-radius: 18px;
+    border-bottom-left-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 0.92em;
+    color: var(--accent-dark);
+    font-family: 'Caveat', cursive;
+    font-size: 1.1em;
+    line-height: 1.35;
+  }
+  textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 0.95em;
+    resize: vertical;
+    transition: all 0.2s;
+    background: #fafafa;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+  /* ====== BOUTONS ====== */
+  .submit-btn {
+    display: block;
+    width: calc(100% - 40px);
+    margin: 30px 20px 0;
+    padding: 18px;
+    background: linear-gradient(135deg, #4a148c, #8e24aa, #d4145a);
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.1em;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(74,20,140,0.35);
+    transition: all 0.3s;
+    font-family: inherit;
+    letter-spacing: 0.3px;
+  }
+  .submit-btn:hover { background-position: 100% 50%; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,20,140,0.45); }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; transform: none; box-shadow: none; }
+  .reset-link { display: block; text-align: center; margin: 16px; color: #888; font-size: 0.82em; text-decoration: underline; cursor: pointer; background: none; border: none; font-family: inherit; }
+
+  /* ====== ERROR ====== */
+  .error-msg {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #b71c1c;
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin: 16px 20px;
+    text-align: center;
+    font-weight: 500;
+    display: none;
+    border-left: 4px solid #b71c1c;
+  }
+  .error-msg.show { display: block; animation: shake 0.4s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  /* ====== MERCI OVERLAY ====== */
+  .merci-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, rgba(74,20,140,0.97), rgba(142,36,170,0.97), rgba(212,20,90,0.97));
+    color: #fff;
+    z-index: 1000;
+    align-items: center; justify-content: center;
+    padding: 30px;
+    text-align: center;
+  }
+  .merci-overlay.show { display: flex; animation: fadeIn 0.5s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .merci-overlay h2 { font-size: 2.2em; margin: 0 0 16px; font-weight: 800; }
+  .merci-overlay p { font-size: 1.05em; max-width: 520px; line-height: 1.6; }
+  .merci-overlay .check {
+    font-size: 5.5em;
+    margin-bottom: 20px;
+    animation: pop 0.6s ease-out;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  }
+  .merci-overlay .signature { margin-top: 28px; font-family: 'Caveat', cursive; font-size: 1.5em; opacity: 0.92; }
+
+  /* ====== PAUSE NOTE (sujets sensibles) ====== */
+  .pause-note {
+    background: linear-gradient(90deg, #fffde7, #fff9c4);
+    color: #5d4037;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 0.88em;
+    margin-bottom: 14px;
+    font-style: italic;
+    border-left: 4px solid #ffc107;
+  }
+
+  /* ====== RESPONSIVE — TABLETTE & GROS MOBILE ====== */
+  @media (max-width: 768px) {
+    body { padding: 0 0 80px 0; }
+    .section { margin: 14px 14px; padding: 22px 16px; }
+    .intro { margin: 16px 14px; padding: 22px 18px; }
+  }
+
+  /* ====== RESPONSIVE — MOBILE STANDARD (iPhone 13/14, Pixel, Samsung) ====== */
+  @media (max-width: 600px) {
+    header { padding: 28px 16px 22px; border-radius: 0 0 22px 22px; }
+    header h1 { font-size: 1.25em; line-height: 1.25; }
+    header .sous { font-size: 1.15em; }
+    .intro { padding: 20px 16px; }
+    .intro h2 { font-size: 1.08em; }
+    .intro p { font-size: 0.92em; }
+    .section { margin: 12px 12px; padding: 20px 14px; border-radius: 16px; }
+    .section-emoji { font-size: 1.8em; }
+    .section-title { font-size: 1.1em; }
+    .section-tag { font-size: 0.66em; }
+    .section-subtitle { font-size: 1em; }
+    .qlabel { font-size: 0.94em; }
+
+    /* Smileys : compactés mais lisibles */
+    .smiley-scale { gap: 4px; }
+    .smiley-scale label { padding: 9px 2px; border-radius: 10px; }
+    .smiley-scale label .face { font-size: 1.55em; }
+    .smiley-scale label .lib { font-size: 0.6em; line-height: 1.1; }
+
+    /* Étoiles : plus petites + wrap natif */
+    .star-scale label { font-size: 1.55em; padding: 3px 1px; }
+    .star-legend { display: block; width: 100%; margin: 4px 0 0; font-size: 0.9em; }
+
+    /* Chips */
+    .chip-cloud { gap: 6px; }
+    .chip-cloud label { padding: 9px 12px; font-size: 0.88em; border-radius: 18px; }
+
+    /* Cards verticales */
+    .card-list label { padding: 11px 12px; font-size: 0.9em; }
+
+    /* Ateliers */
+    .atelier { padding: 12px 13px; gap: 11px; font-size: 0.92em; }
+    .atelier .rank { width: 30px; height: 30px; font-size: 0.92em; }
+
+    /* Visual cards : 2 par ligne */
+    .visual-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .visual-cards label { padding: 12px 8px; border-radius: 12px; }
+    .visual-cards label .vc-emoji { font-size: 1.45em; }
+    .visual-cards label .vc-text { font-size: 0.8em; line-height: 1.25; }
+    .visual-cards-vertical { grid-template-columns: 1fr; }
+    .visual-cards-vertical label { padding: 11px 14px; }
+
+    /* Chat bubbles + textareas */
+    .chat-bubble { font-size: 1em; padding: 12px 14px; }
+    textarea { padding: 12px 14px; font-size: 0.93em; }
+
+    /* Bouton submit */
+    .submit-btn { margin: 24px 14px 0; padding: 16px; font-size: 1.02em; width: calc(100% - 28px); }
+
+    /* Progress dots : plus petits */
+    .progress-bar-container { padding: 10px 14px; }
+    .dots { gap: 3px; }
+    .dot { width: 12px; height: 5px; }
+
+    /* Vote info */
+    .vote-info { font-size: 0.85em; padding: 10px 12px; }
+
+    /* Section "done" check */
+    .section.done::after { width: 26px; height: 26px; font-size: 0.85em; top: 14px; right: 14px; }
+  }
+
+  /* ====== RESPONSIVE — PETIT MOBILE (iPhone SE, anciens Android, ~360px) ====== */
+  @media (max-width: 380px) {
+    header h1 { font-size: 1.1em; }
+    .section { margin: 10px 10px; padding: 18px 12px; }
+    .section-emoji { font-size: 1.55em; }
+    .section-title { font-size: 1em; }
+
+    /* Smileys ultra-compacts */
+    .smiley-scale { gap: 3px; }
+    .smiley-scale label { padding: 7px 1px; }
+    .smiley-scale label .face { font-size: 1.35em; }
+    .smiley-scale label .lib { font-size: 0.54em; }
+
+    /* Étoiles */
+    .star-scale label { font-size: 1.4em; }
+
+    /* Chips */
+    .chip-cloud label { font-size: 0.83em; padding: 8px 10px; }
+
+    /* Visual cards : 1 ligne de 2 reste OK même à 320px (≈140px par carte) */
+    .visual-cards label .vc-emoji { font-size: 1.3em; }
+    .visual-cards label .vc-text { font-size: 0.74em; }
+
+    /* Dots */
+    .dot { width: 10px; height: 4px; }
+    .progress-text { font-size: 0.72em; }
+  }
+
+  /* ====== RESPONSIVE — ULTRA-PETIT (320px, vieux téléphones, mode zoom) ====== */
+  @media (max-width: 340px) {
+    .smiley-scale label .lib { display: none; } /* libellés masqués si vraiment trop étroit */
+    .smiley-scale label { padding: 8px 1px; }
+    .smiley-scale label .face { font-size: 1.5em; }
+    .star-scale label { font-size: 1.25em; }
+    .visual-cards { grid-template-columns: 1fr; }
+    .chip-cloud label { font-size: 0.8em; padding: 7px 9px; }
+  }
+
+  /* ====== ACCESSIBILITÉ : motion reduction ====== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header>
+  <h1>🌱 Mieux se connaître, mieux communiquer</h1>
+  <div class="sous">Un sondage pour préparer ton parcours CPS</div>
+</header>
+
+<!-- ========== PROGRESSION STICKY ========== -->
+<div class="progress-bar-container">
+  <div class="dots" id="dots"></div>
+  <div class="progress-text" id="progressText">Section 0 / 15 · prêt à commencer ?</div>
+  <div class="saved-toast" id="savedToast">💾 sauvegardé sur ton téléphone</div>
+</div>
+
+<!-- ========== INTRO ========== -->
+<div class="intro">
+  <h2><span class="emoji">👋</span> Salut, c'est important.</h2>
+  <p>Les <span class="keyword">compétences psychosociales</span> — apprendre à se connaître, gérer ses émotions, communiquer, coopérer — sont aujourd'hui reconnues comme <strong>essentielles</strong> pour réussir au lycée, en stage, dans la vie pro et dans la vie tout court.</p>
+  <p>Le monde du travail demande de plus en plus de savoir <strong>se présenter</strong>, <strong>écouter</strong>, <strong>désamorcer un conflit</strong>, <strong>dire non sans casser la relation</strong>, <strong>gérer son stress</strong>. Et au quotidien, c'est ce qui fait la différence entre une journée subie et une journée maîtrisée.</p>
+  <p>Dans le cadre du <span class="keyword">parcours éducatif de santé</span>, on va mettre en place des <strong>ateliers</strong> pour travailler ces compétences ensemble. Mais avant, j'ai besoin de toi : j'ai besoin de savoir <strong>où tu en es</strong>, <strong>ce qui te poserait problème dans la vraie vie</strong>, et <strong>comment tu aimerais qu'on travaille</strong>.</p>
+  <p>Réponds franchement, il n'y a aucun jugement. <strong>Ce sondage est anonyme</strong>, personne ne saura qui a répondu quoi.</p>
+  <div class="badges-row">
+    <span class="badge-info badge-anon">🔒 100 % anonyme</span>
+    <span class="badge-info badge-save">💾 Sauvegarde auto</span>
+    <span class="badge-info badge-time">⏱️ 10-15 minutes</span>
+  </div>
+</div>
+
+<form id="sondageForm">
+
+<!-- ========== SECTION 1 — AUTO-POSITIONNEMENT ========== -->
+<div class="section" data-section="1">
+  <div class="section-head">
+    <span class="section-emoji">🪞</span>
+    <div>
+      <span class="section-tag">Étape 1 / 15 · Toi</span>
+      <div class="section-title">Aujourd'hui, je me sens comment ?</div>
+    </div>
+  </div>
+  <div class="section-subtitle">Choisis le smiley qui te ressemble le plus pour chaque phrase 👇</div>
+
+  <div class="question" data-cps="C1.1"><span class="qlabel"><span class="num">1.1</span>Parler de moi, raconter ce que je vis.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae1" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae1" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae1" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae1" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae1" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="C1.5"><span class="qlabel"><span class="num">1.2</span>Reconnaître mes qualités et mes points forts.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae2" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae2" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae2" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae2" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae2" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="E1.2"><span class="qlabel"><span class="num">1.3</span>Dire ce que je ressens (mes émotions).</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae3" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae3" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae3" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae3" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae3" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="S1.2"><span class="qlabel"><span class="num">1.4</span>Écouter vraiment quelqu'un sans l'interrompre.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae4" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae4" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae4" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae4" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae4" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="S1.1"><span class="qlabel"><span class="num">1.5</span>M'exprimer clairement à l'oral.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae5" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae5" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae5" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae5" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae5" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="S2.1"><span class="qlabel"><span class="num">1.6</span>Dire non sans agresser, savoir refuser.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae6" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae6" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae6" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae6" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae6" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="S1.3"><span class="qlabel"><span class="num">1.7</span>Travailler en groupe, coopérer.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae7" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae7" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae7" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae7" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae7" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="C2.4"><span class="qlabel"><span class="num">1.8</span>Demander de l'aide quand j'en ai besoin.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae8" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae8" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae8" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae8" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae8" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="E2.3"><span class="qlabel"><span class="num">1.9</span>Gérer mon stress, mes émotions difficiles.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae9" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae9" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae9" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae9" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae9" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="C1.4"><span class="qlabel"><span class="num">1.10</span>Prendre une décision importante.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae10" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae10" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae10" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae10" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae10" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="C1.6"><span class="qlabel"><span class="num">1.11</span>Me concentrer longtemps sur une tâche.</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae11" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae11" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae11" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae11" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae11" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+
+  <div class="question" data-cps="S1.1"><span class="qlabel"><span class="num">1.12</span>Adapter mon langage selon la situation (pote / prof / pro).</span>
+    <div class="smiley-scale">
+      <label><input type="radio" name="ae12" value="1"><span class="face">😣</span><span class="lib">Pas du tout</span></label>
+      <label><input type="radio" name="ae12" value="2"><span class="face">😕</span><span class="lib">Un peu</span></label>
+      <label><input type="radio" name="ae12" value="3"><span class="face">😐</span><span class="lib">Moyen</span></label>
+      <label><input type="radio" name="ae12" value="4"><span class="face">🙂</span><span class="lib">Bien</span></label>
+      <label><input type="radio" name="ae12" value="5"><span class="face">😄</span><span class="lib">Très à l'aise</span></label>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SECTION 2 — THÈMES (étoiles) ========== -->
+<div class="section" data-section="2">
+  <div class="section-head">
+    <span class="section-emoji">⭐</span>
+    <div>
+      <span class="section-tag">Étape 2 / 15 · Curiosité</span>
+      <div class="section-title">Les thèmes qui m'intéressent</div>
+    </div>
+  </div>
+  <div class="section-subtitle">Mets le nombre d'étoiles selon ton intérêt — 1 étoile = bof, 5 étoiles = j'adorerais ✨</div>
+
+  <div class="question" data-cps="C1.1"><span class="qlabel"><span class="num">2.1</span>Mieux me connaître (qui je suis, comment je fonctionne)</span><div class="star-scale" data-name="th1">{{STARS}}</div></div>
+  <div class="question" data-cps="C1.5"><span class="qlabel"><span class="num">2.2</span>Comprendre mes qualités et mes points forts</span><div class="star-scale" data-name="th2">{{STARS}}</div></div>
+  <div class="question" data-cps="C1.5"><span class="qlabel"><span class="num">2.3</span>Prendre confiance en moi</span><div class="star-scale" data-name="th3">{{STARS}}</div></div>
+  <div class="question" data-cps="C1.3"><span class="qlabel"><span class="num">2.4</span>Comprendre mes besoins et mes valeurs</span><div class="star-scale" data-name="th4">{{STARS}}</div></div>
+  <div class="question" data-cps="C1.3"><span class="qlabel"><span class="num">2.5</span>Réfléchir à mes objectifs personnels</span><div class="star-scale" data-name="th5">{{STARS}}</div></div>
+  <div class="question" data-cps="C1.4"><span class="qlabel"><span class="num">2.6</span>Faire de meilleurs choix / décisions</span><div class="star-scale" data-name="th6">{{STARS}}</div></div>
+  <div class="question" data-cps="C1.2"><span class="qlabel"><span class="num">2.7</span>Penser par moi-même, esprit critique</span><div class="star-scale" data-name="th7">{{STARS}}</div></div>
+  <div class="question" data-cps="C1.6"><span class="qlabel"><span class="num">2.8</span>Mieux me concentrer, gérer mon attention</span><div class="star-scale" data-name="th8">{{STARS}}</div></div>
+  <div class="question" data-cps="E1.1"><span class="qlabel"><span class="num">2.9</span>Comprendre mes émotions</span><div class="star-scale" data-name="th9">{{STARS}}</div></div>
+  <div class="question" data-cps="E1.2"><span class="qlabel"><span class="num">2.10</span>Savoir nommer ce que je ressens</span><div class="star-scale" data-name="th10">{{STARS}}</div></div>
+  <div class="question" data-cps="E2.3"><span class="qlabel"><span class="num">2.11</span>Gérer les moments où je suis mal à l'aise / stressé(e)</span><div class="star-scale" data-name="th11">{{STARS}}</div></div>
+  <div class="question" data-cps="S1.1"><span class="qlabel"><span class="num">2.12</span>Mieux communiquer avec les autres</span><div class="star-scale" data-name="th12">{{STARS}}</div></div>
+  <div class="question" data-cps="S1.1"><span class="qlabel"><span class="num">2.13</span>Apprendre à faire une demande claire</span><div class="star-scale" data-name="th13">{{STARS}}</div></div>
+  <div class="question" data-cps="S1.2"><span class="qlabel"><span class="num">2.14</span>Apprendre à écouter vraiment quelqu'un</span><div class="star-scale" data-name="th14">{{STARS}}</div></div>
+  <div class="question" data-cps="S1.2"><span class="qlabel"><span class="num">2.15</span>Comprendre les malentendus, désamorcer</span><div class="star-scale" data-name="th15">{{STARS}}</div></div>
+  <div class="question" data-cps="S2.2"><span class="qlabel"><span class="num">2.16</span>Gérer les tensions et conflits dans un groupe</span><div class="star-scale" data-name="th16">{{STARS}}</div></div>
+  <div class="question" data-cps="S1.3"><span class="qlabel"><span class="num">2.17</span>Mieux travailler en équipe</span><div class="star-scale" data-name="th17">{{STARS}}</div></div>
+  <div class="question" data-cps="S1.3"><span class="qlabel"><span class="num">2.18</span>Aider, soutenir quelqu'un (comportements prosociaux)</span><div class="star-scale" data-name="th18">{{STARS}}</div></div>
+  <div class="question" data-cps="S1.1"><span class="qlabel"><span class="num">2.19</span>Préparer la vie pro et les relations au travail</span><div class="star-scale" data-name="th19">{{STARS}}</div></div>
+</div>
+
+<!-- ========== SECTION 3 — SITUATIONS (chips) ========== -->
+<div class="section" data-section="3">
+  <div class="section-head">
+    <span class="section-emoji">🎯</span>
+    <div>
+      <span class="section-tag">Étape 3 / 15 · Progresser</span>
+      <div class="section-title">Situations où je veux être plus à l'aise</div>
+    </div>
+  </div>
+  <div class="section-subtitle">Touche au max <strong>5 bulles</strong> qui te parlent <span class="limite-chip" id="counter-sit">0 / 5</span></div>
+  <div class="chip-cloud" data-group="sit" data-max="5">
+    <label data-cps="S1.1"><input type="checkbox" name="sit" value="s1">Parler devant la classe</label>
+    <label data-cps="S1.1"><input type="checkbox" name="sit" value="s2">Passer un oral</label>
+    <label data-cps="E2.3"><input type="checkbox" name="sit" value="s3">Gérer le stress avant une épreuve</label>
+    <label data-cps="C1.5"><input type="checkbox" name="sit" value="s4">Garder confiance en difficulté</label>
+    <label data-cps="C2.4"><input type="checkbox" name="sit" value="s5">Demander de l'aide</label>
+    <label data-cps="S2.1"><input type="checkbox" name="sit" value="s6">Dire non correctement</label>
+    <label data-cps="E2.1"><input type="checkbox" name="sit" value="s7">Expliquer ce que je ressens</label>
+    <label data-cps="C2.2"><input type="checkbox" name="sit" value="s8">Éviter de m'énerver</label>
+    <label data-cps="S1.2"><input type="checkbox" name="sit" value="s9">Mieux comprendre les autres</label>
+    <label data-cps="S1.3"><input type="checkbox" name="sit" value="s10">Mieux travailler en groupe</label>
+    <label data-cps="S2.2"><input type="checkbox" name="sit" value="s11">Gérer une critique</label>
+    <label data-cps="S2.2"><input type="checkbox" name="sit" value="s12">Gérer un conflit</label>
+    <label data-cps="C2.1"><input type="checkbox" name="sit" value="s13">Me motiver</label>
+    <label data-cps="C1.3"><input type="checkbox" name="sit" value="s14">Préparer mon avenir</label>
+    <label data-cps="S1.3"><input type="checkbox" name="sit" value="s15">Réussir en stage</label>
+    <label data-cps="S1.1"><input type="checkbox" name="sit" value="s16">Communiquer avec un tuteur/employeur</label>
+    <label data-cps="C1.4"><input type="checkbox" name="sit" value="s17">Prendre une décision importante</label>
+    <label data-cps="C2.3"><input type="checkbox" name="sit" value="s18">Mieux organiser mes idées</label>
+    <label data-cps="C1.6"><input type="checkbox" name="sit" value="s19">Me concentrer plus longtemps</label>
+  </div>
+</div>
+
+<!-- ========== SECTION 4 — DIFFICULTÉS (cards) ========== -->
+<div class="section" data-section="4">
+  <div class="section-head">
+    <span class="section-emoji">⚠️</span>
+    <div>
+      <span class="section-tag">Étape 4 / 15 · Difficultés</span>
+      <div class="section-title">Ce qui me pose vraiment problème</div>
+    </div>
+  </div>
+  <div class="section-subtitle">Coche toutes les situations qui te ressemblent (même un peu) 🤝</div>
+  <div class="card-list">
+    <label data-cps="S1.1"><input type="checkbox" name="diff" value="d1"><span>Quand je dois prendre la parole, je <strong>bloque</strong>, je rougis, je tremble.</span></label>
+    <label data-cps="E2.1"><input type="checkbox" name="diff" value="d2"><span>Quand quelqu'un m'énerve, je <strong>m'emporte</strong> et je le regrette après.</span></label>
+    <label data-cps="S2.1"><input type="checkbox" name="diff" value="d3"><span>Face à un adulte (prof, employeur), je <strong>me tais</strong> même si je ne suis pas d'accord.</span></label>
+    <label data-cps="S2.1"><input type="checkbox" name="diff" value="d4"><span>Quand mes potes m'entraînent, je <strong>n'ose pas refuser</strong>.</span></label>
+    <label data-cps="E2.3"><input type="checkbox" name="diff" value="d5"><span>En entretien (PFMP, embauche), je <strong>perds mes mots</strong>.</span></label>
+    <label data-cps="S1.1"><input type="checkbox" name="diff" value="d6"><span>Quand on me critique, je <strong>me ferme</strong> ou je <strong>contre-attaque</strong>.</span></label>
+    <label data-cps="C1.5"><input type="checkbox" name="diff" value="d7"><span>Je me sens <strong>jugé(e)</strong> dès que j'ouvre la bouche.</span></label>
+    <label data-cps="E2.1"><input type="checkbox" name="diff" value="d8"><span>Je n'arrive pas à <strong>dire ce que je ressens</strong>.</span></label>
+    <label data-cps="S1.2"><input type="checkbox" name="diff" value="d9"><span>Je <strong>coupe la parole</strong> sans m'en rendre compte.</span></label>
+    <label data-cps="S2.1"><input type="checkbox" name="diff" value="d10"><span>Je dis <strong>ce que les autres veulent entendre</strong>, pas ce que je pense.</span></label>
+    <label data-cps="S1.1"><input type="checkbox" name="diff" value="d11"><span>Mon <strong>langage de tous les jours</strong> me pose problème en stage / au travail.</span></label>
+    <label data-cps="S1.2"><input type="checkbox" name="diff" value="d12"><span>J'ai du mal à <strong>comprendre les sous-entendus</strong>.</span></label>
+    <label data-cps="S1.1"><input type="checkbox" name="diff" value="d13"><span>Je <strong>n'arrive pas à regarder dans les yeux</strong> quand je parle.</span></label>
+    <label data-cps="S1.1"><input type="checkbox" name="diff" value="d14"><span>Au <strong>téléphone</strong>, je suis encore plus mal à l'aise.</span></label>
+    <label data-cps="S1.1"><input type="checkbox" name="diff" value="d15"><span>Mes <strong>messages écrits</strong> (SMS, mails) sont mal pris.</span></label>
+    <label data-cps="E2.3"><input type="checkbox" name="diff" value="d16"><span>Quand je suis <strong>stressé(e)</strong>, je ne sais plus parler.</span></label>
+  </div>
+</div>
+
+<!-- ========== SECTION 5 — ATELIERS PRIORITAIRES ========== -->
+<div class="section" data-section="5">
+  <div class="section-head">
+    <span class="section-emoji">🏆</span>
+    <div>
+      <span class="section-tag">Étape 5 / 15 · Choix</span>
+      <div class="section-title">Mes 5 ateliers prioritaires</div>
+    </div>
+  </div>
+  <div class="section-subtitle">Touche les ateliers dans l'ordre — le 1<sup>er</sup> clic = priorité n°1 🥇</div>
+  <div class="vote-info" id="voteInfo">👉 Sélectionne 5 ateliers (0 / 5)</div>
+  <div class="ateliers-grid" id="ateliers">
+    <div class="atelier" data-id="a1" data-cps="S1.1"><div class="rank">·</div><div class="label">🗣️ <strong>Prendre la parole devant un groupe</strong> (gérer le trac, la voix, la posture)</div></div>
+    <div class="atelier" data-id="a2" data-cps="S1.2"><div class="rank">·</div><div class="label">👂 <strong>Écouter pour vraiment comprendre</strong> (écoute active, reformulation)</div></div>
+    <div class="atelier" data-id="a3" data-cps="S2.1"><div class="rank">·</div><div class="label">🙅 <strong>Dire non sans casser la relation</strong> (assertivité, oser refuser)</div></div>
+    <div class="atelier" data-id="a4" data-cps="S2.2"><div class="rank">·</div><div class="label">⚔️ <strong>Gérer un conflit sans s'énerver</strong> (désamorcer, négocier)</div></div>
+    <div class="atelier" data-id="a5" data-cps="S1.1"><div class="rank">·</div><div class="label">💼 <strong>Communiquer en milieu pro</strong> (entretien, stage, employeur)</div></div>
+    <div class="atelier" data-id="a6" data-cps="S1.1"><div class="rank">·</div><div class="label">🎭 <strong>Adapter mon langage</strong> selon les situations (codes sociaux)</div></div>
+    <div class="atelier" data-id="a7" data-cps="S1.1"><div class="rank">·</div><div class="label">💬 <strong>Faire passer un message clair</strong> (message-je, demande directe)</div></div>
+    <div class="atelier" data-id="a8" data-cps="C1.2"><div class="rank">·</div><div class="label">🤝 <strong>Convaincre sans manipuler</strong> (argumenter, négocier honnêtement)</div></div>
+    <div class="atelier" data-id="a9" data-cps="E2.3"><div class="rank">·</div><div class="label">🧘 <strong>Gérer mes émotions</strong> pendant que je parle (stress, colère, peur)</div></div>
+    <div class="atelier" data-id="a10" data-cps="S1.2"><div class="rank">·</div><div class="label">👀 <strong>Décoder le non-verbal</strong> (gestes, regard, ton, silences)</div></div>
+    <div class="atelier" data-id="a11" data-cps="S2.2"><div class="rank">·</div><div class="label">🗨️ <strong>Sortir d'une dispute</strong> en famille ou entre amis</div></div>
+    <div class="atelier" data-id="a12" data-cps="S1.1"><div class="rank">·</div><div class="label">📱 <strong>Communication en ligne</strong> (messages, réseaux, mails pro)</div></div>
+    <div class="atelier" data-id="a13" data-cps="C1.5"><div class="rank">·</div><div class="label">💪 <strong>Renforcer ma confiance en moi</strong></div></div>
+    <div class="atelier" data-id="a14" data-cps="S1.3"><div class="rank">·</div><div class="label">🎯 <strong>Mieux travailler en équipe</strong> (coopération, répartition des rôles)</div></div>
+    <div class="atelier" data-id="a15" data-cps="C1.1"><div class="rank">·</div><div class="label">🧠 <strong>Mieux me connaître</strong> (forces, valeurs, fonctionnement)</div></div>
+  </div>
+</div>
+
+<!-- ========== SECTION 6 — ACTIVITÉS PRÉFÉRÉES ========== -->
+<div class="section" data-section="6">
+  <div class="section-head">
+    <span class="section-emoji">🎲</span>
+    <div>
+      <span class="section-tag">Étape 6 / 15 · Style</span>
+      <div class="section-title">Activités qui me donnent envie</div>
+    </div>
+  </div>
+  <div class="section-subtitle">5 bulles maximum — celles qui te font dire "ah ouais, ça je veux bien" <span class="limite-chip" id="counter-act">0 / 5</span></div>
+  <div class="chip-cloud" data-group="act" data-max="5">
+    <label><input type="checkbox" name="act" value="ac1">🎭 Jeux de rôle</label>
+    <label><input type="checkbox" name="act" value="ac2">💬 Débats</label>
+    <label><input type="checkbox" name="act" value="ac3">📲 Quiz interactifs</label>
+    <label><input type="checkbox" name="act" value="ac4">🎲 Jeux en équipe</label>
+    <label><input type="checkbox" name="act" value="ac5">🎬 Mises en situation</label>
+    <label><input type="checkbox" name="act" value="ac6">⚡ Défis courts</label>
+    <label><input type="checkbox" name="act" value="ac7">📺 Vidéos + discussion</label>
+    <label><input type="checkbox" name="act" value="ac8">🃏 Cartes à manipuler</label>
+    <label><input type="checkbox" name="act" value="ac9">💼 Situations de stage</label>
+    <label><input type="checkbox" name="act" value="ac10">🌍 Situations vie réelle</label>
+    <label><input type="checkbox" name="act" value="ac11">🧘 Réflexion personnelle</label>
+    <label><input type="checkbox" name="act" value="ac12">🎨 Activités créatives</label>
+    <label><input type="checkbox" name="act" value="ac13">👥 Échanges petit groupe</label>
+    <label><input type="checkbox" name="act" value="ac14">🎥 Analyse de scènes</label>
+    <label><input type="checkbox" name="act" value="ac15">🛠️ Mini-projets</label>
+    <label><input type="checkbox" name="act" value="ac16">🌬️ Respiration / concentration</label>
+    <label><input type="checkbox" name="act" value="ac17">⭕ Cercle de parole</label>
+    <label><input type="checkbox" name="act" value="ac18">🎙️ S'enregistrer / se filmer</label>
+  </div>
+</div>
+
+<!-- ========== SECTION 7 — MODALITÉS DE TRAVAIL (visual cards) ========== -->
+<div class="section" data-section="7">
+  <div class="section-head">
+    <span class="section-emoji">👥</span>
+    <div>
+      <span class="section-tag">Étape 7 / 15 · Format</span>
+      <div class="section-title">Comment je préfère travailler</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">7.1</span>Configuration préférée (plusieurs choix possibles) :</span>
+    <div class="visual-cards">
+      <label><input type="checkbox" name="mod" value="mo1"><span class="vc-emoji">👤</span><span class="vc-text">Seul(e)</span></label>
+      <label><input type="checkbox" name="mod" value="mo2"><span class="vc-emoji">🤝</span><span class="vc-text">Binôme</span></label>
+      <label><input type="checkbox" name="mod" value="mo3"><span class="vc-emoji">👨‍👩‍👧</span><span class="vc-text">Petit groupe</span></label>
+      <label><input type="checkbox" name="mod" value="mo4"><span class="vc-emoji">🏫</span><span class="vc-text">Classe entière</span></label>
+      <label><input type="checkbox" name="mod" value="mo5"><span class="vc-emoji">🔀</span><span class="vc-text">Ça dépend</span></label>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">7.2</span>Quand on travaille en groupe, je préfère :</span>
+    <div class="visual-cards visual-cards-vertical">
+      <label><input type="radio" name="grp" value="g1"><span class="vc-emoji">✋</span><span class="vc-text">Choisir mon groupe</span></label>
+      <label><input type="radio" name="grp" value="g2"><span class="vc-emoji">🧑‍🏫</span><span class="vc-text">Que le prof fasse les groupes</span></label>
+      <label><input type="radio" name="grp" value="g3"><span class="vc-emoji">🎲</span><span class="vc-text">Tirage au hasard</span></label>
+      <label><input type="radio" name="grp" value="g4"><span class="vc-emoji">🔄</span><span class="vc-text">Varier les groupes à chaque fois</span></label>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SECTION 8 — GUIDAGE ========== -->
+<div class="section" data-section="8">
+  <div class="section-head">
+    <span class="section-emoji">🧭</span>
+    <div>
+      <span class="section-tag">Étape 8 / 15 · Repères</span>
+      <div class="section-title">Le niveau de guidage dont j'ai besoin</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">8.1</span>Pour être à l'aise, j'aime :</span>
+    <div class="chip-cloud">
+      <label><input type="checkbox" name="gui" value="gu1">📋 Consignes détaillées</label>
+      <label><input type="checkbox" name="gui" value="gu2">✂️ Consignes courtes</label>
+      <label><input type="checkbox" name="gui" value="gu3">🎯 Un exemple avant</label>
+      <label><input type="checkbox" name="gui" value="gu4">📝 Fiche-guide pas à pas</label>
+      <label><input type="checkbox" name="gui" value="gu5">🆓 Activité libre</label>
+      <label><input type="checkbox" name="gui" value="gu6">📄 Modèle à compléter</label>
+      <label><input type="checkbox" name="gui" value="gu7">✅ Correction collective</label>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">8.2</span>Un petit livret personnel pour suivre mes progrès m'aiderait :</span>
+    <div class="visual-cards">
+      <label><input type="radio" name="livret" value="l1"><span class="vc-emoji">💯</span><span class="vc-text">Oui, beaucoup</span></label>
+      <label><input type="radio" name="livret" value="l2"><span class="vc-emoji">🙂</span><span class="vc-text">Oui, un peu</span></label>
+      <label><input type="radio" name="livret" value="l3"><span class="vc-emoji">🙅</span><span class="vc-text">Non, pas vraiment</span></label>
+      <label><input type="radio" name="livret" value="l4"><span class="vc-emoji">🤷</span><span class="vc-text">Selon les activités</span></label>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SECTION 9 — FORMAT SÉANCE ========== -->
+<div class="section" data-section="9">
+  <div class="section-head">
+    <span class="section-emoji">⏱️</span>
+    <div>
+      <span class="section-tag">Étape 9 / 15 · Rythme</span>
+      <div class="section-title">Format de séance qui me convient</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">9.1</span>Je préfère :</span>
+    <div class="visual-cards">
+      <label><input type="radio" name="duree" value="du1"><span class="vc-emoji">⏱️</span><span class="vc-text">1 heure</span></label>
+      <label><input type="radio" name="duree" value="du2"><span class="vc-emoji">🕐</span><span class="vc-text">2 heures</span></label>
+      <label><input type="radio" name="duree" value="du3"><span class="vc-emoji">⚡</span><span class="vc-text">Courts mais fréquents</span></label>
+      <label><input type="radio" name="duree" value="du4"><span class="vc-emoji">📆</span><span class="vc-text">Longs et espacés</span></label>
+      <label><input type="radio" name="duree" value="du5"><span class="vc-emoji">🎯</span><span class="vc-text">Journée intensive</span></label>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">9.2</span>Dans une séance, je préfère :</span>
+    <div class="visual-cards visual-cards-vertical">
+      <label><input type="radio" name="struct" value="st1"><span class="vc-emoji">🎯</span><span class="vc-text">Une seule grande activité</span></label>
+      <label><input type="radio" name="struct" value="st2"><span class="vc-emoji">🧩</span><span class="vc-text">Plusieurs petites activités</span></label>
+      <label><input type="radio" name="struct" value="st3"><span class="vc-emoji">📖</span><span class="vc-text">Explication puis activité</span></label>
+      <label><input type="radio" name="struct" value="st4"><span class="vc-emoji">💭</span><span class="vc-text">Activité puis discussion</span></label>
+      <label><input type="radio" name="struct" value="st5"><span class="vc-emoji">🏆</span><span class="vc-text">Défi puis bilan</span></label>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SECTION 10 — CADRE & SÉCURITÉ PSY ========== -->
+<div class="section" data-section="10">
+  <div class="section-head">
+    <span class="section-emoji">🛡️</span>
+    <div>
+      <span class="section-tag">Étape 10 / 15 · Sécurité</span>
+      <div class="section-title">Le cadre dont j'ai besoin pour participer sereinement</div>
+    </div>
+  </div>
+  <div class="section-subtitle">5 conditions max — celles qui sont vraiment importantes pour toi <span class="limite-chip" id="counter-cadre">0 / 5</span></div>
+  <div class="chip-cloud" data-group="cadre" data-max="5">
+    <label><input type="checkbox" name="cadre" value="ca1">🚫 Personne ne se moque</label>
+    <label><input type="checkbox" name="cadre" value="ca2">🤐 Pas de jugement</label>
+    <label><input type="checkbox" name="cadre" value="ca3">🙅 Pas obligé(e) de parler</label>
+    <label><input type="checkbox" name="cadre" value="ca4">📋 Consignes claires</label>
+    <label><input type="checkbox" name="cadre" value="ca5">🧑‍🏫 Le prof cadre bien</label>
+    <label><input type="checkbox" name="cadre" value="ca6">😌 Ambiance calme</label>
+    <label><input type="checkbox" name="cadre" value="ca7">⚡ Ambiance dynamique</label>
+    <label><input type="checkbox" name="cadre" value="ca8">💡 Activités utiles</label>
+    <label><input type="checkbox" name="cadre" value="ca9">🌍 Sujets concrets</label>
+    <label><input type="checkbox" name="cadre" value="ca10">🗣️ Chacun donne son avis</label>
+    <label><input type="checkbox" name="cadre" value="ca11">🎬 Exemples réels</label>
+    <label><input type="checkbox" name="cadre" value="ca12">🔒 Pas trop personnel</label>
+  </div>
+</div>
+
+<!-- ========== SECTION 11 — RAPPORT À L'ORAL ========== -->
+<div class="section" data-section="11">
+  <div class="section-head">
+    <span class="section-emoji">🎤</span>
+    <div>
+      <span class="section-tag">Étape 11 / 15 · Oral</span>
+      <div class="section-title">Mon rapport à la prise de parole</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">11.1</span>Pendant les ateliers, parler devant les autres, pour moi c'est :</span>
+    <div class="visual-cards">
+      <label><input type="radio" name="oral1" value="o1"><span class="vc-emoji">😎</span><span class="vc-text">Facile</span></label>
+      <label><input type="radio" name="oral1" value="o2"><span class="vc-emoji">🙂</span><span class="vc-text">OK si à l'aise</span></label>
+      <label><input type="radio" name="oral1" value="o3"><span class="vc-emoji">😬</span><span class="vc-text">Difficile</span></label>
+      <label><input type="radio" name="oral1" value="o4"><span class="vc-emoji">😰</span><span class="vc-text">Très difficile</span></label>
+      <label><input type="radio" name="oral1" value="o5"><span class="vc-emoji">👥</span><span class="vc-text">Petit groupe svp</span></label>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">11.2</span>Je préfère participer (plusieurs choix possibles) :</span>
+    <div class="chip-cloud">
+      <label><input type="checkbox" name="oral2" value="op1">🗣️ À l'oral</label>
+      <label><input type="checkbox" name="oral2" value="op2">✍️ Par écrit</label>
+      <label><input type="checkbox" name="oral2" value="op3">🗳️ Par vote anonyme</label>
+      <label><input type="checkbox" name="oral2" value="op4">📱 Avec le téléphone</label>
+      <label><input type="checkbox" name="oral2" value="op5">👥 En groupe</span></label>
+      <label><input type="checkbox" name="oral2" value="op6">🔀 Ça dépend du sujet</label>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SECTION 12 — SUJETS SENSIBLES ========== -->
+<div class="section" data-section="12">
+  <div class="section-head">
+    <span class="section-emoji">🤫</span>
+    <div>
+      <span class="section-tag">Étape 12 / 15 · Pudeur</span>
+      <div class="section-title">Sujets à aborder avec prudence</div>
+    </div>
+  </div>
+  <div class="pause-note">⚠️ Tu ne seras <strong>jamais obligé(e)</strong> de raconter quelque chose de personnel. Cette section sert juste à savoir comment cadrer les ateliers.</div>
+  <div class="section-subtitle">Coche les sujets pour lesquels tu préfères qu'on prenne des précautions 🌷</div>
+  <div class="chip-cloud">
+    <label><input type="checkbox" name="sens" value="se1">😰 Stress / anxiété</label>
+    <label><input type="checkbox" name="sens" value="se2">💔 Confiance en soi</label>
+    <label><input type="checkbox" name="sens" value="se3">😢 Émotions intimes</label>
+    <label><input type="checkbox" name="sens" value="se4">👨‍👩‍👧 Famille</label>
+    <label><input type="checkbox" name="sens" value="se5">👥 Relations amicales</label>
+    <label><input type="checkbox" name="sens" value="se6">❤️ Relations amoureuses</label>
+    <label><input type="checkbox" name="sens" value="se7">⚔️ Conflits</label>
+    <label><input type="checkbox" name="sens" value="se8">😡 Harcèlement</label>
+    <label><input type="checkbox" name="sens" value="se9">🌅 Avenir / orientation</label>
+    <label><input type="checkbox" name="sens" value="se10">💼 Stage / PFMP</label>
+    <label><input type="checkbox" name="sens" value="se11">🎤 Oral / prise de parole</label>
+    <label><input type="checkbox" name="sens" value="se12">✅ Aucun, je suis ouvert(e) à tout</label>
+  </div>
+</div>
+
+<!-- ========== SECTION 13 — SITUATIONS PRO ========== -->
+<div class="section" data-section="13">
+  <div class="section-head">
+    <span class="section-emoji">💼</span>
+    <div>
+      <span class="section-tag">Étape 13 / 15 · Pro</span>
+      <div class="section-title">Ateliers utiles pour ma vie pro</div>
+    </div>
+  </div>
+  <div class="section-subtitle">5 max — ceux qui te seraient le plus utiles <span class="limite-chip" id="counter-pro">0 / 5</span></div>
+  <div class="chip-cloud" data-group="pro" data-max="5">
+    <label data-cps="S1.1"><input type="checkbox" name="pro" value="pr1">Se présenter à un employeur</label>
+    <label data-cps="S1.1"><input type="checkbox" name="pro" value="pr2">Communiquer avec un tuteur</label>
+    <label data-cps="S2.2"><input type="checkbox" name="pro" value="pr3">Gérer une remarque</label>
+    <label data-cps="S1.1"><input type="checkbox" name="pro" value="pr4">Demander une explication</label>
+    <label data-cps="C2.4"><input type="checkbox" name="pro" value="pr5">Dire qu'on n'a pas compris</label>
+    <label data-cps="S1.3"><input type="checkbox" name="pro" value="pr6">Travailler avec des collègues</label>
+    <label data-cps="S2.2"><input type="checkbox" name="pro" value="pr7">Gérer un désaccord</label>
+    <label data-cps="C2.1"><input type="checkbox" name="pro" value="pr8">Être ponctuel et fiable</label>
+    <label data-cps="E2.2"><input type="checkbox" name="pro" value="pr9">Garder son calme</label>
+    <label data-cps="C1.4"><input type="checkbox" name="pro" value="pr10">Prendre une décision</label>
+    <label data-cps="C1.5"><input type="checkbox" name="pro" value="pr11">Valoriser ses qualités</label>
+    <label data-cps="S1.1"><input type="checkbox" name="pro" value="pr12">Préparer un entretien</label>
+    <label data-cps="S1.1"><input type="checkbox" name="pro" value="pr13">Préparer l'oral du bac</label>
+    <label data-cps="C1.3"><input type="checkbox" name="pro" value="pr14">Expliquer son projet</label>
+    <label data-cps="S1.1"><input type="checkbox" name="pro" value="pr15">Codes du monde pro</label>
+  </div>
+</div>
+
+<!-- ========== SECTION 14 — MOTIVATION & FREINS ========== -->
+<div class="section" data-section="14">
+  <div class="section-head">
+    <span class="section-emoji">⚡</span>
+    <div>
+      <span class="section-tag">Étape 14 / 15 · Énergie</span>
+      <div class="section-title">Ce qui me motive et ce qui me bloque</div>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">14.1</span>Ce qui me donne envie de participer :</span>
+    <div class="chip-cloud">
+      <label><input type="checkbox" name="moti" value="mt1">🌍 C'est concret</label>
+      <label><input type="checkbox" name="moti" value="mt2">🎯 Utile pour ma vie</label>
+      <label><input type="checkbox" name="moti" value="mt3">📚 Utile pour le bac</label>
+      <label><input type="checkbox" name="moti" value="mt4">💼 Utile pour le travail</label>
+      <label><input type="checkbox" name="moti" value="mt5">🎮 Il y a du jeu</label>
+      <label><input type="checkbox" name="moti" value="mt6">🏃 Il y a du mouvement</label>
+      <label><input type="checkbox" name="moti" value="mt7">🗣️ Je peux donner mon avis</label>
+      <label><input type="checkbox" name="moti" value="mt8">✅ Je peux choisir</label>
+      <label><input type="checkbox" name="moti" value="mt9">💡 Je comprends pourquoi</label>
+      <label><input type="checkbox" name="moti" value="mt10">😄 Bonne ambiance</label>
+      <label><input type="checkbox" name="moti" value="mt11">⚡ Pas trop long</label>
+      <label><input type="checkbox" name="moti" value="mt12">🏆 Je réussis quelque chose</label>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">14.2</span>Ce qui peut me bloquer en atelier :</span>
+    <div class="chip-cloud">
+      <label><input type="checkbox" name="frein" value="fr1">👀 Peur du regard des autres</label>
+      <label><input type="checkbox" name="frein" value="fr2">🎤 Peur de parler</label>
+      <label><input type="checkbox" name="frein" value="fr3">❌ Peur de me tromper</label>
+      <label><input type="checkbox" name="frein" value="fr4">😴 Manque d'intérêt</label>
+      <label><input type="checkbox" name="frein" value="fr5">📋 Consignes trop longues</label>
+      <label><input type="checkbox" name="frein" value="fr6">✍️ Trop d'écrit</label>
+      <label><input type="checkbox" name="frein" value="fr7">🗣️ Trop d'oral</label>
+      <label><input type="checkbox" name="frein" value="fr8">🔊 Groupe bruyant</label>
+      <label><input type="checkbox" name="frein" value="fr9">🔒 Activité trop personnelle</label>
+      <label><input type="checkbox" name="frein" value="fr10">🧠 Difficulté à me concentrer</label>
+      <label><input type="checkbox" name="frein" value="fr11">🤷 Ça ne sert à rien</label>
+    </div>
+  </div>
+</div>
+
+<!-- ========== SECTION 15 — VERBATIM & PROFIL ========== -->
+<div class="section" data-section="15">
+  <div class="section-head">
+    <span class="section-emoji">💬</span>
+    <div>
+      <span class="section-tag">Étape 15 / 15 · À toi</span>
+      <div class="section-title">Pour finir, à toi la parole</div>
+    </div>
+  </div>
+  <div class="section-subtitle">Les questions ouvertes sont libres : tu peux laisser vide ✍️</div>
+
+  <div class="question">
+    <div class="chat-bubble">Raconte une situation où la <strong>communication a mal tourné</strong> et que tu aimerais savoir gérer la prochaine fois.</div>
+    <textarea name="v1" rows="3" placeholder="Ex : un conflit avec un collègue de stage, une dispute en famille, un entretien raté…"></textarea>
+  </div>
+
+  <div class="question">
+    <div class="chat-bubble">Un truc <strong>précis</strong> que tu veux absolument apprendre dans ces ateliers.</div>
+    <textarea name="v2" rows="2" placeholder="Ex : ne plus rougir, savoir dire non à mon patron, gérer ma colère…"></textarea>
+  </div>
+
+  <div class="question">
+    <div class="chat-bubble">Si tu pouvais <strong>proposer un atelier</strong>, ce serait sur quoi ?</div>
+    <textarea name="v3" rows="2" placeholder="Ton idée d'atelier idéal…"></textarea>
+  </div>
+
+  <div class="question">
+    <div class="chat-bubble">Qu'est-ce qui ferait qu'un atelier soit <strong>vraiment réussi</strong> pour toi ?</div>
+    <textarea name="v4" rows="2" placeholder="Ce qui te ferait sortir en disant 'c'était top'…"></textarea>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">15.5</span>En communication, je me considère plutôt :</span>
+    <div class="visual-cards">
+      <label><input type="radio" name="profil" value="reserve"><span class="vc-emoji">🙊</span><span class="vc-text">Réservé(e)</span></label>
+      <label><input type="radio" name="profil" value="moyenne"><span class="vc-emoji">😌</span><span class="vc-text">Dans la moyenne</span></label>
+      <label><input type="radio" name="profil" value="expansif"><span class="vc-emoji">🗣️</span><span class="vc-text">Expansif(ve)</span></label>
+      <label><input type="radio" name="profil" value="variable"><span class="vc-emoji">🌗</span><span class="vc-text">Ça dépend</span></label>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">15.6</span>Après le bac, mon projet principal :</span>
+    <div class="visual-cards">
+      <label><input type="radio" name="projet" value="vie_active"><span class="vc-emoji">💼</span><span class="vc-text">Vie active</span></label>
+      <label><input type="radio" name="projet" value="etudes"><span class="vc-emoji">🎓</span><span class="vc-text">Études</span></label>
+      <label><input type="radio" name="projet" value="alternance"><span class="vc-emoji">🔄</span><span class="vc-text">Alternance</span></label>
+      <label><input type="radio" name="projet" value="indecis"><span class="vc-emoji">🤔</span><span class="vc-text">Je ne sais pas</span></label>
+    </div>
+  </div>
+
+  <div class="question">
+    <span class="qlabel"><span class="num">15.7</span>Ma classe :</span>
+    <div class="visual-cards">
+      <label><input type="radio" name="classe" value="TBP1"><span class="vc-emoji">1️⃣</span><span class="vc-text">Terminale BP 1</span></label>
+      <label><input type="radio" name="classe" value="TBP2"><span class="vc-emoji">2️⃣</span><span class="vc-text">Terminale BP 2</span></label>
+      <label><input type="radio" name="classe" value="TBP3"><span class="vc-emoji">3️⃣</span><span class="vc-text">Terminale BP 3</span></label>
+      <label><input type="radio" name="classe" value="autre"><span class="vc-emoji">❓</span><span class="vc-text">Autre</span></label>
+    </div>
+  </div>
+</div>
+
+<div class="error-msg" id="errorMsg"></div>
+
+<button type="submit" class="submit-btn" id="submitBtn">✨ Envoyer mes réponses</button>
+<button type="button" class="reset-link" onclick="if(confirm('Effacer toutes tes réponses sauvegardées et recommencer ?')){localStorage.removeItem('sondage_cps_draft_v3');location.reload();}">🗑️ Effacer et recommencer</button>
+
+</form>
+
+<div class="merci-overlay" id="merci">
+  <div>
+    <div class="check">✨</div>
+    <h2>Merci énormément !</h2>
+    <p>Tes réponses ont été enregistrées de façon <strong>100% anonyme</strong>.</p>
+    <p style="margin-top: 18px; opacity: 0.92;">Grâce à toi, on va pouvoir construire des ateliers vraiment utiles. À très vite en classe !</p>
+    <div class="signature">— Le prof 💜</div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = { apiKey: "AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain: "devoirs-pse.firebaseapp.com", projectId: "devoirs-pse", storageBucket: "devoirs-pse.firebasestorage.app", messagingSenderId: "614730413904", appId: "1:614730413904:web:a5dd478af5de30f6bede55", measurementId: "G-7R9N0JL6GG" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const STORAGE_KEY = 'sondage_cps_draft_v3';
+
+// === Référentiel CPS : mapping items → codes savoirs/savoir-faire ===
+const CPS_MAPPING = {
+  // Section 1 (auto-éval)
+  ae1: "C1.1", ae2: "C1.5", ae3: "E1.2", ae4: "S1.2", ae5: "S1.1", ae6: "S2.1",
+  ae7: "S1.3", ae8: "C2.4", ae9: "E2.3", ae10: "C1.4", ae11: "C1.6", ae12: "S1.1",
+  // Section 2 (thèmes)
+  th1: "C1.1", th2: "C1.5", th3: "C1.5", th4: "C1.3", th5: "C1.3", th6: "C1.4",
+  th7: "C1.2", th8: "C1.6", th9: "E1.1", th10: "E1.2", th11: "E2.3", th12: "S1.1",
+  th13: "S1.1", th14: "S1.2", th15: "S1.2", th16: "S2.2", th17: "S1.3", th18: "S1.3", th19: "S1.1",
+  // Section 3 (situations)
+  s1: "S1.1", s2: "S1.1", s3: "E2.3", s4: "C1.5", s5: "C2.4", s6: "S2.1", s7: "E2.1",
+  s8: "C2.2", s9: "S1.2", s10: "S1.3", s11: "S2.2", s12: "S2.2", s13: "C2.1",
+  s14: "C1.3", s15: "S1.3", s16: "S1.1", s17: "C1.4", s18: "C2.3", s19: "C1.6",
+  // Section 4 (difficultés)
+  d1: "S1.1", d2: "E2.1", d3: "S2.1", d4: "S2.1", d5: "E2.3", d6: "S1.1", d7: "C1.5",
+  d8: "E2.1", d9: "S1.2", d10: "S2.1", d11: "S1.1", d12: "S1.2", d13: "S1.1",
+  d14: "S1.1", d15: "S1.1", d16: "E2.3",
+  // Section 5 (ateliers)
+  a1: "S1.1", a2: "S1.2", a3: "S2.1", a4: "S2.2", a5: "S1.1", a6: "S1.1", a7: "S1.1",
+  a8: "C1.2", a9: "E2.3", a10: "S1.2", a11: "S2.2", a12: "S1.1", a13: "C1.5", a14: "S1.3", a15: "C1.1",
+  // Section 13 (situations pro)
+  pr1: "S1.1", pr2: "S1.1", pr3: "S2.2", pr4: "S1.1", pr5: "C2.4", pr6: "S1.3", pr7: "S2.2",
+  pr8: "C2.1", pr9: "E2.2", pr10: "C1.4", pr11: "C1.5", pr12: "S1.1", pr13: "S1.1",
+  pr14: "C1.3", pr15: "S1.1"
+};
+
+// === Génération des étoiles (template token {{STARS}}) ===
+document.querySelectorAll('.star-scale').forEach(scale => {
+  const name = scale.dataset.name;
+  scale.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const lbl = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = name;
+    input.value = i;
+    lbl.appendChild(input);
+    lbl.appendChild(document.createTextNode('★'));
+    lbl.dataset.value = i;
+    lbl.addEventListener('click', event => {
+      event.preventDefault();
+      input.checked = true;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      updateStars();
+    });
+    scale.appendChild(lbl);
+  }
+  const legend = document.createElement('span');
+  legend.className = 'star-legend';
+  legend.textContent = '(touche pour évaluer)';
+  scale.appendChild(legend);
+});
+function updateStars() {
+  document.querySelectorAll('.star-scale').forEach(scale => {
+    const checked = scale.querySelector('input:checked');
+    const val = checked ? parseInt(checked.value) : 0;
+    scale.querySelectorAll('label').forEach(lbl => {
+      const v = parseInt(lbl.dataset.value);
+      lbl.classList.toggle('lit', v && v <= val);
+    });
+  });
+}
+
+// === Vote prioritaire ateliers ===
+const ateliers = document.querySelectorAll('.atelier');
+const voteInfo = document.getElementById('voteInfo');
+let order = [];
+
+ateliers.forEach(el => {
+  el.addEventListener('click', () => {
+    const id = el.dataset.id;
+    const idx = order.indexOf(id);
+    if (idx >= 0) order.splice(idx, 1);
+    else {
+      if (order.length >= 5) {
+        const removed = order.pop();
+        const removedEl = document.querySelector(`.atelier[data-id="${removed}"]`);
+        if (removedEl) { removedEl.classList.remove('selected'); removedEl.querySelector('.rank').textContent = '·'; }
+      }
+      order.push(id);
+    }
+    updateVoteUI(); saveDraft(); updateProgress();
+  });
+});
+function updateVoteUI() {
+  ateliers.forEach(el => {
+    const rank = order.indexOf(el.dataset.id);
+    if (rank >= 0) { el.classList.add('selected'); el.querySelector('.rank').textContent = (rank + 1); }
+    else { el.classList.remove('selected'); el.querySelector('.rank').textContent = '·'; }
+  });
+  voteInfo.textContent = order.length === 5 ? `✅ 5 ateliers choisis dans l'ordre — tu peux ajuster en cliquant` : `👉 Sélectionne 5 ateliers (${order.length} / 5)`;
+  voteInfo.classList.toggle('complete', order.length === 5);
+}
+
+// === Limites par groupe (chips/cards) ===
+document.querySelectorAll('[data-group][data-max]').forEach(grp => {
+  const max = parseInt(grp.dataset.max);
+  const group = grp.dataset.group;
+  const counter = document.getElementById('counter-' + group);
+  const cbs = grp.querySelectorAll('input[type="checkbox"]');
+  function update() {
+    const checked = grp.querySelectorAll('input:checked').length;
+    if (counter) {
+      counter.textContent = `${checked} / ${max}`;
+      counter.classList.toggle('full', checked >= max);
+    }
+    cbs.forEach(cb => {
+      const lbl = cb.closest('label');
+      if (checked >= max && !cb.checked) { cb.disabled = true; lbl.classList.add('disabled'); }
+      else { cb.disabled = false; lbl.classList.remove('disabled'); }
+    });
+  }
+  cbs.forEach(cb => cb.addEventListener('change', update));
+  update();
+});
+
+// === Dots de progression ===
+const dotsContainer = document.getElementById('dots');
+for (let i = 1; i <= 15; i++) {
+  const dot = document.createElement('div');
+  dot.className = 'dot';
+  dot.dataset.section = i;
+  dotsContainer.appendChild(dot);
+}
+
+// === Sauvegarde locale ===
+const savedToast = document.getElementById('savedToast');
+let saveTimer;
+function saveDraft() {
+  const form = document.getElementById('sondageForm');
+  const data = { radios: {}, checkboxes: {}, textareas: {}, order: order.slice() };
+  form.querySelectorAll('input[type="radio"]:checked').forEach(r => data.radios[r.name] = r.value);
+  form.querySelectorAll('input[type="checkbox"]:checked').forEach(c => { (data.checkboxes[c.name] = data.checkboxes[c.name] || []).push(c.value); });
+  form.querySelectorAll('textarea').forEach(t => { if (t.value) data.textareas[t.name] = t.value; });
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    savedToast.classList.add('show');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => savedToast.classList.remove('show'), 1500);
+  } catch(e) {}
+}
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data.radios||{}).forEach(([name, val]) => { const r = document.querySelector(`input[type="radio"][name="${name}"][value="${val}"]`); if (r) r.checked = true; });
+    Object.entries(data.checkboxes||{}).forEach(([name, vals]) => { vals.forEach(v => { const c = document.querySelector(`input[type="checkbox"][name="${name}"][value="${v}"]`); if (c) c.checked = true; }); });
+    Object.entries(data.textareas||{}).forEach(([name, val]) => { const t = document.querySelector(`textarea[name="${name}"]`); if (t) t.value = val; });
+    order = (data.order || []).slice();
+    updateVoteUI(); updateStars();
+    document.querySelectorAll('[data-group][data-max]').forEach(grp => grp.querySelectorAll('input').forEach(cb => cb.dispatchEvent(new Event('change'))));
+  } catch(e) { console.error(e); }
+}
+
+document.addEventListener('change', () => { saveDraft(); updateProgress(); });
+document.querySelectorAll('textarea').forEach(t => t.addEventListener('input', () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 800); }));
+document.addEventListener('click', e => { if (e.target.closest('.atelier')) updateProgress(); if (e.target.closest('.star-scale')) updateProgress(); });
+
+// === Progression ===
+function updateProgress() {
+  const checks = [
+    () => [...Array(12)].every((_,i) => document.querySelector(`input[name="ae${i+1}"]:checked`)),
+    () => [...Array(19)].every((_,i) => document.querySelector(`input[name="th${i+1}"]:checked`)),
+    () => document.querySelectorAll('input[name="sit"]:checked').length >= 1,
+    () => document.querySelectorAll('input[name="diff"]:checked').length >= 1,
+    () => order.length === 5,
+    () => document.querySelectorAll('input[name="act"]:checked').length >= 1,
+    () => document.querySelectorAll('input[name="mod"]:checked').length >= 1 && document.querySelector('input[name="grp"]:checked'),
+    () => document.querySelectorAll('input[name="gui"]:checked').length >= 1 && document.querySelector('input[name="livret"]:checked'),
+    () => document.querySelector('input[name="duree"]:checked') && document.querySelector('input[name="struct"]:checked'),
+    () => document.querySelectorAll('input[name="cadre"]:checked').length >= 1,
+    () => document.querySelector('input[name="oral1"]:checked') && document.querySelectorAll('input[name="oral2"]:checked').length >= 1,
+    () => document.querySelectorAll('input[name="sens"]:checked').length >= 1,
+    () => document.querySelectorAll('input[name="pro"]:checked').length >= 1,
+    () => document.querySelectorAll('input[name="moti"]:checked').length >= 1,
+    () => document.querySelector('input[name="profil"]:checked') && document.querySelector('input[name="projet"]:checked') && document.querySelector('input[name="classe"]:checked')
+  ];
+  let done = 0;
+  document.querySelectorAll('.dot').forEach((dot, i) => {
+    const ok = (() => { try { return checks[i](); } catch(e) { return false; } })();
+    dot.classList.toggle('done', ok);
+    if (ok) done++;
+    // section animation
+    const section = document.querySelector(`.section[data-section="${i+1}"]`);
+    if (section) section.classList.toggle('done', ok);
+  });
+  document.getElementById('progressText').textContent = `Section ${done} / 15 · ${Math.round(done/15*100)} %`;
+}
+
+// === Soumission ===
+const form = document.getElementById('sondageForm');
+const btn = document.getElementById('submitBtn');
+const errMsg = document.getElementById('errorMsg');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  errMsg.classList.remove('show');
+
+  btn.disabled = true; btn.textContent = '⏳ Envoi en cours…';
+
+  const radio = name => document.querySelector(`input[name="${name}"]:checked`)?.value || null;
+  const checks = name => Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(c => c.value);
+  const text = name => form.elements[name]?.value?.trim().slice(0, 600) || '';
+  const completedSections = Array.from(document.querySelectorAll('.dot.done')).length;
+
+  const data = {
+    auto_eval: {}, themes: {},
+    situations_progresser: checks('sit'), difficultes: checks('diff'),
+    vote_ateliers: order.slice(), activites_preferees: checks('act'),
+    modalites_travail: checks('mod'), groupes_pref: radio('grp'),
+    guidage_pref: checks('gui'), livret_pref: radio('livret'),
+    duree_pref: radio('duree'), structure_pref: radio('struct'),
+    cadre_besoins: checks('cadre'),
+    oral_aisance: radio('oral1'), oral_modes: checks('oral2'),
+    sujets_sensibles: checks('sens'), situations_pro: checks('pro'),
+    motivations: checks('moti'), freins: checks('frein'),
+    verbatim_situation_difficile: text('v1'), verbatim_objectif: text('v2'),
+    verbatim_atelier_propose: text('v3'), verbatim_atelier_reussi: text('v4'),
+    profil: radio('profil'), projet_post_bac: radio('projet'), classe: radio('classe'),
+    cps_mapping: CPS_MAPPING,
+    progression: { sections_completees: completedSections, total_sections: 15, complet: completedSections === 15 },
+    ts: serverTimestamp(), ua: navigator.userAgent.slice(0, 120), version_sondage: 3
+  };
+  for (let i = 1; i <= 12; i++) {
+    const v = document.querySelector(`input[name="ae${i}"]:checked`)?.value;
+    data.auto_eval['ae' + i] = v ? parseInt(v) : null;
+  }
+  for (let i = 1; i <= 19; i++) { const v = document.querySelector(`input[name="th${i}"]:checked`)?.value; if (v) data.themes['th' + i] = parseInt(v); }
+
+  try {
+    await addDoc(collection(db, 'sondage_cps'), data);
+    localStorage.removeItem(STORAGE_KEY);
+    document.getElementById('merci').classList.add('show');
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false; btn.textContent = '✨ Envoyer mes réponses';
+    errMsg.textContent = `❌ Erreur d'envoi : ${err.message}. Réessaie ou préviens le prof.`;
+    errMsg.classList.add('show');
+  }
+});
+
+loadDraft(); updateVoteUI(); updateStars(); updateProgress();
+</script>
+
+</body>
+</html>

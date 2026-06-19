@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche CPS : Connaître les Besoins Psychologiques</title>
+    <style>
+        :root {
+            --primary: #2980b9;
+            --primary-light: #d4e6f1;
+            --secondary: #27ae60;
+            --secondary-light: #e9f7ef;
+            --warning: #e67e22;
+            --danger: #c0392b;
+            --text: #2c3e50;
+            --bg: #fdfdfd;
+            --card: #ffffff;
+            --radius: 12px;
+            --shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #3498db);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 { margin: 0; font-size: 1.8rem; }
+        header p { opacity: 0.9; margin-top: 0.5rem; }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Sections */
+        section {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-left: 5px solid var(--primary);
+        }
+
+        h2 { color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+        h3 { color: var(--secondary); margin-top: 1.5rem; }
+
+        /* Boxes */
+        .box-analogy {
+            background-color: #fff8e1;
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+        
+        .box-pro {
+            background-color: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .box-warning {
+            background-color: #fadbd8;
+            border: 1px solid #e6b0aa;
+            color: #7b241c;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Tables & Lists */
+        .needs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        .needs-table th { background: var(--primary); color: white; padding: 10px; text-align: left; }
+        .needs-table td { border: 1px solid #ddd; padding: 10px; vertical-align: top; }
+        .needs-table tr:nth-child(even) { background-color: #f9f9f9; }
+
+        /* Introspection Tools */
+        .slider-group {
+            margin-bottom: 1.5rem;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+        
+        /* Interactive Drag & Drop */
+        .dd-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .source-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 50px;
+        }
+        .draggable {
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: grab;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .draggable:active { cursor: grabbing; }
+        
+        .target-zones {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .drop-zone {
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+            min-height: 120px;
+            transition: background 0.3s;
+        }
+        .drop-zone h4 { margin: 0 0 10px 0; font-size: 1rem; color: #7f8c8d; }
+        .drop-zone.drag-over { background: var(--secondary-light); border-color: var(--secondary); }
+
+        /* Quiz */
+        .quiz-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f0f3f4;
+            border: none;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .quiz-btn:hover { background: #e0e6e8; }
+        .quiz-btn.correct { background: var(--secondary); color: white; }
+        .quiz-btn.wrong { background: var(--danger); color: white; }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .feedback.success { background: var(--secondary-light); color: var(--secondary); border: 1px solid var(--secondary); }
+        .feedback.error { background: #fadbd8; color: var(--danger); border: 1px solid var(--danger); }
+
+        /* Glossary */
+        dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; }
+        dt { font-weight: bold; color: var(--primary); grid-column: 1; }
+        dd { margin: 0; grid-column: 2; }
+        
+        @media (max-width: 600px) {
+            dl { display: block; }
+            dt { margin-top: 10px; display: block; }
+            dd { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Connaître les Besoins Psychologiques</h1>
+    <p>Le socle indispensable pour choisir des buts personnels concordants et favoriser le bien-être.</p>
+</header>
+
+<main>
+
+    <section>
+        <h2>1. Comprendre la notion</h2>
+        <p>
+            Tout comme notre corps a des besoins physiologiques (faim, soif, sommeil) pour survivre, notre esprit a des <strong>besoins psychologiques</strong> essentiels à son développement, son intégrité et son bien-être. Ce sont des "nutriments psychologiques" inhérents à tout être humain.
+        </p>
+        <p>
+            Il est crucial de distinguer le <strong>besoin</strong> (fondamental) du <strong>désir ou de l'envie</strong> (objet spécifique).
+        </p>
+        <p>
+            <strong>Le conflit interne (Dissonance) :</strong> Nos besoins peuvent parfois s'opposer (ex: besoin de cohérence vs besoin d'affiliation dans un groupe injuste), créant un mal-être.
+        </p>
+
+        <div class="box-analogy">
+            <h3>💡 Analogie : La Nutrition</h3>
+            <p>
+                Imaginez que votre corps réclame de la <strong>vitamine C</strong> (c'est le <em>besoin fondamental</em>).<br>
+                Vous avez envie d'un <strong>soda à l'orange</strong> (c'est le <em>désir/envie</em>).<br>
+                Le soda peut vous donner une satisfaction immédiate, mais il n'est pas essentiel et peut même être nocif s'il remplace une vraie alimentation. En revanche, sans vitamine C (le besoin), votre santé se dégrade réellement.
+            </p>
+        </div>
+
+        <div class="box-pro">
+            <h3>🏫 Exemple Professionnel</h3>
+            <p>
+                Un enseignant se sent épuisé.
+                <ul>
+                    <li><strong>Son discours (Envie) :</strong> "J'ai besoin que les élèves se taisent immédiatement" ou "J'ai besoin de vacances aux Caraïbes".</li>
+                    <li><strong>Son Besoin réel :</strong> Besoin de <em>Repos</em> (Psychocorporel) ou besoin de <em>Compétence</em> (se sentir efficace dans sa classe).</li>
+                </ul>
+                S'il confond l'envie (silence forcé) avec le besoin, il risque d'utiliser des stratégies inadaptées (crier), alors que s'il identifie son besoin de repos, il prendra soin de lui différemment.
+            </p>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Introspection du professionnel</h2>
+        <div class="box-warning">
+            🛑 ÉTAPE OBLIGATOIRE : Avant d'accompagner les autres, explorez vos propres besoins. <br>
+            Les CPS ne se transmettent pas théoriquement, elles se vivent.
+        </div>
+
+        <p>Les 12 besoins principaux sont regroupés en 4 constituants du Soi. Prenez un instant pour évaluer <strong>votre niveau actuel de satisfaction</strong> pour chacun de ces domaines.</p>
+
+        <div class="slider-group">
+            <label><strong>1. Besoins Cognitifs</strong> (Découverte, Cohérence, Transcendance/Sens)<br>
+            <em>Est-ce que je comprends ce que je vis ? Est-ce que cela a du sens ?</em></label>
+            <div class="slider-container">
+                <span>Insatisfait</span>
+                <input type="range" min="0" max="10" value="5" oninput="updateVal('val1', this.value)">
+                <span>Comblé</span>
+            </div>
+            <div style="text-align: right; color: var(--primary); font-weight: bold;" id="val1">5/10</div>
+        </div>
+
+        <div class="slider-group">
+            <label><strong>2. Besoins Affectifs</strong> (Amour, Affiliation, Reconnaissance)<br>
+            <em>Me sens-je aimé, relié aux autres, valorisé ?</em></label>
+            <div class="slider-container">
+                <span>Insatisfait</span>
+                <input type="range" min="0" max="10" value="5" oninput="updateVal('val2', this.value)">
+                <span>Comblé</span>
+            </div>
+            <div style="text-align: right; color: var(--primary); font-weight: bold;" id="val2">5/10</div>
+        </div>
+
+        <div class="slider-group">
+            <label><strong>3. Besoins Comportementaux</strong> (Liberté/Autonomie, Compétence, Réalisation)<br>
+            <em>Suis-je libre de mes actions ? Me sens-je capable et efficace ?</em></label>
+            <div class="slider-container">
+                <span>Insatisfait</span>
+                <input type="range" min="0" max="10" value="5" oninput="updateVal('val3', this.value)">
+                <span>Comblé</span>
+            </div>
+            <div style="text-align: right; color: var(--primary); font-weight: bold;" id="val3">5/10</div>
+        </div>
+
+        <div class="slider-group">
+            <label><strong>4. Besoins Psychocorporels</strong> (Subsistance/Sécurité, Stimulation, Repos)<br>
+            <em>Mon organisme est-il en sécurité, stimulé et reposé ?</em></label>
+            <div class="slider-container">
+                <span>Insatisfait</span>
+                <input type="range" min="0" max="10" value="5" oninput="updateVal('val4', this.value)">
+                <span>Comblé</span>
+            </div>
+            <div style="text-align: right; color: var(--primary); font-weight: bold;" id="val4">5/10</div>
+        </div>
+
+        <p><em>Réflexion personnelle : Y a-t-il un domaine que je "survalorise" au détriment d'un autre (ex: je privilégie la compétence au détriment du repos) ?</em></p>
+    </section>
+
+    <section>
+        <h2>3. Mise en pratique interactive</h2>
+
+        <h3>Exercice A : Besoin ou Envie ?</h3>
+        <p>Le langage courant confond souvent ces termes. Classez les affirmations suivantes.</p>
+        
+        <div id="game-needs-envies" style="text-align: center; margin-bottom: 30px;">
+            <div id="current-card" style="font-size: 1.2rem; font-weight: bold; padding: 20px; background: #eee; border-radius: 8px; margin-bottom: 15px;">
+                Cliquez pour commencer
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="guess('envie')" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">C'est une Envie / Désir</button>
+                <button onclick="guess('besoin')" style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer;">C'est un Besoin Fondamental</button>
+            </div>
+            <div id="game-feedback" class="feedback"></div>
+        </div>
+
+        <hr>
+
+        <h3>Exercice B : Identifier la catégorie de besoin</h3>
+        <p>Glissez les besoins spécifiques dans le bon constituant du Soi (référez-vous à l'introspection si besoin).</p>
+
+        <div class="dd-container">
+            <div class="source-items" id="sourceItems">
+                <div class="draggable" draggable="true" data-target="cognitif">Besoin de sens (Transcendance)</div>
+                <div class="draggable" draggable="true" data-target="affectif">Besoin d'affiliation sociale</div>
+                <div class="draggable" draggable="true" data-target="comportemental">Besoin de compétence</div>
+                <div class="draggable" draggable="true" data-target="psychocorporel">Besoin de repos</div>
+                <div class="draggable" draggable="true" data-target="cognitif">Besoin de cohérence</div>
+                <div class="draggable" draggable="true" data-target="affectif">Besoin de reconnaissance</div>
+            </div>
+
+            <div class="target-zones">
+                <div class="drop-zone" data-type="cognitif">
+                    <h4>🧠 Cognitifs</h4>
+                    <small>Comprendre, Sens, Découverte</small>
+                </div>
+                <div class="drop-zone" data-type="affectif">
+                    <h4>❤️ Affectifs / Relationnels</h4>
+                    <small>Amour, Affiliation, Estime</small>
+                </div>
+                <div class="drop-zone" data-type="comportemental">
+                    <h4>🛠 Comportementaux</h4>
+                    <small>Liberté, Compétence, Réalisation</small>
+                </div>
+                <div class="drop-zone" data-type="psychocorporel">
+                    <h4>🧘 Psychocorporels</h4>
+                    <small>Sécurité, Stimulation, Repos</small>
+                </div>
+            </div>
+            <div id="dd-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Accompagner le public</h2>
+        <p>Une fois que vous avez identifié vos propres besoins, vous pouvez aider votre public (élèves, usagers) à faire de même.</p>
+        <ul>
+            <li><strong>Décoder les comportements rigides :</strong> Si un jeune a un comportement d'opposition ou rigide, demandez-vous : <em>"Quel besoin est frustré ici ?"</em> (ex: besoin de reconnaissance frustré -> travail acharné sans repos).</li>
+            <li><strong>Distinguer l'objet du besoin :</strong> Aidez-les à comprendre que la "tablette" (envie) cache peut-être un besoin de "stimulation" ou de "compétence". Proposez d'autres moyens de satisfaire le besoin réel.</li>
+            <li><strong>Attention aux faux-amis :</strong> Ne validez pas des "substituts de besoins" (popularité, biens matériels) comme des solutions durables.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Validation des acquis</h2>
+        <p><strong>Question : Quelle est la différence fondamentale entre la "non-satisfaction" et la "frustration" d'un besoin ?</strong></p>
+        
+        <button class="quiz-btn" onclick="checkQuiz(this, false)">C'est la même chose, ce sont des synonymes.</button>
+        <button class="quiz-btn" onclick="checkQuiz(this, true)">La frustration implique une menace active et a des effets plus délétères que la simple absence de satisfaction.</button>
+        <button class="quiz-btn" onclick="checkQuiz(this, false)">La non-satisfaction est plus grave car elle signifie que le besoin n'existe pas.</button>
+
+        <div id="quiz-feedback" class="feedback"></div>
+    </section>
+
+    <section>
+        <h2>Glossaire des notions travaillées</h2>
+        <dl>
+            <dt>Besoin psychologique</dt>
+            <dd>"Nutriment" essentiel à l'adaptation, l'intégrité et la croissance de l'individu, indispensable à son bien-être (ex: autonomie, amour).</dd>
+            
+            <dt>Envie / Désir</dt>
+            <dd>Souhait portant sur un attribut ou un résultat spécifique (ex: une tablette, un verre de vin). Sa non-satisfaction ne remet pas en cause l'équilibre psychologique vital.</dd>
+            
+            <dt>Frustration d'un besoin</dt>
+            <dd>État où le besoin n'est pas seulement insatisfait, mais activement menacé, critiqué ou empêché (ex: humiliation vs simple manque de compliment). Plus délétère que la non-satisfaction.</dd>
+            
+            <dt>Dissonance cognitive</dt>
+            <dd>État de tension interne créé lorsque des besoins psychologiques entrent en opposition (ex: besoin de cohérence vs besoin d'appartenance à un groupe violent).</dd>
+            
+            <dt>Constituants du Soi</dt>
+            <dd>Les 4 dimensions regroupant les besoins : Cognitif (tête/sens), Affectif (cœur/lien), Comportemental (action), Psychocorporel (corps/survie).</dd>
+        </dl>
+    </section>
+
+</main>
+
+<script>
+    // --- INTROSPECTION SLIDERS ---
+    function updateVal(id, val) {
+        document.getElementById(id).textContent = val + "/10";
+    }
+
+    // --- GAME A: NEEDS VS ENVIES ---
+    const cards = [
+        { text: "J'ai besoin de cette paire de baskets de marque", type: "envie", expl: "C'est un objet spécifique (Désir), pas un besoin fondamental." },
+        { text: "J'ai besoin de me sentir aimé", type: "besoin", expl: "C'est le besoin affectif d'Amour/Affection." },
+        { text: "J'ai besoin d'un petit verre de vin", type: "envie", expl: "C'est une envie. Le besoin sous-jacent est peut-être la détente (Repos)." },
+        { text: "J'ai besoin de comprendre le monde", type: "besoin", expl: "C'est le besoin cognitif de Cohérence/Compréhension." },
+        { text: "J'ai besoin d'une tablette pour jouer", type: "envie", expl: "Objet spécifique. Le besoin réel est la Stimulation." }
+    ];
+    let currentCardIndex = -1;
+
+    function nextCard() {
+        currentCardIndex++;
+        const display = document.getElementById('current-card');
+        const feedback = document.getElementById('game-feedback');
+        feedback.style.display = 'none';
+
+        if (currentCardIndex < cards.length) {
+            display.textContent = cards[currentCardIndex].text;
+            display.style.background = "#fff";
+        } else {
+            display.textContent = "Exercice terminé ! Bravo.";
+            display.style.background = "#d5f5e3";
+        }
+    }
+
+    function guess(type) {
+        if (currentCardIndex === -1) { nextCard(); return; }
+        if (currentCardIndex >= cards.length) return;
+
+        const card = cards[currentCardIndex];
+        const feedback = document.getElementById('game-feedback');
+        feedback.style.display = 'block';
+
+        if (type === card.type) {
+            feedback.className = "feedback success";
+            feedback.innerHTML = "<strong>Correct !</strong> " + card.expl;
+            setTimeout(nextCard, 2500);
+        } else {
+            feedback.className = "feedback error";
+            feedback.innerHTML = "<strong>Oups.</strong> " + card.expl;
+        }
+    }
+
+    // --- GAME B: DRAG AND DROP ---
+    const draggables = document.querySelectorAll('.draggable');
+    const dropZones = document.querySelectorAll('.drop-zone');
+    const sourceItems = document.getElementById('sourceItems');
+
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+            draggable.classList.add('dragging');
+        });
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('dragging');
+        });
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over');
+        });
+        zone.addEventListener('drop', e => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            const draggable = document.querySelector('.dragging');
+            const targetType = zone.getAttribute('data-type');
+            const itemType = draggable.getAttribute('data-target');
+
+            const feedback = document.getElementById('dd-feedback');
+            feedback.style.display = 'block';
+
+            if (targetType === itemType) {
+                zone.appendChild(draggable);
+                draggable.style.background = "#27ae60";
+                draggable.style.color = "white";
+                draggable.draggable = false;
+                feedback.className = "feedback success";
+                feedback.textContent = "Bien joué ! C'est la bonne catégorie.";
+                checkDDCompletion();
+            } else {
+                feedback.className = "feedback error";
+                feedback.textContent = "Ce n'est pas la bonne catégorie. Essayez encore.";
+            }
+        });
+    });
+
+    function checkDDCompletion() {
+        if (sourceItems.children.length === 0) {
+            document.getElementById('dd-feedback').innerHTML = "<strong>Félicitations !</strong> Vous avez classé tous les besoins correctement.";
+        }
+    }
+
+    // --- QUIZ FINAL ---
+    function checkQuiz(btn, isCorrect) {
+        const feedback = document.getElementById('quiz-feedback');
+        const buttons = document.querySelectorAll('.quiz-btn');
+        
+        buttons.forEach(b => b.disabled = true); // Disable all
+
+        feedback.style.display = 'block';
+        if (isCorrect) {
+            btn.classList.add('correct');
+            feedback.className = "feedback success";
+            feedback.innerHTML = "<strong>Exact !</strong> La frustration est plus intense et dangereuse. Exemple : ne pas être valorisé (non-satisfaction) vs être humilié (frustration).";
+        } else {
+            btn.classList.add('wrong');
+            feedback.className = "feedback error";
+            feedback.innerHTML = "<strong>Faux.</strong> La distinction est importante : la non-satisfaction est une absence (manque), tandis que la frustration est une menace active qui génère souvent des comportements de compensation rigides.";
+        }
+    }
+
+    // Init first card text
+    document.getElementById('current-card').textContent = "Cliquez sur un bouton pour commencer";
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C1.5 - S'auto-évaluer de façon positive et non biaisée</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #e67e22;
+            --light: #ecf0f1;
+            --white: #ffffff;
+            --radius: 8px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--primary);
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; }
+        h2 { color: var(--accent); border-bottom: 2px solid var(--light); padding-bottom: 10px; margin-top: 30px; }
+        h3 { color: var(--primary); font-size: 1.2rem; margin-top: 20px; }
+
+        .content-block { padding: 0 30px 30px 30px; }
+
+        /* Boxes */
+        .analogy-box {
+            background-color: #e8f4fc;
+            border-left: 5px solid var(--accent);
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .intro-box {
+            background-color: #fff8e1;
+            border: 1px solid #ffe0b2;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin: 20px 0;
+        }
+
+        .important-note {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 15px;
+            border-radius: var(--radius);
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        /* Interactive Elements */
+        .interactive-zone {
+            background: var(--light);
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin: 5px;
+        }
+        .btn:hover { background: #2980b9; }
+
+        /* Exercise 1: Sorting */
+        .sort-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .sort-item {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .sort-item:hover { transform: translateX(5px); border-color: var(--accent); }
+        .feedback-area {
+            margin-top: 15px;
+            padding: 10px;
+            display: none;
+            border-radius: 4px;
+        }
+        .feedback-area.success { background: #d4edda; color: #155724; display: block; }
+        .feedback-area.error { background: #f8d7da; color: #721c24; display: block; }
+
+        /* Exercise 2: Reordering */
+        .sequence-list {
+            list-style: none;
+            padding: 0;
+        }
+        .sequence-item {
+            background: white;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .controls button {
+            background: #eee;
+            color: #333;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Quiz */
+        .quiz-option {
+            display: block;
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .quiz-option:hover { background: #f9f9f9; }
+        .quiz-option.selected { border-color: var(--accent); background: #e8f4fc; }
+
+        /* Glossary */
+        .glossary dl { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .glossary dt { font-weight: bold; color: var(--accent); }
+        .glossary dd { margin: 0; font-size: 0.95rem; }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        /* Accordion for "Answers" */
+        details {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        summary { cursor: pointer; font-weight: bold; }
+        
+        .hidden { display: none; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>CPS SYNTHÈSE : S'auto-évaluer de façon positive et non biaisée</h1>
+        <p>Studio CPS – Fiche Pédagogique Interactive</p>
+    </header>
+
+    <div class="content-block">
+
+        <section id="comprendre">
+            <h2>1. Comprendre la notion</h2>
+            <p>
+                S'auto-évaluer, c'est la capacité du <strong>Soi sujet</strong> à porter un jugement sur lui-même (comportements, compétences, performances). 
+                L'enjeu de cette compétence est de transformer ce jugement souvent sévère en une <strong>auto-évaluation positive</strong>.
+            </p>
+            <p>
+                Cela ne signifie pas se vanter, mais développer une attitude bienveillante envers soi-même. Cela implique deux savoir-faire majeurs :
+            </p>
+            <ul>
+                <li><strong>Enrichir son image de soi :</strong> Reconnaître ses qualités, forces et compétences.</li>
+                <li><strong>Développer une relation bienveillante :</strong> Remplacer l'auto-jugement biaisé par une auto-observation constructive (observer comment nous nous traitons).</li>
+            </ul>
+
+            <div class="analogy-box">
+                <strong>💡 L'analogie du miroir :</strong><br>
+                Imaginez que vous vous regardez dans un miroir. Souvent, notre miroir intérieur est déformant (biaisé) : il grossit nos défauts et floute nos qualités. <br>
+                La compétence C1.5 consiste à <strong>nettoyer ce miroir</strong> pour voir la réalité objective : vos forces, vos ressources, et vos besoins, sans filtre négatif. C'est passer du rôle de "Juge impitoyable" à celui d'"Observateur bienveillant".
+            </div>
+
+            <p><strong>Exemple professionnel :</strong><br>
+            Un éducateur sort d'une réunion conflictuelle. 
+            <br><em>Réaction biaisée :</em> "J'ai été nul, je n'ai pas su m'imposer, je ne suis pas fait pour ça."
+            <br><em>Auto-évaluation positive (C1.5) :</em> "J'ai réussi à garder mon calme malgré les cris (qualité). J'ai écouté les besoins de l'autre (compétence). La prochaine fois, je pourrais être plus ferme sur le cadre (axe de développement bienveillant)."</p>
+        </section>
+
+        <section id="introspection">
+            <h2>2. Introspection : D'abord soi</h2>
+            
+            <div class="important-note">
+                ⚠️ Les CPS ne se transmettent pas, elles se vivent. <br>
+                Avant d'accompagner les autres, observez votre propre rapport à vous-même.
+            </div>
+
+            <div class="intro-box">
+                <h3>🔍 Exercice d'auto-observation</h3>
+                <p>Le document souligne que notre <strong>besoin de cohérence</strong> nous pousse souvent à figer une image de nous-mêmes (rigidité). Pour changer, il faut pratiquer la <strong>flexibilité</strong> et la <strong>défusion cognitive</strong> (réaliser que nos pensées ne sont que des croyances).</p>
+                
+                <p>Prenez un instant pour réfléchir à une situation récente où vous vous êtes jugé(e) :</p>
+                <div style="background:white; padding:15px; border-radius:4px; border:1px dashed #ccc;">
+                    <em>"Quelle étiquette me suis-je collée ?" (Ex: Je suis lent, je suis désorganisé...)</em><br><br>
+                    <strong>Défi :</strong> Essayez de transformer cette pensée en une observation de besoin. <br>
+                    Au lieu de "Je suis lent", dites "J'ai besoin de temps pour bien faire les choses".
+                </div>
+            </div>
+        </section>
+
+        <section id="pratique">
+            <h2>3. Pratique Interactive</h2>
+            <p>Testez votre compréhension des mécanismes décrits dans le référentiel.</p>
+
+            <div class="interactive-zone">
+                <h3>Exercice A : Jugement Biaisé vs Observation Bienveillante</h3>
+                <p>Cliquez sur les affirmations qui relèvent d'une <strong>auto-évaluation positive et non biaisée</strong> (telle que définie dans la fiche).</p>
+                
+                <div id="exercise-list" class="sort-container">
+                    </div>
+                <div id="feedback-ex1" class="feedback-area"></div>
+            </div>
+
+            <div class="interactive-zone">
+                <h3>Exercice B : La cascade des effets positifs</h3>
+                <p>Selon le document, s'auto-évaluer positivement enclenche un cercle vertueux. Remettez ces étapes dans l'ordre chronologique de cause à effet :</p>
+                
+                <ul class="sequence-list" id="sequence-list">
+                    <li class="sequence-item" data-order="1">
+                        <span>Porter attention à nos qualités et compétences</span>
+                        <div class="controls"><button onclick="moveUp(this)">↑</button><button onclick="moveDown(this)">↓</button></div>
+                    </li>
+                    <li class="sequence-item" data-order="3">
+                        <span>Enrichir notre image de soi</span>
+                        <div class="controls"><button onclick="moveUp(this)">↑</button><button onclick="moveDown(this)">↓</button></div>
+                    </li>
+                    <li class="sequence-item" data-order="2">
+                        <span>Minimiser les auto-évaluations biaisées</span>
+                        <div class="controls"><button onclick="moveUp(this)">↑</button><button onclick="moveDown(this)">↓</button></div>
+                    </li>
+                    <li class="sequence-item" data-order="5">
+                        <span>Renforcer le sentiment d'auto-efficacité et le pouvoir d'agir</span>
+                        <div class="controls"><button onclick="moveUp(this)">↑</button><button onclick="moveDown(this)">↓</button></div>
+                    </li>
+                    <li class="sequence-item" data-order="4">
+                        <span>Développer une estime de soi plus positive</span>
+                        <div class="controls"><button onclick="moveUp(this)">↑</button><button onclick="moveDown(this)">↓</button></div>
+                    </li>
+                </ul>
+                <button class="btn" onclick="checkSequence()">Vérifier l'ordre</button>
+                <div id="feedback-ex2" class="feedback-area"></div>
+            </div>
+        </section>
+
+        <section id="public">
+            <h2>4. Vers le public (Optionnel)</h2>
+            <p>
+                Une fois ce travail de <strong>défusion cognitive</strong> entamé pour vous-même, vous pourrez accompagner votre public. 
+                L'enjeu sera de les aider à distinguer "ce qu'ils font" (performance) de "ce qu'ils sont" (identité), afin de réduire leur dépendance au regard des autres et gagner en autonomie.
+            </p>
+        </section>
+
+        <section id="validation">
+            <h2>5. Validation des acquis</h2>
+            <p>Répondez à cette question finale pour valider votre compréhension des documents.</p>
+            
+            <div class="interactive-zone">
+                <p><strong>Selon le texte, quelle est la condition principale pour parvenir à s'auto-évaluer de façon positive ?</strong></p>
+                
+                <div class="quiz-option" onclick="checkQuiz(0, this)">
+                    A. Il faut ignorer totalement l'avis des autres pour se concentrer uniquement sur soi.
+                </div>
+                <div class="quiz-option" onclick="checkQuiz(1, this)">
+                    B. Il faut accepter de changer son Image de Soi en faisant preuve de flexibilité et en pratiquant la défusion cognitive.
+                </div>
+                <div class="quiz-option" onclick="checkQuiz(2, this)">
+                    C. Il faut satisfaire uniquement ses besoins physiques sans tenir compte des besoins psychologiques.
+                </div>
+
+                <div id="quiz-feedback" class="feedback-area"></div>
+            </div>
+        </section>
+
+        <section id="glossaire">
+            <h2>📚 Glossaire des notions mobilisées</h2>
+            <div class="glossary">
+                <dl>
+                    <dt>Auto-efficacité (Sentiment d')</dt>
+                    <dd>Confiance en sa capacité personnelle à réussir une tâche ou à faire face à une situation (résultat de l'estime de soi positive).</dd>
+
+                    <dt>Défusion cognitive</dt>
+                    <dd>Mécanisme consistant à prendre du recul pour réaliser que nos représentations de nous-mêmes ne sont que des croyances (souvent construites socialement) et non des vérités absolues.</dd>
+
+                    <dt>Pouvoir d'agir (Empowerment)</dt>
+                    <dd>Capacité à exercer un contrôle sur sa vie et à agir en autonomie, renforcée par une estime de soi solide.</dd>
+
+                    <dt>Biais d'auto-évaluation</dt>
+                    <dd>Déformation du jugement sur soi-même, souvent négative, qui empêche de voir objectivement ses qualités et compétences réelles.</dd>
+                    
+                    <dt>Besoin de cohérence</dt>
+                    <dd>Tendance psychologique naturelle à vouloir préserver notre vision actuelle de nous-mêmes (même si elle est négative), créant une rigidité face au changement.</dd>
+                </dl>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        © CPS Studio 2025 - Fiche générée à partir du référentiel (C1.5). Aucune donnée externe utilisée.
+    </footer>
+</div>
+
+<script>
+    /* --- LOGIQUE EXERCICE 1 (TRI) --- */
+    const ex1Data = [
+        { text: "Je suis vraiment nul en gestion de conflits.", correct: false, reason: "C'est un jugement global, négatif et figé (étiquette)." },
+        { text: "J'ai su écouter l'élève, même si je n'ai pas trouvé la solution immédiate.", correct: true, reason: "C'est une reconnaissance factuelle d'une compétence (écoute) et une acceptation bienveillante." },
+        { text: "C'est toujours la même chose, je n'y arriverai jamais.", correct: false, reason: "C'est une croyance rigide qui renforce le sentiment d'impuissance." },
+        { text: "Je reconnais que j'ai besoin de calme pour travailler efficacement.", correct: true, reason: "C'est une auto-observation bienveillante qui prend en compte les besoins psychologiques." }
+    ];
+
+    const listContainer = document.getElementById('exercise-list');
+    
+    ex1Data.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'sort-item';
+        div.innerText = item.text;
+        div.onclick = () => validateEx1(div, item);
+        listContainer.appendChild(div);
+    });
+
+    function validateEx1(element, item) {
+        // Reset styles slightly to allow multiple clicks if needed for learning
+        const feedback = document.getElementById('feedback-ex1');
+        
+        if (item.correct) {
+            element.style.borderLeft = "5px solid var(--success)";
+            element.style.backgroundColor = "#e8f8f5";
+            feedback.className = "feedback-area success";
+            feedback.innerHTML = `<strong>Correct !</strong> ${item.reason}`;
+        } else {
+            element.style.borderLeft = "5px solid var(--warning)";
+            element.style.backgroundColor = "#fff3cd";
+            feedback.className = "feedback-area error";
+            feedback.innerHTML = `<strong>À revoir.</strong> ${item.reason} Ce n'est pas une auto-évaluation positive.`;
+        }
+    }
+
+    /* --- LOGIQUE EXERCICE 2 (SÉQUENCE) --- */
+    function moveUp(btn) {
+        const li = btn.closest('li');
+        if (li.previousElementSibling) {
+            li.parentNode.insertBefore(li, li.previousElementSibling);
+        }
+    }
+
+    function moveDown(btn) {
+        const li = btn.closest('li');
+        if (li.nextElementSibling) {
+            li.parentNode.insertBefore(li.nextElementSibling, li);
+        }
+    }
+
+    function checkSequence() {
+        const listItems = document.querySelectorAll('#sequence-list li');
+        let currentOrder = [];
+        listItems.forEach(li => currentOrder.push(parseInt(li.getAttribute('data-order'))));
+
+        // L'ordre correct basé sur le texte "Principaux effets" (Image 1) :
+        // 1. Attention qualités -> 2. Minimiser biais -> 3. Enrichir image -> 4. Estime -> 5. Auto-efficacité
+        // Note: Le texte dit "En portant attention... en minimisant... nous pouvons développer des représentations (image)... estime... sentiment d'auto-efficacité".
+        // L'ordre logique strict attendu ici est : 1, 2, 3, 4, 5 (basé sur les data-order initiaux que j'ai mis dans le HTML pour correspondre à la logique du texte)
+        
+        // Let's check if the array is sorted [1, 2, 3, 4, 5] roughly. 
+        // Le texte exact est : "en portant attention (1) ... en minimisant (2) ... nous pouvons développer des représentations (3) ... développer une estime (4) ... renforcer sentiment auto-efficacité (5)".
+        
+        // Pour simplifier l'exercice, on vérifie si c'est strictement 1, 2, 3, 4, 5 OU si 1 et 2 sont interchangés (car ils sont simultanés dans la phrase "en portant... en minimisant").
+        
+        const isSorted = (arr) => {
+            // On accepte que 1 et 2 soient dans n'importe quel ordre au début, tant que le reste suit.
+            if ((arr[0]===1 && arr[1]===2) || (arr[0]===2 && arr[1]===1)) {
+                return arr[2]===3 && arr[3]===4 && arr[4]===5;
+            }
+            return false;
+        };
+
+        const feedback = document.getElementById('feedback-ex2');
+        if (isSorted(currentOrder)) {
+            feedback.className = "feedback-area success";
+            feedback.innerHTML = "<strong>Bravo !</strong> C'est exactement le processus décrit : Attention aux qualités ➔ Image de soi enrichie ➔ Estime de soi ➔ Pouvoir d'agir (Empowerment).";
+        } else {
+            feedback.className = "feedback-area error";
+            feedback.innerHTML = "<strong>Pas tout à fait.</strong> Relisez la section 'Principaux effets'. L'attention aux qualités nourrit l'image de soi, qui nourrit l'estime, qui donne enfin le pouvoir d'agir.";
+        }
+    }
+
+    /* --- LOGIQUE QUIZ FINAL --- */
+    function checkQuiz(index, element) {
+        const feedback = document.getElementById('quiz-feedback');
+        const options = document.querySelectorAll('.quiz-option');
+        
+        // Reset selection
+        options.forEach(opt => opt.classList.remove('selected'));
+        element.classList.add('selected');
+
+        if (index === 1) { // Bonne réponse B
+            feedback.className = "feedback-area success";
+            feedback.innerHTML = `
+                <strong>Exactement !</strong><br>
+                Le texte précise (section "Principale condition") que notre besoin de cohérence crée une rigidité. 
+                Pour s'auto-évaluer positivement, il faut accepter de changer son image de soi via la <strong>flexibilité</strong> et la <strong>défusion cognitive</strong> (comprendre que nos représentations sont des croyances modifiables).
+            `;
+        } else if (index === 0) {
+            feedback.className = "feedback-area error";
+            feedback.innerHTML = `
+                <strong>Faux.</strong><br>
+                Le texte dit que la reconnaissance de soi par soi permet de se <em>distancier</em> du regard de l'autre et de réduire la <em>dépendance</em>, mais pas d'ignorer les autres. Au contraire, une bonne relation à soi améliore la relation aux autres (plus ouverte et apaisée).
+            `;
+        } else {
+            feedback.className = "feedback-area error";
+            feedback.innerHTML = `
+                <strong>Incorrect.</strong><br>
+                L'auto-évaluation positive implique de prendre en compte nos besoins physiques ET psychologiques (besoin de reconnaissance, de confirmation) pour développer une relation bienveillante.
+            `;
+        }
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

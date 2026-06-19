@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS E1.2 : Identifier ses émotions</title>
+    <style>
+        :root {
+            --primary: #d6336c; /* Rose soutenu basé sur le document */
+            --primary-light: #fff0f6;
+            --secondary: #2c3e50;
+            --accent: #20c997;
+            --warning: #ffc107;
+            --text: #333;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary-light);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-top: 30px;
+            border-left: 5px solid var(--primary);
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .intro-box {
+            background-color: var(--primary-light);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 1px solid var(--primary);
+            margin-bottom: 20px;
+        }
+
+        /* Accordions */
+        details {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        summary {
+            background: #f1f3f5;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--secondary);
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        summary:hover {
+            background: #e9ecef;
+        }
+
+        .content-body {
+            padding: 20px;
+            background: #fff;
+        }
+
+        /* Interactive Elements */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s, background 0.2s;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #a61e4d;
+            transform: translateY(-2px);
+        }
+
+        .card-activity {
+            background: #f8f9fa;
+            border: 2px dashed #cbd5e0;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: var(--radius);
+        }
+
+        /* Introspection Section */
+        .introspection-zone {
+            background: linear-gradient(135deg, #fff0f6 0%, #fff 100%);
+            border-left: 5px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-family: inherit;
+        }
+
+        /* Drag and Drop / Matching Styles */
+        .match-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        .draggable-items, .drop-zones {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .draggable {
+            background: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+
+        .draggable.selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .drop-zone {
+            background: #e9ecef;
+            border: 2px solid #ced4da;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            min-height: 50px;
+        }
+
+        .drop-zone.correct {
+            border-color: var(--accent);
+            background-color: #d3f9d8;
+        }
+
+        /* Quiz Styles */
+        .quiz-question {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .options label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .options label:hover {
+            background-color: #f1f3f5;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .feedback.success {
+            background-color: #d3f9d8;
+            color: #1b5e20;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.error {
+            background-color: #ffe3e3;
+            color: #c92a2a;
+            border: 1px solid #fcc2c3;
+        }
+
+        /* Glossary */
+        .glossary-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .glossary-term {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1.5rem; }
+            .match-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>CPS SYNTHÈSE : Identifier ses émotions</h1>
+        <p>Fiche pédagogique interactive | Basée sur le référentiel CPS 2025</p>
+    </header>
+
+    <section>
+        <h2>1. Comprendre la notion</h2>
+        <div class="intro-box">
+            <p><strong>Définition simple :</strong> Identifier ses émotions, c’est la capacité à percevoir ce qui se passe à l’intérieur de soi (sensations, pensées) et à mettre le mot juste dessus.</p>
+        </div>
+
+        <details open>
+            <summary>📖 Les deux piliers de l'identification</summary>
+            <div class="content-body">
+                <p>Selon la définition opérationnelle, cette compétence repose sur deux savoirs psychologiques indissociables :</p>
+                <ul>
+                    <li><strong>1. Percevoir l'expérience interne :</strong> Accepter de ressentir pleinement, d'observer ce qui se passe en soi, même si c'est désagréable.</li>
+                    <li><strong>2. Nommer l'émotion :</strong> Faire correspondre ce ressenti interne avec un vocabulaire spécifique pour le mettre en mots.</li>
+                </ul>
+            </div>
+        </details>
+
+        <details>
+            <summary>💡 Analogie : Le scanner médical et le diagnostic</summary>
+            <div class="content-body">
+                <p>Imaginez que vous êtes un médecin :</p>
+                <ul>
+                    <li><strong>Percevoir</strong> correspond à l'examen clinique ou au scanner : on observe les symptômes bruts (chaleur, nœud au ventre, rythme cardiaque).</li>
+                    <li><strong>Nommer</strong> correspond au diagnostic : on pose un mot précis sur ces symptômes ("C'est une grippe" ou ici "C'est de la colère").</li>
+                </ul>
+                <p><em>Sans l'observation (percevoir), le diagnostic (nommer) est impossible. Sans le diagnostic, on ne peut pas traiter (réguler).</em></p>
+            </div>
+        </details>
+
+        <details>
+            <summary>🎓 Exemple professionnel (Éducation/Social)</summary>
+            <div class="content-body">
+                <p>Un éducateur fait face à un jeune qui refuse une consigne.</p>
+                <ul>
+                    <li><strong>Perception :</strong> L'éducateur sent ses mâchoires se serrer et son cœur accélérer. Il ne repousse pas cette sensation, il note : "Tiens, ça bouillonne en moi".</li>
+                    <li><strong>Nomination :</strong> Il se dit mentalement : "Je ressens de l'irritation et un sentiment d'impuissance".</li>
+                </ul>
+                <p><strong>Résultat :</strong> En identifiant cela, il réduit déjà l'intensité émotionnelle (effet de régulation) et évite de réagir brutalement.</p>
+            </div>
+        </details>
+    </section>
+
+    <section>
+        <h2>2. Introspection du professionnel</h2>
+        <div class="introspection-zone">
+            <h3>⚠️ Étape obligatoire : D'abord soi, ensuite les autres</h3>
+            <p>Le référentiel insiste : on ne peut pas transmettre les CPS sans les vivre. Pour identifier vos émotions, vous devez surmonter un obstacle majeur cité dans les textes : <strong>l'évitement expérientiel</strong>.</p>
+            
+            <div class="card-activity">
+                <h4>Exercice d'auto-analyse : Accepter vs Éviter</h4>
+                <p>L'identification nécessite d'accepter l'expérience interne, même douloureuse. Pensez à une situation professionnelle récente stressante ou désagréable.</p>
+                
+                <p><strong>Avez-vous tendance à :</strong></p>
+                <form id="introspection-form">
+                    <label style="display:block; margin: 10px 0;">
+                        <input type="radio" name="reflex" value="avoid"> 
+                        Fuir la sensation, penser à autre chose, minimiser ("C'est rien, je gère"), vous agiter ? (C'est de l'évitement expérientiel).
+                    </label>
+                    <label style="display:block; margin: 10px 0;">
+                        <input type="radio" name="reflex" value="accept"> 
+                        Observer la sensation physique (gorge serrée, poids...), l'accueillir et vous dire "Je ressens de l'inquiétude" ? (C'est de l'acceptation expérientielle).
+                    </label>
+                </form>
+
+                <p style="margin-top: 15px;"><em>Prenez un instant pour noter comment vous pourriez transformer un moment d'évitement en un moment d'acceptation :</em></p>
+                <textarea placeholder="Exemple : La prochaine fois que je me sens dépassé, au lieu de courir partout, je m'arrêterai 30 secondes pour localiser la sensation dans mon corps..."></textarea>
+            </div>
+            <p class="small-text">Note : Cette réflexion est personnelle et ne sera pas enregistrée.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. S'exercer : Les conditions et mécanismes</h2>
+        <p>Testez votre compréhension des mécanismes décrits dans les fiches techniques.</p>
+
+        <div class="card-activity">
+            <h3>Activité 1 : Relier les concepts clés</h3>
+            <p>Cliquez sur un concept (colonne de gauche) puis cliquez sur sa définition exacte (colonne de droite) telle que décrite dans les documents.</p>
+            
+            <div class="match-container">
+                <div class="draggable-items" id="concepts-list">
+                    </div>
+                <div class="drop-zones" id="definitions-list">
+                    </div>
+            </div>
+            <div id="match-feedback" class="feedback"></div>
+        </div>
+
+        <div class="card-activity">
+            <h3>Activité 2 : Le développement chez l'enfant</h3>
+            <p>Le document précise que la capacité à nommer les émotions se développe progressivement. Remettez ces étapes dans l'ordre chronologique (1 = le plus tôt).</p>
+            
+            <div id="sortable-container">
+                <select id="stage1" style="width:100%; padding:10px; margin:5px 0;">
+                    <option value="">-- Étape 1 (Début) --</option>
+                    <option value="valence">Basé sur la valence (agréable/désagréable) et émotions de base</option>
+                    <option value="specific">Identification fine et dénomination spécifique</option>
+                </select>
+                <div style="text-align:center; font-size: 1.5rem;">⬇️</div>
+                <select id="stage2" style="width:100%; padding:10px; margin:5px 0;">
+                    <option value="">-- Étape 2 (Suite) --</option>
+                    <option value="valence">Basé sur la valence (agréable/désagréable) et émotions de base</option>
+                    <option value="specific">Identification fine et dénomination spécifique</option>
+                </select>
+            </div>
+            <button class="btn" onclick="checkOrder()">Vérifier l'ordre</button>
+            <div id="order-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Accompagner le public</h2>
+        <div class="content-body" style="border-left: 4px solid var(--accent);">
+            <h3>La clé : La Mentalisation (ou empathie parentale)</h3>
+            <p>Pour qu'un enfant (ou un usager en difficulté émotionnelle) apprenne à identifier ses émotions, l'adulte doit jouer un rôle de miroir.</p>
+            <p>Le document définit la <strong>mentalisation</strong> comme le processus par lequel le "caregiver" (l'adulte) :</p>
+            <ol>
+                <li>Décrit l'expérience mentale de l'enfant.</li>
+                <li>La lui présente à nouveau, traduite en mots ou actions compréhensibles.</li>
+            </ol>
+            <p><strong>Conséquence :</strong> C'est ce processus qui permet à l'enfant de guider sa propre identification des émotions et de comprendre ses états internes.</p>
+            <p><em>Exemple pratique : "Je vois que tu serres les poings et que tu fronces les sourcils (description), tu as l'air très en colère parce que le jeu est fini (traduction)."</em></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>5. Validation des acquis</h2>
+        <p>Répondez à ces questions pour valider votre compréhension des documents E1.2.</p>
+
+        <div class="quiz-question" id="q1">
+            <p><strong>1. Parmi les effets suivants, lequel est directement cité comme conséquence du fait d'identifier et nommer ses émotions ?</strong></p>
+            <div class="options">
+                <label><input type="radio" name="q1" value="wrong1"> Cela supprime totalement l'émotion immédiatement.</label>
+                <label><input type="radio" name="q1" value="correct"> Cela réduit l'intensité émotionnelle et amorce la régulation.</label>
+                <label><input type="radio" name="q1" value="wrong2"> Cela permet de manipuler les émotions des autres.</label>
+            </div>
+            <div class="feedback" id="fb-q1"></div>
+        </div>
+
+        <div class="quiz-question" id="q2">
+            <p><strong>2. Qu'est-ce que l'auto-empathie dans ce contexte ?</strong></p>
+            <div class="options">
+                <label><input type="radio" name="q2" value="wrong1"> Être gentil avec soi-même uniquement quand tout va bien.</label>
+                <label><input type="radio" name="q2" value="correct"> La capacité de reconnaître nos propres émotions, qui participe à la reconnaissance de celles d'autrui.</label>
+                <label><input type="radio" name="q2" value="wrong2"> Se regarder dans un miroir pour feindre une émotion.</label>
+            </div>
+            <div class="feedback" id="fb-q2"></div>
+        </div>
+
+        <div class="quiz-question" id="q3">
+            <p><strong>3. Quel est le risque si une figure d'attachement invalide ou ne verbalise pas les états émotionnels de l'enfant ?</strong></p>
+            <div class="options">
+                <label><input type="radio" name="q3" value="correct"> Des perturbations émotionnelles et un déficit de la conscience émotionnelle.</label>
+                <label><input type="radio" name="q3" value="wrong1"> L'enfant deviendra trop bavard.</label>
+                <label><input type="radio" name="q3" value="wrong2"> L'enfant apprendra plus vite par lui-même.</label>
+            </div>
+            <div class="feedback" id="fb-q3"></div>
+        </div>
+
+        <button class="btn" onclick="validateQuiz()">Valider le Quiz</button>
+    </section>
+
+    <section>
+        <h2>Glossaire des notions travaillées</h2>
+        <div class="content-body">
+            <div class="glossary-item">
+                <span class="glossary-term">Auto-empathie</span> : Capacité à reconnaître ses propres émotions, condition préalable pour reconnaître celles d'autrui.
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">Évitement expérientiel</span> : Mécanisme consistant à fuir ou rejeter ses sensations internes désagréables. C'est un obstacle à l'identification des émotions.
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">Mentalisation (parentale)</span> : Processus par lequel l'adulte décrit l'expérience interne de l'enfant et la traduit en mots compréhensibles pour lui, favorisant la régulation émotionnelle.
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">Acceptation expérientielle</span> : Le fait d'accepter et de ressentir son expérience interne pleinement, même lorsqu'elle est douloureuse.
+            </div>
+            <div class="glossary-item">
+                <span class="glossary-term">Valence</span> : Caractère agréable ou désagréable (positif ou négatif) d'une émotion. C'est le premier niveau d'identification chez l'enfant.
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>CPS Studio - Ressource générée à partir des fiches techniques E1.2</p>
+    </footer>
+</div>
+
+<script>
+    /* --- DATA FOR EXERCISE 1 --- */
+    const matchingData = [
+        {
+            id: 1,
+            concept: "Mentalisation parentale",
+            def: "Processus par lequel le caregiver décrit et traduit l'expérience mentale du nourrisson."
+        },
+        {
+            id: 2,
+            concept: "Évitement expérientiel",
+            def: "Mécanisme à abandonner : refus de ressentir une expérience interne perçue comme désagréable."
+        },
+        {
+            id: 3,
+            concept: "Auto-empathie",
+            def: "Capacité de reconnaître nos propres émotions, participant à la reconnaissance des émotions d'autrui."
+        },
+        {
+            id: 4,
+            concept: "Valence",
+            def: "Critère initial d'identification chez l'enfant (agréable vs désagréable)."
+        }
+    ];
+
+    let selectedConcept = null;
+
+    function initMatching() {
+        const conceptsList = document.getElementById('concepts-list');
+        const definitionsList = document.getElementById('definitions-list');
+
+        // Shuffle definitions
+        const shuffledDefs = [...matchingData].sort(() => Math.random() - 0.5);
+
+        matchingData.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'draggable';
+            el.textContent = item.concept;
+            el.dataset.id = item.id;
+            el.onclick = () => selectConcept(el);
+            conceptsList.appendChild(el);
+        });
+
+        shuffledDefs.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'drop-zone';
+            el.textContent = item.def;
+            el.dataset.id = item.id;
+            el.onclick = () => checkMatch(el);
+            definitionsList.appendChild(el);
+        });
+    }
+
+    function selectConcept(element) {
+        // Reset previous selection
+        document.querySelectorAll('.draggable').forEach(el => el.classList.remove('selected'));
+        // Select new
+        element.classList.add('selected');
+        selectedConcept = element;
+    }
+
+    function checkMatch(defElement) {
+        if (!selectedConcept) return;
+
+        const conceptId = selectedConcept.dataset.id;
+        const defId = defElement.dataset.id;
+        const feedback = document.getElementById('match-feedback');
+
+        if (conceptId === defId) {
+            defElement.classList.add('correct');
+            defElement.style.pointerEvents = 'none'; // Disable click
+            selectedConcept.style.visibility = 'hidden'; // Hide the concept
+            selectedConcept = null;
+            feedback.textContent = "Correct !";
+            feedback.className = "feedback success";
+            feedback.style.display = "block";
+            
+            // Check if all done
+            const remaining = document.querySelectorAll('.draggable:not([style*="hidden"])');
+            if (remaining.length === 0) {
+                feedback.textContent = "Bravo ! Toutes les notions sont reliées.";
+            } else {
+                setTimeout(() => feedback.style.display = "none", 1500);
+            }
+        } else {
+            feedback.textContent = "Ce n'est pas la bonne définition. Réessayez.";
+            feedback.className = "feedback error";
+            feedback.style.display = "block";
+        }
+    }
+
+    /* --- LOGIC FOR EXERCISE 2 --- */
+    function checkOrder() {
+        const s1 = document.getElementById('stage1').value;
+        const s2 = document.getElementById('stage2').value;
+        const feedback = document.getElementById('order-feedback');
+
+        if (s1 === 'valence' && s2 === 'specific') {
+            feedback.innerHTML = "<strong>Correct !</strong> <br>Le document indique : d'abord la valence et les émotions de base, ensuite une identification et dénomination plus spécifique.";
+            feedback.className = "feedback success";
+            feedback.style.display = 'block';
+        } else {
+            feedback.textContent = "Ce n'est pas le bon ordre chronologique. Relisez la section sur le développement neuropsychologique.";
+            feedback.className = "feedback error";
+            feedback.style.display = 'block';
+        }
+    }
+
+    /* --- LOGIC FOR QUIZ --- */
+    function validateQuiz() {
+        // Q1
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const fb1 = document.getElementById('fb-q1');
+        if (q1 && q1.value === 'correct') {
+            fb1.innerHTML = "<strong>Exact !</strong> Le document cite : « Identifier et nommer nos émotions amorcent déjà un processus de régulation émotionnelle » [39].";
+            fb1.className = "feedback success";
+        } else {
+            fb1.innerHTML = "Erreur. Le document précise que l'identification réduit l'intensité et amorce la régulation.";
+            fb1.className = "feedback error";
+        }
+        fb1.style.display = 'block';
+
+        // Q2
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const fb2 = document.getElementById('fb-q2');
+        if (q2 && q2.value === 'correct') {
+            fb2.innerHTML = "<strong>Exact !</strong> L'identification des émotions des autres implique l'identification des siennes propres (auto-empathie).";
+            fb2.className = "feedback success";
+        } else {
+            fb2.innerHTML = "Erreur. L'auto-empathie est la capacité de reconnaître nos propres émotions pour mieux comprendre celles des autres.";
+            fb2.className = "feedback error";
+        }
+        fb2.style.display = 'block';
+
+        // Q3
+        const q3 = document.querySelector('input[name="q3"]:checked');
+        const fb3 = document.getElementById('fb-q3');
+        if (q3 && q3.value === 'correct') {
+            fb3.innerHTML = "<strong>Exact !</strong> Une invalidation ou absence de verbalisation peut entraîner un « déficit global de la conscience émotionnelle ». [92]";
+            fb3.className = "feedback success";
+        } else {
+            fb3.innerHTML = "Erreur. L'absence de mentalisation par l'adulte risque de créer des perturbations émotionnelles chez l'enfant.";
+            fb3.className = "feedback error";
+        }
+        fb3.style.display = 'block';
+    }
+
+    // Initialize
+    initMatching();
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

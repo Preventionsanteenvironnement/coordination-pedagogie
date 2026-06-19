@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS Studio : Comprendre et Vivre ses Émotions</title>
+    <style>
+        :root {
+            --primary: #C1345D; /* Couleur dérivée des schémas (rouge/rose) */
+            --secondary: #4A90E2; /* Bleu des cognitions/comportements */
+            --accent: #8BC34A; /* Vert des besoins */
+            --bg: #fdfbfb;
+            --text: #333;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #8e2444);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 { margin: 0; font-size: 2rem; }
+        header p { opacity: 0.9; margin-top: 0.5rem; font-style: italic; }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Sections */
+        section {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--primary);
+        }
+
+        h2 { color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+        h3 { color: var(--secondary); margin-top: 1.5rem; }
+
+        .highlight-box {
+            background-color: #fff0f5;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .analogy {
+            background-color: #e3f2fd;
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        /* Introspection Zone */
+        .introspection {
+            background-color: #f1f8e9;
+            border-left: 5px solid var(--accent);
+        }
+        .introspection h2 { color: #558b2f; }
+        
+        .reflection-prompt {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Interactif - Drag & Drop */
+        .dd-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .draggables {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background: #eee;
+            padding: 1rem;
+            border-radius: var(--radius);
+            min-height: 50px;
+        }
+
+        .draggable {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-weight: bold;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        .drop-zones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .drop-zone {
+            background: #fafafa;
+            border: 2px dashed #ccc;
+            border-radius: var(--radius);
+            padding: 1rem;
+            min-height: 150px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        
+        .drop-zone h4 { margin-top: 0; pointer-events: none; }
+        .drop-zone.hovered { background: #e0e0e0; border-color: var(--secondary); }
+        .drop-zone.correct { border-color: green; background: #e8f5e9; }
+        .drop-zone.wrong { border-color: red; background: #ffebee; }
+
+        /* Interactif - Circuit Needs */
+        .circuit-game {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .step-container {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none; /* Hidden by default */
+        }
+        .step-container.active { display: block; animation: fadeIn 0.5s; }
+        
+        .btn-choice {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn-choice:hover { transform: scale(1.02); background: #357abd; }
+        
+        /* Quiz */
+        .quiz-container { margin-top: 1rem; }
+        .question-block { margin-bottom: 2rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
+        .options label { display: block; margin: 0.5rem 0; cursor: pointer; }
+        .feedback { 
+            margin-top: 1rem; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            display: none; 
+            font-size: 0.95rem;
+        }
+        .feedback.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+        .feedback.error { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
+        /* Glossaire */
+        .glossary dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; }
+        .glossary dt { font-weight: bold; color: var(--primary); }
+        .glossary dd { margin: 0; margin-bottom: 10px; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .drop-zones { grid-template-columns: 1fr; }
+            .glossary dl { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>La Nature et le Mécanisme des Émotions</h1>
+    <p>Comprendre ce qui nous traverse pour mieux s'accompagner soi-même</p>
+</header>
+
+<main>
+
+    <section id="comprendre">
+        <h2>1. Comprendre la mécanique émotionnelle</h2>
+        
+        <h3>Qu'est-ce qu'une émotion ?</h3>
+        <p>L'émotion n'est pas une simple "idée" ou "humeur". C'est une réponse complexe et multicomposante de l'organisme. Elle se manifeste selon deux axes :</p>
+        <ul>
+            <li><strong>Composantes internes (Le vécu) :</strong> Ce qui se passe à l'intérieur de soi (ressenti subjectif global, sensations corporelles comme le cœur qui bat ou la boule au ventre, modifications physiologiques).</li>
+            <li><strong>Composantes externes (L'expression) :</strong> Ce qui est visible à l'extérieur (réactions réflexes du visage, gestes, paralangage comme le ton de la voix).</li>
+        </ul>
+
+        <div class="highlight-box">
+            <strong>Le Cycle de l'Émotion :</strong><br>
+            Les émotions sont reliées en permanence aux <strong>cognitions</strong> (pensées, perceptions) et aux <strong>comportements</strong> (actions).
+            <br><em>Exemple : Une pensée ("Je suis nul") peut déclencher une émotion (tristesse), qui entraîne un comportement (repli sur soi). Inversement, l'émotion influence notre mémoire et nos pensées.</em>
+        </div>
+
+        <h3>L'origine réelle : Le Besoin Psychologique</h3>
+        <p>Contrairement aux idées reçues, l'événement déclencheur (ex: une remarque) n'est pas l'origine de l'émotion. L'origine est la <strong>satisfaction ou la non-satisfaction d'un besoin psychologique</strong>.</p>
+        <ul>
+            <li><strong>Besoin satisfait</strong> ➔ Émotion agréable (Joie, fierté...).</li>
+            <li><strong>Besoin non satisfait</strong> ➔ Émotion désagréable (Peur, colère, tristesse...).</li>
+        </ul>
+        <p>L'émotion possède une <strong>valence</strong> (agréable/désagréable) et une <strong>intensité</strong> (faible/forte) qui dépendent de l'importance de l'enjeu pour le besoin.</p>
+
+        <div class="analogy">
+            <h4>💡 Analogie : Le Tableau de Bord</h4>
+            <p>Imaginez votre corps comme une voiture sophistiquée.</p>
+            <ul>
+                <li><strong>L'événement déclencheur</strong> (interne ou externe) est la route ou la météo.</li>
+                <li><strong>Le besoin psychologique</strong> est l'état du moteur (niveau d'huile, essence, température).</li>
+                <li><strong>L'émotion</strong> est le <strong>voyant lumineux</strong> sur le tableau de bord.</li>
+            </ul>
+            <p>Si le voyant rouge s'allume (émotion désagréable), ce n'est pas la faute de la route, c'est un signal que le moteur (le besoin) réclame de l'attention pour rétablir l'équilibre (homéostasie).</p>
+        </div>
+
+        <h3>Exemple Professionnel</h3>
+        <p>Un éducateur reçoit une remarque sèche d'un parent (<em>Déclencheur externe</em>). Il ressent une chaleur au visage et pense "Il ne me respecte pas" (<em>Cognition</em>). Une colère monte (<em>Émotion</em>, composante interne). Son besoin de reconnaissance ou de respect n'est pas satisfait. Il a envie de répondre sèchement (<em>Tendance à l'action/Comportement</em>).</p>
+    </section>
+
+    <section class="introspection">
+        <h2>2. Introspection du Professionnel</h2>
+        <p><strong>⚠️ Principe fondamental CPS :</strong> On ne peut accompagner les émotions des autres sans avoir exploré les siennes. "D'abord soi, ensuite le public."</p>
+        
+        <p>Prenez un instant pour repenser à une émotion vécue récemment dans votre cadre professionnel.</p>
+
+        <div class="reflection-prompt">
+            <strong>Exercice 1 : Le Scan des Composantes</strong><br>
+            Lors de cet événement, quelles étaient vos composantes internes et externes ? Essayez de distinguer ce qui se passait <em>dedans</em> de ce qui se voyait <em>dehors</em>.
+        </div>
+        <textarea placeholder="Interne (ex: gorge serrée, pensée 'je n'y arriverai pas') &#10;Externe (ex: voix tremblante, regard fuyant)..."></textarea>
+
+        <div class="reflection-prompt" style="margin-top: 1rem;">
+            <strong>Exercice 2 : La Recherche du Besoin</strong><br>
+            Au-delà de l'événement déclencheur, quel besoin psychologique était touché ? (Besoin de compétence, de lien, d'autonomie, de sécurité... ?)
+        </div>
+        <textarea placeholder="Mon besoin non satisfait était..."></textarea>
+    </section>
+
+    <section id="exercices">
+        <h2>3. Entraînement Pratique</h2>
+        <p>Vérifions votre compréhension des mécanismes avant de valider.</p>
+
+        <h3>Exercice A : Interne ou Externe ?</h3>
+        <p>Classez ces manifestations de l'émotion dans la bonne catégorie (selon le modèle des composantes).</p>
+        
+        <div class="dd-container">
+            <div class="draggables" id="draggable-list">
+                </div>
+            <div class="drop-zones">
+                <div class="drop-zone" id="zone-internal" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <h4>Composantes Internes<br><small>(dedans, ressenti)</small></h4>
+                </div>
+                <div class="drop-zone" id="zone-external" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <h4>Composantes Externes<br><small>(dehors, visible)</small></h4>
+                </div>
+            </div>
+            <p id="dd-feedback" style="text-align: center; font-weight: bold; min-height: 1.5em;"></p>
+        </div>
+
+        <hr>
+
+        <h3>Exercice B : La Mécanique du Besoin</h3>
+        <p>Reconstruisez la chaîne logique de l'émotion dans cette situation : <em>"Un collègue me félicite pour mon dossier devant toute l'équipe."</em></p>
+        
+        <div id="scenario-game" class="circuit-game">
+            <div class="step-container active" id="step1">
+                <p><strong>1. Quel est le type de déclencheur ?</strong></p>
+                <button class="btn-choice" onclick="nextStep(1, 'wrong')">Déclencheur interne (pensée)</button>
+                <button class="btn-choice" onclick="nextStep(1, 'correct')">Déclencheur externe (événement)</button>
+                <p class="feedback-mini" id="feed1"></p>
+            </div>
+
+            <div class="step-container" id="step2">
+                <p><strong>2. Quel est l'état du besoin (ex: besoin de compétence/reconnaissance) ?</strong></p>
+                <button class="btn-choice" onclick="nextStep(2, 'correct')">Besoin satisfait</button>
+                <button class="btn-choice" onclick="nextStep(2, 'wrong')">Besoin non satisfait</button>
+                <p class="feedback-mini" id="feed2"></p>
+            </div>
+
+            <div class="step-container" id="step3">
+                <p><strong>3. Quelle sera la valence de l'émotion résultante ?</strong></p>
+                <button class="btn-choice" onclick="nextStep(3, 'wrong')">Désagréable (Tristesse/Colère)</button>
+                <button class="btn-choice" onclick="nextStep(3, 'correct')">Agréable (Joie/Fierté)</button>
+                <p class="feedback-mini" id="feed3"></p>
+            </div>
+
+            <div class="step-container" id="step4">
+                <div class="highlight-box" style="background: #e8f5e9; border-color: green;">
+                    <strong>Bravo !</strong> Vous avez tracé le circuit :<br>
+                    Événement externe ➔ Besoin satisfait ➔ Émotion agréable.<br>
+                    L'émotion est bien le résultat de la satisfaction du besoin.
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <h3>Exercice C : Le Gradient d'Intensité</h3>
+        <p>Les émotions varient en intensité. Utilisez le curseur pour trouver le mot juste correspondant à l'intensité décrite.</p>
+        
+        <div style="margin: 2rem 0;">
+            <label for="intensityRange">Intensité de la PEUR : <span id="intensityLabel">Modérée</span></label>
+            <input type="range" id="intensityRange" min="1" max="3" step="1" value="1" style="width: 100%; margin: 10px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #666;">
+                <span>Faible/Modérée</span>
+                <span>Forte</span>
+                <span>Très Intense</span>
+            </div>
+            <p id="intensityResult" style="font-weight: bold; color: var(--primary); text-align: center; font-size: 1.2rem; margin-top: 1rem;">Inquiet</p>
+        </div>
+
+    </section>
+
+    <section>
+        <h2>4. Vers l'accompagnement du public</h2>
+        <p>Une fois que vous avez identifié vos propres mécanismes (besoins, déclencheurs, intensité), vous pouvez aider un usager à faire de même :</p>
+        <ul>
+            <li>Aidez-le à distinguer le <strong>déclencheur</strong> (ce qui s'est passé) de l'<strong>émotion</strong> (ce qu'il ressent).</li>
+            <li>Cherchez avec lui le <strong>besoin caché</strong> : <em>"Est-ce que tu es en colère parce que tu avais besoin d'aide et que tu ne l'as pas eue ?"</em></li>
+            <li>Observez ensemble les <strong>signaux corporels</strong> (composantes internes) pour repérer l'émotion plus tôt la prochaine fois.</li>
+        </ul>
+    </section>
+
+    <section id="validation">
+        <h2>5. Validation des acquis</h2>
+        <p>Répondez à ce quiz pour vérifier que vous maîtrisez l'ensemble des notions de cette fiche.</p>
+        
+        <div class="quiz-container" id="quiz-area">
+            </div>
+        <button id="submit-quiz" class="btn-choice" style="background-color: var(--primary);">Valider mes réponses</button>
+        <div id="final-score" style="margin-top: 2rem; font-weight: bold; text-align: center;"></div>
+    </section>
+
+    <section class="glossary">
+        <h2>Glossaire des notions mobilisées</h2>
+        <dl>
+            <dt>Composantes Internes</dt>
+            <dd>Manifestations de l'émotion se passant à l'intérieur de l'organisme (ressenti subjectif, sensations corporelles, modifications physiologiques) dont nous avons plus ou moins conscience.</dd>
+
+            <dt>Composantes Externes</dt>
+            <dd>Manifestations de l'émotion visibles à l'extérieur de soi (réactions réflexes du visage, gestes, paralangage comme le ton ou le débit de voix).</dd>
+
+            <dt>Besoin Psychologique</dt>
+            <dd>Élément inhérent au fonctionnement psychologique nécessaire à l'équilibre (homéostasie). Sa satisfaction génère une émotion agréable, sa non-satisfaction une émotion désagréable. Il est l'origine réelle de l'émotion.</dd>
+
+            <dt>Déclencheur</dt>
+            <dd>Événement (externe ou interne via une pensée) qui provoque l'émotion, mais n'en est pas l'origine profonde. Il agit comme une étincelle.</dd>
+
+            <dt>Cognition</dt>
+            <dd>Ensemble des pensées, perceptions et souvenirs. Les cognitions influencent les émotions et sont influencées par elles (interaction permanente).</dd>
+
+            <dt>Valence</dt>
+            <dd>Qualité du ressenti émotionnel : agréable (quand le besoin est satisfait) ou désagréable (quand le besoin n'est pas satisfait).</dd>
+
+            <dt>Intensité</dt>
+            <dd>Force du ressenti émotionnel (faible à fort), dépendant de l'ampleur de la satisfaction ou de la non-satisfaction du besoin.</dd>
+        </dl>
+    </section>
+
+</main>
+
+<script>
+    /* --- LOGIC: DRAG & DROP --- */
+    const dragItems = [
+        { id: "d1", text: "Cœur qui bat vite", type: "internal" },
+        { id: "d2", text: "Poings serrés", type: "external" },
+        { id: "d3", text: "Boule au ventre", type: "internal" },
+        { id: "d4", text: "Pleurs / Larmes", type: "external" },
+        { id: "d5", text: "Ressenti 'je suis énervé'", type: "internal" },
+        { id: "d6", text: "Ton de voix fort", type: "external" }
+    ];
+
+    const draggablesContainer = document.getElementById('draggable-list');
+    
+    // Initialize Draggables
+    dragItems.forEach(item => {
+        let el = document.createElement('div');
+        el.className = 'draggable';
+        el.draggable = true;
+        el.innerText = item.text;
+        el.id = item.id;
+        el.dataset.type = item.type;
+        el.ondragstart = drag;
+        draggablesContainer.appendChild(el);
+    });
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+        ev.dataTransfer.setData("type", ev.target.dataset.type);
+    }
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+        ev.target.closest('.drop-zone').classList.add('hovered');
+    }
+
+    /* Reset hover effect on leave could be added but simpler here */
+    
+    function drop(ev) {
+        ev.preventDefault();
+        const zone = ev.target.closest('.drop-zone');
+        zone.classList.remove('hovered');
+        
+        const dataId = ev.dataTransfer.getData("text");
+        const dataType = ev.dataTransfer.getData("type");
+        const draggedElement = document.getElementById(dataId);
+        
+        let isCorrect = false;
+        if (zone.id === "zone-internal" && dataType === "internal") isCorrect = true;
+        if (zone.id === "zone-external" && dataType === "external") isCorrect = true;
+
+        if (isCorrect) {
+            zone.appendChild(draggedElement);
+            draggedElement.style.background = "#c8e6c9"; // Green tint
+            draggedElement.style.border = "1px solid green";
+            document.getElementById('dd-feedback').innerText = "Correct ! " + draggedElement.innerText + " est bien à sa place.";
+            document.getElementById('dd-feedback').style.color = "green";
+        } else {
+            document.getElementById('dd-feedback').innerText = "Oups ! " + draggedElement.innerText + " ne va pas dans cette catégorie. Réessayez.";
+            document.getElementById('dd-feedback').style.color = "#c62828";
+        }
+    }
+
+    /* --- LOGIC: SCENARIO --- */
+    function nextStep(stepNum, status) {
+        const feedbackEl = document.getElementById('feed' + stepNum);
+        
+        if (status === 'wrong') {
+            feedbackEl.innerText = "Ce n'est pas tout à fait ça. Regardez bien la définition.";
+            feedbackEl.style.color = "red";
+        } else {
+            feedbackEl.innerText = "Exact !";
+            feedbackEl.style.color = "green";
+            // Disable buttons in current step
+            const currentDiv = document.getElementById('step' + stepNum);
+            const buttons = currentDiv.querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+            
+            // Show next
+            const nextStepDiv = document.getElementById('step' + (stepNum + 1));
+            if (nextStepDiv) nextStepDiv.classList.add('active');
+        }
+    }
+
+    /* --- LOGIC: SLIDER INTENSITY --- */
+    const slider = document.getElementById('intensityRange');
+    const label = document.getElementById('intensityLabel');
+    const result = document.getElementById('intensityResult');
+
+    slider.addEventListener('input', function() {
+        const val = parseInt(this.value);
+        if (val === 1) {
+            label.innerText = "Modérée";
+            result.innerText = "Inquiet";
+            result.style.color = "#FF9800"; // Orange
+        } else if (val === 2) {
+            label.innerText = "Forte";
+            result.innerText = "Paniqué";
+            result.style.color = "#FF5722"; // Deep Orange
+        } else {
+            label.innerText = "Intense";
+            result.innerText = "Terrifié";
+            result.style.color = "#B71C1C"; // Red
+        }
+    });
+
+    /* --- LOGIC: QUIZ --- */
+    const quizData = [
+        {
+            question: "Quelle est l'origine réelle d'une émotion ?",
+            options: [
+                "L'événement déclencheur (ce qui vient de se passer)",
+                "La satisfaction ou non-satisfaction d'un besoin psychologique",
+                "Les réactions réflexes du visage"
+            ],
+            correct: 1,
+            feedback: "L'événement n'est que le déclencheur. C'est l'état du besoin (satisfait ou non) qui génère l'émotion."
+        },
+        {
+            question: "Les pensées (cognitions) et les émotions sont-elles liées ?",
+            options: [
+                "Non, ce sont deux processus distincts sans lien.",
+                "Oui, mais seulement dans un sens : les pensées créent les émotions.",
+                "Oui, en interaction permanente : les émotions influencent les pensées et inversement."
+            ],
+            correct: 2,
+            feedback: "Il y a une interaction permanente. Une émotion peut changer nos pensées, et une pensée peut déclencher une émotion."
+        },
+        {
+            question: "L'accélération du rythme cardiaque est une composante...",
+            options: [
+                "Interne (modification physiologique)",
+                "Externe (geste réflexe)",
+                "Cognitive (pensée)"
+            ],
+            correct: 0,
+            feedback: "C'est une modification physiologique qui se passe à l'intérieur de l'organisme, donc une composante interne."
+        }
+    ];
+
+    const quizArea = document.getElementById('quiz-area');
+    
+    quizData.forEach((q, index) => {
+        const qBlock = document.createElement('div');
+        qBlock.className = 'question-block';
+        
+        let html = `<h4>Question ${index + 1} : ${q.question}</h4><div class="options">`;
+        q.options.forEach((opt, i) => {
+            html += `<label><input type="radio" name="q${index}" value="${i}"> ${opt}</label>`;
+        });
+        html += `</div><div class="feedback" id="fb${index}"></div>`;
+        qBlock.innerHTML = html;
+        quizArea.appendChild(qBlock);
+    });
+
+    document.getElementById('submit-quiz').addEventListener('click', function() {
+        let score = 0;
+        quizData.forEach((q, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const fbBox = document.getElementById(`fb${index}`);
+            
+            fbBox.style.display = 'block';
+            
+            if (selected && parseInt(selected.value) === q.correct) {
+                score++;
+                fbBox.className = "feedback success";
+                fbBox.innerHTML = "<strong>Correct !</strong> " + q.feedback;
+            } else {
+                fbBox.className = "feedback error";
+                fbBox.innerHTML = "<strong>Incorrect.</strong> " + q.feedback;
+            }
+        });
+        
+        const finalDiv = document.getElementById('final-score');
+        finalDiv.innerText = `Votre score : ${score} / ${quizData.length}`;
+        if (score === quizData.length) {
+            finalDiv.innerHTML += "<br>🎉 Excellent ! Vous maîtrisez la nature des émotions.";
+        }
+    });
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

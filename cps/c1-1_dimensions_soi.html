@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les Dimensions du Soi Psychologique - Fiche CPS</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --light-bg: #f5f7fa;
+            --success: #27ae60;
+            --warning: #e67e22;
+            --white: #ffffff;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--primary);
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        h3 {
+            color: var(--primary);
+            margin-top: 20px;
+        }
+
+        .intro-box {
+            background-color: #e8f4fc;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border-left: 5px solid var(--accent);
+            margin-bottom: 30px;
+        }
+
+        /* Accordion Style */
+        .accordion {
+            background-color: var(--white);
+            color: var(--primary);
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: 1px solid #ddd;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            transition: 0.4s;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .active, .accordion:hover {
+            background-color: #eee;
+            border-left: 5px solid var(--accent);
+        }
+
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        /* Cards */
+        .card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Analogy Box */
+        .analogy {
+            background: #fff3e0;
+            border: 1px dashed var(--warning);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        /* Introspection Section */
+        .introspection-zone {
+            background: #f0fdf4;
+            border: 1px solid var(--success);
+            padding: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        .important-note {
+            font-weight: bold;
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        /* Interactive Exercise */
+        .drag-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 50px;
+            background: #fafafa;
+        }
+
+        .drop-zone.correct {
+            border-color: var(--success);
+            background: #e8f5e9;
+        }
+
+        .draggable-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 10px;
+            background: #eee;
+            border-radius: 8px;
+        }
+
+        .draggable {
+            background: var(--white);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: move;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            user-select: none;
+            border: 1px solid #ddd;
+        }
+
+        /* Quiz */
+        .quiz-option {
+            display: block;
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+
+        .quiz-option:hover {
+            background: #e3f2fd;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .feedback.success { background: #d4edda; color: #155724; }
+        .feedback.error { background: #f8d7da; color: #721c24; }
+
+        /* Glossary */
+        dl { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        dt { font-weight: bold; color: var(--primary); margin-top: 10px; }
+        dd { margin-left: 0; color: #555; }
+
+        button.validate-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        button.validate-btn:hover {
+            background-color: #219150;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Les 4 Dimensions du Soi Psychologique</h1>
+    <p style="text-align: center; font-style: italic;">Basé sur le référentiel CPS - Fiche C1.1/C1.2</p>
+
+    <div class="intro-box">
+        <p><strong>En bref :</strong> Le Soi psychologique n'est pas un bloc unique. C'est une structure composée de dimensions distinctes mais interreliées. Certaines sont très conscientes, d'autres moins. Pour développer ses compétences psychosociales, il faut apprendre à naviguer entre ces 4 zones.</p>
+    </div>
+
+    <h2>1. Comprendre les notions</h2>
+    <p>Cliquez sur les dimensions pour découvrir leur définition précise.</p>
+
+    <button class="accordion">1. Le Soi Externe</button>
+    <div class="panel">
+        <p>C'est la partie visible, extérieure. Ce que les autres perçoivent de nous.</p>
+        <ul>
+            <li><strong>Contenu :</strong> Corps, comportements, communication, activités, possessions, rôles sociaux.</li>
+            <li><strong>Exemple du texte :</strong> "Je suis une professeure des écoles, possédant une maison, mariée..."</li>
+        </ul>
+    </div>
+
+    <button class="accordion">2. L'Image de Soi (Concept de Soi)</button>
+    <div class="panel">
+        <p>C'est le filtre mental, la représentation que l'on se fait de soi-même.</p>
+        <ul>
+            <li><strong>Contenu :</strong> Pensées, idées, jugements, représentations sur soi.</li>
+            <li><strong>Exemple du texte :</strong> "Je pense que je suis une jeune femme... je ne me trouve pas assez mince..."</li>
+        </ul>
+    </div>
+
+    <button class="accordion">3. Le Soi Sujet (Agent / Acteur)</button>
+    <div class="panel">
+        <p>C'est le "pilote". La partie qui permet d'agir volontairement et de s'autoréguler.</p>
+        <ul>
+            <li><strong>Contenu :</strong> Capacités cognitives (décider, réfléchir) et comportementales (bouger, s'exprimer) pour poser des actions intentionnelles.</li>
+            <li><strong>Exemple :</strong> Décider d'analyser son ressenti ou choisir de marcher.</li>
+        </ul>
+    </div>
+
+    <button class="accordion">4. Le Soi Interne (Contenus du Soi)</button>
+    <div class="panel">
+        <p>C'est l'expérience intérieure, les états mentaux perceptibles et conscientisables.</p>
+        <ul>
+            <li><strong>Les 5 états psychiques :</strong>
+                <ol>
+                    <li><strong>Cognitions :</strong> Pensées, croyances.</li>
+                    <li><strong>Émotions :</strong> Sentiments, affects.</li>
+                    <li><strong>Volitions / Conations :</strong> Besoins, envies, impulsions.</li>
+                    <li><strong>Sensations corporelles.</strong></li>
+                    <li><strong>Impressions globales</strong> et diffuses.</li>
+                </ol>
+            </li>
+            <li><strong>Exemple du texte :</strong> "Je me sens inquiète, je ressens des tensions dans le ventre, je voudrais qu'il y ait de meilleures relations..."</li>
+        </ul>
+    </div>
+
+    <div class="analogy">
+        <h3>💡 L'Analogie du Théâtre</h3>
+        <p>Pour mieux comprendre, imaginez un théâtre :</p>
+        <ul>
+            <li><strong>Soi Externe :</strong> Le décor, le costume que le public voit.</li>
+            <li><strong>Image de Soi :</strong> La critique que l'acteur fait de sa propre performance ("Je n'ai pas été bon sur cette scène").</li>
+            <li><strong>Soi Sujet :</strong> Le metteur en scène intérieur qui décide : "Maintenant, je vais traverser la scène et parler fort".</li>
+            <li><strong>Soi Interne :</strong> Le trac dans le ventre de l'acteur, son envie de boire de l'eau, sa peur d'oublier son texte (ressentis intérieurs).</li>
+        </ul>
+    </div>
+
+    <h2>2. Introspection du Professionnel</h2>
+    
+    <div class="important-note">
+        ⭐ ESSENTIEL ! <br>
+        Les CPS s’ancrent d’abord dans l’expérience personnelle.<br>
+        Les vivre soi-même facilite leur mise en œuvre auprès d’un public.
+    </div>
+
+    <div class="introspection-zone">
+        <h3>Exercice : "Mon État des Lieux"</h3>
+        <p>Prenez un instant, ici et maintenant, pour identifier un élément de votre vécu actuel pour chaque dimension.</p>
+        
+        <label><strong>1. Mon Soi Externe (Un fait observable sur vous maintenant) :</strong></label>
+        <br><em>Ex: Je suis assis devant un écran, je porte un pull bleu...</em>
+        <textarea rows="2" placeholder="Écrivez ici..."></textarea>
+
+        <label><strong>2. Mon Soi Interne (Une sensation ou émotion présente) :</strong></label>
+        <br><em>Ex: Je ressens une tension dans les épaules, je suis curieux...</em>
+        <textarea rows="2" placeholder="Écrivez ici..."></textarea>
+
+        <label><strong>3. Mon Image de Soi (Une pensée sur vous-même qui traverse l'esprit) :</strong></label>
+        <br><em>Ex: Je me dis que je suis fatigué, je pense être compétent...</em>
+        <textarea rows="2" placeholder="Écrivez ici..."></textarea>
+
+        <label><strong>4. Mon Soi Sujet (Une intention d'action) :</strong></label>
+        <br><em>Ex: Je décide de continuer la lecture, je décide de me redresser sur ma chaise...</em>
+        <textarea rows="2" placeholder="Écrivez ici..."></textarea>
+    </div>
+
+    <h2>3. Entraînement : Qui est qui ?</h2>
+    <p>Classez les affirmations suivantes dans la bonne dimension du Soi.</p>
+
+    <div id="game-container">
+        <div class="draggable-items" id="source-container">
+            </div>
+
+        <div class="drag-container">
+            <div class="drop-zone" data-category="externe"><strong>Soi Externe</strong><br><small>(Visible, possessions, rôles)</small></div>
+            <div class="drop-zone" data-category="image"><strong>Image de Soi</strong><br><small>(Jugements, idées sur soi)</small></div>
+            <div class="drop-zone" data-category="sujet"><strong>Soi Sujet / Agent</strong><br><small>(Capacité d'agir, décider)</small></div>
+            <div class="drop-zone" data-category="interne"><strong>Soi Interne</strong><br><small>(Émotions, sensations, besoins)</small></div>
+        </div>
+        <div id="game-feedback" class="feedback"></div>
+    </div>
+
+    <h2>4. Accompagner le public</h2>
+    <p>Une fois ces distinctions intégrées pour vous-même, vous pouvez aider vos usagers (élèves, patients...) à :</p>
+    <ul>
+        <li>Distinguer ce qu'ils <strong>font</strong> (Externe) de ce qu'ils <strong>sont</strong> (Image de soi).</li>
+        <li>Identifier leurs besoins et émotions (Interne) pour mieux s'autoréguler.</li>
+        <li>Prendre conscience de leur pouvoir d'agir (Sujet) : "Je ressens de la colère (Interne), mais je <em>décide</em> (Sujet) de ne pas crier (Externe)."</li>
+    </ul>
+
+    <h2>5. Validation des acquis</h2>
+    
+    <div id="quiz-container">
+        <div class="card">
+            <p class="card-title">Q1. Parmi le "Soi Interne", on retrouve les volitions (ou conations). De quoi s'agit-il ?</p>
+            <label class="quiz-option"><input type="radio" name="q1" value="a"> Des mouvements corporels visibles.</label>
+            <label class="quiz-option"><input type="radio" name="q1" value="b"> Des besoins, envies et impulsions.</label>
+            <label class="quiz-option"><input type="radio" name="q1" value="c"> Des jugements sur sa propre valeur.</label>
+        </div>
+
+        <div class="card">
+            <p class="card-title">Q2. Quelle est la fonction principale du "Soi Sujet" (ou Agent) ?</p>
+            <label class="quiz-option"><input type="radio" name="q2" value="a"> Stocker les souvenirs.</label>
+            <label class="quiz-option"><input type="radio" name="q2" value="b"> Ressentir des émotions.</label>
+            <label class="quiz-option"><input type="radio" name="q2" value="c"> Permettre l'action consciente, volontaire et l'autorégulation.</label>
+        </div>
+
+        <div class="card">
+            <p class="card-title">Q3. "Je ne me trouve pas assez mince". À quelle dimension cela appartient-il ?</p>
+            <label class="quiz-option"><input type="radio" name="q3" value="a"> Soi Externe (c'est le corps).</label>
+            <label class="quiz-option"><input type="radio" name="q3" value="b"> Image de Soi (c'est un jugement/représentation).</label>
+            <label class="quiz-option"><input type="radio" name="q3" value="c"> Soi Interne (c'est une sensation).</label>
+        </div>
+
+        <button class="validate-btn" onclick="validateQuiz()">Valider mes réponses</button>
+        <div id="quiz-feedback" class="feedback"></div>
+    </div>
+
+    <h2>Glossaire des notions</h2>
+    <dl>
+        <dt>Soi psychologique</dt>
+        <dd>Ensemble comportant différentes dimensions distinctes et interreliées (conscientes ou non) qui constituent l'identité psychique.</dd>
+        
+        <dt>Cognitions</dt>
+        <dd>Pensées, croyances, représentations, connaissances (partie du Soi Interne).</dd>
+        
+        <dt>Volitions / Conations</dt>
+        <dd>Besoins, envies, impulsions motivant l'action (partie du Soi Interne).</dd>
+        
+        <dt>Soi Sujet (Agent/Acteur)</dt>
+        <dd>Dimension faisant référence aux capacités cognitives et comportementales permettant d'agir de façon intentionnelle.</dd>
+
+        <dt>Concept de soi</dt>
+        <dd>Synonyme d'Image de soi. Renvoie aux pensées et jugements que l'on porte sur soi-même.</dd>
+    </dl>
+
+    <footer>
+        CPS Studio - Création pédagogique à partir de l'extrait référentiel 2025.
+    </footer>
+</div>
+
+<script>
+    // ACCORDION LOGIC
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            }
+        });
+    }
+
+    // DRAG AND DROP LOGIC (CLICK BASED FOR MOBILE)
+    const items = [
+        { text: "Je suis infirmière", category: "externe" },
+        { text: "Je me trouve nul en maths", category: "image" },
+        { text: "Je décide de me lever", category: "sujet" },
+        { text: "J'ai la gorge nouée", category: "interne" },
+        { text: "Je possède une voiture", category: "externe" },
+        { text: "J'ai envie de crier", category: "interne" } // Volition
+    ];
+
+    const sourceContainer = document.getElementById('source-container');
+    let selectedItem = null;
+
+    // Init items
+    items.forEach(item => {
+        let el = document.createElement('div');
+        el.className = 'draggable';
+        el.innerText = item.text;
+        el.dataset.category = item.category;
+        
+        el.addEventListener('click', function() {
+            // Deselect others
+            document.querySelectorAll('.draggable').forEach(d => d.style.background = 'white');
+            document.querySelectorAll('.draggable').forEach(d => d.style.color = 'black');
+            
+            if (selectedItem === this) {
+                selectedItem = null; // Toggle off
+            } else {
+                selectedItem = this;
+                this.style.background = '#3498db';
+                this.style.color = 'white';
+            }
+        });
+        sourceContainer.appendChild(el);
+    });
+
+    // Drop zones click
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('click', function() {
+            if (selectedItem) {
+                if (selectedItem.dataset.category === this.dataset.category) {
+                    this.appendChild(selectedItem);
+                    selectedItem.style.background = '#d4edda';
+                    selectedItem.style.color = '#155724';
+                    selectedItem.style.cursor = 'default';
+                    selectedItem.style.pointerEvents = 'none'; // Lock it
+                    selectedItem = null;
+                    checkGameCompletion();
+                } else {
+                    // Error visual
+                    const originalBg = this.style.backgroundColor;
+                    this.style.backgroundColor = '#f8d7da';
+                    setTimeout(() => {
+                        this.style.backgroundColor = originalBg;
+                    }, 500);
+                }
+            }
+        });
+    });
+
+    function checkGameCompletion() {
+        if (sourceContainer.children.length === 0) {
+            document.getElementById('game-feedback').innerText = "Bravo ! Vous avez correctement identifié les 4 dimensions.";
+            document.getElementById('game-feedback').className = "feedback success";
+            document.getElementById('game-feedback').style.display = "block";
+        }
+    }
+
+    // QUIZ LOGIC
+    function validateQuiz() {
+        let score = 0;
+        let feedback = "";
+        
+        // Q1
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        if (q1 && q1.value === 'b') score++;
+        
+        // Q2
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        if (q2 && q2.value === 'c') score++;
+
+        // Q3
+        const q3 = document.querySelector('input[name="q3"]:checked');
+        if (q3 && q3.value === 'b') score++;
+
+        const feedbackEl = document.getElementById('quiz-feedback');
+        feedbackEl.style.display = 'block';
+
+        if (score === 3) {
+            feedbackEl.className = 'feedback success';
+            feedbackEl.innerHTML = "<strong>Excellent !</strong> 3/3. Vous maîtrisez les distinctions entre les dimensions, y compris les notions fines comme les conations ou la différence corps/image du corps.";
+        } else {
+            feedbackEl.className = 'feedback error';
+            feedbackEl.innerHTML = "<strong>Attention :</strong> Vous avez " + score + "/3.<br>" +
+                "<ul>" +
+                "<li>Q1 : Les volitions/conations sont les envies et besoins (Soi Interne).</li>" +
+                "<li>Q2 : Le Soi Sujet est celui qui agit intentionnellement.</li>" +
+                "<li>Q3 : 'Je ne me trouve pas...' est un jugement, donc une Image de Soi, pas le corps physique réel (Soi Externe).</li>" +
+                "</ul>";
+        }
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

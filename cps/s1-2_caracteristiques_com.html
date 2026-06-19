@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPS S1.3 : Liens Sociaux et Comportements Prosociaux</title>
+    <style>
+        :root {
+            --primary: #6a1b9a; /* Violet CPS */
+            --secondary: #2e7d32; /* Vert Prosocial */
+            --light: #f3e5f5;
+            --white: #ffffff;
+            --text: #333333;
+            --accent: #ff9800;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #4a148c);
+            color: var(--white);
+            padding: 30px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--light); padding-bottom: 10px; margin-top: 40px; }
+        h3 { color: var(--secondary); margin-top: 25px; }
+
+        .card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .highlight {
+            background-color: var(--light);
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+        }
+
+        .concept-box {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .concept-item {
+            flex: 1;
+            min-width: 250px;
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        /* --- Section Introspection --- */
+        .introspection-zone {
+            background-color: #e8f5e9; /* Vert très clair */
+            border: 2px dashed var(--secondary);
+            padding: 20px;
+            border-radius: var(--border-radius);
+        }
+        
+        .reflection-input {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        /* --- Interactif : Drag & Drop Simplifié (Click based) --- */
+        .game-area {
+            background: #f0f4c3;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .buckets {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .bucket {
+            width: 45%;
+            min-height: 120px;
+            background: white;
+            border: 2px solid var(--secondary);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .bucket h4 { margin-top: 0; color: var(--secondary); }
+
+        .draggable-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .draggable {
+            background: var(--primary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s;
+        }
+
+        .draggable:hover { transform: scale(1.05); }
+        .draggable.correct { background: var(--secondary); }
+        .draggable.wrong { background: #d32f2f; }
+
+        /* --- Quiz Validation --- */
+        .quiz-container {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            background: #fff;
+        }
+
+        .question { font-weight: bold; margin-bottom: 15px; font-size: 1.1em; }
+        
+        .options button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .options button:hover { background: #e0e0e0; }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .feedback.success { background: #d4edda; color: #155724; }
+        .feedback.error { background: #f8d7da; color: #721c24; }
+
+        /* --- Glossaire --- */
+        .glossary dl { display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; }
+        .glossary dt { font-weight: bold; color: var(--primary); }
+        .glossary dd { margin: 0; margin-bottom: 10px; }
+
+        /* --- Responsive --- */
+        @media (max-width: 600px) {
+            .buckets { flex-direction: column; }
+            .bucket { width: 100%; }
+        }
+
+        .btn-action {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+        .btn-action:hover { background-color: #f57c00; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>Compétence S1.3 : Développer des liens et des comportements prosociaux</h1>
+        <p>Savoir entrer en relation et développer des relations de qualité</p>
+    </header>
+
+    <section class="card">
+        <h2>1. Comprendre la notion</h2>
+        <p>Selon les textes de référence, les <strong>liens sociaux</strong> ne sont pas un simple agrément, mais une nécessité vitale. Ils participent à la survie physique et au développement psychosocial dès la naissance. L'absence de ces liens peut affecter l'espérance de vie.</p>
+        
+        <div class="concept-box">
+            <div class="concept-item">
+                <h3>Communication vs Relation</h3>
+                <p>Attention à ne pas confondre :</p>
+                <ul>
+                    <li><strong>La Communication :</strong> C'est la dimension <em>dynamique</em> de l'interaction (échanger, parler).</li>
+                    <li><strong>La Relation :</strong> C'est la <em>forme et la nature</em> du lien (amical, professionnel) qui s'inscrit dans la durée et la stabilité.</li>
+                </ul>
+            </div>
+            <div class="concept-item">
+                <h3>Le Comportement Prosocial</h3>
+                <p>C'est un comportement <strong>volontaire</strong> qui a un effet bénéfique pour autrui, la société ou le vivant. Il est le moteur de relations de qualité (ex: exprimer de la gratitude, aider).</p>
+            </div>
+        </div>
+
+        <div class="highlight">
+            <strong>L'analogie du jardinier :</strong><br>
+            Imaginez une plante. Les interactions ponctuelles (communication) sont comme l'arrosage : nécessaires mais éphémères. La relation, elle, correspond aux racines qui se développent dans le sol. Pour qu'une plante survive, elle a besoin d'arrosage (communication) mais surtout d'un système racinaire stable (relation durable). Un sol riche favorise des racines saines (socialisation), un sol toxique crée des racines malades (exclusion, comportement antisocial).
+        </div>
+
+        <p><strong>Exemple professionnel :</strong><br>
+        Un éducateur observe un jeune isolé. Il ne suffit pas de lui "parler" (communication). Il faut l'aider à initier des interactions répétées, à décoder les codes sociaux (hiérarchie, normes) et à construire, petit à petit, une "sécurité" relationnelle durable avec le groupe.</p>
+    </section>
+
+    <section class="card introspection-zone">
+        <h2>2. Introspection du professionnel</h2>
+        <p><em>"Les CPS ne peuvent être transmises sans être vécues."</em> Avant d'accompagner les autres, observez votre propre fonctionnement relationnel.</p>
+        
+        <p>Le texte souligne que notre cerveau analyse chaque situation selon nos états actuels et nos expériences passées. Il n'y a pas de réponse invariante.</p>
+
+        <h3>Exercice : Mon spectre relationnel</h3>
+        <p>Réfléchissez aux dernières 24 heures. Identifiez une interaction qui a été difficile pour vous.</p>
+        
+        <label for="intro-context">Quel était le contexte (hiérarchie, normes, environnement) ?</label>
+        <textarea id="intro-context" class="reflection-input" placeholder="Ex: Réunion avec un supérieur stressé, bruit ambiant..."></textarea>
+
+        <label for="intro-reaction" style="margin-top:15px; display:block;">Avez-vous réussi à ajuster votre comportement pour "faire passer le message" tout en respectant l'autre ?</label>
+        <textarea id="intro-reaction" class="reflection-input" placeholder="J'ai observé que je me suis fermé... ou j'ai réussi à écouter..."></textarea>
+        
+        <p style="font-size: 0.9em; color: #555; margin-top: 10px;">
+            <strong>Analyse :</strong> Avez-vous agi par "réaction automatique" ou avez-vous pris le temps d'analyser les indices contextuels (besoins de l'autre, moment opportun) comme le suggère la compétence S1.3 ?
+        </p>
+    </section>
+
+    <section class="card">
+        <h2>3. Entraînement : Mécanismes et Nuances</h2>
+        <p>Testons votre capacité à distinguer les concepts clés du document.</p>
+
+        <h3>Activité A : Le tri des conséquences</h3>
+        <p>Les liens sociaux peuvent avoir des effets favorables ou défavorables. Cliquez sur un élément puis cliquez dans la bonne boîte.</p>
+
+        <div class="game-area">
+            <div class="buckets">
+                <div class="bucket" id="bucket-pos" onclick="dropItem('pos')">
+                    <h4>✅ Développement favorable<br><small>(Socialisation / Prosocial)</small></h4>
+                    <div class="bucket-content" id="content-pos"></div>
+                </div>
+                <div class="bucket" id="bucket-neg" onclick="dropItem('neg')">
+                    <h4>⚠️ Effets défavorables<br><small>(Antisocial / Exclusion)</small></h4>
+                    <div class="bucket-content" id="content-neg"></div>
+                </div>
+            </div>
+
+            <div class="draggable-items" id="source-items">
+                </div>
+            <p id="game-feedback" style="font-weight:bold; min-height: 25px; margin-top:10px;"></p>
+        </div>
+
+        <hr style="margin: 30px 0;">
+
+        <h3>Activité B : L'escalier de la relation</h3>
+        <p>Remettez dans l'ordre logique les étapes pour développer une relation de qualité selon le texte (1 = début, 4 = but ultime).</p>
+        <div id="sortable-list" style="background:#f9f9f9; padding:15px; border-radius:8px;">
+            </div>
+        <button class="btn-action" onclick="checkOrder()">Vérifier l'ordre</button>
+        <div id="order-feedback" class="feedback"></div>
+
+    </section>
+
+    <section class="card">
+        <h2>4. Transposition : Accompagner le public</h2>
+        <p>Une fois que vous avez identifié vos propres mécanismes d'adaptation sociale, vous pouvez aider votre public à :</p>
+        <ul>
+            <li><strong>Observer avant d'agir :</strong> Leur apprendre à scanner l'environnement (Qui est là ? Quelle est la hiérarchie ? Est-ce le bon moment ?).</li>
+            <li><strong>Distinguer l'éphémère du durable :</strong> Les aider à comprendre que dire "bonjour" est une interaction, mais que l'amitié demande de la stabilité et du temps.</li>
+            <li><strong>Valoriser le prosocial :</strong> Renforcer positivement chaque acte volontaire bénéfique pour le groupe (entraide, gratitude).</li>
+        </ul>
+    </section>
+
+    <section class="card">
+        <h2>5. Quiz de validation</h2>
+        <p>Avez-vous bien intégré les nuances du document ?</p>
+        
+        <div id="final-quiz">
+            </div>
+    </section>
+
+    <section class="card" style="background: #f0f0f0;">
+        <h2>Glossaire des notions travaillées</h2>
+        <div class="glossary">
+            <dl>
+                <dt>Liens sociaux</dt>
+                <dd>Ensemble des relations affectives entre individus, essentiels à la survie physique et au développement psychosocial.</dd>
+
+                <dt>Communication vs Relation</dt>
+                <dd>La communication est la dimension dynamique (l'action d'échanger), tandis que la relation désigne la forme, la nature et la stabilité du lien dans la durée.</dd>
+
+                <dt>Comportement prosocial</dt>
+                <dd>Comportement volontaire ayant un effet bénéfique pour autrui, la société ou le vivant (ex: aide, gratitude).</dd>
+
+                <dt>Adaptation sociale</dt>
+                <dd>Capacité à ajuster ses comportements relationnels en fonction du contexte, des normes, des hiérarchies et des indices observés.</dd>
+
+                <dt>Besoins affectifs</dt>
+                <dd>Besoins fondamentaux (amour, affection) satisfaits par la construction de relations durables.</dd>
+            </dl>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    /* --- LOGIQUE ACTIVITÉ A (TRI) --- */
+    const itemsData = [
+        { id: 1, text: "Adaptation sociale", type: "pos" },
+        { id: 2, text: "Exclusion", type: "neg" },
+        { id: 3, text: "Domination", type: "neg" },
+        { id: 4, text: "Gratitude", type: "pos" },
+        { id: 5, text: "Inadaptation sociale", type: "neg" },
+        { id: 6, text: "Coopération volontaire", type: "pos" }
+    ];
+
+    let selectedItem = null;
+    let completedItems = 0;
+
+    function initGame() {
+        const container = document.getElementById('source-items');
+        itemsData.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'draggable';
+            el.innerText = item.text;
+            el.onclick = () => selectItem(el, item);
+            container.appendChild(el);
+        });
+    }
+
+    function selectItem(element, itemData) {
+        // Reset styles
+        document.querySelectorAll('.draggable').forEach(d => d.style.border = "none");
+        
+        if (selectedItem && selectedItem.element === element) {
+            selectedItem = null; // Deselect
+            document.getElementById('game-feedback').innerText = "";
+            return;
+        }
+
+        selectedItem = { element: element, data: itemData };
+        element.style.border = "2px solid #333";
+        document.getElementById('game-feedback').innerText = "Maintenant, cliquez sur la bonne boîte (Verte ou Rouge)";
+        document.getElementById('game-feedback').style.color = "#333";
+    }
+
+    function dropItem(bucketType) {
+        if (!selectedItem) return;
+
+        const feedback = document.getElementById('game-feedback');
+        
+        if (selectedItem.data.type === bucketType) {
+            // Success
+            const bucketContent = document.getElementById(bucketType === 'pos' ? 'content-pos' : 'content-neg');
+            selectedItem.element.style.border = "none";
+            selectedItem.element.style.cursor = "default";
+            selectedItem.element.onclick = null; // Disable click
+            selectedItem.element.classList.add('correct');
+            bucketContent.appendChild(selectedItem.element);
+            
+            feedback.innerText = "Correct ! " + getExplanation(selectedItem.data.text);
+            feedback.style.color = "green";
+            selectedItem = null;
+            completedItems++;
+            if(completedItems === itemsData.length) {
+                feedback.innerText = "Bravo ! Vous avez classé tous les effets des liens sociaux mentionnés.";
+            }
+        } else {
+            // Error
+            feedback.innerText = "Erreur. Relisez la définition des effets favorables/défavorables.";
+            feedback.style.color = "red";
+            selectedItem.element.classList.add('wrong');
+            setTimeout(() => selectedItem.element.classList.remove('wrong'), 500);
+        }
+    }
+
+    function getExplanation(text) {
+        if(text === "Exclusion" || text === "Domination") return "Ce sont des processus liés à l'inadaptation sociale ou aux comportements antisociaux.";
+        if(text === "Gratitude") return "C'est une expression d'un comportement prosocial.";
+        return "";
+    }
+
+    /* --- LOGIQUE ACTIVITÉ B (ORDRE) --- */
+    // L'ordre logique basé sur le texte :
+    // 1. Initier l'interaction (savoir se présenter, politesse)
+    // 2. Analyser le contexte et adapter son comportement
+    // 3. Construire dans la durée (stabilité)
+    // 4. Satisfaire les besoins affectifs et d'amour
+    
+    const steps = [
+        { id: 3, text: "Construire la relation dans la durée (Stabilité)" },
+        { id: 1, text: "Initier des interactions (Savoir se présenter, politesse)" },
+        { id: 4, text: "Satisfaire les besoins affectifs profonds (Amour, affection)" },
+        { id: 2, text: "Analyser le contexte et adapter son comportement (Hiérarchie, normes)" }
+    ];
+
+    function initOrderGame() {
+        const container = document.getElementById('sortable-list');
+        // Shuffle simple
+        steps.sort(() => Math.random() - 0.5);
+        
+        steps.forEach((step, index) => {
+            const div = document.createElement('div');
+            div.className = 'order-item';
+            div.style.background = "white";
+            div.style.margin = "5px";
+            div.style.padding = "10px";
+            div.style.border = "1px solid #ccc";
+            div.style.cursor = "pointer";
+            div.innerHTML = `<strong>?</strong> - ${step.text}`;
+            div.dataset.id = step.id;
+            
+            // Simple swap mechanism onclick for mobile friendliness without huge drag libraries
+            div.onclick = function() {
+                const parent = this.parentNode;
+                if(this.previousElementSibling) {
+                    parent.insertBefore(this, this.previousElementSibling);
+                } else {
+                    parent.appendChild(this); // Cycle to bottom if at top
+                }
+            };
+            
+            container.appendChild(div);
+        });
+        
+        const help = document.createElement('p');
+        help.style.fontSize = "0.8em";
+        help.style.fontStyle = "italic";
+        help.innerText = "(Cliquez sur un élément pour le faire remonter)";
+        container.parentNode.insertBefore(help, container);
+    }
+
+    function checkOrder() {
+        const container = document.getElementById('sortable-list');
+        const items = container.querySelectorAll('div');
+        let currentOrder = [];
+        items.forEach(item => currentOrder.push(parseInt(item.dataset.id)));
+
+        const correctOrder = [1, 2, 3, 4]; // Based on logic developed above
+        
+        const isCorrect = JSON.stringify(currentOrder) === JSON.stringify(correctOrder);
+        const feedback = document.getElementById('order-feedback');
+        
+        feedback.style.display = 'block';
+        if(isCorrect) {
+            feedback.className = "feedback success";
+            feedback.innerHTML = "<strong>Excellent !</strong><br>Vous avez reconstitué le cheminement : D'abord l'initiation (savoir-faire de base), puis l'adaptation au contexte, qui permet la durée, et aboutit à la satisfaction des besoins.";
+        } else {
+            feedback.className = "feedback error";
+            feedback.innerHTML = "<strong>Pas tout à fait.</strong><br>Rappelez-vous : On commence par l'interaction (1), on l'ajuste au contexte (2), ce qui permet de durer (3) et enfin de combler les besoins (4).";
+        }
+    }
+
+    /* --- LOGIQUE QUIZ FINAL --- */
+    const quizData = [
+        {
+            question: "Quelle distinction fondamentale le texte fait-il entre Communication et Relation ?",
+            options: [
+                "C'est la même chose, ce sont des synonymes.",
+                "La communication est dynamique (l'échange), la relation est la forme stable du lien.",
+                "La communication est verbale, la relation est non-verbale.",
+                "La relation est éphémère, la communication est durable."
+            ],
+            correct: 1,
+            explanation: "Le texte précise : « La communication renvoie à la dimension dynamique de l'interaction, la notion de relation désigne la forme et la nature du lien » qui s'inscrit dans la durée."
+        },
+        {
+            question: "Selon le texte, comment le cerveau humain traite-t-il un stimulus social ?",
+            options: [
+                "De façon invariante, comme un robot.",
+                "Uniquement en fonction des gènes.",
+                "Il analyse le stimulus selon l'état actuel de l'individu et ses expériences antérieures.",
+                "Il ne traite pas les stimuli sociaux."
+            ],
+            correct: 2,
+            explanation: "Le texte indique que le cerveau ne répond pas de façon invariante mais intègre « les états et objectifs actuels de l'individu » et ses « connaissances antérieures »."
+        },
+        {
+            question: "Qu'est-ce qui caractérise un comportement prosocial ?",
+            options: [
+                "C'est un comportement involontaire et réflexe.",
+                "C'est un comportement volontaire avec un effet bénéfique pour autrui ou la société.",
+                "C'est le fait d'avoir beaucoup d'amis sur les réseaux sociaux.",
+                "C'est un comportement de domination sociale."
+            ],
+            correct: 1,
+            explanation: "Définition du texte : « un comportement volontaire avec un effet bénéfique pour autrui, que ce soit à l'échelle individuelle, de la société... »"
+        }
+    ];
+
+    function initQuiz() {
+        const container = document.getElementById('final-quiz');
+        quizData.forEach((q, index) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'quiz-container';
+            qDiv.style.marginBottom = "20px";
+            
+            let html = `<div class="question">${index + 1}. ${q.question}</div><div class="options">`;
+            q.options.forEach((opt, i) => {
+                html += `<button onclick="checkQuiz(this, ${index}, ${i})">${opt}</button>`;
+            });
+            html += `</div><div id="fb-q${index}" class="feedback"></div>`;
+            
+            qDiv.innerHTML = html;
+            container.appendChild(qDiv);
+        });
+    }
+
+    function checkQuiz(btn, qIndex, optIndex) {
+        const q = quizData[qIndex];
+        const feedbackEl = document.getElementById(`fb-q${qIndex}`);
+        const allBtns = btn.parentNode.querySelectorAll('button');
+        
+        allBtns.forEach(b => b.disabled = true); // Lock answers
+
+        if(optIndex === q.correct) {
+            btn.style.background = "#d4edda";
+            btn.style.borderColor = "#28a745";
+            feedbackEl.className = "feedback success";
+            feedbackEl.style.display = "block";
+            feedbackEl.innerHTML = "<strong>Correct !</strong> " + q.explanation;
+        } else {
+            btn.style.background = "#f8d7da";
+            btn.style.borderColor = "#dc3545";
+            feedbackEl.className = "feedback error";
+            feedbackEl.style.display = "block";
+            feedbackEl.innerHTML = "<strong>Incorrect.</strong> " + q.explanation;
+        }
+    }
+
+    // Initialisation globale
+    window.onload = function() {
+        initGame();
+        initOrderGame();
+        initQuiz();
+    };
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

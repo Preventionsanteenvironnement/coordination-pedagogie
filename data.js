@@ -125,10 +125,10 @@ const THEMATIQUES = [
     couleur: "#c97a2b",
     enfants: [
       {
-        titre: "Site de ressources CPS",
-        desc: "Ressources sur les compétences psychosociales.",
-        lien: "https://github.com/Preventionsanteenvironnement/cps",
-        type: "Lien",
+        titre: "Ressources CPS — référentiel SpF 2025",
+        desc: "Le référentiel des compétences psychosociales (Tome 1), compétence par compétence : fiches détaillées, synthèses et modèles pédagogiques. On revient au portail depuis le menu CPS.",
+        lien: "cps/",
+        type: "Site",
       },
     ],
   },

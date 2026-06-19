@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche CPS S1.2 : Communiquer de façon empathique</title>
+    <style>
+        :root {
+            --primary: #6a1b9a; /* Violet foncé inspiré du document */
+            --secondary: #9c27b0;
+            --accent: #e1bee7;
+            --light: #f3e5f5;
+            --text: #333;
+            --white: #ffffff;
+            --success: #4caf50;
+            --error: #f44336;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #fafafa;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        h1 { margin: 0; font-size: 1.8rem; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; margin-top: 2rem; }
+        h3 { color: var(--secondary); margin-top: 1.5rem; }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Cards & Sections */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary);
+        }
+
+        .analogy {
+            background-color: var(--light);
+            border-left-color: var(--secondary);
+            font-style: italic;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Introspection Section */
+        .introspection-box {
+            background-color: #e8f5e9; /* Vert très pâle pour apaisement */
+            border: 2px dashed #66bb6a;
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .btn-introspection {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: var(--white);
+            border: 1px solid #66bb6a;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        .btn-introspection:hover { background: #c8e6c9; }
+        .btn-introspection.active { background: #66bb6a; color: white; }
+
+        /* Interactive Elements */
+        .drag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            min-height: 50px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .draggable {
+            background: var(--white);
+            border: 1px solid var(--primary);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.9rem;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--secondary);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            min-height: 80px;
+            background-color: var(--light);
+            transition: background 0.3s;
+        }
+        
+        .drop-zone.hover { background-color: #d1c4e9; }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .feedback.correct { background-color: #dcedc8; color: #2e7d32; display: block; }
+        .feedback.incorrect { background-color: #ffcdd2; color: #c62828; display: block; }
+
+        /* Quiz Styles */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: var(--white);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover { background: var(--light); }
+        .quiz-option.selected { border-color: var(--primary); background: var(--light); font-weight: bold; }
+
+        .glossary-term {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: #333;
+            color: #fff;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>CPS SYNTHÈSE : Communiquer de façon empathique</h1>
+    <p>Comprendre, Écouter, Reformuler</p>
+</header>
+
+<div class="container">
+
+    <section>
+        <h2>1. Comprendre la notion</h2>
+        <div class="card">
+            <h3>Définition simplifiée</h3>
+            <p>Communiquer de façon empathique, c'est l'aptitude à <strong>percevoir et comprendre le vécu de l'autre</strong> (ses émotions, son point de vue, ses besoins) et à savoir le <strong>mettre en mots</strong> de façon ajustée.</p>
+            <p>Cela repose sur trois piliers fondamentaux :</p>
+            <ol>
+                <li><strong>La décentration :</strong> Mettre de côté ses propres envies et jugements pour se concentrer uniquement sur l'autre.</li>
+                <li><strong>L'écoute empathique :</strong> Une écoute silencieuse, bienveillante et totale.</li>
+                <li><strong>La parole empathique :</strong> Verbaliser ce que l'on a compris du vécu de l'autre (reformulation) sans interpréter.</li>
+            </ol>
+        </div>
+
+        <div class="card analogy">
+            <h3>💡 L'analogie du "Miroir bienveillant"</h3>
+            <p>Imaginez que vous êtes un miroir pour l'autre. Un miroir ne juge pas si l'image est "belle" ou "laide", il ne déforme pas l'image et n'essaie pas de la changer. Il reflète simplement, avec fidélité, ce qui est devant lui.</p>
+            <p>Communiquer avec empathie, c'est agir comme ce miroir : vous renvoyez à l'autre l'image de ce qu'il vit (ses émotions, ses besoins) pour qu'il puisse se sentir vu et compris, même si vous n'êtes pas d'accord avec le contenu.</p>
+        </div>
+
+        <div class="card">
+            <h3>Exemple professionnel</h3>
+            <p><strong>Situation :</strong> Un usager ou un élève exprime une forte colère car il se sent injustement traité.</p>
+            <p><strong>Réaction habituelle (non empathique) :</strong> "Calmez-vous, ce n'est pas si grave, j'ai juste appliqué le règlement." (Centré sur soi et la justification).</p>
+            <p><strong>Communication empathique :</strong> "Je vois que tu es très en colère (émotion) parce que tu as le sentiment de subir une injustice (point de vue/besoin). Tu aurais besoin que ta situation soit reconnue ?" (Centré sur le vécu de l'autre).</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Introspection du professionnel</h2>
+        <div class="introspection-box">
+            <p>⚠️ <strong>Rappel essentiel :</strong> Les compétences psychosociales ne se transmettent pas sans être vécues. Avant d'écouter les autres, il faut savoir s'écouter soi-même.</p>
+            
+            <h3>L'Auto-empathie : Le prérequis indispensable</h3>
+            <p>Le document précise : <em>"Si nous ne pouvons pas accueillir ni comprendre nos propres expériences internes... nous rencontrons d'importantes difficultés à comprendre celles des autres."</em></p>
+            
+            <p><strong>Exercice de "Décentration" :</strong></p>
+            <p>Avant d'entrer en relation d'aide ou d'écoute, cochez les états internes qui vous habitent <strong>maintenant</strong> :</p>
+            
+            <div id="intro-checklist">
+                <button class="btn-introspection" onclick="toggleIntro(this)">Je suis préoccupé(e) par mes propres problèmes.</button>
+                <button class="btn-introspection" onclick="toggleIntro(this)">Je ressens de l'agacement ou de la fatigue.</button>
+                <button class="btn-introspection" onclick="toggleIntro(this)">J'ai envie de donner mon avis ou de conseiller tout de suite.</button>
+                <button class="btn-introspection" onclick="toggleIntro(this)">Je suis disponible et curieux(se) de ce que l'autre vit.</button>
+            </div>
+
+            <div id="intro-feedback" style="margin-top:15px; font-style:italic; color:#555; display:none;">
+                <p><strong>Analyse :</strong> Si vous avez coché les trois premiers points, vous n'êtes pas encore en état de <strong>décentration</strong>. Pour communiquer de façon empathique, vous devez d'abord reconnaître (auto-empathie) que vous n'êtes pas disponible, ou prendre un temps pour mettre ces ressentis à distance.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. S'entraîner (Mise en pratique)</h2>
+        
+        <div class="card">
+            <h3>Exercice 1 : Posture habituelle vs Posture empathique</h3>
+            <p>Selon la définition opérationnelle, classez les attitudes suivantes dans la bonne catégorie.</p>
+
+            <div class="drag-container" id="source-container">
+                <div class="draggable" draggable="true" data-type="empathique">Écoute silencieuse</div>
+                <div class="draggable" draggable="true" data-type="habituelle">Donner son avis</div>
+                <div class="draggable" draggable="true" data-type="empathique">Reformulation centrée sur l'émotion</div>
+                <div class="draggable" draggable="true" data-type="habituelle">Interpréter le vécu de l'autre</div>
+                <div class="draggable" draggable="true" data-type="empathique">Décentration de soi</div>
+                <div class="draggable" draggable="true" data-type="habituelle">Parler de sa propre expérience</div>
+            </div>
+
+            <div class="drop-zone" id="zone-empathique" ondragover="allowDrop(event)" ondrop="drop(event, 'empathique')">
+                <strong>🔵 Communication Empathique</strong><br>
+                <small>(Accueillir, Décentrer, Reformuler)</small>
+            </div>
+
+            <div class="drop-zone" id="zone-habituelle" ondragover="allowDrop(event)" ondrop="drop(event, 'habituelle')">
+                <strong>⚪ Communication Habituelle</strong><br>
+                <small>(Juger, Interpréter, Conseiller)</small>
+            </div>
+            
+            <div id="drag-feedback" class="feedback"></div>
+        </div>
+
+        <div class="card">
+            <h3>Exercice 2 : La "Reformulation Empathique"</h3>
+            <p><strong>Contexte :</strong> Une collègue vous dit : <em>"J'en ai marre, personne ne m'écoute dans cette réunion, c'est toujours les mêmes qui décident !"</em></p>
+            <p>Quelle est la reformulation empathique la plus ajustée (centrée sur le vécu, l'émotion et le besoin) ?</p>
+            
+            <div id="scenario-options">
+                <button class="quiz-option" onclick="checkScenario(1)">"Tu ne devrais pas t'énerver pour ça, c'est juste une réunion."</button>
+                <button class="quiz-option" onclick="checkScenario(2)">"Tu es exaspérée (émotion) parce que tu as besoin que ta parole soit prise en compte (besoin) ?"</button>
+                <button class="quiz-option" onclick="checkScenario(3)">"Oui, c'est vrai que Michel parle tout le temps, il est pénible."</button>
+            </div>
+            <div id="scenario-feedback" class="feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Accompagner un public</h2>
+        <div class="card" style="border-left-color: #ff9800;">
+            <h3>De l'adulte vers l'enfant</h3>
+            <p>La fiche indique un point crucial pour le développement : <strong>Bénéficier d'une communication empathique</strong>.</p>
+            <p>Les capacités d'empathie de l'enfant ne se développent que si l'entourage (vous, les parents, les éducateurs) communique avec lui de façon empathique et bienveillante. </p>
+            <p>👉 <em>En pratiquant l'exercice de reformulation ci-dessus avec eux, vous leur apprenez implicitement à le faire.</em></p>
+        </div>
+    </section>
+
+    <section>
+        <h2>5. Validation des acquis</h2>
+        <div class="card">
+            <p>Testez votre compréhension globale de la fiche.</p>
+            
+            <div id="final-quiz">
+                <div class="quiz-item" id="q1">
+                    <p><strong>1. Qu'est-ce que la "décentration" selon la fiche ?</strong></p>
+                    <button class="quiz-option" onclick="validateQuiz(1, 'a')">A. Se concentrer très fort pour trouver une solution au problème de l'autre.</button>
+                    <button class="quiz-option" onclick="validateQuiz(1, 'b')">B. Mettre à distance ses propres représentations et émotions pour se rendre disponible.</button>
+                    <button class="quiz-option" onclick="validateQuiz(1, 'c')">C. Accepter de changer d'avis pour être d'accord avec l'autre.</button>
+                    <div class="feedback" id="fb-q1"></div>
+                </div>
+
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+                <div class="quiz-item" id="q2">
+                    <p><strong>2. Quel est l'un des principaux effets de la communication empathique chez la personne écoutée ?</strong></p>
+                    <button class="quiz-option" onclick="validateQuiz(2, 'a')">A. La satisfaction du besoin de reconnaissance et le renforcement de l'estime de soi.</button>
+                    <button class="quiz-option" onclick="validateQuiz(2, 'b')">B. L'oubli immédiat de ses problèmes.</button>
+                    <button class="quiz-option" onclick="validateQuiz(2, 'c')">C. L'acceptation inconditionnelle de toutes les règles.</button>
+                    <div class="feedback" id="fb-q2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Glossaire des notions travaillées</h2>
+        <div class="card" style="background-color: #fcfcfc;">
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Auto-empathie :</span> Capacité à accueillir et comprendre ses propres expériences internes. C'est un prérequis indispensable pour pouvoir comprendre celles des autres.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Décentration :</span> Action de se mettre à distance de ses propres représentations, émotions et envies afin de porter toute son attention sur l'expérience de l'autre.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Écoute silencieuse :</span> Fait de se rendre totalement disponible et ouvert, sans interrompre, pour percevoir l'expérience de l'autre telle qu'elle est vécue.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Reformulation empathique :</span> Mise en mots du vécu de l'autre (émotions, besoins, message) de la façon la plus ajustée possible, sans interprétation ni jugement.
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span class="glossary-term">Questions ouvertes :</span> Questions (ex: "Que ressens-tu ?") destinées à encourager l'autre à explorer et exprimer son vécu, typiques de l'écoute active.
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <p>Créé par CPS Studio - Basé exclusivement sur les fiches "Communiquer de façon empathique (S1.2)" et ses préalables.</p>
+    </footer>
+
+</div>
+
+<script>
+    // INTROSPECTION LOGIC
+    function toggleIntro(btn) {
+        btn.classList.toggle('active');
+        const feedback = document.getElementById('intro-feedback');
+        feedback.style.display = 'block';
+    }
+
+    // DRAG AND DROP LOGIC (Click version for better mobile support + Desktop D&D)
+    let draggedItem = null;
+    const draggables = document.querySelectorAll('.draggable');
+    const feedbackDrag = document.getElementById('drag-feedback');
+    let correctCount = 0;
+
+    // Mouse events for Drag
+    draggables.forEach(elem => {
+        elem.addEventListener('dragstart', function(e) {
+            draggedItem = e.target;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => e.target.style.opacity = '0.5', 0);
+        });
+        elem.addEventListener('dragend', function(e) {
+            e.target.style.opacity = '1';
+            draggedItem = null;
+        });
+        // Mobile "Click to select" fallback logic
+        elem.addEventListener('click', function() {
+            if(this.parentElement.classList.contains('drag-container')) {
+                // If in source, mark as selected
+                draggables.forEach(d => d.style.border = '1px solid var(--primary)');
+                this.style.border = '2px solid orange';
+                draggedItem = this;
+            }
+        });
+    });
+
+    function allowDrop(e) {
+        e.preventDefault();
+    }
+
+    function drop(e, zoneType) {
+        e.preventDefault();
+        // Handle both drag and click selection
+        if (!draggedItem) return;
+
+        const itemType = draggedItem.getAttribute('data-type');
+        
+        if (itemType === zoneType) {
+            // Correct
+            e.currentTarget.appendChild(draggedItem);
+            draggedItem.style.border = '1px solid #4caf50';
+            draggedItem.style.background = '#e8f5e9';
+            draggedItem.draggable = false; // Lock it
+            correctCount++;
+            checkDragCompletion();
+        } else {
+            // Incorrect
+            feedbackDrag.className = 'feedback incorrect';
+            feedbackDrag.innerHTML = '<strong>Oups !</strong> Cet élément ne va pas ici. Réessayez.';
+            setTimeout(() => feedbackDrag.style.display = 'none', 2000);
+        }
+        
+        // Reset selection style if it was a click
+        if(draggedItem) draggedItem = null; 
+    }
+
+    function checkDragCompletion() {
+        if (correctCount === 6) {
+            feedbackDrag.className = 'feedback correct';
+            feedbackDrag.innerHTML = '<strong>Bravo !</strong> Vous savez distinguer les caractéristiques de la communication empathique (décentration, écoute, reformulation) des habitudes de communication (jugement, interprétation).';
+        }
+    }
+
+    // Handle Drop Zone Clicks for Mobile "Click to Move"
+    document.getElementById('zone-empathique').addEventListener('click', function(e) {
+        if(draggedItem) drop({ preventDefault: () => {}, currentTarget: this }, 'empathique');
+    });
+    document.getElementById('zone-habituelle').addEventListener('click', function(e) {
+        if(draggedItem) drop({ preventDefault: () => {}, currentTarget: this }, 'habituelle');
+    });
+
+
+    // SCENARIO LOGIC
+    function checkScenario(choice) {
+        const fb = document.getElementById('scenario-feedback');
+        if (choice === 2) {
+            fb.className = 'feedback correct';
+            fb.innerHTML = `<strong>Excellent !</strong><br>Vous avez reformulé l'émotion ("exaspérée") et le besoin ("parole prise en compte") sans juger ni donner votre avis. C'est le cœur de la compétence.`;
+        } else if (choice === 1) {
+            fb.className = 'feedback incorrect';
+            fb.innerHTML = `<strong>Pas tout à fait.</strong><br>Ici, vous minimisez le vécu de l'autre ("ce n'est pas grave") et vous donnez un conseil. Ce n'est pas empathique car vous n'accueillez pas son émotion.`;
+        } else {
+            fb.className = 'feedback incorrect';
+            fb.innerHTML = `<strong>Attention.</strong><br>Ici, vous êtes d'accord avec elle (sympathie) et vous jugez la tierce personne ("il est pénible"). Ce n'est pas de l'empathie, c'est de la coalition. L'empathie reste centrée sur le vécu de l'interlocuteur.`;
+        }
+    }
+
+    // FINAL QUIZ LOGIC
+    function validateQuiz(qNum, answer) {
+        const fb = document.getElementById(`fb-q${qNum}`);
+        
+        if (qNum === 1) {
+            if (answer === 'b') {
+                fb.className = 'feedback correct';
+                fb.innerHTML = `<strong>Correct !</strong> La décentration est la capacité à sortir de ses propres cadres de référence pour accueillir ceux de l'autre. C'est le premier savoir-faire opérationnel cité.`;
+            } else {
+                fb.className = 'feedback incorrect';
+                fb.innerHTML = `<strong>Erreur.</strong> La réponse A est une "recherche de solution" (pas de l'empathie) et la C est de la "soumission". La décentration (Réponse B) permet juste d'être disponible pour comprendre.`;
+            }
+        }
+        
+        if (qNum === 2) {
+            if (answer === 'a') {
+                fb.className = 'feedback correct';
+                fb.innerHTML = `<strong>Exact !</strong> La fiche mentionne explicitement que cela satisfait le "besoin de reconnaissance et de confirmation de soi", renforçant ainsi l'estime de soi.`;
+            } else {
+                fb.className = 'feedback incorrect';
+                fb.innerHTML = `<strong>Non.</strong> L'empathie ne règle pas magiquement les problèmes (B) et ne demande pas d'accepter tout comportement (C), elle permet à la personne de se sentir comprise et reconnue (A).`;
+            }
+        }
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

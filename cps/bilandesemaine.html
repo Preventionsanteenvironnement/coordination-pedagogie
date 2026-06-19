@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>AGOrA2 – Préparation conseil de classe</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --primary: #4b6ee6;
+      --accent: #ffc857;
+      --border: #d0d4e4;
+      --text-main: #222;
+      --text-soft: #555;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    header {
+      background: linear-gradient(135deg, #4b6ee6, #7c8cf5);
+      color: white;
+      padding: 1.2rem 1.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.3rem;
+    }
+
+    header p {
+      margin: 0.2rem 0 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    main {
+      max-width: 950px;
+      margin: 0 auto 4rem;
+      padding: 1rem;
+    }
+
+    .page {
+      background: white;
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .page-title {
+      font-size: 1.1rem;
+      margin: 0 0 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .page-subtitle {
+      font-size: 0.9rem;
+      margin: 0 0 0.8rem;
+      color: var(--text-soft);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: rgba(0,0,0,0.08);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 0.8rem;
+    }
+
+    label {
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 3rem;
+      resize: none;
+      padding: 0.45rem 0.55rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+      line-height: 1.35;
+    }
+
+    .field-group {
+      margin-bottom: 0.7rem;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .slider-row span {
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      flex: 1;
+    }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+
+    .chip-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      background: #fafbff;
+    }
+
+    .chip-check input {
+      margin: 0;
+    }
+
+    .drag-layout {
+      display: grid;
+      grid-template-columns: minmax(180px, 1.1fr) repeat(3, minmax(150px, 1fr));
+      gap: 0.6rem;
+      margin-top: 0.7rem;
+      align-items: stretch;
+    }
+
+    .drag-column-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .drag-pool, .drop-zone {
+      border-radius: 10px;
+      border: 1px dashed var(--border);
+      padding: 0.4rem;
+      min-height: 90px;
+      background: #fbfcff;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 0.3rem;
+    }
+
+    .drag-item {
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid var(--border);
+      font-size: 0.78rem;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .drag-item:active {
+      cursor: grabbing;
+    }
+
+    .drop-zone.drag-over {
+      border-color: var(--primary);
+      background: #eef2ff;
+    }
+
+    .info-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      margin-top: 0.35rem;
+    }
+
+    .info-btn {
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #333;
+      width: 22px;
+      height: 22px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .info-btn:hover {
+      filter: brightness(0.95);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+
+    .pill {
+      font-size: 0.78rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: #f0f2ff;
+      border: 1px solid var(--border);
+    }
+
+    .section-divider {
+      margin: 0.7rem 0;
+      border-top: 1px dashed #dde0ee;
+    }
+
+    .bottom-actions {
+      text-align: center;
+      margin-top: 1.2rem;
+    }
+
+    .btn-main {
+      border: none;
+      border-radius: 999px;
+      padding: 0.5rem 1.4rem;
+      background: var(--primary);
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(75,110,230,0.3);
+    }
+
+    .btn-main:hover {
+      filter: brightness(1.05);
+    }
+
+    .small-note {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      margin-top: 0.25rem;
+    }
+
+    .page-indicator {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      margin-top: 0.25rem;
+    }
+
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .card-soft {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.6rem;
+      background: #fafbff;
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 720px) {
+      .drag-layout {
+        grid-template-columns: 1fr;
+      }
+      .drag-pool, .drop-zone {
+        min-height: 70px;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+      .page {
+        box-shadow: none;
+        border-radius: 0;
+        margin-bottom: 0;
+        page-break-after: always;
+      }
+      header, .bottom-actions {
+        display: none;
+      }
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      max-width: 440px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      font-size: 0.85rem;
+    }
+
+    .modal h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+    }
+
+    .modal p {
+      margin: 0.2rem 0;
+    }
+
+    .modal ul {
+      margin: 0.25rem 0 0.3rem 1.1rem;
+      padding: 0;
+    }
+
+    .close-modal {
+      margin-top: 0.6rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: none;
+      padding: 0.25rem 0.9rem;
+      background: #ecefff;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mon carnet hebdomadaire – Préparation du conseil de classe</h1>
+  <p>Seconde Bac Pro AGOrA – Groupe 2</p>
+</header>
+
+<main>
+
+  <!-- PAGE 1 -->
+  <section class="page">
+    <h2 class="page-title">
+      Page 1 – Qui je suis et comment s’est passée ma semaine
+      <span class="badge">Réflexivité globale</span>
+    </h2>
+    <p class="page-subtitle">Tu remplis cette page chaque jeudi matin. L’objectif est de faire le point calmement sur ta semaine.</p>
+
+    <div class="grid-2">
+      <div class="field-group">
+        <label for="prenomEleve">Prénom</label>
+        <input type="text" id="prenomEleve" name="prenomEleve" placeholder="Ton prénom">
+      </div>
+      <div class="field-group">
+        <label for="nomEleve">Nom</label>
+        <input type="text" id="nomEleve" name="nomEleve" placeholder="Ton nom">
+      </div>
+      <div class="field-group">
+        <label for="semaineDu">Semaine du</label>
+        <input type="date" id="semaineDu" name="semaineDu">
+      </div>
+      <div class="field-group">
+        <label for="semaineAu">au</label>
+        <input type="date" id="semaineAu" name="semaineAu">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Humeur générale cette semaine</label>
+      <div class="slider-row">
+        <span>Très difficile</span>
+        <input type="range" id="humeur" name="humeur" min="0" max="10" value="5">
+        <span>Très bonne</span>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Niveau de motivation pour le lycée</label>
+      <div class="slider-row">
+        <span>Très faible</span>
+        <input type="range" id="motivation" name="motivation" min="0" max="10" value="5">
+        <span>Très élevé</span>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Ce qui m’a le plus marqué cette semaine (en classe, en atelier, au lycée)</label>
+      <textarea id="marquant" name="marquant" placeholder="Un moment positif, une difficulté, une surprise…"></textarea>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h3 class="page-title" style="font-size:1rem;">
+      Ma place dans le groupe
+      <span class="badge">Groupe 2 / Classe entière (16)</span>
+    </h3>
+
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Quand nous sommes seulement en groupe 2 (8 élèves), je me sens</label>
+        <textarea id="ressentiG2" name="ressentiG2" placeholder="Confiant ? Stressé ? À l’aise ? Pas à l’aise ? Explique…"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Quand nous sommes à 16 (groupe 1 + groupe 2), je me sens</label>
+        <textarea id="ressenti16" name="ressenti16" placeholder="Est-ce que le grand groupe t’aide ou te gêne ? Pourquoi ?"></textarea>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Cette semaine, par rapport au grand groupe (16), je dirais que</label>
+      <div class="pill-row">
+        <label class="chip-check"><input type="checkbox" name="groupe16" value="je-me-fonds"> Je me fonds dans le groupe</label>
+        <label class="chip-check"><input type="checkbox" name="groupe16" value="j-observe"> J’observe beaucoup</label>
+        <label class="chip-check"><input type="checkbox" name="groupe16" value="je-suis-entraine"> Je suis parfois entraîné par les autres</label>
+        <label class="chip-check"><input type="checkbox" name="groupe16" value="je-resiste"> Je résiste quand ça dérape</label>
+        <label class="chip-check"><input type="checkbox" name="groupe16" value="je-me-distingue"> J’essaie de me distinguer (attitude différente)</label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Comment je m’autodiscipline quand le groupe s’agite</label>
+      <textarea id="autodiscipline" name="autodiscipline" placeholder="Ce que je fais concrètement pour rester calme, concentré, respecter les règles…"></textarea>
+    </div>
+
+    <div class="info-line">
+      <span>Tu peux cliquer ici pour revoir ce qu’est un conseil de classe.</span>
+      <button type="button" class="info-btn" data-info="conseil">?</button>
+    </div>
+
+    <div class="page-indicator">Page 1 / 4</div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page">
+    <h2 class="page-title">
+      Page 2 – Mes matières et mon ressenti
+      <span class="badge">Glisser-déposer</span>
+    </h2>
+    <p class="page-subtitle">Déplace chaque matière dans la colonne qui correspond le mieux à ton ressenti cette semaine.</p>
+
+    <div class="drag-layout">
+      <div>
+        <div class="drag-column-title">Matières de la semaine</div>
+        <div class="drag-pool drop-zone" id="matiere-pool">
+          <div class="drag-item" draggable="true">Français</div>
+          <div class="drag-item" draggable="true">Histoire-Géo / EMC</div>
+          <div class="drag-item" draggable="true">Mathématiques</div>
+          <div class="drag-item" draggable="true">Anglais LV1</div>
+          <div class="drag-item" draggable="true">Espagnol LV2</div>
+          <div class="drag-item" draggable="true">Economie-Droit</div>
+          <div class="drag-item" draggable="true">Enseignement Pro Eco-GE-GA</div>
+          <div class="drag-item" draggable="true">DNL</div>
+          <div class="drag-item" draggable="true">PSE</div>
+          <div class="drag-item" draggable="true">Arts appliqués</div>
+          <div class="drag-item" draggable="true">EPS</div>
+          <div class="drag-item" draggable="true">Soutien au parcours</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="drag-column-title">Je suis à l’aise</div>
+        <div class="drop-zone" id="zone-alaise"></div>
+      </div>
+
+      <div>
+        <div class="drag-column-title">Ça va / je progresse</div>
+        <div class="drop-zone" id="zone-ca-va"></div>
+      </div>
+
+      <div>
+        <div class="drag-column-title">En difficulté / j’ai besoin d’aide</div>
+        <div class="drop-zone" id="zone-difficile"></div>
+      </div>
+    </div>
+
+    <div class="field-group" style="margin-top:0.8rem;">
+      <label>Explique une matière où tu es à l’aise</label>
+      <textarea id="alaise-explication" name="alaise-explication" placeholder="Qu’est-ce qui fait que tu te sens à l’aise ? Prof, ambiance, exercices, notes…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Explique une matière où tu es en difficulté</label>
+      <textarea id="difficile-explication" name="difficile-explication" placeholder="Est-ce que c’est la compréhension, l’écrit, la prise de note, la concentration, le vocabulaire… ?"></textarea>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h3 class="page-title" style="font-size:1rem;">
+      Mon ressenti global sur les matières
+      <span class="badge">Classement rapide</span>
+    </h3>
+
+    <div class="field-group">
+      <label>Classe les trois matières où tu te sens le plus en réussite (1 = le plus en réussite)</label>
+      <div class="flex-row">
+        <div class="card-soft">
+          <strong>1</strong>
+          <textarea id="top1" name="top1" placeholder="Matière n°1"></textarea>
+        </div>
+        <div class="card-soft">
+          <strong>2</strong>
+          <textarea id="top2" name="top2" placeholder="Matière n°2"></textarea>
+        </div>
+        <div class="card-soft">
+          <strong>3</strong>
+          <textarea id="top3" name="top3" placeholder="Matière n°3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Classe les trois matières où tu te sens le plus en difficulté (1 = la plus difficile)</label>
+      <div class="flex-row">
+        <div class="card-soft">
+          <strong>1</strong>
+          <textarea id="diff1" name="diff1" placeholder="Matière n°1"></textarea>
+        </div>
+        <div class="card-soft">
+          <strong>2</strong>
+          <textarea id="diff2" name="diff2" placeholder="Matière n°2"></textarea>
+        </div>
+        <div class="card-soft">
+          <strong>3</strong>
+          <textarea id="diff3" name="diff3" placeholder="Matière n°3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-indicator">Page 2 / 4</div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page">
+    <h2 class="page-title">
+      Page 3 – Organisation personnelle et vie de classe
+      <span class="badge">Responsabilisation</span>
+    </h2>
+    <p class="page-subtitle">Ici, tu regardes comment tu t’organises et comment tu te comportes dans le groupe.</p>
+
+    <div class="grid-2">
+      <div class="field-group">
+        <label>Cette semaine, mes devoirs ont été faits</label>
+        <div class="slider-row">
+          <span>Rarement</span>
+          <input type="range" id="devoirs" name="devoirs" min="0" max="10" value="5">
+          <span>Toujours</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Cette semaine, j’avais mon matériel</label>
+        <div class="slider-row">
+          <span>Souvent oublié</span>
+          <input type="range" id="materiel" name="materiel" min="0" max="10" value="5">
+          <span>Toujours prêt</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Ce que j’ai bien géré dans mon organisation</label>
+      <textarea id="orga-ok" name="orga-ok" placeholder="Exemple : j’ai anticipé un contrôle, j’ai mieux géré Pronote, j’ai rangé mon sac…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Ce que j’ai mal géré et que je veux améliorer</label>
+      <textarea id="orga-a-ameliorer" name="orga-a-ameliorer" placeholder="Exemple : retards, oublis de matériel, devoirs non faits, travail de groupe…"></textarea>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h3 class="page-title" style="font-size:1rem;">
+      Les actions que je fais le plus souvent
+      <span class="badge">Glisser-déposer</span>
+    </h3>
+    <p class="page-subtitle">Déplace chaque action dans la colonne qui te correspond le mieux.</p>
+
+    <div class="drag-layout">
+      <div>
+        <div class="drag-column-title">Actions possibles</div>
+        <div class="drag-pool drop-zone" id="actions-pool">
+          <div class="drag-item" draggable="true">Je regarde Pronote pour voir mon travail</div>
+          <div class="drag-item" draggable="true">Je demande de l’aide quand je ne comprends pas</div>
+          <div class="drag-item" draggable="true">Je recopie les devoirs en fin de cours</div>
+          <div class="drag-item" draggable="true">Je révise avant une évaluation</div>
+          <div class="drag-item" draggable="true">Je range mes affaires à la fin du cours</div>
+          <div class="drag-item" draggable="true">Je discute alors que le professeur parle</div>
+          <div class="drag-item" draggable="true">Je me laisse entraîner par les autres</div>
+          <div class="drag-item" draggable="true">Je me calme tout seul quand le groupe s’agite</div>
+          <div class="drag-item" draggable="true">Je change de place si besoin pour mieux travailler</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="drag-column-title">Je fais souvent</div>
+        <div class="drop-zone" id="actions-souvent"></div>
+      </div>
+
+      <div>
+        <div class="drag-column-title">Je fais parfois</div>
+        <div class="drop-zone" id="actions-parfois"></div>
+      </div>
+
+      <div>
+        <div class="drag-column-title">Je fais rarement / jamais</div>
+        <div class="drop-zone" id="actions-rare"></div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h3 class="page-title" style="font-size:1rem;">
+      Compétences psychosociales
+      <span class="badge">Se connaître</span>
+    </h3>
+
+    <div class="field-group">
+      <label>Cette semaine, j’ai surtout utilisé</label>
+      <div class="pill-row">
+        <label class="chip-check"><input type="checkbox" name="cps" value="gestion-emotions"> La gestion de mes émotions</label>
+        <label class="chip-check"><input type="checkbox" name="cps" value="empathie"> L’empathie (me mettre à la place des autres)</label>
+        <label class="chip-check"><input type="checkbox" name="cps" value="communication"> La communication (oser parler, poser des questions)</label>
+        <label class="chip-check"><input type="checkbox" name="cps" value="prise-decision"> La prise de décision</label>
+        <label class="chip-check"><input type="checkbox" name="cps" value="gestion-stress"> La gestion du stress</label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Un exemple concret où j’ai utilisé une compétence psychosociale</label>
+      <textarea id="exemple-cps" name="exemple-cps" placeholder="Exemple : j’ai réussi à rester calme alors que le groupe faisait du bruit."></textarea>
+    </div>
+
+    <div class="info-line">
+      <span>Besoin d’un rappel sur ce que sont les compétences psychosociales ?</span>
+      <button type="button" class="info-btn" data-info="cps">?</button>
+    </div>
+
+    <div class="page-indicator">Page 3 / 4</div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page">
+    <h2 class="page-title">
+      Page 4 – Ce que je veux faire passer au conseil de classe
+      <span class="badge">Message au délégué</span>
+    </h2>
+    <p class="page-subtitle">Ici, tu écris ce que tu veux que le délégué et les adultes sachent sur ton travail et ton comportement.</p>
+
+    <div class="field-group">
+      <label>Ce dont je suis fier en ce moment</label>
+      <textarea id="fierte" name="fierte" placeholder="Un progrès, une attitude, une matière, une relation…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Ce qui est le plus difficile pour moi en ce moment</label>
+      <textarea id="plus-difficile" name="plus-difficile" placeholder="Une matière, un moment de la journée, un type d’exercice…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Trois mots qui résument ma semaine</label>
+      <div class="grid-2">
+        <textarea id="mot1" name="mot1" placeholder="Mot 1"></textarea>
+        <textarea id="mot2" name="mot2" placeholder="Mot 2"></textarea>
+      </div>
+      <textarea id="mot3" name="mot3" placeholder="Mot 3" style="margin-top:0.4rem;"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Niveau de confiance pour la suite de l’année</label>
+      <div class="slider-row">
+        <span>Inquiet</span>
+        <input type="range" id="confiance" name="confiance" min="0" max="10" value="5">
+        <span>Confiant</span>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+
+    <h3 class="page-title" style="font-size:1rem;">
+      Les points importants à retenir pour me présenter au conseil (aujourd’hui)
+      <span class="badge">Synthèse</span>
+    </h3>
+
+    <div class="field-group">
+      <label>Mes forces (ce que je veux qu’on dise en positif)</label>
+      <textarea id="forces" name="forces" placeholder="Exemple : sérieux dans certaines matières, progrès, respect, participation…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Mes difficultés (ce que je reconnais et que je veux travailler)</label>
+      <textarea id="difficultes-synthese" name="difficultes-synthese" placeholder="Exemple : retards, bavardages, manque d’organisation, difficultés en maths…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Ce que j’attends du conseil de classe</label>
+      <textarea id="attentes" name="attentes" placeholder="Exemple : qu’on m’aide à mieux m’organiser, qu’on regarde mes progrès, qu’on comprenne une situation…"></textarea>
+    </div>
+
+    <div class="field-group">
+      <label>Message pour mon délégué</label>
+      <textarea id="message-delegue" name="message-delegue" placeholder="Ce que tu veux qu’il ou elle transmette pour toi le jour du conseil."></textarea>
+    </div>
+
+    <div class="bottom-actions">
+      <button type="button" class="btn-main" onclick="telechargerPageRemplie()">Enregistrer mon travail</button>
+      <div class="small-note">
+        Le fichier téléchargé gardera toutes tes réponses. Le nom du fichier utilisera ton prénom.
+      </div>
+    </div>
+
+    <div class="page-indicator">Page 4 / 4</div>
+  </section>
+
+</main>
+
+<!-- MODALES D’INFO -->
+<div class="modal-backdrop" id="info-conseil">
+  <div class="modal">
+    <h2>Le conseil de classe, c’est quoi ?</h2>
+    <p>Le conseil de classe réunit les professeurs, le CPE, parfois la direction, les délégués d’élèves et les délégués de parents.</p>
+    <ul>
+      <li>On fait le point sur le travail, le comportement et la progression de la classe.</li>
+      <li>On parle aussi de chaque élève, de ses forces, de ses difficultés et des pistes pour progresser.</li>
+      <li>Les délégués d’élèves peuvent transmettre ce que la classe et chaque élève ont préparé.</li>
+    </ul>
+    <p>Ce carnet t’aide à mieux te connaître et à préparer ce qui sera dit te concernant.</p>
+    <button type="button" class="close-modal" data-close="info-conseil">Compris</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="info-cps">
+  <div class="modal">
+    <h2>Les compétences psychosociales</h2>
+    <p>Ce sont des compétences pour bien vivre avec soi-même et avec les autres :</p>
+    <ul>
+      <li>Se connaître et gérer ses émotions.</li>
+      <li>Savoir communiquer, écouter, dire ce qu’on pense.</li>
+      <li>Résoudre des problèmes, prendre des décisions.</li>
+      <li>Gérer le stress, les conflits, la pression du groupe.</li>
+    </ul>
+    <p>Tu les utilises déjà tous les jours. Les repérer t’aide à mieux comprendre ce que tu sais déjà faire.</p>
+    <button type="button" class="close-modal" data-close="info-cps">Compris</button>
+  </div>
+</div>
+
+<script>
+  function initAutoResize() {
+    const textareas = document.querySelectorAll("textarea");
+    textareas.forEach((ta) => {
+      const resize = () => {
+        ta.style.height = "auto";
+        ta.style.height = (ta.scrollHeight + 2) + "px";
+      };
+      ta.addEventListener("input", resize);
+      resize();
+    });
+  }
+
+  function initDragDrop() {
+    let draggedEl = null;
+
+    const items = document.querySelectorAll(".drag-item");
+    const zones = document.querySelectorAll(".drop-zone");
+
+    items.forEach((item) => {
+      item.addEventListener("dragstart", (e) => {
+        draggedEl = item;
+        e.dataTransfer.effectAllowed = "move";
+      });
+    });
+
+    zones.forEach((zone) => {
+      zone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        zone.classList.add("drag-over");
+      });
+      zone.addEventListener("dragleave", () => {
+        zone.classList.remove("drag-over");
+      });
+      zone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        zone.classList.remove("drag-over");
+        if (draggedEl) {
+          zone.appendChild(draggedEl);
+        }
+      });
+    });
+  }
+
+  function initInfoModals() {
+    const buttons = document.querySelectorAll(".info-btn");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.info;
+        const backdrop = document.getElementById("info-" + id);
+        if (backdrop) {
+          backdrop.classList.add("open");
+        }
+      });
+    });
+
+    const closeButtons = document.querySelectorAll(".close-modal");
+    closeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.close;
+        const backdrop = document.getElementById(id);
+        if (backdrop) {
+          backdrop.classList.remove("open");
+        }
+      });
+    });
+
+    const backdrops = document.querySelectorAll(".modal-backdrop");
+    backdrops.forEach((bd) => {
+      bd.addEventListener("click", (e) => {
+        if (e.target === bd) {
+          bd.classList.remove("open");
+        }
+      });
+    });
+  }
+
+  function telechargerPageRemplie() {
+    const prenom = (document.getElementById("prenomEleve")?.value || "").trim() || "sans_prenom";
+    const nom = (document.getElementById("nomEleve")?.value || "").trim();
+    let baseName = "AGORA2_conseil_" + prenom;
+    if (nom) baseName += "_" + nom;
+    baseName += ".html";
+
+    const allInputs = document.querySelectorAll("input, textarea, select");
+    allInputs.forEach((el) => {
+      if (el.tagName === "TEXTAREA") {
+        el.textContent = el.value;
+      } else if (el.tagName === "SELECT") {
+        const options = el.options;
+        for (let i = 0; i < options.length; i++) {
+          if (options[i].selected) {
+            options[i].setAttribute("selected", "selected");
+          } else {
+            options[i].removeAttribute("selected");
+          }
+        }
+      } else {
+        if (el.type !== "button" && el.type !== "submit") {
+          el.setAttribute("value", el.value);
+        }
+      }
+      if (el.type === "checkbox" || el.type === "radio") {
+        if (el.checked) {
+          el.setAttribute("checked", "checked");
+        } else {
+          el.removeAttribute("checked");
+        }
+      }
+    });
+
+    const doctype = "<!DOCTYPE html>\n";
+    const htmlContent = doctype + document.documentElement.outerHTML;
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = baseName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    initAutoResize();
+    initDragDrop();
+    initInfoModals();
+  });
+</script>
+
+</body>
+</html>

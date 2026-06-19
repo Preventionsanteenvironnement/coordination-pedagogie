@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S1.3 - Développer des liens et des comportements prosociaux</title>
+    <style>
+        :root {
+            --primary: #6A1B9A; /* Violet profond */
+            --secondary: #8E24AA;
+            --light: #F3E5F5;
+            --white: #ffffff;
+            --text: #333;
+            --success: #2e7d32;
+            --error: #c62828;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 30px;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        h1 { margin: 0; font-size: 2em; }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--light); padding-bottom: 10px; margin-top: 30px; }
+        h3 { color: var(--secondary); margin-top: 20px; }
+
+        .card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .highlight {
+            background-color: var(--light);
+            border-left: 5px solid var(--primary);
+            padding: 15px;
+            margin: 15px 0;
+            font-style: italic;
+        }
+
+        .analogy-box {
+            background-color: #E3F2FD;
+            border: 1px solid #BBDEFB;
+            padding: 15px;
+            border-radius: var(--radius);
+        }
+
+        /* Introspection Warning */
+        .introspection-warning {
+            background-color: #FFF3E0;
+            border: 2px solid #FF9800;
+            color: #E65100;
+            padding: 15px;
+            border-radius: var(--radius);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Interactive Elements */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        
+        .interaction-area {
+            border: 2px dashed var(--secondary);
+            padding: 20px;
+            border-radius: var(--radius);
+            background: #fafafa;
+            margin-top: 15px;
+        }
+
+        /* Drag and Drop / Categorization Game */
+        .category-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .category-zone {
+            flex: 1;
+            min-width: 140px;
+            min-height: 100px;
+            border: 2px solid var(--light);
+            border-radius: var(--radius);
+            padding: 10px;
+            background: white;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .draggable-item {
+            background: var(--secondary);
+            color: white;
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+        .draggable-item.correct { background: var(--success); }
+        .draggable-item.wrong { background: var(--error); }
+
+        /* Quiz Styles */
+        .quiz-question { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        .quiz-options label { display: block; margin: 8px 0; cursor: pointer; padding: 10px; border-radius: 8px; background: #f5f5f5; transition: background 0.3s; }
+        .quiz-options label:hover { background: #e0e0e0; }
+        .quiz-feedback { margin-top: 10px; padding: 10px; border-radius: 8px; display: none; }
+        .quiz-feedback.show { display: block; }
+        .correct-msg { background-color: #E8F5E9; color: var(--success); border: 1px solid var(--success); }
+        .incorrect-msg { background-color: #FFEBEE; color: var(--error); border: 1px solid var(--error); }
+
+        /* Glossary */
+        dl { display: grid; grid-template-columns: 1fr 3fr; gap: 10px; }
+        dt { font-weight: bold; color: var(--primary); }
+        dd { margin: 0; margin-bottom: 10px; }
+
+        /* Accordion */
+        details { margin-bottom: 15px; }
+        summary { cursor: pointer; font-weight: bold; padding: 10px; background: var(--light); border-radius: 8px; list-style: none; }
+        summary:after { content: "+"; float: right; font-weight: bold; }
+        details[open] summary:after { content: "-"; }
+        details[open] summary { background: #E1BEE7; }
+        .details-content { padding: 15px; border: 1px solid var(--light); border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+
+        @media (max-width: 600px) {
+            dl { grid-template-columns: 1fr; }
+            .category-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>CPS SYNTHÈSE</h1>
+        <p>S1.3 Développer des liens et des comportements prosociaux</p>
+    </header>
+
+    <section class="card">
+        <h2>1. Comprendre la compétence</h2>
+        
+        <p>Les liens sociaux sont l'ensemble des relations affectives entre individus. Ils sont vitaux dès la naissance pour la survie physique et psychique. Développer cette compétence, c'est savoir initier des relations de qualité et agir de manière volontaire pour le bien d'autrui.</p>
+
+        <div class="highlight">
+            <strong>Définition opérationnelle :</strong> C'est la capacité à initier des interactions, à maintenir des relations durables satisfaisant les besoins affectifs, et à adopter des comportements favorables aux autres (aide, partage, réconfort, coopération).
+        </div>
+
+        <div class="analogy-box">
+            <h3>🧩 L'Analogie : Le Jardin Partagé</h3>
+            <p>Imaginez que les liens sociaux sont un jardin.
+            <ul>
+                <li><strong>Entrer en relation</strong>, c'est semer les graines (initier l'échange).</li>
+                <li><strong>Comportement prosocial</strong>, c'est arroser les plantes des autres quand ils sont absents (aide matérielle) ou écouter leurs soucis de jardinage (soutien émotionnel).</li>
+                <li><strong>Régulation émotionnelle</strong>, c'est ne pas piétiner les fleurs du voisin parce qu'on est en colère (ne pas céder à la contagion émotionnelle).</li>
+            </ul>
+            Sans entretien (actes prosociaux), le jardin (la relation) fane.</p>
+        </div>
+
+        <h3>Exemple professionnel</h3>
+        <p>Dans une équipe éducative : Un collègue semble débordé. Au lieu de l'ignorer (réaction neutre) ou de s'énerver de son retard (réaction antisociale), vous proposez de prendre en charge une partie de sa surveillance (comportement prosocial matériel) ou vous prenez le temps de l'écouter (soutien social).</p>
+    </section>
+
+    <section class="card">
+        <h2>2. Introspection du professionnel</h2>
+        
+        <div class="introspection-warning">
+            ⚠️ RAPPEL FONDAMENTAL<br>
+            Les CPS ne se transmettent pas sans être vécues. <br>
+            Avant d'accompagner les autres, explorez votre propre fonctionnement.
+        </div>
+
+        <p>Pour développer des comportements prosociaux, il faut surmonter la <strong>contagion émotionnelle</strong> (réaction automatique face à la détresse de l'autre) grâce à la <strong>régulation émotionnelle</strong>.</p>
+
+        <div class="interaction-area">
+            <h3>🔍 Exercice d'auto-analyse : "Le filtre émotionnel"</h3>
+            <p>Pensez à une situation récente où vous avez fait face à une personne en détresse (colère, pleurs, panique).</p>
+            
+            <label style="font-weight:bold; display:block; margin-top:10px;">Quelle a été votre réaction immédiate ?</label>
+            <select id="intro-select" style="width:100%; padding:10px; margin:10px 0; border-radius:8px;">
+                <option value="">Sélectionnez votre ressenti...</option>
+                <option value="contagion">J'ai été envahi(e) par la même émotion (stress, angoisse) - Contagion émotionnelle</option>
+                <option value="distancing">Je me suis coupé(e) de mes émotions pour agir froidement</option>
+                <option value="regulation">J'ai ressenti son émotion, je l'ai régulée, puis j'ai agi - Comportement prosocial ajusté</option>
+            </select>
+
+            <textarea placeholder="Décrivez brièvement comment vous avez réussi (ou non) à faire la distinction entre VOTRE émotion et LA SIENNE pour apporter une réponse appropriée." style="width:100%; height:80px; padding:10px; border-radius:8px; border:1px solid #ccc; margin-top:10px;"></textarea>
+            
+            <p style="font-size:0.9em; color:#666; margin-top:5px;"><em>Vos réponses restent privées et ne sont pas enregistrées. Cet exercice sert à prendre conscience de la nécessité de réguler ses émotions pour "mieux prendre en compte les besoins de tous".</em></p>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>3. S'exercer et Pratiquer</h2>
+        <p>Les documents identifient plusieurs types de comportements prosociaux. Savez-vous les distinguer pour mieux les encourager ?</p>
+
+        <div class="interaction-area">
+            <h3>Activité 1 : Le Trieur de Comportements</h3>
+            <p>Cliquez sur un comportement (bouton gris) puis cliquez sur la catégorie correspondante.</p>
+
+            <div id="item-container" style="margin-bottom: 15px;">
+                </div>
+
+            <div class="category-container">
+                <div class="category-zone" onclick="checkCategory('matériel', this)">
+                    📦 Matériel<br><small>(Don, partage)</small>
+                </div>
+                <div class="category-zone" onclick="checkCategory('psychologique', this)">
+                    ❤️ Émotionnel / Psychologique<br><small>(Réconfort, soutien)</small>
+                </div>
+                <div class="category-zone" onclick="checkCategory('coopératif', this)">
+                    🤝 Coopératif / Collaboratif<br><small>(But commun, entraide)</small>
+                </div>
+                <div class="category-zone" onclick="checkCategory('altruiste', this)">
+                    ⚖️ Altruiste<br><small>(Implique un coût pour l'acteur)</small>
+                </div>
+            </div>
+            <p id="sort-feedback" style="font-weight:bold; min-height: 20px;"></p>
+        </div>
+
+        <div class="interaction-area">
+            <h3>Activité 2 : Analyse de Contexte</h3>
+            <p>La fiche précise que pour être efficace, l'action prosociale nécessite une <strong>attention au contexte</strong>.</p>
+            
+            <p><strong>Scénario :</strong> Vous entrez dans une salle. Deux personnes discutent vivement. L'une pleure, l'autre parle fort.</p>
+            <p><em>Selon la notion d'attention au contexte (S1.3), quelle est la PREMIÈRE étape avant d'agir ?</em></p>
+            
+            <div class="quiz-options">
+                <label>
+                    <input type="radio" name="scenario" value="wrong1">
+                    Intervenir immédiatement pour faire cesser le bruit (Action immédiate).
+                </label>
+                <label>
+                    <input type="radio" name="scenario" value="wrong2">
+                    Prendre la personne qui pleure dans ses bras pour la réconforter (Action émotionnelle directe).
+                </label>
+                <label>
+                    <input type="radio" name="scenario" value="correct">
+                    Déplacer son attention d'un élément à l'autre pour comprendre la scène et le vécu des personnes présentes.
+                </label>
+            </div>
+            <button class="btn" onclick="checkScenario()">Vérifier mon analyse</button>
+            <div id="scenario-feedback" class="quiz-feedback"></div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>4. Accompagner le public</h2>
+        <details>
+            <summary>Comment transférer cette compétence ?</summary>
+            <div class="details-content">
+                <p>Une fois que vous avez identifié vos propres mécanismes de régulation et vos types de liens :</p>
+                <ul>
+                    <li><strong>Modélisation :</strong> Incarnez les comportements prosociaux (exprimez votre gratitude, proposez de l'aide explicitement) devant votre public.</li>
+                    <li><strong>Lecture du contexte :</strong> Aidez les jeunes/usagers à observer une scène avant d'agir ("Que vois-tu ? De quoi a-t-il besoin selon toi ?").</li>
+                    <li><strong>Valorisation :</strong> Encouragez les actions d'entraide dès le plus jeune âge, même minimes.</li>
+                </ul>
+            </div>
+        </details>
+    </section>
+
+    <section class="card">
+        <h2>5. Validation des acquis</h2>
+        
+        <div class="quiz-question">
+            <p><strong>Question 1 : Quelle distinction fondamentale fait le texte entre "Communication" et "Relation" ?</strong></p>
+            <div class="quiz-options">
+                <label><input type="radio" name="q1" value="a"> C'est la même chose, les deux sont liés.</label>
+                <label><input type="radio" name="q1" value="b"> La communication est dynamique, la relation désigne la forme et la nature du lien (durable).</label>
+                <label><input type="radio" name="q1" value="c"> La communication est verbale, la relation est non-verbale.</label>
+            </div>
+        </div>
+
+        <div class="quiz-question">
+            <p><strong>Question 2 : Qu'est-ce qui définit spécifiquement un comportement "prosocial" ?</strong></p>
+            <div class="quiz-options">
+                <label><input type="radio" name="q2" value="a"> C'est un comportement volontaire avec un effet bénéfique pour autrui.</label>
+                <label><input type="radio" name="q2" value="b"> C'est simplement le fait d'être poli.</label>
+                <label><input type="radio" name="q2" value="c"> C'est obéir aux règles de la société.</label>
+            </div>
+        </div>
+
+        <div class="quiz-question">
+            <p><strong>Question 3 : Quels sont les deux effets bénéfiques principaux des liens sociaux cités ?</strong></p>
+            <div class="quiz-options">
+                <label><input type="radio" name="q3" value="a"> La réussite professionnelle et la richesse.</label>
+                <label><input type="radio" name="q3" value="b"> Satisfaction des besoins affectifs et Bien-être psychique/physique (santé, espérance de vie).</label>
+                <label><input type="radio" name="q3" value="c"> L'absence de conflit et le silence.</label>
+            </div>
+        </div>
+
+        <button class="btn" onclick="validateQuiz()">Valider mes réponses</button>
+        <div id="final-feedback" class="quiz-feedback"></div>
+
+    </section>
+
+    <section class="card">
+        <h3>📚 Glossaire des notions manipulées</h3>
+        <dl>
+            <dt>Comportement prosocial</dt>
+            <dd>Attitude ou action volontaire favorable aux autres (aide, coopération, réconfort) apportant un bénéfice au destinataire, à la société ou à l'humanité.</dd>
+
+            <dt>Contagion émotionnelle</dt>
+            <dd>Réaction automatique où l'on ressent l'émotion de l'autre sans recul. Elle doit être dépassée par la régulation pour apporter une réponse appropriée.</dd>
+
+            <dt>Attention au contexte</dt>
+            <dd>Capacité à déplacer son attention sur les personnes, leurs besoins et l'environnement global avant d'agir efficacement.</dd>
+
+            <dt>Lien social</dt>
+            <dd>Ensemble des relations affectives durables entre individus. Se distingue de la simple communication (interaction dynamique).</dd>
+
+            <dt>Comportement altruiste</dt>
+            <dd>Type de comportement prosocial impliquant un coût pour l'acteur (temps, énergie, ressource) au bénéfice d'autrui.</dd>
+        </dl>
+    </section>
+
+</div>
+
+<script>
+    // --- GAME 1: SORTING ---
+    const items = [
+        { id: 1, text: "Prêter son stylo", category: "matériel" },
+        { id: 2, text: "Consoler un collègue triste", category: "psychologique" },
+        { id: 3, text: "Travailler ensemble sur un projet", category: "coopératif" },
+        { id: 4, text: "Aider un inconnu (perte de temps pour soi)", category: "altruiste" },
+        { id: 5, text: "Partager son repas", category: "matériel" },
+        { id: 6, text: "Écouter activement", category: "psychologique" }
+    ];
+
+    let currentSelection = null;
+    const itemContainer = document.getElementById('item-container');
+    const feedbackSort = document.getElementById('sort-feedback');
+
+    function initSortGame() {
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'draggable-item';
+            el.innerText = item.text;
+            el.dataset.category = item.category;
+            el.onclick = () => selectItem(el);
+            itemContainer.appendChild(el);
+        });
+    }
+
+    function selectItem(el) {
+        if(el.classList.contains('correct')) return; // Already done
+        
+        // Deselect others
+        document.querySelectorAll('.draggable-item').forEach(i => i.style.border = "none");
+        
+        currentSelection = el;
+        el.style.border = "2px solid #333";
+        feedbackSort.innerText = "Sélectionné : " + el.innerText + " -> Choisissez maintenant la catégorie.";
+        feedbackSort.style.color = "#333";
+    }
+
+    function checkCategory(catName, zoneEl) {
+        if (!currentSelection) {
+            feedbackSort.innerText = "Veuillez d'abord cliquer sur un comportement (étiquette violette).";
+            feedbackSort.style.color = "orange";
+            return;
+        }
+
+        if (currentSelection.dataset.category === catName) {
+            currentSelection.classList.add('correct');
+            currentSelection.style.border = "none";
+            currentSelection.onclick = null; // Disable
+            feedbackSort.innerText = "Bravo ! C'est bien un comportement " + catName + ".";
+            feedbackSort.style.color = "green";
+            currentSelection = null;
+            
+            // Check win
+            if(document.querySelectorAll('.draggable-item.correct').length === items.length) {
+                feedbackSort.innerText = "Félicitations ! Vous avez identifié tous les types de comportements prosociaux.";
+            }
+        } else {
+            feedbackSort.innerText = "Non, ce n'est pas la bonne catégorie. Essayez encore.";
+            feedbackSort.style.color = "red";
+            // Visual shake effect logic could go here
+        }
+    }
+
+    initSortGame();
+
+    // --- GAME 2: SCENARIO ---
+    function checkScenario() {
+        const radios = document.getElementsByName('scenario');
+        let val = "";
+        for (const r of radios) { if (r.checked) val = r.value; }
+        
+        const feedback = document.getElementById('scenario-feedback');
+        feedback.className = "quiz-feedback show";
+
+        if (val === "correct") {
+            feedback.innerHTML = "<strong>Correct !</strong><br>Le texte insiste : l'attention et la prise en considération du contexte (personnes, besoins, émotions, actions en fond) sont des <em>prérequis</em> à une interaction efficace. Il faut comprendre avant d'agir.";
+            feedback.className += " correct-msg";
+        } else if (val === "wrong1" || val === "wrong2") {
+            feedback.innerHTML = "<strong>Pas tout à fait.</strong><br>C'est une réaction trop rapide. Le texte explique qu'il est important de <em>« déplacer efficacement son attention »</em> pour comprendre l'ensemble de la scène et le vécu des personnes (régulation) avant d'apporter une réponse appropriée.";
+            feedback.className += " incorrect-msg";
+        } else {
+            feedback.innerHTML = "Veuillez sélectionner une réponse.";
+        }
+    }
+
+    // --- FINAL QUIZ ---
+    function validateQuiz() {
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const q3 = document.querySelector('input[name="q3"]:checked');
+        const fb = document.getElementById('final-feedback');
+        
+        if(!q1 || !q2 || !q3) {
+            fb.innerHTML = "Veuillez répondre à toutes les questions.";
+            fb.className = "quiz-feedback show incorrect-msg";
+            return;
+        }
+
+        let score = 0;
+        let msg = "";
+
+        // Q1
+        if(q1.value === 'b') { score++; } 
+        else { msg += "<p><strong>Q1 Erreur :</strong> La communication est l'aspect dynamique, tandis que la relation désigne la forme, la nature et la stabilité du lien.</p>"; }
+
+        // Q2
+        if(q2.value === 'a') { score++; }
+        else { msg += "<p><strong>Q2 Erreur :</strong> Un comportement prosocial est défini comme volontaire et ayant un effet bénéfique (aide, coopération, etc.).</p>"; }
+
+        // Q3
+        if(q3.value === 'b') { score++; }
+        else { msg += "<p><strong>Q3 Erreur :</strong> Les deux effets majeurs cités sont la satisfaction des besoins affectifs (appartenance) et le bien-être psychique/physique (réduction du stress, santé).</p>"; }
+
+        fb.className = "quiz-feedback show";
+        if(score === 3) {
+            fb.innerHTML = "<strong>Bravo ! 3/3.</strong> Vous avez bien intégré les notions de définition, de distinction relation/commanication et les effets bénéfiques des comportements prosociaux.";
+            fb.className += " correct-msg";
+        } else {
+            fb.innerHTML = `<strong>Score : ${score}/3</strong><br>` + msg;
+            fb.className += " incorrect-msg";
+        }
+    }
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>

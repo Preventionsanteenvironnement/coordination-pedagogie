@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche CPS : Les Buts Personnels Concordants</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #27ae60;
+            --accent-light: #eafaf1;
+            --highlight: #e67e22;
+            --text: #34495e;
+            --bg: #fdfdfd;
+            --card-bg: #ffffff;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #3498db);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--accent);
+        }
+
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent-light);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            color: var(--accent);
+            margin-top: 1.5rem;
+        }
+
+        .analogy-box, .pro-box {
+            background-color: var(--accent-light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .pro-box {
+            background-color: #ecf0f1;
+            border-left: 4px solid var(--primary);
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Introspection Style */
+        .introspection-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ffeeba;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        /* Interactive Elements */
+        .game-area {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .drop-zones {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .zone {
+            width: 45%;
+            min-height: 150px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .zone.correct { border-color: var(--accent); background-color: var(--accent-light); }
+        .zone.wrong { border-color: #c0392b; background-color: #fadbd8; }
+
+        .draggable-item {
+            background: var(--primary);
+            color: white;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: grab;
+            user-select: none;
+            font-size: 0.9rem;
+        }
+
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+
+        .quiz-container {
+            margin-top: 2rem;
+        }
+
+        .quiz-option {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f1f2f6;
+            border: none;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .quiz-option:hover {
+            background: #dfe4ea;
+        }
+
+        .quiz-option.selected-correct {
+            background: var(--accent);
+            color: white;
+        }
+
+        .quiz-option.selected-wrong {
+            background: #c0392b;
+            color: white;
+        }
+
+        .feedback-msg {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback-success { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+        .feedback-error { background: #fadbd8; color: #c0392b; border: 1px solid #c0392b; }
+
+        .glossary-term {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+        }
+
+        /* Flow Diagram Exercise */
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .flow-box {
+            border: 1px solid #ccc;
+            padding: 8px;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+        }
+        .arrow { font-size: 1.2rem; color: #7f8c8d; }
+
+        @media (max-width: 600px) {
+            .zone { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Connaître les buts personnels concordants</h1>
+    <p>Comprendre ce qui nous pousse réellement à agir pour favoriser le bien-être.</p>
+</header>
+
+<main>
+
+    <section id="comprendre">
+        <h2>1. Comprendre la notion</h2>
+        <p>
+            Les <strong>buts personnels</strong> sont des représentations mentales d'états ou de situations que l'on souhaite atteindre. Ils sont intimement liés à notre <strong>image de soi future</strong> et aux "soi possibles" (ce que je ne suis pas encore mais que je désire devenir).
+        </p>
+        <p>
+            L'écart entre notre situation actuelle (soi actuel) et notre situation désirée (soi possible) crée une tension positive appelée <strong>"écart-but-performance"</strong>, qui nous pousse à agir.
+        </p>
+        <p>
+            Cependant, tous les buts ne se valent pas. Il faut distinguer :
+        </p>
+        <ul>
+            <li><strong>Les buts concordants :</strong> Authentiques, en harmonie avec nos valeurs, besoins et intérêts profonds. Ils génèrent une <strong>motivation intrinsèque</strong> (plaisir, satisfaction) et du bien-être.</li>
+            <li><strong>Les buts discordants :</strong> Poursuivis à cause de pressions sociales, normes ou désirabilité (faire plaisir aux autres, image sociale). Ils sont sources de conflits internes.</li>
+        </ul>
+
+        <div class="analogy-box">
+            <h3>💡 Analogie : Le voyage en voiture</h3>
+            <p>Imaginez que vous conduisez une voiture (votre vie).</p>
+            <ul>
+                <li><strong>But concordant :</strong> Vous avez choisi la destination car vous rêvez de visiter ce lieu. Le trajet, même long, vous remplit d'énergie et de joie. Vous conduisez par <em>envie</em>.</li>
+                <li><strong>But discordant :</strong> Vous conduisez vers une destination choisie par vos passagers (parents, société) alors que vous détestez cet endroit. Vous conduisez par <em>obligation</em>. Le trajet est épuisant et frustrant.</li>
+            </ul>
+        </div>
+
+        <div class="pro-box">
+            <h3>🏫 Exemple Professionnel</h3>
+            <p><strong>Un éducateur spécialisé :</strong></p>
+            <ul>
+                <li>S'il monte un projet théâtre parce qu'il adore l'art et croit en son pouvoir émancipateur pour les jeunes ➝ <strong>But concordant</strong> (Énergie, persévérance).</li>
+                <li>S'il monte ce projet uniquement parce que "ça fait bien dans le rapport d'activité" ou que son chef l'a imposé, sans y croire ➝ <strong>But discordant</strong> (Risque d'épuisement, moins d'impact).</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="introspection">
+        <h2>2. Introspection du professionnel</h2>
+        
+        <div class="introspection-warning">
+            ⚠️ IMPORTANT : Les compétences psychosociales (CPS) ne peuvent être transmises sans être d'abord vécues et intégrées personnellement. <br>
+            <strong>Commencez par vous, avant de penser à votre public.</strong>
+        </div>
+
+        <p>Prenez un instant pour réfléchir à vos propres moteurs d'action actuels.</p>
+
+        <h3>Exercice d'auto-analyse</h3>
+        <p>Identifiez un objectif professionnel important que vous poursuivez actuellement.</p>
+        <textarea id="user-goal" placeholder="Écrivez ici votre objectif (ex: Obtenir une certification, Mettre en place un nouvel atelier, Changer de poste...)" aria-label="Votre objectif"></textarea>
+        
+        <p>Posez-vous les questions suivantes :</p>
+        <ul>
+            <li>Cet objectif reflète-t-il mes valeurs personnelles et mes besoins profonds ?</li>
+            <li>Est-ce que je poursuis ce but par plaisir et intérêt (intrinsèque) ou pour répondre à une pression sociale/externe ?</li>
+        </ul>
+        
+        <div style="margin-top: 15px;">
+            <label style="display:flex; align-items:center; gap:10px;">
+                <input type="range" min="0" max="10" value="5" id="concordance-slider" oninput="updateSliderVal(this.value)">
+                <span>Mon sentiment d'authenticité (0 = Contraint, 10 = Pleinement moi-même) : <strong id="slider-val">5</strong>/10</span>
+            </label>
+        </div>
+    </section>
+
+    <section id="activite">
+        <h2>3. Mise en pratique interactive</h2>
+        <p>Pour mieux comprendre la mécanique des buts, réalisons deux courts exercices.</p>
+
+        <h3>Exercice A : Reconstruire le mécanisme de la motivation</h3>
+        <p>Cliquez sur les éléments dans l'ordre chronologique pour reconstruire le schéma logique décrit dans la documentation (Figure 3).</p>
+        
+        <div class="flow-container" id="flow-choices">
+            </div>
+        <div class="flow-container" id="flow-result" style="min-height: 50px; background: #eef; border-radius: 8px; padding: 10px;">
+            <span style="color:#aaa; font-style:italic;">Vos choix apparaîtront ici...</span>
+        </div>
+        <button class="btn" onclick="checkFlow()" style="margin-top:10px; padding: 8px 16px; background:var(--primary); color:white; border:none; border-radius:4px; cursor:pointer;">Valider l'enchaînement</button>
+        <div id="flow-feedback" class="feedback-msg"></div>
+
+        <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #eee;">
+
+        <h3>Exercice B : Concordant ou Discordant ?</h3>
+        <p>Classez les affirmations suivantes selon qu'elles relèvent d'un but concordant (Harmonie) ou discordant (Pression externe).</p>
+
+        <div class="game-area">
+            <div id="source-stack" style="margin-bottom: 15px; min-height: 40px;">
+                </div>
+
+            <div class="drop-zones">
+                <div class="zone" id="zone-concordant" ondragover="allowDrop(event)" ondrop="drop(event, 'concordant')">
+                    <h4>✅ Buts Concordants</h4>
+                    <small>Harmonie, Valeurs, Intérêts</small>
+                </div>
+                <div class="zone" id="zone-discordant" ondragover="allowDrop(event)" ondrop="drop(event, 'discordant')">
+                    <h4>⚠️ Buts Discordants</h4>
+                    <small>Pression sociale, Désirabilité, "Il faut"</small>
+                </div>
+            </div>
+            <div id="sort-feedback" class="feedback-msg"></div>
+        </div>
+    </section>
+
+    <section id="accompagnement">
+        <h2>4. Accompagner le public</h2>
+        <p><em>Une fois que vous avez clarifié vos propres buts, comment aider les autres ?</em></p>
+        <p>Les <strong>aspirations personnelles</strong> sont de grandes dimensions qui organisent la vie (ex: "Aider les personnes fragiles"). Elles se déclinent en buts concrets (ex: "Devenir médecin"), qui eux-mêmes se déclinent en objectifs quotidiens (ex: "Réviser mes leçons").</p>
+        <p><strong>Pistes pour l'accompagnement :</strong></p>
+        <ul>
+            <li>Aidez le public à identifier ses <strong>aspirations</strong> globales avant de fixer des buts.</li>
+            <li>Questionnez le "Pourquoi" : Est-ce pour eux (intrinsèque) ou pour l'image (externe) ?</li>
+            <li>Rappelez que le bien-être dépend davantage de la <strong>nature</strong> des buts (concordants) que de leur simple atteinte.</li>
+        </ul>
+    </section>
+
+    <section id="validation">
+        <h2>5. Validation des acquis</h2>
+        <p>Testez votre compréhension globale avec cette question de synthèse.</p>
+
+        <div class="quiz-container">
+            <p><strong>Parmi les propositions suivantes, laquelle décrit le mieux l'impact des "buts concordants" selon le modèle étudié ?</strong></p>
+            
+            <button class="quiz-option" onclick="checkQuiz(this, false)">
+                A. Ils garantissent la réussite sociale et l'approbation de l'entourage, ce qui crée la motivation.
+            </button>
+            <button class="quiz-option" onclick="checkQuiz(this, true)">
+                B. Ils s'alignent sur les besoins et valeurs du soi, générant une motivation intrinsèque et un bien-être durable.
+            </button>
+            <button class="quiz-option" onclick="checkQuiz(this, false)">
+                C. Ils sont définis par l'écart entre le soi actuel et les normes sociales désirables.
+            </button>
+            <button class="quiz-option" onclick="checkQuiz(this, false)">
+                D. Ce sont de simples tendances automatiques à l'action en réaction à l'environnement immédiat.
+            </button>
+        </div>
+
+        <div id="quiz-feedback" class="feedback-msg"></div>
+    </section>
+
+    <section id="glossaire">
+        <h2>Glossaire des notions travaillées</h2>
+        <dl>
+            <dt class="glossary-term">Buts personnels</dt>
+            <dd>Représentations mentales d'états ou situations qu'une personne souhaite atteindre, liées à l'image de soi future.</dd>
+
+            <dt class="glossary-term">Buts concordants</dt>
+            <dd>Buts alignés avec les valeurs, besoins et intérêts profonds de la personne (le Soi). Ils sont source de motivation intrinsèque et d'harmonie.</dd>
+
+            <dt class="glossary-term">Buts discordants</dt>
+            <dd>Buts poursuivis pour des raisons externes (pression sociale, culpabilité, désirabilité), ne reflétant pas le soi authentique.</dd>
+
+            <dt class="glossary-term">Aspirations personnelles</dt>
+            <dd>Dimensions superordonnées qui organisent et intègrent les différents buts d'une personne (ex: "Aider autrui" est une aspiration, "Devenir infirmier" est un but).</dd>
+
+            <dt class="glossary-term">Motivation intrinsèque</dt>
+            <dd>Forme de motivation la plus autodéterminée, où l'action est réalisée pour l'intérêt et le plaisir qu'elle procure elle-même.</dd>
+
+            <dt class="glossary-term">Écart-but-performance</dt>
+            <dd>Divergence entre le niveau actuel d'accomplissement (soi actuel) et le niveau idéal (soi possible), qui pousse à l'action.</dd>
+        </dl>
+    </section>
+
+</main>
+
+<footer>
+    <p>Ressource pédagogique créée par CPS Studio - Basée sur le référentiel Santé Publique France (Tome I).</p>
+</footer>
+
+<script>
+    // --- SLIDER LOGIC ---
+    function updateSliderVal(val) {
+        document.getElementById('slider-val').innerText = val;
+    }
+
+    // --- EXERCICE A: FLOW DIAGRAM ---
+    const flowCorrectOrder = ["Valeurs/Besoins", "Buts concordants", "Motivation intrinsèque", "Actions épanouissantes"];
+    const flowItems = [
+        "Motivation intrinsèque",
+        "Valeurs/Besoins", 
+        "Actions épanouissantes", 
+        "Buts concordants"
+    ]; // Shuffled
+    
+    let userFlow = [];
+
+    function initFlow() {
+        const container = document.getElementById('flow-choices');
+        container.innerHTML = '';
+        flowItems.forEach(item => {
+            let btn = document.createElement('div');
+            btn.className = 'flow-box';
+            btn.innerText = item;
+            btn.onclick = () => addToFlow(item, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function addToFlow(item, btnElement) {
+        if(userFlow.includes(item)) return;
+        userFlow.push(item);
+        btnElement.style.display = 'none'; // Hide from choices
+        renderUserFlow();
+    }
+
+    function renderUserFlow() {
+        const resultContainer = document.getElementById('flow-result');
+        resultContainer.innerHTML = '';
+        userFlow.forEach((item, index) => {
+            let span = document.createElement('span');
+            span.className = 'flow-box';
+            span.style.background = '#d1f2eb';
+            span.innerText = item;
+            resultContainer.appendChild(span);
+            
+            if (index < userFlow.length - 1) {
+                let arrow = document.createElement('span');
+                arrow.className = 'arrow';
+                arrow.innerHTML = ' &#8594; ';
+                resultContainer.appendChild(arrow);
+            }
+        });
+        
+        // Reset button if needed
+        if(userFlow.length > 0) {
+            let resetBtn = document.createElement('small');
+            resetBtn.innerText = " (Réinitialiser)";
+            resetBtn.style.cursor = "pointer";
+            resetBtn.style.color = "red";
+            resetBtn.style.marginLeft = "10px";
+            resetBtn.onclick = resetFlow;
+            resultContainer.appendChild(resetBtn);
+        }
+    }
+
+    function resetFlow() {
+        userFlow = [];
+        renderUserFlow();
+        initFlow();
+        document.getElementById('flow-feedback').style.display = 'none';
+    }
+
+    function checkFlow() {
+        const feedback = document.getElementById('flow-feedback');
+        feedback.style.display = 'block';
+        
+        // Simple comparison
+        if (JSON.stringify(userFlow) === JSON.stringify(flowCorrectOrder)) {
+            feedback.className = 'feedback-msg feedback-success';
+            feedback.innerHTML = "<strong>Bravo !</strong> C'est exact. Les valeurs et besoins psychologiques nourrissent des buts concordants, qui génèrent une motivation intrinsèque menant à des actions engagées et épanouissantes.";
+        } else {
+            feedback.className = 'feedback-msg feedback-error';
+            feedback.innerHTML = "<strong>Pas tout à fait.</strong> Rappelez-vous : tout part de l'intérieur (Valeurs/Besoins) pour définir le but, ce qui crée la motivation, puis l'action. Réessayez !";
+        }
+    }
+
+    // --- EXERCICE B: DRAG AND DROP ---
+    const sortItems = [
+        { id: "i1", text: "Je veux ce diplôme car j'aime apprendre cette matière", type: "concordant" },
+        { id: "i2", text: "Je dois faire ça pour ne pas décevoir mon père", type: "discordant" },
+        { id: "i3", text: "Cette action a du sens pour moi", type: "concordant" },
+        { id: "i4", text: "Je vise ce poste pour le prestige social", type: "discordant" }
+    ];
+
+    function initSort() {
+        const container = document.getElementById('source-stack');
+        sortItems.forEach(item => {
+            let el = document.createElement('div');
+            el.className = 'draggable-item';
+            el.draggable = true;
+            el.innerText = item.text;
+            el.id = item.id;
+            el.dataset.type = item.type;
+            el.ondragstart = drag;
+            container.appendChild(el);
+        });
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drop(ev, zoneType) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        var el = document.getElementById(data);
+        
+        // Visual feedback based on correctness
+        if (el.dataset.type === zoneType) {
+            ev.target.appendChild(el);
+            el.style.background = "#27ae60"; // Green for success
+            checkSortCompletion();
+        } else {
+            // Shake effect or feedback for wrong drop
+            let feedback = document.getElementById('sort-feedback');
+            feedback.style.display = 'block';
+            feedback.className = 'feedback-msg feedback-error';
+            feedback.innerText = "Attention : " + el.innerText + " semble appartenir à l'autre catégorie.";
+            setTimeout(() => { feedback.style.display = 'none'; }, 3000);
+        }
+    }
+
+    function checkSortCompletion() {
+        const stack = document.getElementById('source-stack');
+        if (stack.children.length === 0) {
+            let feedback = document.getElementById('sort-feedback');
+            feedback.style.display = 'block';
+            feedback.className = 'feedback-msg feedback-success';
+            feedback.innerHTML = "<strong>Excellent !</strong> Vous faites bien la distinction. Les buts concordants viennent du soi (intérêt, sens), les buts discordants viennent de l'extérieur (pression, image).";
+        }
+    }
+
+    // --- QUIZ FINAL ---
+    function checkQuiz(btn, isCorrect) {
+        const feedback = document.getElementById('quiz-feedback');
+        const allBtns = document.querySelectorAll('.quiz-option');
+        
+        // Reset styles
+        allBtns.forEach(b => {
+            b.classList.remove('selected-correct', 'selected-wrong');
+            b.disabled = true;
+        });
+
+        feedback.style.display = 'block';
+
+        if (isCorrect) {
+            btn.classList.add('selected-correct');
+            feedback.className = 'feedback-msg feedback-success';
+            feedback.innerHTML = "<strong>Correct !</strong> Les buts concordants sont essentiels car ils permettent de puiser dans ses ressources personnelles. Ils sont liés à la motivation intrinsèque et génèrent de l'énergie et de la persévérance, contrairement aux obligations sociales.";
+        } else {
+            btn.classList.add('selected-wrong');
+            feedback.className = 'feedback-msg feedback-error';
+            feedback.innerHTML = "<strong>Incorrect.</strong> <br>A : La réussite sociale ne garantit pas le bien-être si le but est discordant.<br>C : L'écart est entre le soi actuel et le soi idéal, pas les normes sociales.<br>D : Cela définit les 'tendances à l'action', pas les buts personnels.<br><br>La bonne réponse était la B : L'alignement sur le soi génère bien-être et motivation intrinsèque.";
+        }
+    }
+
+    // Initialize exercises
+    window.onload = function() {
+        initFlow();
+        initSort();
+    };
+
+</script>
+<div style="text-align: center; margin: 40px 0; padding: 20px;">
+    <a href="index.html" style="background-color: #6a1b9a; color: white; padding: 15px 25px; text-decoration: none; border-radius: 30px; font-family: sans-serif; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+        ⬅️ Retour au Menu CPS
+    </a>
+</div>
+</body>
+</html>
