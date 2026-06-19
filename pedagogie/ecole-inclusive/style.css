@@ -244,6 +244,23 @@ mark { background: #ffe7a3; color: inherit; border-radius: 3px; padding: 0 2px; 
 .drawer .x { background: #f0f2f6; border: none; border-radius: 50%; width: 36px; height: 36px; color: var(--muted); display: inline-flex; align-items: center; justify-content: center; flex: none; }
 .drawer .x .i { font-size: 18px; }
 
+/* ---------- Diagramme de décision ---------- */
+.tree { display: flex; flex-direction: column; align-items: stretch; }
+.tree-start { align-self: center; background: var(--brand); color: #fff; border-radius: var(--r-pill); padding: 9px 18px; font-size: 13.5px; font-weight: 500; text-align: center; }
+.tree-arrow { align-self: center; display: flex; flex-direction: column; align-items: center; color: var(--faint); font-size: 11px; font-weight: 600; padding: 2px 0; }
+.tree-arrow .bar { width: 2px; height: 11px; background: var(--line-2); }
+.tree-arrow .i { font-size: 15px; margin-top: -2px; }
+.rung { display: flex; align-items: center; gap: 11px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 12px 13px; box-shadow: var(--sh-1); }
+.rung.final { border-left: 4px solid var(--c); }
+.rung .q { flex: 1; font-size: 13.5px; font-weight: 500; line-height: 1.35; }
+.rung .yes { flex: none; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--r-pill); padding: 7px 12px; font-size: 12.5px; font-weight: 600;
+  background: color-mix(in srgb, var(--c) 13%, #fff); color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 28%, #fff); white-space: nowrap; }
+.rung .yes .i { font-size: 13px; }
+
+/* ---------- Schéma SVG ---------- */
+.schema { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 15px 16px; box-shadow: var(--sh-1); }
+.schema > svg { width: 100%; max-width: 360px; height: auto; display: block; margin: 6px auto 0; }
+
 /* ---------- Desktop ---------- */
 @media (min-width: 760px) {
   .compare { grid-template-columns: repeat(4, 1fr); }

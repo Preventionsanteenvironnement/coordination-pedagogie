@@ -4,6 +4,7 @@
 ============================================================================ */
 const ICONS = {
   chev: `<path d="m9 6 6 6-6 6"/>`,
+  down: `<path d="m6 9 6 6 6-6"/>`,
   back: `<path d="m14 6-6 6 6 6"/>`,
   home: `<path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/>`,
   layers: `<path d="m12 4 8 4-8 4-8-4z"/><path d="m4.5 12 7.5 3.7 7.5-3.7"/><path d="m4.5 16 7.5 3.7 7.5-3.7"/>`,
@@ -132,9 +133,43 @@ function viewAccueil() {
       `<button class="tile" data-go="${p}"><span class="t-ic">${ic(icn)}</span><span class="t-tx"><strong>${t}</strong><small>${d}</small></span><span class="t-go">${ic("chev")}</span></button>`).join("")}</div>`;
 }
 
+/* ---------------- Diagrammes ---------------- */
+function decisionTree() {
+  const D = window.DISPOSITIFS;
+  const rung = (txt, di, fin) => `<div class="rung ${fin ? "final" : ""}" style="--c:${D[di].c}"><span class="q">${txt}</span><button class="yes" style="--c:${D[di].c}" data-disp="${di}">${fin ? "→" : "oui →"} ${D[di].code}${ic("chev")}</button></div>`;
+  const arr = lbl => `<div class="tree-arrow"><span class="bar"></span>${lbl ? lbl + " " : ""}${ic("down")}</div>`;
+  return `<div class="schema" style="margin-bottom:16px"><div class="card-h">${ic("layers")}Quel plan ? le diagramme de décision</div>
+    <div class="tree">
+      <div class="tree-start">Un élève a un besoin particulier</div>
+      ${arr("")}${rung("Handicap reconnu par la MDPH ?", 0)}
+      ${arr("non")}${rung("Trouble des apprentissages durable (dys, TDAH…) ?", 1)}
+      ${arr("non")}${rung("Maladie ou trouble de santé ?", 2)}
+      ${arr("non")}${rung("Difficulté scolaire passagère", 3, true)}
+    </div></div>`;
+}
+
+function svgMDPH() {
+  const node = (y, fill, stroke, t, d) =>
+    `<rect x="30" y="${y}" width="240" height="56" rx="13" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+     <text x="150" y="${y + 24}" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="600" fill="#1f2a3d">${t}</text>
+     <text x="150" y="${y + 41}" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#5b6677">${d}</text>`;
+  const link = (y1, y2) => `<line x1="150" y1="${y1}" x2="150" y2="${y2}" stroke="#c4cdda" stroke-width="2" marker-end="url(#ar)"/>`;
+  return `<div class="schema"><div class="card-h">${ic("refresh")}Le circuit d'une demande de PPS</div>
+    <svg viewBox="0 0 300 372" role="img" aria-label="La famille saisit la MDPH ; l'équipe pluridisciplinaire évalue les besoins avec le GEVA-Sco ; la CDAPH décide et notifie les droits ; l'école met en œuvre et suit en ESS.">
+      <defs><marker id="ar" markerWidth="10" markerHeight="10" refX="5" refY="4.5" orient="auto"><path d="M1.5 1.5 6 4.5 1.5 7.5" fill="none" stroke="#9aa3b2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+      ${node(8, "#eef1f6", "#d8deea", "La famille", "saisit la MDPH")}
+      ${link(64, 88)}
+      ${node(90, "#efe9fc", "#cdc2f4", "L'équipe pluridisciplinaire", "évalue les besoins · GEVA-Sco")}
+      ${link(146, 170)}
+      ${node(172, "#e6def8", "#bcaef0", "La CDAPH", "décide et notifie les droits")}
+      ${link(228, 252)}
+      ${node(254, "#e9edf6", "#cdd6e6", "L'école — ESS", "met en œuvre et suit (référent)")}
+    </svg></div>`;
+}
+
 /* ---------------- Dispositifs ---------------- */
 function viewDispositifs() {
-  return `<p class="count">Les quatre plans d'accompagnement, du handicap à la difficulté passagère.</p>
+  return `${decisionTree()}<p class="count">Les quatre plans d'accompagnement, du handicap à la difficulté passagère.</p>
     <div class="disp-list">${window.DISPOSITIFS.map((d, i) =>
       `<button class="disp-card" style="--c:${d.c}" data-disp="${i}">
         <div class="dc-top"><span class="dc-ic">${ic(d.icon)}</span><span><span class="dc-code">${d.code}</span> · <span class="dc-motif">${esc(d.motif)}</span></span></div>
@@ -178,6 +213,7 @@ function viewDispositif() {
     ${blocs ? `<div style="--c:${d.c}; display:flex; flex-direction:column; gap:16px;">${blocs}</div>` : ""}
     <section class="card" style="--c:${d.c}"><div class="card-h">${ic("refresh")}La démarche, étape par étape</div>
       <div class="proc">${proc}</div></section>
+    ${d.cle === "pps" ? svgMDPH() : ""}
     <div class="callout teach"><span class="co-ic">${ic("user-check")}</span><div class="co-tx"><span class="co-h">Pour l'enseignant</span>${esc(d.enseignant)}</div></div>
     <div class="callout warn"><span class="co-ic">${ic("alert")}</span><div class="co-tx"><b>À ne pas confondre avec le ${esc(d.confond.code)} —</b> ${esc(d.confond.txt)}</div></div>
     ${srcChips(d.s)}
