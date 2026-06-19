@@ -5,8 +5,6 @@ const SOURCES = {
   "legifrance-circ": { ref: "Circulaire 2016-137 sur Légifrance", origine: "Version référencée sur Légifrance.", url: "https://www.legifrance.gouv.fr/circulaire/id/41407" },
   "circ-bde-2023": { ref: "Circulaire « Bureau des entreprises » du 24 mai 2023", origine: "BOEN n°21 du 25 mai 2023. Le responsable du bureau des entreprises est sous la responsabilité du proviseur et la coordination du DDFPT.", url: "https://www.education.gouv.fr/bo/2023/Hebdo21/MENE2311700C" },
   "eduscol-bde": { ref: "Éduscol — Bureau des entreprises", origine: "« Un bureau des entreprises dans chaque lycée professionnel ».", url: "https://eduscol.education.gouv.fr/5637/un-bureau-des-entreprises-dans-chaque-lycee-professionnel" },
-  "decret-91-1259": { ref: "Décret n°91-1259 du 17 décembre 1991", origine: "Crée l'indemnité de responsabilité du DDFPT (ex-chef de travaux).", url: "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000721596" },
-  "arrete-2023-07-13": { ref: "Arrêté du 13 juillet 2023", origine: "Revalorisation des montants de l'indemnité de responsabilité.", url: "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000047867194" },
   "boen-2026": { ref: "BOEN — fiche de poste DDFPT (rentrée 2026)", origine: "La fiche de poste renvoie toujours aux missions de la circulaire n°2016-137.", url: "https://www.education.gouv.fr/bo/2026/Hebdo2/MENH2531064N" }
 };
 
@@ -61,11 +59,6 @@ const SECTIONS = [
     { t: "Recrutement : être enseignant et justifier d'au moins 5 années d'expérience dans l'enseignement ou la formation ; compétences examinées par une commission académique (autorité du recteur).", s: ["circ-2016-137"] },
     { t: "Compétences attendues : fonctionnement d'un EPLE, formations pro/techno, monde de l'entreprise, référentiels, santé-sécurité au travail, collectivités, comptabilité publique, conduite de projet, animation d'équipe, ingénierie de formation.", s: ["circ-2016-137"] }
   ]},
-  { titre: "Rémunération", icone: "💶", notions: [
-    { t: "Le DDFPT bénéficie de la part fixe de l'ISOE, d'une NBI de 40 points et d'une indemnité de responsabilité.", s: ["page-metier"] },
-    { t: "Indemnité de responsabilité créée par le décret n°91-1259 du 17 décembre 1991.", s: ["decret-91-1259"] },
-    { t: "Montants annuels (arrêté du 13 juillet 2023) : > 1 000 élèves → 7 563 € ; 400 à 1 000 → 6 740 € ; < 400 → 5 917 €.", s: ["arrete-2023-07-13"] }
-  ]},
   { titre: "Ce qu'il peut / ne peut pas", icone: "⚖️", notions: [
     { t: "PEUT : proposer une organisation pédagogique, coordonner les équipes, organiser les plateaux techniques, suivre les équipements, alerter sur la sécurité, conseiller les achats, participer aux EDT, organiser examens/CCF, développer les relations entreprises, participer à la recherche de PFMP.", s: ["circ-2016-137"] },
     { t: "NE PEUT PAS seul : imposer une décision du chef d'établissement, modifier officiellement un EDT sans validation, décider du budget, sanctionner un enseignant, remplacer l'autorité du proviseur ou l'inspection, porter seul la responsabilité juridique de la sécurité, se substituer à l'adjoint gestionnaire, aux évaluateurs ou au bureau des entreprises.", s: ["circ-2016-137"] },
@@ -75,7 +68,6 @@ const SECTIONS = [
     { t: "Texte central — Circulaire n°2016-137 du 11 octobre 2016 (missions des DDFPT).", s: ["circ-2016-137", "legifrance-circ"] },
     { t: "Page métier officielle du ministère.", s: ["page-metier"] },
     { t: "Bureau des entreprises — circulaire du 24 mai 2023 + Éduscol.", s: ["circ-bde-2023", "eduscol-bde"] },
-    { t: "Indemnité — décret n°91-1259 (1991) + arrêté du 13 juillet 2023.", s: ["decret-91-1259", "arrete-2023-07-13"] },
     { t: "Fiche de poste DDFPT — BOEN rentrée 2026.", s: ["boen-2026"] }
   ]}
 ];

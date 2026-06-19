@@ -72,7 +72,7 @@ const THEMATIQUES = [
     enfants: [
       {
         titre: "Le DDFPT — rôle & missions",
-        desc: "Directeur délégué aux formations professionnelles et technologiques : statut, 4 missions, PFMP & bureau des entreprises, sécurité, lettre de mission, rémunération — d'après la circulaire n°2016-137 et les textes officiels.",
+        desc: "Directeur délégué aux formations professionnelles et technologiques : statut, 4 missions, PFMP & bureau des entreprises, sécurité, lettre de mission — d'après la circulaire n°2016-137 et les textes officiels. L'accent est mis sur les missions globales, pas sur l'évaluation de la personne.",
         lien: "acteurs/ddfpt/",
         type: "Guide",
       },
