@@ -44,6 +44,7 @@ const TYPE_LABEL = { loi: "Loi", reglement: "Texte officiel", ouvrage: "Ouvrage 
 const TABS = [
   ["accueil", "home", "Accueil"],
   ["dispositifs", "layers", "Dispositifs"],
+  ["troubles", "brain", "Troubles"],
   ["comprendre", "book-open", "Comprendre"],
   ["adapter", "wand", "Adapter"],
   ["situations", "help", "Situations"],
@@ -51,7 +52,7 @@ const TABS = [
 ];
 
 let page = "accueil";
-let dispIdx = 0, parcoursIdx = 0, themeIdx = 0;
+let dispIdx = 0, trbIdx = 0, parcoursIdx = 0, themeIdx = 0;
 let query = "", searchOn = false;
 
 const $ = s => document.querySelector(s);
@@ -77,6 +78,7 @@ function render() {
   const titles = {
     accueil: "École inclusive", dispositifs: "Les 4 dispositifs",
     dispositif: D[dispIdx] ? D[dispIdx].code : "Dispositif",
+    troubles: "Les troubles", trouble: window.TROUBLES[trbIdx] ? window.TROUBLES[trbIdx].code : "Trouble",
     parcours: P[parcoursIdx] ? P[parcoursIdx].nom : "", theme: "",
     situations: "Que faire si…", glossaire: "Glossaire", search: "Recherche",
   };
@@ -84,7 +86,7 @@ function render() {
   $("#title").textContent = query ? "Recherche" : (titles[page] || "École inclusive");
   $("#backLabel").textContent = page === "accueil" ? "Portail" : "Retour";
 
-  const act = query ? "" : ({ dispositif: "dispositifs", theme: (parcoursIdx === 0 ? "comprendre" : "adapter"),
+  const act = query ? "" : ({ dispositif: "dispositifs", trouble: "troubles", theme: (parcoursIdx === 0 ? "comprendre" : "adapter"),
     parcours: (parcoursIdx === 0 ? "comprendre" : "adapter") })[page] || page;
   $("#tabs").innerHTML = TABS.map(([id, icon, lb]) =>
     `<button class="tab ${act === id ? "active" : ""}" data-tab="${id}">${ic(icon)}${lb}</button>`).join("");
@@ -92,6 +94,7 @@ function render() {
   let html;
   if (query) html = viewSearch();
   else html = ({ accueil: viewAccueil, dispositifs: viewDispositifs, dispositif: viewDispositif,
+    troubles: viewTroubles, trouble: viewTrouble,
     parcours: viewParcours, theme: viewTheme, situations: viewSituations, glossaire: viewGlossaire }[page] || viewAccueil)();
   $("#view").innerHTML = html;
   window.scrollTo && window.scrollTo(0, 0);
@@ -110,7 +113,8 @@ function viewAccueil() {
   const G = window.GUIDE;
   const tiles = [
     ["dispositifs", "layers", "Les 4 dispositifs", "PPS, PAP, PAI, PPRE"],
-    ["comprendre", "book-open", "Comprendre", "Cadre, acteurs, troubles"],
+    ["troubles", "brain", "Les troubles", "TSA, TDAH, dys…"],
+    ["comprendre", "book-open", "Comprendre", "Cadre, acteurs, repères"],
     ["adapter", "wand", "Adapter", "Pédagogie & supports"],
     ["situations", "help", "Que faire si…", "Cas concrets"],
     ["glossaire", "book", "Glossaire", "Tous les sigles"],
@@ -180,6 +184,36 @@ function viewDispositif() {
   </div>`;
 }
 
+/* ---------------- Troubles ---------------- */
+function viewTroubles() {
+  return `<p class="count">Repérer, comprendre, adapter — une fiche par trouble. Le diagnostic reste médical ; nous, on observe des besoins.</p>
+    <div class="disp-list">${window.TROUBLES.map((t, i) =>
+      `<button class="disp-card" style="--c:${t.c}" data-trb="${i}">
+        <div class="dc-top"><span class="dc-ic">${ic(t.icon)}</span><span class="dc-code">${esc(t.code)}</span></div>
+        <div class="dc-nom">${esc(t.nom)}</div>
+        <div class="dc-res">${esc(t.cestquoi)}</div>
+      </button>`).join("")}</div>`;
+}
+
+function viewTrouble() {
+  const t = window.TROUBLES[trbIdx];
+  const block = (h, icn, items) => (items && items.length)
+    ? `<section class="card" style="--c:${t.c}"><div class="card-h">${ic(icn)}${h}</div><ul class="lst">${items.map(x => `<li>${esc(x)}</li>`).join("")}</ul></section>` : "";
+  return `<div class="fiche">
+    <div class="fiche-band" style="--c:${t.c}">
+      <span class="fb-ic">${ic(t.icon)}</span>
+      <div class="fb-code">${esc(t.code)}</div>
+      <div class="fb-nom">${esc(t.nom)}</div>
+      <div class="fb-res">${esc(t.cestquoi)}</div>
+    </div>
+    ${block("Signes en classe", "target", t.signes)}
+    ${block("Adaptations concrètes", "wand", t.adaptations)}
+    ${block("Points d'appui", "user-check", t.appui)}
+    <div class="callout teach"><span class="co-ic">${ic("layers")}</span><div class="co-tx"><span class="co-h">Quel plan d'accompagnement ?</span>${esc(t.plan)}</div></div>
+    ${srcChips(t.s)}
+  </div>`;
+}
+
 /* ---------------- Parcours (Comprendre / Adapter) ---------------- */
 function viewParcours() {
   const p = window.PARCOURS[parcoursIdx];
@@ -227,6 +261,11 @@ function viewSearch() {
     if (norm(d.code + " " + d.nom + " " + d.motif + " " + d.resume).includes(q))
       out.push(`<button class="disp-card" style="--c:${d.c}" data-disp="${i}"><div class="dc-top"><span class="dc-ic">${ic(d.icon)}</span><span class="dc-code">${hl(d.code)}</span></div><div class="dc-nom">${hl(d.nom)}</div><div class="dc-res">${hl(d.resume)}</div></button>`);
   });
+  const trbOut = [];
+  window.TROUBLES.forEach((t, i) => {
+    if (norm(t.code + " " + t.nom + " " + t.cestquoi + " " + t.signes.join(" ") + " " + t.adaptations.join(" ")).includes(q))
+      trbOut.push(`<button class="disp-card" style="--c:${t.c}" data-trb="${i}"><div class="dc-top"><span class="dc-ic">${ic(t.icon)}</span><span class="dc-code">${hl(t.code)}</span></div><div class="dc-nom">${hl(t.nom)}</div><div class="dc-res">${hl(t.cestquoi)}</div></button>`);
+  });
   const notions = [];
   window.PARCOURS.forEach((p, pi) => p.themes.forEach((t, ti) => t.notions.forEach(n => {
     if (norm(n.t).includes(q)) notions.push({ pi, ti, t: t.titre, n });
@@ -236,6 +275,7 @@ function viewSearch() {
 
   let h = "";
   if (out.length) h += `<div class="sec-title">${ic("layers")} Dispositifs</div><div class="disp-list">${out.join("")}</div>`;
+  if (trbOut.length) h += `<div class="sec-title">${ic("brain")} Troubles</div><div class="disp-list">${trbOut.join("")}</div>`;
   if (notions.length) h += `<div class="sec-title">${ic("book-open")} Repères</div><div class="notion-list">${notions.map(x =>
     `<article class="notion" data-goto="${x.pi}:${x.ti}"><p>${hl(x.n.t)}</p><div class="src-chips"><span class="src-chip" style="cursor:default">${esc(x.t)}</span></div></article>`).join("")}</div>`;
   if (sits.length) h += `<div class="sec-title">${ic("help")} Situations</div><div class="sit-list">${sits.map(s =>
@@ -272,6 +312,7 @@ document.addEventListener("click", e => {
   const tab = e.target.closest("[data-tab]"); if (tab) return goTab(tab.dataset.tab);
   const go = e.target.closest("[data-go]"); if (go) return goTab(go.dataset.go);
   const disp = e.target.closest("[data-disp]"); if (disp) { clearSearch(); dispIdx = +disp.dataset.disp; page = "dispositif"; return render(); }
+  const trb = e.target.closest("[data-trb]"); if (trb) { clearSearch(); trbIdx = +trb.dataset.trb; page = "trouble"; return render(); }
   const th = e.target.closest("[data-theme]"); if (th) { themeIdx = +th.dataset.theme; page = "theme"; return render(); }
   const goto = e.target.closest("[data-goto]"); if (goto) { const [pi, ti] = goto.dataset.goto.split(":").map(Number); clearSearch(); parcoursIdx = pi; themeIdx = ti; page = "theme"; return render(); }
   if (e.target.closest("#backdrop")) return closeDrawer();
@@ -283,7 +324,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("#back")) {
     if (query) { clearSearch(); return render(); }
     if (page === "accueil") { location.href = "../../"; return; }
-    const up = { dispositif: "dispositifs", theme: "parcours", parcours: "accueil", dispositifs: "accueil", situations: "accueil", glossaire: "accueil" };
+    const up = { dispositif: "dispositifs", trouble: "troubles", theme: "parcours", parcours: "accueil", dispositifs: "accueil", troubles: "accueil", situations: "accueil", glossaire: "accueil" };
     page = up[page] || "accueil"; return render();
   }
 });

@@ -124,6 +124,84 @@ const DISPOSITIFS = [
 ];
 
 /* --------------------------------------------------------------------
+   TROUBLES — fiches structurées (ce que c'est · signes · adaptations)
+-------------------------------------------------------------------- */
+const TROUBLES = [
+  {
+    code: "TSA", nom: "Trouble du spectre de l'autisme", cle: "tsa", icon: "puzzle", c: "#6b4bd6",
+    cestquoi: "Différences durables dans la communication et l'interaction sociale, intérêts restreints et comportements répétitifs. Des particularités sensorielles sont fréquentes (bruit, lumière, toucher).",
+    signes: ["Difficulté à décoder l'implicite et le second degré", "Besoin de routines, réactions fortes aux changements", "Sensibilité au bruit, à la lumière", "Intérêts intenses et spécifiques", "Fatigue sociale"],
+    adaptations: ["Routines stables et emploi du temps visuel", "Annoncer les changements à l'avance", "Consignes explicites et littérales", "Réduire les stimulations sensorielles", "Prévoir un espace / temps calme"],
+    appui: ["S'appuyer sur les points forts (mémoire, logique, intérêts)", "Expliciter les règles sociales implicites", "En lycée pro : anticiper les PFMP (cadre, tuteur informé)"],
+    plan: "Souvent un PPS (aménagements, parfois AESH), selon les besoins évalués par la MDPH.",
+    s: ["dsm5", "cap-ecole", "enseigner-ue"],
+  },
+  {
+    code: "TDAH", nom: "Déficit de l'attention / hyperactivité", cle: "tdah", icon: "bolt", c: "#d2603a",
+    cestquoi: "Difficultés d'attention soutenue, d'inhibition (impulsivité) et parfois agitation motrice. La mémoire de travail et l'organisation sont fragiles.",
+    signes: ["Se disperse, « rêve »", "Oublie ou perd le matériel", "Commence sans lire la consigne", "A du mal à rester en place", "Variabilité d'un jour à l'autre"],
+    adaptations: ["Tâches courtes et fractionnées", "Une consigne à la fois", "Repères visuels du temps (time-timer)", "Placement au calme, mouvement encadré autorisé", "Routines et rappels"],
+    appui: ["Valoriser les réussites (estime de soi fragile)", "Donner un rôle", "Aider à s'organiser (check-lists, agenda)", "Éviter les remarques répétées sur le comportement"],
+    plan: "PAP (sur avis du médecin scolaire) ; PPS si une AESH ou du matériel financé sont nécessaires.",
+    s: ["dsm5", "troubles-app", "cap-ecole", "corbion"],
+  },
+  {
+    code: "Dyslexie", nom: "Dyslexie / dysorthographie", cle: "dyslexie", icon: "letter", c: "#2f6cd6",
+    cestquoi: "Trouble spécifique de la lecture (dyslexie) et/ou de l'orthographe (dysorthographie) : la lecture reste coûteuse et lente malgré l'entraînement.",
+    signes: ["Lecture lente et fatigante", "Confusions de sons / de lettres", "Orthographe instable", "Difficulté à lire ET comprendre en même temps"],
+    adaptations: ["Lire les consignes à voix haute", "Police lisible, texte aéré", "Temps majoré", "Ne pas sanctionner l'orthographe hors objectif", "Supports audio / lecture vocale"],
+    appui: ["Délester la double tâche : fournir le cours (photocopie / numérique)", "Évaluer à l'oral si l'écrit n'est pas l'objectif"],
+    plan: "PAP (sur avis du médecin scolaire) ; PPS si matériel financé nécessaire.",
+    s: ["troubles-app", "dsm5", "cap-ecole", "guide-mpa"],
+  },
+  {
+    code: "Dyspraxie", nom: "Dyspraxie / dysgraphie", cle: "dyspraxie", icon: "pencil", c: "#1a9e78",
+    cestquoi: "Trouble développemental de la coordination : le geste volontaire est coûteux et peu automatisé. La dysgraphie touche spécifiquement l'écriture manuscrite.",
+    signes: ["Écriture lente, fatigante, peu lisible", "Difficulté à se repérer sur la page", "Mal à l'aise avec règle / compas", "Difficulté à organiser l'espace (géométrie, tableaux)"],
+    adaptations: ["Privilégier le numérique (clavier)", "Documents pré-tracés, cours photocopié", "Alléger la copie", "Accepter une présentation imparfaite", "Temps majoré"],
+    appui: ["Évaluer le fond, pas la forme graphique", "Outils numériques adaptés (traitement de texte, géométrie dynamique)"],
+    plan: "PAP (sur avis du médecin scolaire) ; PPS si un ordinateur financé est nécessaire.",
+    s: ["troubles-app", "dsm5", "cap-ecole", "guide-mpa"],
+  },
+  {
+    code: "Dyscalculie", nom: "Dyscalculie", cle: "dyscalculie", icon: "number", c: "#b8852a",
+    cestquoi: "Trouble spécifique des apprentissages en mathématiques : difficultés durables avec le sens du nombre, les faits numériques et le calcul.",
+    signes: ["Difficulté à mémoriser les tables", "Mal à poser les opérations", "Difficulté à estimer des quantités", "Se repère mal dans les nombres et les unités"],
+    adaptations: ["Autoriser tables et calculatrice (si le calcul n'est pas l'objectif)", "Supports concrets et visuels", "Étapes explicites", "Réduire le nombre d'items"],
+    appui: ["Valoriser le raisonnement plutôt que la vitesse de calcul"],
+    plan: "PAP (sur avis du médecin scolaire).",
+    s: ["troubles-app", "dsm5", "cap-ecole"],
+  },
+  {
+    code: "Dysphasie", nom: "Trouble du langage oral (TDL)", cle: "dysphasie", icon: "message", c: "#c2566f",
+    cestquoi: "Trouble développemental du langage oral (dysphasie) : la compréhension et/ou l'expression orale sont durablement altérées.",
+    signes: ["Phrases courtes ou mal construites", "Manque du mot", "Difficulté à suivre des consignes orales longues", "Difficulté à raconter, à comprendre l'implicite"],
+    adaptations: ["Consignes courtes + appui visuel", "Reformuler, laisser le temps de répondre", "Ne pas finir les phrases à sa place", "Vérifier la compréhension", "Écrit / pictogrammes en soutien"],
+    appui: ["S'appuyer sur le canal visuel et l'écrit"],
+    plan: "PAP (sur avis du médecin scolaire) ; PPS selon les besoins.",
+    s: ["troubles-app", "dsm5", "cap-ecole"],
+  },
+  {
+    code: "TDI", nom: "Développement intellectuel & troubles psychiques", cle: "tdi", icon: "heart", c: "#5a6b8c",
+    cestquoi: "Le TDI associe des limitations du fonctionnement intellectuel ET du comportement adaptatif. À distinguer des troubles psychiques (anxiété, phobie scolaire, troubles de l'humeur, du comportement).",
+    signes: ["TDI : apprentissages plus lents, abstraction difficile, besoin de concret", "Troubles psychiques : anxiété, évitement, variations de l'humeur", "Sensibilité au cadre et aux relations"],
+    adaptations: ["Objectifs réalistes et fonctionnels", "Tâches très découpées, concret et manipulation", "Répétition et valorisation", "Cadre régulier et prévisible (protecteur)", "Stratégies de retour au calme ; désamorcer sans rapport de force"],
+    appui: ["Relier au quotidien et à l'autonomie", "Travailler avec la vie scolaire et les partenaires de santé"],
+    plan: "Souvent un PPS (TDI reconnu MDPH) ; pour les troubles psychiques, PAI ou PPS selon la situation.",
+    s: ["dsm5", "enseigner-ue", "cap-ecole", "corbion"],
+  },
+  {
+    code: "Sensoriel", nom: "Déficiences sensorielles & motrices", cle: "sensoriel", icon: "accessible", c: "#0e8a8a",
+    cestquoi: "L'accès à l'information (audition, vision) ou au geste (motricité) est limité. L'accessibilité et le matériel adapté compensent.",
+    signes: ["Auditive : suit mal les consignes orales, fatigue d'écoute", "Visuelle : difficulté à voir le tableau, les supports", "Motrice : geste, déplacement ou poste de travail contraints"],
+    adaptations: ["Auditive : privilégier le visuel, parler face à l'élève, écrire les consignes, réduire le bruit (système HF si notifié)", "Visuelle : agrandissements, contrastes, braille ou numérique adapté, verbaliser le tableau", "Motrice : accessibilité des locaux et du poste, adapter gestes et matériel, aide humaine, temps majoré"],
+    appui: ["Le matériel adapté (MPA) est souvent notifié — l'anticiper", "Soigner le placement dans la classe"],
+    plan: "PPS (déficience reconnue MDPH) : aides humaines et matérielles notifiées.",
+    s: ["cap-ecole", "guide-mpa"],
+  },
+];
+
+/* --------------------------------------------------------------------
    PARCOURS — Comprendre & Adapter (thèmes + notions)
 -------------------------------------------------------------------- */
 const PARCOURS = [
@@ -160,51 +238,6 @@ const PARCOURS = [
         { t: "Troubles du neurodéveloppement (TND) : apparaissent tôt, durables, liés au fonctionnement du cerveau — pas à un manque de travail ni d'intelligence. Souvent plusieurs troubles associés.", s: ["dsm5", "troubles-app"] },
         { t: "Posture clé : on ne « voit » pas un trouble, on observe des manifestations (lenteur, fatigue, erreurs typiques, évitement). On décrit des BESOINS, on n'étiquette pas.", s: ["cap-ecole", "troubles-app"] },
         { t: "Le diagnostic est posé par des professionnels de santé (médecin, neuropsychologue, orthophoniste…). L'école adapte sans attendre le diagnostic ; le PAS peut aider.", s: ["dsm5", "circ-pas-2025"] },
-      ] },
-      { titre: "Trouble — TSA (autisme)", icon: "puzzle", notions: [
-        { t: "Ce que c'est : trouble du spectre de l'autisme — différences durables dans la communication et l'interaction sociale ET intérêts restreints / comportements répétitifs ; particularités sensorielles fréquentes (bruit, lumière, toucher).", s: ["dsm5"] },
-        { t: "En classe, on peut observer : difficulté à décoder l'implicite et le second degré, besoin de routines, réactions fortes aux changements ou au bruit, intérêts intenses, fatigue sociale.", s: ["cap-ecole", "troubles-app"] },
-        { t: "Adaptations : routines stables et emploi du temps visuel, annoncer les changements à l'avance, consignes explicites et littérales, réduire les stimulations, prévoir un espace/temps calme.", s: ["cap-ecole"] },
-        { t: "S'appuyer sur les points forts (mémoire, logique, intérêts) ; valoriser ; expliciter les règles sociales implicites. En lycée pro : anticiper les PFMP (cadre, tuteur informé).", s: ["cap-ecole", "enseigner-ue"] },
-      ] },
-      { titre: "Trouble — TDAH", icon: "bolt", notions: [
-        { t: "Ce que c'est : trouble déficit de l'attention, avec ou sans hyperactivité — difficultés d'attention soutenue, d'inhibition (impulsivité) et parfois agitation motrice ; mémoire de travail et organisation fragiles.", s: ["dsm5", "troubles-app"] },
-        { t: "En classe : se disperse, oublie/perd le matériel, commence sans lire la consigne, a du mal à rester en place, « rêve », variabilité d'un jour à l'autre.", s: ["troubles-app", "cap-ecole"] },
-        { t: "Adaptations : tâches courtes et fractionnées, une consigne à la fois, repères visuels du temps (time-timer), placement au calme, autoriser le mouvement encadré, routines et rappels.", s: ["cap-ecole"] },
-        { t: "Valoriser les réussites (l'estime de soi est souvent fragile), donner un rôle, aider à s'organiser (check-lists, agenda) ; éviter les remarques répétées sur le comportement.", s: ["cap-ecole", "corbion"] },
-      ] },
-      { titre: "Trouble — Dyslexie / dysorthographie", icon: "letter", notions: [
-        { t: "Ce que c'est : trouble spécifique de la lecture (dyslexie) et/ou de l'orthographe (dysorthographie) — la lecture reste coûteuse et lente malgré l'entraînement.", s: ["troubles-app", "dsm5"] },
-        { t: "En classe : lecture lente/fatigante, confusions de sons/lettres, orthographe instable, difficulté à lire ET comprendre en même temps.", s: ["troubles-app"] },
-        { t: "Adaptations : lire les consignes à voix haute, police lisible et texte aéré, temps majoré, ne pas sanctionner l'orthographe quand ce n'est pas l'objectif, supports audio / lecture vocale.", s: ["cap-ecole", "guide-mpa"] },
-        { t: "Délester la double tâche : fournir le cours (photocopie / numérique), évaluer les connaissances à l'oral si l'écrit n'est pas l'objectif.", s: ["troubles-app"] },
-      ] },
-      { titre: "Trouble — Dyspraxie / dysgraphie", icon: "pencil", notions: [
-        { t: "Ce que c'est : trouble développemental de la coordination (dyspraxie) — le geste volontaire est coûteux et peu automatisé ; la dysgraphie touche spécifiquement l'écriture manuscrite.", s: ["troubles-app", "dsm5"] },
-        { t: "En classe : écriture lente, fatigante, peu lisible ; difficulté à se repérer sur la page, à utiliser règle/compas, à organiser l'espace (géométrie, tableaux).", s: ["troubles-app"] },
-        { t: "Adaptations : privilégier le numérique (clavier), fournir documents pré-tracés et cours photocopié, alléger la copie, accepter une présentation imparfaite, temps majoré.", s: ["cap-ecole", "guide-mpa"] },
-        { t: "Évaluer le fond, pas la forme graphique ; outils numériques adaptés (traitement de texte, géométrie dynamique).", s: ["guide-mpa"] },
-      ] },
-      { titre: "Trouble — Dyscalculie", icon: "number", notions: [
-        { t: "Ce que c'est : trouble spécifique des apprentissages en mathématiques — difficultés durables avec le sens du nombre, les faits numériques et le calcul.", s: ["troubles-app", "dsm5"] },
-        { t: "En classe : difficulté à mémoriser les tables, à poser les opérations, à estimer des quantités, à se repérer dans les nombres et les unités.", s: ["troubles-app"] },
-        { t: "Adaptations : autoriser tables et calculatrice (si l'objectif n'est pas le calcul), supports concrets/visuels, étapes explicites, réduire le nombre d'items, valoriser le raisonnement.", s: ["cap-ecole"] },
-      ] },
-      { titre: "Trouble — Langage oral (dysphasie)", icon: "message", notions: [
-        { t: "Ce que c'est : trouble développemental du langage oral (TDL / dysphasie) — la compréhension et/ou l'expression orale sont durablement altérées.", s: ["troubles-app", "dsm5"] },
-        { t: "En classe : phrases courtes ou mal construites, manque du mot, difficulté à suivre des consignes orales longues, à raconter, à comprendre l'implicite.", s: ["troubles-app"] },
-        { t: "Adaptations : consignes courtes + appui visuel, reformuler, laisser le temps de répondre, ne pas finir les phrases à la place, vérifier la compréhension, écrit/pictogrammes en soutien.", s: ["cap-ecole"] },
-      ] },
-      { titre: "Trouble — TDI & troubles psychiques", icon: "heart", notions: [
-        { t: "TDI (trouble du développement intellectuel) : limitations du fonctionnement intellectuel ET du comportement adaptatif. On vise un potentiel à étayer, par petites étapes concrètes et répétées.", s: ["dsm5", "enseigner-ue"] },
-        { t: "Adaptations TDI : objectifs réalistes et fonctionnels, tâches très découpées, beaucoup de concret et de manipulation, répétition, valorisation, lien avec le quotidien et l'autonomie.", s: ["enseigner-ue", "cap-ecole"] },
-        { t: "Troubles psychiques / du comportement : anxiété, phobie scolaire, troubles de l'humeur, TOP/TC… La régularité du cadre, la relation de confiance et la prévisibilité sont protectrices.", s: ["cap-ecole", "corbion"] },
-        { t: "Posture : sécuriser, désamorcer (ne pas entrer dans le rapport de force), nommer les émotions, prévoir des stratégies de retour au calme ; travailler en lien avec la vie scolaire et les partenaires de santé.", s: ["cap-ecole"] },
-      ] },
-      { titre: "Trouble — Déficiences sensorielles & motrices", icon: "accessible", notions: [
-        { t: "Déficience auditive : privilégier le visuel, parler face à l'élève, écrire les consignes, réduire le bruit ; matériel adapté (système HF) selon notification.", s: ["cap-ecole", "guide-mpa"] },
-        { t: "Déficience visuelle : agrandissements, contrastes, supports en braille ou numériques adaptés, placement, verbaliser ce qui est écrit au tableau.", s: ["cap-ecole", "guide-mpa"] },
-        { t: "Déficience motrice : accessibilité des locaux et du poste de travail, adaptation des gestes et du matériel, aide humaine si besoin, temps majoré.", s: ["cap-ecole"] },
       ] },
     ],
   },
@@ -316,6 +349,7 @@ const GLOSSAIRE = [
 window.GUIDE = GUIDE;
 window.SOURCES = SOURCES;
 window.DISPOSITIFS = DISPOSITIFS;
+window.TROUBLES = TROUBLES;
 window.PARCOURS = PARCOURS;
 window.SITUATIONS = SITUATIONS;
 window.GLOSSAIRE = GLOSSAIRE;
