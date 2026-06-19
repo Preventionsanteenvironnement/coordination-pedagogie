@@ -91,17 +91,23 @@ const THEMATIQUES = [
     couleur: "#5a8a3c",
     enfants: [
       {
-        titre: "École inclusive — guide de formation",
-        desc: "Cadre & dispositifs (PPS, PAP, PAI, PPRE, MDPH, ULIS, AESH), comprendre les troubles (TSA, TDAH, dys…), public, pédagogie adaptée et supports. Par thèmes, avec flashcards, quiz et glossaire.",
-        lien: "pedagogie/ecole-inclusive/",
-        type: "Guide",
-      },
-      {
-        titre: "Grille d'observation GEVA-Sco (ESS)",
-        desc: "Formulaire à remplir par chaque enseignant pour l'équipe de suivi : observation des activités de l'élève (cotation A/B/C/D). Anonyme — matière au lieu du nom, code élève au lieu du nom. Rapide, mobile ; les réponses sont regroupées pour le professeur principal.",
-        lien: "gevasco/",
-        type: "Outil",
-        badge: "Nouveau",
+        titre: "Inclusion",
+        desc: "École inclusive : le cadre et les dispositifs (PPS, PAP, PAI, PPRE), comprendre les troubles, et les outils de suivi (GEVA-Sco).",
+        enfants: [
+          {
+            titre: "École inclusive — guide de formation",
+            desc: "Cadre & dispositifs (PPS, PAP, PAI, PPRE, MDPH, ULIS, AESH), comprendre les troubles (TSA, TDAH, dys…), public, pédagogie adaptée et supports. Par thèmes, avec flashcards, quiz et glossaire.",
+            lien: "pedagogie/ecole-inclusive/",
+            type: "Guide",
+          },
+          {
+            titre: "Grille d'observation GEVA-Sco (ESS)",
+            desc: "Formulaire à remplir par chaque enseignant pour l'équipe de suivi : observation des activités de l'élève (cotation A/B/C/D). Anonyme — matière au lieu du nom, code élève au lieu du nom. Rapide, mobile ; les réponses sont regroupées pour le professeur principal.",
+            lien: "gevasco/",
+            type: "Outil",
+            badge: "Nouveau",
+          },
+        ],
       },
     ],
   },
