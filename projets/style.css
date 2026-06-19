@@ -154,7 +154,23 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
 .doc .doc-ctx{color:var(--muted);font-size:14.5px;line-height:1.6;margin:0 0 8px}
 .doc section{border-top:1px solid var(--line);padding-top:14px;margin-top:16px}
 .doc section:first-of-type{border-top:none;margin-top:14px}
-.doc section h2{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);margin-bottom:9px}
+.doc section h2{font-size:16.5px;font-weight:600;color:var(--ink);margin-bottom:9px}
+.doc .sn{color:var(--accent);font-weight:700;margin-right:3px}
+.doc-cover{text-align:center;padding:26px 20px 22px;border-bottom:2px solid var(--brand);margin-bottom:18px}
+.dc-brand{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.dc-title{font-size:27px;font-weight:700;margin:10px 0 6px}
+.dc-ctx{color:var(--muted);font-size:14.5px;max-width:52ch;margin:0 auto;line-height:1.6}
+.dc-tags{display:flex;gap:8px;justify-content:center;margin:14px 0 7px;flex-wrap:wrap}
+.dc-meta{font-size:12.5px;color:var(--faint)}
+.doc-toc{border:1px solid var(--line);border-radius:var(--r-sm);padding:13px 18px;margin-bottom:18px;background:var(--bg)}
+.doc-toc h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);margin-bottom:8px}
+.toc-list{margin:0;padding-left:2px;list-style:none}
+.toc-list li{font-size:13.5px;color:var(--ink);margin-bottom:4px}
+.doc-resume{background:var(--accent-soft);border-radius:var(--r-sm);padding:14px 16px}
+.doc-resume h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--accent)}
+table.doc-pl{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+table.doc-pl th,table.doc-pl td{border:1px solid var(--line);padding:7px 9px;text-align:left}
+table.doc-pl th{background:var(--bg);font-size:11.5px;text-transform:uppercase;color:var(--muted)}
 .doc ul{margin:0;padding-left:20px}
 .doc li{font-size:14.5px;line-height:1.55;margin-bottom:6px}
 .doc li .by{color:var(--faint);font-size:12px}
@@ -356,10 +372,15 @@ table.pl td{vertical-align:middle}
 
 /* Impression de la fiche */
 @media print{
+  @page{ margin:1.8cm; }
+  @page{ @bottom-right{ content:"Page " counter(page); font-size:9pt; color:#888; } }
   .topbar,.etapebar,.fiche-actions,.toast,.overlay{display:none !important}
-  body{background:#fff;padding:0}
+  body{background:#fff;padding:0;color:#000}
   .wrap{max-width:none;padding:0}
   .doc{border:none;box-shadow:none;border-radius:0;padding:0}
   .doc .retenu{background:#f2f5fa}
-  section{break-inside:avoid}
+  .doc-cover{min-height:78vh;display:flex;flex-direction:column;justify-content:center;page-break-after:always;border-bottom:none}
+  .doc-toc{page-break-after:always;border:none;background:none;padding:0}
+  .doc section{break-inside:avoid;page-break-inside:avoid}
+  .doc section h2{page-break-after:avoid}
 }

@@ -298,20 +298,33 @@ function viewMatrice(){
   return `<div class="etape-head"><div class="eyebrow">Cohérence du projet</div><h2>Matrice d'alignement</h2><div class="et-def">Chaque objectif opérationnel devrait avoir au moins une action et un indicateur.</div></div><div class="mx-wrap"><table class="mx"><thead><tr><th>Objectif opérationnel</th><th>Actions</th><th>Indicateurs</th></tr></thead><tbody>${rows}</tbody></table></div>${orph}`;
 }
 
+function dateFr(){ try{ return new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}); }catch(_){ return ""; } }
 function ficheBodyHTML(){
   const byEt={}; contribs.filter(active).forEach(c=>{(byEt[c.etape]=byEt[c.etape]||[]).push(c);});
   const syn=synthese();
-  const sections=ETAPES.map(e=>{ const items=sortC(byEt[e.id]||[]); let body;
+  const conts=[...new Set(contribs.filter(active).map(c=>c.initiales).filter(Boolean))];
+  const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
+  const acts=ofEt("actions").filter(a=>a.resp||a.ech||a.pst);
+  const toc=[]; if(syn) toc.push("Résumé"); ETAPES.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((ETAPES.length+1)+". Plan d'action");
+  const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:""}</div><div class="dc-meta">${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
+  const tocHtml=`<div class="doc-toc"><h2>Sommaire</h2><ol class="toc-list">${toc.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`;
+  const resume=syn?`<section class="doc-resume"><h2>Résumé</h2><p>${esc(syn)}</p></section>`:"";
+  let num=0;
+  const sections=ETAPES.map(e=>{ num++; const items=sortC(byEt[e.id]||[]); let body;
     if(!items.length) body=`<p class="vide">À compléter.</p>`;
     else { const ep=items.filter(c=>c.epingle), au=items.filter(c=>!c.epingle); body=ep.map(c=>`<div class="retenu">${esc(c.texte)}</div>`).join("")+(au.length?`<ul>${au.map(c=>`<li>${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:""); }
-    return `<section><h2>${esc(e.nom)}</h2>${body}</section>`;}).join("");
-  const acts=ofEt("actions").filter(a=>a.resp||a.ech||a.pst);
-  const plan=acts.length?`<section><h2>Plan d'action</h2><table border="1" cellpadding="5" style="border-collapse:collapse;width:100%;font-size:13px"><tr><th align="left">Action</th><th align="left">Responsable</th><th align="left">Échéance</th><th align="left">Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
-  return `<h1>${esc(projet.titre)}</h1>${projet.contexte?`<p class="doc-ctx">${esc(projet.contexte)}</p>`:""}${syn?`<section class="syn-sec"><h2>Synthèse</h2><p>${esc(syn)}</p></section>`:""}${sections}${plan}`;
+    return `<section><h2><span class="sn">${num}.</span> ${esc(e.nom)}</h2>${body}</section>`;}).join("");
+  const plan=acts.length?`<section><h2><span class="sn">${++num}.</span> Plan d'action</h2><table class="doc-pl"><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
+  return cover+tocHtml+resume+sections+plan;
 }
 function viewFiche(){ return `<div class="fiche-actions"><button class="btn" data-overview>${ic("back")} Vue d'ensemble</button><button class="btn" id="word">${ic("word")} Word</button><button class="btn primary" id="print">${ic("printer")} Imprimer / PDF</button></div><div class="doc">${ficheBodyHTML()}</div>`; }
 function exportWord(){
-  const css=`body{font-family:Calibri,Arial,sans-serif;color:#1a1a1a;font-size:11pt;line-height:1.5}h1{font-size:20pt;color:#26365a}h2{font-size:12pt;color:#2f6cd6;border-bottom:1px solid #ccc;padding-bottom:3px;margin-top:18px}.doc-ctx{color:#555;font-style:italic}.retenu{background:#eef3fb;padding:6px 10px;border-left:3px solid #2f6cd6;margin:4px 0}ul{margin:4px 0}li{margin-bottom:3px}.by{color:#888;font-size:9pt}.vide{color:#999;font-style:italic}.syn-sec p{background:#f3f5f9;padding:10px}table{margin-top:6px}`;
+  const css=`body{font-family:Calibri,Arial,sans-serif;color:#1a1a1a;font-size:11pt;line-height:1.5}
+h1{font-size:20pt;color:#26365a}h2{font-size:13pt;color:#2f6cd6;border-bottom:1px solid #cdd6e6;padding-bottom:3px;margin-top:18px}.sn{color:#2f6cd6}
+.doc-cover{text-align:center;page-break-after:always;padding-top:120pt}.dc-brand{font-size:10pt;letter-spacing:1pt;color:#2f6cd6}.dc-title{font-size:28pt;margin:14pt 0 6pt}.dc-ctx{color:#555;font-style:italic}.dc-tags span{display:inline-block;background:#eef3fb;color:#26365a;border:1px solid #cdd6e6;padding:2pt 8pt;margin:0 3pt;font-size:9pt}.dc-meta{color:#888;font-size:9pt;margin-top:10pt}
+.doc-toc{page-break-after:always}.doc-toc h2{border:none}.doc-resume p{background:#f3f5f9;padding:10px}.doc-ctx{color:#555;font-style:italic}
+.retenu{background:#eef3fb;padding:6px 10px;border-left:3px solid #2f6cd6;margin:4px 0}ul{margin:4px 0}li{margin-bottom:3px}.by{color:#888;font-size:9pt}.vide{color:#999;font-style:italic}
+table{border-collapse:collapse;width:100%;margin-top:6px;font-size:10pt}th,td{border:1px solid #ccc;padding:4pt 6pt;text-align:left}`;
   const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><style>${css}</style></head><body>${ficheBodyHTML()}</body></html>`;
   const blob=new Blob(['﻿'+html],{type:'application/msword'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(projet.titre||'projet').replace(/[^\w -]/g,'')+'.doc'; a.click();
 }
