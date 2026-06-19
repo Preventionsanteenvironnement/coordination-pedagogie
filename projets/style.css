@@ -64,10 +64,19 @@ input,textarea,select{font:inherit}
 
 /* Liste projets */
 .proj-list{display:grid;grid-template-columns:1fr;gap:12px}
-.proj-card{text-align:left;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--r-sm);padding:15px 16px;box-shadow:var(--sh);width:100%;display:block}
-.proj-card h3{font-size:16.5px;font-weight:600}
-.proj-card p{margin:5px 0 9px;font-size:13.5px;color:var(--muted);line-height:1.5}
-.proj-meta{display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:12px;color:var(--faint)}
+@media(min-width:760px){.proj-list{grid-template-columns:1fr 1fr}}
+.proj-card{display:flex;align-items:center;gap:14px;text-align:left;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--rc,var(--accent));border-radius:var(--r-sm);padding:14px 16px;box-shadow:var(--sh);width:100%;transition:border-color .12s,transform .12s}
+.proj-card:hover{border-color:var(--rc,var(--accent));transform:translateY(-1px)}
+.pc-ring{--p:0;width:50px;height:50px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--rc,var(--accent)) calc(var(--p)*1%),var(--line) 0)}
+.pc-ring span{width:38px;height:38px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink)}
+.pc-body{flex:1;min-width:0}
+.pc-top{display:flex;align-items:center;gap:9px}
+.pc-top h3{flex:1;font-size:16px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-sum{margin:4px 0 8px;font-size:13px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pc-m{display:inline-flex;align-items:center;gap:4px}
+.pc-m .i{font-size:14px}
+.pc-go{flex:none;color:var(--faint)}.pc-go .i{font-size:20px}
+.proj-meta{display:flex;flex-wrap:wrap;gap:9px;align-items:center;font-size:12px;color:var(--faint)}
 .mbar{flex:1;min-width:80px;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
 .mbar i{display:block;height:100%;background:var(--accent)}
 .new-proj{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--line2);background:#fbfcfe;color:var(--accent);border-radius:var(--r-sm);padding:15px;font-weight:600;font-size:15px;width:100%}
