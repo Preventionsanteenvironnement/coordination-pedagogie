@@ -55,6 +55,10 @@ const ICONS = {
   ban:`<circle cx="12" cy="12" r="8.5"/><path d="m6.6 6.6 10.8 10.8"/>`,
   toggle:`<rect x="3" y="7" width="18" height="10" rx="5"/><circle cx="9" cy="12" r="3"/>`,
   sync:`<path d="M4 12a8 8 0 0 1 13.7-5.6L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 16"/><path d="M4 20v-4h4"/>`,
+  bulb:`<path d="M9.5 17.5h5"/><path d="M10 21h4"/><path d="M8 14a5 5 0 1 1 8 0c-.8.9-1.2 1.6-1.3 2.5h-5.4c-.1-.9-.5-1.6-1.3-2.5z"/>`,
+  book:`<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H18v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M6.5 18H18v3H6.5A1.5 1.5 0 0 1 5 19.5"/>`,
+  external:`<path d="M14 5h5v5"/><path d="M19 5 11 13"/><path d="M18 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h4"/>`,
+  clip:`<path d="M19 11l-7.5 7.5a4 4 0 0 1-5.7-5.7L13 5.6a2.6 2.6 0 0 1 3.7 3.7l-7.1 7.1a1.3 1.3 0 0 1-1.8-1.8l6.6-6.6"/>`,
 };
 const ic = n => ICONS[n] ? `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>` : "";
 
@@ -150,6 +154,9 @@ const isRapide = () => projet?.mode==="rapide";
 const visIds = () => { const en=projet?.enabled; if(Array.isArray(en)&&en.length) return ETAPES.map(e=>e.id).filter(id=>en.includes(id)); return isRapide()?RAPIDE.slice():ETAPES.map(e=>e.id); };
 const visIdx = () => { const set=new Set(visIds()); return ETAPES.map((e,i)=>i).filter(i=>set.has(ETAPES[i].id)); };
 const REPERES = [ {k:"periode",l:"Période",ph:"ex. janvier → mars"}, {k:"debut",l:"Début",t:"date"}, {k:"fin",l:"Fin",t:"date"}, {k:"frequence",l:"Fréquence",ph:"ex. 1 fois / semaine"}, {k:"lieu",l:"Lieu",ph:"ex. salle B12"}, {k:"nbBenef",l:"Bénéficiaires",ph:"nombre",t:"number"}, {k:"nbEnc",l:"Encadrants",ph:"nombre",t:"number"} ];
+const RTYPES = [ {id:"lien",l:"Lien web",icon:"link",c:"#2f6cd6"}, {id:"doc",l:"Document partagé",icon:"file",c:"#0f8a76"}, {id:"ref",l:"Texte officiel / référence",icon:"book",c:"#6b4bd6"}, {id:"idee",l:"Exemple / inspiration",icon:"bulb",c:"#c77f1a"}, {id:"contact",l:"Contact / partenaire",icon:"user",c:"#c0392b"} ];
+const RTM = Object.fromEntries(RTYPES.map(t=>[t.id,t]));
+const curRes = () => Array.isArray(projet?.ressources) ? projet.ressources.slice() : [];
 
 function nudge(etapeId, txt){
   const t = norm(txt).trim(); if(!t) return null;
@@ -220,6 +227,24 @@ function viewListe(){
   return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button>`}`;
 }
 
+function resRowHTML(r){
+  const t=RTM[r.type]||RTYPES[0]; const et=ETM[r.etape];
+  const titleTxt=esc(r.titre||r.url||"Sans titre");
+  const title=r.url?`<a class="res-title" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${titleTxt} ${ic("external")}</a>`:`<span class="res-title plain">${titleTxt}</span>`;
+  const todo=r.todo?`<button class="res-todo ${r.done?'done':''}" ${RO?'disabled':`data-res-todo="${r.id}"`}>${r.done?ic("check")+" Fait":"À traiter"}</button>`:"";
+  const acts=RO?"":`<button class="res-act" data-res-edit="${r.id}" aria-label="Modifier">${ic("pencil")}</button><button class="res-act" data-res-del="${r.id}" aria-label="Supprimer">${ic("trash")}</button>`;
+  return `<div class="res-row ${r.done?'res-done':''}"><span class="res-ico" style="--rc:${t.c}">${ic(t.icon)}</span><div class="res-main">${title}${r.note?`<div class="res-note">${esc(r.note)}</div>`:""}<div class="res-tags">${et?`<span class="res-etape">${esc(et.nom)}</span>`:""}${r.initiales?`<span class="res-by">${esc(r.initiales)}</span>`:""}${todo}</div></div><div class="res-side">${acts}</div></div>`;
+}
+function resCard(){
+  const list=curRes();
+  const rows=list.length?list.map(resRowHTML).join(""):`<p class="muted" style="font-size:13px;margin:8px 0 0">Liens, documents, références, contacts utiles… déposés par l'équipe.</p>`;
+  return `<div class="card res-card"><div class="rep-h">${ic("clip")} <b>Ressources du projet</b>${list.length?`<span class="res-count">${list.length}</span>`:""}${RO?"":`<button class="btn-mini" data-res-add="" style="margin-left:auto">${ic("plus")} Ajouter</button>`}</div><div class="res-list">${rows}</div>${list.length?`<div class="res-rgpd">${ic("shield")} Pas de lien contenant des données nominatives d'élèves — visible par toute l'équipe.</div>`:""}</div>`;
+}
+function resStrip(etapeId){
+  const list=curRes().filter(r=>r.etape===etapeId);
+  if(!list.length&&RO) return "";
+  return `<div class="res-strip"><div class="res-strip-h">${ic("clip")} Ressources utiles ici${RO?"":`<button class="btn-mini" data-res-add="${etapeId}" style="margin-left:auto">${ic("plus")} Ajouter</button>`}</div>${list.length?`<div class="res-list">${list.map(resRowHTML).join("")}</div>`:`<p class="muted" style="font-size:12.5px;margin:7px 0 0">Aucune ressource liée à cette étape pour l'instant.</p>`}</div>`;
+}
 function reperesCard(){
   const r=projet.reperes||{}; const filled=REPERES.filter(f=>r[f.k]);
   const items=filled.map(f=>`<div class="rp-it"><span class="rp-l">${esc(f.l)}</span><span class="rp-v">${esc(r[f.k])}</span></div>`).join("");
@@ -246,6 +271,7 @@ function viewOverview(){
   return `<div id="onlineInline">${onlineStrip()}</div>
     <div class="ov-head"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ov-meta"><div class="ov-titre">${esc(projet.titre)}</div>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}<div style="margin-top:9px">${stRow}</div></div></div>
     ${reperesCard()}
+    ${resCard()}
     ${firstTodo!=null&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(ETAPES[firstTodo].nom)}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("toggle")} ${vis.length} étape(s)</button>`}</div>
     ${tlTimeline()}
@@ -278,7 +304,7 @@ function viewEtape(){
     <div class="et-q">${esc(T(e.q))}</div><div class="et-def">${esc(T(e.def))}</div>
     <button class="concept-btn" data-concept="${e.id}">${ic("help")} Comprendre la notion</button>
     <div class="et-aide">${ic("info")}<span>${esc(T(e.aide))}</span></div>${exemples}</div>
-    ${contexte}${addZone}${regroupBar}<div class="contribs">${cards}</div>${ecartBlock}
+    ${contexte}${addZone}${regroupBar}<div class="contribs">${cards}</div>${ecartBlock}${resStrip(e.id)}
     <div class="pager"><button class="pgr" data-nav="-1">${ic("back")}<span>Précédent</span></button><button class="pgr next" data-nav="1"><span>Suivant</span>${ic("chev")}</button></div>`;
 }
 
@@ -314,8 +340,8 @@ function ficheBodyHTML(){
   const conts=[...new Set(contribs.filter(active).map(c=>c.initiales).filter(Boolean))];
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
   const acts=ofEt("actions").filter(a=>a.resp||a.ech||a.pst);
-  const _r=projet.reperes||{}; const _rf=REPERES.filter(f=>_r[f.k]);
-  const toc=[]; if(syn) toc.push("Résumé"); if(_rf.length) toc.push("Repères"); ETAPES.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((ETAPES.length+1)+". Plan d'action");
+  const _r=projet.reperes||{}; const _rf=REPERES.filter(f=>_r[f.k]); const _res=curRes();
+  const toc=[]; if(syn) toc.push("Résumé"); if(_rf.length) toc.push("Repères"); ETAPES.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((ETAPES.length+1)+". Plan d'action"); if(_res.length) toc.push("Ressources & références");
   const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:""}</div><div class="dc-meta">${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
   const tocHtml=`<div class="doc-toc"><h2>Sommaire</h2><ol class="toc-list">${toc.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`;
   const resume=syn?`<section class="doc-resume"><h2>Résumé</h2><p>${esc(syn)}</p></section>`:"";
@@ -326,7 +352,8 @@ function ficheBodyHTML(){
     return `<section><h2><span class="sn">${num}.</span> ${esc(e.nom)}</h2>${body}</section>`;}).join("");
   const plan=acts.length?`<section><h2><span class="sn">${++num}.</span> Plan d'action</h2><table class="doc-pl"><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
   const repSec=_rf.length?`<section class="doc-rep"><h2>Repères</h2><table class="doc-pl"><tr><th>Repère</th><th>Valeur</th></tr>${_rf.map(f=>`<tr><td>${esc(f.l)}</td><td>${esc(_r[f.k])}</td></tr>`).join("")}</table></section>`:"";
-  return cover+tocHtml+resume+repSec+sections+plan;
+  const resAnnex=_res.length?`<section class="doc-res"><h2>Ressources &amp; références</h2><ul class="doc-res-list">${_res.map(r=>{const t=RTM[r.type]||RTYPES[0];return `<li><b>${esc(r.titre||r.url||"Sans titre")}</b> <span class="dr-type">${esc(t.l)}</span>${ETM[r.etape]?` <span class="dr-et">— ${esc(ETM[r.etape].nom)}</span>`:""}${r.url?`<br><a href="${esc(r.url)}">${esc(r.url)}</a>`:""}${r.note?`<br><span class="dr-note">${esc(r.note)}</span>`:""}</li>`;}).join("")}</ul></section>`:"";
+  return cover+tocHtml+resume+repSec+sections+plan+resAnnex;
 }
 function viewFiche(){ return `<div class="fiche-actions"><button class="btn" data-overview>${ic("back")} Vue d'ensemble</button><button class="btn" id="word">${ic("word")} Word</button><button class="btn primary" id="print">${ic("printer")} Imprimer / PDF</button></div><div class="doc">${ficheBodyHTML()}</div>`; }
 function exportWord(){
@@ -335,7 +362,8 @@ h1{font-size:20pt;color:#26365a}h2{font-size:13pt;color:#2f6cd6;border-bottom:1p
 .doc-cover{text-align:center;page-break-after:always;padding-top:120pt}.dc-brand{font-size:10pt;letter-spacing:1pt;color:#2f6cd6}.dc-title{font-size:28pt;margin:14pt 0 6pt}.dc-ctx{color:#555;font-style:italic}.dc-tags span{display:inline-block;background:#eef3fb;color:#26365a;border:1px solid #cdd6e6;padding:2pt 8pt;margin:0 3pt;font-size:9pt}.dc-meta{color:#888;font-size:9pt;margin-top:10pt}
 .doc-toc{page-break-after:always}.doc-toc h2{border:none}.doc-resume p{background:#f3f5f9;padding:10px}.doc-ctx{color:#555;font-style:italic}
 .retenu{background:#eef3fb;padding:6px 10px;border-left:3px solid #2f6cd6;margin:4px 0}ul{margin:4px 0}li{margin-bottom:3px}.by{color:#888;font-size:9pt}.vide{color:#999;font-style:italic}
-table{border-collapse:collapse;width:100%;margin-top:6px;font-size:10pt}th,td{border:1px solid #ccc;padding:4pt 6pt;text-align:left}`;
+table{border-collapse:collapse;width:100%;margin-top:6px;font-size:10pt}th,td{border:1px solid #ccc;padding:4pt 6pt;text-align:left}
+.doc-res-list{padding-left:18px}.doc-res-list li{margin-bottom:7pt;font-size:10.5pt}.dr-type{color:#666;font-size:9pt}.dr-et{color:#888;font-size:9pt}.dr-note{color:#555;font-size:9.5pt}`;
   const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'><style>${css}</style></head><body>${ficheBodyHTML()}</body></html>`;
   const blob=new Blob(['﻿'+html],{type:'application/msword'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=(projet.titre||'projet').replace(/[^\w -]/g,'')+'.doc'; a.click();
 }
@@ -386,6 +414,36 @@ function openPerso(){
   draw();
 }
 
+async function saveRes(arr){ try{ await updateDoc(doc(db,COL,projet.id),{ressources:arr}); saved(); }catch(e){ console.error(e); toast("Action impossible."); } }
+async function addRessource(o){ const arr=curRes(); arr.push({id:"r"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), ...o}); await saveRes(arr); }
+async function updRessource(id,o){ await saveRes(curRes().map(r=>r.id===id?{...r,...o}:r)); }
+async function delRessource(id){ await saveRes(curRes().filter(r=>r.id!==id)); }
+async function toggleResTodo(id){ await saveRes(curRes().map(r=>r.id===id?{...r,done:!r.done}:r)); }
+function openRessource(existing, presetEtape){
+  const r=existing||{type:"lien", etape:presetEtape||"", todo:false};
+  const typeChips=RTYPES.map(t=>`<button type="button" class="rt-pick ${r.type===t.id?'on':''}" data-rtype="${t.id}" style="--rc:${t.c}"><span class="rt-ic">${ic(t.icon)}</span>${esc(t.l)}</button>`).join("");
+  const etOpts=`<option value="">— Aucune étape précise —</option>`+ETAPES.map(e=>`<option value="${e.id}" ${r.etape===e.id?'selected':''}>${esc(e.nom)}</option>`).join("");
+  openSheet(`<div class="sheet-head"><h3>${existing?"Modifier la ressource":"Ajouter une ressource"}</h3><button class="x" data-close>${ic("x")}</button></div>
+    <div class="field"><label>Type</label><div class="rt-row">${typeChips}</div></div>
+    <div class="field"><label for="rTitre">Titre</label><input id="rTitre" type="text" placeholder="ex. Padlet — recensement des besoins" value="${esc(r.titre||'')}"></div>
+    <div class="field"><label for="rUrl">Lien (https://…)</label><input id="rUrl" type="url" inputmode="url" placeholder="https://…" value="${esc(r.url||'')}"></div>
+    <div class="field"><label for="rNote">À quoi ça sert ?</label><input id="rNote" type="text" placeholder="ex. Pour recueillir les retours avant le diagnostic" value="${esc(r.note||'')}"></div>
+    <div class="field"><label for="rEtape">Rattacher à une étape</label><select id="rEtape">${etOpts}</select></div>
+    <label class="rchk"><input type="checkbox" id="rTodo" ${r.todo?'checked':''}> <span>Marquer « à traiter » (pense-bête d'équipe)</span></label>
+    <p class="muted" style="font-size:12px;margin:10px 0 0;display:flex;gap:6px;align-items:flex-start">${ic("shield")}<span>Évitez tout lien contenant des données nominatives d'élèves.</span></p>
+    <div class="actions"><button class="btn primary" id="rSave">${ic("check")} ${existing?"Enregistrer":"Ajouter"}</button></div>`);
+  let type=r.type;
+  $("#overlay").querySelectorAll(".rt-pick").forEach(b=>b.onclick=()=>{type=b.dataset.rtype;$("#overlay").querySelectorAll(".rt-pick").forEach(x=>x.classList.toggle("on",x===b));});
+  $("#rSave").onclick=async()=>{
+    const titre=$("#rTitre").value.trim(); let url=$("#rUrl").value.trim();
+    if(url && !/^https?:\/\//i.test(url)) url="https://"+url;
+    if(!titre && !url){ toast("Indiquez au moins un titre ou un lien."); return; }
+    const obj={type, titre:titre||url, url, note:$("#rNote").value.trim(), etape:$("#rEtape").value, todo:$("#rTodo").checked};
+    if(existing){ await updRessource(existing.id, obj); } else { obj.initiales=ident?ident.initiales:""; obj.done=false; await addRessource(obj); }
+    closeSheet();
+  };
+}
+
 /* ---------- Firestore ---------- */
 async function loadListe(){
   try{ const snap=await getDocs(collection(db,COL));
@@ -428,6 +486,10 @@ document.addEventListener("click", e=>{
   const cc=e.target.closest("[data-concept]");if(cc) return openConcept(cc.dataset.concept);
   if(e.target.closest("[data-reperes]")) return openReperes();
   if(e.target.closest("[data-perso]")) return openPerso();
+  const ra=e.target.closest("[data-res-add]"); if(ra){ if(!ident){toast("Identifiez-vous d'abord.");return openIdent();} return openRessource(null, ra.dataset.resAdd||""); }
+  const rEd=e.target.closest("[data-res-edit]"); if(rEd){ const r=curRes().find(x=>x.id===rEd.dataset.resEdit); if(r) openRessource(r); return; }
+  const rDl=e.target.closest("[data-res-del]"); if(rDl){ if(confirm("Supprimer cette ressource ?")) delRessource(rDl.dataset.resDel); return; }
+  const rTd=e.target.closest("[data-res-todo]"); if(rTd) return toggleResTodo(rTd.dataset.resTodo);
   const sl=e.target.closest("[data-sel]");if(sl){const id=sl.dataset.sel;selected.has(id)?selected.delete(id):selected.add(id);return render();}
   if(e.target.closest("[data-regroup]")){regroup=!regroup;selected.clear();return render();}
   if(e.target.closest("[data-merge]")) return fusionner();
