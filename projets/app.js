@@ -242,7 +242,7 @@ function viewEtape(){
         ${regroup?"":`<div class="cact">${RO?"":`<button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>`}${(!RO&&mine.has(c.id))?`<button class="cmini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="cmini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</div>
         <details class="comments"><summary>${ic("comment")} Commentaires${coms.length?` (${coms.length})`:""}</summary><div class="com-list">${coms.map(k=>`<div class="com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="cmini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
       </div></article>`;
-  }).join() : `<div class="empty">Personne n'a encore contribué à cette étape.${locked||RO?"":" Lancez-vous !"}</div>`;
+  }).join("") : `<div class="empty">Personne n'a encore contribué à cette étape.${locked||RO?"":" Lancez-vous !"}</div>`;
   const lockBtn=RO?"":`<button class="lock-btn ${locked?"on":""}" data-lock="${e.id}">${ic(locked?"lock":"unlock")} ${locked?"Verrouillée":"Verrouiller"}</button>`;
   const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup
     ? `<div class="regroup-bar"><span>${selected.size} sélectionné(s)</span><button class="btn-mini" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="btn-mini" data-regroup>Annuler</button></div>`
