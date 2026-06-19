@@ -4,7 +4,7 @@
 ============================================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, doc, addDoc, getDocs, onSnapshot, updateDoc, deleteDoc,
-  serverTimestamp, increment, query, orderBy }
+  serverTimestamp, query, orderBy }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -21,7 +21,7 @@ const COL = "coordination_projets";
 
 /* ---------- Icônes ---------- */
 const ICONS = {
-  back:`<path d="m14 6-6 6 6 6"/>`, chev:`<path d="m9 6 6 6-6 6"/>`,
+  back:`<path d="m14 6-6 6 6 6"/>`, chev:`<path d="m9 6 6 6-6 6"/>`, down:`<path d="m6 9 6 6 6-6"/>`,
   eye:`<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>`,
   stethoscope:`<path d="M6 3v5a4 4 0 0 0 8 0V3"/><path d="M6 3H4M14 3h2"/><path d="M10 16a5 5 0 0 0 5 5 4 4 0 0 0 4-4v-2"/><circle cx="19" cy="13" r="2"/>`,
   help:`<circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.5 2.5 0 0 1 4 1.9c0 1.6-2 2-2 3.6"/><circle cx="11.7" cy="17.4" r=".7" fill="currentColor" stroke="none"/>`,
@@ -30,6 +30,7 @@ const ICONS = {
   checklist:`<path d="M9 5h11M9 12h11M9 19h11"/><path d="m3.5 5 1.2 1.2 2-2.4M3.5 12l1.2 1.2 2-2.4M3.5 19l1.2 1.2 2-2.4"/>`,
   bolt:`<path d="M13 3 5 13.5h5.5L10 21l8-10.5h-5.5z"/>`,
   tool:`<path d="M14.7 6.3a3.6 3.6 0 0 0-4.8 4.6l-5.4 5.4 1.9 1.9 5.4-5.4a3.6 3.6 0 0 0 4.6-4.8l-2.3 2.3-1.9-.4-.4-1.9z"/>`,
+  calendar:`<rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8 3.5v4M16 3.5v4"/>`,
   shield:`<path d="M12 3 5 6v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6z"/>`,
   chart:`<path d="M5 20V10M12 20V4M19 20v-7"/>`,
   clipboard:`<rect x="6" y="5" width="12" height="16" rx="2"/><path d="M9 5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1"/><path d="M9.5 12l1.5 1.5 3.5-3.5"/>`,
@@ -40,34 +41,71 @@ const ICONS = {
   send:`<path d="M4 12 20 4l-6 16-2.5-6.5z"/><path d="M11.5 13.5 20 4"/>`,
   file:`<path d="M13.5 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7.5z"/><path d="M13.5 3v4.5H18"/>`,
   printer:`<path d="M7 9V4h10v5"/><rect x="5" y="9" width="14" height="7" rx="1.5"/><path d="M7 14h10v6H7z"/>`,
-  link:`<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>`,
-  copy:`<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>`,
-  thumb:`<path d="M7 11v9H4v-9z"/><path d="M7 11l4-7a2 2 0 0 1 2.8 2.4L13 11h5.5a2 2 0 0 1 2 2.4l-1.2 5A2 2 0 0 1 17.3 20H7"/>`,
+  star:`<path d="m12 4 2.3 4.7 5.2.8-3.8 3.6.9 5.1-4.6-2.4-4.6 2.4.9-5.1L4.5 9.5l5.2-.8z"/>`,
+  info:`<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".8" fill="currentColor" stroke="none"/>`,
   trash:`<path d="M5 7h14M9 7V5h6v2M6 7l1 13h10l1-13"/>`,
   x:`<path d="m6 6 12 12M18 6 6 18"/>`,
   folder:`<path d="M3.5 7.5a2 2 0 0 1 2-2H9l2 2h7.5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/>`,
-  sparkles:`<path d="m12 4 1.4 3.6L17 9l-3.6 1.4L12 14l-1.4-3.6L7 9z"/><path d="m18 13.5.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6z"/>`,
   check:`<path d="M5 12.5 10 17.5 19.5 7"/>`,
 };
 const ic = n => ICONS[n] ? `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>` : "";
 
 /* ---------- Étapes (méthodologie) ---------- */
 const ETAPES = [
-  { id:"constats", nom:"Constats", icon:"eye", q:"Qu'est-ce qu'on observe concrètement ?", aide:"Observable et factuel — surtout pas un jugement.",
+  { id:"constats", nom:"Constats", icon:"eye",
+    q:"Qu'est-ce qu'on observe concrètement ?",
+    def:"On part du réel : ce qu'on voit, sans interpréter ni juger. Un constat est observable et vérifiable.",
+    aide:"Décrire un comportement précis dans une situation précise.",
     ok:"Certains élèves quittent le cours quand ils ne comprennent pas la consigne.", non:"Les élèves sont immatures, ingérables." },
-  { id:"diagnostic", nom:"Diagnostic", icon:"stethoscope", q:"Qu'est-ce que ces constats révèlent comme besoin réel ?", aide:"On interprète les mécanismes derrière les constats — on ne décrit plus." },
-  { id:"problematique", nom:"Problématique", icon:"help", q:"Quel problème précis allons-nous traiter ?", aide:"Ni trop large, ni une solution déguisée. Faites converger l'équipe avec les votes." },
-  { id:"finalite", nom:"Finalité", icon:"compass", q:"Pourquoi fait-on ce projet ? (le cap)", aide:"Le sens large, non mesurable." },
-  { id:"obj_general", nom:"Objectif général", icon:"target", q:"Qu'est-ce que le dispositif doit permettre à l'élève de faire ?", aide:"Une capacité visée, précise." },
-  { id:"obj_op", nom:"Objectifs opérationnels", icon:"checklist", q:"Qu'est-ce qu'on travaille concrètement et qu'on pourra vérifier ?", aide:"Verbes : identifier, repérer, formuler, préparer, réaliser. À éviter : comprendre, améliorer, favoriser." },
-  { id:"actions", nom:"Actions", icon:"bolt", q:"Quelles actions concrètes répondent aux objectifs ?", aide:"Chaque action doit servir un objectif précis." },
-  { id:"moyens", nom:"Moyens", icon:"tool", q:"De quels moyens a-t-on besoin ?", aide:"Salle, adulte référent, fiches, ENT/Pronote, partenaires…" },
-  { id:"cadre", nom:"Cadre", icon:"shield", q:"Quelles sont les limites du dispositif ?", aide:"Ce qu'il ne fait pas : pas de sanction, pas de suivi psy, pas de remplacement du CPE…" },
-  { id:"indicateurs", nom:"Indicateurs", icon:"chart", q:"À quoi verra-t-on que ça marche ?", aide:"Peu, mais utiles : passages, ressources identifiées, demandes préparées, actions de sortie…" },
-  { id:"evaluation", nom:"Évaluation", icon:"clipboard", q:"Comment évalue-t-on (activité, résultats, effets) ?", aide:"Prévue dès le départ, pas à la fin." },
-  { id:"vigilance", nom:"Points de vigilance", icon:"alert", q:"Quels risques anticiper ?", aide:"Confusion avec la vie scolaire, sanction déguisée, espace refuge, attentes trop larges…" },
+  { id:"diagnostic", nom:"Diagnostic", icon:"stethoscope",
+    q:"Qu'est-ce que ces constats révèlent comme besoin réel ?",
+    def:"Le constat décrit ; le diagnostic comprend. On cherche les mécanismes derrière ce qu'on observe.",
+    aide:"Relisez les constats ci-dessus et demandez : « de quoi est-ce le signe ? »." },
+  { id:"problematique", nom:"Problématique", icon:"help",
+    q:"Quel problème précis allons-nous traiter ?",
+    def:"La question centrale du projet. Ni trop large (« aider les élèves »), ni une solution déguisée (« créer une permanence »).",
+    aide:"Formulez une vraie question. Marquez d'un ★ celle que l'équipe retient." },
+  { id:"finalite", nom:"Finalité", icon:"compass",
+    q:"Pourquoi fait-on ce projet ? Le cap.",
+    def:"Le sens large, la direction. Elle n'est pas mesurable — c'est l'horizon, pas l'objectif précis.",
+    aide:"Ex. « Favoriser l'accrochage scolaire et social des élèves »." },
+  { id:"obj_general", nom:"Objectif général", icon:"target",
+    q:"Qu'est-ce que le dispositif doit permettre à l'élève de faire ?",
+    def:"La capacité visée — concrète, contrairement à la finalité. Ce que l'élève saura faire.",
+    aide:"Ex. « Identifier une difficulté, repérer une ressource et préparer une action »." },
+  { id:"obj_op", nom:"Objectifs opérationnels", icon:"checklist",
+    q:"Qu'est-ce qu'on travaille concrètement et qu'on pourra vérifier ?",
+    def:"On rend l'objectif général observable, en plusieurs objectifs vérifiables.",
+    aide:"Verbes d'action : identifier, repérer, formuler, préparer, réaliser. À éviter : comprendre, améliorer, favoriser." },
+  { id:"actions", nom:"Actions", icon:"bolt",
+    q:"Quelles actions concrètes répondent aux objectifs ?",
+    def:"Ce qu'on met réellement en place. Chaque action doit servir un objectif opérationnel.",
+    aide:"Ex. fiche « je prépare ma demande », carte des ressources, fiche retour après absence…" },
+  { id:"moyens", nom:"Moyens", icon:"tool",
+    q:"De quels moyens a-t-on besoin ?",
+    def:"Les ressources nécessaires : humaines, matérielles, partenaires.",
+    aide:"Salle, adulte référent, fiches, ENT/Pronote, liens CPE/PP/DDFPT/infirmière/PsyEN…" },
+  { id:"miseoeuvre", nom:"Mise en œuvre", icon:"calendar",
+    q:"Où, quand, combien de temps ?",
+    def:"Le concret de terrain : sans calendrier ni lieu, un projet reste une intention.",
+    aide:"Lieu · créneau · période de l'année · durée · fréquence · échéances et bilans d'étape." },
+  { id:"cadre", nom:"Cadre", icon:"shield",
+    q:"Quelles sont les limites du dispositif ?",
+    def:"Ce que le dispositif ne fait pas. Le cadre protège le projet des dérives.",
+    aide:"Ex. pas de sanction, pas de suivi psy, pas de remplacement du CPE, sortie obligatoire avec une action…" },
+  { id:"indicateurs", nom:"Indicateurs", icon:"chart",
+    q:"À quoi verra-t-on que ça marche ?",
+    def:"Les signes observables ou mesurables du suivi. Peu, mais utiles.",
+    aide:"Ex. nombre de passages, ressources identifiées, demandes préparées, actions de sortie." },
+  { id:"evaluation", nom:"Évaluation", icon:"clipboard",
+    q:"Comment évalue-t-on ?",
+    def:"Trois niveaux : l'activité (a-t-elle eu lieu ?), les résultats immédiats, les effets. Prévue dès le départ.",
+    aide:"Bilans par période, analyse des usages, ajustements." },
+  { id:"vigilance", nom:"Points de vigilance", icon:"alert",
+    q:"Quels risques anticiper ?",
+    def:"Les pièges à éviter pour que le projet ne dévie pas de son intention.",
+    aide:"Ex. confusion avec la vie scolaire, sanction déguisée, espace refuge, attentes trop larges." },
 ];
-const CONVERGE = new Set(["problematique","finalite","obj_general"]); // étapes où l'on retient le plus voté
 const ROLES = ["Prof", "Prof PSE", "Prof principal", "Enseignant pro", "CPE", "DDFPT", "Infirmier·ère", "PsyEN", "AESH / Coordo ULIS", "Direction", "Documentaliste", "Autre"];
 const PALETTE = ["#534ab7","#0f6e56","#993c1d","#185fa5","#9a5f0a","#993556","#3c6e3c","#5a6b8c"];
 const colorFor = s => PALETTE[[...String(s||"?")].reduce((a,c)=>a+c.charCodeAt(0),0) % PALETTE.length];
@@ -75,23 +113,21 @@ const colorFor = s => PALETTE[[...String(s||"?")].reduce((a,c)=>a+c.charCodeAt(0
 /* ---------- État ---------- */
 const params = new URLSearchParams(location.search);
 let ident = JSON.parse(localStorage.getItem("projets_ident_v1") || "null");
-let votes = new Set(JSON.parse(localStorage.getItem("projets_votes_v1") || "[]"));
 let mine = new Set(JSON.parse(localStorage.getItem("projets_mine_v1") || "[]"));
 let view = "liste";
 let projets = [];
-let projet = null;          // {id, titre, contexte}
-let contribs = [];          // contributions du projet courant
+let projet = null;
+let contribs = [];
 let etapeIdx = 0;
 let unsub = null;
 let fbError = false;
 
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-const norm = s => String(s||"").toLowerCase();
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2400);}
-function saveVotes(){localStorage.setItem("projets_votes_v1",JSON.stringify([...votes]));}
 function saveMine(){localStorage.setItem("projets_mine_v1",JSON.stringify([...mine]));}
 const avatar = (ini)=>`<span class="ava" style="background:${colorFor(ini)}">${esc((ini||"?").slice(0,3))}</span>`;
+const sortC = arr => arr.slice().sort((a,b)=>(b.epingle?1:0)-(a.epingle?1:0) || (a._t)-(b._t));
 const base = location.origin + location.pathname;
 
 /* ---------- Render ---------- */
@@ -102,6 +138,7 @@ function render(){
   $("#subtitle").textContent = inProj ? (view==="fiche" ? "Fiche projet" : ETAPES[etapeIdx]?.nom) : "Construire à plusieurs mains";
   const ib=$("#identBtn");
   if(ident){ ib.hidden=false; ib.innerHTML=`${ic("user")} ${esc(ident.initiales)}`; } else { ib.hidden=true; }
+  const fb=$("#ficheBtn"); fb.hidden = !(inProj && view!=="fiche"); fb.innerHTML=`${ic("file")} Fiche`;
   $("#etapebar").hidden = !inProj;
   if(inProj) renderEtapeBar();
   $("#view").innerHTML = view==="projet" ? viewEtape() : view==="fiche" ? viewFiche() : viewListe();
@@ -125,8 +162,7 @@ function viewListe(){
         <span class="ident-ava">${ic("user")}</span>
         <div class="ic-tx" style="text-align:left"><strong>Qui êtes-vous ?</strong><small>Initiales + rôle (RGPD : pas de nom)</small></div>
         <span class="btn-mini">Définir</span></button>`;
-  const banner = fbError ? `<div class="banner">${ic("alert")}<span><b>Activation Firestore requise.</b> Les règles de la collection <code>coordination_projets</code> doivent être publiées dans la console Firebase pour enregistrer et partager les contributions.</span></div>` : "";
-
+  const banner = fbError ? `<div class="banner">${ic("alert")}<span><b>Activation Firestore requise.</b> Publiez les règles de la collection <code>coordination_projets</code> dans la console Firebase pour enregistrer et partager les contributions.</span></div>` : "";
   const list = projets.length ? `<div class="proj-list">${projets.map(p=>{
     const mat = Math.round((p._etapes/ETAPES.length)*100);
     return `<button class="proj-card" data-open="${esc(p.id)}">
@@ -135,7 +171,6 @@ function viewListe(){
         <span class="mbar"><i style="width:${mat}%"></i></span><span>${mat}%</span></div>
     </button>`;}).join("")}</div>`
     : `<div class="empty">Aucun projet pour l'instant. Créez le premier ci-dessous — l'équipe pourra le construire avec vous.</div>`;
-
   return `${banner}
     <div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape — du constat à l'évaluation. Chacun contribue, la fiche se compose toute seule.</p></div>
     <div class="sec-title">${ic("user")} Votre identité</div>${idCard}
@@ -147,20 +182,31 @@ function viewListe(){
 /* ---------- Vue étape ---------- */
 function viewEtape(){
   const e = ETAPES[etapeIdx];
-  const list = contribs.filter(c=>c.etape===e.id).sort((a,b)=>(b.daccord||0)-(a.daccord||0) || (a._t)-(b._t));
+  const list = sortC(contribs.filter(c=>c.etape===e.id));
   const exemples = (e.ok||e.non) ? `<div class="exemples">
     ${e.ok?`<div class="ex ok">${ic("check")}<span><b>À préférer —</b> ${esc(e.ok)}</span></div>`:""}
     ${e.non?`<div class="ex non">${ic("x")}<span><b>À éviter —</b> ${esc(e.non)}</span></div>`:""}</div>` : "";
-  const cards = list.length ? list.map((c,idx)=>{
-    const isTop = CONVERGE.has(e.id) && idx===0 && (c.daccord||0)>0;
-    const voted = votes.has(c.id);
-    return `<article class="contrib ${isTop?"top":""}">
+
+  // Contexte amont : ce sur quoi cette étape s'appuie
+  let contexte = "";
+  if(etapeIdx===0){
+    if(projet.contexte) contexte = `<details class="context" open><summary>${ic("folder")} Le contexte du projet</summary><div class="ctx-body"><p>${esc(projet.contexte)}</p></div></details>`;
+  } else {
+    const prev = ETAPES[etapeIdx-1];
+    const pl = sortC(contribs.filter(c=>c.etape===prev.id));
+    const body = pl.length ? `<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`
+      : `<p class="vide">Rien encore à l'étape « ${esc(prev.nom)} ».</p>`;
+    contexte = `<details class="context" open><summary>${ic(prev.icon)} S'appuie sur : ${esc(prev.nom)}</summary><div class="ctx-body">${body}</div></details>`;
+  }
+
+  const cards = list.length ? list.map(c=>{
+    return `<article class="contrib ${c.epingle?"top":""}">
       ${avatar(c.initiales)}
       <div class="cb">
-        <div class="cmeta">${isTop?'<span class="ctop-tag">retenu</span>':""}<b style="color:var(--ink);font-weight:600">${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}</div>
+        <div class="cmeta">${c.epingle?`<span class="ctop-tag">${ic("star")} retenu</span>`:""}<b style="color:var(--ink);font-weight:600">${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}</div>
         <div class="ctext">${esc(c.texte)}</div>
         <div class="cact">
-          <button class="vote ${voted?"on":""}" data-vote="${esc(c.id)}">${ic("thumb")} d'accord · ${c.daccord||0}</button>
+          <button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu pour la fiche":"Retenir"}</button>
           ${mine.has(c.id)?`<button class="cdel" data-del="${esc(c.id)}">${ic("trash")} retirer</button>`:""}
         </div>
       </div></article>`;
@@ -172,9 +218,11 @@ function viewEtape(){
       <div class="eyebrow">Étape ${etapeIdx+1} / ${ETAPES.length}</div>
       <h2>${esc(e.nom)}</h2>
       <div class="et-q">${esc(e.q)}</div>
-      <div class="et-aide">${esc(e.aide)}</div>
+      <div class="et-def">${esc(e.def)}</div>
+      <div class="et-aide">${ic("info")}<span>${esc(e.aide)}</span></div>
       ${exemples}
     </div>
+    ${contexte}
     <div class="contribs">${cards}</div>
     <div class="add-row">
       ${avatar(ident?ident.initiales:"?")}
@@ -191,21 +239,20 @@ function viewEtape(){
 function viewFiche(){
   const byEt = {};
   contribs.forEach(c=>{ (byEt[c.etape]=byEt[c.etape]||[]).push(c); });
-  Object.values(byEt).forEach(a=>a.sort((x,y)=>(y.daccord||0)-(x.daccord||0)||(x._t)-(y._t)));
   const sections = ETAPES.map(e=>{
-    const items=byEt[e.id]||[];
+    const items=sortC(byEt[e.id]||[]);
     let body;
     if(!items.length){ body=`<p class="vide">À compléter.</p>`; }
-    else if(CONVERGE.has(e.id)){
-      const top=items[0];
-      body=`<div class="retenu">${esc(top.texte)}</div>` + (items.length>1?`<ul>${items.slice(1).map(c=>`<li>${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:"");
-    } else {
-      body=`<ul>${items.map(c=>`<li>${esc(c.texte)} <span class="by">— ${esc(c.role)}${(c.daccord||0)?` · ${c.daccord}👍`:""}</span></li>`).join("")}</ul>`;
+    else {
+      const ep=items.filter(c=>c.epingle), au=items.filter(c=>!c.epingle);
+      body = ep.map(c=>`<div class="retenu">${esc(c.texte)}</div>`).join("")
+        + (au.length?`<ul>${au.map(c=>`<li>${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:"");
     }
     return `<section><h2>${esc(e.nom)}</h2>${body}</section>`;
   }).join("");
   return `
     <div class="fiche-actions">
+      <button class="btn" data-etape="0">${ic("back")} Revenir aux étapes</button>
       <button class="btn primary" id="print">${ic("printer")} Imprimer / PDF</button>
     </div>
     <div class="doc">
@@ -229,7 +276,7 @@ function openIdent(){
   let role = ident?ident.role:"";
   $("#iRoles").querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{role=b.dataset.role;$("#iRoles").querySelectorAll(".role-chip").forEach(x=>x.classList.toggle("sel",x===b));});
   $("#saveIdent").onclick=()=>{ const ini=$("#iIni").value.trim().toUpperCase(); if(!ini){toast("Indiquez vos initiales.");return;} if(!role){toast("Choisissez votre rôle.");return;}
-    ident={initiales:ini,role}; localStorage.setItem("projets_ident_v1",JSON.stringify(ident)); closeSheet(); render(); toast("Identité enregistrée ✓"); };
+    ident={initiales:ini,role}; localStorage.setItem("projets_ident_v1",JSON.stringify(ident)); closeSheet(); render(); toast("Identité enregistrée"); };
 }
 
 function openNew(){
@@ -265,12 +312,10 @@ async function loadListe(){
 
 async function openProjet(id){
   if(unsub){unsub();unsub=null;}
-  // charge le doc projet (depuis la liste si dispo, sinon getDocs)
   projet = projets.find(p=>p.id===id) || null;
   if(!projet){ try{ const s=await getDocs(collection(db,COL)); const d=s.docs.find(x=>x.id===id); if(d) projet={id,...d.data()}; }catch(_){} }
   if(!projet){ toast("Projet introuvable."); view="liste"; return loadListe(); }
   view="projet"; etapeIdx=0; contribs=[]; render();
-  // temps réel sur les contributions
   try{
     unsub=onSnapshot(query(collection(db,COL,id,"contributions"),orderBy("createdAt","asc")), snap=>{
       contribs=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});
@@ -284,16 +329,15 @@ async function addContribution(texte){
   texte=texte.trim(); if(!texte) return;
   try{
     const ref=await addDoc(collection(db,COL,projet.id,"contributions"),
-      {etape:ETAPES[etapeIdx].id,texte,initiales:ident.initiales,role:ident.role,daccord:0,createdAt:serverTimestamp()});
+      {etape:ETAPES[etapeIdx].id,texte,initiales:ident.initiales,role:ident.role,epingle:false,createdAt:serverTimestamp()});
     mine.add(ref.id); saveMine();
   }catch(e){ console.error(e); toast("Envoi impossible (règles Firestore)."); }
 }
 
-async function toggleVote(cid){
-  const on=votes.has(cid); const delta=on?-1:1;
-  try{ await updateDoc(doc(db,COL,projet.id,"contributions",cid),{daccord:increment(delta)});
-    if(on)votes.delete(cid);else votes.add(cid); saveVotes();
-  }catch(e){ console.error(e); toast("Vote impossible (règles Firestore)."); }
+async function togglePin(cid){
+  const c=contribs.find(x=>x.id===cid); if(!c) return;
+  try{ await updateDoc(doc(db,COL,projet.id,"contributions",cid),{epingle:!c.epingle}); }
+  catch(e){ console.error(e); toast("Action impossible (règles Firestore)."); }
 }
 
 async function delContribution(cid){
@@ -308,14 +352,16 @@ document.addEventListener("click", e=>{
   const op=e.target.closest("[data-open]"); if(op) return openProjet(op.dataset.open);
   const et=e.target.closest("[data-etape]"); if(et){ etapeIdx=+et.dataset.etape; view="projet"; return render(); }
   const fi=e.target.closest("[data-fiche]"); if(fi){ view="fiche"; return render(); }
-  const vt=e.target.closest("[data-vote]"); if(vt) return toggleVote(vt.dataset.vote);
+  const pn=e.target.closest("[data-pin]"); if(pn) return togglePin(pn.dataset.pin);
   const dl=e.target.closest("[data-del]"); if(dl) return delContribution(dl.dataset.del);
+  if(e.target.closest("#ficheBtn")){ view="fiche"; return render(); }
   if(e.target.closest("#print")) return window.print();
   if(e.target.closest("[data-close]")||e.target.id==="overlay") return closeSheet();
   if(e.target.closest("#identBtn")) return openIdent();
   if(e.target.closest("#sendContrib")){ const t=$("#newContrib"); const v=t.value; t.value=""; return addContribution(v); }
   if(e.target.closest("#back")){
     if(view==="liste"){ location.href="../"; return; }
+    if(view==="fiche"){ view="projet"; return render(); }
     if(unsub){unsub();unsub=null;} view="liste"; projet=null; contribs=[]; render(); loadListe(); return;
   }
 });

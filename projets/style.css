@@ -86,8 +86,28 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
 .etape-head .et-ic{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;margin-bottom:9px}
 .etape-head .et-ic .i{font-size:23px}
 .etape-head h2{font-size:20px}
-.etape-head .et-q{font-size:15px;color:var(--ink);margin-top:3px}
-.etape-head .et-aide{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.etape-head .et-q{font-size:15.5px;font-weight:600;color:var(--ink);margin-top:4px}
+.etape-head .et-def{font-size:14px;color:var(--ink);margin-top:7px;line-height:1.55}
+.etape-head .et-aide{display:flex;gap:7px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:9px;line-height:1.5;background:var(--accent-soft);border-radius:var(--r-sm);padding:9px 11px}
+.etape-head .et-aide .i{font-size:16px;color:var(--accent);flex:none;margin-top:1px}
+.tb-fiche{display:inline-flex;align-items:center;gap:5px;border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:var(--r-pill);padding:7px 13px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.tb-fiche .i{font-size:16px}
+.context{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--r-sm);margin-bottom:14px;box-shadow:var(--sh);overflow:hidden}
+.context>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:11px 14px;font-size:13.5px;font-weight:600;color:var(--accent)}
+.context>summary::-webkit-details-marker{display:none}
+.context>summary .i{font-size:17px;flex:none}
+.context>summary::after{content:"";margin-left:auto;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);width:7px;height:7px;transform:rotate(-45deg);transition:.2s}
+.context[open]>summary::after{transform:rotate(45deg)}
+.ctx-body{padding:0 14px 13px}
+.ctx-body ul{margin:0;padding-left:18px}
+.ctx-body li{margin-bottom:5px;line-height:1.45;font-size:13.5px;color:var(--muted)}
+.ctx-body li .i{font-size:12px;color:#9a6b16;margin-right:2px}
+.ctx-body .by{color:var(--faint);font-size:12px}
+.ctx-body p{margin:0;line-height:1.5;font-size:13.5px;color:var(--muted)}
+.ctx-body .vide{font-style:italic;color:var(--faint)}
+.pin{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line2);background:#fff;border-radius:var(--r-pill);padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.pin .i{font-size:14px}
+.pin.on{background:#fbf2e0;border-color:#e7c977;color:#9a6b16}
 .exemples{display:flex;flex-direction:column;gap:7px;margin:12px 0 4px}
 .ex{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.45;border-radius:var(--r-sm);padding:9px 11px}
 .ex.ok{background:var(--ok-soft);color:#176b40}.ex.non{background:var(--bad-soft);color:#9c2c2c}
@@ -96,11 +116,12 @@ textarea{min-height:74px;resize:vertical;line-height:1.5}
 /* Contributions */
 .contribs{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .contrib{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 13px;box-shadow:var(--sh);display:flex;gap:11px}
-.contrib.top{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent-soft),var(--sh)}
+.contrib.top{border-color:#e7c977;box-shadow:0 0 0 1px #fbf2e0,var(--sh)}
 .ava{width:32px;height:32px;border-radius:50%;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none;color:#fff}
 .contrib .cb{flex:1;min-width:0}
 .contrib .cmeta{font-size:11.5px;color:var(--faint);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-.contrib .ctop-tag{font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:var(--r-pill);padding:2px 8px;text-transform:uppercase;letter-spacing:.03em}
+.contrib .ctop-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#9a6b16;background:#fbf2e0;border-radius:var(--r-pill);padding:2px 8px;text-transform:uppercase;letter-spacing:.03em}
+.contrib .ctop-tag .i{font-size:11px}
 .contrib .ctext{font-size:14px;line-height:1.5;margin:3px 0 7px;white-space:pre-wrap;word-wrap:break-word}
 .contrib .cact{display:flex;gap:7px;align-items:center}
 .vote{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line2);background:#fff;border-radius:var(--r-pill);padding:5px 11px;font-size:12.5px;font-weight:600;color:var(--muted)}
