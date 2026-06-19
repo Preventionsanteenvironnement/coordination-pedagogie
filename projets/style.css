@@ -289,6 +289,8 @@ table.mx td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align
   mark{background:#6a5612;color:#fff}
   .et-ic.ph,.cc-ic{background:color-mix(in srgb,var(--pc) 26%,#0f141c)}
   .concept-btn,.cc-dist{background:color-mix(in srgb,var(--pc) 16%,#0f141c)}
+  .ty-pick,.mode-btn{background:var(--surface)}
+  .pl-in,.pl-st{background:#10161f;color:var(--ink);border-color:var(--line2)}
 }
 
 /* En-tête d'étape coloré par phase + bouton concept */
@@ -320,6 +322,37 @@ table.mx td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align
 .cc-vn{flex:none;width:88px;font-size:12.5px;font-weight:700;color:var(--pc)}
 .cc-vv{font-size:13.5px;color:var(--muted);line-height:1.45}
 .cc-src{font-size:12px;color:var(--faint);font-style:italic;margin:14px 0 0;text-align:right}
+
+/* Type de projet */
+.ty-tag{font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);border-radius:var(--r-pill);padding:3px 10px}
+.ty-pick{border:1.5px solid var(--line2);background:#fff;color:var(--muted);border-radius:var(--r-pill);padding:6px 11px;font-size:12px;font-weight:600}
+.ty-pick.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+
+/* Mode rapide/complet */
+.mode-btn{display:flex;align-items:center;gap:7px;width:100%;justify-content:center;border:1px solid var(--line2);background:#fff;border-radius:var(--r-sm);padding:11px;font-size:13.5px;font-weight:500;color:var(--muted);margin-bottom:8px}
+.mode-btn .i{font-size:18px;color:var(--accent)}
+.mode-btn b{color:var(--ink)}
+
+/* Plan d'action */
+.pst-tag{display:inline-block;font-size:11.5px;font-weight:600;color:#fff;background:var(--sc,var(--faint));border-radius:var(--r-pill);padding:3px 10px}
+table.pl td{vertical-align:middle}
+.pl-act{font-weight:500;color:var(--ink);max-width:200px}
+.pl-in,.pl-st{width:100%;border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font-size:12.5px;background:#fbfcfe;color:var(--ink)}
+.pl-in:focus,.pl-st:focus{outline:none;border-color:var(--accent)}
+
+/* Ajout en haut */
+.add-row.top{margin-top:0;margin-bottom:14px;border-top:none;padding-top:0}
+
+/* Écartées */
+.ecart-block{margin-top:14px}
+.ecart-block>summary{list-style:none;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.ecart-block>summary::-webkit-details-marker{display:none}
+.ecart-block>summary .i{font-size:15px}
+.ecart{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px;margin-top:8px;opacity:.9}
+.ecart .ec-tx{flex:1;font-size:13px;line-height:1.45}
+.ecart .ec-r{font-size:12px;color:var(--faint);font-style:italic;margin-top:3px}
+
+.toast.ok{background:var(--ok)}
 
 /* Impression de la fiche */
 @media print{
