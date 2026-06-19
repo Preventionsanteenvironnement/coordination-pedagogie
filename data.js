@@ -138,6 +138,20 @@ const THEMATIQUES = [
       },
     ],
   },
+  {
+    id: "projets",
+    nom: "Projets d'équipe",
+    couleur: "#2f6cd6",
+    enfants: [
+      {
+        titre: "Atelier projet — construire à plusieurs",
+        desc: "Élaborer un projet d'équipe à plusieurs mains, étape par étape (constat → diagnostic → problématique → objectifs → actions → évaluation). Chacun contribue en temps réel ; la fiche-projet se compose toute seule et s'imprime. Anonyme : initiales + rôle, jamais de nom.",
+        lien: "projets/",
+        type: "Outil",
+        badge: "Nouveau",
+      },
+    ],
+  },
 ];
 
 /* =====================================================================
