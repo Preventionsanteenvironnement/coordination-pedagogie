@@ -656,21 +656,46 @@ table.pl td{vertical-align:middle}
 .pc-ring.nodash{background:color-mix(in srgb,var(--rc) 14%,transparent)}
 .pc-ring.nodash span{background:transparent}
 .pc-ring.nodash .i{font-size:22px;color:var(--rc)}
-.mur-head{margin-bottom:16px}
-.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;align-items:start}
-.idea{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--ic);border-radius:var(--r-sm);padding:14px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:11px}
-.idea.big{box-shadow:0 0 0 2px color-mix(in srgb,var(--ic) 35%,transparent),var(--sh)}
-.idea-tx{font-size:15px;line-height:1.5;color:var(--ink);white-space:pre-wrap;word-wrap:break-word}
-.idea-foot{display:flex;align-items:center;gap:8px}
-.idea-by{flex:1;font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vote{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);border-radius:var(--r-pill);padding:4px 11px;font-size:13px;font-weight:600;flex:none;cursor:pointer}
-.vote .i{font-size:15px}
-.vote.on{border-color:#d4537e;color:#d4537e;background:color-mix(in srgb,#d4537e 10%,transparent)}
-.vote:hover{border-color:#d4537e;color:#d4537e}
-.vote:disabled{cursor:default}
-.idea-acts{display:flex;gap:2px}
-.idea-acts .cmini{width:28px;height:28px}
-.idea-acts .cmini .i{font-size:14px}
+.mur-head{margin-bottom:14px}
+.mur-compose{margin-top:0}
+.anon-chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer}
+.anon-chk input{width:16px;height:16px}
+.wall-bar{display:flex;align-items:center;gap:10px;margin:18px 0 14px}
+.wall-bar>.btn-mini{margin-left:auto}
+.wall-toggle{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px}
+.wt{display:inline-flex;align-items:center;gap:6px;border:none;background:none;color:var(--muted);border-radius:var(--r-pill);padding:6px 13px;font-size:13px;font-weight:600;cursor:pointer}
+.wt.on{background:var(--surface);color:var(--accent);box-shadow:var(--sh)}
+.wt .i{font-size:15px}
+/* Mur de post-it colorés */
+.wall{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;align-items:flex-start;padding:6px 0}
+.po{background:var(--bg);border-radius:12px;padding:14px 15px;box-shadow:0 2px 6px rgba(16,24,40,.13);display:flex;flex-direction:column;gap:11px;transition:transform .15s;transform-origin:center}
+.po{background:var(--bg)}
+.po{--bg:#eee;--tx:#222;background:var(--bg);color:var(--tx)}
+.po:hover{transform:rotate(0) scale(1.03) !important;box-shadow:0 6px 16px rgba(16,24,40,.2);z-index:2}
+.po.po-top{box-shadow:0 0 0 2px color-mix(in srgb,var(--tx) 30%,transparent),0 3px 9px rgba(16,24,40,.16)}
+.po.po-new{animation:po-pop .32s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes po-pop{from{opacity:0;transform:scale(.7) rotate(0)}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.po.po-new{animation:none}}
+.po-tx{margin:0;line-height:1.4;font-weight:500;color:var(--tx);white-space:pre-wrap;word-wrap:break-word}
+.po-ft{display:flex;align-items:center;gap:7px}
+.po-who{display:flex;align-items:center;gap:6px;min-width:0;flex:1}
+.po-av{width:22px;height:22px;font-size:9px}
+.po-by{font-size:11px;color:var(--tx);opacity:.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.po-anon{flex:1;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--tx);opacity:.7}
+.po-anon .i{font-size:14px}
+.po-vote{display:inline-flex;align-items:center;gap:4px;border:1.5px solid color-mix(in srgb,var(--tx) 30%,transparent);background:transparent;color:var(--tx);border-radius:var(--r-pill);padding:3px 10px;font-size:12.5px;font-weight:700;flex:none;cursor:pointer}
+.po-vote .i{font-size:14px}
+.po-vote.on{background:var(--tx);color:var(--bg)}
+.po-vote:disabled{cursor:default;opacity:.7}
+.po-acts{display:flex;gap:1px}
+.po-mini{width:26px;height:26px;border:none;background:none;color:var(--tx);opacity:.55;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.po-mini:hover{opacity:1;background:color-mix(in srgb,var(--tx) 12%,transparent)}
+.po-mini .i{font-size:14px}
+/* Nuage de mots */
+.cloud{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px 22px;box-shadow:var(--sh);min-height:180px}
+.cw{font-weight:600;line-height:1.05;cursor:pointer;transition:transform .12s;padding:2px}
+.cw:hover{transform:scale(1.08)}
+.cw.on{text-decoration:underline;text-decoration-thickness:2px}
 .bilan-tbl{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
 .bilan-tbl th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
 .bilan-tbl td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}

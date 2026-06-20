@@ -67,9 +67,15 @@ const saved = ()=>toast("Enregistré",true);
 const voteCount = i => Array.isArray(i.votes)?i.votes.length:0;
 const iVoted = i => Array.isArray(i.votes)&&i.votes.includes(DEV);
 const sortIdees = arr => arr.slice().sort((a,b)=> voteCount(b)-voteCount(a) || (a._t)-(b._t));
+const POSTITS=[{bg:"#CECBF6",tx:"#26215C",av:"#534AB7"},{bg:"#9FE1CB",tx:"#04342C",av:"#0F6E56"},{bg:"#FAC775",tx:"#412402",av:"#854F0B"},{bg:"#F5C4B3",tx:"#4A1B0C",av:"#993C1D"},{bg:"#B5D4F4",tx:"#042C53",av:"#185FA5"},{bg:"#F4C0D1",tx:"#4B1528",av:"#993556"},{bg:"#C0DD97",tx:"#173404",av:"#3B6D11"},{bg:"#F7C1C1",tx:"#501313",av:"#A32D2D"}];
+const hashStr = s => { let h=0; for(const c of String(s||"")) h=(h*31+c.charCodeAt(0))>>>0; return h; };
+let wallMode = localStorage.getItem("murs_wallmode")||"postit";
+let anonMode = false;
+const seen = new Set();
 
 /* ---------- Rendu ---------- */
 function render(){
+  const drafts={}; document.querySelectorAll("[data-keep]").forEach(el=>drafts[el.id]=el.value);
   const focusId = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.keep!==undefined ? document.activeElement.id : null;
   const inMur = mur && view!=="liste";
   $("#backLabel").textContent = view==="liste" ? "Portail" : (view==="bilan"?"Le mur":"Les murs");
@@ -79,6 +85,7 @@ function render(){
   const bb=$("#bilanBtn"); bb.hidden = !(inMur && view!=="bilan"); bb.innerHTML=`${ic("file")} Bilan`;
   const map = { liste:viewListe, mur:viewMur, bilan:viewBilan };
   $("#view").innerHTML = (map[view]||viewListe)();
+  document.querySelectorAll("[data-keep]").forEach(el=>{ if(drafts[el.id]!==undefined) el.value=drafts[el.id]; });
   if(focusId){ const el=document.getElementById(focusId); if(el){ el.focus(); try{el.selectionStart=el.selectionEnd=el.value.length;}catch(_){} } }
   if(view!=="mur") window.scrollTo&&window.scrollTo(0,0);
 }
@@ -105,17 +112,18 @@ function viewMur(){
   const conts=[...new Set(idees.map(i=>i.initiales).filter(Boolean))];
   const pil = mur.pilote;
   const piloteRow = `<div class="ovh-pilote">${pil?`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx">${avatar(pil.ini,"sm",pil.color)}<b>${esc(pil.ini)}</b> · ${esc(pil.role)}</span>${RO?"":`<button class="lnk-mini" data-pilote>${ident&&pil.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx-none">à définir</span>${RO?"":`<button class="btn-mini" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div>`;
-  const card = i => { const vc=voteCount(i); const big = top>0 && vc===top && vc>0;
-    return `<article class="idea ${big?"big":""}" style="--ic:${i.color||colorFor(i.initiales)}">
-      <div class="idea-tx">${esc(i.texte)}</div>
-      <div class="idea-foot">${avatar(i.initiales,"sm",i.color)}<span class="idea-by">${esc(i.role||"")}</span>
-        <button class="vote ${iVoted(i)?"on":""}" ${RO?"disabled":`data-vote="${esc(i.id)}"`}>${ic("heart")} ${vc||""}</button>
-        ${(!RO&&mine.has(i.id))?`<span class="idea-acts"><button class="cmini" data-edit="${esc(i.id)}" aria-label="Modifier">${ic("pencil")}</button><button class="cmini" data-del="${esc(i.id)}" aria-label="Supprimer">${ic("trash")}</button></span>`:""}</div>
+  const card = i => { const vc=voteCount(i); const pc=POSTITS[hashStr(i.id)%POSTITS.length]; const rot=(hashStr(i.id+"r")%7)-3; const sz=(14+Math.min(vc,9)*1.3).toFixed(1); const w=158+Math.min(vc,9)*9; const isNew=!seen.has(i.id); seen.add(i.id);
+    const who = (i.anon||!i.initiales) ? `<span class="po-anon">${ic("user")} Anonyme</span>` : `<span class="po-who">${avatar(i.initiales,"po-av",i.color||pc.av)}<span class="po-by">${esc(i.role||"")}</span></span>`;
+    return `<article class="po ${isNew?"po-new":""} ${vc&&vc===top?"po-top":""}" style="--bg:${pc.bg};--tx:${pc.tx};width:${w}px;font-size:${sz}px;transform:rotate(${rot}deg)">
+      <p class="po-tx">${esc(i.texte)}</p>
+      <div class="po-ft">${who}<button class="po-vote ${iVoted(i)?"on":""}" ${RO?"disabled":`data-vote="${esc(i.id)}"`}>${ic("heart")} ${vc||""}</button>${(!RO&&mine.has(i.id))?`<span class="po-acts"><button class="po-mini" data-edit="${esc(i.id)}" aria-label="Modifier">${ic("pencil")}</button><button class="po-mini" data-del="${esc(i.id)}" aria-label="Supprimer">${ic("trash")}</button></span>`:""}</div>
     </article>`; };
-  const wall = list.length ? `<div class="wall">${list.map(card).join("")}</div>` : `<div class="empty">Aucune idée pour l'instant.${clos||RO?"":" Lancez-vous !"}</div>`;
+  const cloud = `<div class="cloud">${list.map(i=>{const vc=voteCount(i);const pc=POSTITS[hashStr(i.id)%POSTITS.length];const sz=(16+Math.min(vc,12)*2.2).toFixed(0);return `<span class="cw ${iVoted(i)?"on":""}" style="color:${pc.av};font-size:${sz}px" ${RO?"":`data-vote="${esc(i.id)}"`} title="${vc} vote(s)">${esc(i.texte)}</span>`;}).join("")}</div>`;
+  const wall = !list.length ? `<div class="empty">Aucune idée pour l'instant.${clos||RO?"":" Lancez-vous !"}</div>` : (wallMode==="nuage"?cloud:`<div class="wall">${list.map(card).join("")}</div>`);
   const compose = (RO||clos)?(clos?`<div class="locked-note">${ic("lock")} Mur clos — les idées sont figées.</div>`:"") :
-    `<div class="compose"><textarea data-keep id="newIdea" rows="2" placeholder="${ident?"Votre idée…":"Identifiez-vous pour participer"}"></textarea><div class="compose-foot"><span class="compose-who">${avatar(ident?ident.initiales:"?","",ident?ident.color:"")}<span class="cw-role">${ident?esc(ident.role):"Identifiez-vous"}</span></span><button class="compose-send" id="sendIdea">${ic("plus")} Ajouter</button></div></div>`;
+    `<div class="compose mur-compose"><textarea data-keep id="newIdea" rows="2" placeholder="Votre idée, en quelques mots…"></textarea><div class="compose-foot"><label class="anon-chk"><input type="checkbox" id="anonChk" ${anonMode?"checked":""}> <span>Publier en anonyme</span></label><button class="compose-send" id="sendIdea">${ic("plus")} Ajouter au mur</button></div></div>`;
   const lockBtn = RO?"":`<button class="lock-btn ${clos?"on":""}" data-clos>${ic(clos?"lock":"unlock")} ${clos?"Mur clos":"Clore le mur"}</button>`;
+  const toggle = `<div class="wall-toggle"><button class="wt ${wallMode==="postit"?"on":""}" data-wallmode="postit">${ic("grid")} Post-it</button><button class="wt ${wallMode==="nuage"?"on":""}" data-wallmode="nuage">${ic("wand")} Nuage de mots</button></div>`;
   return `<div class="mur-head">
       <div class="eh-hero">
         <div class="eh-badge" style="background:#0f8a76">${ic("bulb")}</div>
@@ -125,7 +133,7 @@ function viewMur(){
       ${piloteRow}
     </div>
     ${compose}
-    <div class="sec-title">${ic("sort")} Les idées${list.length>1?` <span class="muted" style="font-weight:400;text-transform:none;letter-spacing:0">— les plus votées en premier</span>`:""}<button class="btn-mini" data-bilan style="margin-left:auto">${ic("file")} Bilan</button></div>
+    <div class="wall-bar">${list.length?toggle:`<span></span>`}<button class="btn-mini" data-bilan>${ic("file")} Bilan</button></div>
     ${wall}
     <div class="ov-foot">${RO?"":`<button class="lnk" id="shareMur">${ic("send")} Partager (lecture)</button><button class="lnk danger" id="delMur">${ic("trash")} Supprimer ce mur</button>`}</div>`;
 }
@@ -151,7 +159,7 @@ async function loadListe(){
   if(view==="liste") render();
 }
 async function openMur(id){
-  if(unsub){unsub();} if(unsubI){unsubI();}
+  if(unsub){unsub();} if(unsubI){unsubI();} seen.clear();
   try{
     const ref=doc(db,COL,id); const ds=await getDoc(ref);
     if(!ds.exists()){ toast("Mur introuvable."); view="liste"; render(); return; }
@@ -160,9 +168,11 @@ async function openMur(id){
     unsubI=onSnapshot(collection(db,COL,id,"idees"),s=>{ idees=s.docs.map(d=>{const x={id:d.id,...d.data()}; x._t=x.createdAt&&x.createdAt.seconds?x.createdAt.seconds:0; return x;}); if(view!=="liste") render(); });
   }catch(e){ console.error(e); fbError=true; toast("Ouverture impossible."); }
 }
-async function addIdea(txt){ if(!ident){openIdent();return;} txt=txt.trim(); if(!txt||!mur) return; if(mur.statut==="clos"){toast("Mur clos.");return;}
-  try{ const ref=await addDoc(collection(db,COL,mur.id,"idees"),{texte:txt,initiales:ident.initiales,role:ident.role,color:ident.color||"",votes:[],createdAt:serverTimestamp()}); mine.add(ref.id); saveMine(); saved(); }catch(e){console.error(e);toast("Envoi impossible.");}}
-async function voteIdea(id){ if(!ident){openIdent();return;} const i=idees.find(x=>x.id===id); if(!i) return;
+async function addIdea(txt){ txt=txt.trim(); if(!txt||!mur) return; if(mur.statut==="clos"){toast("Mur clos.");return;}
+  if(!anonMode && !ident){ openIdent(); return; }
+  const base = anonMode ? {initiales:"",role:"",color:"",anon:true} : {initiales:ident.initiales,role:ident.role,color:ident.color||""};
+  try{ const ref=await addDoc(collection(db,COL,mur.id,"idees"),{texte:txt,...base,votes:[],createdAt:serverTimestamp()}); mine.add(ref.id); saveMine(); saved(); }catch(e){console.error(e);toast("Envoi impossible.");}}
+async function voteIdea(id){ const i=idees.find(x=>x.id===id); if(!i) return;
   try{ await updateDoc(doc(db,COL,mur.id,"idees",id),{votes:iVoted(i)?arrayRemove(DEV):arrayUnion(DEV)}); }catch(e){console.error(e);toast("Action impossible.");}}
 async function delIdea(id){ if(!confirm("Supprimer cette idée ?")) return; try{ await deleteDoc(doc(db,COL,mur.id,"idees",id)); mine.delete(id); saveMine(); saved(); }catch(e){console.error(e);toast("Suppression impossible.");}}
 function openEditIdea(id){ const i=idees.find(x=>x.id===id); if(!i) return;
@@ -222,6 +232,7 @@ document.addEventListener("click", e=>{
   const op=e.target.closest("[data-open]"); if(op) return openMur(op.dataset.open);
   if(e.target.closest("[data-bilan]")||e.target.closest("#bilanBtn")){ view="bilan"; return render(); }
   if(e.target.closest("[data-mur]")){ view="mur"; return render(); }
+  const wm=e.target.closest("[data-wallmode]"); if(wm){ wallMode=wm.dataset.wallmode; localStorage.setItem("murs_wallmode",wallMode); return render(); }
   const v=e.target.closest("[data-vote]"); if(v) return voteIdea(v.dataset.vote);
   const ed=e.target.closest("[data-edit]"); if(ed) return openEditIdea(ed.dataset.edit);
   const dl=e.target.closest("[data-del]"); if(dl) return delIdea(dl.dataset.del);
@@ -235,6 +246,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#shareMur")){ const base=location.origin+location.pathname; const url=base+"?m="+mur.id+"&ro=1"; navigator.clipboard?.writeText(url).then(()=>toast("Lien lecture copié",true)).catch(()=>toast(url)); return; }
   if(e.target.closest("#back")){ if(view==="liste"){location.href="../";return;} if(view==="bilan"){view="mur";return render();} if(unsub){unsub();unsub=null;}if(unsubI){unsubI();unsubI=null;} view="liste"; mur=null; idees=[]; render(); loadListe(); return; }
 });
+document.addEventListener("change", e=>{ if(e.target.id==="anonChk") anonMode=e.target.checked; });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape")closeSheet(); if(e.key==="Enter"&&!e.shiftKey&&e.target.id==="newIdea"){e.preventDefault();const v=e.target.value;e.target.value="";addIdea(v);} });
 document.addEventListener("input", e=>{ if(e.target.id==="newIdea"){const t=e.target;t.style.height="auto";t.style.height=Math.min(t.scrollHeight,200)+"px";} });
 
