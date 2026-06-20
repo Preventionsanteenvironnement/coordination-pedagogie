@@ -153,6 +153,7 @@ const active = c=>!c.ecarte;
 const sortC = arr => arr.slice().sort((a,b)=>{ const pa=typeof a.pos==="number"?a.pos:Infinity, pb=typeof b.pos==="number"?b.pos:Infinity; if(pa!==pb) return pa-pb; return (b.epingle?1:0)-(a.epingle?1:0) || (a._t)-(b._t); });
 const ofEt = id => sortC(contribs.filter(c=>c.etape===id && active(c)));
 const ofEtAll = id => sortC(contribs.filter(c=>c.etape===id));
+const splitLines = t => String(t==null?"":t).split("\n").map(s=>s.trim()).filter(Boolean);
 const isLocked = id => (projet?.locked||[]).includes(id);
 const base = location.origin + location.pathname;
 const pub = () => projet?.type==="perso" ? (projet?.typePub||"le public concerné") : ((TYPES.find(t=>t.id===projet?.type)||{}).pub || "l'élève");
@@ -342,12 +343,19 @@ function viewEtape(){
   const prevSteps=S.slice(0,etapeIdx);
   const fil = prevSteps.length ? `<div class="fil"><div class="fil-h">${ic("compass")} Le fil du projet jusqu'ici</div>${prevSteps.map((ps,idx)=>{ const pl=ofEt(ps.id); const open=idx===prevSteps.length-1; const body=pl.length?`<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:`<p class="vide">Rien noté à cette étape.</p>`; return `<details class="fil-step" ${open?"open":""}><summary><span class="fs-ic" style="--pc:${ps.c}">${ic(ps.icon)}</span><span class="fs-n">${esc(ps.nom)}</span>${pl.length?`<span class="fs-ct">${pl.length}</span>`:""}</summary><div class="ctx-body">${body}</div></details>`; }).join("")}</div>` : "";
   const card=(c,i)=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
+    const lines=splitLines(c.texte); const multi=lines.length>1; const lr=Array.isArray(c.lr)?c.lr:[];
+    const hasPick = c.epingle || (multi && lr.length>0);
     const linkSel = isLink && !regroup ? `<div class="link-sel">${ic("link")}<select data-link="${esc(c.id)}"><option value="">↳ Sert un objectif…</option>${objs.map(o=>`<option value="${esc(o.id)}" ${c.lien===o.id?"selected":""}>${esc(o.texte.slice(0,40))}</option>`).join("")}</select></div>` : "";
-    return `<article class="contrib ${c.epingle?"top":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
+    const ctextHTML = multi
+      ? `<div class="ctext lines">${lines.map((ln,idx)=>`<button class="cline ${lr.includes(idx)?'on':''}" ${(RO||regroup)?'disabled':`data-lr="${esc(c.id)}:${idx}"`}>${ic("star")}<span>${esc(ln)}</span></button>`).join("")}</div>`
+      : `<div class="ctext">${esc(c.texte)}</div>`;
+    const badge = c.epingle ? `<span class="ctop-tag">${ic("star")} retenu</span>` : (multi&&lr.length?`<span class="ctop-tag">${ic("star")} ${lr.length} retenu${lr.length>1?"s":""}</span>`:"");
+    const retenirBtn = (RO||multi) ? "" : `<button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>`;
+    return `<article class="contrib ${hasPick?"top":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
       ${regroup?`<span class="chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales)}
-      <div class="cb"><div class="cmeta">${c.epingle?`<span class="ctop-tag">${ic("star")} retenu</span>`:""}<b style="color:var(--ink);font-weight:600">${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?' · modifié':''}</div>
-        <div class="ctext">${esc(c.texte)}</div>${linkSel}
-        ${regroup?"":`<div class="cact">${RO?"":`<button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>${list.length>1?`<span class="cord"><button class="cmini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="cmini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button></span>`:""}<button class="cmini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>`}${(!RO&&mine.has(c.id))?`<button class="cmini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="cmini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</div>
+      <div class="cb"><div class="cmeta">${badge}<b style="color:var(--ink);font-weight:600">${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?' · modifié':''}${multi&&!RO&&!regroup?` · <span class="cmeta-hint">cliquez une ligne pour la retenir</span>`:""}</div>
+        ${ctextHTML}${linkSel}
+        ${regroup?"":`<div class="cact">${RO?"":`${retenirBtn}${list.length>1?`<span class="cord"><button class="cmini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="cmini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button></span>`:""}<button class="cmini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>`}${(!RO&&mine.has(c.id))?`<button class="cmini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="cmini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</div>
         <details class="comments"><summary>${ic("comment")} Commentaires${coms.length?` (${coms.length})`:""}</summary><div class="com-list">${coms.map(k=>`<div class="com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="cmini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
       </div></article>`; };
   const cards=list.length?list.map(card).join(""):`<div class="empty">Personne n'a encore contribué à cette étape.${locked||RO?"":" Lancez-vous !"}</div>`;
@@ -414,7 +422,10 @@ function ficheBodyHTML(){
   let num=0;
   const sections=_S.map(e=>{ num++; const items=sortC(byEt[e.id]||[]); let body;
     if(!items.length) body=`<p class="vide">À compléter.</p>`;
-    else { const ep=items.filter(c=>c.epingle), au=items.filter(c=>!c.epingle); body=ep.map(c=>`<div class="retenu">${esc(c.texte)}</div>`).join("")+(au.length?`<ul>${au.map(c=>`<li>${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:""); }
+    else { const kept=[], rest=[]; items.forEach(c=>{ const lines=splitLines(c.texte);
+        if(lines.length<=1){ (c.epingle?kept:rest).push({t:c.texte, r:c.role}); }
+        else { const lr=Array.isArray(c.lr)?c.lr:[]; lines.forEach((ln,idx)=>(lr.includes(idx)?kept:rest).push({t:ln, r:c.role})); } });
+      body=kept.map(k=>`<div class="retenu">${esc(k.t)}</div>`).join("")+(rest.length?`<ul>${rest.map(x=>`<li>${esc(x.t)} <span class="by">— ${esc(x.r)}</span></li>`).join("")}</ul>`:""); }
     return `<section><h2><span class="sn">${num}.</span> ${esc(e.nom)}</h2>${body}</section>`;}).join("");
   const plan=acts.length?`<section><h2><span class="sn">${++num}.</span> Plan d'action</h2><table class="doc-pl"><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
   const repSec=_rf.length?`<section class="doc-rep"><h2>Repères</h2><table class="doc-pl"><tr><th>Repère</th><th>Valeur</th></tr>${_rf.map(it=>`<tr><td>${esc(it.label)}</td><td>${esc(it.value)}</td></tr>`).join("")}</table></section>`:"";
@@ -615,6 +626,7 @@ async function addContribution(texte){ if(!ident){openIdent();return;} texte=tex
   try{const ref=await addDoc(collection(db,COL,projet.id,"contributions"),{etape:sid,texte,initiales:ident.initiales,role:ident.role,epingle:false,comments:[],createdAt:serverTimestamp()});mine.add(ref.id);saveMine();saved();}catch(e){console.error(e);toast("Envoi impossible.");}}
 async function upd(cid,obj){try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
 async function delContribution(cid){try{await deleteDoc(doc(db,COL,projet.id,"contributions",cid));mine.delete(cid);saveMine();saved();}catch(e){console.error(e);toast("Suppression impossible.");}}
+async function toggleLine(cid,idx){ const c=contribs.find(x=>x.id===cid); if(!c) return; const cur=Array.isArray(c.lr)?c.lr.slice():[]; const k=cur.indexOf(idx); if(k>=0) cur.splice(k,1); else cur.push(idx); upd(cid,{lr:cur}); }
 async function moveContrib(cid,dir){
   const c0=contribs.find(c=>c.id===cid); if(!c0) return;
   const list=ofEt(c0.etape); const idx=list.findIndex(c=>c.id===cid); const j=idx+dir;
@@ -656,6 +668,7 @@ document.addEventListener("click", e=>{
   const et=e.target.closest("[data-etape]");if(et){etapeIdx=+et.dataset.etape;view="etape";regroup=false;selected.clear();render();beat();return;}
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
+  const lrb=e.target.closest("[data-lr]");if(lrb){ const p=lrb.dataset.lr.split(":"); return toggleLine(p[0], +p[1]); }
   const ea=e.target.closest("[data-ecart]");if(ea) return openEcart(ea.dataset.ecart);
   const cu=e.target.closest("[data-cup]");if(cu) return moveContrib(cu.dataset.cup,-1);
   const cd=e.target.closest("[data-cdown]");if(cd) return moveContrib(cd.dataset.cdown,1);
