@@ -311,18 +311,19 @@ function viewOverview(){
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
   const firstTodo=S.findIndex(s=>!contribs.some(c=>c.etape===s.id && active(c)));
   const stRow = RO ? `<span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}` :
-    `<div class="st-row">${Object.entries(STATUTS).map(([k,v])=>`<button class="st-pick ${projet.statut===k||(!projet.statut&&k==="brouillon")?"on":""}" style="--sc:${v.c}" data-statut="${k}">${v.l}</button>`).join("")}</div>
-     <div class="st-row" style="margin-top:7px">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}<button class="ty-pick ${projet.type==="perso"?"on":""}" data-type-custom>${ic("pencil")} ${projet.type==="perso"&&projet.typeCustom?esc(projet.typeCustom):"Autre type…"}</button></div>`;
+    `<div class="st-block"><div class="st-lab">Où en est le projet ?</div><div class="st-row">${Object.entries(STATUTS).map(([k,v])=>`<button class="st-pick ${projet.statut===k||(!projet.statut&&k==="brouillon")?"on":""}" style="--sc:${v.c}" data-statut="${k}">${v.l}</button>`).join("")}</div></div>
+     <div class="st-block"><div class="st-lab">Type de projet <span class="st-hint">— adapte le vocabulaire, modifiable à tout moment</span></div><div class="st-row">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}<button class="ty-pick ${projet.type==="perso"?"on":""}" data-type-custom>${ic("pencil")} ${projet.type==="perso"&&projet.typeCustom?esc(projet.typeCustom):"Autre type…"}</button></div></div>`;
   const syn=synthese();
   return `<div id="onlineInline">${onlineStrip()}</div>
-    <div class="ov-head"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ov-meta"><div class="ov-titre">${esc(projet.titre)}</div>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}<div style="margin-top:9px">${stRow}</div></div></div>
-    ${reperesCard()}
-    ${jalonsCard()}
-    ${resCard()}
+    <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-tags">${stRow}</div></div>
     ${firstTodo>=0&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(S[firstTodo].nom)}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("sync")} ${S.length} étape(s) · modifier</button>`}</div>
     ${tlTimeline()}
     ${syn?`<div class="sec-title">${ic("wand")} Synthèse automatique</div><div class="card syn-card">${esc(syn)}</div>`:""}
+    <div class="sec-title">${ic("clip")} Les outils du projet</div>
+    ${reperesCard()}
+    ${jalonsCard()}
+    ${resCard()}
     <div class="fiche-actions" style="margin-top:16px"><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
     <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
@@ -349,9 +350,14 @@ function viewEtape(){
   const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup?`<div class="regroup-bar"><span>${selected.size} sélectionné(s)</span><button class="btn-mini" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="btn-mini" data-regroup>Annuler</button></div>`:`<button class="btn-mini regroup-toggle" data-regroup>${ic("merge")} Regrouper</button>`) : "";
   const addZone=(RO||locked||regroup)?(locked?`<div class="locked-note">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
     `<div class="compose"><textarea data-keep id="newContrib" rows="3" placeholder="${ident?"Écrire pour « "+e.nom+" »…":"Identifiez-vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="compose-foot"><span class="compose-who">${avatar(ident?ident.initiales:"?")}<span class="cw-role">${ident?esc(ident.role):"Identifiez-vous"}</span></span><button class="compose-send" id="sendContrib">${ic("send")} Ajouter</button></div></div>`;
-  return `<div class="etape-head" style="--pc:${e.c}"><div class="eh-top"><span class="et-ic ph">${ic(e.icon)}</span><div style="flex:1"><div class="eyebrow">Étape ${etapeIdx+1} / ${S.length}${e.phaseNom?` · ${esc(e.phaseNom)}`:""}</div><h2>${esc(e.nom)}</h2></div>${lockBtn}</div>
-    <div class="et-q">${esc(T(e.q))}</div><div class="et-def">${esc(T(e.def))}</div>
-    ${e.custom?"":`<button class="concept-btn" data-concept="${e.id}">${ic("help")} Comprendre la notion</button>`}
+  return `<div class="etape-head" style="--pc:${e.c}">
+    <div class="eh-hero">
+      <div class="eh-badge">${ic(e.icon)}</div>
+      <div class="eh-tx"><div class="eyebrow">Étape ${etapeIdx+1} / ${S.length}${e.phaseNom?` · ${esc(e.phaseNom)}`:""}</div><h2>${esc(e.nom)}</h2><p class="eh-q">${esc(T(e.q))}</p></div>
+      ${lockBtn}
+    </div>
+    <p class="et-def">${esc(T(e.def))}</p>
+    <div class="eh-tools">${e.custom?"":`<button class="concept-btn" data-concept="${e.id}">${ic("help")} Comprendre la notion</button>`}</div>
     ${e.aide?`<div class="et-aide">${ic("info")}<span>${esc(T(e.aide))}</span></div>`:""}</div>
     <div class="etape-grid">
       <div class="etape-main">${fil}${addZone}${regroupBar}<div class="contribs">${cards}</div>${ecartBlock}</div>

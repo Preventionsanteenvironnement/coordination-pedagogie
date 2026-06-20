@@ -91,13 +91,17 @@ input,textarea,select{font:inherit}
 textarea{min-height:74px;resize:vertical;line-height:1.5}
 
 /* Étape (projet) */
-.etape-head{margin-bottom:14px}
-.etape-head .et-ic{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;margin-bottom:9px}
-.etape-head .et-ic .i{font-size:23px}
-.etape-head h2{font-size:20px}
-.etape-head .et-q{font-size:15.5px;font-weight:600;color:var(--ink);margin-top:4px}
-.etape-head .et-def{font-size:14px;color:var(--ink);margin-top:7px;line-height:1.55}
-.etape-head .et-aide{display:flex;gap:7px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:9px;line-height:1.5;background:var(--accent-soft);border-radius:var(--r-sm);padding:9px 11px}
+.etape-head{margin-bottom:16px}
+.eh-hero{display:flex;align-items:flex-start;gap:15px;padding:18px 18px 17px;border-radius:var(--r);background:color-mix(in srgb,var(--pc) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--pc) 22%,var(--line))}
+.eh-badge{width:54px;height:54px;border-radius:16px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--pc);box-shadow:0 4px 12px color-mix(in srgb,var(--pc) 35%,transparent)}
+.eh-badge .i{font-size:28px}
+.eh-tx{flex:1;min-width:0}
+.eh-tx .eyebrow{color:var(--pc)}
+.eh-tx h2{font-size:25px;font-weight:700;line-height:1.12;margin:3px 0 8px;letter-spacing:-.01em}
+.eh-q{font-size:16.5px;font-weight:600;color:var(--ink);line-height:1.4}
+.etape-head .et-def{font-size:14px;color:var(--muted);margin:13px 2px 0;line-height:1.6}
+.eh-tools{margin:12px 0 0}
+.etape-head .et-aide{display:flex;gap:7px;align-items:flex-start;font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.5;background:var(--accent-soft);border-radius:var(--r-sm);padding:9px 11px}
 .etape-head .et-aide .i{font-size:16px;color:var(--accent);flex:none;margin-top:1px}
 .tb-fiche{display:inline-flex;align-items:center;gap:5px;border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:var(--r-pill);padding:7px 13px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .tb-fiche .i{font-size:16px}
@@ -223,12 +227,18 @@ table.doc-pl th{background:var(--bg);font-size:11.5px;text-transform:uppercase;c
 .btn.big{width:100%;justify-content:center;padding:14px;font-size:15.5px;margin-bottom:6px}
 
 /* Vue d'ensemble */
-.ov-head{display:flex;gap:15px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);margin-bottom:16px}
+.ov-hero{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh);margin-bottom:14px}
+.ovh-top{display:flex;gap:16px;align-items:center}
 .ov-ring{flex:none;width:66px;height:66px;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p,0)*1%),var(--line) 0);display:flex;align-items:center;justify-content:center}
 .ov-ring span{width:52px;height:52px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--accent)}
-.ov-meta{flex:1;min-width:0}
-.ov-titre{font-size:18px;font-weight:600}
-.ov-ctx{font-size:13.5px;color:var(--muted);line-height:1.5;margin-top:3px}
+.ovh-tx{flex:1;min-width:0}
+.ovh-eyebrow{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+.ovh-eyebrow .i{font-size:14px}
+.ov-titre{font-size:24px;font-weight:700;line-height:1.15;margin:3px 0 0;letter-spacing:-.01em}
+.ov-ctx{font-size:14px;color:var(--muted);line-height:1.5;margin-top:5px}
+.ovh-tags{margin-top:16px;padding-top:15px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.st-lab{font-size:11.5px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+.st-hint{text-transform:none;letter-spacing:0;font-weight:400;color:var(--faint)}
 .ov-phases{display:grid;grid-template-columns:1fr;gap:11px}
 .ov-phase{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--pc);border-radius:var(--r-sm);padding:13px 14px;box-shadow:var(--sh)}
 .ov-ph-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
@@ -324,10 +334,8 @@ table.mx td{padding:10px 11px;border-bottom:1px solid var(--line);vertical-align
   .perso-row{background:var(--surface)}
 }
 
-/* En-tête d'étape coloré par phase + bouton concept */
-.eh-top{display:flex;align-items:center;gap:10px}
-.et-ic.ph{background:color-mix(in srgb,var(--pc) 14%,#fff);color:var(--pc)}
-.concept-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 8%,#fff);color:var(--pc);border-radius:var(--r-pill);padding:8px 14px;font-size:13.5px;font-weight:600;margin:11px 0 2px}
+/* Bouton concept (coloré par phase) */
+.concept-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 8%,#fff);color:var(--pc);border-radius:var(--r-pill);padding:8px 14px;font-size:13.5px;font-weight:600;margin:0}
 .concept-btn .i{font-size:16px}
 
 /* Fiche concept (à la demande) */
