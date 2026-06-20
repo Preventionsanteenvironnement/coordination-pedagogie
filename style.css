@@ -26,7 +26,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.55;
@@ -222,32 +222,51 @@ main { max-width: 1100px; margin: 0 auto; padding: 22px 20px 60px; }
 .card::before {
   content: "";
   position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 4px;
+  left: 0; top: 0; right: 0;
+  height: 3px;
   background: var(--card-accent, var(--accent));
+  opacity: 0;
+  transition: opacity .18s;
 }
 .card:hover {
   transform: translateY(-4px);
   border-color: var(--card-accent, var(--accent));
+  box-shadow: 0 2px 4px rgba(16,24,40,.05), 0 14px 34px rgba(16,24,40,.10);
 }
+.card:hover::before { opacity: 1; }
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.card-ic {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--card-accent, var(--accent));
+  background: color-mix(in srgb, var(--card-accent, var(--accent)) 13%, transparent);
+}
+.card-ic svg { width: 25px; height: 25px; }
 .card h3 {
   margin: 0 0 8px;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
   font-weight: 600;
-  padding-left: 6px;
+  letter-spacing: -.01em;
 }
 .card p {
   margin: 0 0 16px;
   font-size: .9rem;
   color: var(--text-soft);
-  padding-left: 6px;
   flex: 1;
 }
 .card .meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-left: 6px;
 }
 .type-tag {
   font-size: .72rem;
@@ -294,11 +313,6 @@ main { max-width: 1100px; margin: 0 auto; padding: 22px 20px 60px; }
   margin: 0 0 18px;
   font-size: .9rem;
   color: var(--text-soft);
-}
-.card.outil h3::before {
-  content: "▸";
-  color: var(--card-accent, var(--accent));
-  margin-right: 8px;
 }
 
 .empty {

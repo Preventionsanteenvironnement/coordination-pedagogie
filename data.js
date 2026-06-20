@@ -24,6 +24,7 @@ const THEMATIQUES = [
     id: "administratif",
     nom: "Vie d'établissement & administratif",
     couleur: "#3b6ea5",
+    icon: "school",
     enfants: [
       {
         titre: "Projet d'établissement",
@@ -43,6 +44,7 @@ const THEMATIQUES = [
     id: "pfmp",
     nom: "PFMP",
     couleur: "#c0392b",
+    icon: "briefcase",
     enfants: [
       {
         titre: "Guide PFMP — devenir incollable",
@@ -69,6 +71,7 @@ const THEMATIQUES = [
     id: "acteurs",
     nom: "Acteurs",
     couleur: "#0e7c66",
+    icon: "users",
     enfants: [
       {
         titre: "Le DDFPT — rôle & missions",
@@ -89,10 +92,12 @@ const THEMATIQUES = [
     id: "pedagogie",
     nom: "Pédagogie",
     couleur: "#5a8a3c",
+    icon: "book",
     enfants: [
       {
         titre: "Inclusion",
         desc: "École inclusive : le cadre et les dispositifs (PPS, PAP, PAI, PPRE), comprendre les troubles, et les outils de suivi (GEVA-Sco).",
+        icon: "inclusion",
         enfants: [
           {
             titre: "École inclusive — guide de formation",
@@ -115,6 +120,7 @@ const THEMATIQUES = [
     id: "references",
     nom: "Référentiels & textes officiels",
     couleur: "#9a5ba5",
+    icon: "scale",
     enfants: [
       {
         titre: "Référentiels",
@@ -129,6 +135,7 @@ const THEMATIQUES = [
     id: "cps",
     nom: "Compétences psychosociales",
     couleur: "#c97a2b",
+    icon: "heart",
     enfants: [
       {
         titre: "Ressources CPS — référentiel SpF 2025",
@@ -142,6 +149,7 @@ const THEMATIQUES = [
     id: "projets",
     nom: "Projets d'équipe",
     couleur: "#2f6cd6",
+    icon: "target",
     enfants: [
       {
         titre: "Atelier projet — construire à plusieurs",
@@ -165,6 +173,7 @@ const OUTILS = [
     lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/?suivi",
     type: "Suivi",
     couleur: "#2f7d6b",
+    icon: "calendar",
   },
   {
     titre: "Réunions & disponibilités",
@@ -172,6 +181,7 @@ const OUTILS = [
     lien: "reunions/",
     type: "Outil",
     couleur: "#2f8f83",
+    icon: "clock",
     badge: "Nouveau",
   },
 ];
