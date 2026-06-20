@@ -158,6 +158,14 @@ const THEMATIQUES = [
         type: "Outil",
         badge: "Nouveau",
       },
+      {
+        titre: "Mur d'idées — réfléchir à plusieurs",
+        desc: "Le brainstorming d'équipe : plusieurs murs (chacun son thème), où chacun dépose ses idées en temps réel et vote pour faire remonter les meilleures. On garde tout, et un bilan se télécharge / se partage. Idéal en amont d'un projet. Anonyme : initiales + rôle.",
+        lien: "murs/",
+        type: "Outil",
+        icon: "bulb",
+        badge: "Nouveau",
+      },
     ],
   },
 ];
