@@ -661,7 +661,7 @@ document.addEventListener("click", e=>{
   const cd=e.target.closest("[data-cdown]");if(cd) return moveContrib(cd.dataset.cdown,1);
   const ri=e.target.closest("[data-reint]");if(ri) return upd(ri.dataset.reint,{ecarte:false,raison:""});
   const ed=e.target.closest("[data-edit]");if(ed) return openEdit(ed.dataset.edit);
-  const dl=e.target.closest("[data-del]");if(dl) return delContribution(dl.dataset.del);
+  const dl=e.target.closest("[data-del]");if(dl){ const c=contribs.find(x=>x.id===dl.dataset.del); if(confirm("Supprimer définitivement cette contribution ?\n\n« "+String(c&&c.texte||"").slice(0,100)+" »\n\nPour la mettre de côté sans la perdre, utilisez plutôt « Écarter » (⊘).")) delContribution(dl.dataset.del); return; }
   const cm=e.target.closest("[data-com]");if(cm){const inp=document.getElementById("com_"+cm.dataset.com);const v=inp?inp.value:"";if(inp)inp.value="";return addComment(cm.dataset.com,v);}
   const stt=e.target.closest("[data-statut]");if(stt) return setProj({statut:stt.dataset.statut});
   if(e.target.closest("[data-type-custom]")){ const lbl=prompt("Nom du type de projet :", projet.typeCustom||""); if(lbl&&lbl.trim()) setProj({type:"perso", typeCustom:lbl.trim()}); return; }
