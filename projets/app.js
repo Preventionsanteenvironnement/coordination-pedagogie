@@ -305,9 +305,9 @@ function tlTimeline(){
   const ph={}; S.forEach(s=>{ const k=s.phaseNom||""; (ph[k]=ph[k]||{t:0,d:0}); ph[k].t++; if(cnt(s.id)) ph[k].d++; });
   let lastPhase=null, html="";
   S.forEach((e,i)=>{ const n=cnt(e.id); const done=n>0; const isNext=i===firstTodo; const last=i===S.length-1; const lock=isLocked(e.id);
-    const nextDone = !last && cnt(S[i+1].id)>0;
+    const nextDone = !last && cnt(S[i+1].id)>0; const rdy=((projet.pret||{})[e.id]||[]).length;
     if(e.phaseNom!==lastPhase){ const p=ph[e.phaseNom||""]; const pc=Math.round(p.d/Math.max(p.t,1)*100); html+=`<div class="tl-phase" style="--pc:${e.c}"><span class="tlp-n">${esc(e.phaseNom)}</span><span class="tlp-bar"><i style="width:${pc}%"></i></span><span class="tlp-ct">${p.d}/${p.t}</span></div>`; lastPhase=e.phaseNom; }
-    html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${e.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":`<span class="tl-line ${done&&nextDone?"on":""}"></span>`}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(e.nom)}</span>${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
+    html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${e.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":`<span class="tl-line ${done&&nextDone?"on":""}"></span>`}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(e.nom)}</span>${rdy?`<span class="tl-rdy" title="${rdy} a/ont terminé">${ic("check")} ${rdy}</span>`:""}${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
   return `<div class="tl">${html}</div>`;
 }
 function viewOverview(){
@@ -321,7 +321,7 @@ function viewOverview(){
      <div class="st-block"><div class="st-lab">Type de projet <span class="st-hint">— adapte le vocabulaire, modifiable à tout moment</span></div><div class="st-row">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}<button class="ty-pick ${projet.type==="perso"?"on":""}" data-type-custom>${ic("pencil")} ${projet.type==="perso"&&projet.typeCustom?esc(projet.typeCustom):"Autre type…"}</button></div></div>`;
   const syn=synthese();
   return `<div id="onlineInline">${onlineStrip()}</div>
-    <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-tags">${stRow}</div></div>
+    <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-pilote">${projet.pilote?`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx">${avatar(projet.pilote.ini,"sm")}<b>${esc(projet.pilote.ini)}</b> · ${esc(projet.pilote.role)}</span>${RO?"":`<button class="lnk-mini" data-pilote>${ident&&projet.pilote.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx-none">à définir — qui mène ce projet ?</span>${RO?"":`<button class="btn-mini" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div><div class="ovh-tags">${stRow}</div></div>
     ${done===0&&!RO?`<div class="ov-welcome">${ic("wand")}<div><b>Bienvenue dans votre projet</b><p>Avancez <b>étape par étape, à plusieurs</b> : chacun ajoute ses idées, la plus juste est « retenue », et la fiche se compose toute seule. Les étapes sont <b>modulables</b> (bouton « modifier » plus bas). Commencez par ${esc(S[0]?S[0].nom:"la première étape")} ci-dessous.</p></div></div>`:""}
     ${firstTodo>=0&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(S[firstTodo].nom)}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("sync")} ${S.length} étape(s) · modifier</button>`}</div>
@@ -377,6 +377,7 @@ function viewEtape(){
       <div class="etape-main">${fil}${addZone}${regroupBar}<div class="contribs">${cards}</div>${ecartBlock}</div>
       <aside class="etape-side">${resStrip(e.id)}</aside>
     </div>
+    ${(()=>{const voters=((projet.pret||{})[e.id]||[]);const me=voters.some(v=>v.dev===DEV);return `<div class="ready"><div class="ready-who">${voters.length?`<span class="ready-avs">${voters.map(v=>avatar(v.ini,"sm")).join("")}</span><span class="ready-lab"><b>${voters.length}</b> ${voters.length>1?"ont":"a"} terminé cette étape</span>`:`<span class="ready-lab muted">Personne n'a encore signalé avoir terminé cette étape.</span>`}</div>${RO?"":`<button class="btn-ready ${me?"done":""}" data-ready="${e.id}">${ic("check")} ${me?"Vous avez terminé — annuler":"J'ai terminé cette étape"}</button>`}</div>`;})()}
     <div class="pager"><button class="pgr" data-nav="-1">${ic("back")}<span>Précédent</span></button><button class="pgr next" data-nav="1"><span>Suivant</span>${ic("chev")}</button></div>`;
 }
 
@@ -416,7 +417,7 @@ function ficheBodyHTML(){
   const _jal=(projet.jalons||[]).slice().sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
   const _S=STEPS();
   const toc=[]; if(syn) toc.push("Résumé"); if(_rf.length) toc.push("Repères"); if(_jal.length) toc.push("Calendrier"); _S.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((_S.length+1)+". Plan d'action"); if(_res.length) toc.push("Ressources & références");
-  const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}</div><div class="dc-meta">${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
+  const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}</div><div class="dc-meta">${projet.pilote?`Piloté par ${esc(projet.pilote.ini)} (${esc(projet.pilote.role)}) · `:""}${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
   const tocHtml=`<div class="doc-toc"><h2>Sommaire</h2><ol class="toc-list">${toc.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`;
   const resume=syn?`<section class="doc-resume"><h2>Résumé</h2><p>${esc(syn)}</p></section>`:"";
   let num=0;
@@ -637,6 +638,7 @@ async function moveContrib(cid,dir){
 }
 async function addComment(cid,txt){if(!ident){openIdent();return;}txt=txt.trim();if(!txt)return;const c=contribs.find(x=>x.id===cid);if(!c)return;const coms=[...(c.comments||[]),{ini:ident.initiales,role:ident.role,txt,t:Date.now()}];upd(cid,{comments:coms});}
 async function setProj(obj){try{await updateDoc(doc(db,COL,projet.id),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
+async function toggleReady(eid){ if(!ident){openIdent();return;} const pret=Object.assign({}, projet.pret||{}); const arr=(pret[eid]||[]).slice(); const k=arr.findIndex(v=>v.dev===DEV); if(k>=0) arr.splice(k,1); else arr.push({dev:DEV,ini:ident.initiales,role:ident.role}); pret[eid]=arr; setProj({pret}); }
 async function toggleLock(eid){const cur=projet.locked||[];setProj({locked:cur.includes(eid)?cur.filter(x=>x!==eid):[...cur,eid]});}
 async function fusionner(){ if(!ident){openIdent();return;} const sel=contribs.filter(c=>selected.has(c.id)); if(sel.length<2) return;
   const txt=sel.map(c=>c.texte).join("\n• ").replace(/^/,"• "); const ep=sel.some(c=>c.epingle); const coms=sel.flatMap(c=>c.comments||[]);
@@ -669,6 +671,9 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
   const lrb=e.target.closest("[data-lr]");if(lrb){ const p=lrb.dataset.lr.split(":"); return toggleLine(p[0], +p[1]); }
+  const rdy=e.target.closest("[data-ready]");if(rdy) return toggleReady(rdy.dataset.ready);
+  if(e.target.closest("[data-pilote-take]")){ if(!ident) return openIdent(); return setProj({pilote:{ini:ident.initiales,role:ident.role}}); }
+  if(e.target.closest("[data-pilote]")){ if(!ident) return openIdent(); const p=projet.pilote; if(p&&p.ini===ident.initiales) return setProj({pilote:null}); if(confirm("Devenir le pilote de ce projet ?")) return setProj({pilote:{ini:ident.initiales,role:ident.role}}); return; }
   const ea=e.target.closest("[data-ecart]");if(ea) return openEcart(ea.dataset.ecart);
   const cu=e.target.closest("[data-cup]");if(cu) return moveContrib(cu.dataset.cup,-1);
   const cd=e.target.closest("[data-cdown]");if(cd) return moveContrib(cd.dataset.cdown,1);
