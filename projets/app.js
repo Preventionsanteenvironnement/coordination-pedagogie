@@ -154,6 +154,9 @@ const sortC = arr => arr.slice().sort((a,b)=>{ const pa=typeof a.pos==="number"?
 const ofEt = id => sortC(contribs.filter(c=>c.etape===id && active(c)));
 const ofEtAll = id => sortC(contribs.filter(c=>c.etape===id));
 const splitLines = t => String(t==null?"":t).split("\n").map(s=>s.trim()).filter(Boolean);
+function keptItems(eid){ const out=[]; ofEt(eid).forEach(c=>{ const lines=splitLines(c.texte); if(lines.length<=1){ if(c.epingle) out.push(c.texte); } else { const lr=Array.isArray(c.lr)?c.lr:[]; lines.forEach((ln,i)=>{ if(lr.includes(i)) out.push(ln); }); } }); return out; }
+function allItems(eid){ const out=[]; ofEt(eid).forEach(c=>splitLines(c.texte).forEach(ln=>out.push(ln))); return out; }
+const showItems = eid => { const k=keptItems(eid); return k.length?k:allItems(eid); };
 const isLocked = id => (projet?.locked||[]).includes(id);
 const base = location.origin + location.pathname;
 const pub = () => projet?.type==="perso" ? (projet?.typePub||"le public concerné") : ((TYPES.find(t=>t.id===projet?.type)||{}).pub || "l'élève");
@@ -239,12 +242,12 @@ function render(){
   const inProj = projet && view!=="liste";
   $("#backLabel").textContent = view==="liste" ? "Portail" : (view==="overview"?"Projets":"Projet");
   $("#title").textContent = inProj ? projet.titre : "Atelier projet";
-  $("#subtitle").textContent = inProj ? ({overview:"Vue d'ensemble",fiche:"Fiche projet",matrice:"Alignement",plan:"Plan d'action"}[view]||stepAt(etapeIdx)?.nom) : "Construire à plusieurs mains";
+  $("#subtitle").textContent = inProj ? ({overview:"Vue d'ensemble",fiche:"Fiche projet",matrice:"Alignement",plan:"Plan d'action",presentation:"Présentation"}[view]||stepAt(etapeIdx)?.nom) : "Construire à plusieurs mains";
   const ib=$("#identBtn"); if(ident && !RO){ ib.hidden=false; ib.innerHTML=`${ic("user")} ${esc(ident.initiales)}`; } else ib.hidden=true;
   const fb=$("#ficheBtn"); fb.hidden = !(inProj && view!=="fiche"); fb.innerHTML=`${ic("file")} Fiche`;
-  const showBar = inProj && view!=="overview";
+  const showBar = inProj && view!=="overview" && view!=="presentation";
   $("#etapebar").hidden = !showBar; if(showBar) renderEtapeBar();
-  const map = { liste:viewListe, overview:viewOverview, etape:viewEtape, fiche:viewFiche, matrice:viewMatrice, plan:viewPlan };
+  const map = { liste:viewListe, overview:viewOverview, etape:viewEtape, fiche:viewFiche, matrice:viewMatrice, plan:viewPlan, presentation:viewPresentation };
   $("#view").innerHTML = (map[view]||viewListe)();
   document.querySelectorAll("[data-keep]").forEach(el=>{ if(drafts[el.id]!==undefined) el.value=drafts[el.id]; });
   if(focusId){ const el=document.getElementById(focusId); if(el){ el.focus(); try{el.selectionStart=el.selectionEnd=el.value.length;}catch(_){} } }
@@ -322,6 +325,7 @@ function viewOverview(){
   const syn=synthese();
   return `<div id="onlineInline">${onlineStrip()}</div>
     <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-pilote">${projet.pilote?`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx">${avatar(projet.pilote.ini,"sm",projet.pilote.color)}<b>${esc(projet.pilote.ini)}</b> · ${esc(projet.pilote.role)}</span>${RO?"":`<button class="lnk-mini" data-pilote>${ident&&projet.pilote.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx-none">à définir — qui mène ce projet ?</span>${RO?"":`<button class="btn-mini" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div><div class="ovh-tags">${stRow}</div></div>
+    ${projet.statut==="valide"?`<button class="ov-valid" data-presentation>${ic("check")}<span><b>Projet validé</b> — voir la présentation</span>${ic("chev")}</button>`:""}
     ${done===0&&!RO?`<div class="ov-welcome">${ic("wand")}<div><b>Bienvenue dans votre projet</b><p>Avancez <b>étape par étape, à plusieurs</b> : chacun ajoute ses idées, la plus juste est « retenue », et la fiche se compose toute seule. Les étapes sont <b>modulables</b> (bouton « modifier » plus bas). Commencez par ${esc(S[0]?S[0].nom:"la première étape")} ci-dessous.</p></div></div>`:""}
     ${firstTodo>=0&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(S[firstTodo].nom)}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("sync")} ${S.length} étape(s) · modifier</button>`}</div>
@@ -331,7 +335,7 @@ function viewOverview(){
     ${reperesCard()}
     ${jalonsCard()}
     ${resCard()}
-    <div class="fiche-actions" style="margin-top:16px"><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
+    <div class="fiche-actions" style="margin-top:16px"><button class="btn accent" data-presentation>${ic("eye")} Présentation</button><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
     <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 
@@ -435,6 +439,36 @@ function ficheBodyHTML(){
   return cover+tocHtml+resume+repSec+jalSec+sections+plan+resAnnex;
 }
 function viewFiche(){ return `<div class="fiche-actions"><button class="btn" data-overview>${ic("back")} Vue d'ensemble</button><button class="btn" id="word">${ic("word")} Word</button><button class="btn primary" id="print">${ic("printer")} Imprimer / PDF</button></div><div class="doc">${ficheBodyHTML()}</div>`; }
+function viewPresentation(){
+  const st=STATUTS[projet.statut]||STATUTS.brouillon; const valid=projet.statut==="valide"; const S=STEPS();
+  const conts=[...new Set(contribs.filter(active).map(c=>c.initiales).filter(Boolean))];
+  const periode=(curReperes().find(it=>/p[ée]riode/i.test(it.label))||{}).value||"";
+  const reps=curReperes().filter(it=>String(it.value||"").trim());
+  const journey=PHASES.map(p=>{ const has=S.some(s=>s.ref&&p.etapes.includes(s.ref)&&ofEt(s.id).length); return `<div class="pres-ph ${has?"on":""}"><div class="pres-ph-dot" style="background:${has?p.c:"var(--line2)"}">${has?ic("check"):""}</div><div class="pres-ph-n">${esc(p.nom)}</div></div>`; }).join("");
+  const cards=S.map(s=>{
+    if(s.id==="actions"){ const acts=ofEt("actions"); if(!acts.length) return ""; return `<div class="pres-card wide" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}</div><table class="pres-plan">${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td class="pp-resp">${a.resp?esc(a.resp):"—"}</td><td>${a.ech?`<span class="pres-when">${esc(a.ech)}</span>`:""}</td></tr>`).join("")}</table></div>`; }
+    const items=showItems(s.id); if(!items.length) return "";
+    if(s.id==="problematique"||s.id==="finalite"){ return `<div class="pres-card wide quote-card" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}</div><p class="pres-quote">${esc(items[0])}</p></div>`; }
+    return `<div class="pres-card" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}</div><ul class="pres-list">${items.map(t=>`<li>${ic("check")}<span>${esc(t)}</span></li>`).join("")}</ul></div>`;
+  }).filter(Boolean).join("");
+  const jal=(projet.jalons||[]).slice().sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+  const jalCard=jal.length?`<div class="pres-card wide" style="--pc:#2f7d6b"><div class="pres-lab">${ic("calendar")} Calendrier</div><table class="pres-plan">${jal.map(j=>`<tr><td style="width:150px"><span class="pres-when">${esc(fmtDate(j.date))}</span></td><td>${esc(j.label||"")}</td></tr>`).join("")}</table></div>`:"";
+  const res=curRes(); const resCard2=res.length?`<div class="pres-card" style="--pc:#6b4bd6"><div class="pres-lab">${ic("clip")} Ressources</div><ul class="pres-list">${res.map(r=>`<li>${ic((RTM[r.type]||{}).icon||"link")}<span>${r.url?`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.titre||r.url)}</a>`:esc(r.titre||"")}</span></li>`).join("")}</ul></div>`:"";
+  const repCard=reps.length?`<div class="pres-card" style="--pc:#3b6ea5"><div class="pres-lab">${ic("calendar")} Repères</div><ul class="pres-list">${reps.map(it=>`<li>${ic(it.icon||"info")}<span><b>${esc(it.label)} :</b> ${esc(it.value)}</span></li>`).join("")}</ul></div>`:"";
+  const body=cards+jalCard+repCard+resCard2;
+  return `<div class="pres">
+    <div class="pres-bar">${RO?`<a class="btn" href="../">${ic("back")} Portail</a>`:`<button class="btn" data-overview>${ic("back")} Vue d'ensemble</button>`}<button class="btn" id="presShare">${ic("send")} Partager</button>${RO?"":`<button class="btn" data-fiche>${ic("file")} Fiche / PDF</button>`}</div>
+    <div class="pres-hero ${valid?"valid":""}">
+      ${valid?`<span class="pres-badge">${ic("check")} Projet validé</span>`:`<span class="pres-badge draft" style="--sc:${st.c}">${esc(st.l)}</span>`}
+      <h1 class="pres-title">${esc(projet.titre)}</h1>
+      ${projet.contexte?`<p class="pres-ctx">${esc(projet.contexte)}</p>`:""}
+      <div class="pres-meta">${projet.pilote?`<span class="pres-by">${avatar(projet.pilote.ini,"sm",projet.pilote.color)} Piloté par ${esc(projet.pilote.ini)} · ${esc(projet.pilote.role)}</span>`:""}<span class="pres-by">${ic("users")} ${conts.length} contributeur${conts.length>1?"s":""}</span>${periode?`<span class="pres-by">${ic("calendar")} ${esc(periode)}</span>`:""}</div>
+    </div>
+    <div class="pres-journey">${journey}</div>
+    ${body?`<div class="pres-grid">${body}</div>`:`<div class="empty">Pas encore de contenu à présenter — renseignez et retenez vos étapes.</div>`}
+    <div class="pres-foot">${ic("shield")} Présentation en lecture seule — aucune donnée nominative d'élève.</div>
+  </div>`;
+}
 function exportWord(){
   const css=`body{font-family:Calibri,Arial,sans-serif;color:#1a1a1a;font-size:11pt;line-height:1.5}
 h1{font-size:20pt;color:#26365a}h2{font-size:13pt;color:#2f6cd6;border-bottom:1px solid #cdd6e6;padding-bottom:3px;margin-top:18px}.sn{color:#2f6cd6}
@@ -679,6 +713,8 @@ document.addEventListener("click", e=>{
   const nav=e.target.closest("[data-nav]");if(nav){const v=visIdx();const pos=v.indexOf(etapeIdx);etapeIdx=v[(pos+ +nav.dataset.nav+v.length)%v.length];view="etape";render();beat();return;}
   const et=e.target.closest("[data-etape]");if(et){etapeIdx=+et.dataset.etape;view="etape";regroup=false;selected.clear();render();beat();return;}
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
+  if(e.target.closest("[data-presentation]")){view="presentation";window.scrollTo&&window.scrollTo(0,0);return render();}
+  if(e.target.closest("#presShare")){const url=base+"?p="+projet.id+"&ro=1&vue=presentation";navigator.clipboard?.writeText(url).then(()=>toast("Lien présentation copié",true)).catch(()=>toast(url));return;}
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
   const lrb=e.target.closest("[data-lr]");if(lrb){ const p=lrb.dataset.lr.split(":"); return toggleLine(p[0], +p[1]); }
   const rdy=e.target.closest("[data-ready]");if(rdy) return toggleReady(rdy.dataset.ready);
@@ -713,5 +749,5 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape")closeSheet();
   if(e.key==="Enter"&&!e.shiftKey){ if(e.target.id==="newContrib"){e.preventDefault();const v=e.target.value;e.target.value="";const n=$("#nudge");if(n)n.hidden=true;addContribution(v);} else if(e.target.id&&e.target.id.startsWith("com_")){e.preventDefault();const cid=e.target.id.slice(4);const v=e.target.value;e.target.value="";addComment(cid,v);} } });
 window.addEventListener("beforeunload", ()=>{ try{stopPresence();}catch(_){} });
 
-loadListe().then(()=>{const p=params.get("p");if(p)openProjet(p);});
+loadListe().then(()=>{const p=params.get("p");if(p)openProjet(p).then(()=>{if(params.get("vue")==="presentation"){view="presentation";render();}});});
 render();
