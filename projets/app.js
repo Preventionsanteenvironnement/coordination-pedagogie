@@ -261,7 +261,7 @@ function renderEtapeBar(){
 
 function viewListe(){
   const idCard = RO ? "" : (ident
-    ? `<div class="card ident-card"><span class="ident-ava" style="background:${ident.color||colorFor(ident.initiales)}">${esc(ident.initiales.slice(0,3))}</span><div class="ic-tx"><strong>${esc(ident.initiales)}</strong><small>${esc(ident.role)}</small></div><button class="btn-mini" data-ident>Modifier</button></div>`
+    ? `<div class="card ident-card"><span class="ident-ava" style="background:${ident.color||colorFor(ident.initiales)};color:#fff">${esc(ident.initiales.slice(0,3))}</span><div class="ic-tx"><strong>${esc(ident.initiales)}</strong><small>${esc(ident.role)}</small></div><button class="btn-mini" data-ident>Modifier</button></div>`
     : `<button class="card ident-card" data-ident style="width:100%;cursor:pointer"><span class="ident-ava">${ic("user")}</span><div class="ic-tx" style="text-align:left"><strong>Qui êtes-vous ?</strong><small>Initiales + rôle (RGPD : pas de nom)</small></div><span class="btn-mini">Définir</span></button>`);
   const banner = fbError ? `<div class="banner">${ic("alert")}<span><b>Activation Firestore requise.</b> Publiez les règles de <code>coordination_projets</code>.</span></div>` : "";
   const list = projets.length ? `<div class="proj-list">${projets.map(p=>{const denom=(Array.isArray(p.trame)&&p.trame.length)?p.trame.length:ETAPES.length;const mat=Math.round((p._etapes/Math.max(denom,1))*100);const st=STATUTS[p.statut]||STATUTS.brouillon;const ty=TYPES.find(t=>t.id===p.type);
