@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#26365a">
+    <meta name="robots" content="noindex">
+    <title>Chef-d'œuvre CAP — projet sur deux ans</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="topbar" id="topbar">
+      <button id="back" class="tb-back" aria-label="Retour">
+        <svg viewBox="0 0 24 24" class="i" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
+        <span id="backLabel">Portail</span>
+      </button>
+      <div class="tt"><div id="title">Chef-d'œuvre CAP</div><div id="subtitle" class="sub"></div></div>
+      <button id="identBtn" class="tb-ident" hidden></button>
+    </header>
+
+    <main class="wrap" id="wrap"><div id="view"></div></main>
+
+    <div id="overlay" class="overlay"></div>
+    <div id="toast" class="toast"></div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

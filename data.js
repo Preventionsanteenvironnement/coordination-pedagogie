@@ -174,6 +174,14 @@ const THEMATIQUES = [
         icon: "brain",
         badge: "Nouveau",
       },
+      {
+        titre: "Chef-d'œuvre CAP — piloter sur deux ans",
+        desc: "Le dossier de pilotage du chef-d'œuvre, sur les deux années du CAP : une timeline par périodes (sept. → juin), des co-disciplines colorées, des jalons, et le passage de témoin de l'équipe de 1re année à celle de 2e année — pour continuer et clôturer sans repartir de zéro. Préparation de l'oral, cadre officiel intégré. Un dossier par promotion, entièrement modulable. Anonyme : initiales + rôle, jamais de nom d'élève.",
+        lien: "chef-doeuvre/",
+        type: "Outil",
+        icon: "cap",
+        badge: "Nouveau",
+      },
     ],
   },
 ];

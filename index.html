@@ -73,7 +73,8 @@
       compass:'<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 5.3-5.3 2.2 2.2-5.3z"/>',
       inclusion:'<circle cx="12" cy="5.5" r="2"/><path d="M5 9h14M12 9v5m0 0-3 6m3-6 3 6"/>',
       bulb:'<path d="M9.5 17.5h5"/><path d="M10 21h4"/><path d="M8 14a5 5 0 1 1 8 0c-.8.9-1.2 1.6-1.3 2.5h-5.4c-.1-.9-.5-1.6-1.3-2.5z"/>',
-      brain:'<path d="M12 5a3 3 0 0 0-5.5 1.6A2.8 2.8 0 0 0 5 12a2.8 2.8 0 0 0 1.8 4.8A2.8 2.8 0 0 0 12 19m0-14a3 3 0 0 1 5.5 1.6A2.8 2.8 0 0 1 19 12a2.8 2.8 0 0 1-1.8 4.8A2.8 2.8 0 0 1 12 19m0-14v14"/>'
+      brain:'<path d="M12 5a3 3 0 0 0-5.5 1.6A2.8 2.8 0 0 0 5 12a2.8 2.8 0 0 0 1.8 4.8A2.8 2.8 0 0 0 12 19m0-14a3 3 0 0 1 5.5 1.6A2.8 2.8 0 0 1 19 12a2.8 2.8 0 0 1-1.8 4.8A2.8 2.8 0 0 1 12 19m0-14v14"/>',
+      cap:'<path d="M12 5 2.5 9 12 13l9.5-4z"/><path d="M6 11v4c0 1 2.7 2.2 6 2.2s6-1.2 6-2.2v-4"/><path d="M21.5 9v5"/>'
     };
     const SVG = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (p || ICONS.file) + '</svg>';
     const iconFor = n => SVG(ICONS[n.icon] || (n.enfants ? ICONS.folder : ICONS.file));
