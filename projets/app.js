@@ -62,6 +62,8 @@ const ICONS = {
   clock:`<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>`,
   pin:`<path d="M12 21s7-5.7 7-11a7 7 0 1 0-14 0c0 5.3 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>`,
   euro:`<path d="M16.5 8a5 5 0 1 0 0 8"/><path d="M5 10.5h7M5 13.5h6"/>`,
+  up:`<path d="m6 15 6-6 6 6"/>`,
+  down:`<path d="m6 9 6 6 6-6"/>`,
 };
 const ic = n => ICONS[n] ? `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>` : "";
 
@@ -148,7 +150,7 @@ const saved = ()=>toast("Enregistré",true);
 function saveMine(){localStorage.setItem("projets_mine_v1",JSON.stringify([...mine]));}
 const avatar = (ini,cls="")=>`<span class="ava ${cls}" style="background:${colorFor(ini)}">${esc((ini||"?").slice(0,3))}</span>`;
 const active = c=>!c.ecarte;
-const sortC = arr => arr.slice().sort((a,b)=>(b.epingle?1:0)-(a.epingle?1:0) || (a._t)-(b._t));
+const sortC = arr => arr.slice().sort((a,b)=>{ const pa=typeof a.pos==="number"?a.pos:Infinity, pb=typeof b.pos==="number"?b.pos:Infinity; if(pa!==pb) return pa-pb; return (b.epingle?1:0)-(a.epingle?1:0) || (a._t)-(b._t); });
 const ofEt = id => sortC(contribs.filter(c=>c.etape===id && active(c)));
 const ofEtAll = id => sortC(contribs.filter(c=>c.etape===id));
 const isLocked = id => (projet?.locked||[]).includes(id);
@@ -339,13 +341,13 @@ function viewEtape(){
   const isLink = e.id==="actions"||e.id==="indicateurs"; const objs=ofEt("obj_op");
   const prevSteps=S.slice(0,etapeIdx);
   const fil = prevSteps.length ? `<div class="fil"><div class="fil-h">${ic("compass")} Le fil du projet jusqu'ici</div>${prevSteps.map((ps,idx)=>{ const pl=ofEt(ps.id); const open=idx===prevSteps.length-1; const body=pl.length?`<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:`<p class="vide">Rien noté à cette étape.</p>`; return `<details class="fil-step" ${open?"open":""}><summary><span class="fs-ic" style="--pc:${ps.c}">${ic(ps.icon)}</span><span class="fs-n">${esc(ps.nom)}</span>${pl.length?`<span class="fs-ct">${pl.length}</span>`:""}</summary><div class="ctx-body">${body}</div></details>`; }).join("")}</div>` : "";
-  const card=c=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
+  const card=(c,i)=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
     const linkSel = isLink && !regroup ? `<div class="link-sel">${ic("link")}<select data-link="${esc(c.id)}"><option value="">↳ Sert un objectif…</option>${objs.map(o=>`<option value="${esc(o.id)}" ${c.lien===o.id?"selected":""}>${esc(o.texte.slice(0,40))}</option>`).join("")}</select></div>` : "";
     return `<article class="contrib ${c.epingle?"top":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
       ${regroup?`<span class="chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales)}
       <div class="cb"><div class="cmeta">${c.epingle?`<span class="ctop-tag">${ic("star")} retenu</span>`:""}<b style="color:var(--ink);font-weight:600">${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?' · modifié':''}</div>
         <div class="ctext">${esc(c.texte)}</div>${linkSel}
-        ${regroup?"":`<div class="cact">${RO?"":`<button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button><button class="cmini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>`}${(!RO&&mine.has(c.id))?`<button class="cmini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="cmini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</div>
+        ${regroup?"":`<div class="cact">${RO?"":`<button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>${list.length>1?`<span class="cord"><button class="cmini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="cmini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button></span>`:""}<button class="cmini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>`}${(!RO&&mine.has(c.id))?`<button class="cmini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="cmini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</div>
         <details class="comments"><summary>${ic("comment")} Commentaires${coms.length?` (${coms.length})`:""}</summary><div class="com-list">${coms.map(k=>`<div class="com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="cmini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
       </div></article>`; };
   const cards=list.length?list.map(card).join(""):`<div class="empty">Personne n'a encore contribué à cette étape.${locked||RO?"":" Lancez-vous !"}</div>`;
@@ -613,6 +615,14 @@ async function addContribution(texte){ if(!ident){openIdent();return;} texte=tex
   try{const ref=await addDoc(collection(db,COL,projet.id,"contributions"),{etape:sid,texte,initiales:ident.initiales,role:ident.role,epingle:false,comments:[],createdAt:serverTimestamp()});mine.add(ref.id);saveMine();saved();}catch(e){console.error(e);toast("Envoi impossible.");}}
 async function upd(cid,obj){try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
 async function delContribution(cid){try{await deleteDoc(doc(db,COL,projet.id,"contributions",cid));mine.delete(cid);saveMine();saved();}catch(e){console.error(e);toast("Suppression impossible.");}}
+async function moveContrib(cid,dir){
+  const c0=contribs.find(c=>c.id===cid); if(!c0) return;
+  const list=ofEt(c0.etape); const idx=list.findIndex(c=>c.id===cid); const j=idx+dir;
+  if(idx<0||j<0||j>=list.length) return;
+  const arr=list.slice(); const [m]=arr.splice(idx,1); arr.splice(j,0,m);
+  try{ await Promise.all(arr.map((c,i)=>updateDoc(doc(db,COL,projet.id,"contributions",c.id),{pos:i}))); saved(); }
+  catch(e){ console.error(e); toast("Action impossible."); }
+}
 async function addComment(cid,txt){if(!ident){openIdent();return;}txt=txt.trim();if(!txt)return;const c=contribs.find(x=>x.id===cid);if(!c)return;const coms=[...(c.comments||[]),{ini:ident.initiales,role:ident.role,txt,t:Date.now()}];upd(cid,{comments:coms});}
 async function setProj(obj){try{await updateDoc(doc(db,COL,projet.id),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
 async function toggleLock(eid){const cur=projet.locked||[];setProj({locked:cur.includes(eid)?cur.filter(x=>x!==eid):[...cur,eid]});}
@@ -647,6 +657,8 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
   const ea=e.target.closest("[data-ecart]");if(ea) return openEcart(ea.dataset.ecart);
+  const cu=e.target.closest("[data-cup]");if(cu) return moveContrib(cu.dataset.cup,-1);
+  const cd=e.target.closest("[data-cdown]");if(cd) return moveContrib(cd.dataset.cdown,1);
   const ri=e.target.closest("[data-reint]");if(ri) return upd(ri.dataset.reint,{ecarte:false,raison:""});
   const ed=e.target.closest("[data-edit]");if(ed) return openEdit(ed.dataset.edit);
   const dl=e.target.closest("[data-del]");if(dl) return delContribution(dl.dataset.del);

@@ -272,6 +272,8 @@ table.doc-pl th{background:var(--bg);font-size:11.5px;text-transform:uppercase;c
 /* Édition / commentaires */
 .cmini{border:1px solid var(--line2);background:#fff;color:var(--muted);border-radius:8px;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center}
 .cmini .i{font-size:15px}
+.cmini:disabled{opacity:.32;cursor:default}
+.cord{display:inline-flex;gap:3px;margin:0 1px}
 .comments{margin-top:9px}
 .comments>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--muted)}
 .comments>summary::-webkit-details-marker{display:none}
