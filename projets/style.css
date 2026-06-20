@@ -486,6 +486,8 @@ table.pl td{vertical-align:middle}
 .lnk{background:none;border:none;color:var(--faint);font-size:12.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:var(--r-sm)}
 .lnk:hover{color:var(--accent);background:var(--bg)}
 .lnk .i{font-size:15px}
+.lnk.danger:hover{color:#c0392b;background:#fcebeb}
+.ov-foot{flex-wrap:wrap;gap:6px}
 
 /* Vue étape : 2 colonnes (rédaction + ressources) */
 .etape-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:4px}

@@ -324,7 +324,7 @@ function viewOverview(){
     ${tlTimeline()}
     ${syn?`<div class="sec-title">${ic("wand")} Synthèse automatique</div><div class="card syn-card">${esc(syn)}</div>`:""}
     <div class="fiche-actions" style="margin-top:16px"><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
-    <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button>`}</div>`;
+    <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 
 function viewEtape(){
@@ -450,6 +450,19 @@ function importJSON(){
       toast("Projet importé",true); openProjet(ref.id);
     }catch(e){ console.error(e); toast("Import impossible (fichier invalide)."); } };
   inp.click();
+}
+async function delProjet(){
+  if(!projet||RO) return;
+  if(!confirm(`Supprimer définitivement le projet « ${projet.titre||"sans titre"} » et toutes ses contributions ?\n\nCette action est irréversible. Pensez à « Sauvegarder (JSON) » avant si besoin.`)) return;
+  const pid=projet.id;
+  try{
+    const cs=await getDocs(collection(db,COL,pid,"contributions"));
+    for(const d of cs.docs){ await deleteDoc(doc(db,COL,pid,"contributions",d.id)); }
+    try{ const ps=await getDocs(collection(db,COL,pid,"presence")); for(const d of ps.docs){ await deleteDoc(doc(db,COL,pid,"presence",d.id)); } }catch(_){}
+    await deleteDoc(doc(db,COL,pid));
+    stopPresence(); if(unsub){unsub();unsub=null;} if(unsubP){unsubP();unsubP=null;}
+    view="liste"; projet=null; contribs=[]; render(); loadListe(); toast("Projet supprimé",true);
+  }catch(e){ console.error(e); toast("Suppression impossible."); }
 }
 function openNew(){
   let m=MODELES[0], type=m.type, typeCustom="";
@@ -636,6 +649,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#word")) return exportWord();
   if(e.target.closest("#expJson")) return exportJSON();
   if(e.target.closest("#impJson")) return importJSON();
+  if(e.target.closest("#delProj")) return delProjet();
   if(e.target.closest("#share")){const url=base+"?p="+projet.id+"&ro=1";navigator.clipboard?.writeText(url).then(()=>toast("Lien lecture copié",true)).catch(()=>toast(url));return;}
   if(e.target.closest("[data-close]")||e.target.id==="overlay") return closeSheet();
   if(e.target.closest("#identBtn")) return openIdent();
