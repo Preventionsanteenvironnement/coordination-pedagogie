@@ -703,3 +703,24 @@ table.pl td{vertical-align:middle}
 .bilan-tbl .bv{white-space:nowrap;color:#d4537e;font-weight:600}
 .bilan-tbl .bv .i{font-size:14px;vertical-align:-2px}
 .bilan-tbl .bby{color:var(--muted);white-space:nowrap}
+
+/* ===== Mur v2 : plateau, fusion, écriture en bas ===== */
+.wall-bar{margin:4px 0 12px}
+.board{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:20px 16px;min-height:260px;margin-bottom:14px}
+.board-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:210px;color:var(--muted);font-size:14px;text-align:center}
+.board-empty .i{font-size:36px;color:var(--line2)}
+.po{position:relative}
+.po-count{position:absolute;top:-9px;right:-9px;background:var(--tx);color:var(--bg);font-size:12px;font-weight:700;border-radius:var(--r-pill);padding:2px 8px;box-shadow:0 1px 3px rgba(0,0,0,.22)}
+.cw{position:relative}
+.cw-n{font-size:.52em;font-weight:700;opacity:.8;vertical-align:super;margin-left:1px}
+.mur-compose{position:sticky;bottom:10px;z-index:5;margin-top:0;background:var(--surface);box-shadow:0 -3px 12px rgba(16,24,40,.07),var(--sh)}
+.mur-compose textarea{min-height:42px}
+.mur-compose .compose-foot{margin-top:8px;padding-top:8px}
+.mode-pick{display:flex;gap:8px}
+.mode-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;border:1.5px solid var(--line2);background:var(--surface);border-radius:var(--r-sm);padding:13px 10px;cursor:pointer}
+.mode-opt .i{font-size:20px;color:var(--muted)}
+.mode-opt b{font-size:13.5px;font-weight:600;color:var(--ink)}
+.mode-opt small{font-size:11.5px;color:var(--muted);line-height:1.3}
+.mode-opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.mode-opt.on .i,.mode-opt.on b{color:var(--accent)}
+.bilan-tbl .bc{color:var(--faint);font-weight:600;white-space:nowrap}

@@ -69,9 +69,15 @@ const iVoted = i => Array.isArray(i.votes)&&i.votes.includes(DEV);
 const sortIdees = arr => arr.slice().sort((a,b)=> voteCount(b)-voteCount(a) || (a._t)-(b._t));
 const POSTITS=[{bg:"#CECBF6",tx:"#26215C",av:"#534AB7"},{bg:"#9FE1CB",tx:"#04342C",av:"#0F6E56"},{bg:"#FAC775",tx:"#412402",av:"#854F0B"},{bg:"#F5C4B3",tx:"#4A1B0C",av:"#993C1D"},{bg:"#B5D4F4",tx:"#042C53",av:"#185FA5"},{bg:"#F4C0D1",tx:"#4B1528",av:"#993556"},{bg:"#C0DD97",tx:"#173404",av:"#3B6D11"},{bg:"#F7C1C1",tx:"#501313",av:"#A32D2D"}];
 const hashStr = s => { let h=0; for(const c of String(s||"")) h=(h*31+c.charCodeAt(0))>>>0; return h; };
-let wallMode = localStorage.getItem("murs_wallmode")||"postit";
+let wallMode = "postit";
 let anonMode = false;
 const seen = new Set();
+const normalize = t => String(t||"").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
+function groupIdees(list){
+  const map=new Map();
+  list.forEach(i=>{ const k=normalize(i.texte); if(!k) return; if(!map.has(k)) map.set(k,{key:k,count:0,voters:new Set(),docs:[]}); const g=map.get(k); g.count++; g.docs.push(i); (i.votes||[]).forEach(v=>g.voters.add(v)); });
+  return [...map.values()].map(g=>{ g.docs.sort((a,b)=>(a._t||0)-(b._t||0)); g.rep=g.docs[0]; g.text=g.rep.texte; g.votes=g.voters.size; g.score=g.count+g.votes; g._t=g.rep._t||0; return g; }).sort((a,b)=> b.score-a.score || a._t-b._t );
+}
 
 /* ---------- Rendu ---------- */
 function render(){
@@ -107,45 +113,47 @@ const STATUTS = { ouvert:{l:"Ouvert",c:"#0f8a76"}, clos:{l:"Clos",c:"#8b94a3"} }
 /* ---------- Un mur ---------- */
 function viewMur(){
   const clos = mur.statut==="clos";
-  const list = sortIdees(idees);
-  const top = list.length ? voteCount(list[0]) : 0;
+  const groups = groupIdees(idees);
+  const top = groups.length ? groups[0].score : 0;
+  const total = idees.length;
   const conts=[...new Set(idees.map(i=>i.initiales).filter(Boolean))];
   const pil = mur.pilote;
   const piloteRow = `<div class="ovh-pilote">${pil?`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx">${avatar(pil.ini,"sm",pil.color)}<b>${esc(pil.ini)}</b> · ${esc(pil.role)}</span>${RO?"":`<button class="lnk-mini" data-pilote>${ident&&pil.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx-none">à définir</span>${RO?"":`<button class="btn-mini" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div>`;
-  const card = i => { const vc=voteCount(i); const pc=POSTITS[hashStr(i.id)%POSTITS.length]; const rot=(hashStr(i.id+"r")%7)-3; const sz=(14+Math.min(vc,9)*1.3).toFixed(1); const w=158+Math.min(vc,9)*9; const isNew=!seen.has(i.id); seen.add(i.id);
-    const who = (i.anon||!i.initiales) ? `<span class="po-anon">${ic("user")} Anonyme</span>` : `<span class="po-who">${avatar(i.initiales,"po-av",i.color||pc.av)}<span class="po-by">${esc(i.role||"")}</span></span>`;
-    return `<article class="po ${isNew?"po-new":""} ${vc&&vc===top?"po-top":""}" style="--bg:${pc.bg};--tx:${pc.tx};width:${w}px;font-size:${sz}px;transform:rotate(${rot}deg)">
-      <p class="po-tx">${esc(i.texte)}</p>
-      <div class="po-ft">${who}<button class="po-vote ${iVoted(i)?"on":""}" ${RO?"disabled":`data-vote="${esc(i.id)}"`}>${ic("heart")} ${vc||""}</button>${(!RO&&mine.has(i.id))?`<span class="po-acts"><button class="po-mini" data-edit="${esc(i.id)}" aria-label="Modifier">${ic("pencil")}</button><button class="po-mini" data-del="${esc(i.id)}" aria-label="Supprimer">${ic("trash")}</button></span>`:""}</div>
-    </article>`; };
-  const cloud = `<div class="cloud">${list.map(i=>{const vc=voteCount(i);const pc=POSTITS[hashStr(i.id)%POSTITS.length];const sz=(16+Math.min(vc,12)*2.2).toFixed(0);return `<span class="cw ${iVoted(i)?"on":""}" style="color:${pc.av};font-size:${sz}px" ${RO?"":`data-vote="${esc(i.id)}"`} title="${vc} vote(s)">${esc(i.texte)}</span>`;}).join("")}</div>`;
-  const wall = !list.length ? `<div class="empty">Aucune idée pour l'instant.${clos||RO?"":" Lancez-vous !"}</div>` : (wallMode==="nuage"?cloud:`<div class="wall">${list.map(card).join("")}</div>`);
-  const compose = (RO||clos)?(clos?`<div class="locked-note">${ic("lock")} Mur clos — les idées sont figées.</div>`:"") :
-    `<div class="compose mur-compose"><textarea data-keep id="newIdea" rows="2" placeholder="Votre idée, en quelques mots…"></textarea><div class="compose-foot"><label class="anon-chk"><input type="checkbox" id="anonChk" ${anonMode?"checked":""}> <span>Publier en anonyme</span></label><button class="compose-send" id="sendIdea">${ic("plus")} Ajouter au mur</button></div></div>`;
   const lockBtn = RO?"":`<button class="lock-btn ${clos?"on":""}" data-clos>${ic(clos?"lock":"unlock")} ${clos?"Mur clos":"Clore le mur"}</button>`;
-  const toggle = `<div class="wall-toggle"><button class="wt ${wallMode==="postit"?"on":""}" data-wallmode="postit">${ic("grid")} Post-it</button><button class="wt ${wallMode==="nuage"?"on":""}" data-wallmode="nuage">${ic("wand")} Nuage de mots</button></div>`;
+  const toggle = `<div class="wall-toggle"><button class="wt ${wallMode==="postit"?"on":""}" data-wallmode="postit">${ic("grid")} Post-it</button><button class="wt ${wallMode==="nuage"?"on":""}" data-wallmode="nuage">${ic("wand")} Nuage</button></div>`;
+  const card = g => { const pc=POSTITS[hashStr(g.key)%POSTITS.length]; const rot=(hashStr(g.key+"r")%7)-3; const lvl=Math.min(g.score-1,10); const sz=(14.5+lvl*1.25).toFixed(1); const w=160+lvl*9; const isNew=!seen.has(g.key); seen.add(g.key);
+    const my=g.docs.find(d=>mine.has(d.id)); const cnt=g.count>1?`<span class="po-count">×${g.count}</span>`:"";
+    const who = g.count>1 ? `<span class="po-anon">${ic("users")} ${g.count} personnes</span>` : ((g.rep.anon||!g.rep.initiales)?`<span class="po-anon">${ic("user")} Anonyme</span>`:`<span class="po-who">${avatar(g.rep.initiales,"po-av",g.rep.color||pc.av)}<span class="po-by">${esc(g.rep.role||"")}</span></span>`);
+    return `<article class="po ${isNew?"po-new":""} ${g.score>1&&g.score===top?"po-top":""}" style="--bg:${pc.bg};--tx:${pc.tx};width:${w}px;font-size:${sz}px;transform:rotate(${rot}deg)">${cnt}
+      <p class="po-tx">${esc(g.text)}</p>
+      <div class="po-ft">${who}<button class="po-vote ${g.voters.has(DEV)?"on":""}" ${RO?"disabled":`data-vote="${esc(g.rep.id)}"`}>${ic("heart")} ${g.votes||""}</button>${(!RO&&my)?`<span class="po-acts"><button class="po-mini" data-edit="${esc(my.id)}" aria-label="Modifier la mienne">${ic("pencil")}</button><button class="po-mini" data-del="${esc(my.id)}" aria-label="Retirer la mienne">${ic("trash")}</button></span>`:""}</div>
+    </article>`; };
+  const cloud = `<div class="cloud">${groups.map(g=>{const pc=POSTITS[hashStr(g.key)%POSTITS.length];const lvl=Math.min(g.score-1,16);const sz=(17+lvl*2.1).toFixed(0);return `<span class="cw ${g.voters.has(DEV)?"on":""}" style="color:${pc.av};font-size:${sz}px" ${RO?"":`data-vote="${esc(g.rep.id)}"`} title="${g.count}× proposé · ${g.votes} cœur(s)">${esc(g.text)}${g.score>1?`<sup class="cw-n">${g.score}</sup>`:""}</span>`;}).join("")}</div>`;
+  const inner = !groups.length ? `<div class="board-empty">${ic("bulb")}<span>Le mur est vide.${clos||RO?"":" Écrivez la première idée ci-dessous."}</span></div>` : (wallMode==="nuage"?cloud:`<div class="wall">${groups.map(card).join("")}</div>`);
+  const compose = (RO||clos)?(clos?`<div class="locked-note">${ic("lock")} Mur clos — les idées sont figées.</div>`:"") :
+    `<div class="compose mur-compose"><textarea data-keep id="newIdea" rows="1" placeholder="Écrivez une idée puis Entrée…"></textarea><div class="compose-foot"><label class="anon-chk"><input type="checkbox" id="anonChk" ${anonMode?"checked":""}> <span>Anonyme</span></label><button class="compose-send" id="sendIdea">${ic("plus")} Ajouter</button></div></div>`;
   return `<div class="mur-head">
       <div class="eh-hero">
         <div class="eh-badge" style="background:#0f8a76">${ic("bulb")}</div>
-        <div class="eh-tx"><div class="eyebrow">Mur d'idées${mur.theme?` · ${esc(mur.theme)}`:""}</div><h2>${esc(mur.titre)}</h2><p class="eh-q">${list.length} idée${list.length>1?"s":""} · ${conts.length} participant${conts.length>1?"s":""}</p></div>
+        <div class="eh-tx"><div class="eyebrow">${mur.theme?esc(mur.theme):"Mur d'idées"}</div><h2>${esc(mur.titre)}</h2><p class="eh-q">${groups.length} idée${groups.length>1?"s":""}${total>groups.length?` · ${total} propositions`:""} · ${conts.length} participant${conts.length>1?"s":""}</p></div>
         ${lockBtn}
       </div>
       ${piloteRow}
     </div>
+    <div class="wall-bar">${groups.length?toggle:`<span></span>`}<button class="btn-mini" data-bilan>${ic("file")} Bilan</button></div>
+    <div class="board">${inner}</div>
     ${compose}
-    <div class="wall-bar">${list.length?toggle:`<span></span>`}<button class="btn-mini" data-bilan>${ic("file")} Bilan</button></div>
-    ${wall}
     <div class="ov-foot">${RO?"":`<button class="lnk" id="shareMur">${ic("send")} Partager (lecture)</button><button class="lnk danger" id="delMur">${ic("trash")} Supprimer ce mur</button>`}</div>`;
 }
 
 /* ---------- Bilan ---------- */
 function viewBilan(){
-  const list = sortIdees(idees);
+  const groups = groupIdees(idees);
   const conts=[...new Set(idees.map(i=>i.initiales).filter(Boolean))];
-  const rows = list.map((i,n)=>`<tr><td class="bn">${n+1}</td><td>${esc(i.texte)}</td><td class="bv">${ic("heart")} ${voteCount(i)}</td><td class="bby">${esc(i.role||"")}</td></tr>`).join("");
-  const body = list.length ? `<table class="bilan-tbl"><thead><tr><th>#</th><th>Idée</th><th>Votes</th><th>Proposé par</th></tr></thead><tbody>${rows}</tbody></table>` : `<p class="vide">Aucune idée pour l'instant.</p>`;
+  const rows = groups.map((g,n)=>`<tr><td class="bn">${n+1}</td><td>${esc(g.text)}</td><td class="bc">${g.count>1?"×"+g.count:""}</td><td class="bv">${ic("heart")} ${g.votes}</td></tr>`).join("");
+  const body = groups.length ? `<table class="bilan-tbl"><thead><tr><th>#</th><th>Idée</th><th>Proposée</th><th>Cœurs</th></tr></thead><tbody>${rows}</tbody></table>` : `<p class="vide">Aucune idée pour l'instant.</p>`;
   return `<div class="fiche-actions"><button class="btn" data-mur>${ic("back")} Le mur</button><button class="btn" id="wordMur">${ic("word")} Word</button><button class="btn primary" id="printMur">${ic("printer")} Imprimer / PDF</button></div>
-    <div class="doc"><div class="doc-cover"><div class="dc-brand">Mur d'idées — bilan</div><h1 class="dc-title">${esc(mur.titre)}</h1>${mur.theme?`<p class="dc-ctx">${esc(mur.theme)}</p>`:""}<div class="dc-meta">${mur.pilote?`Piloté par ${esc(mur.pilote.ini)} · `:""}${list.length} idée(s) · ${conts.length} participant(s) · ${dateFr()}</div></div>
+    <div class="doc"><div class="doc-cover"><div class="dc-brand">Mur d'idées — bilan</div><h1 class="dc-title">${esc(mur.titre)}</h1>${mur.theme?`<p class="dc-ctx">${esc(mur.theme)}</p>`:""}<div class="dc-meta">${mur.pilote?`Piloté par ${esc(mur.pilote.ini)} · `:""}${groups.length} idée(s) · ${conts.length} participant(s) · ${dateFr()}</div></div>
     <section><h2>Idées classées par votes</h2>${body}</section></div>`;
 }
 
@@ -163,7 +171,7 @@ async function openMur(id){
   try{
     const ref=doc(db,COL,id); const ds=await getDoc(ref);
     if(!ds.exists()){ toast("Mur introuvable."); view="liste"; render(); return; }
-    mur={id,...ds.data()}; view="mur"; render();
+    mur={id,...ds.data()}; wallMode = mur.mode==="nuage"?"nuage":"postit"; view="mur"; render();
     unsub=onSnapshot(ref,s=>{ if(!s.exists()){return;} mur={id,...s.data()}; if(view!=="liste") render(); });
     unsubI=onSnapshot(collection(db,COL,id,"idees"),s=>{ idees=s.docs.map(d=>{const x={id:d.id,...d.data()}; x._t=x.createdAt&&x.createdAt.seconds?x.createdAt.seconds:0; return x;}); if(view!=="liste") render(); });
   }catch(e){ console.error(e); fbError=true; toast("Ouverture impossible."); }
@@ -211,16 +219,18 @@ function openNew(){
     <div class="field"><label for="mTit">Titre du mur</label><input id="mTit" placeholder="ex. Idées de projets pour l'année"></div>
     <div class="field"><label for="mTheme">Thème / question (optionnel)</label><input id="mTheme" placeholder="ex. Comment renforcer le lien avec les familles ?"></div>
     <div class="field"><label>Inspiration</label><div class="roles" id="mMods">${MODELES.slice(1).map(t=>`<button type="button" class="role-chip" data-mod="${esc(t)}">${esc(t)}</button>`).join("")}</div></div>
+    <div class="field"><label>Affichage du mur</label><div class="mode-pick" id="mMode"><button type="button" class="mode-opt on" data-mode="postit">${ic("grid")} <b>Post-it</b><small>idées en notes colorées</small></button><button type="button" class="mode-opt" data-mode="nuage">${ic("wand")} <b>Nuage de mots</b><small>mots-clés, taille selon la popularité</small></button></div></div>
     <label class="rchk"><input type="checkbox" id="mPilote" ${ident?"checked":""} ${ident?"":"disabled"}> <span>Je pilote ce mur ${ident?`<span class="muted">(vous : ${esc(ident.initiales)} · ${esc(ident.role)})</span>`:`<span class="muted">— identifiez-vous d'abord</span>`}</span></label>
     <div class="actions"><button class="btn primary" id="createM">${ic("plus")} Créer le mur</button></div>`);
   $("#mMods").querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>{$("#mTit").value=b.dataset.mod;});
-  $("#createM").onclick=async()=>{const titre=$("#mTit").value.trim();if(!titre){toast("Donnez un titre.");return;}const pilote=($("#mPilote")&&$("#mPilote").checked&&ident)?{ini:ident.initiales,role:ident.role,color:ident.color||""}:null;const btn=$("#createM");btn.disabled=true;btn.textContent="Création…";try{const ref=await addDoc(collection(db,COL),{titre,theme:$("#mTheme").value.trim(),statut:"ouvert",pilote,createdAt:serverTimestamp()});closeSheet();await openMur(ref.id);}catch(e){console.error(e);fbError=true;btn.disabled=false;btn.innerHTML=`${ic("plus")} Créer le mur`;toast("Enregistrement impossible.");}};
+  let mode="postit"; $("#mMode").querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$("#mMode").querySelectorAll(".mode-opt").forEach(x=>x.classList.toggle("on",x===b));});
+  $("#createM").onclick=async()=>{const titre=$("#mTit").value.trim();if(!titre){toast("Donnez un titre.");return;}const pilote=($("#mPilote")&&$("#mPilote").checked&&ident)?{ini:ident.initiales,role:ident.role,color:ident.color||""}:null;const btn=$("#createM");btn.disabled=true;btn.textContent="Création…";try{const ref=await addDoc(collection(db,COL),{titre,theme:$("#mTheme").value.trim(),statut:"ouvert",mode,pilote,createdAt:serverTimestamp()});closeSheet();await openMur(ref.id);}catch(e){console.error(e);fbError=true;btn.disabled=false;btn.innerHTML=`${ic("plus")} Créer le mur`;toast("Enregistrement impossible.");}};
 }
 
 function exportWord(){
-  const list=sortIdees(idees);
-  const rows=list.map((i,n)=>`<tr><td>${n+1}</td><td>${esc(i.texte)}</td><td>${voteCount(i)}</td><td>${esc(i.role||"")}</td></tr>`).join("");
-  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial,sans-serif;color:#1f2733;margin:2cm}h1{font-size:18pt}table{border-collapse:collapse;width:100%;font-size:11pt;margin-top:8pt}th,td{border:1px solid #ccc;padding:5pt 7pt;text-align:left}</style></head><body><h1>${esc(mur.titre)}</h1>${mur.theme?`<p>${esc(mur.theme)}</p>`:""}<p style="color:#666">${mur.pilote?`Piloté par ${esc(mur.pilote.ini)} · `:""}${list.length} idée(s) · ${dateFr()}</p><table><tr><th>#</th><th>Idée</th><th>Votes</th><th>Proposé par</th></tr>${rows}</table></body></html>`;
+  const groups=groupIdees(idees);
+  const rows=groups.map((g,n)=>`<tr><td>${n+1}</td><td>${esc(g.text)}</td><td>${g.count}</td><td>${g.votes}</td></tr>`).join("");
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial,sans-serif;color:#1f2733;margin:2cm}h1{font-size:18pt}table{border-collapse:collapse;width:100%;font-size:11pt;margin-top:8pt}th,td{border:1px solid #ccc;padding:5pt 7pt;text-align:left}</style></head><body><h1>${esc(mur.titre)}</h1>${mur.theme?`<p>${esc(mur.theme)}</p>`:""}<p style="color:#666">${mur.pilote?`Piloté par ${esc(mur.pilote.ini)} · `:""}${groups.length} idée(s) · ${dateFr()}</p><table><tr><th>#</th><th>Idée</th><th>Proposée</th><th>Cœurs</th></tr>${rows}</table></body></html>`;
   const blob=new Blob([html],{type:"application/msword"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="mur-"+String(mur.titre||"idees").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".doc"; a.click(); URL.revokeObjectURL(a.href); toast("Word téléchargé",true);
 }
 
@@ -232,7 +242,7 @@ document.addEventListener("click", e=>{
   const op=e.target.closest("[data-open]"); if(op) return openMur(op.dataset.open);
   if(e.target.closest("[data-bilan]")||e.target.closest("#bilanBtn")){ view="bilan"; return render(); }
   if(e.target.closest("[data-mur]")){ view="mur"; return render(); }
-  const wm=e.target.closest("[data-wallmode]"); if(wm){ wallMode=wm.dataset.wallmode; localStorage.setItem("murs_wallmode",wallMode); return render(); }
+  const wm=e.target.closest("[data-wallmode]"); if(wm){ wallMode=wm.dataset.wallmode; return render(); }
   const v=e.target.closest("[data-vote]"); if(v) return voteIdea(v.dataset.vote);
   const ed=e.target.closest("[data-edit]"); if(ed) return openEditIdea(ed.dataset.edit);
   const dl=e.target.closest("[data-del]"); if(dl) return delIdea(dl.dataset.del);
