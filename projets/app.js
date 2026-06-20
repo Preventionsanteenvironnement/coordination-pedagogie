@@ -297,11 +297,14 @@ function reperesCard(){
   return `<div class="card rep-card"><div class="rep-h">${ic("calendar")} <b>Repères du projet</b>${RO?"":`<button class="btn-mini" data-reperes style="margin-left:auto">${items.length?"Modifier":"Renseigner"}</button>`}</div>${items.length?`<div class="rp-grid">${grid}</div>`:`<p class="muted" style="font-size:13px;margin:8px 0 0">Période, durée, lieu, bénéficiaires, budget, partenaires…</p>`}</div>`;
 }
 function tlTimeline(){
-  const S=STEPS(); const firstTodo=S.findIndex(s=>!contribs.some(c=>c.etape===s.id&&active(c)));
+  const S=STEPS(); const cnt=id=>contribs.filter(c=>c.etape===id&&active(c)).length;
+  const firstTodo=S.findIndex(s=>!cnt(s.id));
+  const ph={}; S.forEach(s=>{ const k=s.phaseNom||""; (ph[k]=ph[k]||{t:0,d:0}); ph[k].t++; if(cnt(s.id)) ph[k].d++; });
   let lastPhase=null, html="";
-  S.forEach((e,i)=>{ const n=contribs.filter(c=>c.etape===e.id&&active(c)).length; const done=n>0; const isNext=i===firstTodo; const last=i===S.length-1; const lock=isLocked(e.id);
-    if(e.phaseNom!==lastPhase){ html+=`<div class="tl-phase" style="--pc:${e.c}">${esc(e.phaseNom)}</div>`; lastPhase=e.phaseNom; }
-    html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${e.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":'<span class="tl-line"></span>'}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(e.nom)}</span>${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
+  S.forEach((e,i)=>{ const n=cnt(e.id); const done=n>0; const isNext=i===firstTodo; const last=i===S.length-1; const lock=isLocked(e.id);
+    const nextDone = !last && cnt(S[i+1].id)>0;
+    if(e.phaseNom!==lastPhase){ const p=ph[e.phaseNom||""]; const pc=Math.round(p.d/Math.max(p.t,1)*100); html+=`<div class="tl-phase" style="--pc:${e.c}"><span class="tlp-n">${esc(e.phaseNom)}</span><span class="tlp-bar"><i style="width:${pc}%"></i></span><span class="tlp-ct">${p.d}/${p.t}</span></div>`; lastPhase=e.phaseNom; }
+    html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${e.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":`<span class="tl-line ${done&&nextDone?"on":""}"></span>`}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(e.nom)}</span>${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
   return `<div class="tl">${html}</div>`;
 }
 function viewOverview(){
@@ -316,6 +319,7 @@ function viewOverview(){
   const syn=synthese();
   return `<div id="onlineInline">${onlineStrip()}</div>
     <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-tags">${stRow}</div></div>
+    ${done===0&&!RO?`<div class="ov-welcome">${ic("wand")}<div><b>Bienvenue dans votre projet</b><p>Avancez <b>étape par étape, à plusieurs</b> : chacun ajoute ses idées, la plus juste est « retenue », et la fiche se compose toute seule. Les étapes sont <b>modulables</b> (bouton « modifier » plus bas). Commencez par ${esc(S[0]?S[0].nom:"la première étape")} ci-dessous.</p></div></div>`:""}
     ${firstTodo>=0&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(S[firstTodo].nom)}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("sync")} ${S.length} étape(s) · modifier</button>`}</div>
     ${tlTimeline()}
@@ -664,7 +668,7 @@ document.addEventListener("click", e=>{
 });
 document.addEventListener("change", e=>{ const lk=e.target.closest("[data-link]"); if(lk) return upd(lk.dataset.link,{lien:e.target.value});
   const pf=e.target.closest("[data-pf]"); if(pf){const [f,cid]=pf.dataset.pf.split(":");return upd(cid,{[f]:e.target.value});} });
-document.addEventListener("input", e=>{ if(e.target.id==="newContrib"){const n=$("#nudge");if(!n)return;const m=nudge(stepAt(etapeIdx)?.id,e.target.value);if(m){n.innerHTML=`${ic("info")}<span>${esc(m)}</span>`;n.hidden=false;}else n.hidden=true;} });
+document.addEventListener("input", e=>{ if(e.target.id==="newContrib"){const t=e.target;t.style.height="auto";t.style.height=Math.min(t.scrollHeight,320)+"px";const n=$("#nudge");if(!n)return;const m=nudge(stepAt(etapeIdx)?.id,e.target.value);if(m){n.innerHTML=`${ic("info")}<span>${esc(m)}</span>`;n.hidden=false;}else n.hidden=true;} });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape")closeSheet();
   if(e.key==="Enter"&&!e.shiftKey){ if(e.target.id==="newContrib"){e.preventDefault();const v=e.target.value;e.target.value="";const n=$("#nudge");if(n)n.hidden=true;addContribution(v);} else if(e.target.id&&e.target.id.startsWith("com_")){e.preventDefault();const cid=e.target.id.slice(4);const v=e.target.value;e.target.value="";addComment(cid,v);} } });
 window.addEventListener("beforeunload", ()=>{ try{stopPresence();}catch(_){} });
