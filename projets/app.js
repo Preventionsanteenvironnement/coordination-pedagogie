@@ -148,7 +148,7 @@ const norm = s => String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/
 function toast(m,ok){const t=$("#toast");t.textContent=m;t.className="toast show"+(ok?" ok":"");setTimeout(()=>t.classList.remove("show"),2200);}
 const saved = ()=>toast("Enregistré",true);
 function saveMine(){localStorage.setItem("projets_mine_v1",JSON.stringify([...mine]));}
-const avatar = (ini,cls="")=>`<span class="ava ${cls}" style="background:${colorFor(ini)}">${esc((ini||"?").slice(0,3))}</span>`;
+const avatar = (ini,cls="",color="")=>`<span class="ava ${cls}" style="background:${color||colorFor(ini)}">${esc((ini||"?").slice(0,3))}</span>`;
 const active = c=>!c.ecarte;
 const sortC = arr => arr.slice().sort((a,b)=>{ const pa=typeof a.pos==="number"?a.pos:Infinity, pb=typeof b.pos==="number"?b.pos:Infinity; if(pa!==pb) return pa-pb; return (b.epingle?1:0)-(a.epingle?1:0) || (a._t)-(b._t); });
 const ofEt = id => sortC(contribs.filter(c=>c.etape===id && active(c)));
@@ -227,10 +227,10 @@ function synthese(){
 
 /* ---------- Présence ---------- */
 function onlineNow(){ const cut=Date.now()-45000; return presence.filter(p=>(p.lastSeen||0)>cut); }
-function beat(){ if(!ident||RO||!projet) return; const etId=(view==="etape")?(stepAt(etapeIdx)?.id||view):view; setDoc(doc(db,COL,projet.id,"presence",DEV),{initiales:ident.initiales,role:ident.role,etape:etId,lastSeen:Date.now()},{merge:true}).catch(()=>{}); }
+function beat(){ if(!ident||RO||!projet) return; const etId=(view==="etape")?(stepAt(etapeIdx)?.id||view):view; setDoc(doc(db,COL,projet.id,"presence",DEV),{initiales:ident.initiales,role:ident.role,color:ident.color||"",etape:etId,lastSeen:Date.now()},{merge:true}).catch(()=>{}); }
 function startPresence(id){ if(unsubPres){unsubPres();unsubPres=null;} presence=[]; try{ unsubPres=onSnapshot(collection(db,COL,id,"presence"),snap=>{ presence=snap.docs.map(d=>({id:d.id,...d.data()})); const el=$("#onlineInline"); if(el) el.innerHTML=onlineStrip(); }); }catch(_){} beat(); if(hb)clearInterval(hb); hb=setInterval(beat,20000); }
 function stopPresence(){ if(hb){clearInterval(hb);hb=null;} if(unsubPres){unsubPres();unsubPres=null;} if(projet&&ident&&!RO){ deleteDoc(doc(db,COL,projet.id,"presence",DEV)).catch(()=>{}); } presence=[]; }
-function onlineStrip(){ const on=onlineNow(); if(!on.length) return ""; return `<div class="online"><span class="muted" style="font-size:12px">${ic("users")} En ligne</span><div class="ava-row">${on.slice(0,8).map(p=>`<span title="${esc(p.role||"")} · ${esc(ETM[p.etape]?.nom||"")}">${avatar(p.initiales,"sm")}</span>`).join("")}${on.length>8?`<span class="ava sm" style="background:var(--faint)">+${on.length-8}</span>`:""}</div></div>`; }
+function onlineStrip(){ const on=onlineNow(); if(!on.length) return ""; return `<div class="online"><span class="muted" style="font-size:12px">${ic("users")} En ligne</span><div class="ava-row">${on.slice(0,8).map(p=>`<span title="${esc(p.role||"")} · ${esc(ETM[p.etape]?.nom||"")}">${avatar(p.initiales,"sm",p.color)}</span>`).join("")}${on.length>8?`<span class="ava sm" style="background:var(--faint)">+${on.length-8}</span>`:""}</div></div>`; }
 
 /* ---------- Render ---------- */
 function render(){
@@ -261,7 +261,7 @@ function renderEtapeBar(){
 
 function viewListe(){
   const idCard = RO ? "" : (ident
-    ? `<div class="card ident-card"><span class="ident-ava">${esc(ident.initiales.slice(0,3))}</span><div class="ic-tx"><strong>${esc(ident.initiales)}</strong><small>${esc(ident.role)}</small></div><button class="btn-mini" data-ident>Modifier</button></div>`
+    ? `<div class="card ident-card"><span class="ident-ava" style="background:${ident.color||colorFor(ident.initiales)}">${esc(ident.initiales.slice(0,3))}</span><div class="ic-tx"><strong>${esc(ident.initiales)}</strong><small>${esc(ident.role)}</small></div><button class="btn-mini" data-ident>Modifier</button></div>`
     : `<button class="card ident-card" data-ident style="width:100%;cursor:pointer"><span class="ident-ava">${ic("user")}</span><div class="ic-tx" style="text-align:left"><strong>Qui êtes-vous ?</strong><small>Initiales + rôle (RGPD : pas de nom)</small></div><span class="btn-mini">Définir</span></button>`);
   const banner = fbError ? `<div class="banner">${ic("alert")}<span><b>Activation Firestore requise.</b> Publiez les règles de <code>coordination_projets</code>.</span></div>` : "";
   const list = projets.length ? `<div class="proj-list">${projets.map(p=>{const denom=(Array.isArray(p.trame)&&p.trame.length)?p.trame.length:ETAPES.length;const mat=Math.round((p._etapes/Math.max(denom,1))*100);const st=STATUTS[p.statut]||STATUTS.brouillon;const ty=TYPES.find(t=>t.id===p.type);
@@ -321,7 +321,7 @@ function viewOverview(){
      <div class="st-block"><div class="st-lab">Type de projet <span class="st-hint">— adapte le vocabulaire, modifiable à tout moment</span></div><div class="st-row">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}<button class="ty-pick ${projet.type==="perso"?"on":""}" data-type-custom>${ic("pencil")} ${projet.type==="perso"&&projet.typeCustom?esc(projet.typeCustom):"Autre type…"}</button></div></div>`;
   const syn=synthese();
   return `<div id="onlineInline">${onlineStrip()}</div>
-    <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-pilote">${projet.pilote?`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx">${avatar(projet.pilote.ini,"sm")}<b>${esc(projet.pilote.ini)}</b> · ${esc(projet.pilote.role)}</span>${RO?"":`<button class="lnk-mini" data-pilote>${ident&&projet.pilote.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx-none">à définir — qui mène ce projet ?</span>${RO?"":`<button class="btn-mini" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div><div class="ovh-tags">${stRow}</div></div>
+    <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-pilote">${projet.pilote?`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx">${avatar(projet.pilote.ini,"sm",projet.pilote.color)}<b>${esc(projet.pilote.ini)}</b> · ${esc(projet.pilote.role)}</span>${RO?"":`<button class="lnk-mini" data-pilote>${ident&&projet.pilote.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx-none">à définir — qui mène ce projet ?</span>${RO?"":`<button class="btn-mini" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div><div class="ovh-tags">${stRow}</div></div>
     ${done===0&&!RO?`<div class="ov-welcome">${ic("wand")}<div><b>Bienvenue dans votre projet</b><p>Avancez <b>étape par étape, à plusieurs</b> : chacun ajoute ses idées, la plus juste est « retenue », et la fiche se compose toute seule. Les étapes sont <b>modulables</b> (bouton « modifier » plus bas). Commencez par ${esc(S[0]?S[0].nom:"la première étape")} ci-dessous.</p></div></div>`:""}
     ${firstTodo>=0&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(S[firstTodo].nom)}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("sync")} ${S.length} étape(s) · modifier</button>`}</div>
@@ -352,7 +352,7 @@ function viewEtape(){
     const badge = c.epingle ? `<span class="ctop-tag">${ic("star")} retenu</span>` : (multi&&lr.length?`<span class="ctop-tag">${ic("star")} ${lr.length} retenu${lr.length>1?"s":""}</span>`:"");
     const retenirBtn = (RO||multi) ? "" : `<button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>`;
     return `<article class="contrib ${hasPick?"top":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
-      ${regroup?`<span class="chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales)}
+      ${regroup?`<span class="chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales,"",c.color)}
       <div class="cb"><div class="cmeta">${badge}<b style="color:var(--ink);font-weight:600">${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?' · modifié':''}${multi&&!RO&&!regroup?` · <span class="cmeta-hint">cliquez une ligne pour la retenir</span>`:""}</div>
         ${ctextHTML}${linkSel}
         ${regroup?"":`<div class="cact">${RO?"":`${retenirBtn}${list.length>1?`<span class="cord"><button class="cmini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="cmini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button></span>`:""}<button class="cmini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>`}${(!RO&&mine.has(c.id))?`<button class="cmini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="cmini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</div>
@@ -363,7 +363,7 @@ function viewEtape(){
   const lockBtn=RO?"":`<button class="lock-btn ${locked?"on":""}" data-lock="${e.id}">${ic(locked?"lock":"unlock")} ${locked?"Verrouillée":"Verrouiller"}</button>`;
   const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup?`<div class="regroup-bar"><span>${selected.size} sélectionné(s)</span><button class="btn-mini" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="btn-mini" data-regroup>Annuler</button></div>`:`<button class="btn-mini regroup-toggle" data-regroup>${ic("merge")} Regrouper</button>`) : "";
   const addZone=(RO||locked||regroup)?(locked?`<div class="locked-note">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
-    `<div class="compose"><textarea data-keep id="newContrib" rows="3" placeholder="${ident?"Écrire pour « "+e.nom+" »…":"Identifiez-vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="compose-foot"><span class="compose-who">${avatar(ident?ident.initiales:"?")}<span class="cw-role">${ident?esc(ident.role):"Identifiez-vous"}</span></span><button class="compose-send" id="sendContrib">${ic("send")} Ajouter</button></div></div>`;
+    `<div class="compose"><textarea data-keep id="newContrib" rows="3" placeholder="${ident?"Écrire pour « "+e.nom+" »…":"Identifiez-vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="compose-foot"><span class="compose-who">${avatar(ident?ident.initiales:"?","",ident?ident.color:"")}<span class="cw-role">${ident?esc(ident.role):"Identifiez-vous"}</span></span><button class="compose-send" id="sendContrib">${ic("send")} Ajouter</button></div></div>`;
   return `<div class="etape-head" style="--pc:${e.c}">
     <div class="eh-hero">
       <div class="eh-badge">${ic(e.icon)}</div>
@@ -377,7 +377,7 @@ function viewEtape(){
       <div class="etape-main">${fil}${addZone}${regroupBar}<div class="contribs">${cards}</div>${ecartBlock}</div>
       <aside class="etape-side">${resStrip(e.id)}</aside>
     </div>
-    ${(()=>{const voters=((projet.pret||{})[e.id]||[]);const me=voters.some(v=>v.dev===DEV);return `<div class="ready"><div class="ready-who">${voters.length?`<span class="ready-avs">${voters.map(v=>avatar(v.ini,"sm")).join("")}</span><span class="ready-lab"><b>${voters.length}</b> ${voters.length>1?"ont":"a"} terminé cette étape</span>`:`<span class="ready-lab muted">Personne n'a encore signalé avoir terminé cette étape.</span>`}</div>${RO?"":`<button class="btn-ready ${me?"done":""}" data-ready="${e.id}">${ic("check")} ${me?"Vous avez terminé — annuler":"J'ai terminé cette étape"}</button>`}</div>`;})()}
+    ${(()=>{const voters=((projet.pret||{})[e.id]||[]);const me=voters.some(v=>v.dev===DEV);return `<div class="ready"><div class="ready-who">${voters.length?`<span class="ready-avs">${voters.map(v=>avatar(v.ini,"sm",v.color)).join("")}</span><span class="ready-lab"><b>${voters.length}</b> ${voters.length>1?"ont":"a"} terminé cette étape</span>`:`<span class="ready-lab muted">Personne n'a encore signalé avoir terminé cette étape.</span>`}</div>${RO?"":`<button class="btn-ready ${me?"done":""}" data-ready="${e.id}">${ic("check")} ${me?"Vous avez terminé — annuler":"J'ai terminé cette étape"}</button>`}</div>`;})()}
     <div class="pager"><button class="pgr" data-nav="-1">${ic("back")}<span>Précédent</span></button><button class="pgr next" data-nav="1"><span>Suivant</span>${ic("chev")}</button></div>`;
 }
 
@@ -451,9 +451,18 @@ table{border-collapse:collapse;width:100%;margin-top:6px;font-size:10pt}th,td{bo
 function openSheet(html){ $("#overlay").innerHTML=`<div class="sheet">${html}</div>`; $("#overlay").classList.add("show"); }
 function closeSheet(){ $("#overlay").classList.remove("show"); $("#overlay").innerHTML=""; }
 function openIdent(){
-  openSheet(`<div class="sheet-head"><h3>Votre identité</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 14px">RGPD : seulement vos <b>initiales</b> et votre <b>rôle</b> — jamais de nom.</p><div class="field"><label for="iIni">Vos initiales</label><input id="iIni" maxlength="4" placeholder="ex. B.D." value="${esc(ident?ident.initiales:"")}" style="text-transform:uppercase;font-weight:700"></div><div class="field"><label>Votre rôle</label><div class="roles" id="iRoles">${ROLES.map(r=>`<button type="button" class="role-chip ${ident&&ident.role===r?"sel":""}" data-role="${esc(r)}">${esc(r)}</button>`).join("")}</div></div><div class="actions"><button class="btn primary" id="saveIdent">${ic("check")} Enregistrer</button></div>`);
-  let role=ident?ident.role:""; $("#iRoles").querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{role=b.dataset.role;$("#iRoles").querySelectorAll(".role-chip").forEach(x=>x.classList.toggle("sel",x===b));});
-  $("#saveIdent").onclick=()=>{const ini=$("#iIni").value.trim().toUpperCase();if(!ini){toast("Indiquez vos initiales.");return;}if(!role){toast("Choisissez votre rôle.");return;}ident={initiales:ini,role};localStorage.setItem("projets_ident_v1",JSON.stringify(ident));closeSheet();render();beat();toast("Identité enregistrée",true);};
+  let role=ident?ident.role:""; let color=ident&&ident.color||"";
+  const drawPrev=()=>{ const av=$("#identPrev"); if(!av) return; const ini=($("#iIni").value.trim().toUpperCase())||"?"; av.style.background=color||colorFor(ini); av.textContent=ini.slice(0,3); };
+  openSheet(`<div class="sheet-head"><h3>Votre identité</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 14px">RGPD : seulement vos <b>initiales</b> et votre <b>rôle</b> — jamais de nom.</p>
+    <div class="ident-prev"><span class="ava lg" id="identPrev"></span><span class="muted" style="font-size:12.5px">Voici la pastille qui apparaîtra à côté de vos contributions.</span></div>
+    <div class="field"><label for="iIni">Vos initiales</label><input id="iIni" maxlength="4" placeholder="ex. B.D." value="${esc(ident?ident.initiales:"")}" style="text-transform:uppercase;font-weight:700"></div>
+    <div class="field"><label>Couleur de votre pastille</label><div class="color-row" id="iColors">${PALETTE.map(c=>`<button type="button" class="color-sw ${color===c?"on":""}" data-color="${c}" style="background:${c}" aria-label="Couleur"></button>`).join("")}<button type="button" class="color-sw auto ${color?"":"on"}" data-color="" aria-label="Automatique">A</button></div></div>
+    <div class="field"><label>Votre rôle</label><div class="roles" id="iRoles">${ROLES.map(r=>`<button type="button" class="role-chip ${ident&&ident.role===r?"sel":""}" data-role="${esc(r)}">${esc(r)}</button>`).join("")}</div></div>
+    <div class="actions"><button class="btn primary" id="saveIdent">${ic("check")} Enregistrer</button></div>`);
+  $("#iRoles").querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{role=b.dataset.role;$("#iRoles").querySelectorAll(".role-chip").forEach(x=>x.classList.toggle("sel",x===b));});
+  $("#iColors").querySelectorAll("[data-color]").forEach(b=>b.onclick=()=>{color=b.dataset.color;$("#iColors").querySelectorAll(".color-sw").forEach(x=>x.classList.toggle("on",x===b));drawPrev();});
+  $("#iIni").oninput=drawPrev; drawPrev();
+  $("#saveIdent").onclick=()=>{const ini=$("#iIni").value.trim().toUpperCase();if(!ini){toast("Indiquez vos initiales.");return;}if(!role){toast("Choisissez votre rôle.");return;}ident={initiales:ini,role,color};localStorage.setItem("projets_ident_v1",JSON.stringify(ident));closeSheet();render();beat();toast("Identité enregistrée",true);};
 }
 function exportJSON(){
   if(!projet) return;
@@ -498,7 +507,8 @@ function openNew(){
     <div class="field"><label>Type de projet <span class="muted" style="font-weight:400">(adapte le vocabulaire)</span></label><div class="roles" id="tys">${typeChips()}</div></div>
     <div class="field"><label for="pTit">Titre</label><input id="pTit" placeholder="ex. Action de prévention"></div>
     <div class="field"><label for="pCtx">Contexte (optionnel)</label><textarea id="pCtx" placeholder="Le public, le besoin observé…"></textarea></div>
-    <div class="field"><label>Les étapes de votre projet <span class="muted" style="font-weight:400">— modulable à tout moment</span></label><div class="st-row" style="margin-bottom:8px"><button type="button" class="btn-mini" id="sAll">Toutes</button><button type="button" class="btn-mini" id="sRap">Essentiel (6)</button></div><div class="step-chips" id="stps">${stepChips()}</div></div>
+    <label class="rchk"><input type="checkbox" id="pPilote" ${ident?"checked":""} ${ident?"":"disabled"}> <span>Je pilote ce projet ${ident?`<span class="muted">(vous : ${esc(ident.initiales)} · ${esc(ident.role)})</span>`:`<span class="muted">— identifiez-vous d'abord</span>`}</span></label>
+    <div class="field" style="margin-top:16px"><label>Les étapes de votre projet <span class="muted" style="font-weight:400">— modulable à tout moment</span></label><div class="st-row" style="margin-bottom:8px"><button type="button" class="btn-mini" id="sAll">Toutes</button><button type="button" class="btn-mini" id="sRap">Essentiel (6)</button></div><div class="step-chips" id="stps">${stepChips()}</div></div>
     <div class="actions"><button class="btn primary" id="createP">${ic("plus")} Créer le projet</button></div>`);
   const reTy=()=>{$("#tys").innerHTML=typeChips();bindTy();};
   const reStp=()=>{$("#stps").innerHTML=stepChips();bindStp();};
@@ -508,7 +518,7 @@ function openNew(){
   $("#sAll").onclick=()=>{stepsSel=new Set(ETAPES.map(e=>e.id));reStp();};
   $("#sRap").onclick=()=>{stepsSel=new Set(RAPIDE);reStp();};
   bindTy(); bindStp();
-  $("#createP").onclick=async()=>{const titre=$("#pTit").value.trim();if(!titre){toast("Donnez un titre.");return;}const trame=ETAPES.filter(e=>stepsSel.has(e.id)).map(e=>({ref:e.id}));const btn=$("#createP");btn.disabled=true;btn.textContent="Création…";try{const ref=await addDoc(collection(db,COL),{titre,contexte:$("#pCtx").value.trim(),statut:"construction",type,typeCustom:type==="perso"?typeCustom:"",trame,locked:[],createdAt:serverTimestamp()});closeSheet();await openProjet(ref.id);}catch(e){console.error(e);fbError=true;btn.disabled=false;btn.innerHTML=`${ic("plus")} Créer le projet`;toast("Enregistrement impossible.");}};
+  $("#createP").onclick=async()=>{const titre=$("#pTit").value.trim();if(!titre){toast("Donnez un titre.");return;}const trame=ETAPES.filter(e=>stepsSel.has(e.id)).map(e=>({ref:e.id}));const pilote=($("#pPilote")&&$("#pPilote").checked&&ident)?{ini:ident.initiales,role:ident.role,color:ident.color||""}:null;const btn=$("#createP");btn.disabled=true;btn.textContent="Création…";try{const ref=await addDoc(collection(db,COL),{titre,contexte:$("#pCtx").value.trim(),statut:"construction",type,typeCustom:type==="perso"?typeCustom:"",trame,pilote,locked:[],createdAt:serverTimestamp()});closeSheet();await openProjet(ref.id);}catch(e){console.error(e);fbError=true;btn.disabled=false;btn.innerHTML=`${ic("plus")} Créer le projet`;toast("Enregistrement impossible.");}};
 }
 function openEdit(cid){const c=contribs.find(x=>x.id===cid);if(!c)return;openSheet(`<div class="sheet-head"><h3>Modifier</h3><button class="x" data-close>${ic("x")}</button></div><div class="field"><textarea id="eTxt" rows="4">${esc(c.texte)}</textarea></div><div class="actions"><button class="btn primary" id="saveEdit">${ic("check")} Enregistrer</button></div>`);
   $("#saveEdit").onclick=async()=>{const v=$("#eTxt").value.trim();if(!v){toast("Texte vide.");return;}try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),{texte:v,editedAt:Date.now()});closeSheet();saved();}catch(e){console.error(e);toast("Modification impossible.");}};}
@@ -624,7 +634,7 @@ async function openProjet(id){
   startPresence(id);
 }
 async function addContribution(texte){ if(!ident){openIdent();return;} texte=texte.trim(); if(!texte) return; const sid=stepAt(etapeIdx)?.id; if(!sid) return; if(isLocked(sid)){toast("Étape verrouillée.");return;}
-  try{const ref=await addDoc(collection(db,COL,projet.id,"contributions"),{etape:sid,texte,initiales:ident.initiales,role:ident.role,epingle:false,comments:[],createdAt:serverTimestamp()});mine.add(ref.id);saveMine();saved();}catch(e){console.error(e);toast("Envoi impossible.");}}
+  try{const ref=await addDoc(collection(db,COL,projet.id,"contributions"),{etape:sid,texte,initiales:ident.initiales,role:ident.role,color:ident.color||"",epingle:false,comments:[],createdAt:serverTimestamp()});mine.add(ref.id);saveMine();saved();}catch(e){console.error(e);toast("Envoi impossible.");}}
 async function upd(cid,obj){try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
 async function delContribution(cid){try{await deleteDoc(doc(db,COL,projet.id,"contributions",cid));mine.delete(cid);saveMine();saved();}catch(e){console.error(e);toast("Suppression impossible.");}}
 async function toggleLine(cid,idx){ const c=contribs.find(x=>x.id===cid); if(!c) return; const cur=Array.isArray(c.lr)?c.lr.slice():[]; const k=cur.indexOf(idx); if(k>=0) cur.splice(k,1); else cur.push(idx); upd(cid,{lr:cur}); }
@@ -638,11 +648,11 @@ async function moveContrib(cid,dir){
 }
 async function addComment(cid,txt){if(!ident){openIdent();return;}txt=txt.trim();if(!txt)return;const c=contribs.find(x=>x.id===cid);if(!c)return;const coms=[...(c.comments||[]),{ini:ident.initiales,role:ident.role,txt,t:Date.now()}];upd(cid,{comments:coms});}
 async function setProj(obj){try{await updateDoc(doc(db,COL,projet.id),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
-async function toggleReady(eid){ if(!ident){openIdent();return;} const pret=Object.assign({}, projet.pret||{}); const arr=(pret[eid]||[]).slice(); const k=arr.findIndex(v=>v.dev===DEV); if(k>=0) arr.splice(k,1); else arr.push({dev:DEV,ini:ident.initiales,role:ident.role}); pret[eid]=arr; setProj({pret}); }
+async function toggleReady(eid){ if(!ident){openIdent();return;} const pret=Object.assign({}, projet.pret||{}); const arr=(pret[eid]||[]).slice(); const k=arr.findIndex(v=>v.dev===DEV); if(k>=0) arr.splice(k,1); else arr.push({dev:DEV,ini:ident.initiales,role:ident.role,color:ident.color||""}); pret[eid]=arr; setProj({pret}); }
 async function toggleLock(eid){const cur=projet.locked||[];setProj({locked:cur.includes(eid)?cur.filter(x=>x!==eid):[...cur,eid]});}
 async function fusionner(){ if(!ident){openIdent();return;} const sel=contribs.filter(c=>selected.has(c.id)); if(sel.length<2) return;
   const txt=sel.map(c=>c.texte).join("\n• ").replace(/^/,"• "); const ep=sel.some(c=>c.epingle); const coms=sel.flatMap(c=>c.comments||[]);
-  try{ await addDoc(collection(db,COL,projet.id,"contributions"),{etape:stepAt(etapeIdx).id,texte:txt,initiales:ident.initiales,role:ident.role,epingle:ep,comments:coms,regroupe:true,createdAt:serverTimestamp()});
+  try{ await addDoc(collection(db,COL,projet.id,"contributions"),{etape:stepAt(etapeIdx).id,texte:txt,initiales:ident.initiales,role:ident.role,color:ident.color||"",epingle:ep,comments:coms,regroupe:true,createdAt:serverTimestamp()});
     for(const c of sel){ await deleteDoc(doc(db,COL,projet.id,"contributions",c.id)); mine.delete(c.id); } saveMine(); regroup=false; selected.clear(); toast("Regroupées",true); }catch(e){console.error(e);toast("Fusion impossible.");}
 }
 
@@ -672,8 +682,8 @@ document.addEventListener("click", e=>{
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
   const lrb=e.target.closest("[data-lr]");if(lrb){ const p=lrb.dataset.lr.split(":"); return toggleLine(p[0], +p[1]); }
   const rdy=e.target.closest("[data-ready]");if(rdy) return toggleReady(rdy.dataset.ready);
-  if(e.target.closest("[data-pilote-take]")){ if(!ident) return openIdent(); return setProj({pilote:{ini:ident.initiales,role:ident.role}}); }
-  if(e.target.closest("[data-pilote]")){ if(!ident) return openIdent(); const p=projet.pilote; if(p&&p.ini===ident.initiales) return setProj({pilote:null}); if(confirm("Devenir le pilote de ce projet ?")) return setProj({pilote:{ini:ident.initiales,role:ident.role}}); return; }
+  if(e.target.closest("[data-pilote-take]")){ if(!ident) return openIdent(); return setProj({pilote:{ini:ident.initiales,role:ident.role,color:ident.color||""}}); }
+  if(e.target.closest("[data-pilote]")){ if(!ident) return openIdent(); const p=projet.pilote; if(p&&p.ini===ident.initiales) return setProj({pilote:null}); if(confirm("Devenir le pilote de ce projet ?")) return setProj({pilote:{ini:ident.initiales,role:ident.role,color:ident.color||""}}); return; }
   const ea=e.target.closest("[data-ecart]");if(ea) return openEcart(ea.dataset.ecart);
   const cu=e.target.closest("[data-cup]");if(cu) return moveContrib(cu.dataset.cup,-1);
   const cd=e.target.closest("[data-cdown]");if(cd) return moveContrib(cd.dataset.cdown,1);
