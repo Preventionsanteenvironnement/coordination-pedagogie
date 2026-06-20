@@ -37,6 +37,10 @@ const ICONS = {
   alert:`<path d="M12 4 2.5 20h19z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.4" r=".6" fill="currentColor" stroke="none"/>`,
   wand:`<path d="M5 19 15 9"/><path d="m16 3 1 2.2 2.2 1-2.2 1L16 10.4 15 8.2 12.8 7.2 15 6.2z"/>`,
   sort:`<path d="M7 4v16M7 20l-3-3M7 20l3-3M14 7h6M14 12h4M14 17h2"/>`,
+  qr:`<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><path d="M14 14h3M14 14v3M17.5 17.5v.01M20.5 14v3M14 20.5h3.5M20.5 20.5v.01"/>`,
+  clock:`<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>`,
+  sun:`<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>`,
+  moon:`<path d="M20 14.5A8 8 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/>`,
 };
 const ic = n => ICONS[n] ? `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>` : "";
 
@@ -113,6 +117,8 @@ const STATUTS = { ouvert:{l:"Ouvert",c:"#0f8a76"}, clos:{l:"Clos",c:"#8b94a3"} }
 /* ---------- Un mur ---------- */
 function viewMur(){
   const clos = mur.statut==="clos";
+  const timeUp = mur.endsAt && Date.now()>mur.endsAt;
+  const locked = clos || timeUp;
   const groups = groupIdees(idees);
   const top = groups.length ? groups[0].score : 0;
   const total = idees.length;
@@ -128,19 +134,19 @@ function viewMur(){
       <p class="po-tx">${esc(g.text)}</p>
       <div class="po-ft">${who}<button class="po-vote ${g.voters.has(DEV)?"on":""}" ${RO?"disabled":`data-vote="${esc(g.rep.id)}"`}>${ic("heart")} ${g.votes||""}</button>${(!RO&&my)?`<span class="po-acts"><button class="po-mini" data-edit="${esc(my.id)}" aria-label="Modifier la mienne">${ic("pencil")}</button><button class="po-mini" data-del="${esc(my.id)}" aria-label="Retirer la mienne">${ic("trash")}</button></span>`:""}</div>
     </article>`; };
-  const cloud = `<div class="cloud">${groups.map(g=>{const pc=POSTITS[hashStr(g.key)%POSTITS.length];const lvl=Math.min(g.score-1,16);const sz=(17+lvl*2.1).toFixed(0);return `<span class="cw ${g.voters.has(DEV)?"on":""}" style="color:${pc.av};font-size:${sz}px" ${RO?"":`data-vote="${esc(g.rep.id)}"`} title="${g.count}× proposé · ${g.votes} cœur(s)">${esc(g.text)}${g.score>1?`<sup class="cw-n">${g.score}</sup>`:""}</span>`;}).join("")}</div>`;
+  const cloud = `<div class="cloud">${groups.map(g=>{const pc=POSTITS[hashStr(g.key)%POSTITS.length];const lvl=Math.min(g.score-1,16);const sz=(17+lvl*2.1).toFixed(0);const isNew=!seen.has("c_"+g.key);seen.add("c_"+g.key);return `<span class="cw ${isNew?"cw-new":""} ${g.voters.has(DEV)?"on":""}" style="color:${pc.av};font-size:${sz}px" ${RO?"":`data-vote="${esc(g.rep.id)}"`} title="${g.count}× proposé · ${g.votes} cœur(s)">${esc(g.text)}${g.score>1?`<sup class="cw-n">${g.score}</sup>`:""}</span>`;}).join("")}</div>`;
   const inner = !groups.length ? `<div class="board-empty">${ic("bulb")}<span>Le mur est vide.${clos||RO?"":" Écrivez la première idée ci-dessous."}</span></div>` : (wallMode==="nuage"?cloud:`<div class="wall">${groups.map(card).join("")}</div>`);
-  const compose = (RO||clos)?(clos?`<div class="locked-note">${ic("lock")} Mur clos — les idées sont figées.</div>`:"") :
+  const compose = (RO||locked)?(locked?`<div class="locked-note">${ic("lock")} ${timeUp?"Temps écoulé":"Mur clos"} — les idées sont figées.</div>`:"") :
     `<div class="compose mur-compose"><textarea data-keep id="newIdea" rows="1" placeholder="Écrivez une idée puis Entrée…"></textarea><div class="compose-foot"><label class="anon-chk"><input type="checkbox" id="anonChk" ${anonMode?"checked":""}> <span>Anonyme</span></label><button class="compose-send" id="sendIdea">${ic("plus")} Ajouter</button></div></div>`;
   return `<div class="mur-head">
       <div class="eh-hero">
         <div class="eh-badge" style="background:#0f8a76">${ic("bulb")}</div>
-        <div class="eh-tx"><div class="eyebrow">${mur.theme?esc(mur.theme):"Mur d'idées"}</div><h2>${esc(mur.titre)}</h2><p class="eh-q">${groups.length} idée${groups.length>1?"s":""}${total>groups.length?` · ${total} propositions`:""} · ${conts.length} participant${conts.length>1?"s":""}</p></div>
+        <div class="eh-tx"><div class="eyebrow">${mur.theme?esc(mur.theme):"Mur d'idées"}</div><h2>${esc(mur.titre)}</h2><p class="eh-q">${groups.length} idée${groups.length>1?"s":""}${total>groups.length?` · ${total} propositions`:""} · ${conts.length} participant${conts.length>1?"s":""}${mur.endsAt?` · <span class="mur-timer ${timeUp?"up":""}" id="murTimer">${timeUp?"Temps écoulé":""}</span>`:""}</p></div>
         ${lockBtn}
       </div>
       ${piloteRow}
     </div>
-    <div class="wall-bar">${groups.length?toggle:`<span></span>`}<button class="btn-mini" data-bilan>${ic("file")} Bilan</button></div>
+    <div class="wall-bar">${groups.length?toggle:`<span></span>`}<span class="wall-bar-r">${RO?"":`<button class="btn-mini" data-qr aria-label="Code QR — rejoindre au téléphone">${ic("qr")}</button><button class="btn-mini ${mur.endsAt&&!timeUp?"on":""}" data-timer aria-label="Minuteur">${ic("clock")}</button>`}<button class="btn-mini" data-bilan>${ic("file")} Bilan</button></span></div>
     <div class="board">${inner}</div>
     ${compose}
     <div class="ov-foot">${RO?"":`<button class="lnk" id="shareMur">${ic("send")} Partager (lecture)</button><button class="lnk danger" id="delMur">${ic("trash")} Supprimer ce mur</button>`}</div>`;
@@ -242,6 +248,9 @@ document.addEventListener("click", e=>{
   const op=e.target.closest("[data-open]"); if(op) return openMur(op.dataset.open);
   if(e.target.closest("[data-bilan]")||e.target.closest("#bilanBtn")){ view="bilan"; return render(); }
   if(e.target.closest("[data-mur]")){ view="mur"; return render(); }
+  if(e.target.closest("#themeBtn")){ theme=(theme==="dark")?"light":"dark"; localStorage.setItem("murs_theme",theme); return applyTheme(); }
+  if(e.target.closest("[data-qr]")) return openQR();
+  if(e.target.closest("[data-timer]")) return openTimer();
   const wm=e.target.closest("[data-wallmode]"); if(wm){ wallMode=wm.dataset.wallmode; return render(); }
   const v=e.target.closest("[data-vote]"); if(v) return voteIdea(v.dataset.vote);
   const ed=e.target.closest("[data-edit]"); if(ed) return openEditIdea(ed.dataset.edit);
@@ -260,4 +269,28 @@ document.addEventListener("change", e=>{ if(e.target.id==="anonChk") anonMode=e.
 document.addEventListener("keydown", e=>{ if(e.key==="Escape")closeSheet(); if(e.key==="Enter"&&!e.shiftKey&&e.target.id==="newIdea"){e.preventDefault();const v=e.target.value;e.target.value="";addIdea(v);} });
 document.addEventListener("input", e=>{ if(e.target.id==="newIdea"){const t=e.target;t.style.height="auto";t.style.height=Math.min(t.scrollHeight,200)+"px";} });
 
+/* ---------- Thème clair / sombre ---------- */
+let theme = localStorage.getItem("murs_theme");
+function applyTheme(){ const root=document.documentElement; if(theme) root.setAttribute("data-theme",theme); else root.removeAttribute("data-theme"); const b=$("#themeBtn"); if(b){ const dark = theme==="dark" || (!theme && matchMedia("(prefers-color-scheme: dark)").matches); b.innerHTML = dark?ic("sun"):ic("moon"); } }
+
+/* ---------- QR code ---------- */
+function openQR(){
+  if(!mur) return; const base=location.origin+location.pathname; const url=base+"?m="+mur.id;
+  let inner="";
+  try{ const qr=window.qrcode(0,"M"); qr.addData(url); qr.make(); inner=qr.createSvgTag({cellSize:6,margin:2,scalable:true}); }
+  catch(_){ inner=`<img src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(url)}" alt="QR code">`; }
+  openSheet(`<div class="sheet-head"><h3>Rejoindre depuis un téléphone</h3><button class="x" data-close>${ic("x")}</button></div><div class="qr-wrap">${inner}</div><p class="muted" style="text-align:center;font-size:13px;margin:0 0 4px">Scannez ce code : le mur s'ouvre sur le téléphone, on peut <b>participer</b> directement.</p><div class="actions"><button class="btn" id="qrCopy">${ic("send")} Copier le lien</button></div>`);
+  $("#qrCopy").onclick=()=>{ navigator.clipboard?.writeText(url).then(()=>toast("Lien copié",true)).catch(()=>toast(url)); };
+}
+
+/* ---------- Minuteur / échéance ---------- */
+function openTimer(){
+  const running = mur.endsAt && mur.endsAt>Date.now();
+  openSheet(`<div class="sheet-head"><h3>Minuteur du mur</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:13.5px;margin:0 0 12px">Lancez un compte à rebours commun. À la fin, le mur passe en lecture seule.</p><div class="field"><label>Durée</label><div class="timer-presets">${[3,5,10,15,20,30].map(m=>`<button type="button" class="btn-mini" data-min="${m}">${m} min</button>`).join("")}</div></div>${running?`<div class="actions"><button class="btn" id="timerStop">${ic("x")} Arrêter le minuteur</button></div>`:""}`);
+  $("#overlay").querySelectorAll("[data-min]").forEach(b=>b.onclick=()=>{ setMur({endsAt:Date.now()+(+b.dataset.min)*60000}); closeSheet(); });
+  const st=$("#timerStop"); if(st) st.onclick=()=>{ setMur({endsAt:null}); closeSheet(); };
+}
+setInterval(()=>{ if(view!=="mur"||!mur) return; const el=$("#murTimer"); const end=mur.endsAt; if(!end){ if(el)el.textContent=""; return; } const left=end-Date.now(); if(left<=0){ if(el&&!el.classList.contains("up")){ render(); } return; } if(el){ const m=Math.floor(left/60000),s=Math.floor((left%60000)/1000); el.textContent=m+":"+String(s).padStart(2,"0"); } },1000);
+
+applyTheme();
 loadListe().then(()=>{ const m=params.get("m"); if(m) openMur(m); });
