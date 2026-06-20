@@ -166,6 +166,14 @@ const THEMATIQUES = [
         icon: "bulb",
         badge: "Nouveau",
       },
+      {
+        titre: "Carte mentale — construire à plusieurs",
+        desc: "Une carte mentale collaborative : une idée centrale, des branches et sous-branches qui se disposent toutes seules (façon XMind), en temps réel. Chacun ajoute, modifie le sien, avec sa couleur ; le pilote peut tout corriger. Canevas qu'on déplace et zoome, image téléchargeable. Anonyme : initiales + rôle.",
+        lien: "cartes/",
+        type: "Outil",
+        icon: "brain",
+        badge: "Nouveau",
+      },
     ],
   },
 ];
