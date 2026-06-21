@@ -868,3 +868,27 @@ table.pl td{vertical-align:middle}
 .reunir-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto}
 .reunir-it{display:flex;gap:10px;align-items:flex-start;text-align:left;border:1px solid var(--line2);background:var(--surface);border-radius:12px;padding:11px 13px;font-size:13.5px;color:var(--ink);line-height:1.45}
 .reunir-it:hover{border-color:var(--accent);background:var(--bg)}.reunir-it b{font-weight:600;color:var(--muted);font-size:12.5px}
+
+/* ----- Mini-timeline d'étapes (colorée par étape, cliquable) ----- */
+.ev-steps{display:flex;align-items:flex-start;gap:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:13px 14px 11px;box-shadow:var(--sh);margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.ev-steps::-webkit-scrollbar{display:none}
+.ev-step{flex:none;display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:none;padding:0 3px;position:relative;cursor:pointer;min-width:72px;font:inherit}
+.ev-step:not(:last-child)::after{content:"";position:absolute;top:15px;left:calc(50% + 18px);width:calc(100% - 36px);height:2.5px;border-radius:2px;background:var(--line)}
+.ev-step.done:not(:last-child)::after{background:var(--sc)}
+.ev-stepb{width:31px;height:31px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--faint);background:var(--bg);border:2px solid var(--line2);transition:transform .15s;z-index:1}
+.ev-stepb .i{font-size:15px;stroke-width:3}
+.ev-step.done .ev-stepb{color:#fff;background:var(--sc);border-color:transparent}
+.ev-step.on .ev-stepb{color:#fff;background:var(--sc);border-color:transparent;transform:scale(1.14);box-shadow:0 6px 15px color-mix(in srgb,var(--sc) 45%,transparent)}
+.ev-stepn{font-size:11px;font-weight:600;color:var(--faint);white-space:nowrap;max-width:86px;overflow:hidden;text-overflow:ellipsis}
+.ev-step.on .ev-stepn{color:var(--sc);font-weight:800}.ev-step.done .ev-stepn{color:var(--muted)}
+.ev-step:hover .ev-stepb{transform:scale(1.09)}.ev-step.on:hover .ev-stepb{transform:scale(1.14)}
+
+/* ----- Recap encadré par étape ----- */
+.ev-recap-grid{display:flex;flex-direction:column;gap:10px}
+.ev-recap-step{border:1px solid color-mix(in srgb,var(--sc) 24%,var(--line));border-left:4px solid var(--sc);border-radius:12px;padding:10px 13px;background:color-mix(in srgb,var(--sc) 4%,var(--surface))}
+.ev-recap-lab{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--sc);margin-bottom:7px}.ev-recap-lab .i{font-size:15px}
+.ev-recap-step ul{margin:0;padding-left:18px}.ev-recap-step li{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:3px}
+
+/* ----- Bouton aperçu (en-tête) ----- */
+.ev-apercu{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);border:none;border-radius:999px;padding:6px 12px;white-space:nowrap}.ev-apercu .i{font-size:14px}
+@media(max-width:480px){.ev-apercu span{display:none}}

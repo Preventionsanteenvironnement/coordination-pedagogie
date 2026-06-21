@@ -89,6 +89,12 @@ const PHASES = [
   { nom:"Agir", c:"#d2603a", etapes:["actions","moyens","miseoeuvre"] },
   { nom:"Cadrer & évaluer", c:"#6b4bd6", etapes:["cadre","indicateurs","evaluation","vigilance"] },
 ];
+const STEPCOL = {
+  constats:"#3b82f6", diagnostic:"#2563eb", problematique:"#6366f1",
+  finalite:"#0d9488", obj_general:"#10b981", obj_op:"#16a34a",
+  actions:"#f59e0b", moyens:"#f97316", miseoeuvre:"#ef4444",
+  cadre:"#8b5cf6", indicateurs:"#a855f7", evaluation:"#d946ef", vigilance:"#ec4899",
+};
 const RAPIDE = ["constats","diagnostic","obj_op","actions","miseoeuvre","evaluation"];
 const STATUTS = { brouillon:{l:"Brouillon",c:"#8b94a3"}, construction:{l:"En construction",c:"#2f6cd6"}, valide:{l:"Validé",c:"#0f8a76"}, archive:{l:"Archivé",c:"#9a6b16"} };
 const PST = { todo:{l:"À faire",c:"#8b94a3"}, doing:{l:"En cours",c:"#2f6cd6"}, done:{l:"Fait",c:"#0f8a76"} };
@@ -172,7 +178,7 @@ function projTrame(){
 function STEPS(){
   const noms=projet?.etapeNoms||{};
   return projTrame().map(s=>{
-    if(s.ref){ const b=ETM[s.ref]; if(!b) return null; const ph=phaseOf(b.id)||{}; return {id:b.id, ref:b.id, nom:noms[b.id]||b.nom, icon:b.icon, q:b.q, def:b.def, aide:b.aide, c:ph.c||"var(--accent)", phaseNom:ph.nom||"", custom:false}; }
+    if(s.ref){ const b=ETM[s.ref]; if(!b) return null; const ph=phaseOf(b.id)||{}; return {id:b.id, ref:b.id, nom:noms[b.id]||b.nom, icon:b.icon, q:b.q, def:b.def, aide:b.aide, c:STEPCOL[b.id]||ph.c||"var(--accent)", phaseNom:ph.nom||"", custom:false}; }
     const ph=s.phase?(PHASES.find(p=>p.nom===s.phase)||{}):{};
     return {id:s.id, ref:null, nom:s.nom||"Étape libre", icon:s.icon||"folder", q:s.q||"Qu'est-ce qu'on note à cette étape ?", def:s.def||"Une étape libre, ajoutée à votre projet.", aide:s.aide||"", c:ph.c||"#64748b", phaseNom:ph.nom||"Sur-mesure", custom:true};
   }).filter(Boolean);
@@ -369,11 +375,14 @@ function viewEtape(){
   const e=S[etapeIdx]; const list=ofEt(e.id); const ecartees=sortC(contribs.filter(c=>c.etape===e.id&&!active(c))); const locked=isLocked(e.id);
   const isLink = e.id==="actions"||e.id==="indicateurs"; const objs=ofEt("obj_op");
   const pc=e.c||"#6a5cff";
-  const curPhase=PHASES.findIndex(p=>p.etapes.includes(e.id));
-  const journey=`<div class="ev-journey">${PHASES.map((p,i)=>{const st=curPhase<0?"":i<curPhase?"done":i===curPhase?"on":"";return `<div class="ev-ph ${st}" style="--pc:${p.c}"><span class="ev-phb">${st==="done"?ic("check"):i+1}</span><span class="ev-phn">${esc(p.nom)}</span></div>`;}).join("")}</div>`;
-  const prevSteps=S.slice(0,etapeIdx); const recap=[];
-  prevSteps.forEach(ps=>{ ofEt(ps.id).forEach(c=>{ const ls=splitLines(c.texte); if(ls.length<=1){ if(c.epingle) recap.push({t:c.texte,c:ps.c}); } else { const lr=Array.isArray(c.lr)?c.lr:[]; ls.forEach((ln,idx)=>{ if(lr.includes(idx)) recap.push({t:ln,c:ps.c}); }); } }); });
-  const recapBlock = prevSteps.length ? `<div class="ev-recap"><div class="ev-recap-h">${ic("compass")} Ce qui est retenu jusqu'ici</div>${recap.length?`<div class="ev-recap-list">${recap.slice(-6).map(r=>`<div class="ev-rchip" style="--cc:${r.c||"#6a5cff"}"><span class="ev-rck">${ic("check")}</span><span>${esc(r.t)}</span></div>`).join("")}</div>`:`<div class="ev-recap-empty">Rien de retenu aux étapes précédentes — marquez les idées clés d'une ★.</div>`}</div>` : "";
+  const journey=`<div class="ev-steps">${S.map((s,i)=>{const stt=i<etapeIdx?"done":i===etapeIdx?"on":"";return `<button class="ev-step ${stt}" style="--sc:${s.c}" ${RO?"":`data-etape="${i}"`}><span class="ev-stepb">${stt==="done"?ic("check"):i+1}</span><span class="ev-stepn">${esc(s.nom)}</span></button>`;}).join("")}</div>`;
+  const prevSteps=S.slice(0,etapeIdx);
+  const recapSteps = prevSteps.slice(-3).map(ps=>{ const sy=synthOf(ps.id); let lines=[];
+    if(sy.length){ lines=sy.slice().sort((a,b)=>synthSupport(b)-synthSupport(a)).map(en=>en.texte); }
+    else { ofEt(ps.id).forEach(c=>{ const ls=splitLines(c.texte); if(ls.length<=1){ if(c.epingle) lines.push(c.texte); } else { const lr=Array.isArray(c.lr)?c.lr:[]; ls.forEach((ln,idx)=>{ if(lr.includes(idx)) lines.push(ln); }); } }); }
+    if(!lines.length) return ""; return `<div class="ev-recap-step" style="--sc:${ps.c}"><div class="ev-recap-lab">${ic(ps.icon)} ${esc(ps.nom)}</div><ul>${lines.slice(0,5).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`;
+  }).filter(Boolean).join("");
+  const recapBlock = prevSteps.length && recapSteps ? `<div class="ev-recap"><div class="ev-recap-h">${ic("compass")} Ce qui est retenu jusqu'ici — à garder sous les yeux</div><div class="ev-recap-grid">${recapSteps}</div></div>` : "";
   const card=(c,i)=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
     const reprisN=isReprisN(c.id,e.id);
     const votes=Array.isArray(c.votes)?c.votes:[]; const voted=votes.includes(DEV);
@@ -386,11 +395,11 @@ function viewEtape(){
       <div class="ev-tx">${esc(c.texte)}</div>${linkSel}
       ${regroup?"":`<div class="ev-react">${acts}${more}</div><details class="ev-coms"><summary>${ic("comment")} Commentaires${coms.length?` · ${coms.length}`:""}</summary><div class="ev-com-list">${coms.map(k=>`<div class="ev-com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="ev-com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="ev-mini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
     </article>`; };
-  const cards=list.length?list.map(card).join(""):`<div class="ev-empty">${ic("bulb")}<div><b>Personne n'a encore contribué.</b>${locked||RO?"":"<span>Lance‑toi — une idée, même imparfaite.</span>"}</div></div>`;
+  const cards=list.length?list.map(card).join(""):`<div class="ev-empty">${ic("bulb")}<div><b>Aucune proposition pour l'instant.</b>${locked||RO?"":"<span>Proposez la première ci‑dessus.</span>"}</div></div>`;
   const ecartBlock = ecartees.length?`<details class="ev-ecart"><summary>${ic("ban")} Écartées · ${ecartees.length}</summary>${ecartees.map(c=>`<div class="ev-ec"><div class="ev-ec-tx">${esc(c.texte)} <span class="ev-by">— ${esc(c.role)}</span>${c.raison?`<div class="ev-ec-r">Raison : ${esc(c.raison)}</div>`:""}</div>${RO?"":`<button class="ev-mini" data-reint="${esc(c.id)}" title="Réintégrer">${ic("check")}</button>`}</div>`).join("")}</details>`:"";
   const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup?`<div class="ev-regroup"><span>${selected.size} sélectionné(s)</span><button class="ev-mini2" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="ev-mini2" data-regroup>Annuler</button></div>`:`<button class="ev-mini2 reg" data-regroup>${ic("merge")} Regrouper des idées proches</button>`) : "";
   const addZone=(RO||locked||regroup)?(locked?`<div class="ev-locked">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
-    `<div class="ev-compose"><div class="ev-comp-h">${ic("pencil")} À toi de jouer</div><textarea data-keep id="newContrib" rows="2" placeholder="${ident?"Ton idée, même imparfaite…":"Identifie‑toi pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="ev-comp-foot"><span class="ev-micro">Rien n'est définitif tant que ce n'est pas retenu.</span><button class="ev-add" id="sendContrib">${ic("plus")} Ajouter</button></div></div>`;
+    `<div class="ev-compose"><div class="ev-comp-h">${ic("pencil")} Votre proposition</div><textarea data-keep id="newContrib" rows="2" placeholder="${ident?"Une observation, une hypothèse, une idée…":"Identifiez‑vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="ev-comp-foot"><span class="ev-micro">Le pilote reprendra les idées retenues dans la synthèse.</span><button class="ev-add" id="sendContrib">${ic("plus")} Proposer</button></div></div>`;
   const lockBtn=RO?"":`<button class="ev-lock ${locked?"on":""}" data-lock="${e.id}" aria-label="${locked?"Déverrouiller l'étape":"Verrouiller l'étape"}">${ic(locked?"lock":"unlock")}</button>`;
   const on=(typeof onlineNow==="function")?onlineNow():[]; const presHTML=on.length?`<span class="ev-pres"><span class="ev-pres-dot"></span><span class="ev-pres-avs">${on.slice(0,4).map(p=>avatar(p.initiales,"sm",p.color)).join("")}</span>${on.length} en ligne</span>`:"";
   const v=visIdx(); const pos=v.indexOf(etapeIdx); const pct=Math.round((pos+1)/Math.max(v.length,1)*100);
@@ -398,8 +407,7 @@ function viewEtape(){
   const readyBlock=`<div class="ev-ready"><div class="ev-ready-who">${voters.length?`<span class="ev-ready-avs">${voters.map(x=>avatar(x.ini,"sm",x.color)).join("")}</span><span><b>${voters.length}</b> ${voters.length>1?"ont":"a"} terminé cette étape</span>`:`<span class="muted">Personne n'a encore signalé avoir terminé cette étape.</span>`}</div>${RO?"":`<button class="ev-btn-ready ${meReady?"done":""}" data-ready="${e.id}">${ic("check")} ${meReady?"Terminé — annuler":"J'ai terminé cette étape"}</button>`}</div>`;
   return `${journey}
     <div class="ev-hero" style="--pc:${pc}">
-      <div class="ev-mtl">${S.map((s,i)=>{const stt=i<etapeIdx?"done":i===etapeIdx?"on":"";return `<div class="ev-mstep ${stt}"><span class="ev-md">${stt==="done"?ic("check"):i+1}</span><span class="ev-mn">${esc(s.nom)}${i===etapeIdx?" · en cours":""}</span></div>`;}).join("")}</div>
-      <div class="ev-hero-top"><span class="ev-eyebrow">${ic(e.icon)} ${e.phaseNom?esc(e.phaseNom):"Étape "+(etapeIdx+1)}</span><span class="ev-htools">${presHTML}${lockBtn}</span></div>
+      <div class="ev-hero-top"><span class="ev-eyebrow">${ic(e.icon)} ${e.phaseNom?esc(e.phaseNom):"Sur-mesure"} · étape ${etapeIdx+1}/${S.length}</span><span class="ev-htools">${presHTML}${RO?"":`<button class="ev-apercu" data-overview>${ic("grid")} <span>Aperçu</span></button>`}${lockBtn}</span></div>
       <h2 class="ev-title">${esc(e.nom)}</h2>
       <div class="ev-q">${ic("help")}<span>${esc(T(e.q))}</span></div>
       <div class="ev-prog"><span>Avancement</span><span class="ev-bar"><i style="width:${pct}%"></i></span><span>${pct}%</span></div>
