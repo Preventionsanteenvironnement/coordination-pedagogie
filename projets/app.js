@@ -344,45 +344,54 @@ function viewEtape(){
   if(etapeIdx>=S.length) etapeIdx=S.length-1; if(etapeIdx<0) etapeIdx=0;
   const e=S[etapeIdx]; const list=ofEt(e.id); const ecartees=sortC(contribs.filter(c=>c.etape===e.id&&!active(c))); const locked=isLocked(e.id);
   const isLink = e.id==="actions"||e.id==="indicateurs"; const objs=ofEt("obj_op");
-  const prevSteps=S.slice(0,etapeIdx);
-  const fil = prevSteps.length ? `<div class="fil"><div class="fil-h">${ic("compass")} Le fil du projet jusqu'ici</div>${prevSteps.map((ps,idx)=>{ const pl=ofEt(ps.id); const open=idx===prevSteps.length-1; const body=pl.length?`<ul>${pl.map(c=>`<li>${c.epingle?ic("star"):""}${esc(c.texte)} <span class="by">— ${esc(c.role)}</span></li>`).join("")}</ul>`:`<p class="vide">Rien noté à cette étape.</p>`; return `<details class="fil-step" ${open?"open":""}><summary><span class="fs-ic" style="--pc:${ps.c}">${ic(ps.icon)}</span><span class="fs-n">${esc(ps.nom)}</span>${pl.length?`<span class="fs-ct">${pl.length}</span>`:""}</summary><div class="ctx-body">${body}</div></details>`; }).join("")}</div>` : "";
+  const pc=e.c||"#6a5cff";
+  const curPhase=PHASES.findIndex(p=>p.etapes.includes(e.id));
+  const journey=`<div class="ev-journey">${PHASES.map((p,i)=>{const st=curPhase<0?"":i<curPhase?"done":i===curPhase?"on":"";return `<div class="ev-ph ${st}" style="--pc:${p.c}"><span class="ev-phb">${st==="done"?ic("check"):i+1}</span><span class="ev-phn">${esc(p.nom)}</span></div>`;}).join("")}</div>`;
+  const prevSteps=S.slice(0,etapeIdx); const recap=[];
+  prevSteps.forEach(ps=>{ ofEt(ps.id).forEach(c=>{ const ls=splitLines(c.texte); if(ls.length<=1){ if(c.epingle) recap.push({t:c.texte,c:ps.c}); } else { const lr=Array.isArray(c.lr)?c.lr:[]; ls.forEach((ln,idx)=>{ if(lr.includes(idx)) recap.push({t:ln,c:ps.c}); }); } }); });
+  const recapBlock = prevSteps.length ? `<div class="ev-recap"><div class="ev-recap-h">${ic("compass")} Ce qui est retenu jusqu'ici</div>${recap.length?`<div class="ev-recap-list">${recap.slice(-6).map(r=>`<div class="ev-rchip" style="--cc:${r.c||"#6a5cff"}"><span class="ev-rck">${ic("check")}</span><span>${esc(r.t)}</span></div>`).join("")}</div>`:`<div class="ev-recap-empty">Rien de retenu aux étapes précédentes — marquez les idées clés d'une ★.</div>`}</div>` : "";
   const card=(c,i)=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
     const lines=splitLines(c.texte); const multi=lines.length>1; const lr=Array.isArray(c.lr)?c.lr:[];
-    const hasPick = c.epingle || (multi && lr.length>0);
-    const linkSel = isLink && !regroup ? `<div class="link-sel">${ic("link")}<select data-link="${esc(c.id)}"><option value="">↳ Sert un objectif…</option>${objs.map(o=>`<option value="${esc(o.id)}" ${c.lien===o.id?"selected":""}>${esc(o.texte.slice(0,40))}</option>`).join("")}</select></div>` : "";
-    const ctextHTML = multi
-      ? `<div class="ctext lines">${lines.map((ln,idx)=>`<button class="cline ${lr.includes(idx)?'on':''}" ${(RO||regroup)?'disabled':`data-lr="${esc(c.id)}:${idx}"`}>${ic("star")}<span>${esc(ln)}</span></button>`).join("")}</div>`
-      : `<div class="ctext">${esc(c.texte)}</div>`;
-    const badge = c.epingle ? `<span class="ctop-tag">${ic("star")} retenu</span>` : (multi&&lr.length?`<span class="ctop-tag">${ic("star")} ${lr.length} retenu${lr.length>1?"s":""}</span>`:"");
-    const retenirBtn = (RO||multi) ? "" : `<button class="pin ${c.epingle?"on":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>`;
-    return `<article class="contrib ${hasPick?"top":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
-      ${regroup?`<span class="chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales,"",c.color)}
-      <div class="cb"><div class="cmeta">${badge}<b style="color:var(--ink);font-weight:600">${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?' · modifié':''}${multi&&!RO&&!regroup?` · <span class="cmeta-hint">cliquez une ligne pour la retenir</span>`:""}</div>
-        ${ctextHTML}${linkSel}
-        ${regroup?"":`<div class="cact">${RO?"":`${retenirBtn}${list.length>1?`<span class="cord"><button class="cmini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="cmini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button></span>`:""}<button class="cmini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>`}${(!RO&&mine.has(c.id))?`<button class="cmini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="cmini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</div>
-        <details class="comments"><summary>${ic("comment")} Commentaires${coms.length?` (${coms.length})`:""}</summary><div class="com-list">${coms.map(k=>`<div class="com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="cmini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
-      </div></article>`; };
-  const cards=list.length?list.map(card).join(""):`<div class="empty">Personne n'a encore contribué à cette étape.${locked||RO?"":" Lancez-vous !"}</div>`;
-  const ecartBlock = ecartees.length?`<details class="ecart-block"><summary>${ic("ban")} Écartées (${ecartees.length})</summary>${ecartees.map(c=>`<div class="ecart"><div class="ec-tx">${esc(c.texte)} <span class="by">— ${esc(c.role)}</span>${c.raison?`<div class="ec-r">Raison : ${esc(c.raison)}</div>`:""}</div>${RO?"":`<button class="cmini" data-reint="${esc(c.id)}" title="Réintégrer">${ic("check")}</button>`}</div>`).join("")}</details>`:"";
-  const lockBtn=RO?"":`<button class="lock-btn ${locked?"on":""}" data-lock="${e.id}">${ic(locked?"lock":"unlock")} ${locked?"Verrouillée":"Verrouiller"}</button>`;
-  const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup?`<div class="regroup-bar"><span>${selected.size} sélectionné(s)</span><button class="btn-mini" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="btn-mini" data-regroup>Annuler</button></div>`:`<button class="btn-mini regroup-toggle" data-regroup>${ic("merge")} Regrouper</button>`) : "";
-  const addZone=(RO||locked||regroup)?(locked?`<div class="locked-note">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
-    `<div class="compose"><textarea data-keep id="newContrib" rows="3" placeholder="${ident?"Écrire pour « "+e.nom+" »…":"Identifiez-vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="compose-foot"><span class="compose-who">${avatar(ident?ident.initiales:"?","",ident?ident.color:"")}<span class="cw-role">${ident?esc(ident.role):"Identifiez-vous"}</span></span><button class="compose-send" id="sendContrib">${ic("send")} Ajouter</button></div></div>`;
-  return `<div class="etape-head" style="--pc:${e.c}">
-    <div class="eh-hero">
-      <div class="eh-badge">${ic(e.icon)}</div>
-      <div class="eh-tx"><div class="eyebrow">Étape ${etapeIdx+1} / ${S.length}${e.phaseNom?` · ${esc(e.phaseNom)}`:""}</div><h2>${esc(e.nom)}</h2><p class="eh-q">${esc(T(e.q))}</p></div>
-      ${lockBtn}
+    const votes=Array.isArray(c.votes)?c.votes:[]; const voted=votes.includes(DEV);
+    const status=(c.epingle||(multi&&lr.length))?"keep":(c.precise?"prec":"");
+    const tag=c.epingle?`<span class="ev-tag k">${ic("star")} Retenu</span>`:(multi&&lr.length?`<span class="ev-tag k">${ic("star")} ${lr.length} retenu${lr.length>1?"s":""}</span>`:(c.precise?`<span class="ev-tag p">${ic("pencil")} À préciser</span>`:`<span class="ev-tag n">Proposé</span>`));
+    const linkSel = isLink && !regroup ? `<div class="ev-link">${ic("link")}<select data-link="${esc(c.id)}"><option value="">↳ Sert un objectif…</option>${objs.map(o=>`<option value="${esc(o.id)}" ${c.lien===o.id?"selected":""}>${esc(o.texte.slice(0,40))}</option>`).join("")}</select></div>` : "";
+    const txt = multi
+      ? `<div class="ev-tx lines">${lines.map((ln,idx)=>`<button class="ev-line ${lr.includes(idx)?"on":""}" ${(RO||regroup)?"disabled":`data-lr="${esc(c.id)}:${idx}"`}>${ic("star")}<span>${esc(ln)}</span></button>`).join("")}</div>`
+      : `<div class="ev-tx">${esc(c.texte)}</div>`;
+    const acts = RO ? (votes.length?`<span class="ev-rb static">${ic("check")} ${votes.length}</span>`:"") :
+      `<button class="ev-rb ${voted?"on":""}" data-vote="${esc(c.id)}">${ic("check")} D'accord${votes.length?` · ${votes.length}`:""}</button>${multi?"":`<button class="ev-rb ${c.epingle?"on keep":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>`}<button class="ev-rb ${c.precise?"on prec":""}" data-precise="${esc(c.id)}">${ic("pencil")} ${c.precise?"À préciser":"Préciser"}</button>`;
+    const more = RO?"":`<span class="ev-more">${list.length>1?`<button class="ev-mini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="ev-mini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button>`:""}<button class="ev-mini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>${mine.has(c.id)?`<button class="ev-mini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="ev-mini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</span>`;
+    return `<article class="ev-card ${status} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
+      <div class="ev-ctop">${regroup?`<span class="ev-chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales,"",c.color)}<span class="ev-who"><b>${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?" · modifié":""}</span>${tag}</div>
+      ${txt}${linkSel}
+      ${regroup?"":`<div class="ev-react">${acts}${more}</div><details class="ev-coms"><summary>${ic("comment")} Commentaires${coms.length?` · ${coms.length}`:""}</summary><div class="ev-com-list">${coms.map(k=>`<div class="ev-com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="ev-com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="ev-mini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
+    </article>`; };
+  const cards=list.length?list.map(card).join(""):`<div class="ev-empty">${ic("bulb")}<div><b>Personne n'a encore contribué.</b>${locked||RO?"":"<span>Lance‑toi — une idée, même imparfaite.</span>"}</div></div>`;
+  const ecartBlock = ecartees.length?`<details class="ev-ecart"><summary>${ic("ban")} Écartées · ${ecartees.length}</summary>${ecartees.map(c=>`<div class="ev-ec"><div class="ev-ec-tx">${esc(c.texte)} <span class="ev-by">— ${esc(c.role)}</span>${c.raison?`<div class="ev-ec-r">Raison : ${esc(c.raison)}</div>`:""}</div>${RO?"":`<button class="ev-mini" data-reint="${esc(c.id)}" title="Réintégrer">${ic("check")}</button>`}</div>`).join("")}</details>`:"";
+  const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup?`<div class="ev-regroup"><span>${selected.size} sélectionné(s)</span><button class="ev-mini2" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="ev-mini2" data-regroup>Annuler</button></div>`:`<button class="ev-mini2 reg" data-regroup>${ic("merge")} Regrouper des idées proches</button>`) : "";
+  const addZone=(RO||locked||regroup)?(locked?`<div class="ev-locked">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
+    `<div class="ev-compose"><div class="ev-comp-h">${ic("pencil")} À toi de jouer</div><textarea data-keep id="newContrib" rows="2" placeholder="${ident?"Ton idée, même imparfaite…":"Identifie‑toi pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="ev-comp-foot"><span class="ev-micro">Rien n'est définitif tant que ce n'est pas retenu.</span><button class="ev-add" id="sendContrib">${ic("plus")} Ajouter</button></div></div>`;
+  const lockBtn=RO?"":`<button class="ev-lock ${locked?"on":""}" data-lock="${e.id}" aria-label="${locked?"Déverrouiller l'étape":"Verrouiller l'étape"}">${ic(locked?"lock":"unlock")}</button>`;
+  const on=(typeof onlineNow==="function")?onlineNow():[]; const presHTML=on.length?`<span class="ev-pres"><span class="ev-pres-dot"></span><span class="ev-pres-avs">${on.slice(0,4).map(p=>avatar(p.initiales,"sm",p.color)).join("")}</span>${on.length} en ligne</span>`:"";
+  const v=visIdx(); const pos=v.indexOf(etapeIdx); const pct=Math.round((pos+1)/Math.max(v.length,1)*100);
+  const voters=((projet.pret||{})[e.id]||[]); const meReady=voters.some(x=>x.dev===DEV);
+  const readyBlock=`<div class="ev-ready"><div class="ev-ready-who">${voters.length?`<span class="ev-ready-avs">${voters.map(x=>avatar(x.ini,"sm",x.color)).join("")}</span><span><b>${voters.length}</b> ${voters.length>1?"ont":"a"} terminé cette étape</span>`:`<span class="muted">Personne n'a encore signalé avoir terminé cette étape.</span>`}</div>${RO?"":`<button class="ev-btn-ready ${meReady?"done":""}" data-ready="${e.id}">${ic("check")} ${meReady?"Terminé — annuler":"J'ai terminé cette étape"}</button>`}</div>`;
+  return `${journey}
+    <div class="ev-hero" style="--pc:${pc}">
+      <div class="ev-hero-top"><span class="ev-eyebrow">${ic(e.icon)} Étape ${etapeIdx+1} sur ${S.length}${e.phaseNom?` · ${esc(e.phaseNom)}`:""}</span><span class="ev-htools">${presHTML}${lockBtn}</span></div>
+      <h2 class="ev-title">${esc(e.nom)}</h2>
+      <div class="ev-q">${ic("help")}<span>${esc(T(e.q))}</span></div>
+      <div class="ev-prog"><span>Avancement</span><span class="ev-bar"><i style="width:${pct}%"></i></span><span>${pct}%</span></div>
     </div>
-    <p class="et-def">${esc(T(e.def))}</p>
-    <div class="eh-tools">${e.custom?"":`<button class="concept-btn" data-concept="${e.id}">${ic("help")} Comprendre la notion</button>`}</div>
-    ${e.aide?`<div class="et-aide">${ic("info")}<span>${esc(T(e.aide))}</span></div>`:""}</div>
-    <div class="etape-grid">
-      <div class="etape-main">${fil}${addZone}${regroupBar}<div class="contribs">${cards}</div>${ecartBlock}</div>
-      <aside class="etape-side">${resStrip(e.id)}</aside>
+    <div class="ev-coach"><span class="ev-coach-ic">${ic("bulb")}</span><div class="ev-coach-tx"><b>${esc(T(e.def))}</b>${e.aide?`<p>${esc(T(e.aide))}</p>`:""}</div>${e.custom?"":`<button class="ev-coach-more" data-concept="${e.id}">${ic("help")} La notion</button>`}</div>
+    ${recapBlock}
+    <div class="ev-grid">
+      <div class="ev-main">${addZone}${regroupBar}<div class="ev-cards">${cards}</div>${ecartBlock}</div>
+      <aside class="ev-side">${resStrip(e.id)}</aside>
     </div>
-    ${(()=>{const voters=((projet.pret||{})[e.id]||[]);const me=voters.some(v=>v.dev===DEV);return `<div class="ready"><div class="ready-who">${voters.length?`<span class="ready-avs">${voters.map(v=>avatar(v.ini,"sm",v.color)).join("")}</span><span class="ready-lab"><b>${voters.length}</b> ${voters.length>1?"ont":"a"} terminé cette étape</span>`:`<span class="ready-lab muted">Personne n'a encore signalé avoir terminé cette étape.</span>`}</div>${RO?"":`<button class="btn-ready ${me?"done":""}" data-ready="${e.id}">${ic("check")} ${me?"Vous avez terminé — annuler":"J'ai terminé cette étape"}</button>`}</div>`;})()}
-    <div class="pager"><button class="pgr" data-nav="-1">${ic("back")}<span>Précédent</span></button><button class="pgr next" data-nav="1"><span>Suivant</span>${ic("chev")}</button></div>`;
+    ${readyBlock}
+    <div class="ev-pager"><button class="ev-pgr" data-nav="-1">${ic("back")} Précédent</button><button class="ev-pgr next" data-nav="1">Suivant ${ic("chev")}</button></div>`;
 }
 
 function viewPlan(){
@@ -715,6 +724,8 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
   if(e.target.closest("[data-presentation]")){view="presentation";window.scrollTo&&window.scrollTo(0,0);return render();}
   if(e.target.closest("#presShare")){const url=base+"?p="+projet.id+"&ro=1&vue=presentation";navigator.clipboard?.writeText(url).then(()=>toast("Lien présentation copié",true)).catch(()=>toast(url));return;}
+  const vt=e.target.closest("[data-vote]");if(vt){const c=contribs.find(x=>x.id===vt.dataset.vote);if(!c)return;const arr=Array.isArray(c.votes)?c.votes.slice():[];const k=arr.indexOf(DEV);if(k>=0)arr.splice(k,1);else arr.push(DEV);return upd(vt.dataset.vote,{votes:arr});}
+  const pcz=e.target.closest("[data-precise]");if(pcz){const c=contribs.find(x=>x.id===pcz.dataset.precise);if(!c)return;return upd(pcz.dataset.precise,{precise:!c.precise});}
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
   const lrb=e.target.closest("[data-lr]");if(lrb){ const p=lrb.dataset.lr.split(":"); return toggleLine(p[0], +p[1]); }
   const rdy=e.target.closest("[data-ready]");if(rdy) return toggleReady(rdy.dataset.ready);
