@@ -586,7 +586,7 @@ async function delDossier(){
   catch(e){ console.error(e); toast("Suppression impossible."); }
 }
 function exportJSON(){
-  const data={ _type:"chef-doeuvre-cap", titre:dossier.titre, specialite:dossier.specialite, anneeDebut:dossier.anneeDebut, nbEleves:dossier.nbEleves, classe:dossier.classe, phase:dossier.phase, doc:{}, elements:els.map(({id,_t,createdAt,...r})=>r) };
+  const data={ _type:"chef-doeuvre-cap", titre:dossier.titre, specialite:dossier.specialite, anneeDebut:dossier.anneeDebut, nbEleves:dossier.nbEleves, classe:dossier.classe, phase:dossier.phase, doc:{}, elements:els.map(({_t,createdAt,id,...r})=>({_lid:id,...r})) };
   ["resume","finalite","problematique","production","heures1","heures2","t_bilan","t_decisions","t_reste","t_vigilance","t_reprise","prepaOral","support","oralDate","transmissionPrete"].forEach(f=>data.doc[f]=dossier[f]||"");
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="chef-doeuvre-"+String(dossier.titre||"cap").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".json"; a.click(); URL.revokeObjectURL(a.href); toast("Exporté",true);
 }
@@ -610,7 +610,11 @@ async function createFrom(data, isModel){
     base.transmissionPrete = !!base.transmissionPrete;
     const ref=await addDoc(collection(db,COL),base);
     const col=collection(db,COL,ref.id,"elements");
-    for(const e of (data.elements||[])){ await addDoc(col,{...e,createdAt:serverTimestamp()}); }
+    const list=data.elements||[]; const idMap={};
+    // 1) éléments non-action d'abord (on mémorise _lid → nouvel id pour les disciplines)
+    for(const e of list){ if(e.type==="action") continue; const {_lid,...r}=e; const n=await addDoc(col,{...r,createdAt:serverTimestamp()}); if(_lid) idMap[_lid]=n.id; }
+    // 2) actions ensuite, en remappant discId vers le nouvel id de discipline
+    for(const e of list){ if(e.type!=="action") continue; const {_lid,...r}=e; if(r.discId&&idMap[r.discId]) r.discId=idMap[r.discId]; await addDoc(col,{...r,createdAt:serverTimestamp()}); }
     toast(isModel?"Modèle créé":"Importé",true); await openDossier(ref.id);
   }catch(e){ console.error(e); fbError=true; toast("Création impossible."); }
 }
