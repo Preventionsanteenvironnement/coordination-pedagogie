@@ -146,6 +146,8 @@ let view = "liste";
 let projets = [], projet = null, contribs = [], etapeIdx = 0;
 let unsub = null, unsubP = null, unsubPres = null, hb = null, presence = [];
 let regroup = false, selected = new Set();
+let discussion = [], unsubDisc = null, chatOpen = false;
+let chatSeen = JSON.parse(localStorage.getItem("projets_chat_seen") || "{}");
 let fbError = false;
 
 const $ = s => document.querySelector(s);
@@ -251,6 +253,7 @@ function render(){
   $("#subtitle").textContent = inProj ? ({overview:"Vue d'ensemble",fiche:"Fiche projet",matrice:"Alignement",plan:"Plan d'action",presentation:"Présentation"}[view]||stepAt(etapeIdx)?.nom) : "Construire à plusieurs mains";
   const ib=$("#identBtn"); if(ident && !RO){ ib.hidden=false; ib.innerHTML=`${ic("user")} ${esc(ident.initiales)}`; } else ib.hidden=true;
   const fb=$("#ficheBtn"); fb.hidden = !(inProj && view!=="fiche"); fb.innerHTML=`${ic("file")} Fiche`;
+  updateChatBadge();
   const showBar = inProj && view!=="overview" && view!=="presentation";
   $("#etapebar").hidden = !showBar; if(showBar) renderEtapeBar();
   const map = { liste:viewListe, overview:viewOverview, etape:viewEtape, fiche:viewFiche, matrice:viewMatrice, plan:viewPlan, presentation:viewPresentation };
@@ -357,6 +360,48 @@ function viewOverview(){
     <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 
+/* ---- Fiche participant : son historique (centré sur les propositions retenues) ---- */
+function retenueOf(cid){ const sy=(projet&&projet.synthese)||{}; for(const eid in sy){ const arr=sy[eid]||[]; for(const en of arr){ if((en.sources||[]).includes(cid)) return {eid, entry:en}; } } return null; }
+function stepMeta(id){ const b=ETM[id]; const nom=((projet&&projet.etapeNoms)||{})[id]||(b&&b.nom)||id; const c=STEPCOL[id]||(phaseOf(id)||{}).c||"#6a5cff"; const icon=(b&&b.icon)||"folder"; return {nom,c,icon}; }
+function openParticipant(ini){
+  if(!ini) return;
+  const mineList=contribs.filter(c=>c.initiales===ini && !c.ecarte);
+  const role=(mineList[0]||{}).role||""; const color=(mineList[0]||{}).color||"";
+  const ret=[], pend=[];
+  mineList.forEach(c=>{ const r=retenueOf(c.id); (r?ret:pend).push({c,r}); });
+  const decorate=(arr)=> arr.map(o=>{ const sid=o.r?o.r.eid:o.c.etape; return {...o, sid, m:stepMeta(sid)}; });
+  const retS=decorate(ret), penS=decorate(pend);
+  const line=(o,retenue)=>`<div class="pp-item" style="--sc:${o.m.c}"><div class="pp-top"><span class="pp-step">${ic(o.m.icon)} ${esc(o.m.nom)}</span>${retenue?`<span class="pp-tag">${ic("check")} Retenue</span>`:`<span class="pp-tag pend">En proposition</span>`}</div><div class="pp-tx">${esc(o.c.texte)}</div></div>`;
+  const retHTML = retS.length ? retS.map(o=>line(o,true)).join("") : `<div class="pp-empty">${ic("info")} Aucune proposition retenue dans la synthèse pour l'instant.</div>`;
+  const penHTML = penS.length ? `<details class="pp-more"><summary>${ic("clip")} Autres propositions, en attente · ${penS.length}</summary><div class="pp-list">${penS.map(o=>line(o,false)).join("")}</div></details>` : "";
+  openSheet(`<div class="sheet-head"><div class="pp-head"><span class="pp-ava">${avatar(ini,"",color)}</span><div class="pp-id"><h3>${esc(role||"Participant")} · ${esc(ini)}</h3><small>${ret.length} retenue${ret.length>1?"s":""} · ${mineList.length} proposition${mineList.length>1?"s":""}</small></div></div><button class="x" data-close>${ic("x")}</button></div>
+    <div class="pp-sec">${ic("star")} Propositions retenues</div><div class="pp-list">${retHTML}</div>${penHTML}`);
+}
+
+/* ---- Discussion d'équipe (chat) ---- */
+function fmtTime(s){ if(!s)return""; try{ return new Date(s*1000).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); }catch(_){ return ""; } }
+function unreadCount(){ if(!projet) return 0; const seen=chatSeen[projet.id]||0; return discussion.filter(m=>(m._t>seen)&&(!ident||m.ini!==ident.initiales)).length; }
+function markChatSeen(){ if(!projet)return; const last=discussion.reduce((a,m)=>Math.max(a,m._t||0),0); chatSeen[projet.id]=Math.max(last, Math.floor(Date.now()/1000)); try{localStorage.setItem("projets_chat_seen",JSON.stringify(chatSeen));}catch(_){} updateChatBadge(); }
+function updateChatBadge(){ const b=$("#chatBtn"); if(!b)return; const inProj=projet&&view!=="liste"; b.hidden=!inProj; if(!inProj)return; const n=unreadCount(); b.innerHTML=`${ic("comment")}${n?`<span class="tb-chat-badge">${n>9?"9+":n}</span>`:""}`; b.classList.toggle("has-unread",!!n); }
+function chatListHTML(){
+  if(!discussion.length) return `<div class="chat-empty">${ic("comment")}<p>Aucun message pour l'instant.<br>Posez une question, donnez un avis ou une directive.</p></div>`;
+  return discussion.map(m=>{ const me=ident&&m.ini===ident.initiales; return `<div class="chat-msg ${me?"me":""}">${me?"":avatar(m.ini,"sm",m.color)}<div class="chat-b"><div class="chat-meta"><b>${esc(m.role||"—")}</b> · ${esc(m.ini||"")}</div><div class="chat-txt">${esc(m.txt)}</div><span class="chat-t">${fmtTime(m._t)}</span></div></div>`; }).join("");
+}
+function renderChat(){ const el=$("#chatPanel"); if(!el)return; const on=(typeof onlineNow==="function")?onlineNow().length:0;
+  el.innerHTML=`<div class="chat-head"><span class="chat-h-ic">${ic("comment")}</span><div class="chat-h-tx"><b>Discussion d'équipe</b><small>${on?on+" en ligne":"Messages de l'équipe"}</small></div><button class="chat-x" id="chatClose" aria-label="Fermer">${ic("x")}</button></div>
+    <div class="chat-list" id="chatList">${chatListHTML()}</div>
+    ${(ident&&!RO)?`<div class="chat-form"><input id="chatInput" data-keep placeholder="Un message, une question, une directive…" autocomplete="off"><button class="chat-send" id="chatSend" aria-label="Envoyer">${ic("send")}</button></div>`:`<div class="chat-form ro">${ident?"Lecture seule.":"Identifiez-vous pour écrire."}</div>`}`;
+  const l=$("#chatList"); if(l)l.scrollTop=l.scrollHeight;
+}
+function toggleChatPanel(){ const p=$("#chatPanel"), b=$("#chatBackdrop"); if(!p||!b)return;
+  if(chatOpen){ renderChat(); p.hidden=false; b.hidden=false; requestAnimationFrame(()=>{p.classList.add("show");b.classList.add("show");}); const i=$("#chatInput"); if(i&&window.matchMedia&&!window.matchMedia("(max-width:560px)").matches) try{i.focus();}catch(_){} }
+  else { p.classList.remove("show"); b.classList.remove("show"); setTimeout(()=>{ if(!chatOpen){p.hidden=true;b.hidden=true;} },260); }
+  updateChatBadge();
+}
+async function sendMessage(txt){ if(!ident){openIdent();return;} txt=(txt||"").trim(); if(!txt||!projet)return;
+  try{ await addDoc(collection(db,COL,projet.id,"discussion"),{ini:ident.initiales,role:ident.role,color:ident.color||"",txt,createdAt:serverTimestamp()}); markChatSeen(); }
+  catch(e){ console.error(e); toast("Message non envoyé."); } }
+
 function synthBoard(e){
   const eid=e.id; const pc=e.c||"#2563eb";
   const entries=synthOf(eid).slice().sort((a,b)=>synthSupport(b)-synthSupport(a));
@@ -390,7 +435,7 @@ function viewEtape(){
       `<button class="ev-rb ${voted?"on":""}" data-vote="${esc(c.id)}">${ic("check")} D'accord${votes.length?` · ${votes.length}`:""}</button>${reprisN?`<span class="ev-repris">${ic("check")} dans la synthèse · n°${reprisN}</span>`:(canSynth()?`<button class="ev-rb addsyn" data-addsynth="${esc(c.id)}">${ic("star")} Ajouter à la synthèse</button>`:"")}`;
     const more = RO?"":`<span class="ev-more">${list.length>1?`<button class="ev-mini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="ev-mini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button>`:""}<button class="ev-mini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>${mine.has(c.id)?`<button class="ev-mini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="ev-mini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</span>`;
     return `<article class="ev-card ${reprisN?"used":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
-      <div class="ev-ctop">${regroup?`<span class="ev-chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales,"",c.color)}<span class="ev-who"><b>${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?" · modifié":""}</span></div>
+      <div class="ev-ctop">${regroup?`<span class="ev-chk ${sel?"on":""}">${sel?ic("check"):""}</span><span class="ev-who"><b>${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?" · modifié":""}</span>`:`<button class="ev-who-btn" data-who="${esc(c.initiales||"")}" title="Voir l'historique de ${esc(c.initiales||"")}">${avatar(c.initiales,"",c.color)}<span class="ev-who"><b>${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?" · modifié":""}</span></button>`}</div>
       <div class="ev-tx">${esc(c.texte)}</div>${linkSel}
       ${regroup?"":`<div class="ev-react">${acts}${more}</div><details class="ev-coms"><summary>${ic("comment")} Commentaires${coms.length?` · ${coms.length}`:""}</summary><div class="ev-com-list">${coms.map(k=>`<div class="ev-com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="ev-com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="ev-mini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
     </article>`; };
@@ -703,9 +748,10 @@ async function openProjet(id){
   projet=projets.find(p=>p.id===id)||null;
   if(!projet){ try{const d=await getDoc(doc(db,COL,id));if(d.exists())projet={id,...d.data()};}catch(_){} }
   if(!projet){toast("Projet introuvable.");view="liste";return loadListe();}
-  view="overview"; etapeIdx=0; contribs=[]; regroup=false; selected.clear(); render();
+  view="overview"; etapeIdx=0; contribs=[]; discussion=[]; chatOpen=false; regroup=false; selected.clear(); render();
   try{ unsubP=onSnapshot(doc(db,COL,id),d=>{if(d.exists()){projet={id,...d.data()};if(view!=="liste")render();}}); }catch(_){}
   try{ unsub=onSnapshot(query(collection(db,COL,id,"contributions"),orderBy("createdAt","asc")),snap=>{contribs=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});fbError=false;if(view!=="liste")render();},err=>{console.error(err);fbError=true;render();}); }catch(e){console.error(e);fbError=true;render();}
+  try{ unsubDisc=onSnapshot(query(collection(db,COL,id,"discussion"),orderBy("createdAt","asc")),snap=>{discussion=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});if(chatOpen){const l=$("#chatList");if(l){l.innerHTML=chatListHTML();l.scrollTop=l.scrollHeight;}}updateChatBadge();},err=>{console.error(err);}); }catch(_){}
   startPresence(id);
 }
 async function addContribution(texte){ if(!ident){openIdent();return;} texte=texte.trim(); if(!texte) return; const sid=stepAt(etapeIdx)?.id; if(!sid) return; if(isLocked(sid)){toast("Étape verrouillée.");return;}
@@ -782,6 +828,10 @@ document.addEventListener("click", e=>{
   const sre=e.target.closest("[data-synth-reunir]");if(sre){const eid=stepAt(etapeIdx)?.id;if(eid)openReunir(eid,sre.dataset.synthReunir);return;}
   const sdl=e.target.closest("[data-synth-del]");if(sdl){const eid=stepAt(etapeIdx)?.id;if(eid&&confirm("Retirer cette ligne du tableau de synthèse ?\n(Les idées d'origine restent dans le mur.)"))delSynth(eid,sdl.dataset.synthDel);return;}
   if(e.target.closest("[data-copilote]")){ if(!ident)return openIdent(); const c=projet.copilote; if(c&&c.ini===ident.initiales) return setProj({copilote:null}); return setProj({copilote:{ini:ident.initiales,role:ident.role,color:ident.color||""}}); }
+  const who=e.target.closest("[data-who]");if(who) return openParticipant(who.dataset.who);
+  if(e.target.closest("#chatBtn")){ chatOpen=!chatOpen; if(chatOpen)markChatSeen(); toggleChatPanel(); return; }
+  if(e.target.closest("#chatClose")||e.target.closest("#chatBackdrop")){ chatOpen=false; toggleChatPanel(); return; }
+  if(e.target.closest("#chatSend")){ const i=$("#chatInput"); const v=i?i.value:""; if(i)i.value=""; return sendMessage(v); }
   const vt=e.target.closest("[data-vote]");if(vt){const c=contribs.find(x=>x.id===vt.dataset.vote);if(!c)return;const arr=Array.isArray(c.votes)?c.votes.slice():[];const k=arr.indexOf(DEV);if(k>=0)arr.splice(k,1);else arr.push(DEV);return upd(vt.dataset.vote,{votes:arr});}
   const pcz=e.target.closest("[data-precise]");if(pcz){const c=contribs.find(x=>x.id===pcz.dataset.precise);if(!c)return;return upd(pcz.dataset.precise,{precise:!c.precise});}
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
@@ -809,13 +859,13 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-close]")||e.target.id==="overlay") return closeSheet();
   if(e.target.closest("#identBtn")) return openIdent();
   if(e.target.closest("#sendContrib")){const t=$("#newContrib");const v=t?t.value:"";if(t)t.value="";const n=$("#nudge");if(n)n.hidden=true;return addContribution(v);}
-  if(e.target.closest("#back")){ if(view==="liste"){location.href="../";return;} if(view!=="overview"){view="overview";regroup=false;selected.clear();return render();} stopPresence(); if(unsub){unsub();unsub=null;}if(unsubP){unsubP();unsubP=null;}view="liste";projet=null;contribs=[];render();loadListe();return; }
+  if(e.target.closest("#back")){ if(view==="liste"){location.href="../";return;} if(view!=="overview"){view="overview";regroup=false;selected.clear();return render();} stopPresence(); if(unsub){unsub();unsub=null;}if(unsubP){unsubP();unsubP=null;}if(unsubDisc){unsubDisc();unsubDisc=null;}chatOpen=false;toggleChatPanel();view="liste";projet=null;contribs=[];discussion=[];render();loadListe();return; }
 });
 document.addEventListener("change", e=>{ const lk=e.target.closest("[data-link]"); if(lk) return upd(lk.dataset.link,{lien:e.target.value});
   const pf=e.target.closest("[data-pf]"); if(pf){const [f,cid]=pf.dataset.pf.split(":");return upd(cid,{[f]:e.target.value});} });
 document.addEventListener("input", e=>{ if(e.target.id==="newContrib"){const t=e.target;t.style.height="auto";t.style.height=Math.min(t.scrollHeight,320)+"px";const n=$("#nudge");if(!n)return;const m=nudge(stepAt(etapeIdx)?.id,e.target.value);if(m){n.innerHTML=`${ic("info")}<span>${esc(m)}</span>`;n.hidden=false;}else n.hidden=true;} });
-document.addEventListener("keydown", e=>{ if(e.key==="Escape")closeSheet();
-  if(e.key==="Enter"&&!e.shiftKey){ if(e.target.id==="newContrib"){e.preventDefault();const v=e.target.value;e.target.value="";const n=$("#nudge");if(n)n.hidden=true;addContribution(v);} else if(e.target.id&&e.target.id.startsWith("com_")){e.preventDefault();const cid=e.target.id.slice(4);const v=e.target.value;e.target.value="";addComment(cid,v);} } });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape"){closeSheet(); if(chatOpen){chatOpen=false;toggleChatPanel();}}
+  if(e.key==="Enter"&&!e.shiftKey){ if(e.target.id==="newContrib"){e.preventDefault();const v=e.target.value;e.target.value="";const n=$("#nudge");if(n)n.hidden=true;addContribution(v);} else if(e.target.id==="chatInput"){e.preventDefault();const v=e.target.value;e.target.value="";sendMessage(v);} else if(e.target.id&&e.target.id.startsWith("com_")){e.preventDefault();const cid=e.target.id.slice(4);const v=e.target.value;e.target.value="";addComment(cid,v);} } });
 window.addEventListener("beforeunload", ()=>{ try{stopPresence();}catch(_){} });
 
 loadListe().then(()=>{const p=params.get("p");if(p)openProjet(p).then(()=>{if(params.get("vue")==="presentation"){view="presentation";render();}});});
