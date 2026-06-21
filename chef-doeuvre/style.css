@@ -936,3 +936,8 @@ table.pl td{vertical-align:middle}
 .bil-edit{color:var(--faint);flex:none}.bil-edit .i{font-size:14px}
 .bil-tx{font-size:14px;line-height:1.62;color:#2f3744;white-space:pre-wrap}
 .bil-block.empty .bil-tx{color:var(--faint);font-style:italic}
+
+/* ----- Indicateur d'enregistrement discret (barre du haut) ----- */
+.tb-save{flex:none;display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;border-radius:var(--r-pill);padding:4px 9px;white-space:nowrap;background:rgba(255,255,255,.13);color:#cfeadd;transition:opacity .2s}
+.tb-save.saving{color:#ffe4ab;background:rgba(255,255,255,.18)}
+@media(max-width:400px){.tb-save{font-size:0;gap:0;padding:5px 7px}.tb-save::before{content:"✓";font-size:13px}}

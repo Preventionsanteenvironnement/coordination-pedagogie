@@ -120,7 +120,8 @@ let dossierTab = "projet";   // "projet" (cœur) | "cadre" (repères : officiel,
 
 let toastT;
 function toast(m,ok){ const t=$("#toast"); t.textContent=m; t.className="toast show"+(ok?" ok":""); clearTimeout(toastT); toastT=setTimeout(()=>t.className="toast",2200); }
-const saved = ()=>toast("Enregistré",true);
+function setSave(state){ const s=$("#saveDot"); if(!s) return; if(state==="saving"){ s.hidden=false; s.className="tb-save saving"; s.textContent="Enregistrement…"; } else { s.hidden=(!dossier||view==="liste"||RO); s.className="tb-save ok"; s.textContent="✓ Enregistré"; } }
+const saved = ()=>{ toast("Enregistré",true); setSave("ok"); };
 const isAdmin = ()=> !!(ident && dossier && dossier.pilote && dossier.pilote.ini===ident.initiales);
 const canEdit = ()=> !RO && !!ident;
 
@@ -143,6 +144,7 @@ function render(){
   $("#title").textContent = inD ? dossier.titre : "Chef-d'œuvre CAP";
   $("#subtitle").textContent = inD ? (dossier.specialite||cohorte()||"Projet sur deux ans") : "Projet sur deux ans";
   const ib=$("#identBtn"); if(ident && !RO){ ib.hidden=false; ib.innerHTML=`${ic("user")} ${esc(ident.initiales)}`; } else ib.hidden=true;
+  const sd=$("#saveDot"); if(sd){ if(inD && !RO){ sd.hidden=false; if(!sd.classList.contains("saving")){ sd.className="tb-save ok"; sd.textContent="✓ Enregistré"; } } else sd.hidden=true; }
   const map = { liste:viewListe, dossier:viewDossier, presentation:viewPresentation };
   $("#view").innerHTML = (map[view]||viewListe)();
   if(view!=="dossier") window.scrollTo&&window.scrollTo(0,0);
@@ -571,11 +573,11 @@ async function seed(did){
 }
 
 /* =====================  FIRESTORE  ===================== */
-async function addEl(obj){ if(!dossier) return; try{ const ref=await addDoc(collection(db,COL,dossier.id,"elements"),{...obj,ini:ident?ident.initiales:"",role:ident?ident.role:"",color:obj.color||(ident?ident.color:"")||"",createdAt:serverTimestamp()}); saved(); return ref; }catch(e){console.error(e);toast("Ajout impossible.");} }
-async function updEl(id,obj){ try{ await updateDoc(doc(db,COL,dossier.id,"elements",id),{...obj,editedAt:Date.now()}); saved(); }catch(e){console.error(e);toast("Action impossible.");} }
-async function delEl(id,sure){ if(!sure && !confirm("Supprimer cet élément ?")) return; try{ await deleteDoc(doc(db,COL,dossier.id,"elements",id)); saved(); }catch(e){console.error(e);toast("Suppression impossible.");} }
-async function setDoc(obj){ try{ await updateDoc(doc(db,COL,dossier.id),obj); closeSheet(); saved(); }catch(e){console.error(e);toast("Action impossible.");} }
-async function setDocQuiet(obj){ try{ await updateDoc(doc(db,COL,dossier.id),obj); }catch(e){console.error(e);toast("Action impossible.");} }
+async function addEl(obj){ if(!dossier) return; setSave("saving"); try{ const ref=await addDoc(collection(db,COL,dossier.id,"elements"),{...obj,ini:ident?ident.initiales:"",role:ident?ident.role:"",color:obj.color||(ident?ident.color:"")||"",createdAt:serverTimestamp()}); saved(); return ref; }catch(e){console.error(e);setSave("ok");toast("Ajout impossible.");} }
+async function updEl(id,obj){ setSave("saving"); try{ await updateDoc(doc(db,COL,dossier.id,"elements",id),{...obj,editedAt:Date.now()}); saved(); }catch(e){console.error(e);setSave("ok");toast("Action impossible.");} }
+async function delEl(id,sure){ if(!sure && !confirm("Supprimer cet élément ?")) return; setSave("saving"); try{ await deleteDoc(doc(db,COL,dossier.id,"elements",id)); saved(); }catch(e){console.error(e);setSave("ok");toast("Suppression impossible.");} }
+async function setDoc(obj){ setSave("saving"); try{ await updateDoc(doc(db,COL,dossier.id),obj); closeSheet(); saved(); }catch(e){console.error(e);setSave("ok");toast("Action impossible.");} }
+async function setDocQuiet(obj){ setSave("saving"); try{ await updateDoc(doc(db,COL,dossier.id),obj); }catch(e){console.error(e);setSave("ok");toast("Action impossible.");} }
 
 async function loadListe(){
   try{ const snap=await getDocs(query(collection(db,COL), orderBy("createdAt","desc")));
