@@ -896,3 +896,25 @@ table.pl td{vertical-align:middle}
   .pres{border:none;box-shadow:none;border-radius:0}
   .pr-sec,.pr-head{break-inside:avoid}
 }
+
+/* ----- Onglet « Cadre & repères » séparé du cœur ----- */
+.cadre-access{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:13px 15px;margin:12px 0}
+.cadre-access:hover{border-color:var(--line2)}
+.ca-ic{width:36px;height:36px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,#0e7c66 12%,var(--surface));color:#0e7c66}
+.ca-ic .i{font-size:18px}
+.ca-tx{flex:1;min-width:0}
+.ca-tx b{display:block;font-size:14.5px;font-weight:600;color:var(--ink)}
+.ca-tx small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.ca-go{color:var(--faint)}.ca-go .i{font-size:18px}
+.cadre-intro{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;line-height:1.55;color:#2a3a55;margin:10px 0 14px}
+.cadre-intro .i{font-size:18px;flex:none;color:var(--accent);margin-top:1px}
+.cadre-intro b{font-weight:600}
+
+/* ----- Timeline : étape = en-tête + ajout d'étape ----- */
+.tl-addstep{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;font-weight:600;color:var(--ac,#7f57c9);background:color-mix(in srgb,var(--ac,#7f57c9) 9%,var(--surface));border:1px dashed color-mix(in srgb,var(--ac,#7f57c9) 38%,transparent);border-radius:var(--r-sm);padding:9px 13px}
+.tl-addstep .i{font-size:15px}
+.tl-empty{color:var(--faint);font-size:13.5px;font-style:italic;padding:6px 2px 10px}
+/* la « jalon-chip » sert désormais d'en-tête d'étape : un peu plus présente */
+.jchip{padding:10px 12px}
+.jchip-n{font-size:14.5px}
+.jchip-n .i{font-size:15px}

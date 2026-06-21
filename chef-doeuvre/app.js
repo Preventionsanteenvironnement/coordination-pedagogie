@@ -115,7 +115,8 @@ let ident = JSON.parse(localStorage.getItem("projets_ident_v1") || "null");
 const params = new URLSearchParams(location.search);
 const RO = params.get("ro")==="1";
 let dossiers=[], dossier=null, els=[], view="liste", fbError=false, unsub=null, unsubE=null;
-let openSecs = new Set(["timeline"]);
+let openSecs = new Set(["timeline","transmission","cadre","peda","hor"]);
+let dossierTab = "projet";   // "projet" (cœur) | "cadre" (repères : officiel, pédagogique, horaire)
 
 let toastT;
 function toast(m,ok){ const t=$("#toast"); t.textContent=m; t.className="toast show"+(ok?" ok":""); clearTimeout(toastT); toastT=setTimeout(()=>t.className="toast",2200); }
@@ -130,6 +131,8 @@ const discColor = id => { const d=discs().find(x=>x.id===id); return d?d.color:"
 const discName = id => { const d=discs().find(x=>x.id===id); return d?d.nom:""; };
 const jalons = ()=> byType("jalon").slice().sort((a,b)=>(a.annee-b.annee)||(a.periode-b.periode)||((a.ordre||0)-(b.ordre||0)));
 const actionsOf = (yr,p)=> byType("action").filter(a=>a.annee===yr&&a.periode===p).sort((a,b)=>(a._t||0)-(b._t||0));
+const stepIdx = (yr)=> [...new Set([...jalons().filter(j=>j.annee===yr),...byType("action").filter(a=>a.annee===yr)].map(x=>x.periode))].sort((a,b)=>a-b);
+const stepLabel = (yr,p)=>{ const j=jalons().find(x=>x.annee===yr&&x.periode===p); return j?j.nom:("Étape "+(p+1)); };
 const cohorte = ()=> dossier&&dossier.anneeDebut ? `${dossier.anneeDebut}–${dossier.anneeDebut+2}` : "";
 const anScolaire = (yr)=> dossier&&dossier.anneeDebut ? `${dossier.anneeDebut+(yr-1)}–${dossier.anneeDebut+yr}` : (yr===1?"Année 1":"Année 2");
 
@@ -229,14 +232,14 @@ function dashHero(){
           ${dossier.nbEleves?`<span class="dh-tag soft">${ic("users")} ${dossier.nbEleves} élèves</span>`:""}
         </div>
       </div>
-      <div class="dash-ring" style="--p:${pct}"><div class="dr-in"><b>${jf}/${jl.length}</b><small>jalons</small></div></div>
+      <div class="dash-ring" style="--p:${pct}"><div class="dr-in"><b>${jf}/${jl.length}</b><small>étapes</small></div></div>
     </div>
     <div class="dash-stats">
       <div class="dstat"><span class="ds-n">${af}/${acts.length}</span><span class="ds-l">actions réalisées</span></div>
       <div class="dstat"><span class="ds-n">${ds.length}</span><span class="ds-l">disciplines</span></div>
       <div class="dstat"><span class="ds-n">${anScolaire(1)}</span><span class="ds-l">→ ${anScolaire(2)}</span></div>
     </div>
-    ${next?`<div class="dash-next">${ic("route")} <span>Prochaine étape : <b>${esc(next.nom)}</b> · ${anScolaire(next.annee)} · ${PERIODES[next.periode]}</span></div>`:`<div class="dash-next done">${ic("check")} <span>Tous les jalons sont atteints.</span></div>`}
+    ${next?`<div class="dash-next">${ic("route")} <span>Prochaine étape : <b>${esc(next.nom)}</b> · ${anScolaire(next.annee)}</span></div>`:`<div class="dash-next done">${ic("check")} <span>Toutes les étapes sont franchies.</span></div>`}
     ${pilRow()}
     ${phaseSel}
   </div>`;
@@ -250,24 +253,25 @@ function timelineBlock(){
   let html="";
   [1,2].forEach(yr=>{
     const cur = (PHASES[dossier.phase||"brouillon"]||{}).an===yr;
+    const idxs = stepIdx(yr);
     html += `<div class="tl-year ${cur?"cur":""}">
       <div class="tl-yhead"><span class="tl-ybadge">Année ${yr}</span><span class="tl-yscol">${anScolaire(yr)}</span>${cur?`<span class="tl-ynow">${ic("spark")} en cours</span>`:""}</div>
       <div class="tl-track">`;
-    PERIODES.forEach((plab,pi)=>{
+    if(!idxs.length) html += `<div class="tl-empty">${RO?"—":"Aucune étape pour l'instant."}</div>`;
+    idxs.forEach(pi=>{
       const js=jalons().filter(j=>j.annee===yr&&j.periode===pi);
       const as=actionsOf(yr,pi);
-      const isOral = yr===2 && plab.includes("Mai");
+      const done = js.length && js.every(j=>j.fait);
       html += `<div class="tl-period">
-        <div class="cdo-rail"><span class="cdo-node ${js.some(j=>j.fait)?"done":""}"></span></div>
+        <div class="cdo-rail"><span class="cdo-node ${done?"done":""}"></span></div>
         <div class="tl-pbody">
-          <div class="tl-plab">${esc(plab)}${isOral?`<span class="tl-oral">${ic("mic")} Oral fixe</span>`:""}</div>
           ${js.map(j=>jalonChip(j)).join("")}
           ${as.map(a=>actionCard(a)).join("")}
           ${RO?"":`<button class="tl-add" data-addaction="${yr}_${pi}">${ic("plus")} Action / objectif</button>`}
         </div>
       </div>`;
     });
-    html += `</div></div>`;
+    html += `${RO?"":`<button class="tl-addstep" data-addstep="${yr}">${ic("plus")} Ajouter une étape</button>`}</div></div>`;
     if(yr===1) html += handoffBand();
   });
   return `<div class="timeline">${html}</div>`;
@@ -295,8 +299,8 @@ function handoffBand(){
   return `<div class="handoff ${ready?"ready":""}">
     <div class="handoff-ic">${ic("handoff")}</div>
     <div class="handoff-tx">
-      <strong>Passage de témoin · année 1 → année 2</strong>
-      <span>${ready?"Transmission prête : l'équipe de 2e année peut reprendre.":(filled?"En cours de rédaction par l'équipe de 1re année.":"À remplir en fin d'année 1 pour que l'équipe suivante poursuive.")}</span>
+      <strong>Bilan · année 1 → année 2</strong>
+      <span>${ready?"Bilan finalisé : l'équipe de 2e année peut reprendre.":(filled?"En cours de rédaction par l'équipe de 1re année.":"À remplir en fin d'année 1 pour que l'équipe suivante poursuive.")}</span>
     </div>
     <button class="handoff-go" data-sec="transmission">${ic("chevd")} Ouvrir</button>
   </div>`;
@@ -321,17 +325,17 @@ function viewDossier(){
   // Suivi horaire (souple)
   const horBody = `<div class="hint-card">${ic("clock")} <div>Cadre indicatif : <b>87 h</b> en année 1 + <b>78 h</b> en année 2 = <b>165 h</b> sur le cycle (dotation professeur = le double). On raisonne en <b>groupes d'heures</b>, pas heure par heure.</div></div>
     <div class="frows">${fieldRow("heures1","Volume & rythme — année 1","clock")}${fieldRow("heures2","Volume & rythme — année 2","clock")}</div>`;
-  // Transmission
-  const transBody = `<div class="hint-card gold">${ic("handoff")} <div>Le <b>passage de témoin</b> : l'équipe de 1re année consigne ici ce qui a été fait et ce qui reste, pour que l'équipe de 2e année reprenne sans repartir de zéro.</div></div>
+  // Bilan (ex-passage de témoin)
+  const transBody = `<div class="hint-card gold">${ic("handoff")} <div>Le <b>bilan</b> : l'équipe de 1re année consigne ici ce qui a été fait et ce qui reste, pour que l'équipe de 2e année reprenne sans repartir de zéro.</div></div>
     <div class="frows">
-      ${fieldRow("t_bilan","Année 1 — ce qui a été fait (bilan)","award")}
+      ${fieldRow("t_bilan","Année 1 — ce qui a été fait","award")}
       ${fieldRow("t_decisions","Décisions prises","check")}
       ${fieldRow("t_reste","Ce qui reste à faire en année 2","route")}
       ${fieldRow("t_vigilance","Points de vigilance","alert")}
       ${fieldRow("t_reprise","Consignes de reprise (rentrée année 2)","flag")}
     </div>
     <div class="subh">${ic("book")} Ressources utilisées / à transmettre</div>${listLines("ressource","Ajouter une ressource","book")}
-    ${RO?"":`<button class="btn ${d.transmissionPrete?"":"primary"} wfull" data-transready>${ic(d.transmissionPrete?"x":"check")} ${d.transmissionPrete?"Transmission marquée prête — annuler":"Marquer la transmission comme prête"}</button>`}`;
+    ${RO?"":`<button class="btn ${d.transmissionPrete?"":"primary"} wfull" data-transready>${ic(d.transmissionPrete?"x":"check")} ${d.transmissionPrete?"Bilan finalisé — annuler":"Marquer le bilan comme finalisé"}</button>`}`;
   // Acteurs & jury
   const actBody = `<div class="subh">${ic("user")} Enseignants référents <span class="subh-hint">(noms facultatifs — « Référent 1 » suffit)</span></div>${chipsList("acteur","Référent")}
     <div class="subh">${ic("users")} Partenaires</div>${chipsList("partenaire","Partenaire")}
@@ -343,14 +347,24 @@ function viewDossier(){
     <div class="subh">${ic("info")} Questions possibles du jury</div>${listLines("question","Ajouter une question","info")}
     <div class="subh">${ic("award")} Bilan par groupe <span class="subh-hint">(anonyme : Groupe A, Équipe 1… jamais de nom d'élève)</span></div>${listLines("bilan","Ajouter un bilan de groupe","users")}`;
 
+  // Onglet « Cadre & repères » : à l'écart du cœur, accessible par un bouton
+  if(dossierTab==="cadre"){
+    return `<button class="lnk back-dossier" data-cadreback>${ic("back")} Retour au projet</button>
+      <div class="cadre-intro">${ic("info")}<div>Les <b>repères de référence</b> : le cadre officiel, le cadre pédagogique et le volume horaire. Le cœur du dossier — ce qui s'est fait avec les élèves — est dans « Retour au projet ».</div></div>
+      ${secBlock("cadre","shield","Le cadre officiel","Repères réglementaires — chef-d'œuvre CAP",cadreBody,"#0e7c66")}
+      ${secBlock("peda","layers","Cadre pédagogique","Résumé, finalité, disciplines, compétences",pedaBody,"#2f6cd6")}
+      ${secBlock("hor","clock","Volume horaire","Cadre 165 h, en groupes d'heures",horBody,"#0e7c66")}
+      <button class="lnk back-dossier" data-cadreback>${ic("back")} Retour au projet</button>`;
+  }
+  // Cœur : le projet (ce qui s'est fait avec les élèves)
+  const cadreBtn = `<button class="cadre-access" data-cadre><span class="ca-ic">${ic("book")}</span><span class="ca-tx"><b>Cadre & repères</b><small>officiel · pédagogique · horaires</small></span><span class="ca-go">${ic("chev")}</span></button>`;
   return `${dashHero()}
-    ${secBlock("cadre","shield","Le cadre officiel","Repères réglementaires — chef-d'œuvre CAP",cadreBody,"#0e7c66")}
-    ${secBlock("peda","layers","Cadre pédagogique","Résumé, finalité, disciplines, compétences",pedaBody,"#2f6cd6")}
-    ${secBlock("timeline","calendar","Timeline sur deux ans","Périodes, actions, jalons — la vue d'ensemble",timelineBlock(),"#7f57c9")}
-    ${secBlock("transmission","handoff","Passage de témoin","Année 1 → année 2 — la mémoire de l'équipe",transBody,"#9a6b16")}
-    ${secBlock("hor","clock","Volume horaire","Cadre 165 h, en groupes d'heures",horBody,"#0e7c66")}
+    ${RO?"":cadreBtn}
+    ${secBlock("timeline","calendar","Le projet, étape par étape","Année 1 et année 2 — ce qui s'est fait avec les élèves",timelineBlock(),"#7f57c9")}
+    ${secBlock("transmission","handoff","Bilan","Ce qui a été fait, ce qui reste — pour l'équipe suivante",transBody,"#9a6b16")}
     ${secBlock("acteurs","users","Acteurs & jury","Référents, partenaires, jury de l'oral",actBody,"#185fa5")}
-    ${secBlock("eval","mic","Évaluation & oral","Cadre, critères, questions, bilan",evalBody,"#c0392b")}
+    ${secBlock("eval","mic","Évaluation & oral","Critères, questions, bilan par groupe",evalBody,"#c0392b")}
+    ${RO?"":cadreBtn}
     <div class="ov-foot">
       <button class="lnk" id="presBtn">${ic("award")} Vue de présentation</button>
       ${RO?"":`<button class="lnk" id="exportBtn">${ic("download")} Exporter (JSON)</button>
@@ -366,10 +380,10 @@ function viewPresentation(){
   const txt=(f)=> d[f]&&String(d[f]).trim()?`<p>${esc(d[f])}</p>`:"";
   const lines=(type)=>{ const a=byType(type); return a.length?`<ul>${a.map(e=>`<li>${esc(e.texte||e.nom)}</li>`).join("")}</ul>`:""; };
   const discChips = discs().map(e=>`<span class="pr-chip" style="--cc:${e.color}"><span class="chip-dot" style="background:${e.color}"></span>${esc(e.nom)}</span>`).join("");
-  const tl = [1,2].map(yr=>`<div class="pr-year"><h4>Année ${yr} · ${anScolaire(yr)}</h4>${PERIODES.map((pl,pi)=>{
+  const tl = [1,2].map(yr=>`<div class="pr-year"><h4>Année ${yr} · ${anScolaire(yr)}</h4>${stepIdx(yr).map((pi,n)=>{
     const js=jl.filter(j=>j.annee===yr&&j.periode===pi), as=actionsOf(yr,pi);
     if(!js.length&&!as.length) return "";
-    return `<div class="pr-per"><div class="pr-perlab">${esc(pl)}</div><div class="pr-peritems">${js.map(j=>`<span class="pr-jal ${j.fait?"done":""}">${ic("flag")} ${esc(j.nom)}</span>`).join("")}${as.map(a=>`<span class="pr-act" style="--c:${a.discId?discColor(a.discId):"#8b94a3"}">${esc(a.titre)}</span>`).join("")}</div></div>`;
+    return `<div class="pr-per"><div class="pr-perlab">Étape ${n+1}</div><div class="pr-peritems">${js.map(j=>`<span class="pr-jal ${j.fait?"done":""}">${ic("flag")} ${esc(j.nom)}</span>`).join("")}${as.map(a=>`<span class="pr-act" style="--c:${a.discId?discColor(a.discId):"#8b94a3"}">${esc(a.titre)}</span>`).join("")}</div></div>`;
   }).join("")}</div>`).join("");
   const transmission = ["t_bilan","t_decisions","t_reste","t_vigilance","t_reprise"].some(f=>d[f]&&String(d[f]).trim())
     ? `<div class="pr-trans">${["t_bilan|Bilan année 1","t_decisions|Décisions","t_reste|Reste à faire (année 2)","t_vigilance|Vigilance","t_reprise|Consignes de reprise"].map(s=>{const[f,l]=s.split("|");return d[f]&&String(d[f]).trim()?`<div class="pr-tr"><b>${l}</b><p>${esc(d[f])}</p></div>`:"";}).join("")}</div>` : "";
@@ -387,7 +401,7 @@ function viewPresentation(){
       ${sec("Finalité & intention", txt("finalite")+txt("problematique")+txt("production"))}
       ${sec("Compétences visées", lines("comp_pro")+lines("comp_trans"))}
       ${sec("Déroulé sur deux ans", `<div class="pr-tl">${tl}</div>`)}
-      ${sec("Passage de témoin · année 1 → année 2", transmission)}
+      ${sec("Bilan · année 1 → année 2", transmission)}
       ${sec("Évaluation & oral", (d.prepaOral?`<p>${esc(d.prepaOral)}</p>`:"")+lines("critere"))}
       <footer class="pr-foot">${ic("shield")} Document d'équipe — RGPD : aucun nom d'élève. Généré le ${dateFr()}.</footer>
     </article>
@@ -467,7 +481,7 @@ function openAction(slot, id){
   const [yr,pi]=slot.split("_").map(Number);
   const cur = id ? els.find(e=>e.id===id) : {annee:yr,periode:pi,statut:"prevu"};
   const ds=discs();
-  openSheet(`<div class="sheet-head"><h3>${id?"Modifier l'action":"Action / objectif"} <small class="sh-sub">Année ${cur.annee} · ${PERIODES[cur.periode]}</small></h3><button class="x" data-close>${ic("x")}</button></div>
+  openSheet(`<div class="sheet-head"><h3>${id?"Modifier l'action":"Action / objectif"} <small class="sh-sub">Année ${cur.annee} · ${esc(stepLabel(cur.annee,cur.periode))}</small></h3><button class="x" data-close>${ic("x")}</button></div>
     <div class="field"><label>Intitulé</label><input id="aTit" placeholder="ex. Visite d'un restaurant partenaire" value="${esc(cur.titre||"")}"></div>
     <div class="field"><label>Détail (facultatif)</label><textarea id="aDet" rows="2" placeholder="Précisions, objectif visé…">${esc(cur.detail||"")}</textarea></div>
     <div class="field"><label>Discipline</label><div class="seg" id="aDisc">${ds.length?ds.map(d=>`<button type="button" class="seg-btn ${cur.discId===d.id?"on":""}" data-d="${esc(d.id)}" style="--c:${d.color}"><span class="chip-dot" style="background:${d.color}"></span>${esc(d.nom)}</button>`).join(""):`<span class="muted" style="font-size:13px">Ajoutez des disciplines dans « Cadre pédagogique » pour les colorer ici.</span>`}<button type="button" class="seg-btn ${cur.discId?"":"on"}" data-d="">Aucune</button></div></div>
@@ -483,28 +497,22 @@ function openAction(slot, id){
 
 function openJalon(id){
   const j=els.find(e=>e.id===id); if(!j) return;
-  openSheet(`<div class="sheet-head"><h3>Jalon <small class="sh-sub">Année ${j.annee} · ${PERIODES[j.periode]}</small></h3><button class="x" data-close>${ic("x")}</button></div>
-    <div class="field"><label>Intitulé</label><input id="jNom" value="${esc(j.nom)}"></div>
-    <div class="field"><label>Date / repère (facultatif)</label><input id="jDate" placeholder="ex. mi-juin" value="${esc(j.date||"")}"></div>
-    <div class="field"><label>Note (facultatif)</label><textarea id="jNote" rows="2" placeholder="Précision sur ce jalon…">${esc(j.note||"")}</textarea></div>
-    <label class="rchk"><input type="checkbox" id="jFait" ${j.fait?"checked":""}> <span>Jalon atteint</span></label>
+  openSheet(`<div class="sheet-head"><h3>Étape <small class="sh-sub">Année ${j.annee}</small></h3><button class="x" data-close>${ic("x")}</button></div>
+    <div class="field"><label>Intitulé de l'étape</label><input id="jNom" value="${esc(j.nom)}"></div>
+    <div class="field"><label>Note (facultatif)</label><textarea id="jNote" rows="2" placeholder="Précision sur cette étape…">${esc(j.note||"")}</textarea></div>
+    <label class="rchk"><input type="checkbox" id="jFait" ${j.fait?"checked":""}> <span>Étape franchie</span></label>
     <div class="actions"><button class="btn danger-btn" id="jDel">${ic("trash")}</button><button class="btn primary" id="jSave">${ic("check")} Enregistrer</button></div>`);
-  $("#jSave").onclick=async()=>{ await updEl(id,{nom:$("#jNom").value.trim()||j.nom,date:$("#jDate").value.trim(),note:$("#jNote").value.trim(),fait:$("#jFait").checked}); closeSheet(); };
+  $("#jSave").onclick=async()=>{ await updEl(id,{nom:$("#jNom").value.trim()||j.nom,note:$("#jNote").value.trim(),fait:$("#jFait").checked}); closeSheet(); };
   $("#jDel").onclick=async()=>{ await delEl(id,true); closeSheet(); };
 }
-function openAddJalon(){
+function openAddStep(yr){
   if(!ident){openIdent();return;}
-  openSheet(`<div class="sheet-head"><h3>Nouveau jalon</h3><button class="x" data-close>${ic("x")}</button></div>
-    <div class="field"><label>Intitulé</label><input id="jNom" placeholder="ex. Réunion d'équipe"></div>
-    <div class="field"><label>Année</label><div class="seg" id="jAn"><button type="button" class="seg-btn on" data-a="1">Année 1</button><button type="button" class="seg-btn" data-a="2">Année 2</button></div></div>
-    <div class="field"><label>Période</label><div class="seg wrap" id="jPe">${PERIODES.map((p,i)=>`<button type="button" class="seg-btn ${i===0?"on":""}" data-p="${i}">${esc(p)}</button>`).join("")}</div></div>
-    <div class="actions"><button class="btn primary" id="jSave">${ic("plus")} Ajouter</button></div>`);
-  let an=1,pe=0;
-  $("#jAn").querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{an=+b.dataset.a;$("#jAn").querySelectorAll(".seg-btn").forEach(x=>x.classList.toggle("on",x===b));});
-  $("#jPe").querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{pe=+b.dataset.p;$("#jPe").querySelectorAll(".seg-btn").forEach(x=>x.classList.toggle("on",x===b));});
-  $("#jSave").onclick=async()=>{ const nom=$("#jNom").value.trim(); if(!nom){toast("Donnez un intitulé.");return;} await addEl({type:"jalon",nom,annee:an,periode:pe,fait:false}); closeSheet(); };
+  openSheet(`<div class="sheet-head"><h3>Nouvelle étape <small class="sh-sub">Année ${yr}</small></h3><button class="x" data-close>${ic("x")}</button></div>
+    <div class="field"><label>Intitulé de l'étape</label><input id="jNom" placeholder="ex. Composer le menu final" autofocus></div>
+    <div class="actions"><button class="btn primary" id="jSave">${ic("plus")} Ajouter l'étape</button></div>`);
+  setTimeout(()=>$("#jNom")&&$("#jNom").focus(),40);
+  $("#jSave").onclick=async()=>{ const nom=$("#jNom").value.trim(); if(!nom){toast("Donnez un intitulé.");return;} const idx=stepIdx(yr); const next=idx.length?Math.max(...idx)+1:0; await addEl({type:"jalon",nom,annee:yr,periode:next,fait:false}); closeSheet(); };
 }
-
 function openPhase(){
   openSheet(`<div class="sheet-head"><h3>Où en est ce chef-d'œuvre ?</h3><button class="x" data-close>${ic("x")}</button></div>
     <div class="phase-list">${PHASE_ORDER.map(k=>`<button class="phase-opt ${(dossier.phase||"brouillon")===k?"on":""}" data-setphase="${k}"><span class="po-dot" style="background:${PHASES[k].c}"></span><span>${PHASES[k].lab}</span>${(dossier.phase||"brouillon")===k?ic("check"):""}</button>`).join("")}</div>`);
@@ -570,6 +578,7 @@ async function loadListe(){
 }
 async function openDossier(id){
   if(unsub){unsub();} if(unsubE){unsubE();}
+  dossierTab="projet";
   try{ const ref=doc(db,COL,id); const ds=await getDoc(ref); if(!ds.exists()){ toast("Dossier introuvable."); view="liste"; render(); return; }
     dossier={id,...ds.data()}; view="dossier"; render();
     unsub=onSnapshot(ref,s=>{ if(!s.exists())return; dossier={id,...s.data()}; if(view!=="liste") render(); });
@@ -634,13 +643,16 @@ document.addEventListener("click", e=>{
   const ea=e.target.closest("[data-eladd]"); if(ea) return openEl(ea.dataset.eladd);
   const ed=e.target.closest("[data-eledit]"); if(ed){ const t=ed.dataset.eltype||(els.find(x=>x.id===ed.dataset.eledit)||{}).type; return openEl(t,ed.dataset.eledit); }
   const ex=e.target.closest("[data-eldel]"); if(ex){ e.stopPropagation(); return delEl(ex.dataset.eldel); }
+  // onglet cadre & repères
+  if(e.target.closest("[data-cadre]")){ dossierTab="cadre"; render(); window.scrollTo&&window.scrollTo(0,0); return; }
+  if(e.target.closest("[data-cadreback]")){ dossierTab="projet"; render(); window.scrollTo&&window.scrollTo(0,0); return; }
   // actions timeline
   const aa=e.target.closest("[data-addaction]"); if(aa) return openAction(aa.dataset.addaction);
   const ae=e.target.closest("[data-actedit]"); if(ae){ const a=els.find(x=>x.id===ae.dataset.actedit); if(a) return openAction(a.annee+"_"+a.periode,a.id); return; }
-  // jalons
+  // étapes (jalons)
   const jt=e.target.closest("[data-jtoggle]"); if(jt){ e.stopPropagation(); const j=els.find(x=>x.id===jt.dataset.jtoggle); if(j) return updEl(j.id,{fait:!j.fait}); return; }
   const je=e.target.closest("[data-jalon]"); if(je) return openJalon(je.dataset.jalon);
-  if(e.target.closest("[data-addjalon]")) return openAddJalon();
+  const as=e.target.closest("[data-addstep]"); if(as) return openAddStep(+as.dataset.addstep);
   // phase
   if(e.target.closest("[data-phasebtn]")) return openPhase();
   const sp=e.target.closest("[data-setphase]"); if(sp) return setDoc({phase:sp.dataset.setphase});
@@ -657,7 +669,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#delDossier")) return delDossier();
   if(e.target.closest("#printPres")) return window.print();
   if(e.target.closest("#sharePres")||e.target.closest("#shareDossier")){ const base=location.origin+location.pathname; const url=base+"?d="+dossier.id+"&ro=1"; navigator.clipboard?.writeText(url).then(()=>toast("Lien lecture copié",true)).catch(()=>toast(url)); return; }
-  if(e.target.closest("#back")){ if(view==="presentation"){ view="dossier"; return render(); } if(view==="liste"){ location.href="../"; return; } return backToListe(); }
+  if(e.target.closest("#back")){ if(view==="presentation"){ view="dossier"; return render(); } if(view==="dossier"&&dossierTab==="cadre"){ dossierTab="projet"; return render(); } if(view==="liste"){ location.href="../"; return; } return backToListe(); }
 });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape")closeSheet(); });
 
