@@ -197,6 +197,13 @@ function fieldRow(field,label,icon){
   const has = v!=null && String(v).trim()!=="";
   return `<button class="frow ${has?"":"empty"}" ${RO?"":`data-field="${field}"`} ${RO?'tabindex="-1"':""}><span class="frow-ic">${ic(icon||"doc")}</span><span class="frow-tx"><span class="frow-l">${label||meta.l}</span><span class="frow-v">${has?esc(v):(RO?"—":"À renseigner…")}</span></span>${RO?"":`<span class="frow-edit">${ic("pencil")}</span>`}</button>`;
 }
+function bilanBlock(field,title,icon){
+  const v=dossier[field]; const has = v!=null && String(v).trim()!=="";
+  return `<div class="bil-block ${has?"":"empty"}" ${RO?"":`data-field="${field}"`}>
+    <div class="bil-h"><span class="bil-ic">${ic(icon)}</span><h4>${title}</h4>${RO?"":`<span class="bil-edit">${ic("pencil")}</span>`}</div>
+    <div class="bil-tx">${has?esc(v):(RO?"—":"À renseigner…")}</div>
+  </div>`;
+}
 function chipsList(type, addLabel){
   const arr=byType(type);
   const meta=ELS[type];
@@ -274,7 +281,8 @@ function timelineBlock(){
     html += `${RO?"":`<button class="tl-addstep" data-addstep="${yr}">${ic("plus")} Ajouter une étape</button>`}</div></div>`;
     if(yr===1) html += handoffBand();
   });
-  return `<div class="timeline">${html}</div>`;
+  const note = RO?"":`<div class="free-note">${ic("info")}<span>Outil <b>libre</b> : ajoutez, renommez ou réordonnez les étapes, et complétez les objectifs au fil du travail. Chacun avance à son rythme.</span></div>`;
+  return `${note}<div class="timeline">${html}</div>`;
 }
 function jalonChip(j){
   return `<div class="jchip ${j.fait?"done":""}" ${RO?"":`data-jalon="${esc(j.id)}"`}>
@@ -325,14 +333,14 @@ function viewDossier(){
   // Suivi horaire (souple)
   const horBody = `<div class="hint-card">${ic("clock")} <div>Cadre indicatif : <b>87 h</b> en année 1 + <b>78 h</b> en année 2 = <b>165 h</b> sur le cycle (dotation professeur = le double). On raisonne en <b>groupes d'heures</b>, pas heure par heure.</div></div>
     <div class="frows">${fieldRow("heures1","Volume & rythme — année 1","clock")}${fieldRow("heures2","Volume & rythme — année 2","clock")}</div>`;
-  // Bilan (ex-passage de témoin)
-  const transBody = `<div class="hint-card gold">${ic("handoff")} <div>Le <b>bilan</b> : l'équipe de 1re année consigne ici ce qui a été fait et ce qui reste, pour que l'équipe de 2e année reprenne sans repartir de zéro.</div></div>
-    <div class="frows">
-      ${fieldRow("t_bilan","Année 1 — ce qui a été fait","award")}
-      ${fieldRow("t_decisions","Décisions prises","check")}
-      ${fieldRow("t_reste","Ce qui reste à faire en année 2","route")}
-      ${fieldRow("t_vigilance","Points de vigilance","alert")}
-      ${fieldRow("t_reprise","Consignes de reprise (rentrée année 2)","flag")}
+  // Bilan (ex-passage de témoin) — mise en forme document, agréable à lire
+  const transBody = `<div class="hint-card gold">${ic("handoff")} <div>Le <b>bilan</b> de l'année 1, écrit pour l'équipe suivante : ce qui a été fait, ce qui reste, et par où reprendre — d'un coup d'œil.</div></div>
+    <div class="bilan-doc">
+      ${bilanBlock("t_bilan","Ce qui a été fait","award")}
+      ${bilanBlock("t_decisions","Décisions prises","check")}
+      ${bilanBlock("t_reste","Ce qui reste à faire","route")}
+      ${bilanBlock("t_vigilance","Points de vigilance","alert")}
+      ${bilanBlock("t_reprise","Par où reprendre (rentrée année 2)","flag")}
     </div>
     <div class="subh">${ic("book")} Ressources utilisées / à transmettre</div>${listLines("ressource","Ajouter une ressource","book")}
     ${RO?"":`<button class="btn ${d.transmissionPrete?"":"primary"} wfull" data-transready>${ic(d.transmissionPrete?"x":"check")} ${d.transmissionPrete?"Bilan finalisé — annuler":"Marquer le bilan comme finalisé"}</button>`}`;

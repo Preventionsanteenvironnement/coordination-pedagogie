@@ -918,3 +918,21 @@ table.pl td{vertical-align:middle}
 .jchip{padding:10px 12px}
 .jchip-n{font-size:14.5px}
 .jchip-n .i{font-size:15px}
+
+/* ----- Note « outil libre » ----- */
+.free-note{display:flex;gap:9px;align-items:flex-start;background:color-mix(in srgb,#7f57c9 7%,var(--surface));border:1px solid color-mix(in srgb,#7f57c9 22%,transparent);border-radius:var(--r-sm);padding:11px 13px;font-size:12.5px;line-height:1.5;color:#4a3d73;margin:0 0 12px}
+.free-note .i{font-size:17px;flex:none;color:#7f57c9;margin-top:1px}
+.free-note b{font-weight:700}
+
+/* ----- Bilan « document », agréable à lire ----- */
+.bilan-doc{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.bil-block{background:var(--surface);border:1px solid var(--line);border-left:3px solid #9a6b16;border-radius:var(--r-sm);padding:13px 15px;width:100%;text-align:left;display:block}
+.bil-block:hover{border-color:var(--line2);border-left-color:#9a6b16}
+.bil-block.empty{border-left-style:dashed;background:#fbfaf6}
+.bil-h{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bil-ic{width:26px;height:26px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,#9a6b16 13%,var(--surface));color:#9a6b16}
+.bil-ic .i{font-size:15px}
+.bil-h h4{flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.bil-edit{color:var(--faint);flex:none}.bil-edit .i{font-size:14px}
+.bil-tx{font-size:14px;line-height:1.62;color:#2f3744;white-space:pre-wrap}
+.bil-block.empty .bil-tx{color:var(--faint);font-style:italic}
