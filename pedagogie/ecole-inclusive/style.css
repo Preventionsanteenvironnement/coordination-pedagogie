@@ -370,3 +370,10 @@ mark { background: #ffe7a3; color: inherit; border-radius: 3px; padding: 0 2px; 
   .tnd-rep, .ori-grid { grid-template-columns: 1fr; }
   .tnd-fam ul { columns: 1; }
 }
+
+/* Sous-onglets de fiche dispositif (accès rapide, pas de scroll) */
+.dtabs { display: flex; gap: 5px; background: color-mix(in srgb, var(--c) 8%, #fff); border: 1px solid color-mix(in srgb, var(--c) 18%, var(--line)); border-radius: var(--r-pill); padding: 4px; overflow-x: auto; scrollbar-width: none; }
+.dtabs::-webkit-scrollbar { display: none; }
+.dtab { flex: 1; white-space: nowrap; border: none; background: none; border-radius: var(--r-pill); padding: 9px 12px; font-size: 13.5px; font-weight: 600; color: var(--muted); transition: background .15s, color .15s; }
+.dtab.on { background: var(--c); color: #fff; box-shadow: 0 2px 8px color-mix(in srgb, var(--c) 30%, transparent); }
+.dtab-body { display: flex; flex-direction: column; gap: 16px; animation: oriUp .2s ease; }

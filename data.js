@@ -95,24 +95,32 @@ const THEMATIQUES = [
     icon: "book",
     enfants: [
       {
-        titre: "Pratiques inclusives",
-        desc: "Le cadre et les dispositifs (PPS, PAP, PAI, PPRE), comprendre les troubles du neurodéveloppement, l'orienteur « quel dispositif ? », et l'outil de suivi GEVA-Sco.",
-        icon: "inclusion",
-        enfants: [
-          {
-            titre: "Inclusion",
-            desc: "Guide de formation : les 4 dispositifs en fiches approfondies (procédure, acteurs, cas concrets), les troubles du neurodéveloppement, l'orienteur « quel dispositif pour mon élève ? », pédagogie adaptée et glossaire. Sources officielles.",
-            lien: "pedagogie/ecole-inclusive/",
-            type: "Guide",
-          },
-          {
-            titre: "Grille d'observation GEVA-Sco (ESS)",
-            desc: "Formulaire à remplir par chaque enseignant pour l'équipe de suivi : observation des activités de l'élève (cotation A/B/C/D). Anonyme — matière au lieu du nom, code élève au lieu du nom. Rapide, mobile ; les réponses sont regroupées pour le professeur principal.",
-            lien: "gevasco/",
-            type: "Outil",
-            badge: "Nouveau",
-          },
-        ],
+        titre: "Ressources pédagogiques",
+        desc: "Démarches, méthodes et outils pour la classe.",
+        lien: "#",
+        type: "Dossier",
+        badge: "À venir",
+      },
+    ],
+  },
+  {
+    id: "pratiques-inclusives",
+    nom: "Pratiques inclusives",
+    couleur: "#6b4bd6",
+    icon: "inclusion",
+    enfants: [
+      {
+        titre: "Inclusion",
+        desc: "Guide de formation : les 4 dispositifs en fiches approfondies (procédure, acteurs, cas concrets), les troubles du neurodéveloppement, l'orienteur « quel dispositif pour mon élève ? », pédagogie adaptée et glossaire. Sources officielles.",
+        lien: "pedagogie/ecole-inclusive/",
+        type: "Guide",
+      },
+      {
+        titre: "Grille d'observation GEVA-Sco (ESS)",
+        desc: "Formulaire à remplir par chaque enseignant pour l'équipe de suivi : observation des activités de l'élève (cotation A/B/C/D). Anonyme — matière au lieu du nom, code élève au lieu du nom. Rapide, mobile ; les réponses sont regroupées pour le professeur principal.",
+        lien: "gevasco/",
+        type: "Outil",
+        badge: "Nouveau",
       },
     ],
   },

@@ -54,7 +54,7 @@ const TABS = [
 ];
 
 let page = "accueil";
-let dispIdx = 0, trbIdx = 0, parcoursIdx = 0, themeIdx = 0;
+let dispIdx = 0, trbIdx = 0, parcoursIdx = 0, themeIdx = 0, dispTab = "essentiel";
 let query = "", searchOn = false;
 let orientSel = new Set();
 
@@ -217,6 +217,28 @@ function viewDispositif() {
 
   const article = d.article ? `<a class="ressource-link" style="--c:${d.c}" href="${esc(d.article.url)}" target="_blank" rel="noopener"><span class="rl-ic">${ic("external")}</span><span class="rl-tx"><strong>Le texte de référence</strong><small>${esc(d.article.ref)}</small></span></a>` : "";
 
+  const confond = `<div class="callout warn"><span class="co-ic">${ic("alert")}</span><div class="co-tx"><b>À ne pas confondre avec le ${esc(d.confond.code)} —</b> ${esc(d.confond.txt)}</div></div>`;
+
+  const PANES = {
+    essentiel: `
+      ${sec("Pour quel élève ?", "users", `<p class="card-p">${esc(d.pourQui)}</p>`)}
+      ${sec("À quoi ça sert", "flag", `<p class="card-p">${esc(d.objectifs)}</p>`)}
+      ${qui}
+      ${permet}${limites}
+      ${confond}
+      ${article}
+      ${srcChips(d.s)}`,
+    demarche: `${urg}${procSec}${d.cle === "pps" ? svgMDPH() : ""}`,
+    acteurs: acteurs,
+    cas: exemple,
+  };
+  const tabs = [["essentiel", "L'essentiel"], ["demarche", "La démarche"]];
+  if (d.acteurs) tabs.push(["acteurs", "Les acteurs"]);
+  if (d.exemple) tabs.push(["cas", "Un cas concret"]);
+  if (!PANES[dispTab]) dispTab = "essentiel";
+  const tabNav = `<div class="dtabs" style="--c:${d.c}">${tabs.map(([id, lb]) =>
+    `<button class="dtab ${dispTab === id ? "on" : ""}" data-disptab="${id}">${esc(lb)}</button>`).join("")}</div>`;
+
   return `<div class="fiche">
     <div class="fiche-band" style="--c:${d.c}">
       <span class="fb-ic">${ic(d.icon)}</span>
@@ -225,18 +247,8 @@ function viewDispositif() {
       <div class="fb-res">${esc(d.resume)}</div>
     </div>
     <div class="facts" style="--c:${d.c}">${factCards}</div>
-    ${sec("Pour quel élève ?", "users", `<p class="card-p">${esc(d.pourQui)}</p>`)}
-    ${sec("À quoi ça sert", "flag", `<p class="card-p">${esc(d.objectifs)}</p>`)}
-    ${qui}
-    ${permet}${limites}
-    ${urg}
-    ${procSec}
-    ${acteurs}
-    ${d.cle === "pps" ? svgMDPH() : ""}
-    ${exemple}
-    <div class="callout warn"><span class="co-ic">${ic("alert")}</span><div class="co-tx"><b>À ne pas confondre avec le ${esc(d.confond.code)} —</b> ${esc(d.confond.txt)}</div></div>
-    ${article}
-    ${srcChips(d.s)}
+    ${tabNav}
+    <div class="dtab-body">${PANES[dispTab]}</div>
   </div>`;
 }
 
@@ -414,7 +426,8 @@ document.addEventListener("click", e => {
   const tab = e.target.closest("[data-tab]"); if (tab) return goTab(tab.dataset.tab);
   const go = e.target.closest("[data-go]"); if (go) return goTab(go.dataset.go);
   const ori = e.target.closest("[data-orient]"); if (ori) { const k = ori.dataset.orient; orientSel.has(k) ? orientSel.delete(k) : orientSel.add(k); return render(); }
-  const disp = e.target.closest("[data-disp]"); if (disp) { clearSearch(); dispIdx = +disp.dataset.disp; page = "dispositif"; return render(); }
+  const dt = e.target.closest("[data-disptab]"); if (dt) { dispTab = dt.dataset.disptab; return render(); }
+  const disp = e.target.closest("[data-disp]"); if (disp) { clearSearch(); dispIdx = +disp.dataset.disp; dispTab = "essentiel"; page = "dispositif"; return render(); }
   const trb = e.target.closest("[data-trb]"); if (trb) { clearSearch(); trbIdx = +trb.dataset.trb; page = "trouble"; return render(); }
   const th = e.target.closest("[data-theme]"); if (th) { themeIdx = +th.dataset.theme; page = "theme"; return render(); }
   const goto = e.target.closest("[data-goto]"); if (goto) { const [pi, ti] = goto.dataset.goto.split(":").map(Number); clearSearch(); parcoursIdx = pi; themeIdx = ti; page = "theme"; return render(); }
