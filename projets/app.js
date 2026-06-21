@@ -408,7 +408,7 @@ function synthBoard(e){
   const entries=synthOf(eid).slice().sort((a,b)=>synthSupport(b)-synthSupport(a));
   const co=canSynth(); const pil=projet.pilote, cop=projet.copilote;
   const piloteBadge=`${ic("star")} Pilote${pil?" · "+esc(pil.ini):""}${cop?" & "+esc(cop.ini):""}`;
-  const compact = synthCompact===null ? entries.length>8 : !!synthCompact;
+  const compact = synthCompact===null ? entries.length>=1 : !!synthCompact;
   const enMeta=(en)=>({ au:synthAuthors(en), supp:synthSupport(en), merged:(en.sources||[]).length>1, reformed:(()=>{const s0=cById((en.sources||[])[0]);return (en.sources||[]).length===1 && s0 && s0.texte!==en.texte;})() });
   const actsHTML=(en)=> co?`<span class="ev-sacts"><button class="ev-mini" data-synth-reform="${esc(en.id)}" title="Reformuler">${ic("pencil")}</button><button class="ev-mini" data-synth-reunir="${esc(en.id)}" title="Réunir une idée proche">${ic("merge")}</button><button class="ev-mini" data-synth-del="${esc(en.id)}" title="Retirer">${ic("trash")}</button></span>`:"";
   // -- Vue détaillée (cartes) --
