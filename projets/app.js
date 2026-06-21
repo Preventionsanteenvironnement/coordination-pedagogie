@@ -147,6 +147,8 @@ let projets = [], projet = null, contribs = [], etapeIdx = 0;
 let unsub = null, unsubP = null, unsubPres = null, hb = null, presence = [];
 let regroup = false, selected = new Set();
 let discussion = [], unsubDisc = null, chatOpen = false, discCount = -1;
+let synthCompact = null, synthOpen = null;
+const SYNTHPAL = ["#2563eb","#7c3aed","#0891b2","#0f8a66","#d97706","#db2777","#4f46e5","#0d9488","#b45309","#9333ea","#0369a1","#15803d"];
 let chatSeen = JSON.parse(localStorage.getItem("projets_chat_seen") || "{}");
 let fbError = false;
 
@@ -407,12 +409,31 @@ function synthBoard(e){
   const entries=synthOf(eid).slice().sort((a,b)=>synthSupport(b)-synthSupport(a));
   const co=canSynth(); const pil=projet.pilote, cop=projet.copilote;
   const piloteBadge=`${ic("star")} Pilote${pil?" · "+esc(pil.ini):""}${cop?" & "+esc(cop.ini):""}`;
-  const items=entries.map((en,i)=>{ const au=synthAuthors(en); const supp=synthSupport(en); const merged=(en.sources||[]).length>1; const src0=cById((en.sources||[])[0]); const reformed=(en.sources||[]).length===1 && src0 && src0.texte!==en.texte;
-    return `<div class="ev-sitem"><span class="ev-snum">${i+1}</span><div class="ev-sbody"><div class="ev-stext">${esc(en.texte)}</div><div class="ev-sfrom">${au.length?`<span class="ev-savs">${au.slice(0,4).map(a=>avatar(a.ini,"sm",a.color)).join("")}</span><span class="ev-sau">${au.map(a=>esc(a.ini)).join(", ")}</span>`:""}${merged?`<span class="ev-merged">${(en.sources||[]).length} réunies</span>`:(reformed?`<span class="ev-reform">reformulé</span>`:"")}<span class="ev-supp" title="Soutien">${ic("chart")} ${supp}</span>${co?`<span class="ev-sacts"><button class="ev-mini" data-synth-reform="${esc(en.id)}" title="Reformuler">${ic("pencil")}</button><button class="ev-mini" data-synth-reunir="${esc(en.id)}" title="Réunir une idée proche">${ic("merge")}</button><button class="ev-mini" data-synth-del="${esc(en.id)}" title="Retirer">${ic("trash")}</button></span>`:""}</div></div></div>`;
+  const compact = synthCompact===null ? entries.length>8 : !!synthCompact;
+  const enMeta=(en)=>({ au:synthAuthors(en), supp:synthSupport(en), merged:(en.sources||[]).length>1, reformed:(()=>{const s0=cById((en.sources||[])[0]);return (en.sources||[]).length===1 && s0 && s0.texte!==en.texte;})() });
+  const actsHTML=(en)=> co?`<span class="ev-sacts"><button class="ev-mini" data-synth-reform="${esc(en.id)}" title="Reformuler">${ic("pencil")}</button><button class="ev-mini" data-synth-reunir="${esc(en.id)}" title="Réunir une idée proche">${ic("merge")}</button><button class="ev-mini" data-synth-del="${esc(en.id)}" title="Retirer">${ic("trash")}</button></span>`:"";
+  // -- Vue détaillée (cartes) --
+  const items=entries.map((en,i)=>{ const m=enMeta(en);
+    return `<div class="ev-sitem"><span class="ev-snum">${i+1}</span><div class="ev-sbody"><div class="ev-stext">${esc(en.texte)}</div><div class="ev-sfrom">${m.au.length?`<span class="ev-savs">${m.au.slice(0,4).map(a=>avatar(a.ini,"sm",a.color)).join("")}</span><span class="ev-sau">${m.au.map(a=>esc(a.ini)).join(", ")}</span>`:""}${m.merged?`<span class="ev-merged">${(en.sources||[]).length} réunies</span>`:(m.reformed?`<span class="ev-reform">reformulé</span>`:"")}<span class="ev-supp" title="Soutien">${ic("chart")} ${m.supp}</span>${actsHTML(en)}</div></div></div>`;
   }).join("");
-  const body = entries.length ? items+(co?`<div class="ev-sslot">${ic("plus")} La prochaine idée retenue s'ajoute ici, par ordre de soutien…</div>`:"")
+  // -- Vue condensée (étiquettes colorées + détail au clic) --
+  const chips=entries.map((en,i)=>{ const cc=SYNTHPAL[i%SYNTHPAL.length]; const open=synthOpen===en.id; const tx=en.texte.length>52?en.texte.slice(0,50).trim()+"…":en.texte; const n=(en.sources||[]).length;
+    return `<button class="ev-chip ${open?"open":""}" style="--cc:${cc}" data-synthchip="${esc(en.id)}"><span class="ev-chip-n">${i+1}</span><span class="ev-chip-t">${esc(tx)}</span>${n>1?`<span class="ev-chip-m" title="${n} idées réunies">${ic("merge")}${n}</span>`:""}</button>`;
+  }).join("");
+  let detail="";
+  if(compact && synthOpen){ const oi=entries.findIndex(x=>x.id===synthOpen);
+    if(oi>=0){ const en=entries[oi]; const m=enMeta(en); const cc=SYNTHPAL[oi%SYNTHPAL.length];
+      const srcs=(en.sources||[]).map(cid=>cById(cid)).filter(Boolean);
+      const origines = srcs.length?`<div class="ev-cd-src"><div class="ev-cd-lab">${ic("compass")} D'où ça vient${srcs.length>1?` · ${srcs.length} idées réunies`:""}</div>${srcs.map(s=>`<div class="ev-cd-srcit">${avatar(s.initiales,"sm",s.color)}<div><b>${esc(s.role||"—")} · ${esc(s.initiales||"")}</b><span>${esc(s.texte)}</span></div></div>`).join("")}</div>`:"";
+      detail=`<div class="ev-chip-detail" style="--cc:${cc}"><div class="ev-cd-top"><span class="ev-snum">${oi+1}</span><div class="ev-cd-tx">${esc(en.texte)}</div><button class="ev-cd-x" data-synthchip="${esc(en.id)}" title="Fermer">${ic("x")}</button></div><div class="ev-cd-meta">${m.au.length?`<span class="ev-savs">${m.au.slice(0,5).map(a=>avatar(a.ini,"sm",a.color)).join("")}</span>`:""}<span class="ev-supp">${ic("chart")} ${m.supp} soutien${m.supp>1?"s":""}</span>${m.reformed?`<span class="ev-reform">reformulé</span>`:""}${co?actsHTML(en):""}</div>${origines}</div>`;
+    }
+  }
+  const viewToggle = entries.length>1 ? `<span class="ev-synth-view"><button class="${compact?"":"on"}" data-synthview="0" title="Vue détaillée">${ic("checklist")}</button><button class="${compact?"on":""}" data-synthview="1" title="Vue condensée">${ic("grid")}</button></span>` : "";
+  const body = entries.length
+    ? (compact ? `<div class="ev-chips">${chips}</div>${detail}${co&&!synthOpen?`<div class="ev-chip-hint">${ic("info")} Clique une étiquette pour la déplier, voir son origine ou la modifier.</div>`:""}`
+                : items+(co?`<div class="ev-sslot">${ic("plus")} La prochaine idée retenue s'ajoute ici, par ordre de soutien…</div>`:""))
     : `<div class="ev-sempty">${ic("table")}<span>${co?"Compose le tableau : sous chaque idée du mur, clique « Ajouter à la synthèse ».":"Le pilote n'a pas encore composé la synthèse de cette étape."}</span></div>`;
-  return `<section class="ev-synth" style="--pc:${pc}"><div class="ev-synth-h"><span class="ev-synth-ic">${ic("table")}</span><b>Le tableau · ${esc(e.nom)}</b><span class="ev-synth-pil">${piloteBadge}</span></div>${body}</section>`;
+  return `<section class="ev-synth ${compact?"is-compact":""}" style="--pc:${pc}"><div class="ev-synth-h"><span class="ev-synth-ic">${ic("table")}</span><b>Le tableau · ${esc(e.nom)}</b>${viewToggle}<span class="ev-synth-pil">${piloteBadge}</span></div>${body}</section>`;
 }
 function viewEtape(){
   const S=STEPS(); if(!S.length) return viewOverview();
@@ -823,6 +844,8 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
   if(e.target.closest("[data-presentation]")){view="presentation";window.scrollTo&&window.scrollTo(0,0);return render();}
   if(e.target.closest("#presShare")){const url=base+"?p="+projet.id+"&ro=1&vue=presentation";navigator.clipboard?.writeText(url).then(()=>toast("Lien présentation copié",true)).catch(()=>toast(url));return;}
+  const svw=e.target.closest("[data-synthview]");if(svw){synthCompact=svw.dataset.synthview==="1";synthOpen=null;return render();}
+  const sch=e.target.closest("[data-synthchip]");if(sch){synthOpen=synthOpen===sch.dataset.synthchip?null:sch.dataset.synthchip;return render();}
   const asn=e.target.closest("[data-addsynth]");if(asn){const eid=stepAt(etapeIdx)?.id;if(eid)addSynth(eid,asn.dataset.addsynth);return;}
   const srf=e.target.closest("[data-synth-reform]");if(srf){const eid=stepAt(etapeIdx)?.id;if(eid)openReform(eid,srf.dataset.synthReform);return;}
   const sre=e.target.closest("[data-synth-reunir]");if(sre){const eid=stepAt(etapeIdx)?.id;if(eid)openReunir(eid,sre.dataset.synthReunir);return;}
