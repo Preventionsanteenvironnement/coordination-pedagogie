@@ -37,6 +37,7 @@ const ICONS = {
   clock: `<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>`,
   alert: `<path d="M12 4 2.5 20h19z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.4" r=".6" fill="currentColor" stroke="none"/>`,
   "user-check": `<circle cx="9" cy="8" r="3.4"/><path d="M3.5 20a6 6 0 0 1 11 0"/><path d="m15.5 13 1.7 1.7 3.3-3.4"/>`,
+  check2: `<path d="m5 12.5 4.5 4.5L19 7"/>`,
   x: `<path d="m6 6 12 12M18 6 6 18"/>`,
 };
 function ic(name) { const p = ICONS[name]; return p ? `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${p}</svg>` : ""; }
@@ -48,13 +49,14 @@ const TABS = [
   ["troubles", "brain", "Troubles"],
   ["comprendre", "book-open", "Comprendre"],
   ["adapter", "wand", "Adapter"],
-  ["situations", "help", "Situations"],
+  ["orienter", "target", "Quel dispositif ?"],
   ["glossaire", "book", "Glossaire"],
 ];
 
 let page = "accueil";
 let dispIdx = 0, trbIdx = 0, parcoursIdx = 0, themeIdx = 0;
 let query = "", searchOn = false;
+let orientSel = new Set();
 
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? "").replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
@@ -77,11 +79,11 @@ function srcChips(ids) {
 function render() {
   const D = window.DISPOSITIFS, P = window.PARCOURS;
   const titles = {
-    accueil: "École inclusive", dispositifs: "Les 4 dispositifs",
+    accueil: "Inclusion", dispositifs: "Les 4 dispositifs",
     dispositif: D[dispIdx] ? D[dispIdx].code : "Dispositif",
     troubles: "Les troubles", trouble: window.TROUBLES[trbIdx] ? window.TROUBLES[trbIdx].code : "Trouble",
     parcours: P[parcoursIdx] ? P[parcoursIdx].nom : "", theme: "",
-    situations: "Que faire si…", glossaire: "Glossaire", search: "Recherche",
+    orienter: "Quel dispositif ?", glossaire: "Glossaire", search: "Recherche",
   };
   if (page === "theme") titles.theme = P[parcoursIdx].themes[themeIdx].titre;
   $("#title").textContent = query ? "Recherche" : (titles[page] || "École inclusive");
@@ -96,7 +98,7 @@ function render() {
   if (query) html = viewSearch();
   else html = ({ accueil: viewAccueil, dispositifs: viewDispositifs, dispositif: viewDispositif,
     troubles: viewTroubles, trouble: viewTrouble,
-    parcours: viewParcours, theme: viewTheme, situations: viewSituations, glossaire: viewGlossaire }[page] || viewAccueil)();
+    parcours: viewParcours, theme: viewTheme, orienter: viewOrienteur, glossaire: viewGlossaire }[page] || viewAccueil)();
   $("#view").innerHTML = html;
   window.scrollTo && window.scrollTo(0, 0);
 }
@@ -113,24 +115,27 @@ function cmpCard(d, i) {
 function viewAccueil() {
   const G = window.GUIDE;
   const tiles = [
+    ["orienter", "target", "Quel dispositif ?", "Cochez, trouvez la piste"],
     ["dispositifs", "layers", "Les 4 dispositifs", "PPS, PAP, PAI, PPRE"],
-    ["troubles", "brain", "Les troubles", "TSA, TDAH, dys…"],
+    ["troubles", "brain", "Les troubles", "TND : TSA, TDAH, dys…"],
     ["comprendre", "book-open", "Comprendre", "Cadre, acteurs, repères"],
     ["adapter", "wand", "Adapter", "Pédagogie & supports"],
-    ["situations", "help", "Que faire si…", "Cas concrets"],
     ["glossaire", "book", "Glossaire", "Tous les sigles"],
   ];
   return `
     <div class="hero">
       <span class="h-may">${esc(G.maj)}</span>
       <h1>${esc(G.titre)}</h1>
-      <p>${esc(G.sousTitre)}. Comprendre les élèves à besoins éducatifs particuliers et adapter sa pédagogie.</p>
+      <p>${esc(G.sousTitre)}.</p>
     </div>
     <div class="sec-title">${ic("layers")} Quel dispositif pour quel élève ?</div>
     <div class="compare">${window.DISPOSITIFS.map(cmpCard).join("")}</div>
     <div class="sec-title">${ic("home")} Explorer le guide</div>
     <div class="tiles">${tiles.map(([p, icn, t, d]) =>
-      `<button class="tile" data-go="${p}"><span class="t-ic">${ic(icn)}</span><span class="t-tx"><strong>${t}</strong><small>${d}</small></span><span class="t-go">${ic("chev")}</span></button>`).join("")}</div>`;
+      `<button class="tile" data-go="${p}"><span class="t-ic">${ic(icn)}</span><span class="t-tx"><strong>${t}</strong><small>${d}</small></span><span class="t-go">${ic("chev")}</span></button>`).join("")}</div>
+    <div class="sec-title">${ic("external")} Pour aller plus loin</div>
+    <div class="res-list">${window.RESSOURCES.map(r =>
+      `<a class="res-ext" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="re-ic">${ic("external")}</span><span class="re-tx"><strong>${esc(r.t)}</strong><small>${esc(r.d)}</small></span></a>`).join("")}</div>`;
 }
 
 /* ---------------- Diagrammes ---------------- */
@@ -188,18 +193,29 @@ function viewDispositif() {
   ];
   const factCards = facts.map(([icn, k, v, y]) =>
     `<div class="fact ${y ? "mdph-y" : ""}"><div class="f-k">${ic(icn)}${k}</div><div class="f-v">${esc(v)}</div></div>`).join("");
+  const sec = (h, icn, body, cls = "") => `<section class="card ${cls}" style="--c:${d.c}"><div class="card-h">${ic(icn)}${h}</div>${body}</section>`;
+  const ul = (items, bad) => `<ul class="lst ${bad ? "bad" : ""}">${items.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
 
-  const blocs = (d.blocs || []).map(b =>
-    `<section class="card ${b.bad ? "bad" : ""}"><div class="card-h">${ic(b.bad ? "alert" : "target")}${esc(b.h)}</div>
-      <ul class="lst ${b.bad ? "bad" : ""}">${b.items.map(x => `<li>${esc(x)}</li>`).join("")}</ul></section>`).join("");
+  const qui = `<div class="who" style="--c:${d.c}"><span class="who-ic">${ic("user-check")}</span><div><span class="who-h">Qui solliciter</span>${esc(d.qui)}</div></div>`;
+  const permet = d.permet ? sec("Ce que ça permet", "target", ul(d.permet)) : "";
+  const limites = (d.limites && d.limites.length) ? sec("Ce que ça ne permet pas", "alert", ul(d.limites, true), "bad") : "";
 
-  const urg = d.urgence ? `<section class="urg"><div class="card-h">${ic("alert")}Protocole d'urgence — le réflexe enseignant</div>
+  const urg = d.urgence ? `<section class="urg"><div class="card-h">${ic("alert")}Le réflexe en cas d'urgence</div>
     <div class="urg-steps">${d.urgence.map((u, i) =>
       `<div class="urg-step"><span class="u-n">${i + 1}</span><span class="u-tx"><b>${esc(u.t)}</b> ${esc(u.d)}</span></div>`).join("")}</div></section>` : "";
 
   const proc = (d.process || []).map((s, i) =>
     `<div class="step"><div class="s-rail"><span class="s-dot">${i + 1}</span><span class="s-line"></span></div>
       <div class="s-body"><div class="s-t">${esc(s.t)}</div><div class="s-d">${esc(s.d)}</div></div></div>`).join("");
+  const procSec = sec("La démarche, étape par étape", "refresh", `<div class="proc">${proc}</div>`);
+
+  const acteurs = d.acteurs ? sec("Les acteurs", "users",
+    `<div class="actors">${d.acteurs.map(a => `<div class="actor"><div class="ac-n">${esc(a.nom)}</div><div class="ac-r">${esc(a.role)}</div></div>`).join("")}</div>`) : "";
+
+  const exemple = d.exemple ? `<section class="cas" style="--c:${d.c}"><div class="card-h">${ic("user")}Un cas concret — ${esc(d.exemple.titre)}</div>
+    <div class="cas-steps">${d.exemple.lignes.map((l, i) => `<div class="cas-step"><span class="cs-n">${i + 1}</span><p>${esc(l)}</p></div>`).join("")}</div></section>` : "";
+
+  const article = d.article ? `<a class="ressource-link" style="--c:${d.c}" href="${esc(d.article.url)}" target="_blank" rel="noopener"><span class="rl-ic">${ic("external")}</span><span class="rl-tx"><strong>Le texte de référence</strong><small>${esc(d.article.ref)}</small></span></a>` : "";
 
   return `<div class="fiche">
     <div class="fiche-band" style="--c:${d.c}">
@@ -209,20 +225,33 @@ function viewDispositif() {
       <div class="fb-res">${esc(d.resume)}</div>
     </div>
     <div class="facts" style="--c:${d.c}">${factCards}</div>
+    ${sec("Pour quel élève ?", "users", `<p class="card-p">${esc(d.pourQui)}</p>`)}
+    ${sec("À quoi ça sert", "flag", `<p class="card-p">${esc(d.objectifs)}</p>`)}
+    ${qui}
+    ${permet}${limites}
     ${urg}
-    ${blocs ? `<div style="--c:${d.c}; display:flex; flex-direction:column; gap:16px;">${blocs}</div>` : ""}
-    <section class="card" style="--c:${d.c}"><div class="card-h">${ic("refresh")}La démarche, étape par étape</div>
-      <div class="proc">${proc}</div></section>
+    ${procSec}
+    ${acteurs}
     ${d.cle === "pps" ? svgMDPH() : ""}
-    <div class="callout teach"><span class="co-ic">${ic("user-check")}</span><div class="co-tx"><span class="co-h">Pour l'enseignant</span>${esc(d.enseignant)}</div></div>
+    ${exemple}
     <div class="callout warn"><span class="co-ic">${ic("alert")}</span><div class="co-tx"><b>À ne pas confondre avec le ${esc(d.confond.code)} —</b> ${esc(d.confond.txt)}</div></div>
+    ${article}
     ${srcChips(d.s)}
   </div>`;
 }
 
 /* ---------------- Troubles ---------------- */
 function viewTroubles() {
-  return `<p class="count">Repérer, comprendre, adapter — une fiche par trouble. Le diagnostic reste médical ; nous, on observe des besoins.</p>
+  const T = window.TND_INTRO;
+  const intro = `<section class="tnd-intro">
+    <p class="tnd-chapo">${esc(T.chapo)}</p>
+    <div class="tnd-rep">${T.reperes.map(r => `<div class="tnd-r"><b>${esc(r.k)}</b><span>${esc(r.v)}</span></div>`).join("")}</div>
+    <div class="tnd-fam"><div class="tnd-fam-h">${ic("layers")}Les familles de troubles du neurodéveloppement</div>
+      <ul>${T.familles.map(f => `<li>${esc(f)}</li>`).join("")}</ul></div>
+    ${srcChips(T.s)}
+  </section>
+  <div class="sec-title">${ic("brain")} Les fiches</div>`;
+  return `${intro}
     <div class="disp-list">${window.TROUBLES.map((t, i) =>
       `<button class="disp-card" style="--c:${t.c}" data-trb="${i}">
         <div class="dc-top"><span class="dc-ic">${ic(t.icon)}</span><span class="dc-code">${esc(t.code)}</span></div>
@@ -274,12 +303,47 @@ function viewTheme() {
     </div>`;
 }
 
-/* ---------------- Situations ---------------- */
-function viewSituations() {
-  return `<p class="count">Des cas concrets et la conduite à tenir, étape par étape.</p>
+/* ---------------- Orienteur : « Quel dispositif ? » ---------------- */
+function viewOrienteur() {
+  const O = window.ORIENTEUR;
+  const dispByCle = {}; window.DISPOSITIFS.forEach((d, i) => dispByCle[d.cle] = { d, i });
+  const counts = {}; O.forEach(g => counts[g.cle] = 0);
+  O.forEach((g, gi) => g.items.forEach((it, ii) => { if (orientSel.has(gi + ":" + ii)) counts[g.cle]++; }));
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+  const groups = O.map((g, gi) => `
+    <div class="ori-grp" style="--c:${g.c}">
+      <div class="ori-grp-h">${esc(g.groupe)}</div>
+      <div class="ori-items">${g.items.map((it, ii) => {
+        const on = orientSel.has(gi + ":" + ii);
+        return `<button class="ori-item ${on ? "on" : ""}" data-orient="${gi}:${ii}"><span class="ori-box">${on ? ic("check2") : ""}</span><span class="ori-tx">${esc(it)}</span></button>`;
+      }).join("")}</div>
+    </div>`).join("");
+
+  let result;
+  if (!total) {
+    result = `<div class="ori-empty">${ic("target")}<p>Cochez ce que vous observez : la piste apparaît ici, avec la marche à suivre.</p></div>`;
+  } else {
+    const ranked = Object.keys(counts).filter(k => counts[k] > 0).sort((a, b) => counts[b] - counts[a]);
+    const top = ranked[0]; const { d, i } = dispByCle[top];
+    const steps = (d.process || []).slice(0, 4).map((s, si) => `<div class="ori-step"><span class="os-n">${si + 1}</span><div><b>${esc(s.t)}</b> ${esc(s.d)}</div></div>`).join("");
+    const others = ranked.slice(1).map(k => `<button class="ori-chip" style="--c:${dispByCle[k].d.c}" data-disp="${dispByCle[k].i}">${esc(dispByCle[k].d.code)}</button>`).join("");
+    result = `<div class="ori-res" style="--c:${d.c}">
+      <div class="ori-res-top"><span class="ori-res-tag">Piste à explorer</span><span class="ori-res-code">${esc(d.code)}</span><span class="ori-res-nom">${esc(d.nom)}</span></div>
+      <p class="ori-res-qui"><span>${ic("user-check")}</span><span><b>Qui solliciter :</b> ${esc(d.qui)}</span></p>
+      <div class="ori-steps">${steps}</div>
+      <div class="ori-res-acts"><button class="ori-go" style="--c:${d.c}" data-disp="${i}">Voir la fiche complète ${ic("chev")}</button>${others ? `<span class="ori-also">Autre piste : ${others}</span>` : ""}</div>
+    </div>`;
+  }
+
+  const sits = `<div class="sec-title">${ic("help")} Des cas concrets, étape par étape</div>
     <div class="sit-list">${window.SITUATIONS.map(s =>
-      `<article class="sit"><h3>${ic("help")}<span>${esc(s.cas)}</span></h3>
-        <ol>${s.etapes.map(e => `<li>${esc(e)}</li>`).join("")}</ol>${srcChips(s.s)}</article>`).join("")}</div>`;
+      `<article class="sit"><h3>${ic("help")}<span>${esc(s.cas)}</span></h3><ol>${s.etapes.map(e => `<li>${esc(e)}</li>`).join("")}</ol>${srcChips(s.s)}</article>`).join("")}</div>`;
+
+  return `<div class="ori-head"><h2>Quel dispositif pour mon élève ?</h2><p>Cochez ce que vous observez. Une piste — PPS, PAP, PAI ou PPRE — apparaît avec la marche à suivre.</p></div>
+    <div class="ori-grid">${groups}</div>
+    ${result}
+    ${sits}`;
 }
 
 /* ---------------- Glossaire ---------------- */
@@ -343,10 +407,13 @@ function goTab(id) {
   render();
 }
 
+if (!window.__inclInit) {
+  window.__inclInit = true;
 document.addEventListener("click", e => {
   const src = e.target.closest("[data-src]"); if (src) return openSource(src.dataset.src);
   const tab = e.target.closest("[data-tab]"); if (tab) return goTab(tab.dataset.tab);
   const go = e.target.closest("[data-go]"); if (go) return goTab(go.dataset.go);
+  const ori = e.target.closest("[data-orient]"); if (ori) { const k = ori.dataset.orient; orientSel.has(k) ? orientSel.delete(k) : orientSel.add(k); return render(); }
   const disp = e.target.closest("[data-disp]"); if (disp) { clearSearch(); dispIdx = +disp.dataset.disp; page = "dispositif"; return render(); }
   const trb = e.target.closest("[data-trb]"); if (trb) { clearSearch(); trbIdx = +trb.dataset.trb; page = "trouble"; return render(); }
   const th = e.target.closest("[data-theme]"); if (th) { themeIdx = +th.dataset.theme; page = "theme"; return render(); }
@@ -360,11 +427,12 @@ document.addEventListener("click", e => {
   if (e.target.closest("#back")) {
     if (query) { clearSearch(); return render(); }
     if (page === "accueil") { location.href = "../../"; return; }
-    const up = { dispositif: "dispositifs", trouble: "troubles", theme: "parcours", parcours: "accueil", dispositifs: "accueil", troubles: "accueil", situations: "accueil", glossaire: "accueil" };
+    const up = { dispositif: "dispositifs", trouble: "troubles", theme: "parcours", parcours: "accueil", dispositifs: "accueil", troubles: "accueil", orienter: "accueil", glossaire: "accueil" };
     page = up[page] || "accueil"; return render();
   }
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDrawer(); } });
 $("#search").addEventListener("input", e => { query = e.target.value; render(); });
+}
 
 render();

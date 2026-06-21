@@ -95,13 +95,13 @@ const THEMATIQUES = [
     icon: "book",
     enfants: [
       {
-        titre: "Inclusion",
-        desc: "École inclusive : le cadre et les dispositifs (PPS, PAP, PAI, PPRE), comprendre les troubles, et les outils de suivi (GEVA-Sco).",
+        titre: "Pratiques inclusives",
+        desc: "Le cadre et les dispositifs (PPS, PAP, PAI, PPRE), comprendre les troubles du neurodéveloppement, l'orienteur « quel dispositif ? », et l'outil de suivi GEVA-Sco.",
         icon: "inclusion",
         enfants: [
           {
-            titre: "École inclusive — guide de formation",
-            desc: "Cadre & dispositifs (PPS, PAP, PAI, PPRE, MDPH, ULIS, AESH), comprendre les troubles (TSA, TDAH, dys…), public, pédagogie adaptée et supports. Par thèmes, avec flashcards, quiz et glossaire.",
+            titre: "Inclusion",
+            desc: "Guide de formation : les 4 dispositifs en fiches approfondies (procédure, acteurs, cas concrets), les troubles du neurodéveloppement, l'orienteur « quel dispositif pour mon élève ? », pédagogie adaptée et glossaire. Sources officielles.",
             lien: "pedagogie/ecole-inclusive/",
             type: "Guide",
           },
