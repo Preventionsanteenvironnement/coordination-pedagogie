@@ -148,7 +148,6 @@ let unsub = null, unsubP = null, unsubPres = null, hb = null, presence = [];
 let regroup = false, selected = new Set();
 let discussion = [], unsubDisc = null, chatOpen = false, discCount = -1;
 let synthCompact = null, synthOpen = null;
-const SYNTHPAL = ["#2563eb","#7c3aed","#0891b2","#0f8a66","#d97706","#db2777","#4f46e5","#0d9488","#b45309","#9333ea","#0369a1","#15803d"];
 let chatSeen = JSON.parse(localStorage.getItem("projets_chat_seen") || "{}");
 let fbError = false;
 
@@ -417,12 +416,12 @@ function synthBoard(e){
     return `<div class="ev-sitem"><span class="ev-snum">${i+1}</span><div class="ev-sbody"><div class="ev-stext">${esc(en.texte)}</div><div class="ev-sfrom">${m.au.length?`<span class="ev-savs">${m.au.slice(0,4).map(a=>avatar(a.ini,"sm",a.color)).join("")}</span><span class="ev-sau">${m.au.map(a=>esc(a.ini)).join(", ")}</span>`:""}${m.merged?`<span class="ev-merged">${(en.sources||[]).length} réunies</span>`:(m.reformed?`<span class="ev-reform">reformulé</span>`:"")}<span class="ev-supp" title="Soutien">${ic("chart")} ${m.supp}</span>${actsHTML(en)}</div></div></div>`;
   }).join("");
   // -- Vue condensée (étiquettes colorées + détail au clic) --
-  const chips=entries.map((en,i)=>{ const cc=SYNTHPAL[i%SYNTHPAL.length]; const open=synthOpen===en.id; const tx=en.texte.length>52?en.texte.slice(0,50).trim()+"…":en.texte; const n=(en.sources||[]).length;
-    return `<button class="ev-chip ${open?"open":""}" style="--cc:${cc}" data-synthchip="${esc(en.id)}"><span class="ev-chip-n">${i+1}</span><span class="ev-chip-t">${esc(tx)}</span>${n>1?`<span class="ev-chip-m" title="${n} idées réunies">${ic("merge")}${n}</span>`:""}</button>`;
+  const chips=entries.map((en)=>{ const au=synthAuthors(en); const a0=au[0]||{}; const cc=a0.color||pc; const open=synthOpen===en.id; const tx=en.texte.length>52?en.texte.slice(0,50).trim()+"…":en.texte; const n=(en.sources||[]).length;
+    return `<button class="ev-chip ${open?"open":""}" style="--cc:${cc}" data-synthchip="${esc(en.id)}">${avatar(a0.ini,"sm",cc)}<span class="ev-chip-t">${esc(tx)}</span>${n>1?`<span class="ev-chip-m" title="${n} idées réunies">${ic("merge")}${au.length>1?" "+au.length+" auteurs":" "+n}</span>`:""}</button>`;
   }).join("");
   let detail="";
   if(compact && synthOpen){ const oi=entries.findIndex(x=>x.id===synthOpen);
-    if(oi>=0){ const en=entries[oi]; const m=enMeta(en); const cc=SYNTHPAL[oi%SYNTHPAL.length];
+    if(oi>=0){ const en=entries[oi]; const m=enMeta(en); const cc=(synthAuthors(en)[0]||{}).color||pc;
       const srcs=(en.sources||[]).map(cid=>cById(cid)).filter(Boolean);
       const origines = srcs.length?`<div class="ev-cd-src"><div class="ev-cd-lab">${ic("compass")} D'où ça vient${srcs.length>1?` · ${srcs.length} idées réunies`:""}</div>${srcs.map(s=>`<div class="ev-cd-srcit">${avatar(s.initiales,"sm",s.color)}<div><b>${esc(s.role||"—")} · ${esc(s.initiales||"")}</b><span>${esc(s.texte)}</span></div></div>`).join("")}</div>`:"";
       detail=`<div class="ev-chip-detail" style="--cc:${cc}"><div class="ev-cd-top"><span class="ev-snum">${oi+1}</span><div class="ev-cd-tx">${esc(en.texte)}</div><button class="ev-cd-x" data-synthchip="${esc(en.id)}" title="Fermer">${ic("x")}</button></div><div class="ev-cd-meta">${m.au.length?`<span class="ev-savs">${m.au.slice(0,5).map(a=>avatar(a.ini,"sm",a.color)).join("")}</span>`:""}<span class="ev-supp">${ic("chart")} ${m.supp} soutien${m.supp>1?"s":""}</span>${m.reformed?`<span class="ev-reform">reformulé</span>`:""}${co?actsHTML(en):""}</div>${origines}</div>`;
