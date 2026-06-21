@@ -319,15 +319,26 @@ function viewOverview(){
   const pct=Math.round(done/Math.max(S.length,1)*100);
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const ty=TYPES.find(t=>t.id===projet.type);
   const firstTodo=S.findIndex(s=>!contribs.some(c=>c.etape===s.id && active(c)));
-  const stRow = RO ? `<span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}` :
-    `<div class="st-block"><div class="st-lab">Où en est le projet ?</div><div class="st-row">${Object.entries(STATUTS).map(([k,v])=>`<button class="st-pick ${projet.statut===k||(!projet.statut&&k==="brouillon")?"on":""}" style="--sc:${v.c}" data-statut="${k}">${v.l}</button>`).join("")}</div></div>
-     <div class="st-block"><div class="st-lab">Type de projet <span class="st-hint">— adapte le vocabulaire, modifiable à tout moment</span></div><div class="st-row">${TYPES.map(t=>`<button class="ty-pick ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}<button class="ty-pick ${projet.type==="perso"?"on":""}" data-type-custom>${ic("pencil")} ${projet.type==="perso"&&projet.typeCustom?esc(projet.typeCustom):"Autre type…"}</button></div></div>`;
-  const syn=synthese();
-  return `<div id="onlineInline">${onlineStrip()}</div>
-    <div class="ov-hero"><div class="ovh-top"><div class="ov-ring" style="--p:${pct}"><span>${pct}%</span></div><div class="ovh-tx"><div class="ovh-eyebrow">${ic("folder")} Projet d'équipe</div><h1 class="ov-titre">${esc(projet.titre)}</h1>${projet.contexte?`<div class="ov-ctx">${esc(projet.contexte)}</div>`:""}</div></div><div class="ovh-pilote">${projet.pilote?`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx">${avatar(projet.pilote.ini,"sm",projet.pilote.color)}<b>${esc(projet.pilote.ini)}</b> · ${esc(projet.pilote.role)}</span>${RO?"":`<button class="lnk-mini" data-pilote>${ident&&projet.pilote.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`<span class="opx-lab">${ic("compass")} Pilote</span><span class="opx-none">à définir — qui mène ce projet ?</span>${RO?"":`<button class="btn-mini" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div><div class="ovh-tags">${stRow}</div></div>
-    ${projet.statut==="valide"?`<button class="ov-valid" data-presentation>${ic("check")}<span><b>Projet validé</b> — voir la présentation</span>${ic("chev")}</button>`:""}
-    ${done===0&&!RO?`<div class="ov-welcome">${ic("wand")}<div><b>Bienvenue dans votre projet</b><p>Avancez <b>étape par étape, à plusieurs</b> : chacun ajoute ses idées, la plus juste est « retenue », et la fiche se compose toute seule. Les étapes sont <b>modulables</b> (bouton « modifier » plus bas). Commencez par ${esc(S[0]?S[0].nom:"la première étape")} ci-dessous.</p></div></div>`:""}
-    ${firstTodo>=0&&!RO?`<button class="btn primary big" data-etape="${firstTodo}">${ic("bolt")} Continuer : ${esc(S[firstTodo].nom)}</button>`:""}
+  const syn=synthese(); const on=(typeof onlineNow==="function")?onlineNow():[];
+  const pil=projet.pilote;
+  const phaseDone=p=>{const v=p.etapes.filter(id=>visSet.has(id));return v.length&&v.every(id=>contribs.some(c=>c.etape===id&&active(c)));};
+  const phaseStart=p=>p.etapes.some(id=>visSet.has(id)&&contribs.some(c=>c.etape===id&&active(c)));
+  const journey=`<div class="ev-journey">${PHASES.map((p,i)=>{const v=p.etapes.filter(id=>visSet.has(id));if(!v.length)return "";const d=phaseDone(p);const s2=d?"done":(phaseStart(p)?"on":"");return `<div class="ev-ph ${s2}" style="--pc:${p.c}"><span class="ev-phb">${d?ic("check"):i+1}</span><span class="ev-phn">${esc(p.nom)}</span></div>`;}).join("")}</div>`;
+  const settings = RO?"":`<div class="sec-title">${ic("toggle")} Réglages du projet</div>
+    <div class="ov2-settings">
+      <div class="ov2-set"><span class="ov2-slab">${ic("clipboard")} Où en est le projet ?</span><div class="ov2-srow">${Object.entries(STATUTS).map(([k,v])=>`<button class="ov2-st ${projet.statut===k||(!projet.statut&&k==="brouillon")?"on":""}" style="--sc:${v.c}" data-statut="${k}">${v.l}</button>`).join("")}</div></div>
+      <div class="ov2-set"><span class="ov2-slab">${ic("pencil")} Type de projet <span class="muted" style="font-weight:400">— adapte le vocabulaire</span></span><div class="ov2-srow">${TYPES.map(t=>`<button class="ov2-ty ${projet.type===t.id||(!projet.type&&t.id==="peda")?"on":""}" data-type="${t.id}">${esc(t.l)}</button>`).join("")}<button class="ov2-ty ${projet.type==="perso"?"on":""}" data-type-custom>${ic("pencil")} ${projet.type==="perso"&&projet.typeCustom?esc(projet.typeCustom):"Autre…"}</button></div></div>
+    </div>`;
+  return `<div id="onlineInline" hidden>${onlineStrip()}</div>
+    <div class="ov2-hero">
+      <div class="ov2-hero-top"><span class="ov2-eyebrow">${ic("users")} Projet d'équipe</span>${on.length?`<span class="ev-pres"><span class="ev-pres-dot"></span><span class="ev-pres-avs">${on.slice(0,4).map(p=>avatar(p.initiales,"sm",p.color)).join("")}</span>${on.length} en ligne</span>`:""}</div>
+      <div class="ov2-hero-main"><div class="ov2-ring" style="--p:${pct}"><span>${pct}<small>%</small></span></div><div class="ov2-htx"><h1>${esc(projet.titre)}</h1>${projet.contexte?`<p class="ov2-ctx">${esc(projet.contexte)}</p>`:""}<div class="ov2-meta"><span class="ov2-stat" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ov2-typ">${esc(typeLabel())}</span>`:""}<span class="ov2-cnt">${done}/${S.length} étapes</span></div></div></div>
+      <div class="ov2-pilote">${pil?`${ic("compass")}<span class="ov2-pwho">${avatar(pil.ini,"sm",pil.color)}<b>${esc(pil.ini)}</b> · ${esc(pil.role)}</span>${RO?"":`<button class="ov2-plnk" data-pilote>${ident&&pil.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`${ic("compass")}<span class="ov2-pnone">Pilote à définir — qui mène ce projet ?</span>${RO?"":`<button class="ov2-ptake" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div>
+    </div>
+    ${projet.statut==="valide"?`<button class="ov2-valid" data-presentation>${ic("check")}<span><b>Projet validé</b> — voir la présentation</span>${ic("chev")}</button>`:""}
+    ${done===0&&!RO?`<div class="ov2-welcome"><span class="ov2-wic">${ic("wand")}</span><div><b>Bienvenue — on construit ce projet à plusieurs</b><p>Chacun ajoute ses idées, la plus juste est « retenue », et la fiche se compose toute seule. On commence par <b>${esc(S[0]?S[0].nom:"la première étape")}</b>.</p></div></div>`:""}
+    ${journey}
+    ${firstTodo>=0&&!RO?`<button class="ov2-continue" data-etape="${firstTodo}"><span class="ov2-cic">${ic("bolt")}</span><span class="ov2-ctx2"><small>Continuer</small>${esc(S[firstTodo].nom)}</span>${ic("chev")}</button>`:""}
     <div class="sec-title">${ic("grid")} Le parcours du projet${RO?"":`<button class="btn-mini" data-perso style="margin-left:auto">${ic("sync")} ${S.length} étape(s) · modifier</button>`}</div>
     ${tlTimeline()}
     ${syn?`<div class="sec-title">${ic("wand")} Synthèse automatique</div><div class="card syn-card">${esc(syn)}</div>`:""}
@@ -336,6 +347,7 @@ function viewOverview(){
     ${jalonsCard()}
     ${resCard()}
     <div class="fiche-actions" style="margin-top:16px"><button class="btn accent" data-presentation>${ic("eye")} Présentation</button><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
+    ${settings}
     <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 

@@ -779,3 +779,49 @@ table.pl td{vertical-align:middle}
 .ev-pgr{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:700;color:var(--ink);background:var(--surface);border:1.5px solid var(--line2);border-radius:14px;padding:13px}
 .ev-pgr .i{font-size:17px}
 .ev-pgr.next{color:#fff;background:linear-gradient(135deg,#1a1730,#3a2f63);border-color:transparent;box-shadow:0 8px 20px rgba(26,23,48,.28)}
+
+/* ----- Vue d'ensemble — refonte 2026 · classes .ov2-* ----- */
+.ov2-hero{position:relative;overflow:hidden;border-radius:24px;padding:20px 20px;color:#fff;background:linear-gradient(135deg,#4f46e5,#7c5cff 55%,#9b6bff);box-shadow:0 16px 40px rgba(90,70,230,.34);margin-bottom:14px}
+.ov2-hero::after{content:"";position:absolute;right:-50px;top:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.12)}
+.ov2-hero::before{content:"";position:absolute;left:-30px;bottom:-70px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07)}
+.ov2-hero>*{position:relative}
+.ov2-hero-top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ov2-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.2);padding:6px 12px;border-radius:999px}
+.ov2-eyebrow .i{font-size:15px}
+.ov2-hero-top .ev-pres{margin-left:auto}
+.ov2-hero-main{display:flex;align-items:center;gap:16px}
+.ov2-ring{--p:0;width:74px;height:74px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#fff calc(var(--p)*1%),rgba(255,255,255,.24) 0)}
+.ov2-ring span{width:58px;height:58px;border-radius:50%;background:#6a5cff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800}.ov2-ring small{font-size:11px;font-weight:700;margin-left:1px}
+.ov2-htx{flex:1;min-width:0}
+.ov2-htx h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.2}
+.ov2-ctx{font-size:13.5px;color:rgba(255,255,255,.86);margin:6px 0 0;line-height:1.5}
+.ov2-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.ov2-meta span{font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 11px}
+.ov2-stat{color:#fff;background:var(--sc,#fff);box-shadow:0 0 0 1px rgba(255,255,255,.3)}
+.ov2-typ,.ov2-cnt{color:#fff;background:rgba(255,255,255,.18)}
+.ov2-pilote{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:15px;padding-top:14px;border-top:1px solid rgba(255,255,255,.2);font-size:13px;color:#fff}
+.ov2-pilote>.i{font-size:16px;opacity:.85}
+.ov2-pwho{display:inline-flex;align-items:center;gap:6px}.ov2-pwho b{font-weight:700}
+.ov2-pnone{color:rgba(255,255,255,.82)}
+.ov2-plnk{margin-left:auto;font-size:12.5px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);border:none;border-radius:999px;padding:6px 13px}
+.ov2-ptake{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:#5b4bd6;background:#fff;border:none;border-radius:999px;padding:7px 14px}.ov2-ptake .i{font-size:14px}
+
+.ov2-valid{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#dcf6ec;border:1.5px solid #a9dcc4;border-radius:16px;padding:14px 16px;color:#0f8a66;font-size:14px;margin-bottom:14px}
+.ov2-valid b{font-weight:700}.ov2-valid .i:first-child{font-size:20px}.ov2-valid span{flex:1}.ov2-valid .i:last-child{font-size:18px}
+
+.ov2-welcome{display:flex;gap:13px;align-items:flex-start;background:linear-gradient(120deg,var(--surface),#f3f0ff);border:1.5px solid #ddd6ff;border-radius:18px;padding:15px 17px;margin-bottom:14px}
+.ov2-wic{width:40px;height:40px;flex:none;border-radius:13px;background:linear-gradient(135deg,#6a5cff,#9b6bff);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(106,92,255,.3)}.ov2-wic .i{font-size:21px}
+.ov2-welcome b{font-size:14.5px;font-weight:700;color:var(--ink)}.ov2-welcome p{font-size:13px;color:var(--muted);line-height:1.55;margin:4px 0 0}
+
+.ov2-continue{display:flex;align-items:center;gap:13px;width:100%;text-align:left;color:#fff;background:linear-gradient(135deg,#6a5cff,#9b6bff);border:none;border-radius:18px;padding:16px 18px;box-shadow:0 12px 28px rgba(106,92,255,.36);margin:14px 0;transition:transform .12s}
+.ov2-continue:hover{transform:translateY(-1px)}
+.ov2-cic{width:38px;height:38px;flex:none;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center}.ov2-cic .i{font-size:20px}
+.ov2-ctx2{flex:1;display:flex;flex-direction:column;font-size:17px;font-weight:700;line-height:1.2}.ov2-ctx2 small{font-size:11.5px;font-weight:600;opacity:.82;text-transform:uppercase;letter-spacing:.04em;margin-bottom:1px}
+.ov2-continue>.i{font-size:20px}
+
+.ov2-settings{display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px 16px;box-shadow:var(--sh)}
+.ov2-slab{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:9px}.ov2-slab .i{font-size:15px;color:var(--muted)}
+.ov2-srow{display:flex;flex-wrap:wrap;gap:7px}
+.ov2-st,.ov2-ty{font-size:12.5px;font-weight:600;border:1.5px solid var(--line2);background:var(--surface);color:var(--muted);border-radius:999px;padding:7px 13px;display:inline-flex;align-items:center;gap:5px}
+.ov2-st.on{color:#fff;background:var(--sc,var(--accent));border-color:var(--sc,var(--accent))}
+.ov2-ty.on{color:#5b4bd6;background:#efecff;border-color:#cdc4f7}.ov2-ty .i{font-size:13px}
