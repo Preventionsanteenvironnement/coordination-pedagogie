@@ -146,7 +146,7 @@ let view = "liste";
 let projets = [], projet = null, contribs = [], etapeIdx = 0;
 let unsub = null, unsubP = null, unsubPres = null, hb = null, presence = [];
 let regroup = false, selected = new Set();
-let discussion = [], unsubDisc = null, chatOpen = false;
+let discussion = [], unsubDisc = null, chatOpen = false, discCount = -1;
 let chatSeen = JSON.parse(localStorage.getItem("projets_chat_seen") || "{}");
 let fbError = false;
 
@@ -382,7 +382,7 @@ function openParticipant(ini){
 function fmtTime(s){ if(!s)return""; try{ return new Date(s*1000).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}); }catch(_){ return ""; } }
 function unreadCount(){ if(!projet) return 0; const seen=chatSeen[projet.id]||0; return discussion.filter(m=>(m._t>seen)&&(!ident||m.ini!==ident.initiales)).length; }
 function markChatSeen(){ if(!projet)return; const last=discussion.reduce((a,m)=>Math.max(a,m._t||0),0); chatSeen[projet.id]=Math.max(last, Math.floor(Date.now()/1000)); try{localStorage.setItem("projets_chat_seen",JSON.stringify(chatSeen));}catch(_){} updateChatBadge(); }
-function updateChatBadge(){ const b=$("#chatBtn"); if(!b)return; const inProj=projet&&view!=="liste"; b.hidden=!inProj; if(!inProj)return; const n=unreadCount(); b.innerHTML=`${ic("comment")}${n?`<span class="tb-chat-badge">${n>9?"9+":n}</span>`:""}`; b.classList.toggle("has-unread",!!n); }
+function updateChatBadge(){ const b=$("#chatBtn"); if(!b)return; const inProj=projet&&view!=="liste"; b.hidden=!inProj; if(!inProj)return; const n=unreadCount(); b.innerHTML=`${ic("comment")}<span class="tb-chat-lbl">Discussion</span>${n?`<span class="tb-chat-badge">${n>9?"9+":n}</span>`:""}`; b.classList.toggle("has-unread",!!n); }
 function chatListHTML(){
   if(!discussion.length) return `<div class="chat-empty">${ic("comment")}<p>Aucun message pour l'instant.<br>Posez une question, donnez un avis ou une directive.</p></div>`;
   return discussion.map(m=>{ const me=ident&&m.ini===ident.initiales; return `<div class="chat-msg ${me?"me":""}">${me?"":avatar(m.ini,"sm",m.color)}<div class="chat-b"><div class="chat-meta"><b>${esc(m.role||"—")}</b> · ${esc(m.ini||"")}</div><div class="chat-txt">${esc(m.txt)}</div><span class="chat-t">${fmtTime(m._t)}</span></div></div>`; }).join("");
@@ -748,10 +748,10 @@ async function openProjet(id){
   projet=projets.find(p=>p.id===id)||null;
   if(!projet){ try{const d=await getDoc(doc(db,COL,id));if(d.exists())projet={id,...d.data()};}catch(_){} }
   if(!projet){toast("Projet introuvable.");view="liste";return loadListe();}
-  view="overview"; etapeIdx=0; contribs=[]; discussion=[]; chatOpen=false; regroup=false; selected.clear(); render();
+  view="overview"; etapeIdx=0; contribs=[]; discussion=[]; discCount=-1; chatOpen=false; regroup=false; selected.clear(); render();
   try{ unsubP=onSnapshot(doc(db,COL,id),d=>{if(d.exists()){projet={id,...d.data()};if(view!=="liste")render();}}); }catch(_){}
   try{ unsub=onSnapshot(query(collection(db,COL,id,"contributions"),orderBy("createdAt","asc")),snap=>{contribs=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});fbError=false;if(view!=="liste")render();},err=>{console.error(err);fbError=true;render();}); }catch(e){console.error(e);fbError=true;render();}
-  try{ unsubDisc=onSnapshot(query(collection(db,COL,id,"discussion"),orderBy("createdAt","asc")),snap=>{discussion=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});if(chatOpen){const l=$("#chatList");if(l){l.innerHTML=chatListHTML();l.scrollTop=l.scrollHeight;}}updateChatBadge();},err=>{console.error(err);}); }catch(_){}
+  try{ unsubDisc=onSnapshot(query(collection(db,COL,id,"discussion"),orderBy("createdAt","asc")),snap=>{discussion=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});const top=discussion[discussion.length-1];if(discCount>=0&&discussion.length>discCount&&top&&(!ident||top.ini!==ident.initiales)&&!chatOpen){toast("Nouveau message · "+esc(top.role||top.ini||""));}discCount=discussion.length;if(chatOpen){const l=$("#chatList");if(l){l.innerHTML=chatListHTML();l.scrollTop=l.scrollHeight;}}updateChatBadge();},err=>{console.error(err);}); }catch(_){}
   startPresence(id);
 }
 async function addContribution(texte){ if(!ident){openIdent();return;} texte=texte.trim(); if(!texte) return; const sid=stepAt(etapeIdx)?.id; if(!sid) return; if(isLocked(sid)){toast("Étape verrouillée.");return;}

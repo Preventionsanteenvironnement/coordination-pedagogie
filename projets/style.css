@@ -927,10 +927,13 @@ table.pl td{vertical-align:middle}
 .pp-more[open]>summary{margin-bottom:9px}
 
 /* ----- Bouton chat (barre du haut) ----- */
-.tb-chat{position:relative;flex:none;width:36px;height:34px;border:none;border-radius:var(--r-pill);background:rgba(255,255,255,.16);color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-.tb-chat .i{font-size:17px}
+.tb-chat{position:relative;flex:none;display:inline-flex;align-items:center;gap:5px;border:none;border-radius:var(--r-pill);background:rgba(255,255,255,.16);color:#fff;padding:7px 13px;font-size:12.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+.tb-chat .i{font-size:16px}
 .tb-chat.has-unread{background:#fff;color:var(--brand)}
-.tb-chat-badge{position:absolute;top:-5px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--brand)}
+.tb-chat-badge{position:absolute;top:-6px;right:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:999px;background:#ef4444;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--brand)}
+.tb-chat.has-unread .tb-chat-badge{border-color:#fff;animation:chatPulse 1.6s ease-in-out infinite}
+@keyframes chatPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{transform:scale(1.13);box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+@media(max-width:560px){.tb-chat-lbl{display:none}.tb-chat{padding:7px 10px}}
 
 /* ----- Panneau Discussion d'équipe ----- */
 .chat-backdrop{position:fixed;inset:0;background:rgba(18,22,40,.42);z-index:60;opacity:0;transition:opacity .26s}
