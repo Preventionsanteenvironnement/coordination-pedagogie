@@ -825,3 +825,46 @@ table.pl td{vertical-align:middle}
 .ov2-st,.ov2-ty{font-size:12.5px;font-weight:600;border:1.5px solid var(--line2);background:var(--surface);color:var(--muted);border-radius:999px;padding:7px 13px;display:inline-flex;align-items:center;gap:5px}
 .ov2-st.on{color:#fff;background:var(--sc,var(--accent));border-color:var(--sc,var(--accent))}
 .ov2-ty.on{color:#5b4bd6;background:#efecff;border-color:#cdc4f7}.ov2-ty .i{font-size:13px}
+
+/* ----- Mini-timeline (en-tête d'étape) ----- */
+.ev-mtl{display:flex;align-items:center;gap:0;margin-bottom:13px;overflow-x:auto;scrollbar-width:none}
+.ev-mtl::-webkit-scrollbar{display:none}
+.ev-mstep{display:flex;align-items:center;gap:6px;flex:none;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.66);white-space:nowrap;padding:3px 2px}
+.ev-md{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.45);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex:none}.ev-md .i{font-size:11px;stroke-width:3}
+.ev-mstep.done{color:rgba(255,255,255,.9)}.ev-mstep.done .ev-md{background:rgba(255,255,255,.9);border-color:transparent;color:var(--pc)}
+.ev-mstep.on{color:#fff;background:rgba(255,255,255,.2);border-radius:999px;padding:4px 13px 4px 6px;font-weight:700}.ev-mstep.on .ev-md{background:#fff;border-color:#fff;color:var(--pc)}
+.ev-mstep:not(:last-child)::after{content:"";width:14px;height:2px;background:rgba(255,255,255,.3);border-radius:2px;margin:0 4px;flex:none}
+
+/* ----- Tableau de synthèse (à la couleur de l'étape) ----- */
+.ev-synth{position:relative;overflow:hidden;background:var(--surface);border:1.5px solid color-mix(in srgb,var(--pc) 28%,var(--line));border-radius:22px;padding:16px 18px 18px;box-shadow:0 12px 32px color-mix(in srgb,var(--pc) 14%,transparent);margin-bottom:14px}
+.ev-synth::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--pc),color-mix(in srgb,var(--pc) 55%,#a06bff))}
+.ev-synth-h{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+.ev-synth-ic{width:38px;height:38px;border-radius:12px;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,var(--pc),color-mix(in srgb,var(--pc) 55%,#7c5cff));box-shadow:0 6px 14px color-mix(in srgb,var(--pc) 32%,transparent)}.ev-synth-ic .i{font-size:19px}
+.ev-synth-h b{flex:1;min-width:0;font-size:16px;font-weight:800;color:var(--ink)}
+.ev-synth-pil{flex:none;display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--pc);background:color-mix(in srgb,var(--pc) 11%,var(--surface));border-radius:999px;padding:5px 11px}.ev-synth-pil .i{font-size:13px}
+.ev-sitem{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:15px;padding:13px 14px;margin-bottom:10px;background:color-mix(in srgb,var(--pc) 3%,var(--surface));animation:evpop .45s both}
+@keyframes evpop{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+.ev-snum{width:27px;height:27px;border-radius:9px;flex:none;background:color-mix(in srgb,var(--pc) 13%,var(--surface));color:var(--pc);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.ev-sbody{flex:1;min-width:0}
+.ev-stext{font-size:15px;font-weight:600;color:var(--ink);line-height:1.45}
+.ev-sfrom{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.ev-savs{display:flex}.ev-savs .ava{margin-left:-6px}.ev-savs .ava:first-child{margin-left:0}
+.ev-merged{font-size:10.5px;font-weight:700;color:#0f8a66;background:#dcf6e6;border-radius:999px;padding:2px 8px}
+.ev-reform{font-size:10.5px;font-weight:700;color:#7c5cff;background:#efeaff;border-radius:999px;padding:2px 8px}
+.ev-supp{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--pc)}.ev-supp .i{font-size:13px}
+.ev-sacts{display:inline-flex;gap:3px;margin-left:auto}
+.ev-sslot{display:flex;align-items:center;gap:9px;border:1.5px dashed color-mix(in srgb,var(--pc) 30%,var(--line2));border-radius:14px;padding:12px 14px;color:color-mix(in srgb,var(--pc) 55%,var(--muted));font-size:13px;font-weight:600}.ev-sslot .i{font-size:15px}
+.ev-sempty{display:flex;gap:11px;align-items:center;color:var(--muted);font-size:13.5px;line-height:1.5;padding:6px 2px}.ev-sempty .i{font-size:22px;color:var(--pc);flex:none}
+
+/* ----- Mur + repris + co-pilote ----- */
+.ev-mur-h{display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:var(--ink);margin-bottom:2px}.ev-mur-h .i{font-size:16px;color:#7c5cff}
+.ev-card.used{opacity:.6;background:var(--bg)}
+.ev-rb.addsyn{color:#fff;background:linear-gradient(135deg,var(--accent),#5b8def)}
+.ev-repris{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#0f8a66}.ev-repris .i{font-size:14px}
+.ev-pdef{display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--sh);margin-top:14px}
+.ev-pdef-ic{width:34px;height:34px;border-radius:11px;flex:none;background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--accent);display:flex;align-items:center;justify-content:center}.ev-pdef-ic .i{font-size:17px}
+.ev-pdef-tx{flex:1;min-width:160px}.ev-pdef-tx b{font-size:13.5px;font-weight:700;color:var(--ink)}.ev-pdef-tx p{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:3px}
+.ev-pdef-co{flex:none;align-self:center;display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface));border:none;border-radius:999px;padding:8px 14px}.ev-pdef-co .i{font-size:14px}
+.reunir-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto}
+.reunir-it{display:flex;gap:10px;align-items:flex-start;text-align:left;border:1px solid var(--line2);background:var(--surface);border-radius:12px;padding:11px 13px;font-size:13.5px;color:var(--ink);line-height:1.45}
+.reunir-it:hover{border-color:var(--accent);background:var(--bg)}.reunir-it b{font-weight:600;color:var(--muted);font-size:12.5px}

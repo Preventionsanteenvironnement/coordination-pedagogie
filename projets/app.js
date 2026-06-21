@@ -351,6 +351,18 @@ function viewOverview(){
     <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 
+function synthBoard(e){
+  const eid=e.id; const pc=e.c||"#2563eb";
+  const entries=synthOf(eid).slice().sort((a,b)=>synthSupport(b)-synthSupport(a));
+  const co=canSynth(); const pil=projet.pilote, cop=projet.copilote;
+  const piloteBadge=`${ic("star")} Pilote${pil?" · "+esc(pil.ini):""}${cop?" & "+esc(cop.ini):""}`;
+  const items=entries.map((en,i)=>{ const au=synthAuthors(en); const supp=synthSupport(en); const merged=(en.sources||[]).length>1; const src0=cById((en.sources||[])[0]); const reformed=(en.sources||[]).length===1 && src0 && src0.texte!==en.texte;
+    return `<div class="ev-sitem"><span class="ev-snum">${i+1}</span><div class="ev-sbody"><div class="ev-stext">${esc(en.texte)}</div><div class="ev-sfrom">${au.length?`<span class="ev-savs">${au.slice(0,4).map(a=>avatar(a.ini,"sm",a.color)).join("")}</span><span class="ev-sau">${au.map(a=>esc(a.ini)).join(", ")}</span>`:""}${merged?`<span class="ev-merged">${(en.sources||[]).length} réunies</span>`:(reformed?`<span class="ev-reform">reformulé</span>`:"")}<span class="ev-supp" title="Soutien">${ic("chart")} ${supp}</span>${co?`<span class="ev-sacts"><button class="ev-mini" data-synth-reform="${esc(en.id)}" title="Reformuler">${ic("pencil")}</button><button class="ev-mini" data-synth-reunir="${esc(en.id)}" title="Réunir une idée proche">${ic("merge")}</button><button class="ev-mini" data-synth-del="${esc(en.id)}" title="Retirer">${ic("trash")}</button></span>`:""}</div></div></div>`;
+  }).join("");
+  const body = entries.length ? items+(co?`<div class="ev-sslot">${ic("plus")} La prochaine idée retenue s'ajoute ici, par ordre de soutien…</div>`:"")
+    : `<div class="ev-sempty">${ic("table")}<span>${co?"Compose le tableau : sous chaque idée du mur, clique « Ajouter à la synthèse ».":"Le pilote n'a pas encore composé la synthèse de cette étape."}</span></div>`;
+  return `<section class="ev-synth" style="--pc:${pc}"><div class="ev-synth-h"><span class="ev-synth-ic">${ic("table")}</span><b>Le tableau · ${esc(e.nom)}</b><span class="ev-synth-pil">${piloteBadge}</span></div>${body}</section>`;
+}
 function viewEtape(){
   const S=STEPS(); if(!S.length) return viewOverview();
   if(etapeIdx>=S.length) etapeIdx=S.length-1; if(etapeIdx<0) etapeIdx=0;
@@ -363,20 +375,15 @@ function viewEtape(){
   prevSteps.forEach(ps=>{ ofEt(ps.id).forEach(c=>{ const ls=splitLines(c.texte); if(ls.length<=1){ if(c.epingle) recap.push({t:c.texte,c:ps.c}); } else { const lr=Array.isArray(c.lr)?c.lr:[]; ls.forEach((ln,idx)=>{ if(lr.includes(idx)) recap.push({t:ln,c:ps.c}); }); } }); });
   const recapBlock = prevSteps.length ? `<div class="ev-recap"><div class="ev-recap-h">${ic("compass")} Ce qui est retenu jusqu'ici</div>${recap.length?`<div class="ev-recap-list">${recap.slice(-6).map(r=>`<div class="ev-rchip" style="--cc:${r.c||"#6a5cff"}"><span class="ev-rck">${ic("check")}</span><span>${esc(r.t)}</span></div>`).join("")}</div>`:`<div class="ev-recap-empty">Rien de retenu aux étapes précédentes — marquez les idées clés d'une ★.</div>`}</div>` : "";
   const card=(c,i)=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
-    const lines=splitLines(c.texte); const multi=lines.length>1; const lr=Array.isArray(c.lr)?c.lr:[];
+    const reprisN=isReprisN(c.id,e.id);
     const votes=Array.isArray(c.votes)?c.votes:[]; const voted=votes.includes(DEV);
-    const status=(c.epingle||(multi&&lr.length))?"keep":(c.precise?"prec":"");
-    const tag=c.epingle?`<span class="ev-tag k">${ic("star")} Retenu</span>`:(multi&&lr.length?`<span class="ev-tag k">${ic("star")} ${lr.length} retenu${lr.length>1?"s":""}</span>`:(c.precise?`<span class="ev-tag p">${ic("pencil")} À préciser</span>`:`<span class="ev-tag n">Proposé</span>`));
     const linkSel = isLink && !regroup ? `<div class="ev-link">${ic("link")}<select data-link="${esc(c.id)}"><option value="">↳ Sert un objectif…</option>${objs.map(o=>`<option value="${esc(o.id)}" ${c.lien===o.id?"selected":""}>${esc(o.texte.slice(0,40))}</option>`).join("")}</select></div>` : "";
-    const txt = multi
-      ? `<div class="ev-tx lines">${lines.map((ln,idx)=>`<button class="ev-line ${lr.includes(idx)?"on":""}" ${(RO||regroup)?"disabled":`data-lr="${esc(c.id)}:${idx}"`}>${ic("star")}<span>${esc(ln)}</span></button>`).join("")}</div>`
-      : `<div class="ev-tx">${esc(c.texte)}</div>`;
     const acts = RO ? (votes.length?`<span class="ev-rb static">${ic("check")} ${votes.length}</span>`:"") :
-      `<button class="ev-rb ${voted?"on":""}" data-vote="${esc(c.id)}">${ic("check")} D'accord${votes.length?` · ${votes.length}`:""}</button>${multi?"":`<button class="ev-rb ${c.epingle?"on keep":""}" data-pin="${esc(c.id)}">${ic("star")} ${c.epingle?"Retenu":"Retenir"}</button>`}<button class="ev-rb ${c.precise?"on prec":""}" data-precise="${esc(c.id)}">${ic("pencil")} ${c.precise?"À préciser":"Préciser"}</button>`;
+      `<button class="ev-rb ${voted?"on":""}" data-vote="${esc(c.id)}">${ic("check")} D'accord${votes.length?` · ${votes.length}`:""}</button>${reprisN?`<span class="ev-repris">${ic("check")} dans la synthèse · n°${reprisN}</span>`:(canSynth()?`<button class="ev-rb addsyn" data-addsynth="${esc(c.id)}">${ic("star")} Ajouter à la synthèse</button>`:"")}`;
     const more = RO?"":`<span class="ev-more">${list.length>1?`<button class="ev-mini" data-cup="${esc(c.id)}" ${i===0?"disabled":""} aria-label="Monter">${ic("up")}</button><button class="ev-mini" data-cdown="${esc(c.id)}" ${i===list.length-1?"disabled":""} aria-label="Descendre">${ic("down")}</button>`:""}<button class="ev-mini" data-ecart="${esc(c.id)}" title="Écarter">${ic("ban")}</button>${mine.has(c.id)?`<button class="ev-mini" data-edit="${esc(c.id)}">${ic("pencil")}</button><button class="ev-mini" data-del="${esc(c.id)}">${ic("trash")}</button>`:""}</span>`;
-    return `<article class="ev-card ${status} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
-      <div class="ev-ctop">${regroup?`<span class="ev-chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales,"",c.color)}<span class="ev-who"><b>${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?" · modifié":""}</span>${tag}</div>
-      ${txt}${linkSel}
+    return `<article class="ev-card ${reprisN?"used":""} ${regroup?"selectable":""} ${sel?"sel":""}" ${regroup?`data-sel="${esc(c.id)}"`:""}>
+      <div class="ev-ctop">${regroup?`<span class="ev-chk ${sel?"on":""}">${sel?ic("check"):""}</span>`:avatar(c.initiales,"",c.color)}<span class="ev-who"><b>${esc(c.role||"—")}</b> · ${esc(c.initiales||"")}${c.editedAt?" · modifié":""}</span></div>
+      <div class="ev-tx">${esc(c.texte)}</div>${linkSel}
       ${regroup?"":`<div class="ev-react">${acts}${more}</div><details class="ev-coms"><summary>${ic("comment")} Commentaires${coms.length?` · ${coms.length}`:""}</summary><div class="ev-com-list">${coms.map(k=>`<div class="ev-com"><b>${esc(k.role)}</b> · ${esc(k.ini)} : ${esc(k.txt)}</div>`).join("")}</div>${RO?"":`<div class="ev-com-add"><input data-keep id="com_${esc(c.id)}" placeholder="Répondre…"><button class="ev-mini" data-com="${esc(c.id)}">${ic("send")}</button></div>`}</details>`}
     </article>`; };
   const cards=list.length?list.map(card).join(""):`<div class="ev-empty">${ic("bulb")}<div><b>Personne n'a encore contribué.</b>${locked||RO?"":"<span>Lance‑toi — une idée, même imparfaite.</span>"}</div></div>`;
@@ -391,17 +398,20 @@ function viewEtape(){
   const readyBlock=`<div class="ev-ready"><div class="ev-ready-who">${voters.length?`<span class="ev-ready-avs">${voters.map(x=>avatar(x.ini,"sm",x.color)).join("")}</span><span><b>${voters.length}</b> ${voters.length>1?"ont":"a"} terminé cette étape</span>`:`<span class="muted">Personne n'a encore signalé avoir terminé cette étape.</span>`}</div>${RO?"":`<button class="ev-btn-ready ${meReady?"done":""}" data-ready="${e.id}">${ic("check")} ${meReady?"Terminé — annuler":"J'ai terminé cette étape"}</button>`}</div>`;
   return `${journey}
     <div class="ev-hero" style="--pc:${pc}">
-      <div class="ev-hero-top"><span class="ev-eyebrow">${ic(e.icon)} Étape ${etapeIdx+1} sur ${S.length}${e.phaseNom?` · ${esc(e.phaseNom)}`:""}</span><span class="ev-htools">${presHTML}${lockBtn}</span></div>
+      <div class="ev-mtl">${S.map((s,i)=>{const stt=i<etapeIdx?"done":i===etapeIdx?"on":"";return `<div class="ev-mstep ${stt}"><span class="ev-md">${stt==="done"?ic("check"):i+1}</span><span class="ev-mn">${esc(s.nom)}${i===etapeIdx?" · en cours":""}</span></div>`;}).join("")}</div>
+      <div class="ev-hero-top"><span class="ev-eyebrow">${ic(e.icon)} ${e.phaseNom?esc(e.phaseNom):"Étape "+(etapeIdx+1)}</span><span class="ev-htools">${presHTML}${lockBtn}</span></div>
       <h2 class="ev-title">${esc(e.nom)}</h2>
       <div class="ev-q">${ic("help")}<span>${esc(T(e.q))}</span></div>
       <div class="ev-prog"><span>Avancement</span><span class="ev-bar"><i style="width:${pct}%"></i></span><span>${pct}%</span></div>
     </div>
     <div class="ev-coach"><span class="ev-coach-ic">${ic("bulb")}</span><div class="ev-coach-tx"><b>${esc(T(e.def))}</b>${e.aide?`<p>${esc(T(e.aide))}</p>`:""}</div>${e.custom?"":`<button class="ev-coach-more" data-concept="${e.id}">${ic("help")} La notion</button>`}</div>
     ${recapBlock}
+    ${synthBoard(e)}
     <div class="ev-grid">
-      <div class="ev-main">${addZone}${regroupBar}<div class="ev-cards">${cards}</div>${ecartBlock}</div>
+      <div class="ev-main"><div class="ev-mur-h">${ic("pencil")} Le mur · propositions</div>${addZone}${regroupBar}<div class="ev-cards">${cards}</div>${ecartBlock}</div>
       <aside class="ev-side">${resStrip(e.id)}</aside>
     </div>
+    <div class="ev-pdef"><span class="ev-pdef-ic">${ic("compass")}</span><div class="ev-pdef-tx"><b>Le pilote ${projet.copilote?"et le co‑pilote animent":"(et un co‑pilote possible) anime"} le tableau</b><p>Il choisit les idées, réunit les doublons et reformule pour mettre l'étape au clair. Chaque idée garde son auteur, l'originale reste dans le mur — rien n'est confisqué.</p></div>${RO?"":`<button class="ev-pdef-co" data-copilote>${ic("user")} ${projet.copilote?(ident&&projet.copilote.ini===ident.initiales?"Quitter le co‑pilotage":"Co‑pilote : "+esc(projet.copilote.ini)):"Devenir co‑pilote"}</button>`}</div>
     ${readyBlock}
     <div class="ev-pager"><button class="ev-pgr" data-nav="-1">${ic("back")} Précédent</button><button class="ev-pgr next" data-nav="1">Suivant ${ic("chev")}</button></div>`;
 }
@@ -446,12 +456,15 @@ function ficheBodyHTML(){
   const tocHtml=`<div class="doc-toc"><h2>Sommaire</h2><ol class="toc-list">${toc.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`;
   const resume=syn?`<section class="doc-resume"><h2>Résumé</h2><p>${esc(syn)}</p></section>`:"";
   let num=0;
-  const sections=_S.map(e=>{ num++; const items=sortC(byEt[e.id]||[]); let body;
-    if(!items.length) body=`<p class="vide">À compléter.</p>`;
-    else { const kept=[], rest=[]; items.forEach(c=>{ const lines=splitLines(c.texte);
-        if(lines.length<=1){ (c.epingle?kept:rest).push({t:c.texte, r:c.role}); }
-        else { const lr=Array.isArray(c.lr)?c.lr:[]; lines.forEach((ln,idx)=>(lr.includes(idx)?kept:rest).push({t:ln, r:c.role})); } });
-      body=kept.map(k=>`<div class="retenu">${esc(k.t)}</div>`).join("")+(rest.length?`<ul>${rest.map(x=>`<li>${esc(x.t)} <span class="by">— ${esc(x.r)}</span></li>`).join("")}</ul>`:""); }
+  const sections=_S.map(e=>{ num++; const sy=synthOf(e.id); let body;
+    if(sy.length){ const ents=sy.slice().sort((a,b)=>synthSupport(b)-synthSupport(a));
+      body=ents.map(en=>{const au=synthAuthors(en).map(a=>a.ini).filter(Boolean).join(", "); return `<div class="retenu">${esc(en.texte)}${au?` <span class="by">— ${esc(au)}</span>`:""}</div>`;}).join(""); }
+    else { const items=sortC(byEt[e.id]||[]);
+      if(!items.length) body=`<p class="vide">À compléter.</p>`;
+      else { const kept=[], rest=[]; items.forEach(c=>{ const lines=splitLines(c.texte);
+          if(lines.length<=1){ (c.epingle?kept:rest).push({t:c.texte, r:c.role}); }
+          else { const lr=Array.isArray(c.lr)?c.lr:[]; lines.forEach((ln,idx)=>(lr.includes(idx)?kept:rest).push({t:ln, r:c.role})); } });
+        body=kept.map(k=>`<div class="retenu">${esc(k.t)}</div>`).join("")+(rest.length?`<ul>${rest.map(x=>`<li>${esc(x.t)} <span class="by">— ${esc(x.r)}</span></li>`).join("")}</ul>`:""); } }
     return `<section><h2><span class="sn">${num}.</span> ${esc(e.nom)}</h2>${body}</section>`;}).join("");
   const plan=acts.length?`<section><h2><span class="sn">${++num}.</span> Plan d'action</h2><table class="doc-pl"><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
   const repSec=_rf.length?`<section class="doc-rep"><h2>Repères</h2><table class="doc-pl"><tr><th>Repère</th><th>Valeur</th></tr>${_rf.map(it=>`<tr><td>${esc(it.label)}</td><td>${esc(it.value)}</td></tr>`).join("")}</table></section>`:"";
@@ -703,6 +716,27 @@ async function moveContrib(cid,dir){
 }
 async function addComment(cid,txt){if(!ident){openIdent();return;}txt=txt.trim();if(!txt)return;const c=contribs.find(x=>x.id===cid);if(!c)return;const coms=[...(c.comments||[]),{ini:ident.initiales,role:ident.role,txt,t:Date.now()}];upd(cid,{comments:coms});}
 async function setProj(obj){try{await updateDoc(doc(db,COL,projet.id),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
+
+/* ---------- Tableau de synthèse (par étape) ---------- */
+function isAdminBy(){ return !!(ident && projet && ((projet.pilote&&projet.pilote.ini===ident.initiales)||(projet.copilote&&projet.copilote.ini===ident.initiales))); }
+function canSynth(){ return !RO && isAdminBy(); }
+function synthOf(eid){ return ((projet.synthese||{})[eid]||[]); }
+function cById(cid){ return contribs.find(c=>c.id===cid); }
+function isReprisN(cid,eid){ const a=synthOf(eid); for(let i=0;i<a.length;i++){ if((a[i].sources||[]).includes(cid)) return i+1; } return 0; }
+function synthAuthors(en){ const seen=new Set(),out=[]; (en.sources||[]).forEach(cid=>{const c=cById(cid); if(c){const k=c.initiales||"?"; if(!seen.has(k)){seen.add(k); out.push({ini:c.initiales,role:c.role,color:c.color});}}}); return out; }
+function synthSupport(en){ let v=0; (en.sources||[]).forEach(cid=>{const c=cById(cid); if(c) v+=(Array.isArray(c.votes)?c.votes.length:0);}); return (en.sources||[]).length+v; }
+async function saveSynth(eid,arr){ const sy=Object.assign({},projet.synthese||{}); sy[eid]=arr; await setProj({synthese:sy}); }
+async function addSynth(eid,cid){ if(!canSynth()) return; const c=cById(cid); if(!c) return; const arr=synthOf(eid).slice(); arr.push({id:"s"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),texte:c.texte,sources:[cid]}); try{ await updateDoc(doc(db,COL,projet.id,"contributions",cid),{epingle:true}); }catch(_){}; await saveSynth(eid,arr); }
+async function delSynth(eid,sid){ if(!canSynth()) return; await saveSynth(eid,synthOf(eid).filter(e=>e.id!==sid)); }
+async function reunirSynth(eid,sid,cid){ if(!canSynth()) return; const arr=synthOf(eid).map(e=>e.id===sid?{...e,sources:[...(e.sources||[]),cid]}:e); try{ await updateDoc(doc(db,COL,projet.id,"contributions",cid),{epingle:true}); }catch(_){}; await saveSynth(eid,arr); }
+async function reformSynth(eid,sid,texte){ if(!canSynth()) return; await saveSynth(eid,synthOf(eid).map(e=>e.id===sid?{...e,texte}:e)); }
+function openReform(eid,sid){ const en=synthOf(eid).find(x=>x.id===sid); if(!en) return;
+  openSheet(`<div class="sheet-head"><h3>Reformuler dans le tableau</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:12.5px;margin:0 0 12px">Mets l'idée au clair. Les auteurs d'origine restent crédités, et l'idée reste dans le mur.</p><div class="field"><textarea id="rfTxt" rows="4">${esc(en.texte)}</textarea></div><div class="actions"><button class="btn primary" id="rfSave">${ic("check")} Enregistrer</button></div>`);
+  setTimeout(()=>$("#rfTxt")&&$("#rfTxt").focus(),40);
+  $("#rfSave").onclick=async()=>{ const v=$("#rfTxt").value.trim(); if(!v) return; await reformSynth(eid,sid,v); closeSheet(); }; }
+function openReunir(eid,sid){ const avail=ofEt(eid).filter(c=>!isReprisN(c.id,eid));
+  openSheet(`<div class="sheet-head"><h3>Réunir une idée proche</h3><button class="x" data-close>${ic("x")}</button></div><p class="muted" style="font-size:12.5px;margin:0 0 12px">Choisis une idée du mur qui dit la même chose — elle rejoint cette ligne et son auteur est crédité.</p>${avail.length?`<div class="reunir-list">${avail.map(c=>`<button class="reunir-it" data-reunir-pick="${esc(c.id)}">${avatar(c.initiales,"sm",c.color)}<span><b>${esc(c.role)}</b> · ${esc(c.initiales)}<br>${esc(c.texte)}</span></button>`).join("")}</div>`:`<div class="empty">Toutes les idées du mur sont déjà reprises.</div>`}`);
+  $("#overlay").querySelectorAll("[data-reunir-pick]").forEach(b=>b.onclick=async()=>{ await reunirSynth(eid,sid,b.dataset.reunirPick); closeSheet(); }); }
 async function toggleReady(eid){ if(!ident){openIdent();return;} const pret=Object.assign({}, projet.pret||{}); const arr=(pret[eid]||[]).slice(); const k=arr.findIndex(v=>v.dev===DEV); if(k>=0) arr.splice(k,1); else arr.push({dev:DEV,ini:ident.initiales,role:ident.role,color:ident.color||""}); pret[eid]=arr; setProj({pret}); }
 async function toggleLock(eid){const cur=projet.locked||[];setProj({locked:cur.includes(eid)?cur.filter(x=>x!==eid):[...cur,eid]});}
 async function fusionner(){ if(!ident){openIdent();return;} const sel=contribs.filter(c=>selected.has(c.id)); if(sel.length<2) return;
@@ -736,6 +770,11 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
   if(e.target.closest("[data-presentation]")){view="presentation";window.scrollTo&&window.scrollTo(0,0);return render();}
   if(e.target.closest("#presShare")){const url=base+"?p="+projet.id+"&ro=1&vue=presentation";navigator.clipboard?.writeText(url).then(()=>toast("Lien présentation copié",true)).catch(()=>toast(url));return;}
+  const asn=e.target.closest("[data-addsynth]");if(asn){const eid=stepAt(etapeIdx)?.id;if(eid)addSynth(eid,asn.dataset.addsynth);return;}
+  const srf=e.target.closest("[data-synth-reform]");if(srf){const eid=stepAt(etapeIdx)?.id;if(eid)openReform(eid,srf.dataset.synthReform);return;}
+  const sre=e.target.closest("[data-synth-reunir]");if(sre){const eid=stepAt(etapeIdx)?.id;if(eid)openReunir(eid,sre.dataset.synthReunir);return;}
+  const sdl=e.target.closest("[data-synth-del]");if(sdl){const eid=stepAt(etapeIdx)?.id;if(eid&&confirm("Retirer cette ligne du tableau de synthèse ?\n(Les idées d'origine restent dans le mur.)"))delSynth(eid,sdl.dataset.synthDel);return;}
+  if(e.target.closest("[data-copilote]")){ if(!ident)return openIdent(); const c=projet.copilote; if(c&&c.ini===ident.initiales) return setProj({copilote:null}); return setProj({copilote:{ini:ident.initiales,role:ident.role,color:ident.color||""}}); }
   const vt=e.target.closest("[data-vote]");if(vt){const c=contribs.find(x=>x.id===vt.dataset.vote);if(!c)return;const arr=Array.isArray(c.votes)?c.votes.slice():[];const k=arr.indexOf(DEV);if(k>=0)arr.splice(k,1);else arr.push(DEV);return upd(vt.dataset.vote,{votes:arr});}
   const pcz=e.target.closest("[data-precise]");if(pcz){const c=contribs.find(x=>x.id===pcz.dataset.precise);if(!c)return;return upd(pcz.dataset.precise,{precise:!c.precise});}
   const pn=e.target.closest("[data-pin]");if(pn){const c=contribs.find(x=>x.id===pn.dataset.pin);return upd(pn.dataset.pin,{epingle:!c.epingle});}
