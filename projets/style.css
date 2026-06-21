@@ -883,11 +883,22 @@ table.pl td{vertical-align:middle}
 .ev-step.on .ev-stepn{color:var(--sc);font-weight:800}.ev-step.done .ev-stepn{color:var(--muted)}
 .ev-step:hover .ev-stepb{transform:scale(1.09)}.ev-step.on:hover .ev-stepb{transform:scale(1.14)}
 
-/* ----- Recap encadré par étape ----- */
-.ev-recap-grid{display:flex;flex-direction:column;gap:10px}
-.ev-recap-step{border:1px solid color-mix(in srgb,var(--sc) 24%,var(--line));border-left:4px solid var(--sc);border-radius:12px;padding:10px 13px;background:color-mix(in srgb,var(--sc) 4%,var(--surface))}
-.ev-recap-lab{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;color:var(--sc);margin-bottom:7px}.ev-recap-lab .i{font-size:15px}
-.ev-recap-step ul{margin:0;padding-left:18px}.ev-recap-step li{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:3px}
+/* ----- Fil conducteur : étape précédente en accordéon ----- */
+.ev-fil{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;margin-bottom:14px;padding:1px 2px}
+.ev-fil-intro{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}.ev-fil-intro b{color:var(--ink);font-weight:700}.ev-fil-intro .i{font-size:15px;color:var(--faint)}
+.ev-fil-acc{flex:0 0 auto}
+.ev-fil-acc summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--sc);background:color-mix(in srgb,var(--sc) 10%,var(--surface));border:1px solid color-mix(in srgb,var(--sc) 26%,transparent);border-radius:999px;padding:6px 12px;transition:background .15s,box-shadow .15s;user-select:none}
+.ev-fil-acc summary::-webkit-details-marker{display:none}
+.ev-fil-acc summary:hover{background:color-mix(in srgb,var(--sc) 16%,var(--surface))}
+.ev-fil-acc summary .i{font-size:14px}
+.ev-fil-n{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--sc);color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+.ev-fil-chev{display:inline-flex;transition:transform .2s}.ev-fil-chev .i{font-size:14px}
+.ev-fil-acc[open]{flex:1 0 100%}
+.ev-fil-acc[open] .ev-fil-chev{transform:rotate(180deg)}
+.ev-fil-acc[open] summary{background:color-mix(in srgb,var(--sc) 14%,var(--surface));box-shadow:0 3px 10px color-mix(in srgb,var(--sc) 18%,transparent)}
+.ev-fil-acc ul{margin:9px 0 2px;padding:12px 14px 12px 30px;list-style:disc;background:color-mix(in srgb,var(--sc) 5%,var(--surface));border:1px solid color-mix(in srgb,var(--sc) 20%,var(--line));border-left:3px solid var(--sc);border-radius:12px;animation:filopen .25s ease}
+.ev-fil-acc li{font-size:13.5px;color:var(--ink);line-height:1.5;margin-bottom:3px}.ev-fil-acc li::marker{color:var(--sc)}
+@keyframes filopen{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 
 /* ----- Bouton aperçu (en-tête) ----- */
 .ev-apercu{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);border:none;border-radius:999px;padding:6px 12px;white-space:nowrap}.ev-apercu .i{font-size:14px}

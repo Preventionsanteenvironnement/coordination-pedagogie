@@ -377,12 +377,11 @@ function viewEtape(){
   const pc=e.c||"#6a5cff";
   const journey=`<div class="ev-steps">${S.map((s,i)=>{const stt=i<etapeIdx?"done":i===etapeIdx?"on":"";return `<button class="ev-step ${stt}" style="--sc:${s.c}" ${RO?"":`data-etape="${i}"`}><span class="ev-stepb">${stt==="done"?ic("check"):i+1}</span><span class="ev-stepn">${esc(s.nom)}</span></button>`;}).join("")}</div>`;
   const prevSteps=S.slice(0,etapeIdx);
-  const recapSteps = prevSteps.slice(-3).map(ps=>{ const sy=synthOf(ps.id); let lines=[];
+  const filData = prevSteps.slice(-3).map(ps=>{ const sy=synthOf(ps.id); let lines=[];
     if(sy.length){ lines=sy.slice().sort((a,b)=>synthSupport(b)-synthSupport(a)).map(en=>en.texte); }
     else { ofEt(ps.id).forEach(c=>{ const ls=splitLines(c.texte); if(ls.length<=1){ if(c.epingle) lines.push(c.texte); } else { const lr=Array.isArray(c.lr)?c.lr:[]; ls.forEach((ln,idx)=>{ if(lr.includes(idx)) lines.push(ln); }); } }); }
-    if(!lines.length) return ""; return `<div class="ev-recap-step" style="--sc:${ps.c}"><div class="ev-recap-lab">${ic(ps.icon)} ${esc(ps.nom)}</div><ul>${lines.slice(0,5).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`;
-  }).filter(Boolean).join("");
-  const recapBlock = prevSteps.length && recapSteps ? `<div class="ev-recap"><div class="ev-recap-h">${ic("compass")} Ce qui est retenu jusqu'ici — à garder sous les yeux</div><div class="ev-recap-grid">${recapSteps}</div></div>` : "";
+    return {nom:ps.nom,c:ps.c,icon:ps.icon,lines}; }).filter(x=>x.lines.length);
+  const filBlock = (prevSteps.length && filData.length) ? `<div class="ev-fil"><span class="ev-fil-intro">${ic("compass")} <b>${esc(e.nom)}</b> s'appuie sur</span>${filData.map(rs=>`<details class="ev-fil-acc" style="--sc:${rs.c}"><summary>${ic(rs.icon)} <span class="ev-fil-nom">${esc(rs.nom)}</span> <span class="ev-fil-n">${rs.lines.length}</span><span class="ev-fil-chev">${ic("down")}</span></summary><ul>${rs.lines.slice(0,6).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></details>`).join("")}</div>` : "";
   const card=(c,i)=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
     const reprisN=isReprisN(c.id,e.id);
     const votes=Array.isArray(c.votes)?c.votes:[]; const voted=votes.includes(DEV);
@@ -413,7 +412,7 @@ function viewEtape(){
       <div class="ev-prog"><span>Avancement</span><span class="ev-bar"><i style="width:${pct}%"></i></span><span>${pct}%</span></div>
     </div>
     <div class="ev-coach"><span class="ev-coach-ic">${ic("bulb")}</span><div class="ev-coach-tx"><b>${esc(T(e.def))}</b>${e.aide?`<p>${esc(T(e.aide))}</p>`:""}</div>${e.custom?"":`<button class="ev-coach-more" data-concept="${e.id}">${ic("help")} La notion</button>`}</div>
-    ${recapBlock}
+    ${filBlock}
     ${synthBoard(e)}
     <div class="ev-grid">
       <div class="ev-main"><div class="ev-mur-h">${ic("pencil")} Le mur · propositions</div>${addZone}${regroupBar}<div class="ev-cards">${cards}</div>${ecartBlock}</div>
