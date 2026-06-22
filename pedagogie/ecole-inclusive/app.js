@@ -45,11 +45,11 @@ function ic(name) { const p = ICONS[name]; return p ? `<svg class="i" viewBox="0
 const TYPE_LABEL = { loi: "Loi", reglement: "Texte officiel", ouvrage: "Ouvrage / ressource" };
 const TABS = [
   ["accueil", "home", "Accueil"],
-  ["dispositifs", "layers", "Dispositifs"],
-  ["troubles", "brain", "Troubles"],
-  ["comprendre", "book-open", "Comprendre"],
+  ["orienter", "target", "Agir vite"],
   ["adapter", "wand", "Adapter"],
-  ["orienter", "target", "Quel dispositif ?"],
+  ["dispositifs", "layers", "Plans"],
+  ["comprendre", "book-open", "Comprendre"],
+  ["troubles", "brain", "Troubles"],
   ["glossaire", "book", "Glossaire"],
 ];
 
@@ -83,7 +83,7 @@ function render() {
     dispositif: D[dispIdx] ? D[dispIdx].code : "Dispositif",
     troubles: "Les troubles", trouble: window.TROUBLES[trbIdx] ? window.TROUBLES[trbIdx].code : "Trouble",
     parcours: P[parcoursIdx] ? P[parcoursIdx].nom : "", theme: "",
-    orienter: "Quel dispositif ?", glossaire: "Glossaire", search: "Recherche",
+    orienter: "Agir vite", glossaire: "Glossaire", search: "Recherche",
   };
   if (page === "theme") titles.theme = P[parcoursIdx].themes[themeIdx].titre;
   $("#title").textContent = query ? "Recherche" : (titles[page] || "École inclusive");
@@ -114,25 +114,72 @@ function cmpCard(d, i) {
 }
 function viewAccueil() {
   const G = window.GUIDE;
-  const tiles = [
-    ["orienter", "target", "Quel dispositif ?", "Cochez, trouvez la piste"],
-    ["dispositifs", "layers", "Les 4 dispositifs", "PPS, PAP, PAI, PPRE"],
-    ["troubles", "brain", "Les troubles", "TND : TSA, TDAH, dys…"],
-    ["comprendre", "book-open", "Comprendre", "Cadre, acteurs, repères"],
-    ["adapter", "wand", "Adapter", "Pédagogie & supports"],
-    ["glossaire", "book", "Glossaire", "Tous les sigles"],
+  const quick = [
+    ["orienter", "target", "J'ai un élève en difficulté", "Observer, adapter, puis choisir la bonne piste.", "primary"],
+    ["adapter", "wand", "Adapter mon cours", "Consignes, supports, évaluations et posture.", ""],
+    ["dispositifs", "layers", "Comprendre les plans", "PPS, PAP, PAI, PPRE sans se perdre dans les sigles.", ""],
+    ["troubles", "brain", "Identifier les besoins", "TSA, TDAH, dys, langage, sensoriel : repères utiles.", ""],
+  ];
+  const starter = [
+    ["1", "Observer", "Repérer ce qui bloque vraiment : lire, copier, comprendre, rester attentif, gérer le bruit."],
+    ["2", "Adapter", "Modifier la tâche tout de suite : consigne courte, exemple, support aéré, réponse guidée."],
+    ["3", "Orienter", "Si le besoin dure, mobiliser l'équipe et choisir PPRE, PAP, PAI ou PPS."],
+  ];
+  const situations = [
+    ["Il ne copie pas le cours", "Délester l'écrit", "adapter"],
+    ["Il décroche vite", "Fractionner la tâche", "adapter"],
+    ["Il y a une notification", "Lire le plan", "dispositifs"],
+    ["Je ne sais pas quel plan", "Cochez les indices", "orienter"],
   ];
   return `
-    <div class="hero">
-      <span class="h-may">${esc(G.maj)}</span>
-      <h1>${esc(G.titre)}</h1>
-      <p>${esc(G.sousTitre)}.</p>
+    <div class="home-hero">
+      <div class="hh-copy">
+        <span class="h-may">${esc(G.maj)}</span>
+        <h1>Pratiques inclusives</h1>
+        <p>${esc(G.sousTitre)}. Commencez par agir simplement, puis approfondissez les dispositifs.</p>
+        <div class="hero-actions">
+          <button class="hero-btn primary" data-go="orienter">${ic("target")} Je veux aider un élève demain</button>
+          <button class="hero-btn" data-go="adapter">${ic("wand")} Voir les adaptations concrètes</button>
+        </div>
+      </div>
+      <div class="hh-panel" aria-label="Méthode en trois gestes">
+        <span class="hh-panel-k">Réflexe de base</span>
+        <strong>Observer → adapter → orienter</strong>
+        <small>Vous pouvez adapter pédagogiquement avant d'avoir un document officiel.</small>
+      </div>
     </div>
-    <div class="sec-title">${ic("layers")} Quel dispositif pour quel élève ?</div>
+
+    <section class="starter">
+      <div class="starter-head">
+        <span>${ic("user-check")}</span>
+        <div><h2>Si vous débutez, partez d'ici</h2><p>Le but n'est pas de diagnostiquer. Le but est de rendre l'entrée dans la tâche possible.</p></div>
+      </div>
+      <div class="starter-steps">${starter.map(([n, t, d]) =>
+        `<article class="starter-step"><span>${n}</span><strong>${t}</strong><p>${d}</p></article>`).join("")}</div>
+    </section>
+
+    <div class="sec-title">${ic("target")} Entrées rapides</div>
+    <div class="quick-grid">${quick.map(([p, icn, t, d, cls]) =>
+      `<button class="quick-card ${cls}" data-go="${p}">
+        <span class="qc-ic">${ic(icn)}</span><span class="qc-tx"><strong>${t}</strong><small>${d}</small></span><span class="t-go">${ic("chev")}</span>
+      </button>`).join("")}</div>
+
+    <div class="sec-title">${ic("help")} Situations fréquentes</div>
+    <div class="situation-strip">${situations.map(([t, d, p]) =>
+      `<button class="situation-chip" data-go="${p}"><strong>${t}</strong><span>${d}</span></button>`).join("")}</div>
+
+    <div class="sec-title">${ic("layers")} Les quatre plans, en un coup d'œil</div>
     <div class="compare">${window.DISPOSITIFS.map(cmpCard).join("")}</div>
-    <div class="sec-title">${ic("home")} Explorer le guide</div>
-    <div class="tiles">${tiles.map(([p, icn, t, d]) =>
-      `<button class="tile" data-go="${p}"><span class="t-ic">${ic(icn)}</span><span class="t-tx"><strong>${t}</strong><small>${d}</small></span><span class="t-go">${ic("chev")}</span></button>`).join("")}</div>
+
+    <div class="sec-title">${ic("book-open")} Explorer le guide complet</div>
+    <div class="tiles">
+      ${[
+        ["comprendre", "book-open", "Comprendre le cadre", "Principes, acteurs, PAS, LPI, AESH"],
+        ["glossaire", "book", "Glossaire", "Tous les sigles et mots utiles"],
+      ].map(([p, icn, t, d]) =>
+        `<button class="tile" data-go="${p}"><span class="t-ic">${ic(icn)}</span><span class="t-tx"><strong>${t}</strong><small>${d}</small></span><span class="t-go">${ic("chev")}</span></button>`).join("")}
+    </div>
+
     <div class="sec-title">${ic("external")} Pour aller plus loin</div>
     <div class="res-list">${window.RESSOURCES.map(r =>
       `<a class="res-ext" href="${esc(r.url)}" target="_blank" rel="noopener"><span class="re-ic">${ic("external")}</span><span class="re-tx"><strong>${esc(r.t)}</strong><small>${esc(r.d)}</small></span></a>`).join("")}</div>`;
@@ -352,7 +399,7 @@ function viewOrienteur() {
     <div class="sit-list">${window.SITUATIONS.map(s =>
       `<article class="sit"><h3>${ic("help")}<span>${esc(s.cas)}</span></h3><ol>${s.etapes.map(e => `<li>${esc(e)}</li>`).join("")}</ol>${srcChips(s.s)}</article>`).join("")}</div>`;
 
-  return `<div class="ori-head"><h2>Quel dispositif pour mon élève ?</h2><p>Cochez ce que vous observez. Une piste — PPS, PAP, PAI ou PPRE — apparaît avec la marche à suivre.</p></div>
+  return `<div class="ori-head"><h2>Agir vite : quel dispositif pour mon élève ?</h2><p>Cochez ce que vous observez. Une piste — PPS, PAP, PAI ou PPRE — apparaît avec la marche à suivre.</p></div>
     <div class="ori-grid">${groups}</div>
     ${result}
     ${sits}`;
