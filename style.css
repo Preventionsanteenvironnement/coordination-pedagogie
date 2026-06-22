@@ -422,16 +422,21 @@ header.hero p{opacity:.96}
 @media (prefers-reduced-motion: reduce){.card,header.hero::before,header.hero::after{animation:none}}
 
 /* ============ Cartes « Bientôt » + écran Arrive bientôt ============ */
-.card.soon{cursor:pointer;text-align:left;font:inherit;width:100%;border:1px solid var(--line);background:var(--card-bg,#fff)}
-.card.soon .card-ic{filter:grayscale(.55);opacity:.78}
-.card.soon h3,.card.soon p{opacity:.72}
-.card.soon::after{background:rgba(120,124,140,.06)}
-.card.soon:hover{transform:translateY(-3px)}
-.card.soon .arrow.lock{color:var(--text-soft)}
+.card.soon{cursor:pointer;text-align:left;font:inherit;width:100%;border:1.5px dashed color-mix(in srgb,#8b91a4 55%,var(--line));background:repeating-linear-gradient(135deg,#fafafc,#fafafc 11px,#f3f4f8 11px,#f3f4f8 22px)}
+.card.soon::before{background:#b9bdc9!important}
+.card.soon .card-ic{filter:grayscale(1);opacity:.65;background:linear-gradient(135deg,#9498a6,#b6bac6);box-shadow:none}
+.card.soon h3{opacity:.62}
+.card.soon p{opacity:.5}
+.card.soon::after{background:rgba(120,124,140,.04)}
+.card.soon:hover{transform:translateY(-3px);border-color:#8b91a4;box-shadow:0 12px 26px rgba(60,64,82,.14)}
+.card.soon .arrow.lock{color:#8b91a4}
 .card.soon .arrow.lock svg{width:18px;height:18px}
-.badge.badge-soon{background:#5b6376;color:#fff}
+.card.soon .type-tag{color:#7d8294}
+.badge.badge-soon{background:#5b6376;color:#fff;display:inline-flex;align-items:center;gap:4px}
+.badge.badge-soon::before{content:"";width:7px;height:7px;border-radius:50%;background:#f0b400}
 
 .soon-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(22,24,40,.5);backdrop-filter:blur(3px);opacity:0;transition:opacity .22s}
+.soon-overlay[hidden]{display:none}
 .soon-overlay.open{opacity:1}
 .soon-modal{position:relative;width:min(420px,100%);background:#fff;border-radius:24px;padding:30px 28px 26px;text-align:center;box-shadow:0 30px 70px rgba(20,20,60,.32);transform:translateY(14px) scale(.97);transition:transform .24s cubic-bezier(.2,.8,.3,1)}
 .soon-overlay.open .soon-modal{transform:none}
