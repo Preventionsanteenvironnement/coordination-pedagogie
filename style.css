@@ -420,3 +420,27 @@ header.hero p{opacity:.96}
 .grid .card:nth-child(2){animation-delay:.05s}.grid .card:nth-child(3){animation-delay:.1s}.grid .card:nth-child(4){animation-delay:.16s}.grid .card:nth-child(5){animation-delay:.22s}.grid .card:nth-child(6){animation-delay:.28s}.grid .card:nth-child(7){animation-delay:.34s}
 @keyframes portalCardUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){.card,header.hero::before,header.hero::after{animation:none}}
+
+/* ============ Cartes « Bientôt » + écran Arrive bientôt ============ */
+.card.soon{cursor:pointer;text-align:left;font:inherit;width:100%;border:1px solid var(--line);background:var(--card-bg,#fff)}
+.card.soon .card-ic{filter:grayscale(.55);opacity:.78}
+.card.soon h3,.card.soon p{opacity:.72}
+.card.soon::after{background:rgba(120,124,140,.06)}
+.card.soon:hover{transform:translateY(-3px)}
+.card.soon .arrow.lock{color:var(--text-soft)}
+.card.soon .arrow.lock svg{width:18px;height:18px}
+.badge.badge-soon{background:#5b6376;color:#fff}
+
+.soon-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(22,24,40,.5);backdrop-filter:blur(3px);opacity:0;transition:opacity .22s}
+.soon-overlay.open{opacity:1}
+.soon-modal{position:relative;width:min(420px,100%);background:#fff;border-radius:24px;padding:30px 28px 26px;text-align:center;box-shadow:0 30px 70px rgba(20,20,60,.32);transform:translateY(14px) scale(.97);transition:transform .24s cubic-bezier(.2,.8,.3,1)}
+.soon-overlay.open .soon-modal{transform:none}
+.soon-x{position:absolute;top:14px;right:16px;border:none;background:none;font-size:26px;line-height:1;color:#9aa0b0;cursor:pointer;padding:2px 6px;border-radius:8px}
+.soon-x:hover{background:#f1f2f6;color:#444}
+.soon-art{margin:2px auto 6px;width:200px;max-width:80%}
+.soon-art svg{width:100%;height:auto;--soon-accent:var(--accent)}
+.soon-eyebrow{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,#fff);border-radius:999px;padding:4px 12px;margin-bottom:10px}
+.soon-modal h2{font-size:1.35rem;margin:0 0 8px;color:var(--text,#1c2030)}
+.soon-tx{font-size:.95rem;line-height:1.55;color:var(--text-soft,#5a6072);margin:0 0 20px}
+.soon-cta{border:none;cursor:pointer;font:inherit;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#a06bff));border-radius:13px;padding:11px 26px;box-shadow:0 8px 20px color-mix(in srgb,var(--accent) 30%,transparent)}
+.soon-cta:hover{filter:brightness(1.05)}
