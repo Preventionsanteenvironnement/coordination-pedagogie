@@ -432,7 +432,9 @@ function synthBoard(e){
     ? (compact ? `<div class="ev-chips">${chips}</div>${detail}${co&&!synthOpen?`<div class="ev-chip-hint">${ic("info")} Clique une étiquette pour la déplier, voir son origine ou la modifier.</div>`:""}`
                 : items+(co?`<div class="ev-sslot">${ic("plus")} La prochaine idée retenue s'ajoute ici, par ordre de soutien…</div>`:""))
     : `<div class="ev-sempty">${ic("table")}<span>${co?"Compose le tableau : sous chaque idée du mur, clique « Ajouter à la synthèse ».":"Le pilote n'a pas encore composé la synthèse de cette étape."}</span></div>`;
-  return `<section class="ev-synth ${compact?"is-compact":""}" style="--pc:${pc}"><div class="ev-synth-h"><span class="ev-synth-ic">${ic("table")}</span><b>Le tableau · ${esc(e.nom)}</b>${viewToggle}<span class="ev-synth-pil">${piloteBadge}</span></div>${body}</section>`;
+  const directBtn = co?`<button class="ev-direct ${projet.directMode?"on":""}" data-directmode title="${projet.directMode?"Mode direct ACTIVÉ : les propositions des collègues entrent directement dans le tableau. Cliquez pour reprendre la main (validation par le pilote).":"Activer le mode direct : les propositions des collègues iront droit dans le tableau, sans validation de votre part."}">${ic("bolt")} Mode direct · ${projet.directMode?"ON":"OFF"}</button>`:"";
+  const directNote = projet.directMode?`<div class="ev-direct-note">${ic("bolt")} Mode direct activé — chaque nouvelle proposition arrive directement ici.</div>`:"";
+  return `<section class="ev-synth ${compact?"is-compact":""}" style="--pc:${pc}"><div class="ev-synth-h"><span class="ev-synth-ic">${ic("table")}</span><b>Le tableau · ${esc(e.nom)}</b>${viewToggle}${directBtn}<span class="ev-synth-pil">${piloteBadge}</span></div>${directNote}${body}</section>`;
 }
 function viewEtape(){
   const S=STEPS(); if(!S.length) return viewOverview();
@@ -463,7 +465,7 @@ function viewEtape(){
   const ecartBlock = ecartees.length?`<details class="ev-ecart"><summary>${ic("ban")} Écartées · ${ecartees.length}</summary>${ecartees.map(c=>`<div class="ev-ec"><div class="ev-ec-tx">${esc(c.texte)} <span class="ev-by">— ${esc(c.role)}</span>${c.raison?`<div class="ev-ec-r">Raison : ${esc(c.raison)}</div>`:""}</div>${RO?"":`<button class="ev-mini" data-reint="${esc(c.id)}" title="Réintégrer">${ic("check")}</button>`}</div>`).join("")}</details>`:"";
   const regroupBar = (!RO&&!locked&&list.length>1) ? (regroup?`<div class="ev-regroup"><span>${selected.size} sélectionné(s)</span><button class="ev-mini2" data-merge ${selected.size<2?"disabled":""}>${ic("merge")} Fusionner</button><button class="ev-mini2" data-regroup>Annuler</button></div>`:`<button class="ev-mini2 reg" data-regroup>${ic("merge")} Regrouper des idées proches</button>`) : "";
   const addZone=(RO||locked||regroup)?(locked?`<div class="ev-locked">${ic("lock")} Étape verrouillée — contributions figées.</div>`:"") :
-    `<div class="ev-compose"><div class="ev-comp-h">${ic("pencil")} Votre proposition</div><textarea data-keep id="newContrib" rows="2" placeholder="${ident?"Une observation, une hypothèse, une idée…":"Identifiez‑vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="ev-comp-foot"><span class="ev-micro">Le pilote reprendra les idées retenues dans la synthèse.</span><button class="ev-add" id="sendContrib">${ic("plus")} Proposer</button></div></div>`;
+    `<div class="ev-compose"><div class="ev-comp-h">${ic("pencil")} Votre proposition</div><textarea data-keep id="newContrib" rows="2" placeholder="${ident?"Une observation, une hypothèse, une idée…":"Identifiez‑vous pour contribuer…"}"></textarea><div class="nudge" id="nudge" hidden></div><div class="ev-comp-foot">${projet.directMode?`<span class="ev-micro ev-micro-direct">${ic("bolt")} Votre proposition apparaîtra aussitôt dans le tableau.</span>`:`<span class="ev-micro">Le pilote reprendra les idées retenues dans la synthèse.</span>`}<button class="ev-add" id="sendContrib">${ic("plus")} Proposer</button></div></div>`;
   const lockBtn=RO?"":`<button class="ev-lock ${locked?"on":""}" data-lock="${e.id}" aria-label="${locked?"Déverrouiller l'étape":"Verrouiller l'étape"}">${ic(locked?"lock":"unlock")}</button>`;
   const on=(typeof onlineNow==="function")?onlineNow():[]; const presHTML=on.length?`<span class="ev-pres"><span class="ev-pres-dot"></span><span class="ev-pres-avs">${on.slice(0,4).map(p=>avatar(p.initiales,"sm",p.color)).join("")}</span>${on.length} en ligne</span>`:"";
   const v=visIdx(); const pos=v.indexOf(etapeIdx); const pct=Math.round((pos+1)/Math.max(v.length,1)*100);
@@ -775,7 +777,9 @@ async function openProjet(id){
   startPresence(id);
 }
 async function addContribution(texte){ if(!ident){openIdent();return;} texte=texte.trim(); if(!texte) return; const sid=stepAt(etapeIdx)?.id; if(!sid) return; if(isLocked(sid)){toast("Étape verrouillée.");return;}
-  try{const ref=await addDoc(collection(db,COL,projet.id,"contributions"),{etape:sid,texte,initiales:ident.initiales,role:ident.role,color:ident.color||"",epingle:false,comments:[],createdAt:serverTimestamp()});mine.add(ref.id);saveMine();saved();}catch(e){console.error(e);toast("Envoi impossible.");}}
+  try{const ref=await addDoc(collection(db,COL,projet.id,"contributions"),{etape:sid,texte,initiales:ident.initiales,role:ident.role,color:ident.color||"",epingle:!!projet.directMode,comments:[],createdAt:serverTimestamp()});mine.add(ref.id);saveMine();
+    if(projet.directMode){ const arr=synthOf(sid).slice(); arr.push({id:"s"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),texte,sources:[ref.id]}); await saveSynth(sid,arr); toast("Proposition ajoutée directement au tableau."); }
+    saved();}catch(e){console.error(e);toast("Envoi impossible.");}}
 async function upd(cid,obj){try{await updateDoc(doc(db,COL,projet.id,"contributions",cid),obj);saved();}catch(e){console.error(e);toast("Action impossible.");}}
 async function delContribution(cid){try{await deleteDoc(doc(db,COL,projet.id,"contributions",cid));mine.delete(cid);saveMine();saved();}catch(e){console.error(e);toast("Suppression impossible.");}}
 async function toggleLine(cid,idx){ const c=contribs.find(x=>x.id===cid); if(!c) return; const cur=Array.isArray(c.lr)?c.lr.slice():[]; const k=cur.indexOf(idx); if(k>=0) cur.splice(k,1); else cur.push(idx); upd(cid,{lr:cur}); }
@@ -849,6 +853,7 @@ document.addEventListener("click", e=>{
   const srf=e.target.closest("[data-synth-reform]");if(srf){const eid=stepAt(etapeIdx)?.id;if(eid)openReform(eid,srf.dataset.synthReform);return;}
   const sre=e.target.closest("[data-synth-reunir]");if(sre){const eid=stepAt(etapeIdx)?.id;if(eid)openReunir(eid,sre.dataset.synthReunir);return;}
   const sdl=e.target.closest("[data-synth-del]");if(sdl){const eid=stepAt(etapeIdx)?.id;if(eid&&confirm("Retirer cette ligne du tableau de synthèse ?\n(Les idées d'origine restent dans le mur.)"))delSynth(eid,sdl.dataset.synthDel);return;}
+  if(e.target.closest("[data-directmode]")){ if(!canSynth())return; return setProj({directMode:!projet.directMode}); }
   if(e.target.closest("[data-copilote]")){ if(!ident)return openIdent(); const c=projet.copilote; if(c&&c.ini===ident.initiales) return setProj({copilote:null}); return setProj({copilote:{ini:ident.initiales,role:ident.role,color:ident.color||""}}); }
   const who=e.target.closest("[data-who]");if(who) return openParticipant(who.dataset.who);
   if(e.target.closest("#chatBtn")){ chatOpen=!chatOpen; if(chatOpen)markChatSeen(); toggleChatPanel(); return; }
