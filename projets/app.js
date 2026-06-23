@@ -416,7 +416,7 @@ function synthBoard(e){
     return `<div class="ev-sitem"><span class="ev-snum">${i+1}</span><div class="ev-sbody"><div class="ev-stext">${esc(en.texte)}</div><div class="ev-sfrom">${m.au.length?`<span class="ev-savs">${m.au.slice(0,4).map(a=>avatar(a.ini,"sm",a.color)).join("")}</span><span class="ev-sau">${m.au.map(a=>esc(a.ini)).join(", ")}</span>`:""}${m.merged?`<span class="ev-merged">${(en.sources||[]).length} réunies</span>`:(m.reformed?`<span class="ev-reform">reformulé</span>`:"")}<span class="ev-supp" title="Soutien">${ic("chart")} ${m.supp}</span>${actsHTML(en)}</div></div></div>`;
   }).join("");
   // -- Vue condensée (étiquettes colorées + détail au clic) --
-  const chips=entries.map((en)=>{ const au=synthAuthors(en); const a0=au[0]||{}; const cc=a0.color||pc; const open=synthOpen===en.id; const tx=en.texte.length>52?en.texte.slice(0,50).trim()+"…":en.texte; const n=(en.sources||[]).length;
+  const chips=entries.map((en)=>{ const au=synthAuthors(en); const a0=au[0]||{}; const cc=a0.color||pc; const open=synthOpen===en.id; const tx=en.texte; const n=(en.sources||[]).length;
     return `<button class="ev-chip ${open?"open":""}" style="--cc:${cc}" data-synthchip="${esc(en.id)}">${avatar(a0.ini,"sm",cc)}<span class="ev-chip-t">${esc(tx)}</span>${n>1?`<span class="ev-chip-m" title="${n} idées réunies">${ic("merge")}${au.length>1?" "+au.length+" auteurs":" "+n}</span>`:""}</button>`;
   }).join("");
   let detail="";

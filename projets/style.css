@@ -870,10 +870,10 @@ table.pl td{vertical-align:middle}
 
 /* ----- Vue condensée : étiquettes colorées ----- */
 .ev-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
-.ev-chip{display:inline-flex;align-items:center;gap:7px;max-width:100%;border:1.5px solid color-mix(in srgb,var(--cc) 32%,transparent);background:color-mix(in srgb,var(--cc) 9%,var(--surface));color:color-mix(in srgb,var(--cc) 82%,#222);border-radius:999px;padding:6px 13px 6px 6px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s;animation:evpop .4s both}
+.ev-chip{display:inline-flex;align-items:flex-start;gap:7px;max-width:100%;border:1.5px solid color-mix(in srgb,var(--cc) 32%,transparent);background:color-mix(in srgb,var(--cc) 9%,var(--surface));color:color-mix(in srgb,var(--cc) 82%,#222);border-radius:15px;padding:7px 13px 7px 7px;font:inherit;font-size:13.5px;font-weight:600;text-align:left;cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s;animation:evpop .4s both}
 .ev-chip:hover{background:color-mix(in srgb,var(--cc) 15%,var(--surface));transform:translateY(-1px);box-shadow:0 4px 12px color-mix(in srgb,var(--cc) 22%,transparent)}
 .ev-chip .ava{width:22px;height:22px;font-size:10px;flex:none}
-.ev-chip-t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev-chip-t{min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.4;padding-top:1px}
 .ev-chip-m{flex:none;display:inline-flex;align-items:center;gap:1px;font-size:11px;font-weight:800;color:var(--cc)}.ev-chip-m .i{font-size:13px}
 .ev-chip.open{background:var(--cc);color:#fff;border-color:var(--cc);box-shadow:0 6px 16px color-mix(in srgb,var(--cc) 34%,transparent)}
 .ev-chip.open .ava{background:rgba(255,255,255,.24)!important;color:#fff}.ev-chip.open .ev-chip-m{color:#fff}
