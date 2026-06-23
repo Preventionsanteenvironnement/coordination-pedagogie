@@ -342,7 +342,7 @@ function viewOverview(){
   return `<div id="onlineInline" hidden>${onlineStrip()}</div>
     <div class="ov2-hero">
       <div class="ov2-hero-top"><span class="ov2-eyebrow">${ic("users")} Projet d'équipe</span>${on.length?`<span class="ev-pres"><span class="ev-pres-dot"></span><span class="ev-pres-avs">${on.slice(0,4).map(p=>avatar(p.initiales,"sm",p.color)).join("")}</span>${on.length} en ligne</span>`:""}</div>
-      <div class="ov2-hero-main"><div class="ov2-ring" style="--p:${pct}"><span>${pct}<small>%</small></span></div><div class="ov2-htx"><h1>${esc(projet.titre)}</h1>${projet.contexte?`<p class="ov2-ctx">${esc(projet.contexte)}</p>`:""}<div class="ov2-meta"><span class="ov2-stat" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ov2-typ">${esc(typeLabel())}</span>`:""}<span class="ov2-cnt">${done}/${S.length} étapes</span></div></div></div>
+      <div class="ov2-hero-main"><div class="ov2-ring" style="--p:${pct}"><span>${pct}<small>%</small></span></div><div class="ov2-htx"><h1>${esc(projet.titre)}${RO?"":`<button class="ov2-rename" data-rename aria-label="Renommer le projet" title="Renommer">${ic("pencil")}</button>`}</h1>${projet.contexte?`<p class="ov2-ctx">${esc(projet.contexte)}</p>`:""}<div class="ov2-meta"><span class="ov2-stat" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ov2-typ">${esc(typeLabel())}</span>`:""}<span class="ov2-cnt">${done}/${S.length} étapes</span></div></div></div>
       <div class="ov2-pilote">${pil?`${ic("compass")}<span class="ov2-pwho">${avatar(pil.ini,"sm",pil.color)}<b>${esc(pil.ini)}</b> · ${esc(pil.role)}</span>${RO?"":`<button class="ov2-plnk" data-pilote>${ident&&pil.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`${ic("compass")}<span class="ov2-pnone">Pilote à définir — qui mène ce projet ?</span>${RO?"":`<button class="ov2-ptake" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div>
     </div>
     ${projet.statut==="valide"?`<button class="ov2-valid" data-presentation>${ic("check")}<span><b>Projet validé</b> — voir la présentation</span>${ic("chev")}</button>`:""}
@@ -526,19 +526,19 @@ function ficheBodyHTML(){
   const _jal=(projet.jalons||[]).slice().sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
   const _S=STEPS();
   const toc=[]; if(syn) toc.push("Résumé"); if(_rf.length) toc.push("Repères"); if(_jal.length) toc.push("Calendrier"); _S.forEach((e,i)=>toc.push((i+1)+". "+e.nom)); if(acts.length) toc.push((_S.length+1)+". Plan d'action"); if(_res.length) toc.push("Ressources & références");
-  const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}</div><div class="dc-meta">${projet.pilote?`Piloté par ${esc(projet.pilote.ini)} (${esc(projet.pilote.role)}) · `:""}${conts.length} contributeur(s) · ${dateFr()}</div></div>`;
+  const cover=`<div class="doc-cover"><div class="dc-brand">Atelier projet — fiche de projet</div><h1 class="dc-title">${esc(projet.titre)}</h1>${projet.contexte?`<p class="dc-ctx">${esc(projet.contexte)}</p>`:""}<div class="dc-tags"><span class="st-tag" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ty-tag">${esc(typeLabel())}</span>`:""}</div><div class="dc-meta">${projet.pilote?`Piloté par ${esc(projet.pilote.ini)} (${esc(projet.pilote.role)}) · `:""}${dateFr()}</div></div>`;
   const tocHtml=`<div class="doc-toc"><h2>Sommaire</h2><ol class="toc-list">${toc.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`;
   const resume=syn?`<section class="doc-resume"><h2>Résumé</h2><p>${esc(syn)}</p></section>`:"";
   let num=0;
   const sections=_S.map(e=>{ num++; const sy=synthOf(e.id); let body;
     if(sy.length){ const ents=sy.slice().sort((a,b)=>synthSupport(b)-synthSupport(a));
-      body=ents.map(en=>{const au=synthAuthors(en).map(a=>a.ini).filter(Boolean).join(", "); return `<div class="retenu">${esc(en.texte)}${au?` <span class="by">— ${esc(au)}</span>`:""}</div>`;}).join(""); }
+      body=ents.map(en=>`<div class="retenu">${esc(en.texte)}</div>`).join(""); }
     else { const items=sortC(byEt[e.id]||[]);
       if(!items.length) body=`<p class="vide">À compléter.</p>`;
       else { const kept=[], rest=[]; items.forEach(c=>{ const lines=splitLines(c.texte);
           if(lines.length<=1){ (c.epingle?kept:rest).push({t:c.texte, r:c.role}); }
           else { const lr=Array.isArray(c.lr)?c.lr:[]; lines.forEach((ln,idx)=>(lr.includes(idx)?kept:rest).push({t:ln, r:c.role})); } });
-        body=kept.map(k=>`<div class="retenu">${esc(k.t)}</div>`).join("")+(rest.length?`<ul>${rest.map(x=>`<li>${esc(x.t)} <span class="by">— ${esc(x.r)}</span></li>`).join("")}</ul>`:""); } }
+        body=kept.map(k=>`<div class="retenu">${esc(k.t)}</div>`).join("")+(rest.length?`<ul>${rest.map(x=>`<li>${esc(x.t)}</li>`).join("")}</ul>`:""); } }
     return `<section><h2><span class="sn">${num}.</span> ${esc(e.nom)}</h2>${body}</section>`;}).join("");
   const plan=acts.length?`<section><h2><span class="sn">${++num}.</span> Plan d'action</h2><table class="doc-pl"><tr><th>Action</th><th>Responsable</th><th>Échéance</th><th>Statut</th></tr>${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td>${esc(a.resp||"—")}</td><td>${esc(a.ech||"—")}</td><td>${esc((PST[a.pst||"todo"]).l)}</td></tr>`).join("")}</table></section>`:"";
   const repSec=_rf.length?`<section class="doc-rep"><h2>Repères</h2><table class="doc-pl"><tr><th>Repère</th><th>Valeur</th></tr>${_rf.map(it=>`<tr><td>${esc(it.label)}</td><td>${esc(it.value)}</td></tr>`).join("")}</table></section>`:"";
@@ -570,7 +570,7 @@ function viewPresentation(){
       ${valid?`<span class="pres-badge">${ic("check")} Projet validé</span>`:`<span class="pres-badge draft" style="--sc:${st.c}">${esc(st.l)}</span>`}
       <h1 class="pres-title">${esc(projet.titre)}</h1>
       ${projet.contexte?`<p class="pres-ctx">${esc(projet.contexte)}</p>`:""}
-      <div class="pres-meta">${projet.pilote?`<span class="pres-by">${avatar(projet.pilote.ini,"sm",projet.pilote.color)} Piloté par ${esc(projet.pilote.ini)} · ${esc(projet.pilote.role)}</span>`:""}<span class="pres-by">${ic("users")} ${conts.length} contributeur${conts.length>1?"s":""}</span>${periode?`<span class="pres-by">${ic("calendar")} ${esc(periode)}</span>`:""}</div>
+      <div class="pres-meta">${projet.pilote?`<span class="pres-by">${avatar(projet.pilote.ini,"sm",projet.pilote.color)} Piloté par ${esc(projet.pilote.ini)} · ${esc(projet.pilote.role)}</span>`:""}${periode?`<span class="pres-by">${ic("calendar")} ${esc(periode)}</span>`:""}</div>
     </div>
     <div class="pres-journey">${journey}</div>
     ${body?`<div class="pres-grid">${body}</div>`:`<div class="empty">Pas encore de contenu à présenter — renseignez et retenez vos étapes.</div>`}
@@ -683,7 +683,7 @@ function parseLoose(v){
 async function importFromData(data){
   const p=(data&&data.project)||data; if(!p||typeof p!=="object"){toast("Format non reconnu.");return false;}
   try{
-    const ref=await addDoc(collection(db,COL),{ titre:(p.titre||"Projet importé")+" (importé)", contexte:p.contexte||"", type:p.type||"peda", typeCustom:p.typeCustom||"", statut:p.statut||"brouillon", reperes:p.reperes||{}, ressources:p.ressources||[], jalons:p.jalons||[], enabled:Array.isArray(p.enabled)?p.enabled:null, etapeNoms:p.etapeNoms||{}, locked:p.locked||[], createdAt:serverTimestamp() });
+    const ref=await addDoc(collection(db,COL),{ titre:(p.titre||"Projet importé"), contexte:p.contexte||"", type:p.type||"peda", typeCustom:p.typeCustom||"", statut:p.statut||"brouillon", reperes:p.reperes||{}, ressources:p.ressources||[], jalons:p.jalons||[], enabled:Array.isArray(p.enabled)?p.enabled:null, etapeNoms:p.etapeNoms||{}, locked:p.locked||[], createdAt:serverTimestamp() });
     for(const c of (data.contributions||[])){ await addDoc(collection(db,COL,ref.id,"contributions"),{ etape:c.etape||"constats", texte:c.texte||"", initiales:c.initiales||"", role:c.role||"", epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo", createdAt:serverTimestamp() }); }
     toast("Projet importé",true); openProjet(ref.id); return true;
   }catch(e){ console.error(e); toast("Enregistrement impossible."); return false; }
@@ -959,6 +959,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#impJson")) return importJSON();
   if(e.target.closest("#pasteJson")) return pasteJSON();
   if(e.target.closest("#delProj")) return delProjet();
+  if(e.target.closest("[data-rename]")){ if(!projet)return; const v=prompt("Renommer le projet :", projet.titre||""); if(v!==null&&v.trim()) setProj({titre:v.trim()}); return; }
   if(e.target.closest("#share")){const url=base+"?p="+projet.id+"&ro=1";navigator.clipboard?.writeText(url).then(()=>toast("Lien lecture copié",true)).catch(()=>toast(url));return;}
   if(e.target.closest("[data-close]")||e.target.id==="overlay") return closeSheet();
   if(e.target.closest("#identBtn")) return openIdent();

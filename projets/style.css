@@ -999,3 +999,8 @@ table.pl td{vertical-align:middle}
 .chat-send{width:42px;height:42px;flex:none;border:none;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}.chat-send .i{font-size:18px}
 .chat-send:hover{filter:brightness(1.05)}
 @media(max-width:560px){.chat-panel{top:auto;left:0;right:0;width:100%;height:86vh;border-radius:20px 20px 0 0;transform:translateY(100%)}.chat-panel.show{transform:none}}
+
+/* Renommer le projet (crayon à côté du titre) */
+.ov2-rename{border:none;background:none;color:rgba(255,255,255,.7);cursor:pointer;padding:3px 5px;margin-left:8px;border-radius:8px;vertical-align:middle;transition:background .15s,color .15s}
+.ov2-rename:hover{color:#fff;background:rgba(255,255,255,.18)}
+.ov2-rename .i{font-size:17px}
