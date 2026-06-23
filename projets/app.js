@@ -251,9 +251,9 @@ function render(){
   const inProj = projet && view!=="liste";
   $("#backLabel").textContent = view==="liste" ? "Portail" : (view==="overview"?"Projets":"Projet");
   $("#title").textContent = inProj ? projet.titre : "Atelier projet";
-  $("#subtitle").textContent = inProj ? ({overview:"Vue d'ensemble",fiche:"Fiche projet",matrice:"Alignement",plan:"Plan d'action",presentation:"Présentation"}[view]||stepAt(etapeIdx)?.nom) : "Construire à plusieurs mains";
+  $("#subtitle").textContent = inProj ? ({overview:"Vue d'ensemble",fiche:"Fiche projet",matrice:"Alignement",plan:"Plan d'action",presentation:"Fiche du projet"}[view]||stepAt(etapeIdx)?.nom) : "Construire à plusieurs mains";
   const ib=$("#identBtn"); if(ident && !RO){ ib.hidden=false; ib.innerHTML=`${ic("user")} ${esc(ident.initiales)}`; } else ib.hidden=true;
-  const fb=$("#ficheBtn"); fb.hidden = !(inProj && view!=="fiche"); fb.innerHTML=`${ic("file")} Fiche`;
+  const fb=$("#ficheBtn"); fb.hidden = !(inProj && view!=="presentation"); fb.innerHTML=`${ic("file")} Fiche`;
   updateChatBadge();
   const showBar = inProj && view!=="overview" && view!=="presentation";
   $("#etapebar").hidden = !showBar; if(showBar) renderEtapeBar();
@@ -269,7 +269,7 @@ function renderEtapeBar(){
     STEPS().map((e,i)=>`<button class="estep ${view==="etape"&&i===etapeIdx?"active":""}" data-etape="${i}">${ic(e.icon)}${esc(e.nom)}${isLocked(e.id)?ic("lock"):(filled.has(e.id)?'<span class="dot"></span>':"")}</button>`).join("") +
     `<button class="estep ${view==="plan"?"active":""}" data-plan>${ic("table")}Plan d'action</button>` +
     `<button class="estep ${view==="matrice"?"active":""}" data-matrice>${ic("columns")}Alignement</button>` +
-    `<button class="estep fiche ${view==="fiche"?"active":""}" data-fiche>${ic("file")}Fiche</button>`;
+    `<button class="estep fiche ${view==="presentation"?"active":""}" data-fiche>${ic("file")}Fiche</button>`;
 }
 
 function viewListe(){
@@ -356,7 +356,7 @@ function viewOverview(){
     ${reperesCard()}
     ${jalonsCard()}
     ${resCard()}
-    <div class="fiche-actions" style="margin-top:16px"><button class="btn accent" data-presentation>${ic("eye")} Présentation</button><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
+    <div class="fiche-actions" style="margin-top:16px"><button class="btn primary" data-presentation>${ic("file")} Voir la fiche</button><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
     ${settings}
     <div class="ov-foot">${RO?"":`<button class="lnk" id="promptIA">${ic("wand")} Générer un projet (JSON)</button><button class="lnk" id="impJson">${ic("file")} Importer un fichier JSON</button><button class="lnk" id="pasteJson">${ic("clipboard")} Coller un JSON</button><button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
@@ -549,15 +549,18 @@ function ficheBodyHTML(){
 function viewFiche(){ return `<div class="fiche-actions"><button class="btn" data-overview>${ic("back")} Vue d'ensemble</button><button class="btn" id="word">${ic("word")} Word</button><button class="btn primary" id="print">${ic("printer")} Imprimer / PDF</button></div><div class="doc">${ficheBodyHTML()}</div>`; }
 function viewPresentation(){
   const st=STATUTS[projet.statut]||STATUTS.brouillon; const valid=projet.statut==="valide"; const S=STEPS();
-  const conts=[...new Set(contribs.filter(active).map(c=>c.initiales).filter(Boolean))];
   const periode=(curReperes().find(it=>/p[ée]riode/i.test(it.label))||{}).value||"";
   const reps=curReperes().filter(it=>String(it.value||"").trim());
-  const journey=PHASES.map(p=>{ const has=S.some(s=>s.ref&&p.etapes.includes(s.ref)&&ofEt(s.id).length); return `<div class="pres-ph ${has?"on":""}"><div class="pres-ph-dot" style="background:${has?p.c:"var(--line2)"}">${has?ic("check"):""}</div><div class="pres-ph-n">${esc(p.nom)}</div></div>`; }).join("");
-  const cards=S.map(s=>{
-    if(s.id==="actions"){ const acts=ofEt("actions"); if(!acts.length) return ""; return `<div class="pres-card wide" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}</div><table class="pres-plan">${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td class="pp-resp">${a.resp?esc(a.resp):"—"}</td><td>${a.ech?`<span class="pres-when">${esc(a.ech)}</span>`:""}</td></tr>`).join("")}</table></div>`; }
-    const items=showItems(s.id); if(!items.length) return "";
-    if(s.id==="problematique"||s.id==="finalite"){ return `<div class="pres-card wide quote-card" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}</div><p class="pres-quote">${esc(items[0])}</p></div>`; }
-    return `<div class="pres-card" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}</div><ul class="pres-list">${items.map(t=>`<li>${ic("check")}<span>${esc(t)}</span></li>`).join("")}</ul></div>`;
+  const has=s=>(s.id==="actions")?ofEt("actions").length>0:showItems(s.id).length>0;
+  const filled=S.filter(has).length; const pct=S.length?Math.round(filled/S.length*100):0;
+  const journey=PHASES.map(p=>{ const hasP=S.some(s=>s.ref&&p.etapes.includes(s.ref)&&has(s)); return `<div class="pres-ph ${hasP?"on":""}"><div class="pres-ph-dot" style="background:${hasP?p.c:"var(--line2)"}">${hasP?ic("check"):""}</div><div class="pres-ph-n">${esc(p.nom)}</div></div>`; }).join("");
+  const pen=i=>RO?"":`<button class="pres-edit no-print" data-etape="${i}" aria-label="Modifier cette étape" title="Modifier">${ic("pencil")}</button>`;
+  const todoCard=(s,i)=>RO?"":`<button class="pres-card todo no-print" data-etape="${i}" style="--pc:${s.c}"><span class="pres-lab">${ic(s.icon)} ${esc(s.nom)}</span><span class="pres-todo">${ic("plus")} À compléter</span></button>`;
+  const cards=S.map((s,i)=>{
+    if(s.id==="actions"){ const acts=ofEt("actions"); if(!acts.length) return todoCard(s,i); return `<div class="pres-card wide" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}${pen(i)}</div><table class="pres-plan">${acts.map(a=>`<tr><td>${esc(a.texte)}</td><td class="pp-resp">${a.resp?esc(a.resp):"—"}</td><td>${a.ech?`<span class="pres-when">${esc(a.ech)}</span>`:""}</td></tr>`).join("")}</table></div>`; }
+    const items=showItems(s.id); if(!items.length) return todoCard(s,i);
+    if(s.id==="problematique"||s.id==="finalite"){ return `<div class="pres-card wide quote-card" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}${pen(i)}</div><p class="pres-quote">${esc(items[0])}</p></div>`; }
+    return `<div class="pres-card" style="--pc:${s.c}"><div class="pres-lab">${ic(s.icon)} ${esc(s.nom)}${pen(i)}</div><ul class="pres-list">${items.map(t=>`<li>${ic("check")}<span>${esc(t)}</span></li>`).join("")}</ul></div>`;
   }).filter(Boolean).join("");
   const jal=(projet.jalons||[]).slice().sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
   const jalCard=jal.length?`<div class="pres-card wide" style="--pc:#2f7d6b"><div class="pres-lab">${ic("calendar")} Calendrier</div><table class="pres-plan">${jal.map(j=>`<tr><td style="width:150px"><span class="pres-when">${esc(fmtDate(j.date))}</span></td><td>${esc(j.label||"")}</td></tr>`).join("")}</table></div>`:"";
@@ -565,16 +568,17 @@ function viewPresentation(){
   const repCard=reps.length?`<div class="pres-card" style="--pc:#3b6ea5"><div class="pres-lab">${ic("calendar")} Repères</div><ul class="pres-list">${reps.map(it=>`<li>${ic(it.icon||"info")}<span><b>${esc(it.label)} :</b> ${esc(it.value)}</span></li>`).join("")}</ul></div>`:"";
   const body=cards+jalCard+repCard+resCard2;
   return `<div class="pres">
-    <div class="pres-bar">${RO?`<a class="btn" href="../">${ic("back")} Portail</a>`:`<button class="btn" data-overview>${ic("back")} Vue d'ensemble</button>`}<button class="btn" id="presShare">${ic("send")} Partager</button>${RO?"":`<button class="btn" data-fiche>${ic("file")} Fiche / PDF</button>`}</div>
+    <div class="pres-bar no-print">${RO?`<a class="btn" href="../">${ic("back")} Portail</a>`:`<button class="btn primary" data-overview>${ic("pencil")} Modifier</button><button class="btn" id="print">${ic("printer")} Imprimer / PDF</button><button class="btn" id="word">${ic("word")} Word</button>`}<button class="btn" id="presShare">${ic("send")} Partager</button></div>
     <div class="pres-hero ${valid?"valid":""}">
       ${valid?`<span class="pres-badge">${ic("check")} Projet validé</span>`:`<span class="pres-badge draft" style="--sc:${st.c}">${esc(st.l)}</span>`}
       <h1 class="pres-title">${esc(projet.titre)}</h1>
       ${projet.contexte?`<p class="pres-ctx">${esc(projet.contexte)}</p>`:""}
       <div class="pres-meta">${projet.pilote?`<span class="pres-by">${avatar(projet.pilote.ini,"sm",projet.pilote.color)} Piloté par ${esc(projet.pilote.ini)} · ${esc(projet.pilote.role)}</span>`:""}${periode?`<span class="pres-by">${ic("calendar")} ${esc(periode)}</span>`:""}</div>
+      <div class="pres-prog"><div class="pres-prog-bar"><span style="width:${pct}%"></span></div><span class="pres-prog-tx">${filled}/${S.length} étapes renseignées · ${pct}%</span></div>
     </div>
     <div class="pres-journey">${journey}</div>
-    ${body?`<div class="pres-grid">${body}</div>`:`<div class="empty">Pas encore de contenu à présenter — renseignez et retenez vos étapes.</div>`}
-    <div class="pres-foot">${ic("shield")} Présentation en lecture seule — aucune donnée nominative d'élève.</div>
+    ${body?`<div class="pres-grid">${body}</div>`:`<div class="empty">Pas encore de contenu — clique « Modifier » pour commencer à renseigner les étapes.</div>`}
+    <div class="pres-foot">${ic("shield")} Aucune donnée nominative d'élève. ${RO?"Lien en lecture seule.":""}</div>
   </div>`;
 }
 function exportWord(){
@@ -840,14 +844,15 @@ async function loadListe(){
   }catch(e){console.error(e);fbError=true;projets=[];}
   if(view==="liste") render();
 }
+let landPending=false;
 async function openProjet(id){
   if(unsub){unsub();unsub=null;} if(unsubP){unsubP();unsubP=null;} stopPresence();
   projet=projets.find(p=>p.id===id)||null;
   if(!projet){ try{const d=await getDoc(doc(db,COL,id));if(d.exists())projet={id,...d.data()};}catch(_){} }
   if(!projet){toast("Projet introuvable.");view="liste";return loadListe();}
-  view="overview"; etapeIdx=0; contribs=[]; discussion=[]; discCount=-1; chatOpen=false; regroup=false; selected.clear(); render();
+  view="overview"; etapeIdx=0; contribs=[]; discussion=[]; discCount=-1; chatOpen=false; regroup=false; selected.clear(); landPending=!params.get("vue"); render();
   try{ unsubP=onSnapshot(doc(db,COL,id),d=>{if(d.exists()){projet={id,...d.data()};if(view!=="liste")render();}}); }catch(_){}
-  try{ unsub=onSnapshot(query(collection(db,COL,id,"contributions"),orderBy("createdAt","asc")),snap=>{contribs=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});fbError=false;if(view!=="liste")render();},err=>{console.error(err);fbError=true;render();}); }catch(e){console.error(e);fbError=true;render();}
+  try{ unsub=onSnapshot(query(collection(db,COL,id,"contributions"),orderBy("createdAt","asc")),snap=>{contribs=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});fbError=false;if(landPending){landPending=false;if(view==="overview"&&(contribs.length>0||Object.keys(projet.synthese||{}).length>0))view="presentation";}if(view!=="liste")render();},err=>{console.error(err);fbError=true;render();}); }catch(e){console.error(e);fbError=true;render();}
   try{ unsubDisc=onSnapshot(query(collection(db,COL,id,"discussion"),orderBy("createdAt","asc")),snap=>{discussion=snap.docs.map(d=>{const x=d.data();return {id:d.id,...x,_t:x.createdAt?.seconds||0};});const top=discussion[discussion.length-1];if(discCount>=0&&discussion.length>discCount&&top&&(!ident||top.ini!==ident.initiales)&&!chatOpen){toast("Nouveau message · "+esc(top.role||top.ini||""));}discCount=discussion.length;if(chatOpen){const l=$("#chatList");if(l){l.innerHTML=chatListHTML();l.scrollTop=l.scrollHeight;}}updateChatBadge();},err=>{console.error(err);}); }catch(_){}
   startPresence(id);
 }
@@ -919,7 +924,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-merge]")) return fusionner();
   const nav=e.target.closest("[data-nav]");if(nav){const v=visIdx();const pos=v.indexOf(etapeIdx);etapeIdx=v[(pos+ +nav.dataset.nav+v.length)%v.length];view="etape";render();beat();return;}
   const et=e.target.closest("[data-etape]");if(et){etapeIdx=+et.dataset.etape;view="etape";regroup=false;selected.clear();render();beat();return;}
-  if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="fiche";return render();}
+  if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="presentation";return render();}
   if(e.target.closest("[data-presentation]")){view="presentation";window.scrollTo&&window.scrollTo(0,0);return render();}
   if(e.target.closest("#presShare")){const url=base+"?p="+projet.id+"&ro=1&vue=presentation";navigator.clipboard?.writeText(url).then(()=>toast("Lien présentation copié",true)).catch(()=>toast(url));return;}
   const svw=e.target.closest("[data-synthview]");if(svw){synthCompact=svw.dataset.synthview==="1";synthOpen=null;return render();}
