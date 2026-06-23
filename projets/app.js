@@ -280,7 +280,7 @@ function viewListe(){
   const list = projets.length ? `<div class="proj-list">${projets.map(p=>{const denom=(Array.isArray(p.trame)&&p.trame.length)?p.trame.length:ETAPES.length;const mat=Math.round((p._etapes/Math.max(denom,1))*100);const st=STATUTS[p.statut]||STATUTS.brouillon;const ty=TYPES.find(t=>t.id===p.type);
     return `<button class="proj-card" data-open="${esc(p.id)}" style="--rc:${st.c}"><div class="pc-ring" style="--p:${mat}"><span>${mat}%</span></div><div class="pc-body"><div class="pc-top"><h3>${esc(p.titre)}</h3><span class="st-tag" style="--sc:${st.c}">${st.l}</span></div><p class="pc-sum">${p.contexte?esc(p.contexte):`<span class="muted">Sans description pour l'instant.</span>`}</p><div class="proj-meta">${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:(p.type==="perso"&&p.typeCustom?`<span class="ty-tag">${esc(p.typeCustom)}</span>`:"")}<span class="pc-m">${ic("grid")} ${denom} étapes</span><span class="pc-m">${ic("users")} ${p._contribs}</span></div></div><span class="pc-go">${ic("chev")}</span></button>`;}).join("")}</div>`
     : `<div class="empty">Aucun projet pour l'instant.${RO?"":" Créez le premier ci-dessous."}</div>`;
-  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button><div class="liste-foot"><button class="lnk" id="promptIA">${ic("wand")} Prompt IA — générer un projet</button><button class="lnk" id="impJson">${ic("file")} Importer un projet (JSON)</button></div>`}`;
+  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button><div class="liste-foot"><button class="lnk" id="promptIA">${ic("wand")} Générer un projet (JSON)</button><button class="lnk" id="impJson">${ic("file")} Importer un projet (JSON)</button></div>`}`;
 }
 
 function resRowHTML(r){
@@ -358,7 +358,7 @@ function viewOverview(){
     ${resCard()}
     <div class="fiche-actions" style="margin-top:16px"><button class="btn accent" data-presentation>${ic("eye")} Présentation</button><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
     ${settings}
-    <div class="ov-foot">${RO?"":`<button class="lnk" id="promptIA">${ic("wand")} Prompt IA — générer un projet</button><button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
+    <div class="ov-foot">${RO?"":`<button class="lnk" id="promptIA">${ic("wand")} Générer un projet (JSON)</button><button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 
 /* ---- Fiche participant : son historique (centré sur les propositions retenues) ---- */
@@ -657,8 +657,8 @@ LE PROJET À TRANSFORMER :
 [décris ici ton projet : contexte, profils, idées, questions ouvertes, cadre, risques…]`;
 
 function openPromptIA(){
-  openSheet(`<div class="sheet-head"><h3>${ic("wand")} Générer un projet avec une IA</h3><button class="x" data-close>${ic("x")}</button></div>
-    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Copiez ce prompt, collez-le dans une IA (ChatGPT, Claude…), puis <b>décrivez votre projet à la fin</b>. Elle renvoie un <b>JSON</b> : revenez ici et faites « Importer un projet (JSON) ».</p>
+  openSheet(`<div class="sheet-head"><h3>${ic("wand")} Générer un projet (JSON)</h3><button class="x" data-close>${ic("x")}</button></div>
+    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Copiez ce texte, collez-le dans un assistant (ChatGPT, Claude…), puis <b>décrivez votre projet à la fin</b>. Il renvoie un <b>JSON</b> : revenez ici et faites « Importer un projet (JSON) ».</p>
     <textarea id="promptTxt" readonly style="width:100%;font:inherit;font-size:12px;line-height:1.5;border:1px solid var(--line2);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink);resize:vertical;height:40vh">${esc(PROMPT_IA)}</textarea>
     <div class="actions" style="margin-top:12px"><button class="btn primary" id="copyPrompt">${ic("file")} Copier le prompt</button></div>`);
   const c=$("#copyPrompt"); if(c) c.onclick=async()=>{ try{ await navigator.clipboard.writeText(PROMPT_IA); }catch(_){ const t=$("#promptTxt"); if(t){ t.focus(); t.select(); try{document.execCommand("copy");}catch(__){}} } toast("Prompt copié",true); };
