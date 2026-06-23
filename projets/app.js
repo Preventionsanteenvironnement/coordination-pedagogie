@@ -444,11 +444,11 @@ function viewEtape(){
   const pc=e.c||"#6a5cff";
   const journey=`<div class="ev-steps">${S.map((s,i)=>{const stt=i<etapeIdx?"done":i===etapeIdx?"on":"";return `<button class="ev-step ${stt}" style="--sc:${s.c}" ${RO?"":`data-etape="${i}"`}><span class="ev-stepb">${stt==="done"?ic("check"):i+1}</span><span class="ev-stepn">${esc(s.nom)}</span></button>`;}).join("")}</div>`;
   const prevSteps=S.slice(0,etapeIdx);
-  const filData = prevSteps.slice(-3).map(ps=>{ const sy=synthOf(ps.id); let lines=[];
+  const filData = prevSteps.map(ps=>{ const sy=synthOf(ps.id); let lines=[];
     if(sy.length){ lines=sy.slice().sort((a,b)=>synthSupport(b)-synthSupport(a)).map(en=>en.texte); }
     else { ofEt(ps.id).forEach(c=>{ const ls=splitLines(c.texte); if(ls.length<=1){ if(c.epingle) lines.push(c.texte); } else { const lr=Array.isArray(c.lr)?c.lr:[]; ls.forEach((ln,idx)=>{ if(lr.includes(idx)) lines.push(ln); }); } }); }
     return {nom:ps.nom,c:ps.c,icon:ps.icon,lines}; }).filter(x=>x.lines.length);
-  const filBlock = (prevSteps.length && filData.length) ? `<div class="ev-fil"><span class="ev-fil-intro">${ic("compass")} <b>${esc(e.nom)}</b> s'appuie sur</span>${filData.map(rs=>`<details class="ev-fil-acc" style="--sc:${rs.c}"><summary>${ic(rs.icon)} <span class="ev-fil-nom">${esc(rs.nom)}</span> <span class="ev-fil-n">${rs.lines.length}</span><span class="ev-fil-chev">${ic("down")}</span></summary><ul>${rs.lines.slice(0,6).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></details>`).join("")}</div>` : "";
+  const filBlock = (prevSteps.length && filData.length) ? `<div class="ev-fil"><span class="ev-fil-intro">${ic("compass")} <b>${esc(e.nom)}</b> s'appuie sur</span>${filData.map(rs=>`<details class="ev-fil-acc" style="--sc:${rs.c}"><summary>${ic(rs.icon)} <span class="ev-fil-nom">${esc(rs.nom)}</span> <span class="ev-fil-n">${rs.lines.length}</span><span class="ev-fil-chev">${ic("down")}</span></summary><ul>${rs.lines.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></details>`).join("")}</div>` : "";
   const card=(c,i)=>{ const coms=c.comments||[]; const sel=selected.has(c.id);
     const reprisN=isReprisN(c.id,e.id);
     const votes=Array.isArray(c.votes)?c.votes:[]; const voted=votes.includes(DEV);
