@@ -675,9 +675,9 @@ function exportJSON(){
 }
 function parseLoose(v){
   v=String(v||"").trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
-  try{ return JSON.parse(v); }catch(_){}
-  const a=v.indexOf("{"), b=v.lastIndexOf("}");
-  if(a>=0&&b>a){ try{ return JSON.parse(v.slice(a,b+1)); }catch(_){} }
+  const slice=s=>{const a=s.indexOf("{"),b=s.lastIndexOf("}");return (a>=0&&b>a)?s.slice(a,b+1):s;};
+  const dq=s=>s.replace(/[“”„‟″]/g,'"');  // guillemets doubles « courbes » -> droits
+  for(const t of [v, slice(v), dq(v), slice(dq(v))]){ try{ return JSON.parse(t); }catch(_){} }
   return null;
 }
 async function importFromData(data){
@@ -696,7 +696,7 @@ function importJSON(){
 }
 function pasteJSON(){
   openSheet(`<div class="sheet-head"><h3>${ic("file")} Coller un JSON</h3><button class="x" data-close>${ic("x")}</button></div>
-    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Collez ici le <b>JSON</b> renvoyé par l'assistant, puis « Importer ». (Les éventuelles balises ` + "```" + ` autour sont gérées.)</p>
+    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Collez ici le <b>JSON</b> renvoyé par l'assistant, puis « Importer ». Les balises de code et les guillemets « courbes » sont corrigés automatiquement.</p>
     <textarea id="pasteTxt" style="width:100%;font:inherit;font-size:12.5px;line-height:1.5;border:1px solid var(--line2);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink);resize:vertical;height:40vh" placeholder='{ "_format": "atelier-projet", "project": { ... }, "contributions": [ ... ] }'></textarea>
     <div class="actions" style="margin-top:12px"><button class="btn primary" id="doPaste">${ic("file")} Importer</button></div>`);
   const b=$("#doPaste"); if(b) b.onclick=async()=>{ const t=$("#pasteTxt"); const v=t?t.value:""; if(!v.trim()){toast("Collez d'abord le JSON.");return;} const data=parseLoose(v); if(!data){toast("JSON invalide — vérifiez le copier-coller.");return;} closeSheet(); await importFromData(data); };
