@@ -280,7 +280,7 @@ function viewListe(){
   const list = projets.length ? `<div class="proj-list">${projets.map(p=>{const denom=(Array.isArray(p.trame)&&p.trame.length)?p.trame.length:ETAPES.length;const mat=Math.round((p._etapes/Math.max(denom,1))*100);const st=STATUTS[p.statut]||STATUTS.brouillon;const ty=TYPES.find(t=>t.id===p.type);
     return `<button class="proj-card" data-open="${esc(p.id)}" style="--rc:${st.c}"><div class="pc-ring" style="--p:${mat}"><span>${mat}%</span></div><div class="pc-body"><div class="pc-top"><h3>${esc(p.titre)}</h3><span class="st-tag" style="--sc:${st.c}">${st.l}</span></div><p class="pc-sum">${p.contexte?esc(p.contexte):`<span class="muted">Sans description pour l'instant.</span>`}</p><div class="proj-meta">${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:(p.type==="perso"&&p.typeCustom?`<span class="ty-tag">${esc(p.typeCustom)}</span>`:"")}<span class="pc-m">${ic("grid")} ${denom} étapes</span><span class="pc-m">${ic("users")} ${p._contribs}</span></div></div><span class="pc-go">${ic("chev")}</span></button>`;}).join("")}</div>`
     : `<div class="empty">Aucun projet pour l'instant.${RO?"":" Créez le premier ci-dessous."}</div>`;
-  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button><div class="liste-foot"><button class="lnk" id="impJson">${ic("file")} Importer un projet (JSON)</button></div>`}`;
+  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button><div class="liste-foot"><button class="lnk" id="promptIA">${ic("wand")} Prompt IA — générer un projet</button><button class="lnk" id="impJson">${ic("file")} Importer un projet (JSON)</button></div>`}`;
 }
 
 function resRowHTML(r){
@@ -358,7 +358,7 @@ function viewOverview(){
     ${resCard()}
     <div class="fiche-actions" style="margin-top:16px"><button class="btn accent" data-presentation>${ic("eye")} Présentation</button><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
     ${settings}
-    <div class="ov-foot">${RO?"":`<button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
+    <div class="ov-foot">${RO?"":`<button class="lnk" id="promptIA">${ic("wand")} Prompt IA — générer un projet</button><button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 
 /* ---- Fiche participant : son historique (centré sur les propositions retenues) ---- */
@@ -605,6 +605,63 @@ function openIdent(){
   $("#iColors").querySelectorAll("[data-color]").forEach(b=>b.onclick=()=>{color=b.dataset.color;$("#iColors").querySelectorAll(".color-sw").forEach(x=>x.classList.toggle("on",x===b));drawPrev();});
   $("#iIni").oninput=drawPrev; drawPrev();
   $("#saveIdent").onclick=()=>{const ini=$("#iIni").value.trim().toUpperCase();if(!ini){toast("Indiquez vos initiales.");return;}if(!role){toast("Choisissez votre rôle.");return;}ident={initiales:ini,role,color};localStorage.setItem("projets_ident_v1",JSON.stringify(ident));closeSheet();render();beat();toast("Identité enregistrée",true);};
+}
+const PROMPT_IA = `Tu es un assistant qui transforme la description d'un projet d'équipe (lycée pro / établissement scolaire) en un fichier JSON importable dans l'outil « Atelier projet ».
+
+CE QUE TU PRODUIS : uniquement un objet JSON valide (aucun texte avant/après, pas de Markdown, pas de commentaires), parsable directement.
+
+STRUCTURE EXACTE :
+{
+  "_format": "atelier-projet",
+  "_v": 1,
+  "project": { "titre": "...", "contexte": "2 à 4 phrases", "type": "vie", "statut": "construction", "etapeNoms": {} },
+  "contributions": [
+    { "etape": "constats", "texte": "Une seule idée par entrée.", "initiales": "EQ", "role": "Équipe", "epingle": true }
+  ]
+}
+
+ÉTAPES (champ "etape") — n'utilise QUE ces identifiants, range chaque idée selon son sens :
+- constats : ce qu'on observe, sans interpréter (observable, vérifiable).
+- diagnostic : ce que les constats révèlent (le besoin réel, « de quoi est-ce le signe ? »).
+- problematique : LA question centrale (vraie question ; préfixe d'un étoile celle qui est retenue).
+- finalite : le cap, le sens large (non mesurable).
+- obj_general : la capacité visée (« être capable de… »).
+- obj_op : objectifs opérationnels, vérifiables (verbes d'action).
+- actions : les actions concrètes.
+- moyens : ressources (humaines, matérielles, partenaires, temps).
+- miseoeuvre : où, quand, fréquence, durée (l'identifiant est bien "miseoeuvre", sans « en »).
+- cadre : limites et éthique (ce que le projet ne fait pas, ce qui est volontaire, non évalué, les règles).
+- indicateurs : signes observables que ça marche.
+- evaluation : comment on évalue (bilans, usages, effets).
+- vigilance : risques à anticiper.
+Tu n'es pas obligé de remplir les 13 étapes ; 1 à 6 idées par étape.
+
+CHAMPS D'UNE CONTRIBUTION :
+- etape (un des 13 ids) ; texte (UNE seule idée) ;
+- initiales : 2-3 lettres anonymes (jamais un vrai nom) ;
+- role : un parmi Prof, Prof PSE, Prof principal, Enseignant pro, CPE, DDFPT, Infirmier·ère, PsyEN, AESH / Coordo ULIS, Direction, Documentaliste, Équipe, Autre ;
+- epingle : true pour les 2-3 idées les plus importantes d'une étape, sinon false.
+
+PROJECT :
+- type : un parmi peda, vie, familles, prevention, accomp, evenement, partenariat, administratif, etablissement, autre.
+- statut : brouillon, construction, valide ou archive (en général construction).
+- etapeNoms : objet optionnel pour renommer une étape, ex. { "indicateurs": "Signes que le lien se tisse" }. Sinon {}.
+
+RÈGLES :
+- RGPD : jamais de nom d'élève, d'enseignant ni d'établissement — uniquement initiales-codes + rôles.
+- Une idée = une contribution.
+- Reste fidèle à la description (n'invente pas de faits, mais reformule et range).
+- Sortie = JSON pur uniquement.
+
+LE PROJET À TRANSFORMER :
+[décris ici ton projet : contexte, profils, idées, questions ouvertes, cadre, risques…]`;
+
+function openPromptIA(){
+  openSheet(`<div class="sheet-head"><h3>${ic("wand")} Générer un projet avec une IA</h3><button class="x" data-close>${ic("x")}</button></div>
+    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Copiez ce prompt, collez-le dans une IA (ChatGPT, Claude…), puis <b>décrivez votre projet à la fin</b>. Elle renvoie un <b>JSON</b> : revenez ici et faites « Importer un projet (JSON) ».</p>
+    <textarea id="promptTxt" readonly style="width:100%;font:inherit;font-size:12px;line-height:1.5;border:1px solid var(--line2);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink);resize:vertical;height:40vh">${esc(PROMPT_IA)}</textarea>
+    <div class="actions" style="margin-top:12px"><button class="btn primary" id="copyPrompt">${ic("file")} Copier le prompt</button></div>`);
+  const c=$("#copyPrompt"); if(c) c.onclick=async()=>{ try{ await navigator.clipboard.writeText(PROMPT_IA); }catch(_){ const t=$("#promptTxt"); if(t){ t.focus(); t.select(); try{document.execCommand("copy");}catch(__){}} } toast("Prompt copié",true); };
 }
 function exportJSON(){
   if(!projet) return;
@@ -879,6 +936,7 @@ document.addEventListener("click", e=>{
   const lk=e.target.closest("[data-lock]");if(lk) return toggleLock(lk.dataset.lock);
   if(e.target.closest("#print")) return window.print();
   if(e.target.closest("#word")) return exportWord();
+  if(e.target.closest("#promptIA")) return openPromptIA();
   if(e.target.closest("#expJson")) return exportJSON();
   if(e.target.closest("#impJson")) return importJSON();
   if(e.target.closest("#delProj")) return delProjet();
