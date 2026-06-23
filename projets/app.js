@@ -280,7 +280,7 @@ function viewListe(){
   const list = projets.length ? `<div class="proj-list">${projets.map(p=>{const denom=(Array.isArray(p.trame)&&p.trame.length)?p.trame.length:ETAPES.length;const mat=Math.round((p._etapes/Math.max(denom,1))*100);const st=STATUTS[p.statut]||STATUTS.brouillon;const ty=TYPES.find(t=>t.id===p.type);
     return `<button class="proj-card" data-open="${esc(p.id)}" style="--rc:${st.c}"><div class="pc-ring" style="--p:${mat}"><span>${mat}%</span></div><div class="pc-body"><div class="pc-top"><h3>${esc(p.titre)}</h3><span class="st-tag" style="--sc:${st.c}">${st.l}</span></div><p class="pc-sum">${p.contexte?esc(p.contexte):`<span class="muted">Sans description pour l'instant.</span>`}</p><div class="proj-meta">${ty?`<span class="ty-tag">${esc(ty.l)}</span>`:(p.type==="perso"&&p.typeCustom?`<span class="ty-tag">${esc(p.typeCustom)}</span>`:"")}<span class="pc-m">${ic("grid")} ${denom} étapes</span><span class="pc-m">${ic("users")} ${p._contribs}</span></div></div><span class="pc-go">${ic("chev")}</span></button>`;}).join("")}</div>`
     : `<div class="empty">Aucun projet pour l'instant.${RO?"":" Créez le premier ci-dessous."}</div>`;
-  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button><div class="liste-foot"><button class="lnk" id="promptIA">${ic("wand")} Générer un projet (JSON)</button><button class="lnk" id="impJson">${ic("file")} Importer un projet (JSON)</button></div>`}`;
+  return `${banner}<div class="hero"><h1>Atelier projet</h1><p>Construisez un projet d'équipe à plusieurs mains, étape par étape.</p></div>${idCard?`<div class="sec-title">${ic("user")} Votre identité</div>${idCard}`:""}<div class="sec-title">${ic("folder")} Les projets</div>${list}${RO?"":`<button class="new-proj" data-new style="margin-top:12px">${ic("plus")} Nouveau projet</button><div class="liste-foot"><button class="lnk" id="promptIA">${ic("wand")} Générer un projet (JSON)</button><button class="lnk" id="impJson">${ic("file")} Importer un fichier JSON</button><button class="lnk" id="pasteJson">${ic("clipboard")} Coller un JSON</button></div>`}`;
 }
 
 function resRowHTML(r){
@@ -658,7 +658,7 @@ LE PROJET À TRANSFORMER :
 
 function openPromptIA(){
   openSheet(`<div class="sheet-head"><h3>${ic("wand")} Générer un projet (JSON)</h3><button class="x" data-close>${ic("x")}</button></div>
-    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Copiez ce texte, collez-le dans un assistant (ChatGPT, Claude…), puis <b>décrivez votre projet à la fin</b>. Il renvoie un <b>JSON</b> : revenez ici et faites « Importer un projet (JSON) ».</p>
+    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Copiez ce texte, collez-le dans un assistant (ChatGPT, Claude…), puis <b>décrivez votre projet à la fin</b>. Il renvoie un <b>JSON</b> : revenez ici et faites « Coller un JSON » (ou « Importer un fichier JSON »).</p>
     <textarea id="promptTxt" readonly style="width:100%;font:inherit;font-size:12px;line-height:1.5;border:1px solid var(--line2);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink);resize:vertical;height:40vh">${esc(PROMPT_IA)}</textarea>
     <div class="actions" style="margin-top:12px"><button class="btn primary" id="copyPrompt">${ic("file")} Copier le prompt</button></div>`);
   const c=$("#copyPrompt"); if(c) c.onclick=async()=>{ try{ await navigator.clipboard.writeText(PROMPT_IA); }catch(_){ const t=$("#promptTxt"); if(t){ t.focus(); t.select(); try{document.execCommand("copy");}catch(__){}} } toast("Prompt copié",true); };
@@ -673,15 +673,33 @@ function exportJSON(){
   a.download="projet-"+String(projet.titre||"sans-titre").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".json";
   a.click(); URL.revokeObjectURL(a.href); toast("Sauvegarde JSON téléchargée",true);
 }
+function parseLoose(v){
+  v=String(v||"").trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
+  try{ return JSON.parse(v); }catch(_){}
+  const a=v.indexOf("{"), b=v.lastIndexOf("}");
+  if(a>=0&&b>a){ try{ return JSON.parse(v.slice(a,b+1)); }catch(_){} }
+  return null;
+}
+async function importFromData(data){
+  const p=(data&&data.project)||data; if(!p||typeof p!=="object"){toast("Format non reconnu.");return false;}
+  try{
+    const ref=await addDoc(collection(db,COL),{ titre:(p.titre||"Projet importé")+" (importé)", contexte:p.contexte||"", type:p.type||"peda", typeCustom:p.typeCustom||"", statut:p.statut||"brouillon", reperes:p.reperes||{}, ressources:p.ressources||[], jalons:p.jalons||[], enabled:Array.isArray(p.enabled)?p.enabled:null, etapeNoms:p.etapeNoms||{}, locked:p.locked||[], createdAt:serverTimestamp() });
+    for(const c of (data.contributions||[])){ await addDoc(collection(db,COL,ref.id,"contributions"),{ etape:c.etape||"constats", texte:c.texte||"", initiales:c.initiales||"", role:c.role||"", epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo", createdAt:serverTimestamp() }); }
+    toast("Projet importé",true); openProjet(ref.id); return true;
+  }catch(e){ console.error(e); toast("Enregistrement impossible."); return false; }
+}
 function importJSON(){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
   inp.onchange=async()=>{ const f=inp.files&&inp.files[0]; if(!f) return;
-    try{ const data=JSON.parse(await f.text()); const p=data.project||data; if(!p||typeof p!=="object"){toast("Fichier non reconnu.");return;}
-      const ref=await addDoc(collection(db,COL),{ titre:(p.titre||"Projet importé")+" (importé)", contexte:p.contexte||"", type:p.type||"peda", typeCustom:p.typeCustom||"", statut:p.statut||"brouillon", reperes:p.reperes||{}, ressources:p.ressources||[], jalons:p.jalons||[], enabled:Array.isArray(p.enabled)?p.enabled:null, etapeNoms:p.etapeNoms||{}, locked:p.locked||[], createdAt:serverTimestamp() });
-      for(const c of (data.contributions||[])){ await addDoc(collection(db,COL,ref.id,"contributions"),{ etape:c.etape||"constats", texte:c.texte||"", initiales:c.initiales||"", role:c.role||"", epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo", createdAt:serverTimestamp() }); }
-      toast("Projet importé",true); openProjet(ref.id);
-    }catch(e){ console.error(e); toast("Import impossible (fichier invalide)."); } };
+    const data=parseLoose(await f.text()); if(!data){toast("Fichier JSON invalide.");return;} await importFromData(data); };
   inp.click();
+}
+function pasteJSON(){
+  openSheet(`<div class="sheet-head"><h3>${ic("file")} Coller un JSON</h3><button class="x" data-close>${ic("x")}</button></div>
+    <p class="muted" style="font-size:13.5px;margin:0 0 12px">Collez ici le <b>JSON</b> renvoyé par l'assistant, puis « Importer ». (Les éventuelles balises ` + "```" + ` autour sont gérées.)</p>
+    <textarea id="pasteTxt" style="width:100%;font:inherit;font-size:12.5px;line-height:1.5;border:1px solid var(--line2);border-radius:12px;padding:12px;background:var(--bg);color:var(--ink);resize:vertical;height:40vh" placeholder='{ "_format": "atelier-projet", "project": { ... }, "contributions": [ ... ] }'></textarea>
+    <div class="actions" style="margin-top:12px"><button class="btn primary" id="doPaste">${ic("file")} Importer</button></div>`);
+  const b=$("#doPaste"); if(b) b.onclick=async()=>{ const t=$("#pasteTxt"); const v=t?t.value:""; if(!v.trim()){toast("Collez d'abord le JSON.");return;} const data=parseLoose(v); if(!data){toast("JSON invalide — vérifiez le copier-coller.");return;} closeSheet(); await importFromData(data); };
 }
 async function delProjet(){
   if(!projet||RO) return;
@@ -939,6 +957,7 @@ document.addEventListener("click", e=>{
   if(e.target.closest("#promptIA")) return openPromptIA();
   if(e.target.closest("#expJson")) return exportJSON();
   if(e.target.closest("#impJson")) return importJSON();
+  if(e.target.closest("#pasteJson")) return pasteJSON();
   if(e.target.closest("#delProj")) return delProjet();
   if(e.target.closest("#share")){const url=base+"?p="+projet.id+"&ro=1";navigator.clipboard?.writeText(url).then(()=>toast("Lien lecture copié",true)).catch(()=>toast(url));return;}
   if(e.target.closest("[data-close]")||e.target.id==="overlay") return closeSheet();
