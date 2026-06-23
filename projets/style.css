@@ -543,7 +543,7 @@ table.pl td{vertical-align:middle}
 .jal-poll:hover{color:var(--accent)}
 .jal-poll .i{font-size:15px}
 .ov-foot{display:flex;justify-content:center;margin-top:14px}
-.liste-foot{display:flex;justify-content:center;margin-top:10px}
+.liste-foot{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-top:10px}
 .lnk{background:none;border:none;color:var(--faint);font-size:12.5px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:6px 10px;border-radius:var(--r-sm)}
 .lnk:hover{color:var(--accent);background:var(--bg)}
 .lnk .i{font-size:15px}

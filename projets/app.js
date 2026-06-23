@@ -358,7 +358,7 @@ function viewOverview(){
     ${resCard()}
     <div class="fiche-actions" style="margin-top:16px"><button class="btn accent" data-presentation>${ic("eye")} Présentation</button><button class="btn" data-plan>${ic("table")} Plan d'action</button><button class="btn" data-matrice>${ic("columns")} Alignement</button><button class="btn" data-fiche>${ic("file")} Fiche</button>${RO?"":`<button class="btn" id="share">${ic("send")} Partager (lecture)</button>`}</div>
     ${settings}
-    <div class="ov-foot">${RO?"":`<button class="lnk" id="promptIA">${ic("wand")} Générer un projet (JSON)</button><button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
+    <div class="ov-foot">${RO?"":`<button class="lnk" id="promptIA">${ic("wand")} Générer un projet (JSON)</button><button class="lnk" id="impJson">${ic("file")} Importer un fichier JSON</button><button class="lnk" id="pasteJson">${ic("clipboard")} Coller un JSON</button><button class="lnk" id="expJson">${ic("file")} Sauvegarder ce projet (JSON)</button><button class="lnk danger" id="delProj">${ic("trash")} Supprimer ce projet</button>`}</div>`;
 }
 
 /* ---- Fiche participant : son historique (centré sur les propositions retenues) ---- */
