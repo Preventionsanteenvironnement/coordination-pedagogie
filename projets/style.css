@@ -1027,3 +1027,9 @@ table.pl td{vertical-align:middle}
   .pres-grid{grid-template-columns:1fr 1fr}
   a{color:inherit;text-decoration:none}
 }
+
+/* Modifier lumineux + statut bien visible (fiche) */
+.pres-bar .btn.primary{background:linear-gradient(135deg,#5b6ef5,#7c5cff);border:none;color:#fff;font-weight:700;box-shadow:0 4px 16px rgba(108,92,231,.42)}
+.pres-bar .btn.primary:hover{filter:brightness(1.07);box-shadow:0 7px 22px rgba(108,92,231,.5)}
+.pres-bar .btn.primary .i{font-size:19px}
+.pres-badge.draft{color:#fff;background:var(--sc);box-shadow:0 3px 10px color-mix(in srgb,var(--sc) 36%,transparent)}

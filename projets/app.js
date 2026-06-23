@@ -926,7 +926,7 @@ document.addEventListener("click", e=>{
   const et=e.target.closest("[data-etape]");if(et){etapeIdx=+et.dataset.etape;view="etape";regroup=false;selected.clear();render();beat();return;}
   if(e.target.closest("[data-fiche]")||e.target.closest("#ficheBtn")){view="presentation";return render();}
   if(e.target.closest("[data-presentation]")){view="presentation";window.scrollTo&&window.scrollTo(0,0);return render();}
-  if(e.target.closest("#presShare")){const url=base+"?p="+projet.id+"&ro=1&vue=presentation";navigator.clipboard?.writeText(url).then(()=>toast("Lien présentation copié",true)).catch(()=>toast(url));return;}
+  if(e.target.closest("#presShare")){const url=base+"?p="+projet.id+"&vue=presentation";navigator.clipboard?.writeText(url).then(()=>toast("Lien copié — vos collègues verront la fiche et pourront participer",true)).catch(()=>toast(url));return;}
   const svw=e.target.closest("[data-synthview]");if(svw){synthCompact=svw.dataset.synthview==="1";synthOpen=null;return render();}
   const sch=e.target.closest("[data-synthchip]");if(sch){synthOpen=synthOpen===sch.dataset.synthchip?null:sch.dataset.synthchip;return render();}
   const asn=e.target.closest("[data-addsynth]");if(asn){const eid=stepAt(etapeIdx)?.id;if(eid)addSynth(eid,asn.dataset.addsynth);return;}
