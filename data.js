@@ -45,7 +45,6 @@ const THEMATIQUES = [
     nom: "PFMP",
     couleur: "#c0392b",
     icon: "briefcase",
-    soon: true,
     enfants: [
       {
         titre: "Guide PFMP — devenir incollable",
@@ -73,7 +72,6 @@ const THEMATIQUES = [
     nom: "Acteurs",
     couleur: "#0e7c66",
     icon: "users",
-    soon: true,
     enfants: [
       {
         titre: "Le DDFPT — rôle & missions",
@@ -111,7 +109,6 @@ const THEMATIQUES = [
     nom: "Pratiques inclusives",
     couleur: "#6b4bd6",
     icon: "inclusion",
-    soon: true,
     enfants: [
       {
         titre: "Inclusion",
@@ -185,7 +182,7 @@ const THEMATIQUES = [
         lien: "cartes/",
         type: "Outil",
         icon: "brain",
-        soon: true,
+        badge: "Nouveau",
       },
       {
         titre: "Chef-d'œuvre CAP — piloter sur deux ans",
