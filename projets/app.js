@@ -323,6 +323,15 @@ function tlTimeline(){
     html+=`<button class="tl-item ${done?"done":""} ${isNext?"next":""}" style="--pc:${e.c}" data-etape="${i}"><span class="tl-rail"><span class="tl-dot">${done?ic("check"):""}</span>${last?"":`<span class="tl-line ${done&&nextDone?"on":""}"></span>`}</span><span class="tl-body"><span class="tl-ic">${ic(e.icon)}</span><span class="tl-n">${esc(e.nom)}</span>${rdy?`<span class="tl-rdy" title="${rdy} a/ont terminé">${ic("check")} ${rdy}</span>`:""}${lock?`<span class="tl-lock">${ic("lock")}</span>`:n?`<span class="tl-ct">${n}</span>`:isNext?`<span class="tl-next">à faire</span>`:""}</span></button>`; });
   return `<div class="tl">${html}</div>`;
 }
+function collabBanner(){
+  if(RO) return "";
+  const S=STEPS(); const n=(projet.locked||[]).filter(id=>S.some(s=>s.id===id)).length; const open=n===0;
+  return `<div class="collab ${open?"open":"closed"} no-print">
+    <span class="collab-ic">${ic(open?"unlock":"lock")}</span>
+    <div class="collab-tx"><b>${open?"Mur ouvert à tous":`${n} étape(s) fermée(s)`}</b><span>${open?"Vos collègues peuvent écrire directement sur le mur — sans validation de votre part.":"Sur ces étapes, vos collègues ne peuvent pas écrire pour l'instant."}</span></div>
+    ${open?`<button class="collab-btn ghost" data-lockall>${ic("lock")} Tout figer</button>`:`<button class="collab-btn" data-openall>${ic("unlock")} Ouvrir le mur à tous</button>`}
+  </div>`;
+}
 function viewOverview(){
   const S=STEPS(); const visSet=new Set(S.map(s=>s.id));
   const done=new Set(contribs.filter(active).map(c=>c.etape).filter(id=>visSet.has(id))).size;
@@ -345,6 +354,7 @@ function viewOverview(){
       <div class="ov2-hero-main"><div class="ov2-ring" style="--p:${pct}"><span>${pct}<small>%</small></span></div><div class="ov2-htx"><h1>${esc(projet.titre)}${RO?"":`<button class="ov2-rename" data-rename aria-label="Renommer le projet" title="Renommer">${ic("pencil")}</button>`}</h1>${projet.contexte?`<p class="ov2-ctx">${esc(projet.contexte)}</p>`:""}<div class="ov2-meta"><span class="ov2-stat" style="--sc:${st.c}">${st.l}</span>${typeLabel()?`<span class="ov2-typ">${esc(typeLabel())}</span>`:""}<span class="ov2-cnt">${done}/${S.length} étapes</span></div></div></div>
       <div class="ov2-pilote">${pil?`${ic("compass")}<span class="ov2-pwho">${avatar(pil.ini,"sm",pil.color)}<b>${esc(pil.ini)}</b> · ${esc(pil.role)}</span>${RO?"":`<button class="ov2-plnk" data-pilote>${ident&&pil.ini===ident.initiales?"Me retirer":"Reprendre"}</button>`}`:`${ic("compass")}<span class="ov2-pnone">Pilote à définir — qui mène ce projet ?</span>${RO?"":`<button class="ov2-ptake" data-pilote-take>${ic("user")} Se proposer</button>`}`}</div>
     </div>
+    ${collabBanner()}
     ${projet.statut==="valide"?`<button class="ov2-valid" data-presentation>${ic("check")}<span><b>Projet validé</b> — voir la présentation</span>${ic("chev")}</button>`:""}
     ${done===0&&!RO?`<div class="ov2-welcome"><span class="ov2-wic">${ic("wand")}</span><div><b>Bienvenue — on construit ce projet à plusieurs</b><p>Chacun ajoute ses idées, la plus juste est « retenue », et la fiche se compose toute seule. On commence par <b>${esc(S[0]?S[0].nom:"la première étape")}</b>.</p></div></div>`:""}
     ${journey}
@@ -569,6 +579,7 @@ function viewPresentation(){
   const body=cards+jalCard+repCard+resCard2;
   return `<div class="pres">
     <div class="pres-bar no-print">${RO?`<a class="btn" href="../">${ic("back")} Portail</a>`:`<button class="btn primary" data-overview>${ic("pencil")} Modifier</button><button class="btn" id="print">${ic("printer")} Imprimer / PDF</button><button class="btn" id="word">${ic("word")} Word</button>`}<button class="btn" id="presShare">${ic("send")} Partager</button></div>
+    ${collabBanner()}
     <div class="pres-hero ${valid?"valid":""}">
       ${valid?`<span class="pres-badge">${ic("check")} Projet validé</span>`:`<span class="pres-badge draft" style="--sc:${st.c}">${esc(st.l)}</span>`}
       <h1 class="pres-title">${esc(projet.titre)}</h1>
@@ -957,6 +968,8 @@ document.addEventListener("click", e=>{
   if(e.target.closest("[data-type-custom]")){ const lbl=prompt("Nom du type de projet :", projet.typeCustom||""); if(lbl&&lbl.trim()) setProj({type:"perso", typeCustom:lbl.trim()}); return; }
   const ty=e.target.closest("[data-type]");if(ty) return setProj({type:ty.dataset.type});
   const lk=e.target.closest("[data-lock]");if(lk) return toggleLock(lk.dataset.lock);
+  if(e.target.closest("[data-openall]")){ setProj({locked:[]}); toast("Mur ouvert à tous — vos collègues peuvent écrire librement.",true); return; }
+  if(e.target.closest("[data-lockall]")){ setProj({locked:STEPS().map(s=>s.id)}); toast("Mur figé — plus de nouvelles contributions.",true); return; }
   if(e.target.closest("#print")) return window.print();
   if(e.target.closest("#word")) return exportWord();
   if(e.target.closest("#promptIA")) return openPromptIA();

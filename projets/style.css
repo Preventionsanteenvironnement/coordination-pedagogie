@@ -1033,3 +1033,24 @@ table.pl td{vertical-align:middle}
 .pres-bar .btn.primary:hover{filter:brightness(1.07);box-shadow:0 7px 22px rgba(108,92,231,.5)}
 .pres-bar .btn.primary .i{font-size:19px}
 .pres-badge.draft{color:#fff;background:var(--sc);box-shadow:0 3px 10px color-mix(in srgb,var(--sc) 36%,transparent)}
+
+/* Bandeau collaboration — ouvrir le mur a tous */
+.collab{display:flex;align-items:center;gap:13px;margin:14px 0;padding:14px 16px;border-radius:16px;border:1.5px solid;animation:collabIn .25s ease}
+@keyframes collabIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.collab.open{background:linear-gradient(135deg,#eafaf2,#f1fbf6);border-color:#aee5c8}
+.collab.closed{background:linear-gradient(135deg,#fff4e6,#fff8ef);border-color:#f3cd96}
+.collab-ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center}
+.collab-ic .i{width:21px;height:21px;color:#fff}
+.collab.open .collab-ic{background:linear-gradient(135deg,#1faa63,#2bbf76);box-shadow:0 4px 12px rgba(31,170,99,.32)}
+.collab.closed .collab-ic{background:linear-gradient(135deg,#e08c2a,#eaa53f);box-shadow:0 4px 12px rgba(224,140,42,.3)}
+.collab-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.collab-tx b{font-size:15px;color:#1f3322}
+.collab.closed .collab-tx b{color:#6b431a}
+.collab-tx span{font-size:12.5px;color:#5a6b60;line-height:1.35}
+.collab.closed .collab-tx span{color:#8a6a45}
+.collab-btn{flex:none;display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:12px;border:none;cursor:pointer;font-weight:700;font-size:13.5px;color:#fff;background:linear-gradient(135deg,#1faa63,#2bbf76);box-shadow:0 4px 14px rgba(31,170,99,.34);transition:filter .15s,box-shadow .15s}
+.collab-btn:hover{filter:brightness(1.06);box-shadow:0 6px 18px rgba(31,170,99,.44)}
+.collab-btn .i{width:17px;height:17px}
+.collab-btn.ghost{background:transparent;color:#3c8c5f;border:1.5px solid #b9e3cb;box-shadow:none;font-weight:600}
+.collab-btn.ghost:hover{background:#eafaf2;filter:none;box-shadow:none}
+@media(max-width:560px){.collab{flex-wrap:wrap}.collab-btn{width:100%;justify-content:center}}
