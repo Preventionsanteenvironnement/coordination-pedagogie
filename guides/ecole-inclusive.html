@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>École inclusive — Le guide de l'enseignant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6fb; --bg2:#eaeef7; --surface:#ffffff; --ink:#16203a; --ink2:#3d4866; --muted:#737e9c;
+  --brand:#2f54eb; --brand-d:#1f3bbf; --brand-soft:#e7ecfe;
+  --ppre:#2b7fff; --ppre-s:#e3effe;
+  --pap:#7c5cdb; --pap-s:#efeafe;
+  --pai:#0fa892; --pai-s:#dcf5f0;
+  --pps:#ef8a2b; --pps-s:#fdeedd;
+  --rose:#e0457b; --line:#e4e8f2; --line2:#eef1f8;
+  --ok:#16a36a; --shadow:0 18px 44px -24px rgba(28,46,102,.42); --shadow-sm:0 8px 22px -14px rgba(28,46,102,.35);
+  --rad:18px; --serif:'Sora',system-ui,sans-serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0c1020; --bg2:#11162a; --surface:#161c33; --ink:#eaeefb; --ink2:#c2c9e0; --muted:#8b95b6;
+  --brand:#7c97ff; --brand-d:#9db2ff; --brand-soft:#1d2748;
+  --ppre:#5fa0ff; --ppre-s:#16243f; --pap:#a98cff; --pap-s:#241a40; --pai:#43c9b3; --pai-s:#0f2e2a; --pps:#f6a85c; --pps-s:#33240f;
+  --rose:#f178a4; --line:#26304f; --line2:#1b2238; --shadow:0 22px 60px -28px rgba(0,0,0,.8); --shadow-sm:0 12px 30px -20px rgba(0,0,0,.65);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0;font-weight:700;letter-spacing:-.015em}
+a{color:var(--brand);text-decoration:none}
+::selection{background:var(--brand);color:#fff}
+
+#bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:linear-gradient(90deg,var(--ppre),var(--pap),var(--pai),var(--pps))}
+
+/* HEADER */
+.hd{position:fixed;top:0;left:0;right:0;z-index:200;background:color-mix(in srgb,var(--bg) 85%,transparent);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hd-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:12px 22px}
+.logo{display:flex;align-items:center;gap:12px;cursor:pointer;flex:0 0 auto}
+.logo .ic{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--pps));display:grid;place-items:center;
+  color:#fff;box-shadow:var(--shadow-sm)}
+.logo b{font-family:var(--serif);font-size:17px;font-weight:700;line-height:1}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:2px}
+.nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 13px;border-radius:10px;color:var(--ink2);font-size:13.5px;font-weight:600;white-space:nowrap;cursor:pointer;transition:.15s}
+.nav a:hover{background:var(--brand-soft);color:var(--brand)}
+.nav a.active{background:var(--brand);color:#fff}
+.tbtn{flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  cursor:pointer;display:grid;place-items:center}
+.burger{display:none;flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
+/* LAYOUT */
+.wrap{max-width:1180px;margin:0 auto;padding:104px 22px 90px}
+.page{display:none;animation:fade .45s ease both}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(20px);transition:.6s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--brand);background:var(--brand-soft);padding:6px 13px;border-radius:30px;margin-bottom:18px}
+.h-title{font-size:clamp(1.9rem,4.2vw,2.9rem);margin-bottom:.4em;max-width:20ch}
+.lead{font-size:clamp(1.05rem,2vw,1.25rem);color:var(--ink2);max-width:60ch;line-height:1.6}
+.sec-h{font-size:clamp(1.4rem,3vw,1.9rem);margin:56px 0 6px}
+.sec-sub{color:var(--muted);margin-bottom:22px;max-width:62ch}
+p{margin:0 0 16px}
+
+/* HERO */
+.hero{position:relative;border-radius:28px;overflow:hidden;padding:clamp(34px,6vw,68px);color:#fff;box-shadow:var(--shadow);margin-bottom:26px}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(125deg,#1f3bbf,#2f54eb 45%,#6a3fd6)}
+.hero::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.55;
+  background:radial-gradient(38% 50% at 85% 12%,rgba(239,138,43,.7),transparent 60%),radial-gradient(40% 46% at 8% 92%,rgba(15,168,146,.6),transparent 62%)}
+.hero .eyebrow{color:#fff;background:rgba(255,255,255,.16)}
+.hero h1{font-size:clamp(2rem,5.4vw,3.6rem);max-width:18ch;margin-bottom:.35em}
+.hero p{font-size:clamp(1.05rem,2.2vw,1.3rem);max-width:54ch;color:rgba(255,255,255,.9)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:30px;font-weight:600;font-size:15px;cursor:pointer;border:0;font-family:var(--sans);transition:.2s}
+.btn-p{background:#fff;color:var(--brand-d)}.btn-p:hover{transform:translateY(-2px)}
+.btn-g{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.34)}.btn-g:hover{background:rgba(255,255,255,.24)}
+
+/* STAT */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:8px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow-sm)}
+.stat b{font-family:var(--serif);font-size:1.9rem;font-weight:800;display:block;line-height:1;color:var(--brand)}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* GRID + CARDS */
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:24px;box-shadow:var(--shadow-sm);transition:.22s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.card h3{font-size:1.15rem;margin-bottom:8px}
+.card p{font-size:14.5px;color:var(--ink2);margin:0}
+.ic-chip{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;margin-bottom:14px}
+
+/* dispositif card (color coded) */
+.disp{border-radius:var(--rad);overflow:hidden;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow-sm);transition:.22s}
+.disp:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.disp .top{padding:20px 22px;color:#fff;position:relative}
+.disp .sig{font-family:var(--serif);font-weight:800;font-size:1.5rem;line-height:1}
+.disp .full{font-size:13px;opacity:.92;margin-top:4px}
+.disp .badge{position:absolute;top:18px;right:18px;font-size:11px;font-weight:700;background:rgba(255,255,255,.2);padding:5px 11px;border-radius:20px}
+.disp .body{padding:18px 22px}
+.disp .row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.disp .row:last-child{border-bottom:0}
+.disp .row .k{flex:0 0 96px;color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em}
+.disp .row .v{color:var(--ink2);flex:1}
+.disp.ppre .top{background:linear-gradient(120deg,var(--ppre),#1c63e0)} .disp.ppre .sig{color:#fff}
+.disp.pap .top{background:linear-gradient(120deg,var(--pap),#6446c4)}
+.disp.pai .top{background:linear-gradient(120deg,var(--pai),#0b8a78)}
+.disp.pps .top{background:linear-gradient(120deg,var(--pps),#d9760f)}
+
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;margin:2px 4px 2px 0}
+.t-ppre{background:var(--ppre-s);color:var(--ppre)} .t-pap{background:var(--pap-s);color:var(--pap)}
+.t-pai{background:var(--pai-s);color:var(--pai)} .t-pps{background:var(--pps-s);color:var(--pps)}
+.t-n{background:var(--bg2);color:var(--ink2)}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border-radius:var(--rad);overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid var(--line)}
+.tbl th,.tbl td{padding:13px 15px;text-align:left;border-bottom:1px solid var(--line2);vertical-align:top}
+.tbl thead th{background:var(--bg2);font-family:var(--serif);font-size:13px;color:var(--ink)}
+.tbl td:first-child{font-weight:700}
+.tbl tr:last-child td{border-bottom:0}
+.tbl-wrap{overflow-x:auto;margin:18px 0}
+
+/* CALLOUTS */
+.call{border-radius:14px;padding:18px 22px;margin:22px 0;display:flex;gap:14px;align-items:flex-start;border:1px solid}
+.call .ci{flex:0 0 auto;margin-top:1px}
+.call p{margin:0;font-size:15px}
+.call.info{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 25%,transparent)} .call.info .ci{color:var(--brand)}
+.call.warn{background:var(--pps-s);border-color:color-mix(in srgb,var(--pps) 35%,transparent)} .call.warn .ci{color:var(--pps)}
+.call.key{background:var(--pai-s);border-color:color-mix(in srgb,var(--pai) 30%,transparent)} .call.key .ci{color:var(--pai)}
+
+/* DECISION TOOL */
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:30px;box-shadow:var(--shadow);margin:18px 0}
+.tool .q{font-family:var(--serif);font-weight:700;font-size:1.3rem;margin-bottom:20px;text-align:center}
+.opts{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.opt{text-align:left;padding:18px 20px;border:2px solid var(--line);border-radius:16px;background:var(--bg);cursor:pointer;transition:.18s;font-family:var(--sans);font-size:15px;color:var(--ink)}
+.opt:hover{border-color:var(--brand);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.opt b{display:block;font-family:var(--serif);font-size:1.05rem;margin-bottom:5px}
+.opt span{font-size:13.5px;color:var(--muted)}
+.res{display:none;animation:fade .5s}
+.res.show{display:block}
+.res-card{border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)}
+.res-card .rh{padding:24px 26px;color:#fff}
+.res-card .rh .rh-lab{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.92;margin-bottom:9px}
+.res-card .rh .rh-name{font-family:var(--serif);font-size:1.5rem;font-weight:800;line-height:1.15;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.res-card .rh .rh-sig{font-size:13px;font-weight:700;background:rgba(255,255,255,.24);padding:4px 13px;border-radius:20px;letter-spacing:.04em}
+.res-card .rh .rh-what{font-size:14.5px;opacity:.95;margin-top:11px;max-width:54ch;line-height:1.5}
+.res-card .rb{padding:24px 26px;background:var(--surface)}
+.res-card .rb h4{font-size:1rem;margin:16px 0 6px;color:var(--ink)}
+.res-card .rb p{font-size:14.5px;color:var(--ink2);margin:0}
+.res-card ul{margin:6px 0 0;padding-left:20px;font-size:14.5px;color:var(--ink2)}
+.res-card li{margin-bottom:6px}
+
+/* ACCORDION */
+.acc{border:1px solid var(--line);border-radius:14px;margin-bottom:12px;background:var(--surface);overflow:hidden}
+.acc-h{padding:18px 22px;cursor:pointer;display:flex;align-items:center;gap:14px;font-weight:600;font-size:1.02rem}
+.acc-h .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.acc-h .chev{margin-left:auto;transition:.3s;color:var(--muted)}
+.acc.open .chev{transform:rotate(180deg)}
+.acc-b{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.acc-b .in{padding:0 22px 22px 46px;font-size:14.5px;color:var(--ink2)}
+.acc-b .in b{color:var(--ink)}
+.acc-b .role{display:inline-block;font-size:11.5px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:3px 10px;border-radius:14px;margin-bottom:10px}
+
+/* TIMELINE */
+.tl{position:relative;margin:24px 0;padding-left:34px}
+.tl::before{content:"";position:absolute;left:11px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--ppre),var(--pps))}
+.tl-step{position:relative;margin-bottom:24px}
+.tl-step .n{position:absolute;left:-34px;top:0;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;box-shadow:0 0 0 4px var(--bg)}
+.tl-step h4{font-size:1.1rem;margin-bottom:4px}
+.tl-step p{font-size:14.5px;color:var(--ink2);margin:0}
+
+/* steps list */
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{position:relative;padding:0 0 13px 40px;counter-increment:s;font-size:15px;color:var(--ink2)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:27px;height:27px;border-radius:9px;background:var(--brand-soft);color:var(--brand);font-family:var(--serif);font-weight:700;display:grid;place-items:center;font-size:13px}
+.steps li b{color:var(--ink)}
+
+/* twocol */
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.col-box{border-radius:16px;padding:22px;border:1px solid var(--line)}
+.col-box.yes{background:var(--pai-s);border-color:color-mix(in srgb,var(--pai) 30%,transparent)}
+.col-box.no{background:var(--pps-s);border-color:color-mix(in srgb,var(--pps) 30%,transparent)}
+.col-box h4{font-size:1.1rem;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.col-box ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--ink2)}
+.col-box li{margin-bottom:8px}
+
+/* glossary */
+.gsearch{width:100%;max-width:420px;padding:13px 18px;border:1px solid var(--line);border-radius:30px;background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:15px;margin-bottom:22px}
+.gsearch:focus{outline:2px solid var(--brand);border-color:transparent}
+.gitem{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:12px;padding:16px 20px;margin-bottom:10px}
+.gitem h4{font-size:1.05rem;color:var(--brand-d);margin-bottom:3px}
+.gitem p{font-size:14px;color:var(--ink2);margin:0}
+
+/* resource */
+.rsrc{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:12px;transition:.2s}
+.rsrc:hover{border-color:var(--brand);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.rsrc .ri{width:42px;height:42px;border-radius:11px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:0 0 auto}
+.rsrc b{display:block;font-family:var(--serif);font-size:1.02rem}
+.rsrc span{font-size:13.5px;color:var(--muted)}
+.rsrc .url{font-size:12.5px;color:var(--brand);font-weight:600;margin-top:3px;display:block;word-break:break-all}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:54px;padding-top:24px;border-top:1px solid var(--line)}
+.pagenav a{flex:1;padding:16px 20px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:.2s}
+.pagenav a:hover{border-color:var(--brand);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em}
+.pagenav b{display:block;font-family:var(--serif);font-size:1.02rem;margin-top:3px}
+.pagenav .nx{text-align:right}
+
+.foot{border-top:1px solid var(--line);background:var(--surface)}
+.foot-in{max-width:1180px;margin:0 auto;padding:30px 22px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center}
+.help{background:var(--pps-s);border:1px solid color-mix(in srgb,var(--pps) 30%,transparent);border-radius:14px;padding:14px 20px;font-size:14px;color:var(--ink2)}
+.help b{color:var(--pps)}
+
+.scrim{position:fixed;inset:0;background:rgba(8,12,28,.55);z-index:150;opacity:0;pointer-events:none;transition:.3s}
+.scrim.show{opacity:1;pointer-events:auto}
+
+@media(max-width:920px){
+  .burger{display:grid}
+  .nav{position:fixed;top:0;right:-300px;width:280px;height:100vh;flex-direction:column;background:var(--surface);
+    padding:80px 16px;gap:6px;transition:.32s;z-index:160;box-shadow:var(--shadow);overflow-y:auto}
+  .nav.open{right:0}
+  .nav a{font-size:15px;padding:12px 16px}
+  .twocol{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  body{font-size:16px}
+  .wrap{padding:96px 16px 70px}
+  .hero{padding:30px 22px;border-radius:22px}
+  .logo small{display:none}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<header class="hd">
+  <div class="hd-in">
+    <div class="logo" data-go="accueil">
+      <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/><circle cx="12" cy="14" r="2.2"/></svg></div>
+      <div><b>École inclusive</b><small>Le guide de l'enseignant</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a data-go="accueil">Accueil</a>
+      <a data-go="cadre">Le cadre</a>
+      <a data-go="dispositifs">Les 4 dispositifs</a>
+      <a data-go="orientation">Trouver le plan</a>
+      <a data-go="mdph">Parcours MDPH</a>
+      <a data-go="acteurs">Les acteurs</a>
+      <a data-go="structures">Structures &amp; aménagements</a>
+      <a data-go="lycee">Lycée &amp; après</a>
+      <a data-go="glossaire">Glossaire</a>
+      <a data-go="ressources">Ressources</a>
+    </nav>
+    <button class="tbtn" id="theme" aria-label="Thème"><svg id="ti" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="burger" id="burger" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="wrap">
+
+<!-- ============ ACCUEIL ============ -->
+<section class="page active" id="accueil">
+  <div class="hero reveal">
+    <div class="eyebrow">Comprendre · Orienter · Agir</div>
+    <h1>Tous les dispositifs de l'école inclusive, enfin clairs.</h1>
+    <p>Un guide pour l'enseignant qui veut savoir, simplement et sûrement, <b>quel dispositif pour quel élève</b>, qui fait quoi, et à quel moment agir — de la maternelle au lycée.</p>
+    <div class="cta">
+      <button class="btn btn-p" data-go="orientation">Quel plan pour mon élève&nbsp;?
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="btn btn-g" data-go="dispositifs">Découvrir les 4 dispositifs</button>
+    </div>
+  </div>
+
+  <div class="eyebrow reveal">Le réflexe de départ</div>
+  <h2 class="h-title reveal" style="margin-bottom:10px">Une seule question commande tout&nbsp;: <br>quelle est l'<u>origine</u> du besoin&nbsp;?</h2>
+  <p class="lead reveal" style="margin-bottom:26px">Difficulté scolaire, trouble des apprentissages, problème de santé ou handicap reconnu&nbsp;: à chaque origine correspond un dispositif. C'est la clé pour ne plus les confondre.</p>
+
+  <div class="grid g4">
+    <div class="disp ppre reveal"><div class="top"><div class="sig">PPRE</div><div class="full">Difficulté scolaire</div></div><div class="body"><p style="margin:0;font-size:14px;color:var(--ink2)">L'élève ne maîtrise pas le socle. Réponse <b>pédagogique</b>, interne à l'école.</p></div></div>
+    <div class="disp pap reveal"><div class="top"><div class="sig">PAP</div><div class="full">Trouble des apprentissages</div></div><div class="body"><p style="margin:0;font-size:14px;color:var(--ink2)">Un trouble « dys », TDAH… Aménagements <b>pédagogiques</b>, sur avis du médecin.</p></div></div>
+    <div class="disp pai reveal"><div class="top"><div class="sig">PAI</div><div class="full">Trouble de santé</div></div><div class="body"><p style="margin:0;font-size:14px;color:var(--ink2)">Maladie, allergie, traitement… Cadre <b>médical</b> : soins et sécurité à l'école.</p></div></div>
+    <div class="disp pps reveal"><div class="top"><div class="sig">PPS</div><div class="full">Handicap reconnu</div></div><div class="body"><p style="margin:0;font-size:14px;color:var(--ink2)">Reconnu par la <b>MDPH</b> : AESH, ULIS, matériel… Le seul plan qui passe par la MDPH.</p></div></div>
+  </div>
+
+  <div class="call info reveal" style="margin-top:24px">
+    <div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+    <p><b>Bon à savoir&nbsp;:</b> ces dispositifs <b>ne s'excluent pas</b>. Un élève peut avoir, par exemple, un PAI (santé) <em>et</em> un PPS (handicap). Seul le PPS suppose un passage par la MDPH&nbsp;; les trois autres se mettent en place en interne.</p>
+  </div>
+
+  <h2 class="sec-h reveal">Ce que vous trouverez ici</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic-chip" style="background:var(--ppre-s);color:var(--ppre)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5V6a2 2 0 0 1 2-2h12v16H6a2 2 0 0 0-2 2z"/></svg></div><h3>Des fiches claires</h3><p>Chaque dispositif expliqué&nbsp;: pour qui, qui décide, sur quelle base, à quel niveau, et votre rôle d'enseignant.</p></div>
+    <div class="card reveal"><div class="ic-chip" style="background:var(--pap-s);color:var(--pap)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div><h3>Un outil d'orientation</h3><p>Répondez à une question, obtenez le bon dispositif et la première démarche à engager.</p></div>
+    <div class="card reveal"><div class="ic-chip" style="background:var(--pai-s);color:var(--pai)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Un annuaire des acteurs</h3><p>Enseignant référent, AESH, ESS, MDPH… Qui fait quoi, et à qui s'adresser pour quoi.</p></div>
+  </div>
+
+  <div class="pagenav"><span></span><a class="nx" data-go="cadre"><small>Commencer →</small><b>Comprendre l'école inclusive</b></a></div>
+</section>
+
+<!-- ============ CADRE ============ -->
+<section class="page" id="cadre">
+  <div class="eyebrow reveal">Le cadre</div>
+  <h1 class="h-title reveal">L'école inclusive&nbsp;: un principe, une histoire, un vocabulaire</h1>
+  <p class="lead reveal">Avant les dispositifs, l'esprit. L'école inclusive n'est pas une tolérance accordée à quelques élèves&nbsp;: c'est un changement de regard sur le rôle même de l'école.</p>
+
+  <h2 class="sec-h reveal">Intégration ou inclusion&nbsp;? Le renversement</h2>
+  <p class="sec-sub reveal">Deux mots qu'on confond, deux logiques opposées. Tout est là.</p>
+  <div class="twocol reveal">
+    <div class="col-box no"><h4>Intégration <span class="tag t-n">hier</span></h4><p style="margin:0;font-size:14.5px;color:var(--ink2)">C'est à l'<b>élève</b> de s'adapter. On l'aide à « se normaliser » pour rejoindre le cadre ordinaire. La difficulté est vue comme une propriété de l'élève&nbsp;; s'il ne s'adapte pas, il rejoint une structure à part.</p></div>
+    <div class="col-box yes"><h4>Inclusion <span class="tag t-n">aujourd'hui</span></h4><p style="margin:0;font-size:14.5px;color:var(--ink2)">C'est à l'<b>école</b> de s'adapter. La difficulté ou le handicap « résultent de la rencontre entre l'élève et la situation scolaire »&nbsp;: l'école garantit un environnement accessible à tous, quels que soient les besoins.</p></div>
+  </div>
+
+  <h2 class="sec-h reveal">Trois lois fondatrices</h2>
+  <div class="tl reveal">
+    <div class="tl-step"><div class="n">1</div><h4>2005 — Loi pour l'égalité des droits et des chances</h4><p>Le mot « intégration » cède la place à « scolarisation ». Création des <b>MDPH</b> et de la <b>CDAPH</b>, et du <b>PPS</b>. Tout enfant a droit à une scolarité comme les autres. (Loi du 11 février 2005.)</p></div>
+    <div class="tl-step"><div class="n">2</div><h4>2013 — Loi de refondation de l'École</h4><p>« Tous les enfants partagent la capacité d'apprendre et de progresser. » La notion d'<b>école inclusive</b> entre dans la loi. (Loi du 8 juillet 2013.)</p></div>
+    <div class="tl-step"><div class="n">3</div><h4>2019 — Loi pour une école de la confiance</h4><p>Renforce l'inclusion de <b>tous</b> les enfants « sans aucune distinction » et structure le service public de l'école inclusive. (Loi du 26 juillet 2019.)</p></div>
+  </div>
+
+  <h2 class="sec-h reveal">Quatre principes à retenir</h2>
+  <div class="grid g4">
+    <div class="card reveal"><h3 style="font-size:1.05rem">Accessibilité</h3><p>Adapter l'offre éducative à la diversité des élèves — pas seulement au handicap.</p></div>
+    <div class="card reveal"><h3 style="font-size:1.05rem">Compensation</h3><p>Des mesures (aides humaines, matérielles, aménagements) qui compensent les conséquences d'un trouble ou d'un handicap.</p></div>
+    <div class="card reveal"><h3 style="font-size:1.05rem">Droit commun</h3><p>Mêmes programmes, mêmes diplômes. On adapte le chemin, pas l'exigence.</p></div>
+    <div class="card reveal"><h3 style="font-size:1.05rem">Logique de parcours</h3><p>On passe de la « filière » à un parcours individualisé et continu, suivi sur toute la scolarité.</p></div>
+  </div>
+
+  <div class="call key reveal">
+    <div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></div>
+    <p><b>« Besoins éducatifs particuliers » (BEP)&nbsp;:</b> l'école inclusive ne concerne pas que les élèves handicapés. Elle vise tous les élèves à besoins particuliers — difficulté scolaire, trouble, maladie, haut potentiel… C'est pourquoi il existe quatre dispositifs, et non un seul.</p>
+  </div>
+
+  <div class="pagenav"><a data-go="accueil"><small>← Précédent</small><b>Accueil</b></a><a class="nx" data-go="dispositifs"><small>Suivant →</small><b>Les 4 dispositifs</b></a></div>
+</section>
+
+<!-- ============ DISPOSITIFS ============ -->
+<section class="page" id="dispositifs">
+  <div class="eyebrow reveal">Le cœur du guide</div>
+  <h1 class="h-title reveal">Les 4 dispositifs d'accompagnement</h1>
+  <p class="lead reveal">PPRE, PAP, PAI, PPS. Ils répondent à quatre situations différentes. Voici, pour chacun, l'essentiel — repérable à sa couleur.</p>
+
+  <div class="grid g2" style="margin-top:24px">
+    <!-- PPRE -->
+    <div class="disp ppre reveal"><div class="top"><div class="sig">PPRE</div><div class="full">Programme personnalisé de réussite éducative</div><span class="badge">Pédagogique</span></div>
+      <div class="body">
+        <div class="row"><span class="k">Pour qui</span><span class="v">Élève en <b>difficulté scolaire</b> (socle non maîtrisé). Ni trouble, ni maladie, ni handicap requis. <b>Obligatoire en cas de redoublement.</b></span></div>
+        <div class="row"><span class="k">Cadre</span><span class="v">Pédagogique. <b>Pas de MDPH, pas de médical.</b></span></div>
+        <div class="row"><span class="k">Qui décide</span><span class="v">Le directeur / chef d'établissement avec l'équipe pédagogique.</span></div>
+        <div class="row"><span class="k">Contenu</span><span class="v">Un plan d'actions pédagogiques ciblées (objectifs, échéances), surtout conduit en classe.</span></div>
+        <div class="row"><span class="k">Niveaux</span><span class="v">Maternelle → lycée. Coordonné par l'enseignant ou le professeur principal.</span></div>
+        <div class="row"><span class="k">Durée</span><span class="v">Courte (en général entre deux congés scolaires), puis évaluée.</span></div>
+        <div class="row"><span class="k">Votre rôle</span><span class="v">Vous le repérez, l'initiez, le rédigez et le mettez en œuvre. <b>C'est votre premier outil.</b></span></div>
+      </div>
+    </div>
+    <!-- PAP -->
+    <div class="disp pap reveal"><div class="top"><div class="sig">PAP</div><div class="full">Plan d'accompagnement personnalisé</div><span class="badge">Sur avis médical</span></div>
+      <div class="body">
+        <div class="row"><span class="k">Pour qui</span><span class="v">Élève avec un ou des <b>troubles des apprentissages</b> (dys, TDAH…), difficultés durables, sans handicap reconnu, quand le PPRE ne suffit pas.</span></div>
+        <div class="row"><span class="k">Cadre</span><span class="v">Pédagogique, mais <b>déclenché sur avis du médecin de l'Éducation nationale</b>. Pas de MDPH.</span></div>
+        <div class="row"><span class="k">Qui décide</span><span class="v">Avis du médecin EN → le directeur / chef d'établissement élabore avec l'équipe et la famille.</span></div>
+        <div class="row"><span class="k">Contenu</span><span class="v">Aménagements pédagogiques (supports adaptés, allègements…). <b>Ouvre droit aux aménagements d'examens.</b></span></div>
+        <div class="row"><span class="k">Niveaux</span><span class="v">Maternelle → lycée, organisé par cycles.</span></div>
+        <div class="row"><span class="k">Durée</span><span class="v">Suit l'élève toute la scolarité&nbsp;; réévalué chaque année.</span></div>
+        <div class="row"><span class="k">Votre rôle</span><span class="v">Vous pouvez l'initier&nbsp;; vous proposez et appliquez les aménagements au quotidien.</span></div>
+      </div>
+    </div>
+    <!-- PAI -->
+    <div class="disp pai reveal"><div class="top"><div class="sig">PAI</div><div class="full">Projet d'accueil individualisé</div><span class="badge">Médical</span></div>
+      <div class="body">
+        <div class="row"><span class="k">Pour qui</span><span class="v">Élève avec un <b>trouble de santé</b> sur longue période (asthme, allergie, diabète, intolérance…) nécessitant soins, traitement ou régime à l'école.</span></div>
+        <div class="row"><span class="k">Cadre</span><span class="v">Médical / sécurité. <b>Ne règle pas les apprentissages.</b></span></div>
+        <div class="row"><span class="k">Qui décide</span><span class="v">Directeur / chef d'établissement + médecin EN (ou PMI) + infirmier, à partir des données du médecin qui suit l'enfant.</span></div>
+        <div class="row"><span class="k">Contenu</span><span class="v">Traitements, régimes, aménagements d'horaires, et une fiche <b>« conduite à tenir en cas d'urgence »</b>.</span></div>
+        <div class="row"><span class="k">Niveaux</span><span class="v">De la crèche au lycée — temps scolaire <b>et</b> périscolaire.</span></div>
+        <div class="row"><span class="k">Durée</span><span class="v">Reconductible chaque année&nbsp;; à emporter en sortie / voyage scolaire.</span></div>
+        <div class="row"><span class="k">Votre rôle</span><span class="v">Vous l'<b>appliquez</b> (vous le signez si vous y participez) et connaissez le protocole d'urgence.</span></div>
+      </div>
+    </div>
+    <!-- PPS -->
+    <div class="disp pps reveal"><div class="top"><div class="sig">PPS</div><div class="full">Projet personnalisé de scolarisation</div><span class="badge">MDPH</span></div>
+      <div class="body">
+        <div class="row"><span class="k">Pour qui</span><span class="v">Élève dont le <b>handicap est reconnu par la MDPH</b>, nécessitant compensation et aménagements décidés par la CDAPH.</span></div>
+        <div class="row"><span class="k">Cadre</span><span class="v"><b>Handicap / MDPH</b> — le seul des quatre.</span></div>
+        <div class="row"><span class="k">Qui décide</span><span class="v">Demande de la famille → équipe pluridisciplinaire de la MDPH rédige → <b>la CDAPH décide</b>.</span></div>
+        <div class="row"><span class="k">Base</span><span class="v">Dossier MDPH (Cerfa) + certificat médical &lt; 12 mois + <b>GEVA-Sco</b>.</span></div>
+        <div class="row"><span class="k">Contenu</span><span class="v">Orientation (ULIS…), <b>AESH</b>, matériel adapté, SESSAD, aménagements + examens.</span></div>
+        <div class="row"><span class="k">Durée</span><span class="v">Évalué chaque année en <b>ESS</b>&nbsp;; révisé à chaque changement de cycle.</span></div>
+        <div class="row"><span class="k">Votre rôle</span><span class="v">Vous <b>alimentez le GEVA-Sco</b> et participez à l'ESS animée par l'enseignant référent.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec-h reveal">Tableau comparatif</h2>
+  <div class="tbl-wrap reveal">
+    <table class="tbl">
+      <thead><tr><th>Dispositif</th><th>Public (le déclencheur)</th><th>Cadre</th><th>Qui décide</th><th>Contenu</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag t-ppre">PPRE</span></td><td>Difficulté scolaire&nbsp;; obligatoire si redoublement</td><td>Pédagogique (ni MDPH ni médical)</td><td>Directeur + équipe pédagogique</td><td>Plan d'actions pédagogiques, en classe</td></tr>
+        <tr><td><span class="tag t-pap">PAP</span></td><td>Trouble des apprentissages (dys, TDAH)</td><td>Pédagogique <b>sur avis médical</b></td><td>Médecin EN → établissement</td><td>Aménagements pédagogiques + examens</td></tr>
+        <tr><td><span class="tag t-pai">PAI</span></td><td>Maladie / trouble de santé</td><td>Médical / santé</td><td>Établissement + médecin EN + infirmier</td><td>Soins, régimes, protocole d'urgence</td></tr>
+        <tr><td><span class="tag t-pps">PPS</span></td><td>Handicap reconnu par la MDPH</td><td>Handicap / <b>MDPH</b></td><td>MDPH rédige, <b>CDAPH décide</b></td><td>AESH, ULIS, matériel, aménagements + examens</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call warn reveal">
+    <div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+    <p><b>Le piège à éviter&nbsp;:</b> confondre PAP et PPS. Le PAP reste <em>interne</em> à l'Éducation nationale (trouble des apprentissages, avis du médecin EN). Le PPS suppose une <em>reconnaissance de handicap</em> par la MDPH. Si vous hésitez, posez-vous la question de l'origine du besoin → l'outil suivant vous aide.</p>
+  </div>
+
+  <div class="pagenav"><a data-go="cadre"><small>← Précédent</small><b>Le cadre</b></a><a class="nx" data-go="orientation"><small>Suivant →</small><b>Quel plan pour quel élève&nbsp;?</b></a></div>
+</section>
+
+<!-- ============ ORIENTATION (interactive) ============ -->
+<section class="page" id="orientation">
+  <div class="eyebrow reveal">Outil d'orientation</div>
+  <h1 class="h-title reveal">Quel plan pour quel élève&nbsp;?</h1>
+  <p class="lead reveal">Une question, une réponse. Identifiez l'origine principale du besoin de l'élève&nbsp;: l'outil vous indique le dispositif adapté et votre première démarche.</p>
+
+  <div class="tool reveal">
+    <div class="q" id="toolQ">Quelle est l'origine principale du besoin de l'élève&nbsp;?</div>
+    <div class="opts" id="toolOpts">
+      <button class="opt" data-r="ppre"><b>Difficultés scolaires</b><span>L'élève peine à maîtriser le socle, sans trouble ni maladie identifiés.</span></button>
+      <button class="opt" data-r="pap"><b>Trouble des apprentissages</b><span>Un trouble « dys », un TDAH… diagnostiqué ou suspecté, qui dure.</span></button>
+      <button class="opt" data-r="pai"><b>Problème de santé</b><span>Maladie, allergie, traitement, régime à gérer sur le temps scolaire.</span></button>
+      <button class="opt" data-r="pps"><b>Situation de handicap</b><span>Un handicap reconnu — ou à faire reconnaître — par la MDPH.</span></button>
+    </div>
+    <div class="res" id="toolRes"></div>
+    <button class="btn" id="toolReset" style="display:none;margin:20px auto 0;background:var(--bg2);color:var(--ink)">↺ Recommencer</button>
+  </div>
+
+  <div class="call info reveal">
+    <div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+    <p>Cet outil donne une <b>première orientation</b>. Un même élève peut relever de plusieurs dispositifs. En cas de doute, l'<b>équipe éducative</b>, le <b>médecin de l'Éducation nationale</b> et l'<b>enseignant référent</b> sont vos interlocuteurs.</p>
+  </div>
+
+  <div class="pagenav"><a data-go="dispositifs"><small>← Précédent</small><b>Les 4 dispositifs</b></a><a class="nx" data-go="mdph"><small>Suivant →</small><b>Le parcours MDPH</b></a></div>
+</section>
+
+<!-- ============ MDPH ============ -->
+<section class="page" id="mdph">
+  <div class="eyebrow reveal">Démarches</div>
+  <h1 class="h-title reveal">Le parcours MDPH &amp; le GEVA-Sco</h1>
+  <p class="lead reveal">Dès qu'un handicap est en jeu, le chemin passe par la MDPH. Voici les étapes, le rôle du GEVA-Sco, et ce que la commission peut décider.</p>
+
+  <h2 class="sec-h reveal">Le GEVA-Sco, l'outil de dialogue école ↔ MDPH</h2>
+  <p class="sec-sub reveal">« Guide d'évaluation des besoins de compensation en matière de scolarisation ». Il rassemble les observations sur les apprentissages, l'autonomie et la vie sociale de l'élève. Deux versions&nbsp;:</p>
+  <div class="grid g2 reveal">
+    <div class="card" style="border-left:4px solid var(--ppre)"><h3>GEVA-Sco — première demande</h3><p>Pour un élève dont le handicap n'a <b>pas encore</b> été reconnu. Rempli par l'<b>équipe éducative</b> (réunie par le directeur). Transmis à la MDPH par la <b>famille</b>, avec le dossier.</p></div>
+    <div class="card" style="border-left:4px solid var(--pps)"><h3>GEVA-Sco — réexamen</h3><p>Pour un élève déjà reconnu, avec un PPS. Rempli par les <b>enseignants</b> lors de l'<b>ESS</b>. Transmis par l'<b>enseignant référent</b>.</p></div>
+  </div>
+
+  <h2 class="sec-h reveal">Le parcours, étape par étape</h2>
+  <div class="tl reveal">
+    <div class="tl-step"><div class="n">1</div><h4>Équipe éducative</h4><p>Réunie par le directeur / chef d'établissement, à la demande de la famille ou de l'équipe. La famille est membre de droit.</p></div>
+    <div class="tl-step"><div class="n">2</div><h4>GEVA-Sco première demande</h4><p>Renseigné par l'équipe éducative.</p></div>
+    <div class="tl-step"><div class="n">3</div><h4>Dossier MDPH</h4><p>Cerfa n° 15692*01 + certificat médical (Cerfa 15695*01, &lt; 1 an) + justificatifs + GEVA-Sco. Déposé par la famille. <b>Délai d'instruction : 4 mois.</b></p></div>
+    <div class="tl-step"><div class="n">4</div><h4>Évaluation (EPE)</h4><p>L'équipe pluridisciplinaire de la MDPH évalue la situation et les besoins, et rédige le PPS.</p></div>
+    <div class="tl-step"><div class="n">5</div><h4>Décision de la CDAPH</h4><p>La commission décide et <b>notifie</b> les droits (AESH, ULIS, matériel, SESSAD, AEEH…).</p></div>
+    <div class="tl-step"><div class="n">6</div><h4>Mise en œuvre du PPS</h4><p>Par l'équipe pédagogique de l'établissement.</p></div>
+    <div class="tl-step"><div class="n">7</div><h4>Suivi en ESS — chaque année</h4><p>L'équipe de suivi, animée par l'enseignant référent, fait le bilan. Au besoin, GEVA-Sco réexamen → retour à l'évaluation.</p></div>
+  </div>
+
+  <h2 class="sec-h reveal">Ce que la CDAPH peut notifier</h2>
+  <div class="grid g3 reveal">
+    <div class="card"><h3 style="font-size:1.05rem">AESH</h3><p>Aide humaine — individuelle, mutualisée, ou en dispositif ULIS.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">ULIS</h3><p>Orientation vers un dispositif collectif d'inclusion.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">Matériel adapté</h3><p>Prêt d'ordinateur, logiciels…</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">SESSAD / médico-social</h3><p>Soins et accompagnement sur les lieux de vie, jusqu'à 20 ans.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">Transport adapté</h3><p>Prise en charge du transport scolaire.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">AEEH</h3><p>Allocation d'éducation de l'enfant handicapé (taux ≥ 50 %).</p></div>
+  </div>
+
+  <div class="call warn reveal">
+    <div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16h.01"/></svg></div>
+    <p><b>Nouveauté — le Pôle d'appui à la scolarité (PAS)&nbsp;:</b> un binôme enseignant-coordonnateur + éducateur médico-social apporte une réponse <b>rapide, de premier niveau</b>, sans attendre une reconnaissance de handicap, et accompagne la famille vers la MDPH si besoin. En cours de généralisation (jusqu'à la rentrée 2027).</p>
+  </div>
+
+  <div class="pagenav"><a data-go="orientation"><small>← Précédent</small><b>Quel plan&nbsp;?</b></a><a class="nx" data-go="acteurs"><small>Suivant →</small><b>Les acteurs</b></a></div>
+</section>
+
+<!-- ============ ACTEURS ============ -->
+<section class="page" id="acteurs">
+  <div class="eyebrow reveal">Annuaire</div>
+  <h1 class="h-title reveal">Les acteurs&nbsp;: qui fait quoi&nbsp;?</h1>
+  <p class="lead reveal">Vous n'êtes jamais seul. Voici qui intervient autour de l'élève — et à qui vous adresser, selon votre besoin. <b>Cliquez</b> pour déplier.</p>
+
+  <h2 class="sec-h reveal">Spécifiques au handicap</h2>
+  <div class="reveal">
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pps)"></span>Enseignant référent (ERSEH) — le pivot<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Élèves en situation de handicap</span><p><b>Rôle&nbsp;:</b> interlocuteur privilégié de l'élève, de la famille et des équipes, et lien permanent avec la MDPH, de la maternelle au post-bac. Il <b>réunit et anime l'ESS</b>, en rédige le compte rendu, garantit la continuité du PPS et contribue au GEVA-Sco.</p><p style="margin-top:8px"><b>Vous le sollicitez quand&nbsp;:</b> il faut mettre en œuvre ou faire évoluer un PPS, préparer un dossier MDPH, ou assurer une transition. Coordonnées auprès du directeur / chef d'établissement.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pps)"></span>AESH — l'accompagnant<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Élèves en situation de handicap</span><p><b>Rôle&nbsp;:</b> facilite l'accueil, l'intégration et l'accompagnement de l'élève en classe et sur les temps périscolaires. Trois modalités&nbsp;: <b>individuelle</b>, <b>mutualisée</b>, ou <b>collective</b> (en ULIS).</p><p style="margin-top:8px"><b>À savoir&nbsp;:</b> l'AESH n'intervient que <b>si un PPS existe</b> et <b>si l'aide a été notifiée par la CDAPH</b>. Ce n'est ni l'enseignant ni l'établissement qui décide seul de l'attribution. L'AESH n'est ni codeur LPC, ni interprète LSF, ni enseignant spécialisé.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pps)"></span>Équipe de suivi de la scolarisation (ESS)<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Élèves en situation de handicap</span><p><b>Rôle&nbsp;:</b> suit la mise en œuvre du PPS et l'évalue <b>au moins une fois par an</b>. Réunit l'élève, ses parents, l'enseignant référent, les enseignants et l'AESH, avec l'appui du PsyEN, du médecin EN, etc.</p><p style="margin-top:8px"><b>Vous y participez</b> comme membre, sur convocation de l'enseignant référent.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pps)"></span>Professeur ressource (service départemental école inclusive)<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Troubles spécifiques (dont TSA/TND)</span><p><b>Rôle&nbsp;:</b> enseignant spécialisé qui apporte conseils pédagogiques, aide à l'observation et aux adaptations. Au moins un référent « TSA/TND » par département, sous l'autorité de l'IEN-ASH.</p><p style="margin-top:8px"><b>Vous le sollicitez quand&nbsp;:</b> vous avez besoin d'un appui concret pour adapter votre classe à un trouble spécifique.</p></div></div></div>
+  </div>
+
+  <h2 class="sec-h reveal">Pour tous les élèves</h2>
+  <div class="reveal">
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--brand)"></span>Enseignant / Professeur principal<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Tous les élèves</span><p><b>Rôle&nbsp;:</b> acteur de premier rang. Il recueille les informations, coordonne les liens (famille, équipe, référent, médico-social), suit les acquisitions et applique les volets pédagogiques des plans.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--brand)"></span>RASED<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">École primaire</span><p><b>Rôle&nbsp;:</b> réseau d'aides spécialisées (PsyEN + professeurs des écoles spécialisés) pour les difficultés d'apprentissage et d'adaptation — <b>pas spécifique au handicap</b>. Intervention limitée, avec accord des parents.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--brand)"></span>Pôle d'appui à la scolarité (PAS)<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Tous les élèves à BEP</span><p><b>Rôle&nbsp;:</b> binôme enseignant-coordonnateur + éducateur médico-social, pour une réponse rapide de premier niveau, sans attendre une reconnaissance de handicap. Mobilisable par l'enseignant, l'élève ou les parents.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--brand)"></span>PsyEN — psychologue de l'Éducation nationale<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Tous les élèves</span><p><b>Rôle&nbsp;:</b> analyse la situation de l'élève face aux apprentissages, mène entretiens et bilans, recherche des solutions internes ou externes. Son expertise nourrit l'ESS.</p></div></div></div>
+  </div>
+
+  <h2 class="sec-h reveal">Santé, social &amp; instances</h2>
+  <div class="reveal">
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pai)"></span>Médecin de l'Éducation nationale<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Santé</span><p><b>Rôle&nbsp;:</b> apporte l'expertise médicale. Son avis est requis pour le <b>PAP</b> et il copilote le <b>PAI</b>. Il fonde aussi l'avis de l'ESS.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pai)"></span>Infirmier scolaire &amp; assistant de service social<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Santé / social</span><p><b>Rôle&nbsp;:</b> l'infirmier apporte un appui de santé au quotidien (et au PAI)&nbsp;; l'assistant social intervient sur la dimension familiale et sociale. Tous deux peuvent éclairer l'ESS.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pai)"></span>MDPH &amp; CDAPH<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Handicap</span><p><b>Rôle&nbsp;:</b> la MDPH reçoit et évalue les demandes&nbsp;; la <b>CDAPH</b> décide et notifie (PPS, AESH, matériel, orientation…). Vous ne la sollicitez pas directement&nbsp;: la demande est portée par la famille&nbsp;; vous contribuez via le GEVA-Sco.</p></div></div></div>
+    <div class="acc"><div class="acc-h"><span class="dot" style="background:var(--pai)"></span>Directeur / chef d'établissement &amp; IEN-ASH<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><span class="role">Encadrement</span><p><b>Rôle&nbsp;:</b> le directeur / chef d'établissement met en œuvre les plans et transmet les coordonnées de l'enseignant référent. L'<b>IEN-ASH</b> pilote l'adaptation scolaire au niveau départemental et mobilise les professeurs ressources.</p></div></div></div>
+  </div>
+
+  <h2 class="sec-h reveal">À qui s'adresser pour quoi</h2>
+  <div class="tbl-wrap reveal">
+    <table class="tbl">
+      <thead><tr><th>Votre besoin</th><th>L'acteur à solliciter</th></tr></thead>
+      <tbody>
+        <tr><td>Mettre en œuvre / faire évoluer un PPS, lien école–famille–MDPH</td><td>Enseignant référent (ERSEH)</td></tr>
+        <tr><td>Accompagnement humain en classe (élève notifié)</td><td>AESH</td></tr>
+        <tr><td>Conseils pour adapter à un trouble (TSA/TND…)</td><td>Professeur ressource (via l'IEN-ASH)</td></tr>
+        <tr><td>Élève en difficulté d'apprentissage (primaire), sans handicap</td><td>RASED</td></tr>
+        <tr><td>Réponse rapide, sans attendre la MDPH</td><td>Pôle d'appui à la scolarité (PAS)</td></tr>
+        <tr><td>Bilans, analyse des apprentissages</td><td>PsyEN</td></tr>
+        <tr><td>Avis médical (PAP, PAI, besoins)</td><td>Médecin de l'Éducation nationale</td></tr>
+        <tr><td>Reconnaissance du handicap, notification d'aides</td><td>MDPH / CDAPH (demande portée par la famille)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagenav"><a data-go="mdph"><small>← Précédent</small><b>Parcours MDPH</b></a><a class="nx" data-go="structures"><small>Suivant →</small><b>Structures &amp; aménagements</b></a></div>
+</section>
+
+<!-- ============ STRUCTURES ============ -->
+<section class="page" id="structures">
+  <div class="eyebrow reveal">Sur le terrain</div>
+  <h1 class="h-title reveal">Structures de scolarisation &amp; aménagements</h1>
+  <p class="lead reveal">Où l'élève est-il scolarisé, et avec quels aménagements&nbsp;? Et surtout&nbsp;: ce que vous pouvez faire vous-même, en classe, dès demain.</p>
+
+  <h2 class="sec-h reveal">Les modalités de scolarisation</h2>
+  <div class="grid g2 reveal">
+    <div class="card"><h3>Classe ordinaire (avec accompagnement)</h3><p>Le cadre par défaut de l'école inclusive. L'accompagnement (AESH, matériel) y est apporté selon les besoins. La grande majorité des élèves en situation de handicap y sont scolarisés.</p></div>
+    <div class="card"><h3>ULIS — dispositif collectif</h3><p>Unité localisée pour l'inclusion scolaire&nbsp;: regroupement à effectif réduit, animé par un coordonnateur, pour la mise en œuvre des PPS. Quatre déclinaisons&nbsp;: <span class="tag t-n">ULIS école</span><span class="tag t-n">collège</span><span class="tag t-n">lycée GT</span><span class="tag t-n">lycée pro</span>. Sur notification de la CDAPH.</p></div>
+    <div class="card"><h3>Établissements &amp; services médico-sociaux</h3><p>IME, ITEP, et services comme le <b>SESSAD</b> (qui intervient sur les lieux de vie de l'élève jusqu'à 20 ans). Une <b>unité d'enseignement</b> y assure la scolarité. Orientation décidée par la CDAPH.</p></div>
+    <div class="card"><h3>Scolarisation empêchée par la santé</h3><p>À l'hôpital (avec enseignants spécialisés), à domicile, ou via l'<b>APADHE</b> (accompagnement pédagogique à domicile, à l'hôpital ou à l'école). Outils à distance&nbsp;: Ted-i, Cartable connecté.</p></div>
+  </div>
+
+  <div class="call info reveal">
+    <div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+    <p><b>L'APADHE</b> s'active après une interruption de scolarité <b>de plus de 15 jours</b> (2 semaines consécutives, ou 3 semaines discontinues pour une maladie longue). Jusqu'à <b>6 h/semaine</b>, assuré en priorité par les professeurs habituels, après transmission au médecin EN et au DASEN. Gratuit pour les familles.</p>
+  </div>
+
+  <h2 class="sec-h reveal">Les aménagements possibles</h2>
+  <div class="grid g3 reveal">
+    <div class="card"><div class="ic-chip" style="background:var(--ppre-s);color:var(--ppre)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3>Pédagogiques</h3><p>Supports aérés/agrandis, police adaptée, fiches mémo, repères visuels, allègement du travail, place dans la classe, contrôles aménagés, non-pénalisation de l'orthographe (dys)…</p></div>
+    <div class="card"><div class="ic-chip" style="background:var(--pap-s);color:var(--pap)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div><h3>Matériels</h3><p>Matériel informatique (de l'établissement ou de l'élève), logiciels, matériel pédagogique adapté prêté sur notification dans le cadre d'un PPS.</p></div>
+    <div class="card"><div class="ic-chip" style="background:var(--pps-s);color:var(--pps)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6l4 2M22 12A10 10 0 1 1 12 2"/></svg></div><h3>Examens &amp; concours</h3><p>Majoration de temps (« tiers-temps », ≤ 1/3), preneur de notes, sujets adaptés, étalement, conservation des notes 5 ans, dispenses d'épreuves. Demande au médecin désigné par la CDAPH&nbsp;; décision de l'autorité organisatrice. <b>Un dossier MDPH n'est pas obligatoire.</b></p></div>
+  </div>
+
+  <h2 class="sec-h reveal">Qui décide quoi&nbsp;? Le repère essentiel</h2>
+  <div class="twocol reveal">
+    <div class="col-box yes"><h4><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pai)" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Ce que vous pouvez faire vous-même</h4>
+      <ul>
+        <li>Adapter vos supports (police, aération, fiches mémo, repères visuels)</li>
+        <li>Choisir la place de l'élève dans la classe</li>
+        <li>Aménager vos évaluations, alléger le travail</li>
+        <li>Ne pas pénaliser l'orthographe (élèves dys)</li>
+        <li>Mettre en place un <b>PPRE</b> avec l'équipe</li>
+        <li>Utiliser le matériel informatique de l'établissement</li>
+      </ul>
+    </div>
+    <div class="col-box no"><h4><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pps)" stroke-width="2.4"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg> Ce qui nécessite un avis ou une notification</h4>
+      <ul>
+        <li><b>PAP</b> → avis du médecin de l'Éducation nationale</li>
+        <li><b>PAI</b> → médecin EN + infirmier + médecin traitant</li>
+        <li><b>PPS</b>, AESH, matériel adapté, orientation ULIS → notification CDAPH</li>
+        <li>Aménagements d'examens → médecin CDAPH + autorité académique</li>
+        <li>Dispense d'enseignement → recteur d'académie</li>
+        <li>Maintien en maternelle → décision de la CDAPH</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pagenav"><a data-go="acteurs"><small>← Précédent</small><b>Les acteurs</b></a><a class="nx" data-go="lycee"><small>Suivant →</small><b>Lycée &amp; après</b></a></div>
+</section>
+
+<!-- ============ LYCEE ============ -->
+<section class="page" id="lycee">
+  <div class="eyebrow reveal">La continuité</div>
+  <h1 class="h-title reveal">Lycée, post-bac &amp; insertion</h1>
+  <p class="lead reveal">Le parcours ne s'arrête pas au collège. Voici ce qui se poursuit, ce qui change, et les droits qui ouvrent l'après — souvent mal connus.</p>
+
+  <h2 class="sec-h reveal">Que deviennent les plans&nbsp;?</h2>
+  <div class="tbl-wrap reveal">
+    <table class="tbl">
+      <thead><tr><th>Plan</th><th>Au lycée</th><th>Dans le supérieur (BTS, CPGE, DN MADE, université…)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag t-pps">PPS</span></td><td>Se poursuit à l'identique (référent + ESS)</td><td>Se poursuit&nbsp;: dossier MDPH, suivi par l'enseignant référent et l'ESS</td></tr>
+        <tr><td><span class="tag t-pai">PAI</span></td><td>Se poursuit (dispositif interne)</td><td>Se poursuit dans l'établissement</td></tr>
+        <tr><td><span class="tag t-pap">PAP</span></td><td>Se poursuit</td><td><b>Devient un PAEH</b> (plan d'accompagnement de l'étudiant en situation de handicap)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="call key reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div><p><b>Dans le supérieur&nbsp;:</b> l'interlocuteur devient la <b>personne référente handicap de l'établissement</b>. Le PAEH s'obtient en 3 étapes&nbsp;: évaluation des besoins → avis d'un médecin agréé → décision de l'établissement. Depuis la circulaire du 10 juillet 2024, un <b>dossier MDPH n'est pas obligatoire</b> pour obtenir des aménagements dans le supérieur.</p></div>
+
+  <h2 class="sec-h reveal">Les aménagements d'examens</h2>
+  <p class="sec-sub reveal">Pour les examens terminaux (bac…) et concours, la demande suit la procédure de l'académie ou de l'organisateur — même avec un PPS/PAI (procédure alors simplifiée). La décision relève de l'<b>autorité académique</b>. Bonne nouvelle&nbsp;: les aménagements du bac sont <b>portables</b> vers les examens du supérieur.</p>
+
+  <h2 class="sec-h reveal">Les aides financières</h2>
+  <div class="grid g3 reveal">
+    <div class="card"><h3 style="font-size:1.05rem">AEEH</h3><p>Allocation d'éducation de l'enfant handicapé. Taux d'incapacité ≥ 50 % évalué par la MDPH, sans condition de ressources. Compléments possibles.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">PCH</h3><p>Prestation de compensation du handicap. Attribuée par la CDAPH, versée par le conseil départemental.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">AAH</h3><p>Allocation aux adultes handicapés, dès 16 ans sous conditions. Attribuée par la CDAPH.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">Bourses &amp; fonds sociaux</h3><p>Bourses de collège/lycée (4 points de charge en plus pour les élèves en situation de handicap), allocation de rentrée, fonds sociaux des établissements.</p></div>
+    <div class="card"><h3 style="font-size:1.05rem">AJPP</h3><p>Allocation journalière de présence parentale, pour un parent qui interrompt son activité.</p></div>
+  </div>
+
+  <h2 class="sec-h reveal">Vers l'emploi</h2>
+  <div class="call info reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><p><b>RQTH</b> (reconnaissance de la qualité de travailleur handicapé)&nbsp;: demandable dès <b>15 ans</b>, elle facilite stages, apprentissage et PFMP, et l'aménagement du poste. Pour les <b>15-20 ans</b>, le bénéfice d'un PPS, de l'AEEH ou de la PCH <b>vaut RQTH</b> (loi du 18 décembre 2023). Côté employeur&nbsp;: aides de l'<b>Agefiph</b> (privé) et du <b>FIPHFP</b> (public).</p></div>
+
+  <div class="pagenav"><a data-go="structures"><small>← Précédent</small><b>Structures &amp; aménagements</b></a><a class="nx" data-go="glossaire"><small>Suivant →</small><b>Glossaire</b></a></div>
+</section>
+
+<!-- ============ GLOSSAIRE ============ -->
+<section class="page" id="glossaire">
+  <div class="eyebrow reveal">Mémo</div>
+  <h1 class="h-title reveal">Glossaire des sigles</h1>
+  <p class="lead reveal" style="margin-bottom:22px">Tout le vocabulaire de l'école inclusive, en clair. Tapez pour filtrer.</p>
+  <input class="gsearch reveal" id="gs" placeholder="🔍  Rechercher un sigle (ex. PPS, AESH, MDPH…)">
+  <div id="glist" class="reveal"></div>
+  <div class="pagenav"><a data-go="lycee"><small>← Précédent</small><b>Lycée &amp; après</b></a><a class="nx" data-go="ressources"><small>Suivant →</small><b>Ressources</b></a></div>
+</section>
+
+<!-- ============ RESSOURCES ============ -->
+<section class="page" id="ressources">
+  <div class="eyebrow reveal">Pour aller plus loin</div>
+  <h1 class="h-title reveal">Ressources officielles</h1>
+  <p class="lead reveal">Les sites de référence pour vérifier, approfondir et accompagner les familles.</p>
+
+  <div class="reveal" style="margin-top:22px">
+    <a class="rsrc" href="https://www.monparcourshandicap.gouv.fr" target="_blank" rel="noopener"><div class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg></div><div><b>Mon Parcours Handicap</b><span>Le service public d'information (CNSA). Source des fiches de ce guide.</span><span class="url">monparcourshandicap.gouv.fr</span></div></a>
+    <a class="rsrc" href="https://eduscol.education.fr/1216/l-ecole-inclusive" target="_blank" rel="noopener"><div class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10 12 5 2 10l10 5 10-5zM6 12v5c3 2 9 2 12 0v-5"/></svg></div><div><b>Éduscol — L'école inclusive</b><span>Ressources et textes de référence pour les enseignants (ministère).</span><span class="url">eduscol.education.fr</span></div></a>
+    <a class="rsrc" href="https://www.cap-ecole-inclusive.fr" target="_blank" rel="noopener"><div class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/></svg></div><div><b>Cap École inclusive</b><span>Plateforme d'aide aux enseignants (Réseau Canopé)&nbsp;: fiches pratiques et outils par besoin.</span><span class="url">cap-ecole-inclusive.fr</span></div></a>
+    <a class="rsrc" href="https://www.education.gouv.fr/l-ecole-inclusive-7426" target="_blank" rel="noopener"><div class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 9h.01M9 13h.01M9 17h.01"/></svg></div><div><b>education.gouv.fr — École inclusive</b><span>Présentation institutionnelle et chiffres officiels.</span><span class="url">education.gouv.fr</span></div></a>
+    <a class="rsrc" href="https://www.service-public.fr" target="_blank" rel="noopener"><div class="ri"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div><b>Service-Public.fr</b><span>Démarches, formulaires Cerfa (dossier MDPH), droits des familles.</span><span class="url">service-public.fr</span></div></a>
+  </div>
+
+  <div class="help reveal" style="margin-top:24px">
+    <b>📞 Cellule « Aide handicap École »</b> — un numéro national pour les familles et les équipes&nbsp;: <b>0 805 805 110</b> (gratuit). Pour toute question sur la scolarisation d'un élève en situation de handicap.
+  </div>
+
+  <div class="call info reveal">
+    <div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div>
+    <p>Ce guide synthétise des fiches officielles à des fins d'information et de formation. En cas de doute sur une situation précise, référez-vous aux textes en vigueur et à vos interlocuteurs académiques (enseignant référent, médecin EN, IEN-ASH).</p>
+  </div>
+
+  <div class="pagenav"><a data-go="glossaire"><small>← Précédent</small><b>Glossaire</b></a><a class="nx" data-go="accueil"><small>Retour →</small><b>Accueil</b></a></div>
+</section>
+
+</div>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span>École inclusive · le guide de l'enseignant — information &amp; formation</span>
+    <span>De la maternelle au lycée · sources officielles</span>
+  </div>
+</footer>
+
+<script>
+/* ROUTING */
+const pages=[...document.querySelectorAll('.page')], links=[...document.querySelectorAll('.nav a')];
+function go(id){
+  const pg=document.getElementById(id); if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active')); pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);
+  window.scrollTo({top:0,behavior:'instant'});
+  closeMenu(); requestAnimationFrame(()=>scan(pg));
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+
+/* MENU */
+const nav=document.getElementById('nav'),scrim=document.getElementById('scrim');
+function closeMenu(){nav.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('burger').onclick=()=>{nav.classList.toggle('open');scrim.classList.toggle('show');};
+scrim.onclick=closeMenu;
+
+/* THEME */
+const tb=document.getElementById('theme'),ti=document.getElementById('ti');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false; tb.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');ti.innerHTML=dark?sun:moon;};
+
+/* REVEAL */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.08});
+function scan(s){(s||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));} scan();
+
+/* PROGRESS */
+const bar=document.getElementById('bar');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+
+/* ACCORDIONS */
+document.querySelectorAll('.acc-h').forEach(h=>h.onclick=()=>{
+  const a=h.parentElement,b=a.querySelector('.acc-b');
+  const open=a.classList.toggle('open'); b.style.maxHeight=open?b.scrollHeight+'px':0;
+});
+
+/* DECISION TOOL */
+const RES={
+  ppre:{c:'ppre',sig:'PPRE',full:'Programme personnalisé de réussite éducative',what:"Un plan d'actions pédagogiques, interne à l'école, pour aider l'élève à maîtriser le socle commun.",why:"L'origine est une <b>difficulté scolaire</b>, sans trouble ni maladie identifiés. La réponse est pédagogique et interne à l'école.",
+    who:"Le directeur / chef d'établissement, avec l'équipe pédagogique. Pas de MDPH, pas d'avis médical.",
+    steps:["Repérez précisément les compétences du socle non maîtrisées.","Proposez un PPRE en équipe (réunion de l'équipe éducative, famille présente).","Rédigez un plan d'actions ciblées et conduisez-le en classe, sur une courte période.","Si la difficulté persiste malgré le PPRE, envisagez un PAP (trouble) ou une autre réponse."]},
+  pap:{c:'pap',sig:'PAP',full:"Plan d'accompagnement personnalisé",what:"Des aménagements pédagogiques pour compenser un trouble des apprentissages, sur avis du médecin de l'Éducation nationale.",why:"L'origine est un <b>trouble des apprentissages</b> (dys, TDAH…) durable, sans handicap reconnu, quand le PPRE ne suffit pas.",
+    who:"Déclenché sur <b>avis du médecin de l'Éducation nationale</b>, puis élaboré par l'établissement avec la famille. Pas de MDPH.",
+    steps:["Échangez avec la famille et orientez vers le médecin de l'Éducation nationale.","Le médecin EN constate le trouble et se prononce sur la pertinence d'un PAP.","Construisez les aménagements pédagogiques avec l'équipe.","Appliquez-les au quotidien&nbsp;; ils ouvrent droit aux aménagements d'examens. Réévaluation annuelle."]},
+  pai:{c:'pai',sig:'PAI',full:"Projet d'accueil individualisé",what:"Un protocole médical pour accueillir l'élève en sécurité : soins, traitements, régime et conduite à tenir en cas d'urgence.",why:"L'origine est un <b>trouble de santé</b> (maladie chronique, allergie, diabète…) nécessitant soins, traitement ou régime sur le temps scolaire.",
+    who:"Le directeur / chef d'établissement avec le <b>médecin de l'Éducation nationale et l'infirmier</b>, à partir des prescriptions du médecin qui suit l'enfant.",
+    steps:["Signalez la situation à la direction et à l'infirmier / médecin scolaire.","Le PAI est établi avec la famille et le médecin EN (protocole de soins + conduite à tenir en cas d'urgence).","Prenez connaissance du protocole et appliquez-le&nbsp;; signez-le si vous y participez.","Emportez-le lors des sorties et voyages scolaires."]},
+  pps:{c:'pps',sig:'PPS',full:'Projet personnalisé de scolarisation',what:"La feuille de route officielle de la scolarité d'un élève en situation de handicap, décidée par la MDPH.",why:"L'origine est une <b>situation de handicap</b> appelant compensation et aménagements. C'est le seul cas qui passe par la MDPH.",
+    who:"La <b>famille</b> dépose la demande&nbsp;; la MDPH évalue et rédige&nbsp;; la <b>CDAPH</b> décide et notifie (AESH, ULIS, matériel…).",
+    steps:["Réunissez l'équipe éducative et renseignez le <b>GEVA-Sco première demande</b>.","Informez la famille&nbsp;: c'est elle qui dépose le dossier MDPH (Cerfa + certificat médical &lt; 1 an).","Appuyez-vous sur l'enseignant référent, interlocuteur MDPH.","Une fois le PPS notifié, mettez-le en œuvre et participez à l'ESS annuelle."]}
+};
+const colors={ppre:'var(--ppre)',pap:'var(--pap)',pai:'var(--pai)',pps:'var(--pps)'};
+const grad={ppre:'linear-gradient(120deg,var(--ppre),#1c63e0)',pap:'linear-gradient(120deg,var(--pap),#6446c4)',pai:'linear-gradient(120deg,var(--pai),#0b8a78)',pps:'linear-gradient(120deg,var(--pps),#d9760f)'};
+const opts=document.getElementById('toolOpts'),resEl=document.getElementById('toolRes'),reset=document.getElementById('toolReset'),q=document.getElementById('toolQ');
+opts.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+  const r=RES[o.dataset.r];
+  resEl.innerHTML=`<div class="res-card"><div class="rh" style="background:${grad[r.c]}"><div class="rh-lab">Le dispositif adapté à cette situation</div><div class="rh-name">${r.full}<span class="rh-sig">${r.sig}</span></div><div class="rh-what">${r.what}</div></div>
+    <div class="rb"><h4>Pourquoi ce dispositif&nbsp;?</h4><p>${r.why}</p><h4>Qui décide&nbsp;?</h4><p>${r.who}</p><h4>Vos premières démarches</h4><ul>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ul></div></div>`;
+  resEl.classList.add('show'); opts.style.display='none'; q.style.display='none'; reset.style.display='inline-flex';
+  resEl.scrollIntoView({behavior:'smooth',block:'center'});
+});
+reset.onclick=()=>{resEl.classList.remove('show');resEl.innerHTML='';opts.style.display='grid';q.style.display='block';reset.style.display='none';};
+
+/* GLOSSARY */
+const GLOSS=[
+  ['AAH','Allocation aux adultes handicapés — dès 16 ans sous conditions, attribuée par la CDAPH.'],
+  ['AEEH','Allocation d\'éducation de l\'enfant handicapé — aide aux familles, taux d\'incapacité ≥ 50 % évalué par la MDPH.'],
+  ['AESH','Accompagnant d\'élève en situation de handicap — aide humaine (individuelle, mutualisée ou collective), notifiée par la CDAPH.'],
+  ['AGEFIPH','Organisme d\'aides à l\'emploi des travailleurs handicapés dans le secteur privé.'],
+  ['AJPP','Allocation journalière de présence parentale — pour un parent qui interrompt son activité.'],
+  ['APADHE','Accompagnement pédagogique à domicile, à l\'hôpital ou à l\'école — pour une scolarité empêchée par la santé.'],
+  ['BEP','Besoins éducatifs particuliers — tout élève nécessitant une réponse adaptée (difficulté, trouble, maladie, handicap, HPI…).'],
+  ['CDAPH','Commission des droits et de l\'autonomie des personnes handicapées — prend les décisions au sein de la MDPH.'],
+  ['Cerfa','Formulaires officiels — dossier MDPH : n° 15692*01 (demande) et n° 15695*01 (certificat médical).'],
+  ['CMP','Centre médico-psychologique — soins en santé mentale, 0-16 ans, rattaché à un hôpital.'],
+  ['CMPP','Centre médico-psycho-pédagogique — difficultés d\'apprentissage et troubles, 0-20 ans, ambulatoire.'],
+  ['CAMSP','Centre d\'action médico-sociale précoce — dépistage et soins jusqu\'à 6 ans.'],
+  ['DASEN','Directeur académique des services de l\'Éducation nationale.'],
+  ['EPE','Équipe pluridisciplinaire d\'évaluation — évalue les besoins à la MDPH et rédige le PPS.'],
+  ['ERSEH','Enseignant référent pour la scolarisation des élèves en situation de handicap — le pivot famille / école / MDPH.'],
+  ['ESS','Équipe de suivi de la scolarisation — suit et évalue le PPS chaque année, animée par l\'enseignant référent.'],
+  ['FIPHFP','Fonds pour l\'insertion des personnes handicapées dans la fonction publique.'],
+  ['GEVA-Sco','Guide d\'évaluation des besoins de compensation en matière de scolarisation — outil de dialogue école ↔ MDPH (versions première demande / réexamen).'],
+  ['IEN-ASH','Inspecteur de l\'Éducation nationale chargé de l\'adaptation scolaire et de la scolarisation des élèves handicapés.'],
+  ['IME','Institut médico-éducatif — établissement médico-social avec unité d\'enseignement.'],
+  ['ITEP','Institut thérapeutique, éducatif et pédagogique — pour des troubles du comportement.'],
+  ['MDPH','Maison départementale des personnes handicapées — instance qui reçoit et évalue les demandes (créée en 2005).'],
+  ['PAI','Projet d\'accueil individualisé — trouble de santé : soins et sécurité à l\'école (cadre médical, sans MDPH).'],
+  ['PAP','Plan d\'accompagnement personnalisé — trouble des apprentissages : aménagements pédagogiques sur avis du médecin EN (sans MDPH).'],
+  ['PAEH','Plan d\'accompagnement de l\'étudiant en situation de handicap — le PAP du supérieur.'],
+  ['PAS','Pôle d\'appui à la scolarité — réponse rapide de premier niveau, sans attendre une reconnaissance de handicap.'],
+  ['PCH','Prestation de compensation du handicap — attribuée par la CDAPH, versée par le conseil départemental.'],
+  ['PCO','Plateforme de coordination et d\'orientation — parcours de diagnostic précoce des troubles du neurodéveloppement.'],
+  ['PPRE','Programme personnalisé de réussite éducative — difficulté scolaire : plan d\'actions pédagogiques interne (sans MDPH ni médical).'],
+  ['PPS','Projet personnalisé de scolarisation — handicap reconnu par la MDPH : le seul plan décidé par la CDAPH.'],
+  ['PsyEN','Psychologue de l\'Éducation nationale — analyse des apprentissages, bilans, appui à l\'ESS et au RASED.'],
+  ['RASED','Réseau d\'aides spécialisées aux élèves en difficulté — à l\'école primaire (PsyEN + enseignants spécialisés).'],
+  ['RQTH','Reconnaissance de la qualité de travailleur handicapé — dès 15 ans&nbsp;; pour les 15-20 ans, un PPS/AEEH/PCH en vaut équivalence.'],
+  ['SEGPA','Section d\'enseignement général et professionnel adapté — enseignement adapté au collège.'],
+  ['SESSAD','Service d\'éducation spéciale et de soins à domicile — accompagne sur les lieux de vie jusqu\'à 20 ans.'],
+  ['TND','Troubles du neurodéveloppement (dont les « dys », le TDAH, le TSA).'],
+  ['TSA','Trouble du spectre de l\'autisme.'],
+  ['ULIS','Unité localisée pour l\'inclusion scolaire — dispositif collectif (école / collège / lycée GT / lycée pro), sur notification CDAPH.'],
+  ['Unité d\'enseignement','Dispositif de scolarisation au sein d\'un établissement médico-social (IME, ITEP…).']
+];
+const glist=document.getElementById('glist'),gs=document.getElementById('gs');
+function renderG(f=''){
+  const q=f.trim().toLowerCase();
+  glist.innerHTML=GLOSS.filter(([k,v])=>!q||k.toLowerCase().includes(q)||v.toLowerCase().includes(q))
+    .map(([k,v])=>`<div class="gitem"><h4>${k}</h4><p>${v}</p></div>`).join('')||'<p style="color:var(--muted)">Aucun résultat.</p>';
+}
+renderG(); gs.addEventListener('input',e=>renderG(e.target.value));
+
+/* INIT */
+const start=location.hash.replace('#','');
+if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

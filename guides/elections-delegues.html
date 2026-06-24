@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Organiser les élections de délégués — le guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf8ff; --bg2:#f0ecfb; --surface:#ffffff; --ink:#221a40; --ink2:#473e66; --muted:#7a728f;
+  --blue:#3866ff; --blue-d:#2848cc; --blue-s:#e3e9ff;
+  --yellow:#f7b500; --yellow-s:#fcf0cf; --green:#1eb866; --green-s:#d7f5e5;
+  --pink:#e5469b; --pink-s:#fbe1f0; --orange:#ff7a30; --orange-s:#ffe7d6; --cyan:#15bcd4; --cyan-s:#d4f4f8;
+  --line:#e8e3f3; --line2:#f1edf9; --shadow:0 22px 54px -26px rgba(56,46,120,.42); --shadow-sm:0 10px 26px -16px rgba(56,46,120,.34);
+  --rad:20px; --disp:'Fredoka',system-ui,sans-serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#13111f; --bg2:#1a1730; --surface:#1d1933; --ink:#efeafc; --ink2:#c9c1e3; --muted:#8c84a6;
+  --blue:#8da3ff; --blue-d:#a8b9ff; --blue-s:#1d2348;
+  --yellow:#fbc63f; --yellow-s:#352a0f; --green:#46cd84; --green-s:#0f3322; --pink:#f274b3; --pink-s:#371a2c; --orange:#ff9759; --orange-s:#371f10; --cyan:#48ccdf; --cyan-s:#0f303a;
+  --line:#2a2542; --line2:#1e1a33; --shadow:0 26px 64px -30px rgba(0,0,0,.85); --shadow-sm:0 14px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17.5px;line-height:1.68;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--disp);line-height:1.16;margin:0;font-weight:600;letter-spacing:-.005em}
+a{color:var(--blue)}::selection{background:var(--pink);color:#fff}
+svg text{font-family:'Inter',sans-serif}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:linear-gradient(90deg,var(--blue),var(--pink),var(--yellow),var(--green))}
+
+.hd{position:fixed;top:0;left:0;right:0;z-index:200;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hd-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:11px 22px}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer;flex:0 0 auto}
+.logo .mk{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--pink));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm)}
+.logo b{font-family:var(--disp);font-size:17px;font-weight:600;line-height:1}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.nav{display:flex;gap:3px;margin-left:auto;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 12px;border-radius:11px;color:var(--ink2);font-size:13.5px;font-weight:600;white-space:nowrap;cursor:pointer;transition:.15s}
+.nav a:hover{background:var(--blue-s);color:var(--blue-d)}
+.nav a.active{background:var(--blue);color:#fff}
+.tbtn{flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.burger{display:none;flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
+.wrap{max-width:920px;margin:0 auto;padding:100px 26px 96px}
+.page{display:none;animation:fade .45s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(20px);transition:.6s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.kick{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--pink);background:var(--pink-s);padding:7px 14px;border-radius:30px;margin-bottom:18px}
+.h1{font-size:clamp(2rem,4.8vw,3.1rem);font-weight:600;margin-bottom:.4em;letter-spacing:-.01em;max-width:18ch}
+.lead{font-size:clamp(1.1rem,2vw,1.34rem);color:var(--ink2);max-width:62ch;line-height:1.6}
+.h2{font-size:clamp(1.55rem,3vw,2.1rem);font-weight:600;margin:56px 0 8px}
+.h3{font-size:1.3rem;font-weight:600;margin:32px 0 8px}
+.sub{color:var(--muted);margin-bottom:22px;max-width:64ch}
+p{margin:0 0 17px}strong{font-weight:700;color:var(--ink)}
+
+.hero{position:relative;border-radius:30px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;box-shadow:var(--shadow);margin-bottom:26px}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(125deg,#2848cc,#3866ff 42%,#e5469b)}
+.hero::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.5;background:radial-gradient(38% 50% at 84% 12%,rgba(247,181,0,.7),transparent 60%),radial-gradient(40% 46% at 8% 92%,rgba(30,184,102,.6),transparent 62%)}
+.hero .kick{color:#fff;background:rgba(255,255,255,.2)}
+.hero h1{font-size:clamp(2.1rem,5.6vw,3.7rem);font-weight:600;max-width:18ch;margin-bottom:.35em}
+.hero p{font-size:clamp(1.1rem,2.2vw,1.34rem);max-width:52ch;color:rgba(255,255,255,.94)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:30px;font-weight:600;font-size:15px;cursor:pointer;border:0;font-family:var(--sans);transition:.2s}
+.btn-p{background:#fff;color:var(--blue-d)}.btn-p:hover{transform:translateY(-2px)}
+.btn-g{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.36)}.btn-g:hover{background:rgba(255,255,255,.28)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:6px 0 8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+.stat b{font-family:var(--disp);font-size:1.7rem;font-weight:600;display:block;line-height:1.05;color:var(--blue-d)}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:24px;box-shadow:var(--shadow-sm);transition:.22s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.card .ic{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;margin-bottom:14px;font-size:1.6rem}
+.card h3{font-size:1.16rem;margin-bottom:8px}
+.card p{font-size:14.6px;color:var(--ink2);margin:0}
+.ic-b{background:var(--blue-s);color:var(--blue-d)} .ic-y{background:var(--yellow-s);color:var(--yellow)} .ic-g{background:var(--green-s);color:var(--green)} .ic-p{background:var(--pink-s);color:var(--pink)} .ic-o{background:var(--orange-s);color:var(--orange)} .ic-c{background:var(--cyan-s);color:var(--cyan)}
+
+.call{border-radius:16px;padding:20px 24px;margin:24px 0;border-left:5px solid;background:var(--surface);box-shadow:var(--shadow-sm)}
+.call .lbl{font-family:var(--disp);font-weight:600;font-size:1.05rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.call p{margin:0;font-size:15.5px;color:var(--ink2)}.call p+p{margin-top:8px}
+.call.info{border-color:var(--blue)}.call.info .lbl{color:var(--blue-d)}
+.call.do{border-color:var(--green)}.call.do .lbl{color:var(--green)}
+.call.law{border-color:var(--pink)}.call.law .lbl{color:var(--pink)}
+.call.tip{border-color:var(--yellow)}.call.tip .lbl{color:var(--yellow)}
+
+.quote{margin:34px 0;padding:28px 32px;border-radius:20px;background:linear-gradient(135deg,var(--blue-s),var(--pink-s));position:relative}
+.quote p{font-family:var(--disp);font-weight:500;font-size:clamp(1.25rem,2.7vw,1.65rem);line-height:1.32;margin:0;color:var(--ink)}
+.quote .src{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:10px;font-weight:500}
+
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:26px 24px;margin:26px 0;box-shadow:var(--shadow-sm)}
+.diagram .dt{font-family:var(--disp);font-weight:600;font-size:1.1rem;margin-bottom:4px;text-align:center}
+.diagram .dd{font-size:13px;color:var(--muted);text-align:center;margin-bottom:18px}
+.diagram svg{display:block;width:100%;height:auto}
+
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{position:relative;padding:0 0 16px 48px;counter-increment:s;font-size:15.5px;color:var(--ink2)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:32px;height:32px;border-radius:11px;background:var(--pink-s);color:var(--pink);font-family:var(--disp);font-weight:600;display:grid;place-items:center;font-size:15px}
+.steps li b{color:var(--ink)}
+
+.chk{list-style:none;margin:0;padding:0}
+.chk li{position:relative;padding:9px 0 9px 32px;font-size:15.5px;color:var(--ink2);border-bottom:1px solid var(--line2)}
+.chk li:last-child{border-bottom:0}
+.chk li::before{content:"";position:absolute;left:0;top:14px;width:18px;height:18px;border-radius:6px;background:var(--green-s);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231eb866' stroke-width='3'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");background-size:14px;background-repeat:no-repeat;background-position:center}
+.chk li b{color:var(--ink)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+.box{border-radius:16px;padding:22px;border:1px solid var(--line)}
+.box.yes{background:var(--green-s);border-color:color-mix(in srgb,var(--green) 30%,transparent)}
+.box.no{background:var(--orange-s);border-color:color-mix(in srgb,var(--orange) 32%,transparent)}
+.box h4{font-size:1.08rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.box ul{margin:0;padding-left:18px;font-size:14.6px;color:var(--ink2)}.box li{margin-bottom:7px}
+
+.tbl-wrap{overflow-x:auto;margin:18px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--surface);border-radius:var(--rad);overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid var(--line)}
+.tbl th,.tbl td{padding:13px 15px;text-align:left;border-bottom:1px solid var(--line2);vertical-align:top}
+.tbl thead th{background:var(--bg2);font-family:var(--disp);font-weight:600;font-size:13px;color:var(--ink)}
+.tbl td:first-child{font-weight:700}.tbl tr:last-child td{border-bottom:0}
+.ref{display:inline-block;font-size:12px;color:var(--muted);font-style:italic}
+.refline{font-size:12px;color:var(--muted);font-style:italic;margin:-8px 0 16px}
+
+.gsearch{width:100%;max-width:420px;padding:13px 18px;border:1px solid var(--line);border-radius:30px;background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:15px;margin-bottom:20px}
+.gsearch:focus{outline:2px solid var(--blue);border-color:transparent}
+.gitem{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--pink);border-radius:12px;padding:15px 19px;margin-bottom:10px}
+.gitem h4{font-size:1.05rem;color:var(--blue-d);margin-bottom:3px}
+.gitem p{font-size:14px;color:var(--ink2);margin:0}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
+.pagenav a{flex:1;padding:16px 22px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:.2s;text-decoration:none}
+.pagenav a:hover{border-color:var(--pink);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.07em}
+.pagenav b{display:block;font-family:var(--disp);font-size:1.04rem;font-weight:600;margin-top:3px;color:var(--ink)}
+.pagenav .nx{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(14,10,30,.55);z-index:150;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(max-width:920px){
+  .burger{display:grid}
+  .nav{position:fixed;top:0;right:-300px;width:280px;height:100vh;flex-direction:column;background:var(--surface);padding:78px 16px;gap:5px;transition:.32s;z-index:160;box-shadow:var(--shadow);overflow-y:auto}
+  .nav.open{right:0}.nav a{font-size:15px;padding:12px 16px}
+  .two{grid-template-columns:1fr}
+}
+@media(max-width:560px){ body{font-size:16.5px} .wrap{padding:92px 16px 70px} .hero{padding:30px 22px} .logo small{display:none} }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<header class="hd">
+  <div class="hd-in">
+    <div class="logo" data-go="accueil">
+      <div class="mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h16v11H4zM9 9V5l3-2 3 2v4M9 14h6"/></svg></div>
+      <div><b>Élections de délégués</b><small>Le guide pour bien les organiser</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a data-go="accueil">Accueil</a>
+      <a data-go="role">Le rôle du délégué</a>
+      <a data-go="organiser">Organiser l'élection</a>
+      <a data-go="cas">Groupes &amp; cas particuliers</a>
+      <a data-go="instances">Après l'élection</a>
+      <a data-go="eco">Éco-délégués</a>
+      <a data-go="conseils">Conseils</a>
+      <a data-go="glossaire">Glossaire &amp; textes</a>
+    </nav>
+    <button class="tbtn" id="theme"><svg id="ti" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="burger" id="burger"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="wrap">
+
+<!-- ACCUEIL -->
+<section class="page active" id="accueil">
+  <div class="hero reveal">
+    <div class="kick">🗳️ La démocratie, ça s'apprend en classe</div>
+    <h1>Organiser une élection de délégués, tout simplement.</h1>
+    <p>Le rôle du délégué, la procédure pas à pas, les cas particuliers (groupes, internat, lycée pro), les instances et tous les sigles expliqués. De quoi faire de cette élection un beau moment de citoyenneté.</p>
+    <div class="cta">
+      <button class="btn btn-p" data-go="organiser">Organiser l'élection
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="btn btn-g" data-go="role">Le rôle du délégué</button>
+    </div>
+  </div>
+
+  <p class="lead reveal">Au collège et au lycée, chaque classe élit <strong>deux délégués</strong> (et leurs suppléants) au début de l'année. Ce sont les <strong>porte-paroles de tous les élèves</strong> — et leur élection est, pour la classe, une vraie leçon de démocratie.</p>
+
+  <div class="stats reveal">
+    <div class="stat"><b>2</b><span>délégués par classe (+ suppléants)</span></div>
+    <div class="stat"><b>7<sup>e</sup> sem.</b><span>élection avant la fin de la 7<sup>e</sup> semaine</span></div>
+    <div class="stat"><b>2 tours</b><span>scrutin uninominal à deux tours</span></div>
+    <div class="stat"><b>Tous</b><span>électeurs et éligibles</span></div>
+  </div>
+  <p class="refline reveal">Articles R421-26 à R421-36 du Code de l'éducation · circulaires « vie lycéenne ».</p>
+
+  <h2 class="h2 reveal">Trois bonnes raisons d'y soigner le moment</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic ic-b">🎓</div><h3>On apprend à voter</h3><p>Candidature, profession de foi, scrutin secret, dépouillement : un parcours civique miniature, grandeur nature.</p></div>
+    <div class="card reveal"><div class="ic ic-p">🗣️</div><h3>On donne la parole</h3><p>Les délégués portent la voix de leurs camarades dans les instances de l'établissement.</p></div>
+    <div class="card reveal"><div class="ic ic-g">🌍</div><h3>On s'engage</h3><p>Délégués et éco-délégués deviennent acteurs du climat scolaire et du développement durable.</p></div>
+  </div>
+
+  <div class="quote reveal"><p>« Les délégués des élèves recueillent les avis et les propositions des élèves et les expriment auprès du chef d'établissement et du conseil d'administration. »</p><div class="src">Article R421-27 du Code de l'éducation</div></div>
+
+  <div class="pagenav"><span></span><a class="nx" data-go="role"><small>Étape 1 →</small><b>Le rôle du délégué</b></a></div>
+</section>
+
+<!-- ROLE -->
+<section class="page" id="role">
+  <div class="kick reveal">La mission</div>
+  <h1 class="h1 reveal">Le rôle &amp; les missions du délégué</h1>
+  <p class="lead reveal">Un délégué n'est ni un chef, ni un « bon élève récompensé » : c'est un <strong>représentant</strong> et un <strong>médiateur</strong>, au service de toute sa classe.</p>
+
+  <h2 class="h2 reveal">Ce qu'il fait</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-b">📣</div><h3>Représenter la classe</h3><p>Il est le porte-parole de tous les élèves auprès des enseignants et des autres adultes de l'établissement.</p></div>
+    <div class="card reveal"><div class="ic ic-g">🤝</div><h3>Faire le lien (médiateur)</h3><p>Entre ses camarades et la communauté éducative : direction, personnels enseignants et non-enseignants, parents.</p></div>
+    <div class="card reveal"><div class="ic ic-p">🪑</div><h3>Siéger au conseil de classe</h3><p>Les deux délégués y participent chaque trimestre : le conseil se prononce sur la vie de la classe et la scolarité de chacun.</p></div>
+    <div class="card reveal"><div class="ic ic-o">⚖️</div><h3>Le conseil de discipline</h3><p>Si un élève de la classe y passe, les deux délégués de sa classe y participent.</p></div>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">📊 Et au-delà de la classe</div><p>Les délégués <strong>recueillent les avis et propositions</strong> des élèves et les portent au chef d'établissement et au <strong>conseil d'administration (CA)</strong>. Dans les lycées, tous les délégués se réunissent <strong>au moins deux fois par an</strong> en <strong>assemblée générale des délégués</strong> (instance consultative pour échanger et s'informer).</p></div>
+
+  <h2 class="h2 reveal">Ce qu'un délégué n'est pas</h2>
+  <div class="two reveal">
+    <div class="box yes"><h4>✓ Un délégué…</h4><ul>
+      <li>représente <strong>tous</strong> ses camarades, même ceux qui n'ont pas voté pour lui</li>
+      <li>écoute, transmet, fait remonter les idées</li>
+      <li>respecte la confidentialité (conseil de classe, conseil de discipline)</li>
+    </ul></div>
+    <div class="box no"><h4>✗ Un délégué n'est pas…</h4><ul>
+      <li>un « surveillant » ou un adjoint du professeur</li>
+      <li>quelqu'un qui parle seulement en son nom</li>
+      <li>forcément le meilleur élève : tous sont éligibles</li>
+    </ul></div>
+  </div>
+
+  <div class="pagenav"><a data-go="accueil"><small>← Précédent</small><b>Accueil</b></a><a class="nx" data-go="organiser"><small>Suivant →</small><b>Organiser l'élection</b></a></div>
+</section>
+
+<!-- ORGANISER -->
+<section class="page" id="organiser">
+  <div class="kick reveal">Mode d'emploi</div>
+  <h1 class="h1 reveal">Organiser l'élection, pas à pas</h1>
+  <p class="lead reveal">Une procédure simple et cadrée. L'idéal&nbsp;: en faire un vrai moment civique, avec campagne, bulletins et urne.</p>
+
+  <h2 class="h2 reveal">Le calendrier de la rentrée</h2>
+  <div class="diagram reveal">
+    <div class="dt">Les repères de l'année</div>
+    <div class="dd">Quelques dates clés à connaître (semaines après la rentrée).</div>
+    <svg viewBox="0 0 720 150" role="img" aria-label="Calendrier des élections">
+      <defs><marker id="arr" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--blue)"/></marker></defs>
+      <line x1="40" y1="70" x2="690" y2="70" stroke="var(--blue)" stroke-width="2.5" marker-end="url(#arr)"/>
+      <g text-anchor="middle" font-size="11.5">
+        <circle cx="120" cy="70" r="9" fill="var(--green)"/><text x="120" y="46" font-weight="700" fill="var(--green)">S6</text><text x="120" y="100" fill="var(--ink2)">Semaine de la</text><text x="120" y="115" fill="var(--ink2)">démocratie scolaire</text>
+        <circle cx="290" cy="70" r="9" fill="var(--pink)"/><text x="290" y="46" font-weight="700" fill="var(--pink)">avant S7</text><text x="290" y="100" fill="var(--ink2)">Élection des</text><text x="290" y="115" fill="var(--ink2)">délégués de classe</text>
+        <circle cx="470" cy="70" r="9" fill="var(--yellow)"/><text x="470" y="46" font-weight="700" fill="var(--yellow)">≤ S13</text><text x="470" y="100" fill="var(--ink2)">Élection CAVL</text><text x="470" y="115" fill="var(--ink2)">(académie)</text>
+        <circle cx="630" cy="70" r="9" fill="var(--orange)"/><text x="630" y="46" font-weight="700" fill="var(--orange)">≤ S15</text><text x="630" y="100" fill="var(--ink2)">Élection CNVL</text><text x="630" y="115" fill="var(--ink2)">(national)</text>
+      </g>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Les 6 étapes</h2>
+  <ol class="steps reveal">
+    <li><b>Expliquer</b> aux élèves ce qu'est un délégué, son rôle et le déroulé du vote (idéalement en heure de vie de classe).</li>
+    <li><b>Recueillir les candidatures</b> : chaque candidat se présente <strong>avec son suppléant</strong> (le binôme « titulaire + suppléant »). Tous les élèves peuvent être candidats.</li>
+    <li><b>La campagne</b> : laisser les candidats présenter leurs idées (profession de foi, courte présentation orale).</li>
+    <li><b>Le vote</b> : <strong>scrutin uninominal à deux tours</strong>, à bulletin secret. On vote pour un nom (et son suppléant).</li>
+    <li><b>Le dépouillement</b> : compter les voix devant la classe. <strong>En cas d'égalité, le plus jeune candidat est élu.</strong></li>
+    <li><b>Proclamer</b> les résultats et expliquer la suite (conseil de classe, instances).</li>
+  </ol>
+
+  <h2 class="h2 reveal">Comprendre le scrutin à deux tours</h2>
+  <div class="diagram reveal">
+    <div class="dt">Scrutin uninominal à deux tours</div>
+    <div class="dd">On vote pour une personne (« uninominal »). Deux tours si nécessaire.</div>
+    <svg viewBox="0 0 720 220" role="img" aria-label="Scrutin uninominal à deux tours">
+      <defs><marker id="arr2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--ink2)"/></marker></defs>
+      <g text-anchor="middle" font-size="12.5" font-weight="700">
+        <rect x="40" y="30" width="200" height="56" rx="14" fill="var(--blue-s)"/><text x="140" y="55" fill="var(--blue-d)">1ᵉʳ tour</text><text x="140" y="73" font-size="11" font-weight="400" fill="var(--ink2)">majorité absolue ?</text>
+        <rect x="300" y="14" width="200" height="48" rx="14" fill="var(--green-s)"/><text x="400" y="34" fill="var(--green)">OUI → élu·e</text><text x="400" y="51" font-size="10.5" font-weight="400" fill="var(--ink2)">plus de la moitié des voix</text>
+        <rect x="300" y="100" width="200" height="48" rx="14" fill="var(--yellow-s)"/><text x="400" y="120" fill="var(--yellow)">NON → 2ᵉ tour</text><text x="400" y="137" font-size="10.5" font-weight="400" fill="var(--ink2)">majorité relative</text>
+        <rect x="540" y="100" width="160" height="48" rx="14" fill="var(--pink-s)"/><text x="620" y="120" fill="var(--pink)">élu·e</text><text x="620" y="137" font-size="10.5" font-weight="400" fill="var(--ink2)">le plus de voix</text>
+        <rect x="300" y="168" width="400" height="40" rx="12" fill="var(--orange-s)"/><text x="500" y="193" font-size="12" fill="var(--orange)">Égalité ? → le plus jeune candidat est élu</text>
+      </g>
+      <g stroke="var(--ink2)" stroke-width="1.8" fill="none" marker-end="url(#arr2)">
+        <line x1="240" y1="50" x2="296" y2="38"/><line x1="240" y1="66" x2="296" y2="118"/><line x1="500" y1="124" x2="536" y2="124"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="call law reveal"><div class="lbl">📜 Ce que disent les textes</div><p>« Deux délégués d'élèves sont élus au scrutin uninominal à deux tours dans chaque classe. Le nom de chaque candidat est accompagné de celui de son suppléant. <strong>Tous les élèves sont électeurs et éligibles.</strong> » L'élection se fait <strong>au plus tard avant la fin de la septième semaine</strong> de l'année scolaire. <span class="ref">Articles R421-28 et R421-30 du Code de l'éducation</span></p></div>
+
+  <div class="call tip reveal"><div class="lbl">🎒 Pour un vote « pour de vrai »</div><p>Préparez une <strong>urne</strong>, des <strong>bulletins</strong>, un <strong>isoloir</strong> improvisé et une liste d'émargement. Le vote est <strong>personnel et secret</strong> — c'est ce qui en fait une vraie expérience citoyenne.</p></div>
+
+  <div class="pagenav"><a data-go="role"><small>← Précédent</small><b>Le rôle du délégué</b></a><a class="nx" data-go="cas"><small>Suivant →</small><b>Groupes &amp; cas particuliers</b></a></div>
+</section>
+
+<!-- CAS -->
+<section class="page" id="cas">
+  <div class="kick reveal">Toutes les situations</div>
+  <h1 class="h1 reveal">Groupes, internat, lycée pro… les cas particuliers</h1>
+  <p class="lead reveal">Et quand il n'y a pas de « classe » fixe&nbsp;? Le Code de l'éducation a tout prévu.</p>
+
+  <div class="call law reveal"><div class="lbl">📜 Le cas des groupes (la clé)</div><p>« Deux délégués d'élèves sont élus au scrutin uninominal à deux tours <strong>dans chaque classe ou, dans le cas d'une organisation différente, dans les groupes définis à cet effet</strong> par le ministre chargé de l'éducation. » <span class="ref">Article R421-28 du Code de l'éducation</span></p><p>Autrement dit&nbsp;: lorsque les élèves ne sont pas réunis en classes stables (organisation en <strong>groupes</strong>, fréquente en <strong>lycée professionnel</strong>), l'élection des deux délégués se fait <strong>au sein du groupe défini</strong> à cet effet. C'est l'établissement qui organise ces groupes électoraux, dans ce cadre.</p></div>
+
+  <h2 class="h2 reveal">Les autres situations</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-b">🛏️</div><h3>L'internat</h3><p>Dans un établissement avec internat, <strong>l'ensemble des élèves internes est assimilé à une classe</strong> : ils élisent leurs propres représentants. <span class="ref">Art. R421-28</span></p></div>
+    <div class="card reveal"><div class="ic ic-g">🎓</div><h3>Les classes post-bac (BTS, CPGE…)</h3><p>Les délégués de ces classes élisent <strong>au moins un représentant au CA</strong> ; le chef d'établissement fixe le nombre de sièges selon leur part dans les effectifs. <span class="ref">Art. R421-28</span></p></div>
+    <div class="card reveal"><div class="ic ic-p">🏫</div><h3>Au collège : être candidat au CA</h3><p>Pour le 2<sup>e</sup> degré (élection des représentants élèves au CA), seuls sont <strong>éligibles les élèves de la 5<sup>e</sup> et au-delà</strong>. <span class="ref">Art. R421-28</span></p></div>
+    <div class="card reveal"><div class="ic ic-o">🌍</div><h3>Sans condition de nationalité</h3><p>Les règles s'appliquent aux élèves <strong>sans condition de nationalité</strong>. <span class="ref">Art. R421-29</span></p></div>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">💡 À retenir</div><p>Quelle que soit l'organisation (classe entière, groupes, internat), le principe reste le même&nbsp;: <strong>deux délégués + deux suppléants</strong>, élus au scrutin uninominal à deux tours, tous électeurs et éligibles, avant la fin de la 7<sup>e</sup> semaine.</p></div>
+
+  <div class="pagenav"><a data-go="organiser"><small>← Précédent</small><b>Organiser l'élection</b></a><a class="nx" data-go="instances"><small>Suivant →</small><b>Après l'élection</b></a></div>
+</section>
+
+<!-- INSTANCES -->
+<section class="page" id="instances">
+  <div class="kick reveal">La démocratie continue</div>
+  <h1 class="h1 reveal">Après l'élection : où siègent les délégués&nbsp;?</h1>
+  <p class="lead reveal">L'élection des délégués de classe n'est que le premier degré. Elle ouvre la porte à toute la vie démocratique de l'établissement.</p>
+
+  <h2 class="h2 reveal">Une élection « à deux degrés »</h2>
+  <div class="diagram reveal">
+    <div class="dt">Du vote de la classe aux instances</div>
+    <div class="dd">Les élèves élisent les délégués ; les délégués élisent ensuite leurs représentants.</div>
+    <svg viewBox="0 0 720 200" role="img" aria-label="Élection à deux degrés">
+      <defs><marker id="arr3" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--pink)"/></marker></defs>
+      <g text-anchor="middle" font-size="12.5" font-weight="700">
+        <rect x="30" y="70" width="180" height="60" rx="16" fill="var(--blue-s)"/><text x="120" y="95" fill="var(--blue-d)">Tous les élèves</text><text x="120" y="114" font-size="11" font-weight="400" fill="var(--ink2)">votent (1ᵉʳ degré)</text>
+        <rect x="270" y="70" width="180" height="60" rx="16" fill="var(--pink-s)"/><text x="360" y="95" fill="var(--pink)">Délégués de classe</text><text x="360" y="114" font-size="11" font-weight="400" fill="var(--ink2)">+ suppléants</text>
+        <rect x="510" y="40" width="180" height="52" rx="16" fill="var(--green-s)"/><text x="600" y="62" fill="var(--green)">Conseil d'admin.</text><text x="600" y="79" font-size="11" font-weight="400" fill="var(--ink2)">(CA) — 2ᵉ degré</text>
+        <rect x="510" y="108" width="180" height="52" rx="16" fill="var(--yellow-s)"/><text x="600" y="130" fill="var(--yellow)">CVL (lycée)</text><text x="600" y="147" font-size="11" font-weight="400" fill="var(--ink2)">vie lycéenne</text>
+      </g>
+      <g stroke="var(--pink)" stroke-width="2" fill="none" marker-end="url(#arr3)">
+        <line x1="210" y1="100" x2="266" y2="100"/><line x1="450" y1="92" x2="506" y2="70"/><line x1="450" y1="108" x2="506" y2="128"/>
+      </g>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Les instances, des plus proches aux plus larges</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-b">🪑</div><h3>Le conseil de classe</h3><p>Chaque trimestre : il examine la scolarité de chaque élève et la vie de la classe. Les 2 délégués y siègent.</p></div>
+    <div class="card reveal"><div class="ic ic-p">🗂️</div><h3>L'assemblée générale des délégués</h3><p>Au lycée, tous les délégués se réunissent <strong>≥ 2 fois par an</strong> pour s'informer et échanger (rôle consultatif). <span class="ref">Art. R421-42</span></p></div>
+    <div class="card reveal"><div class="ic ic-g">🏛️</div><h3>Le conseil d'administration (CA)</h3><p>L'instance qui gère l'établissement. Des représentants élèves y siègent : <strong>3 en collège</strong> ; <strong>4 issus du CVL en lycée</strong> (+ le vice-président du CVL).</p></div>
+    <div class="card reveal"><div class="ic ic-o">💬</div><h3>Le CVC — conseil de la vie collégienne</h3><p>Au collège : un lieu d'échange et de propositions (organisation, bien-être, climat scolaire, projets). Présidé par le chef d'établissement.</p></div>
+    <div class="card reveal"><div class="ic ic-c">🎤</div><h3>Le CVL — conseil de la vie lycéenne</h3><p>Au lycée : <strong>10 élus lycéens</strong>, élus au <strong>suffrage universel direct</strong> (tous les élèves votent), pour 2 ans. Donne des avis sur la vie quotidienne du lycée.</p></div>
+    <div class="card reveal"><div class="ic ic-y">🌐</div><h3>CAVL &amp; CNVL</h3><p>Au-delà du lycée : le <strong>CAVL</strong> (académie, présidé par le recteur) et le <strong>CNVL</strong> (national, présidé par le ministre) portent la voix des lycéens.</p></div>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">🔎 Zoom — le CVL en bref</div><p>Composition&nbsp;: 10 élus lycéens, 5 enseignants/personnels d'éducation, 3 personnels administratifs, sociaux et de santé (ASS), 2 représentants des parents. Le <strong>chef d'établissement</strong> le préside ; le <strong>vice-président est un élève élu</strong>. Candidatures déposées <strong>10 jours avant</strong> le scrutin, avec une <strong>profession de foi</strong>.</p></div>
+
+  <div class="pagenav"><a data-go="cas"><small>← Précédent</small><b>Groupes &amp; cas particuliers</b></a><a class="nx" data-go="eco"><small>Suivant →</small><b>Éco-délégués</b></a></div>
+</section>
+
+<!-- ECO -->
+<section class="page" id="eco">
+  <div class="kick reveal">L'engagement écologique</div>
+  <h1 class="h1 reveal">Les éco-délégués</h1>
+  <p class="lead reveal">À côté des délégués de classe, les éco-délégués portent la transition écologique au cœur de l'établissement. Ce sont les <strong>ambassadeurs du développement durable</strong>.</p>
+
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-g">🌱</div><h3>Leur mission</h3><p>Apporter leur engagement et leurs connaissances à leur classe en faveur du développement durable, et sensibiliser leurs camarades.</p></div>
+    <div class="card reveal"><div class="ic ic-b">💡</div><h3>Des gestes concrets</h3><p>Éteindre les lumières, vérifier fenêtres et radiateurs en hiver, installer le tri des déchets, proposer des actions (« marches vertes »…).</p></div>
+    <div class="card reveal"><div class="ic ic-y">🗳️</div><h3>Comment on les élit</h3><p>Ils sont élus <strong>parallèlement aux délégués d'élèves</strong> et <strong>selon les mêmes modalités</strong> (scrutin uninominal à deux tours).</p></div>
+    <div class="card reveal"><div class="ic ic-p">🤝</div><h3>Trois respects</h3><p>Une vision qui unit le <strong>respect de la planète</strong>, le <strong>respect du Vivant</strong> et le <strong>respect de l'autre</strong>.</p></div>
+  </div>
+
+  <div class="quote reveal"><p>« Les élèves d'aujourd'hui sont les citoyens de demain : l'éco-délégué en est déjà un. »</p><div class="src">d'après les ressources « éco-délégués » du Ministère</div></div>
+
+  <div class="pagenav"><a data-go="instances"><small>← Précédent</small><b>Après l'élection</b></a><a class="nx" data-go="conseils"><small>Suivant →</small><b>Conseils</b></a></div>
+</section>
+
+<!-- CONSEILS -->
+<section class="page" id="conseils">
+  <div class="kick reveal">Pour que ce soit réussi… et joyeux</div>
+  <h1 class="h1 reveal">Conseils pour une belle élection</h1>
+  <p class="lead reveal">Au-delà de la procédure, quelques idées pour faire de ce moment une vraie fête de la citoyenneté.</p>
+
+  <h2 class="h2 reveal">Avant le vote</h2>
+  <ul class="chk reveal">
+    <li><b>Expliquer le rôle</b> en heure de vie de classe : un délégué représente <em>tout le monde</em>, pas un clan.</li>
+    <li><b>Dédramatiser la candidature</b> : ce n'est pas réservé aux meilleurs élèves ; encourager la diversité des profils, filles et garçons.</li>
+    <li><b>Proposer une profession de foi</b> courte : « Si je suis élu·e, je proposerai… ».</li>
+    <li><b>Préparer le matériel</b> : urne, bulletins, isoloir, liste d'émargement — pour un vote « comme un vrai ».</li>
+  </ul>
+
+  <h2 class="h2 reveal">Après le vote</h2>
+  <ul class="chk reveal">
+    <li><b>Féliciter tous les candidats</b>, pas seulement les élus : oser se présenter est déjà un engagement.</li>
+    <li><b>Accompagner les délégués</b> : leur expliquer le conseil de classe, la confidentialité, comment recueillir les avis de la classe.</li>
+    <li><b>Valoriser l'engagement</b> : une formation des délégués peut être organisée (souvent portée par le CPE et le CVL/CVC).</li>
+    <li><b>Faire vivre le lien</b> toute l'année : un temps régulier où les délégués font remonter ce que pense la classe.</li>
+  </ul>
+
+  <div class="call tip reveal"><div class="lbl">🎉 La Semaine de la démocratie scolaire</div><p>Elle a lieu la <strong>6<sup>e</sup> semaine après la rentrée</strong> et donne du sens à toutes ces élections (parents, CVL…). Une belle occasion de mettre la citoyenneté à l'honneur dans l'établissement.</p></div>
+
+  <div class="call do reveal"><div class="lbl">🧭 Le rôle du professeur principal</div><p>Au collège comme au lycée, le professeur principal <strong>participe à l'organisation des élections de délégués</strong> et leur rappelle les attributions du conseil de classe et leur rôle. <span class="ref">Circulaire n° 2018-108 du 10 octobre 2018</span></p></div>
+
+  <div class="pagenav"><a data-go="eco"><small>← Précédent</small><b>Éco-délégués</b></a><a class="nx" data-go="glossaire"><small>Suivant →</small><b>Glossaire &amp; textes</b></a></div>
+</section>
+
+<!-- GLOSSAIRE -->
+<section class="page" id="glossaire">
+  <div class="kick reveal">Tous les mots, tous les textes</div>
+  <h1 class="h1 reveal">Glossaire &amp; références</h1>
+  <p class="lead reveal" style="margin-bottom:20px">Chaque sigle expliqué simplement. Tapez pour filtrer.</p>
+  <input class="gsearch reveal" id="gs" placeholder="🔍  Rechercher (ex. CVL, CA, scrutin, suppléant…)">
+  <div id="glist" class="reveal"></div>
+
+  <h2 class="h2 reveal">Les textes de référence</h2>
+  <div class="tbl-wrap reveal">
+    <table class="tbl">
+      <thead><tr><th>Texte</th><th>Ce qu'il fixe</th></tr></thead>
+      <tbody>
+        <tr><td>Code de l'éducation, art. R421-27</td><td>Les délégués recueillent et expriment les avis des élèves.</td></tr>
+        <tr><td>Art. R421-28</td><td>Élection à deux degrés ; 2 délégués par classe (ou par groupe défini) au scrutin uninominal à 2 tours ; internat ; post-bac ; éligibilité au CA.</td></tr>
+        <tr><td>Art. R421-29</td><td>Application sans condition de nationalité ; mandats d'un an au CA.</td></tr>
+        <tr><td>Art. R421-30</td><td>Élections des délégués <strong>avant la fin de la 7<sup>e</sup> semaine</strong> ; modalités de scrutin, candidatures, vote secret, contestations.</td></tr>
+        <tr><td>Art. R421-42</td><td>L'assemblée générale des délégués des élèves.</td></tr>
+        <tr><td>Pages « vie scolaire » du Ministère</td><td>Rôle des délégués, éco-délégués, CVC, CVL, CAVL, CNVL, Semaine de la démocratie scolaire.</td></tr>
+        <tr><td>Circulaire n° 2018-108 du 10-10-2018</td><td>Rôle du professeur principal (dont l'organisation des élections de délégués).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">ℹ️ Bon à savoir</div><p>Les modalités précises (matériel de vote, dates exactes, organisation des groupes en lycée pro) peuvent être adaptées par l'établissement et l'académie. En cas de doute, rapprochez-vous du <strong>CPE</strong> et de l'<strong>équipe de direction</strong>.</p></div>
+
+  <div class="pagenav"><a data-go="conseils"><small>← Précédent</small><b>Conseils</b></a><a class="nx" data-go="accueil"><small>Retour →</small><b>Accueil</b></a></div>
+</section>
+
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')], links=[...document.querySelectorAll('.nav a')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>scan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const nav=document.getElementById('nav'),scrim=document.getElementById('scrim');
+function closeMenu(){nav.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('burger').onclick=()=>{nav.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tb=document.getElementById('theme'),ti=document.getElementById('ti');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tb.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');ti.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.06});
+function scan(s){(s||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}scan();
+const bar=document.getElementById('bar');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+
+const GLOSS=[
+ ['Délégué de classe','Élève élu pour représenter sa classe (deux par classe). Porte-parole et médiateur entre les élèves et les adultes.'],
+ ['Suppléant','Élève élu en binôme avec le délégué titulaire ; il le remplace en cas d\'empêchement.'],
+ ['Scrutin uninominal à deux tours','On vote pour une seule personne (« uninominal »). Si personne n\'a la majorité absolue au 1ᵉʳ tour, un 2ᵉ tour a lieu à la majorité relative.'],
+ ['Scrutin plurinominal à un tour','On peut voter pour plusieurs noms en une seule fois ; les candidats avec le plus de voix sont élus (utilisé pour désigner les représentants au CA).'],
+ ['Majorité absolue','Plus de la moitié des voix exprimées.'],
+ ['Majorité relative','Le plus grand nombre de voix, même sans dépasser la moitié.'],
+ ['Profession de foi','Court texte dans lequel un candidat présente ses motivations et ses idées.'],
+ ['Émargement','Liste signée par chaque électeur pour attester qu\'il a voté.'],
+ ['Conseil de classe','Réunion trimestrielle sur la scolarité de chaque élève et la vie de la classe ; les deux délégués y siègent.'],
+ ['Conseil de discipline','Instance qui examine le cas d\'un élève ; les deux délégués de sa classe y participent.'],
+ ['CA — Conseil d\'administration','Instance qui gère l\'établissement (budget, projet, règlement intérieur). Des représentants élèves y siègent.'],
+ ['EPLE','Établissement public local d\'enseignement : un collège ou un lycée public.'],
+ ['AG des délégués','Assemblée générale des délégués des élèves : au lycée, tous les délégués se réunissent au moins 2 fois par an (rôle consultatif).'],
+ ['Éco-délégué','Élève élu, ambassadeur du développement durable, qui sensibilise sa classe aux gestes écologiques.'],
+ ['CVC','Conseil de la vie collégienne : au collège, instance d\'échange et de propositions présidée par le chef d\'établissement.'],
+ ['CVL','Conseil des délégués pour la vie lycéenne : au lycée, 10 élus lycéens (suffrage universel direct, 2 ans) qui donnent des avis sur la vie du lycée.'],
+ ['Vice-président du CVL','Élève élu qui seconde le chef d\'établissement à la présidence du CVL, pour l\'année scolaire.'],
+ ['CAVL','Conseil académique de la vie lycéenne : au niveau de l\'académie, présidé par le recteur ; 20 élus issus des CVL.'],
+ ['CNVL','Conseil national de la vie lycéenne : au niveau national, présidé par le ministre ; 64 élus issus des CAVL.'],
+ ['ASS','Personnels administratifs, sociaux et de santé (représentés au CVL).'],
+ ['Semaine de la démocratie scolaire','6ᵉ semaine après la rentrée : elle met à l\'honneur les élections (parents, CVL) et l\'engagement.'],
+ ['Suffrage universel direct','Mode d\'élection où tous les électeurs (ici, tous les élèves) votent directement pour leurs représentants.'],
+ ['Électeur / éligible','Électeur : qui peut voter. Éligible : qui peut être candidat. Pour les délégués, tous les élèves sont les deux.']
+];
+const glist=document.getElementById('glist'),gs=document.getElementById('gs');
+function rg(f=''){const q=f.trim().toLowerCase();
+ glist.innerHTML=GLOSS.filter(([k,v])=>!q||k.toLowerCase().includes(q)||v.toLowerCase().includes(q)).map(([k,v])=>`<div class="gitem"><h4>${k}</h4><p>${v}</p></div>`).join('')||'<p style="color:var(--muted)">Aucun résultat.</p>';}
+rg(); gs.addEventListener('input',e=>rg(e.target.value));
+
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

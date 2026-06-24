@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faire réussir tous les élèves — Guide de la différenciation pédagogique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf6ef; --bg2:#f2ece1; --surface:#ffffff; --ink:#241c3a; --ink2:#4a4264; --muted:#7c7592;
+  --violet:#5b3fd1; --violet-d:#4a31b0; --violet-s:#ece7fb;
+  --coral:#ef5d4e; --coral-s:#fde6e2; --teal:#0fa79a; --teal-s:#d8f3ef;
+  --amber:#f0a32c; --amber-s:#fcefd6; --pink:#d9469a; --pink-s:#fbe3f1;
+  --line:#e7e1d6; --line2:#f0ebe2; --shadow:0 22px 54px -26px rgba(60,40,120,.45); --shadow-sm:0 10px 26px -16px rgba(60,40,120,.38);
+  --rad:20px; --disp:'Bricolage Grotesque',system-ui,sans-serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#15121e; --bg2:#1b1726; --surface:#1f1a2d; --ink:#efe9f7; --ink2:#cabfdf; --muted:#938aa8;
+  --violet:#a48cff; --violet-d:#bba6ff; --violet-s:#241c40;
+  --coral:#ff7a6c; --coral-s:#3a1d1a; --teal:#3fcabb; --teal-s:#0f322e; --amber:#f5b955; --amber-s:#352713; --pink:#f06bb4; --pink-s:#3a1830;
+  --line:#2c2640; --line2:#211c30; --shadow:0 26px 64px -30px rgba(0,0,0,.85); --shadow-sm:0 14px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17.5px;line-height:1.68;
+  -webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--disp);line-height:1.12;margin:0;font-weight:700;letter-spacing:-.01em}
+a{color:var(--violet)}
+::selection{background:var(--violet);color:#fff}
+svg text{font-family:'Inter',sans-serif}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:linear-gradient(90deg,var(--violet),var(--coral),var(--amber))}
+
+/* HEADER */
+.hd{position:fixed;top:0;left:0;right:0;z-index:200;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hd-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:11px 22px}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer;flex:0 0 auto}
+.logo .mk{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--violet),var(--coral));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm);font-family:var(--disp);font-weight:800}
+.logo b{font-family:var(--disp);font-size:16px;font-weight:700;line-height:1}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.nav{display:flex;gap:3px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 12px;border-radius:11px;color:var(--ink2);font-size:13.5px;font-weight:600;white-space:nowrap;cursor:pointer;transition:.15s}
+.nav a:hover{background:var(--violet-s);color:var(--violet-d)}
+.nav a.active{background:var(--violet);color:#fff}
+.tbtn{flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.burger{display:none;flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
+.wrap{max-width:920px;margin:0 auto;padding:100px 26px 96px}
+.page{display:none;animation:fade .45s ease both}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(20px);transition:.6s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+.kick{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--violet-d);background:var(--violet-s);padding:7px 14px;border-radius:30px;margin-bottom:18px}
+.h1{font-size:clamp(2rem,4.6vw,3rem);font-weight:800;margin-bottom:.4em;letter-spacing:-.02em;max-width:18ch}
+.lead{font-size:clamp(1.1rem,2vw,1.32rem);color:var(--ink2);max-width:62ch;line-height:1.6}
+.h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;margin:58px 0 8px}
+.h3{font-size:1.28rem;font-weight:700;margin:34px 0 8px}
+.sub{color:var(--muted);margin-bottom:22px;max-width:64ch}
+p{margin:0 0 17px}
+strong{font-weight:700;color:var(--ink)}
+
+/* hero */
+.hero{position:relative;border-radius:28px;overflow:hidden;padding:clamp(34px,5vw,62px);color:#fff;box-shadow:var(--shadow);margin-bottom:26px}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(130deg,#4a31b0,#5b3fd1 46%,#9b3fb0)}
+.hero::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.55;background:radial-gradient(40% 50% at 84% 12%,rgba(240,163,44,.65),transparent 60%),radial-gradient(42% 46% at 6% 92%,rgba(239,93,78,.6),transparent 62%)}
+.hero .kick{color:#fff;background:rgba(255,255,255,.18)}
+.hero h1{font-size:clamp(2.1rem,5.4vw,3.6rem);font-weight:800;max-width:17ch;margin-bottom:.35em}
+.hero p{font-size:clamp(1.08rem,2.2vw,1.32rem);max-width:50ch;color:rgba(255,255,255,.92)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:30px;font-weight:600;font-size:15px;cursor:pointer;border:0;font-family:var(--sans);transition:.2s}
+.btn-p{background:#fff;color:var(--violet-d)}.btn-p:hover{transform:translateY(-2px)}
+.btn-g{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.34)}.btn-g:hover{background:rgba(255,255,255,.26)}
+
+/* cards */
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:24px;box-shadow:var(--shadow-sm);transition:.22s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.card .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px;font-size:1.5rem}
+.card h3{font-size:1.16rem;margin-bottom:8px}
+.card p{font-size:14.6px;color:var(--ink2);margin:0}
+.ic-v{background:var(--violet-s);color:var(--violet-d)} .ic-c{background:var(--coral-s);color:var(--coral)}
+.ic-t{background:var(--teal-s);color:var(--teal)} .ic-a{background:var(--amber-s);color:var(--amber)} .ic-p{background:var(--pink-s);color:var(--pink)}
+
+/* callout */
+.call{border-radius:16px;padding:20px 24px;margin:24px 0;border-left:5px solid;background:var(--surface);box-shadow:var(--shadow-sm)}
+.call .lbl{font-family:var(--disp);font-weight:700;font-size:1.02rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.call p{margin:0;font-size:15.5px;color:var(--ink2)}
+.call.why{border-color:var(--violet)} .call.why .lbl{color:var(--violet-d)}
+.call.do{border-color:var(--teal)} .call.do .lbl{color:var(--teal)}
+.call.stop{border-color:var(--coral)} .call.stop .lbl{color:var(--coral)}
+.call.tip{border-color:var(--amber)} .call.tip .lbl{color:var(--amber)}
+
+/* quote */
+.quote{margin:34px 0;padding:26px 30px;border-radius:18px;background:linear-gradient(135deg,var(--violet-s),var(--coral-s));position:relative}
+.quote p{font-family:var(--disp);font-style:normal;font-weight:600;font-size:clamp(1.2rem,2.6vw,1.55rem);line-height:1.35;margin:0;color:var(--ink)}
+.quote .src{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:10px;font-weight:500}
+
+/* diagram band */
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:26px 24px;margin:26px 0;box-shadow:var(--shadow-sm)}
+.diagram .dt{font-family:var(--disp);font-weight:700;font-size:1.05rem;margin-bottom:4px;text-align:center}
+.diagram .dd{font-size:13px;color:var(--muted);text-align:center;margin-bottom:18px}
+.diagram svg{display:block;width:100%;height:auto}
+
+/* steps list */
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{position:relative;padding:0 0 15px 46px;counter-increment:s;font-size:15.5px;color:var(--ink2)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:30px;height:30px;border-radius:10px;background:var(--violet-s);color:var(--violet-d);font-family:var(--disp);font-weight:700;display:grid;place-items:center;font-size:14px}
+.steps li b{color:var(--ink)}
+
+/* checklist */
+.chk{list-style:none;margin:0;padding:0}
+.chk li{position:relative;padding:8px 0 8px 32px;font-size:15.5px;color:var(--ink2);border-bottom:1px solid var(--line2)}
+.chk li:last-child{border-bottom:0}
+.chk li::before{content:"";position:absolute;left:0;top:13px;width:18px;height:18px;border-radius:6px;background:var(--teal-s);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230fa79a' stroke-width='3'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");background-size:14px;background-repeat:no-repeat;background-position:center}
+.chk li b{color:var(--ink)}
+
+/* two col compare */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+.box{border-radius:16px;padding:22px;border:1px solid var(--line)}
+.box.yes{background:var(--teal-s);border-color:color-mix(in srgb,var(--teal) 30%,transparent)}
+.box.no{background:var(--coral-s);border-color:color-mix(in srgb,var(--coral) 30%,transparent)}
+.box h4{font-size:1.08rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.box ul{margin:0;padding-left:18px;font-size:14.6px;color:var(--ink2)}.box li{margin-bottom:7px}
+
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;margin:2px 3px 2px 0;background:var(--bg2);color:var(--ink2)}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
+.pagenav a{flex:1;padding:16px 22px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:.2s;text-decoration:none}
+.pagenav a:hover{border-color:var(--violet);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.07em}
+.pagenav b{display:block;font-family:var(--disp);font-size:1.04rem;margin-top:3px;color:var(--ink)}
+.pagenav .nx{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(20,12,30,.55);z-index:150;opacity:0;pointer-events:none;transition:.3s}
+.scrim.show{opacity:1;pointer-events:auto}
+
+@media(max-width:920px){
+  .burger{display:grid}
+  .nav{position:fixed;top:0;right:-300px;width:280px;height:100vh;flex-direction:column;background:var(--surface);padding:78px 16px;gap:5px;transition:.32s;z-index:160;box-shadow:var(--shadow);overflow-y:auto}
+  .nav.open{right:0}.nav a{font-size:15px;padding:12px 16px}
+  .two{grid-template-columns:1fr}
+}
+@media(max-width:560px){ body{font-size:16.5px} .wrap{padding:92px 16px 70px} .hero{padding:30px 22px} .logo small{display:none} }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<header class="hd">
+  <div class="hd-in">
+    <div class="logo" data-go="accueil">
+      <div class="mk">✶</div>
+      <div><b>Faire réussir tous les élèves</b><small>Guide de la différenciation pédagogique</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a data-go="accueil">Accueil</a>
+      <a data-go="comprendre">Comprendre</a>
+      <a data-go="pourquoi">Pourquoi</a>
+      <a data-go="construire">Construire un cours</a>
+      <a data-go="expliciter">Rendre accessible</a>
+      <a data-go="cooperer">Faire coopérer</a>
+      <a data-go="evaluer">Évaluer</a>
+      <a data-go="climat">Climat &amp; posture</a>
+      <a data-go="difficulte">Élèves en difficulté</a>
+      <a data-go="memo">À retenir</a>
+    </nav>
+    <button class="tbtn" id="theme"><svg id="ti" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="burger" id="burger"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="wrap">
+
+<!-- ============ ACCUEIL ============ -->
+<section class="page active" id="accueil">
+  <div class="hero reveal">
+    <div class="kick">Enseigner pour que chacun apprenne</div>
+    <h1>Un même cours pour tous… crée des différences.</h1>
+    <p>Comment adapter son enseignement pour faire réussir tous les élèves — sans baisser les exigences. Des principes, des techniques concrètes, des schémas, et le « pourquoi » derrière chaque geste.</p>
+    <div class="cta">
+      <button class="btn btn-p" data-go="comprendre">Commencer
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="btn btn-g" data-go="construire">Construire un cours</button>
+    </div>
+  </div>
+
+  <p class="lead reveal">La recherche est claire : <strong>ni le « tout collectif » (le même cours pour tous), ni le « tout individualisé » ne font réussir tous les élèves.</strong> La différenciation cherche l'équilibre — et c'est une compétence qui s'apprend.</p>
+
+  <div class="diagram reveal">
+    <div class="dt">Le curseur de l'enseignement</div>
+    <div class="dd">La différenciation n'est ni l'un, ni l'autre extrême : c'est l'équilibre au centre.</div>
+    <svg viewBox="0 0 720 150" role="img" aria-label="Curseur entre tout collectif et tout individualisé">
+      <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="var(--coral)"/><stop offset="0.5" stop-color="var(--teal)"/><stop offset="1" stop-color="var(--coral)"/></linearGradient></defs>
+      <rect x="40" y="62" width="640" height="20" rx="10" fill="url(#g1)" opacity="0.85"/>
+      <circle cx="360" cy="72" r="20" fill="var(--surface)" stroke="var(--teal)" stroke-width="5"/>
+      <text x="360" y="120" text-anchor="middle" font-size="15" font-weight="700" fill="var(--teal)">Différenciation</text>
+      <text x="360" y="138" text-anchor="middle" font-size="11.5" fill="var(--muted)">l'équilibre visé</text>
+      <text x="40" y="44" text-anchor="start" font-size="13.5" font-weight="700" fill="var(--coral)">Tout collectif</text>
+      <text x="40" y="108" text-anchor="start" font-size="11.5" fill="var(--muted)">le même cours pour tous</text>
+      <text x="680" y="44" text-anchor="end" font-size="13.5" font-weight="700" fill="var(--coral)">Tout individualisé</text>
+      <text x="680" y="108" text-anchor="end" font-size="11.5" fill="var(--muted)">école à plusieurs vitesses</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Ce que vous trouverez ici</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic ic-v">🎯</div><h3>Le « pourquoi »</h3><p>Malentendus scolaires, implicites, charge cognitive : comprendre <em>pourquoi</em> différencier change tout.</p></div>
+    <div class="card reveal"><div class="ic ic-c">🧩</div><h3>Des gestes concrets</h3><p>Expliciter, étayer, construire une séquence, adapter consignes et supports — avec des exemples.</p></div>
+    <div class="card reveal"><div class="ic ic-t">📊</div><h3>Des schémas</h3><p>Le cycle d'apprentissage, l'escalier de la consigne, la boucle d'évaluation… pour visualiser et retenir.</p></div>
+  </div>
+
+  <div class="quote reveal"><p>« Plus un élève est loin des savoirs scolaires, plus il a besoin d'être guidé de façon structurée. »</p><div class="src">Cnesco / Ifé — Conférence de consensus sur la différenciation pédagogique, 2017</div></div>
+
+  <div class="pagenav"><span></span><a class="nx" data-go="comprendre"><small>Étape 1 →</small><b>Comprendre la différenciation</b></a></div>
+</section>
+
+<!-- ============ COMPRENDRE ============ -->
+<section class="page" id="comprendre">
+  <div class="kick reveal">Les bases</div>
+  <h1 class="h1 reveal">Qu'est-ce que différencier&nbsp;?</h1>
+  <p class="lead reveal">Différencier, c'est prendre en compte les caractéristiques de chaque élève (acquis, rythme, besoins) <strong>pour les amener tous aux mêmes objectifs</strong> — en variant les chemins, pas les ambitions.</p>
+
+  <h2 class="h2 reveal">Ce que c'est… et ce que ce n'est pas</h2>
+  <div class="two reveal">
+    <div class="box yes"><h4>✓ Différencier, c'est…</h4><ul>
+      <li>Garder des <strong>objectifs ambitieux communs à tous</strong></li>
+      <li>Proposer une <strong>palette de chemins</strong> vers le même résultat</li>
+      <li>Adapter le degré de guidage, les supports, le temps, l'aide</li>
+      <li>Concerner <strong>tous</strong> les élèves, pas seulement les plus fragiles</li>
+      <li>Préserver d'importants <strong>temps collectifs</strong> en classe entière</li>
+    </ul></div>
+    <div class="box no"><h4>✗ Ce n'est pas…</h4><ul>
+      <li><strong>Baisser les objectifs</strong> pour certains (ça creuse les écarts)</li>
+      <li><strong>Tout individualiser</strong> (école à plusieurs vitesses)</li>
+      <li>Une simple <strong>remédiation</strong> séparée pour les élèves en difficulté</li>
+      <li>Donner des tâches <strong>plus simples et moins stimulantes</strong> aux plus faibles</li>
+      <li>Installer des <strong>groupes de niveau</strong> permanents</li>
+    </ul></div>
+  </div>
+
+  <h2 class="h2 reveal">Deux différenciations — une seule dépend de vous</h2>
+  <div class="diagram reveal">
+    <div class="dt">Structurelle ou pédagogique&nbsp;?</div>
+    <div class="dd">Ce qui relève de l'institution (et que la recherche juge inefficace) vs ce qui relève de l'enseignant.</div>
+    <svg viewBox="0 0 720 250" role="img" aria-label="Arbre de la différenciation">
+      <line x1="360" y1="40" x2="180" y2="110" stroke="var(--line)" stroke-width="2"/>
+      <line x1="360" y1="40" x2="540" y2="110" stroke="var(--line)" stroke-width="2"/>
+      <rect x="270" y="14" width="180" height="44" rx="12" fill="var(--violet-s)" stroke="var(--violet)" stroke-width="1.5"/>
+      <text x="360" y="41" text-anchor="middle" font-size="15" font-weight="700" fill="var(--violet-d)">Différencier</text>
+      <!-- left: structurelle -->
+      <rect x="70" y="110" width="220" height="120" rx="14" fill="var(--coral-s)" stroke="var(--coral)" stroke-width="1.5"/>
+      <text x="180" y="138" text-anchor="middle" font-size="14" font-weight="700" fill="var(--coral)">Structurelle</text>
+      <text x="180" y="160" text-anchor="middle" font-size="11.5" fill="var(--ink2)">parcours · filières · redoublement</text>
+      <text x="180" y="178" text-anchor="middle" font-size="11.5" fill="var(--ink2)">classes de niveau</text>
+      <text x="180" y="204" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--coral)">✗ jugée inefficace</text>
+      <text x="180" y="220" text-anchor="middle" font-size="11" fill="var(--muted)">(relève de l'institution)</text>
+      <!-- right: pédagogique -->
+      <rect x="430" y="110" width="220" height="120" rx="14" fill="var(--teal-s)" stroke="var(--teal)" stroke-width="1.5"/>
+      <text x="540" y="138" text-anchor="middle" font-size="14" font-weight="700" fill="var(--teal)">Pédagogique</text>
+      <text x="540" y="160" text-anchor="middle" font-size="11.5" fill="var(--ink2)">vos gestes en classe</text>
+      <text x="540" y="178" text-anchor="middle" font-size="11.5" fill="var(--ink2)">expliciter · étayer · varier</text>
+      <text x="540" y="204" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--teal)">✓ recommandée</text>
+      <text x="540" y="220" text-anchor="middle" font-size="11" fill="var(--muted)">(relève de l'enseignant)</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Sur quoi peut-on différencier&nbsp;? Les 4 leviers</h2>
+  <div class="grid g4">
+    <div class="card reveal"><div class="ic ic-v">📚</div><h3>Les contenus</h3><p>Des textes, des données ou des exemples différents pour viser la même notion.</p></div>
+    <div class="card reveal"><div class="ic ic-c">⚙️</div><h3>Les processus</h3><p>Le degré de guidage, l'aide, le temps, la manière de s'y prendre.</p></div>
+    <div class="card reveal"><div class="ic ic-t">✍️</div><h3>Les productions</h3><p>Montrer ce qu'on a compris autrement : oral, écrit, schéma, maquette.</p></div>
+    <div class="card reveal"><div class="ic ic-a">🪑</div><h3>Les structures</h3><p>L'organisation : seul, en binôme, en petit groupe, en atelier ; espaces et temps.</p></div>
+  </div>
+
+  <div class="pagenav"><a data-go="accueil"><small>← Précédent</small><b>Accueil</b></a><a class="nx" data-go="pourquoi"><small>Suivant →</small><b>Pourquoi différencier</b></a></div>
+</section>
+
+<!-- ============ POURQUOI ============ -->
+<section class="page" id="pourquoi">
+  <div class="kick reveal">Le fondement</div>
+  <h1 class="h1 reveal">Pourquoi différencier&nbsp;?</h1>
+  <p class="lead reveal">Comprendre le « pourquoi » est ce qui transforme une recette en geste professionnel. Trois raisons de fond.</p>
+
+  <h2 class="h2 reveal">1. Un cours identique fabrique des écarts</h2>
+  <p class="reveal">Les élèves n'arrivent pas avec le même bagage, le même rythme, la même familiarité avec les codes de l'école. Leur servir <strong>exactement la même chose, de la même façon</strong>, n'est pas neutre : ceux qui sont déjà proches des attentes avancent vite, les autres décrochent. L'égalité de traitement produit de l'inégalité de réussite.</p>
+
+  <h2 class="h2 reveal">2. Les implicites pénalisent les plus fragiles</h2>
+  <div class="call why reveal"><div class="lbl">⚡ Les malentendus scolaires</div><p>« Les approches pédagogiques qui contiennent <strong>trop d'exigences scolaires implicites sont défavorables aux élèves qui viennent d'un milieu socialement défavorisé.</strong> » Ce qui n'est pas dit explicitement — ce qu'on attend, comment s'y prendre, à quoi sert la tâche — est décodé par les élèves « initiés » et manqué par les autres. <strong>Expliciter, c'est rétablir l'égalité d'accès au savoir.</strong></p></div>
+
+  <h2 class="h2 reveal">3. La mémoire de travail a des limites</h2>
+  <div class="call why reveal"><div class="lbl">🧠 La charge cognitive</div><p>Apprendre un savoir scolaire demande un gros effort mental. Si le support est encombré (décorations, informations dispersées, consignes doubles, trop de sources), une partie des ressources de l'élève est gaspillée à trier au lieu d'apprendre. <strong>Épurer et structurer libère la pensée pour l'essentiel.</strong></p></div>
+
+  <h2 class="h2 reveal">Le piège invisible : la « différenciation à l'insu »</h2>
+  <div class="call stop reveal"><div class="lbl">🚫 À surveiller chez soi</div><p>Par bonne volonté, l'enseignant tend, sans s'en rendre compte, à donner aux élèves en difficulté des activités <strong>plus simples, plus découpées, moins stimulantes</strong>, avec des <strong>attentes plus faibles</strong>, des <strong>feed-backs moins précis</strong>, <strong>moins d'autonomie</strong>, moins de sollicitations à l'oral et moins de temps pour répondre. Résultat : les écarts se creusent. Différencier, c'est faire l'<em>inverse</em> : maintenir l'ambition pour tous.</p></div>
+
+  <div class="quote reveal"><p>« Un enseignement totalement individualisé, qui oublie le collectif de la classe, peut créer une école à plusieurs vitesses, qui demande moins aux élèves en difficulté. »</p><div class="src">Cnesco / Ifé, 2017</div></div>
+
+  <h3 class="h3 reveal">Quelques repères chiffrés</h3>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic ic-v" style="font-size:1.3rem">22 %</div><h3 style="font-size:1.02rem">des profs de collège différencient</h3><p>en France, contre 44 % en moyenne (enquête internationale TALIS 2013).</p></div>
+    <div class="card reveal"><div class="ic ic-c" style="font-size:1.3rem">67 %</div><h3 style="font-size:1.02rem">donnent les mêmes exercices à tous</h3><p>jusqu'à réussite — une pratique peu différenciante.</p></div>
+    <div class="card reveal"><div class="ic ic-t" style="font-size:1.3rem">15 %</div><h3 style="font-size:1.02rem">formés aux besoins individuels</h3><p>en CM1 (vs 42 % en moyenne) : la faible différenciation tient surtout à la faible formation.</p></div>
+  </div>
+
+  <div class="pagenav"><a data-go="comprendre"><small>← Précédent</small><b>Comprendre</b></a><a class="nx" data-go="construire"><small>Suivant →</small><b>Construire un cours</b></a></div>
+</section>
+
+<!-- ============ CONSTRUIRE ============ -->
+<section class="page" id="construire">
+  <div class="kick reveal">La conception</div>
+  <h1 class="h1 reveal">Construire un cours qui fait apprendre</h1>
+  <p class="lead reveal">Avant les adaptations, une bonne architecture. Partir des besoins, viser haut, et respecter la façon dont on apprend vraiment.</p>
+
+  <h2 class="h2 reveal">Comprendre ne suffit pas pour apprendre</h2>
+  <p class="reveal">Un apprentissage ne s'arrête pas à « avoir compris ». Il faut ensuite <strong>structurer</strong> (reprendre dans des situations variées) puis <strong>automatiser</strong>, sous peine d'oubli. D'où une règle de planification : <strong>plusieurs courtes séances rapprochées</strong> valent mieux qu'une longue séance isolée.</p>
+  <div class="diagram reveal">
+    <div class="dt">Le cycle de l'apprentissage</div>
+    <div class="dd">Reprendre régulièrement, dans un délai court, pour éviter la perte mnésique.</div>
+    <svg viewBox="0 0 760 170" role="img" aria-label="Cycle de l'apprentissage">
+      <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--violet)"/></marker></defs>
+      <g font-size="13" font-weight="700" text-anchor="middle">
+        <g><rect x="14" y="50" width="118" height="50" rx="12" fill="var(--violet-s)"/><text x="73" y="80" fill="var(--violet-d)">Découvrir</text></g>
+        <g><rect x="160" y="50" width="118" height="50" rx="12" fill="var(--teal-s)"/><text x="219" y="80" fill="var(--teal)">Comprendre</text></g>
+        <g><rect x="306" y="50" width="118" height="50" rx="12" fill="var(--amber-s)"/><text x="365" y="80" fill="var(--amber)">Structurer</text></g>
+        <g><rect x="452" y="50" width="118" height="50" rx="12" fill="var(--pink-s)"/><text x="511" y="80" fill="var(--pink)">Automatiser</text></g>
+        <g><rect x="598" y="50" width="118" height="50" rx="12" fill="var(--coral-s)"/><text x="657" y="80" fill="var(--coral)">Transférer</text></g>
+      </g>
+      <g stroke="var(--violet)" stroke-width="2" fill="none" marker-end="url(#ar)">
+        <line x1="134" y1="75" x2="156" y2="75"/><line x1="280" y1="75" x2="302" y2="75"/><line x1="426" y1="75" x2="448" y2="75"/><line x1="572" y1="75" x2="594" y2="75"/>
+      </g>
+      <path d="M657 105 C 657 145, 73 145, 73 105" stroke="var(--muted)" stroke-width="1.6" fill="none" stroke-dasharray="5 5" marker-end="url(#ar)"/>
+      <text x="365" y="160" text-anchor="middle" font-size="11.5" fill="var(--muted)">reprise régulière</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Enseigner explicitement — en 3 temps</h2>
+  <ol class="steps reveal">
+    <li><b>Mise en situation</b> — annoncer clairement l'objectif (« à la fin, vous saurez… »), rappeler ce qui est déjà connu.</li>
+    <li><b>Apprentissage guidé</b> — présenter le contenu avec des <strong>exemples clairs</strong>, du simple au complexe ; vérifier la compréhension par des tâches semblables ; rétroagir au fur et à mesure.</li>
+    <li><b>Objectivation</b> — extraire et faire noter l'essentiel : « ce qu'il faut retenir », les procédures, le vocabulaire.</li>
+  </ol>
+  <div class="call do reveal"><div class="lbl">✓ Le geste-clé</div><p>Présenter un <strong>problème déjà résolu</strong> et faire expliciter la procédure : pour les élèves les moins avancés, étudier un exemple corrigé est plus efficace que de chercher seul d'emblée.</p></div>
+
+  <h2 class="h2 reveal">Différencier aux trois moments de la séquence</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic ic-v">⏪</div><h3>Avant</h3><p><strong>Tester</strong> les prérequis · <strong>réactiver</strong> les notions utiles · <strong>préparer</strong> certains élèves en leur donnant des clés d'accès.</p></div>
+    <div class="card reveal"><div class="ic ic-t">⏯️</div><h3>Pendant</h3><p><strong>Soutenir / étayer</strong> · <strong>adapter</strong> support, consigne, exigence, temps · <strong>évaluer</strong> le cheminement (acquis et erreurs).</p></div>
+    <div class="card reveal"><div class="ic ic-a">⏩</div><h3>Après</h3><p><strong>Exercer</strong> (consolider, ex. plan de travail) · <strong>revoir</strong> de façon ciblée ce qui n'est pas acquis.</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Le secret d'une bonne préparation : l'analyse de la tâche</h2>
+  <p class="reveal">Avant de donner un exercice, <strong>mettez-vous à la place de l'élève</strong> et décomposez tout ce que la tâche exige réellement. Une consigne « simple » mobilise souvent des dizaines d'habiletés cachées.</p>
+  <div class="diagram reveal">
+    <div class="dt">Les 3 faces d'une tâche</div>
+    <div class="dd">Ce que la consigne demande vraiment — pour repérer où ça coince.</div>
+    <svg viewBox="0 0 720 210" role="img" aria-label="Les trois faces d'une tâche">
+      <g text-anchor="middle">
+        <rect x="40" y="30" width="180" height="150" rx="16" fill="var(--violet-s)"/><text x="130" y="64" font-size="14" font-weight="700" fill="var(--violet-d)">Cognitif</text>
+        <text x="130" y="92" font-size="11.5" fill="var(--ink2)">vocabulaire, savoirs,</text><text x="130" y="110" font-size="11.5" fill="var(--ink2)">inférences, stratégies</text>
+        <rect x="270" y="30" width="180" height="150" rx="16" fill="var(--teal-s)"/><text x="360" y="64" font-size="14" font-weight="700" fill="var(--teal)">Sensorimoteur</text>
+        <text x="360" y="92" font-size="11.5" fill="var(--ink2)">motricité fine, repérage</text><text x="360" y="110" font-size="11.5" fill="var(--ink2)">visuel, écoute</text>
+        <rect x="500" y="30" width="180" height="150" rx="16" fill="var(--amber-s)"/><text x="590" y="64" font-size="14" font-weight="700" fill="var(--amber)">Psychosocial</text>
+        <text x="590" y="92" font-size="11.5" fill="var(--ink2)">travailler en groupe,</text><text x="590" y="110" font-size="11.5" fill="var(--ink2)">seul, gérer le regard</text>
+      </g>
+      <text x="360" y="200" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink2)">→ Difficulté repérée · Adaptation prévue · Matériel à préparer</text>
+    </svg>
+  </div>
+
+  <div class="pagenav"><a data-go="pourquoi"><small>← Précédent</small><b>Pourquoi</b></a><a class="nx" data-go="expliciter"><small>Suivant →</small><b>Rendre accessible</b></a></div>
+</section>
+
+<!-- ============ EXPLICITER ============ -->
+<section class="page" id="expliciter">
+  <div class="kick reveal">Le cœur du métier</div>
+  <h1 class="h1 reveal">Rendre accessible &amp; expliciter</h1>
+  <p class="lead reveal">Étayer, c'est prendre en charge ce qui dépasse l'élève pour qu'il se concentre sur ce qu'il peut faire. Expliciter, c'est rendre visible l'invisible.</p>
+
+  <div class="quote reveal"><p>« L'étayage consiste à prendre en main les éléments de la tâche qui excèdent les capacités du débutant, pour qu'il concentre ses efforts sur ce qui reste à sa portée. »</p><div class="src">d'après J. Bruner</div></div>
+
+  <h2 class="h2 reveal">Faire penser l'élève : les 4 questions</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-v">1</div><h3>Quelle est la tâche&nbsp;?</h3><p>… et comment saurai-je que je l'ai réussie&nbsp;? (critères de réussite explicites)</p></div>
+    <div class="card reveal"><div class="ic ic-c">2</div><h3>Quel problème résoudre&nbsp;?</h3><p>Qu'est-ce qui fait obstacle, qu'est-ce que je dois dépasser&nbsp;?</p></div>
+    <div class="card reveal"><div class="ic ic-t">3</div><h3>Quelles connaissances&nbsp;?</h3><p>Qu'est-ce que je sais déjà qui peut m'aider&nbsp;?</p></div>
+    <div class="card reveal"><div class="ic ic-a">4</div><h3>Quelles stratégies&nbsp;?</h3><p>Comment vais-je m'y prendre, dans quel ordre&nbsp;?</p></div>
+  </div>
+  <div class="call tip reveal"><div class="lbl">💡 Le réflexe qui change tout</div><p>Dans vos questions, privilégiez le <strong>« comment »</strong> au <strong>« pourquoi »</strong>. « Comment as-tu fait&nbsp;? » fait verbaliser des procédures concrètes ; « pourquoi&nbsp;? » appelle des justifications souvent inaccessibles. Et <strong>méfiez-vous de vos évidences</strong> : la compréhension de l'élève est rarement la vôtre.</p></div>
+
+  <h2 class="h2 reveal">Renforcer une consigne, par paliers</h2>
+  <div class="diagram reveal">
+    <div class="dt">L'escalier de la consigne</div>
+    <div class="dd">On ajoute un palier seulement si nécessaire. Une seule action à la fois — jamais de consigne « double tâche ».</div>
+    <svg viewBox="0 0 720 240" role="img" aria-label="Escalier de renforcement de la consigne">
+      <g>
+        <rect x="20" y="180" width="160" height="44" rx="9" fill="var(--violet-s)"/><text x="100" y="207" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--violet-d)">Orale simple</text>
+        <rect x="190" y="135" width="160" height="44" rx="9" fill="var(--teal-s)"/><text x="270" y="162" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--teal)">+ écrite</text>
+        <rect x="360" y="90" width="160" height="44" rx="9" fill="var(--amber-s)"/><text x="440" y="111" text-anchor="middle" font-size="12" font-weight="700" fill="var(--amber)">+ verbe encadré</text><text x="440" y="126" text-anchor="middle" font-size="10.5" fill="var(--ink2)">accentué à l'oral</text>
+        <rect x="530" y="45" width="170" height="44" rx="9" fill="var(--pink-s)"/><text x="615" y="72" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--pink)">+ pictogramme</text>
+      </g>
+      <text x="100" y="172" text-anchor="middle" font-size="11" fill="var(--muted)">« Entoure le verbe »</text>
+      <path d="M610 35 L 615 24 L 620 35" fill="var(--muted)"/><line x1="615" y1="44" x2="615" y2="26" stroke="var(--muted)" stroke-width="1.4"/>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Des supports « Faciles à Lire et à Comprendre » (FALC)</h2>
+  <p class="sub reveal">Utiles à tous, indispensables aux fragiles. Quelques règles simples :</p>
+  <ul class="chk reveal">
+    <li><b>Une idée par phrase, une phrase par ligne.</b> Phrases courtes, actives et positives (« reste » plutôt que « ne pars pas »).</li>
+    <li><b>Mots du quotidien</b> ; toujours le <strong>même mot</strong> pour la même chose ; pas de métaphores, abréviations ni gros nombres.</li>
+    <li><b>Renommer plutôt que pronominaliser</b> (« Léa range… Léa prend… » plutôt que « elle »).</li>
+    <li><b>Mise en page aérée</b> : police sans empattement ≥ 14, texte aligné à gauche (non justifié), contrasté.</li>
+    <li><b>Un exemple vaut mille mots</b> : illustrer, et garder un pictogramme constant pour une même notion.</li>
+  </ul>
+
+  <h2 class="h2 reveal">Alléger la charge, doser la tâche</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-t">🧹</div><h3>Épurer le support</h3><p>Supprimer les décorations parasites, les informations dispersées. Au maximum <strong>deux sources</strong> d'information à la fois (pas trois).</p></div>
+    <div class="card reveal"><div class="ic ic-a">✂️</div><h3>Fractionner</h3><p>Distribuer les exercices <strong>un à un</strong>, donner des <strong>bandes-réponses</strong> plutôt qu'une grande feuille vide qui « fait peur ».</p></div>
+    <div class="card reveal"><div class="ic ic-v">⏱️</div><h3>Rendre le temps visible</h3><p>Rituels de début/fin, <strong>sablier ou minuteur visuel</strong> (Time-Timer), emploi du temps affiché.</p></div>
+    <div class="card reveal"><div class="ic ic-c">🧱</div><h3>Du concret vers l'abstrait</h3><p>Manipuler avant de symboliser : objet réel → image → schéma → mot. La manipulation est une rampe d'accès.</p></div>
+  </div>
+
+  <div class="diagram reveal">
+    <div class="dt">Le continuum concret → abstrait</div>
+    <div class="dd">On avance d'un cran quand le précédent est solide.</div>
+    <svg viewBox="0 0 720 110" role="img" aria-label="Continuum du concret vers l'abstrait">
+      <defs><marker id="ar2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--teal)"/></marker></defs>
+      <line x1="40" y1="55" x2="680" y2="55" stroke="var(--teal)" stroke-width="2" marker-end="url(#ar2)"/>
+      <g text-anchor="middle" font-size="12.5" font-weight="700">
+        <circle cx="80" cy="55" r="8" fill="var(--coral)"/><text x="80" y="86" fill="var(--ink2)">Objet réel</text>
+        <circle cx="230" cy="55" r="8" fill="var(--amber)"/><text x="230" y="86" fill="var(--ink2)">Photo / image</text>
+        <circle cx="380" cy="55" r="8" fill="var(--teal)"/><text x="380" y="86" fill="var(--ink2)">Dessin / schéma</text>
+        <circle cx="530" cy="55" r="8" fill="var(--violet)"/><text x="530" y="86" fill="var(--ink2)">Pictogramme</text>
+        <circle cx="660" cy="55" r="8" fill="var(--pink)"/><text x="655" y="86" fill="var(--ink2)">Mot / symbole</text>
+      </g>
+      <text x="80" y="34" text-anchor="middle" font-size="11" fill="var(--muted)">concret</text>
+      <text x="655" y="34" text-anchor="middle" font-size="11" fill="var(--muted)">abstrait</text>
+    </svg>
+  </div>
+
+  <div class="pagenav"><a data-go="construire"><small>← Précédent</small><b>Construire un cours</b></a><a class="nx" data-go="cooperer"><small>Suivant →</small><b>Faire coopérer</b></a></div>
+</section>
+
+<!-- ============ COOPERER ============ -->
+<section class="page" id="cooperer">
+  <div class="kick reveal">Les dispositifs</div>
+  <h1 class="h1 reveal">Faire travailler les élèves ensemble</h1>
+  <p class="lead reveal">Le groupe n'est pas un obstacle à gérer, c'est un moteur d'apprentissage — à condition de l'organiser.</p>
+
+  <h2 class="h2 reveal">Pourquoi le groupe fait apprendre</h2>
+  <p class="reveal">La confrontation des points de vue crée un <strong>conflit sociocognitif</strong> : le désaccord oblige à reconsidérer, à argumenter, à reconstruire. « Tous les élèves, quel que soit leur niveau, progressent plus en situation interactive qu'individuellement. » Et il existe un seuil : la vraie dynamique de groupe démarre à <strong>4 personnes</strong>, quand les interactions deviennent plus nombreuses que les membres.</p>
+  <div class="diagram reveal">
+    <div class="dt">Le seuil des 4</div>
+    <div class="dd">À 2 ou 3, tout repose sur l'enseignant. À 4, le groupe commence à se soutenir lui-même.</div>
+    <svg viewBox="0 0 720 200" role="img" aria-label="Le seuil des 4 dans la dynamique de groupe">
+      <g stroke="var(--line)" stroke-width="1.5">
+        <!-- 2 -->
+        <circle cx="80" cy="70" r="12" fill="var(--violet)"/><circle cx="160" cy="70" r="12" fill="var(--violet)"/>
+        <line x1="92" y1="70" x2="148" y2="70" stroke="var(--coral)"/>
+        <!-- 3 -->
+        <circle cx="300" cy="45" r="12" fill="var(--violet)"/><circle cx="270" cy="95" r="12" fill="var(--violet)"/><circle cx="330" cy="95" r="12" fill="var(--violet)"/>
+        <line x1="300" y1="57" x2="276" y2="84" stroke="var(--coral)"/><line x1="300" y1="57" x2="324" y2="84" stroke="var(--coral)"/><line x1="282" y1="95" x2="318" y2="95" stroke="var(--coral)"/>
+        <!-- 4 -->
+        <circle cx="500" cy="45" r="12" fill="var(--teal)"/><circle cx="580" cy="45" r="12" fill="var(--teal)"/><circle cx="500" cy="115" r="12" fill="var(--teal)"/><circle cx="580" cy="115" r="12" fill="var(--teal)"/>
+        <line x1="500" y1="45" x2="580" y2="45" stroke="var(--teal)"/><line x1="500" y1="115" x2="580" y2="115" stroke="var(--teal)"/><line x1="500" y1="45" x2="500" y2="115" stroke="var(--teal)"/><line x1="580" y1="45" x2="580" y2="115" stroke="var(--teal)"/><line x1="500" y1="45" x2="580" y2="115" stroke="var(--teal)"/><line x1="580" y1="45" x2="500" y2="115" stroke="var(--teal)"/>
+      </g>
+      <g text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--ink2)">
+        <text x="120" y="120">2 → 1 lien</text>
+        <text x="300" y="135">3 → 3 liens</text>
+        <text x="540" y="155">4 → 6 liens</text>
+      </g>
+      <text x="540" y="178" text-anchor="middle" font-size="12" font-weight="700" fill="var(--teal)">le groupe se soutient</text>
+      <text x="210" y="178" text-anchor="middle" font-size="12" fill="var(--muted)">tout passe par l'enseignant</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Quatre dispositifs efficaces</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-v">🗂️</div><h3>Le plan de travail</h3><p>Les élèves consolident en autonomie pendant que vous menez un <strong>atelier dirigé</strong> avec quelques élèves repérés. Vous vous libérez de la gestion collective.</p></div>
+    <div class="card reveal"><div class="ic ic-t">🤝</div><h3>Le tutorat entre élèves</h3><p>Bénéfique au tutoré <em>et</em> au tuteur (qui consolide en expliquant). Condition : <strong>préparer le tuteur</strong> à analyser la difficulté. Variez pour que chacun soit tuteur un jour.</p></div>
+    <div class="card reveal"><div class="ic ic-a">👥</div><h3>Le petit groupe (2-5)</h3><p>Efficace si la tâche exige <strong>l'apport de chacun</strong>, avec des rôles explicites et un bilan de ce qui a été appris. Sinon, certains se reposent sur les autres.</p></div>
+    <div class="card reveal"><div class="ic ic-p">👩‍🏫</div><h3>Le co-enseignement</h3><p>Deux enseignants, un même groupe : deux façons d'expliquer. « Parfois on comprend avec le second prof ce qu'on n'avait pas compris avec le premier. »</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Les groupes de besoin : oui, mais flexibles</h2>
+  <div class="call do reveal"><div class="lbl">✓ La bonne pratique</div><p>Regrouper temporairement des élèves autour d'<strong>une compétence précise</strong>, sur la base d'une évaluation — puis <strong>recomposer dès que ça progresse</strong>. Le temps en groupe homogène doit rester <strong>nettement inférieur</strong> au temps en classe hétérogène.</p></div>
+  <div class="call stop reveal"><div class="lbl">🚫 Le piège</div><p>Des <strong>groupes de niveau permanents</strong> : les élèves décodent l'image qu'on se fait d'eux, se démotivent et se trouvent stigmatisés. Et attention à la <strong>remédiation « externalisée »</strong> : un savoir coupé de la classe, de plus en plus simplifié, que l'élève fragile ne reconnecte pas tout seul.</p></div>
+
+  <div class="pagenav"><a data-go="expliciter"><small>← Précédent</small><b>Rendre accessible</b></a><a class="nx" data-go="evaluer"><small>Suivant →</small><b>Évaluer</b></a></div>
+</section>
+
+<!-- ============ EVALUER ============ -->
+<section class="page" id="evaluer">
+  <div class="kick reveal">Le moteur des progrès</div>
+  <h1 class="h1 reveal">Évaluer pour faire progresser</h1>
+  <p class="lead reveal">L'évaluation la plus utile n'est pas celle qui sanctionne, mais celle qui informe — l'élève et vous — en cours de route.</p>
+
+  <h2 class="h2 reveal">La boucle de l'évaluation formative</h2>
+  <div class="diagram reveal">
+    <div class="dt">Évaluer en continu, sans note couperet</div>
+    <div class="dd">Trois manières de « lire » l'élève → un bilan → une régulation → on recommence.</div>
+    <svg viewBox="0 0 720 230" role="img" aria-label="Boucle de l'évaluation formative">
+      <defs><marker id="ar3" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--violet)"/></marker></defs>
+      <g text-anchor="middle" font-size="12.5" font-weight="700">
+        <rect x="40" y="20" width="180" height="48" rx="12" fill="var(--violet-s)"/><text x="130" y="49" fill="var(--violet-d)">Observer au travail</text>
+        <rect x="270" y="20" width="180" height="48" rx="12" fill="var(--teal-s)"/><text x="360" y="49" fill="var(--teal)">Analyser les productions</text>
+        <rect x="500" y="20" width="180" height="48" rx="12" fill="var(--amber-s)"/><text x="590" y="44" fill="var(--amber)">Interroger</text><text x="590" y="60" font-size="11" fill="var(--ink2)">les procédures</text>
+        <rect x="270" y="150" width="180" height="48" rx="12" fill="var(--coral-s)"/><text x="360" y="179" fill="var(--coral)">Réguler &amp; remédier</text>
+      </g>
+      <g stroke="var(--violet)" stroke-width="2" fill="none" marker-end="url(#ar3)">
+        <line x1="220" y1="44" x2="266" y2="44"/><line x1="450" y1="44" x2="496" y2="44"/>
+        <path d="M590 70 C 590 120, 450 130, 420 148"/>
+        <path d="M300 150 C 230 120, 130 110, 130 72"/>
+      </g>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Les leviers qui marchent</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-v">🎯</div><h3>Des attentes élevées pour tous</h3><p>Proposer un vrai défi à chacun motive et réduit les écarts. Baisser la barre démotive.</p></div>
+    <div class="card reveal"><div class="ic ic-t">💬</div><h3>Le feed-back, l'arme la plus puissante</h3><p>Des retours précis sur les points forts/faibles et les <strong>progrès par rapport à soi-même</strong> (pas par rapport aux autres).</p></div>
+    <div class="card reveal"><div class="ic ic-a">📍</div><h3>Des objectifs courts &amp; précis</h3><p>Plutôt que lointains et vagues : des progrès graduels, visibles, qui construisent la confiance.</p></div>
+    <div class="card reveal"><div class="ic ic-c">🪞</div><h3>L'auto-évaluation</h3><p>Construire avec les élèves des critères de réussite clairs : ils repèrent l'essentiel et gagnent en autonomie.</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Deux principes éthiques</h2>
+  <div class="call do reveal"><div class="lbl">✓ L'erreur est formatrice</div><p>Ne lui donnez pas de valeur négative. Faites <strong>entourer les réussites</strong> plutôt que les fautes ; autorisez l'écrit sans trace (ardoise, brouillon) pour oser. L'erreur bien exploitée est une information précieuse, pas une faute morale.</p></div>
+  <div class="call tip reveal"><div class="lbl">⚖️ Séparer le travail de la personne</div><p>« Être un mauvais élève, c'est être un mauvais enfant » : voilà le raccourci que font les élèves. Bannissez le vocabulaire de jugement (« tu es nul », « pas capable »). On évalue <strong>un travail</strong>, jamais une personne — et on capitalise les progrès au lieu de « repartir de zéro » chaque trimestre.</p></div>
+
+  <div class="pagenav"><a data-go="cooperer"><small>← Précédent</small><b>Faire coopérer</b></a><a class="nx" data-go="climat"><small>Suivant →</small><b>Climat &amp; posture</b></a></div>
+</section>
+
+<!-- ============ CLIMAT ============ -->
+<section class="page" id="climat">
+  <div class="kick reveal">La condition de tout</div>
+  <h1 class="h1 reveal">Climat, posture &amp; motivation</h1>
+  <p class="lead reveal">Aucune différenciation ne tient sans un climat de classe serein et une posture qui met en confiance. Cela se travaille — jusque dans la voix et le placement du corps.</p>
+
+  <h2 class="h2 reveal">La règle des 80/20</h2>
+  <div class="diagram reveal">
+    <div class="dt">Prévenir plutôt que corriger</div>
+    <div class="dd">80 % de l'énergie sur la prévention, 20 % sur la correction.</div>
+    <svg viewBox="0 0 720 120" role="img" aria-label="Règle 80/20 prévention correction">
+      <rect x="40" y="40" width="512" height="40" rx="10" fill="var(--teal)"/>
+      <rect x="552" y="40" width="128" height="40" rx="10" fill="var(--coral)"/>
+      <text x="296" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">80 % Prévention</text>
+      <text x="616" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">20 % Correction</text>
+      <text x="296" y="104" text-anchor="middle" font-size="11.5" fill="var(--muted)">lien, attentes claires, routines</text>
+      <text x="616" y="104" text-anchor="middle" font-size="11.5" fill="var(--muted)">rappels, choix</text>
+    </svg>
+  </div>
+  <ul class="chk reveal">
+    <li><b>Créer le lien</b> : accueillir, écouter, montrer de l'empathie — la base de tout.</li>
+    <li><b>Des attentes claires</b> : choisir 3 à 5 valeurs (respect, responsabilité…) définies par des comportements précis, et les <strong>enseigner</strong>.</li>
+    <li><b>Renforcer le positif</b> : féliciter le comportement attendu pour en faire une habitude, plutôt que réprimander.</li>
+    <li><b>Représenter ce qu'on attend</b> (et non la liste des interdits) ; construire le règlement <strong>avec</strong> les élèves.</li>
+  </ul>
+
+  <h2 class="h2 reveal">La posture : un outil pédagogique</h2>
+  <div class="call tip reveal"><div class="lbl">🎚️ Votre voix et votre corps parlent</div><p>Ne pas ouvrir une séance avec une voix qui « trahit un agacement préalable ». Afficher une <strong>« heureuse surprise » sincère</strong> face aux réponses installe la confiance — et permet ensuite d'oser des questions plus exigeantes.</p></div>
+  <div class="diagram reveal">
+    <div class="dt">Où se placer&nbsp;?</div>
+    <div class="dd">Face à l'élève ou dans son dos : anxiogène. À côté, à l'angle de la table : apaisant.</div>
+    <svg viewBox="0 0 720 200" role="img" aria-label="Placement de l'enseignant">
+      <!-- table 1: en face -->
+      <g><rect x="40" y="70" width="120" height="70" rx="10" fill="var(--bg2)" stroke="var(--line)"/>
+        <circle cx="70" cy="105" r="13" fill="var(--violet)"/><circle cx="130" cy="105" r="13" fill="var(--coral)"/>
+        <text x="100" y="165" text-anchor="middle" font-size="12" font-weight="700" fill="var(--coral)">En face ✗</text></g>
+      <!-- table 2: dans le dos -->
+      <g><rect x="280" y="70" width="120" height="70" rx="10" fill="var(--bg2)" stroke="var(--line)"/>
+        <circle cx="340" cy="100" r="13" fill="var(--violet)"/><circle cx="340" cy="100" r="13" fill="none"/>
+        <circle cx="340" cy="135" r="13" fill="var(--coral)"/>
+        <text x="340" y="165" text-anchor="middle" font-size="12" font-weight="700" fill="var(--coral)">Dans le dos ✗</text></g>
+      <!-- table 3: à l'angle -->
+      <g><rect x="520" y="70" width="120" height="70" rx="10" fill="var(--teal-s)" stroke="var(--teal)"/>
+        <circle cx="548" cy="98" r="13" fill="var(--violet)"/><circle cx="585" cy="132" r="13" fill="var(--teal)"/>
+        <text x="580" y="165" text-anchor="middle" font-size="12" font-weight="700" fill="var(--teal)">À l'angle ✓</text></g>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Allumer la motivation</h2>
+  <div class="diagram reveal">
+    <div class="dt">Le cercle vertueux</div>
+    <svg viewBox="0 0 720 130" role="img" aria-label="Cercle vertueux de la motivation">
+      <defs><marker id="ar4" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="var(--pink)"/></marker></defs>
+      <g text-anchor="middle" font-size="12.5" font-weight="700">
+        <rect x="20" y="45" width="150" height="44" rx="22" fill="var(--violet-s)"/><text x="95" y="72" fill="var(--violet-d)">Acteur de ses</text>
+        <rect x="200" y="45" width="130" height="44" rx="22" fill="var(--teal-s)"/><text x="265" y="72" fill="var(--teal)">Motivation ↑</text>
+        <rect x="360" y="45" width="130" height="44" rx="22" fill="var(--amber-s)"/><text x="425" y="72" fill="var(--amber)">Autonomie ↑</text>
+        <rect x="520" y="45" width="170" height="44" rx="22" fill="var(--pink-s)"/><text x="605" y="72" fill="var(--pink)">Apprend davantage</text>
+      </g>
+      <g stroke="var(--pink)" stroke-width="2" fill="none" marker-end="url(#ar4)">
+        <line x1="170" y1="67" x2="196" y2="67"/><line x1="330" y1="67" x2="356" y2="67"/><line x1="490" y1="67" x2="516" y2="67"/>
+        <path d="M605 91 C 605 120, 95 120, 95 91"/>
+      </g>
+    </svg>
+  </div>
+  <ul class="chk reveal">
+    <li><b>Partir des centres d'intérêt</b> pour les élèves au vécu scolaire douloureux — puis diversifier peu à peu.</li>
+    <li><b>Offrir un choix</b> dès la présentation de la tâche (quel problème, quel livre) : ça nourrit le sentiment d'autodétermination.</li>
+    <li><b>Donner du sens</b> : dire la finalité (pourquoi on fait ça) et le produit attendu. Le désintérêt vient souvent d'un manque de sens.</li>
+    <li><b>Le coin de répit</b> : un espace pour se calmer, <em>« l'inverse de l'exclusion »</em> — pas une punition.</li>
+  </ul>
+
+  <div class="call stop reveal"><div class="lbl">🚫 Le piège de la bienveillance</div><p>La <strong>surprotection</strong> et l'aide systématique créent de la dépendance et privent l'élève du collectif stimulant. « Ils nous ont montré une capacité d'adaptation que nous ne soupçonnions pas. » Aider, c'est viser à se rendre <em>inutile</em>.</p></div>
+
+  <div class="pagenav"><a data-go="evaluer"><small>← Précédent</small><b>Évaluer</b></a><a class="nx" data-go="difficulte"><small>Suivant →</small><b>Élèves en difficulté</b></a></div>
+</section>
+
+<!-- ============ DIFFICULTE ============ -->
+<section class="page" id="difficulte">
+  <div class="kick reveal">Quand ça coince</div>
+  <h1 class="h1 reveal">Aider concrètement les élèves en difficulté</h1>
+  <p class="lead reveal">« Il n'existe pas de pédagogie spéciale, mais des démarches particulièrement adaptées. » Ce qui aide les élèves les plus fragiles aide souvent toute la classe.</p>
+
+  <h2 class="h2 reveal">Viser l'autonomie : estomper l'aide</h2>
+  <p class="reveal">L'aide n'est utile que si elle se retire. On planifie son <strong>estompage progressif</strong> (le « fading ») : on prend en charge beaucoup au début, puis on relâche, par paliers, jusqu'à l'autonomie.</p>
+  <div class="diagram reveal">
+    <div class="dt">L'estompage de l'étayage</div>
+    <div class="dd">L'aide descend, l'autonomie monte.</div>
+    <svg viewBox="0 0 720 200" role="img" aria-label="Estompage de l'étayage">
+      <g>
+        <rect x="40" y="40" width="140" height="120" rx="10" fill="var(--coral)" opacity="0.85"/><text x="110" y="105" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">Tout</text><text x="110" y="123" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">accompagné</text>
+        <rect x="210" y="75" width="140" height="85" rx="10" fill="var(--amber)" opacity="0.85"/><text x="280" y="123" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">Aide ciblée</text>
+        <rect x="380" y="105" width="140" height="55" rx="10" fill="var(--teal)" opacity="0.85"/><text x="450" y="138" text-anchor="middle" font-size="12.5" font-weight="700" fill="#fff">À distance</text>
+        <rect x="550" y="130" width="140" height="30" rx="10" fill="var(--violet)" opacity="0.85"/><text x="620" y="150" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Autonome</text>
+      </g>
+      <path d="M40 36 L 690 18" stroke="var(--teal)" stroke-width="2.5" stroke-dasharray="6 5" fill="none"/>
+      <text x="690" y="14" text-anchor="end" font-size="11.5" font-weight="700" fill="var(--teal)">autonomie ↑</text>
+      <text x="110" y="182" text-anchor="middle" font-size="11" fill="var(--muted)">aide ↓ au fil du temps</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Des réponses utiles à tous</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-v">🎯</div><h3>Attention / concentration</h3><p>« La distraction vient d'un problème d'alignement des priorités. » Apporter des repères, éclairer l'essentiel, et <strong>faire dire à l'élève</strong> ce qui a capté son attention.</p></div>
+    <div class="card reveal"><div class="ic ic-c">📖</div><h3>Lecture / décodage</h3><p>Méthodes <strong>phoniques</strong> explicites (graphème-phonème), progressivité dans la réussite, automatisation du décodage. Segmenter, repères couleur, cache de lecture.</p></div>
+    <div class="card reveal"><div class="ic ic-t">🔁</div><h3>« DYS » &amp; troubles du langage</h3><p>FALC, supports aérés, police adaptée, textes à trous, temps majoré, outils numériques (synthèse vocale, prédicteur de mots).</p></div>
+    <div class="card reveal"><div class="ic ic-a">🧭</div><h3>Besoin de prévisibilité (TSA)</h3><p>Rituels stables, transitions matérialisées, consignes <strong>répétées à l'identique</strong> (une reformulation est comprise comme une nouvelle consigne), repères visuels.</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Trois exemples qui inspirent</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic ic-p">🛒</div><h3>Le projet « faire les courses »</h3><p>Liste → trajet → achats (en groupe puis seuls). Des élèves « inhibés » devenus autonomes : le réel donne du sens aux apprentissages.</p></div>
+    <div class="card reveal"><div class="ic ic-v">➗</div><h3>L'entretien d'explicitation</h3><p>Un élève écrit « 44 » pour « 4 et 4 ». En le faisant parler, l'enseignante comprend sa logique, le félicite, puis reformule la procédure. On part de la pensée réelle de l'élève.</p></div>
+    <div class="card reveal"><div class="ic ic-t">📅</div><h3>Le savoir n'est pas « magique »</h3><p>Naomi croyait que les maîtresses « puisaient leur savoir dans un tiroir ». De petites fiches de méthode l'ont rendue autonome : montrer <em>comment</em> on fait.</p></div>
+  </div>
+
+  <div class="pagenav"><a data-go="climat"><small>← Précédent</small><b>Climat &amp; posture</b></a><a class="nx" data-go="memo"><small>Suivant →</small><b>À retenir</b></a></div>
+</section>
+
+<!-- ============ MEMO ============ -->
+<section class="page" id="memo">
+  <div class="kick reveal">La synthèse</div>
+  <h1 class="h1 reveal">À retenir</h1>
+  <p class="lead reveal">L'essentiel du guide, en une page — à relire avant de préparer une séance.</p>
+
+  <h2 class="h2 reveal">Les 8 gestes professionnels</h2>
+  <ul class="chk reveal">
+    <li><b>Viser haut pour tous</b> : on adapte le chemin, jamais l'objectif.</li>
+    <li><b>Expliciter</b> l'objectif, les attentes, les critères de réussite et les procédures.</li>
+    <li><b>Étayer</b> puis <strong>estomper</strong> l'aide : viser l'autonomie, pas la dépendance.</li>
+    <li><b>Épurer</b> les supports et <strong>doser</strong> la tâche pour alléger la charge cognitive.</li>
+    <li><b>Faire coopérer</b> : conflit sociocognitif, tutorat préparé, groupes flexibles.</li>
+    <li><b>Évaluer en continu</b> par le feed-back, en distinguant le travail de la personne.</li>
+    <li><b>Soigner le climat</b> (80/20) et la posture : voix, placement, heureuse surprise.</li>
+    <li><b>Partir de l'élève</b> : ses besoins, ses centres d'intérêt, sa pensée réelle.</li>
+  </ul>
+
+  <h2 class="h2 reveal">Les 5 pièges à éviter</h2>
+  <div class="grid g2">
+    <div class="card reveal" style="border-left:4px solid var(--coral)"><h3 style="font-size:1.05rem">Baisser les objectifs</h3><p>Différencier les buts (et non les chemins) creuse les inégalités.</p></div>
+    <div class="card reveal" style="border-left:4px solid var(--coral)"><h3 style="font-size:1.05rem">Tout individualiser</h3><p>On perd le collectif, moteur d'apprentissage, et on crée une école à deux vitesses.</p></div>
+    <div class="card reveal" style="border-left:4px solid var(--coral)"><h3 style="font-size:1.05rem">Les groupes de niveau permanents</h3><p>Stigmatisation et démotivation durables.</p></div>
+    <div class="card reveal" style="border-left:4px solid var(--coral)"><h3 style="font-size:1.05rem">La « différenciation à l'insu »</h3><p>Donner moins, attendre moins des plus fragiles — sans s'en rendre compte.</p></div>
+    <div class="card reveal" style="border-left:4px solid var(--coral);grid-column:1/-1"><h3 style="font-size:1.05rem">La surprotection</h3><p>Trop d'aide crée de la dépendance ; on sous-estime ce dont les élèves sont capables.</p></div>
+  </div>
+
+  <div class="quote reveal"><p>« Comprendre n'est pas suffisant pour apprendre : il faut ensuite structurer, puis automatiser. »</p><div class="src">Enseigner en Unité d'enseignement</div></div>
+
+  <h2 class="h2 reveal">Sources</h2>
+  <ul class="chk reveal">
+    <li><b>Cnesco / Ifé–ENS de Lyon</b>, <em>Différenciation pédagogique : comment adapter l'enseignement pour la réussite de tous les élèves&nbsp;?</em> — Conférence de consensus, dossier de synthèse, mars 2017.</li>
+    <li><b>Bruno Egron (dir.)</b>, <em>Enseigner en Unité d'enseignement</em> — Retz, 2021.</li>
+  </ul>
+  <p class="reveal" style="color:var(--muted);font-size:14px">Guide d'information et de formation, synthétisant ces deux ressources. Les pratiques décrites sont à adapter à votre discipline, votre niveau et vos élèves.</p>
+
+  <div class="pagenav"><a data-go="difficulte"><small>← Précédent</small><b>Élèves en difficulté</b></a><a class="nx" data-go="accueil"><small>Retour →</small><b>Accueil</b></a></div>
+</section>
+
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')], links=[...document.querySelectorAll('.nav a')];
+function go(id){
+  const pg=document.getElementById(id); if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active')); pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id); window.scrollTo({top:0,behavior:'instant'});
+  closeMenu(); requestAnimationFrame(()=>scan(pg));
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const nav=document.getElementById('nav'),scrim=document.getElementById('scrim');
+function closeMenu(){nav.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('burger').onclick=()=>{nav.classList.toggle('open');scrim.classList.toggle('show');};
+scrim.onclick=closeMenu;
+const tb=document.getElementById('theme'),ti=document.getElementById('ti');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false; tb.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');ti.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.06});
+function scan(s){(s||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));} scan();
+const bar=document.getElementById('bar');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+const start=location.hash.replace('#','');
+if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide des PFMP — Périodes de formation en milieu professionnel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f5; --surface:#ffffff; --surface2:#f6f9fb; --ink:#13212e; --ink2:#3a4b5c; --muted:#6c7d8e;
+  --brand:#0e7d8a; --brand-d:#0a5e69; --brand-soft:#dcf1f3;
+  --indigo:#4f5bd5; --indigo-s:#e7e9fb; --violet:#7c4dcc; --violet-s:#efe8fb;
+  --green:#1f9d63; --green-s:#dcf4e8; --amber:#c97a12; --amber-s:#fbeed6; --red:#cf3a3a; --red-s:#fbe4e4;
+  --line:#dde6ec; --line2:#eef3f6; --shadow:0 20px 50px -28px rgba(15,60,80,.5); --shadow-sm:0 8px 24px -16px rgba(15,60,80,.4);
+  --rad:16px; --disp:'Plus Jakarta Sans',system-ui,sans-serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0b1219; --surface:#121c26; --surface2:#0f1822; --ink:#e8eef3; --ink2:#bcc9d4; --muted:#7e8e9d;
+  --brand:#3fb8c4; --brand-d:#63c9d3; --brand-soft:#103038;
+  --indigo:#8b95f0; --indigo-s:#1b1f3d; --violet:#b292f0; --violet-s:#241a3a;
+  --green:#4cc488; --green-s:#0f2e20; --amber:#e0a64e; --amber-s:#33260f; --red:#e87a7a; --red-s:#331818;
+  --line:#22303c; --line2:#172029; --shadow:0 24px 60px -30px rgba(0,0,0,.85); --shadow-sm:0 12px 30px -20px rgba(0,0,0,.65);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17.5px;line-height:1.68;
+  -webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--disp);line-height:1.18;margin:0;font-weight:700;letter-spacing:-.01em}
+a{color:var(--brand)}
+::selection{background:var(--brand);color:#fff}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:linear-gradient(90deg,var(--brand),var(--amber))}
+
+/* TOPBAR (mobile) */
+.top{position:fixed;top:0;left:0;right:0;height:58px;z-index:120;display:none;align-items:center;gap:12px;padding:0 18px;
+  background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top .mk{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-d));display:grid;place-items:center;color:#fff}
+.top b{font-family:var(--disp);font-size:15px}
+.burger{margin-left:auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer}
+
+/* LAYOUT: sidebar + content */
+.shell{display:flex;min-height:100vh}
+.side{width:288px;flex:0 0 auto;position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--line);padding:24px 16px 40px}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 10px 18px;cursor:pointer}
+.brand .mk{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-d));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--disp);font-size:18px;font-weight:800;line-height:1.05;display:block}
+.brand small{font-size:11.5px;color:var(--muted);font-weight:500}
+.side-g{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:18px 12px 8px;font-weight:700}
+.nav-link{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;color:var(--ink2);text-decoration:none;
+  cursor:pointer;transition:.15s;font-size:14.5px;font-weight:600}
+.nav-link svg{width:19px;height:19px;flex:0 0 auto;opacity:.8}
+.nav-link:hover{background:var(--brand-soft);color:var(--brand-d)}
+.nav-link.active{background:var(--brand);color:#fff}.nav-link.active svg{opacity:1}
+[data-theme="dark"] .nav-link.active{color:#08171c}
+.side-foot{margin-top:20px;padding:14px 12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.tbtn{width:100%;margin-top:10px;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);color:var(--ink2);cursor:pointer;font-family:var(--sans);font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
+
+.main{flex:1;min-width:0}
+.wrap{max-width:880px;margin:0 auto;padding:48px 40px 90px}
+.page{display:none;animation:fade .4s ease both}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(16px);transition:.55s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* headings */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--brand-d);background:var(--brand-soft);padding:6px 13px;border-radius:30px;margin-bottom:16px}
+.h1{font-size:clamp(1.9rem,4vw,2.7rem);font-weight:800;margin-bottom:.4em;letter-spacing:-.02em}
+.lead{font-size:clamp(1.08rem,2vw,1.28rem);color:var(--ink2);max-width:60ch;line-height:1.6}
+.h2{font-size:clamp(1.35rem,2.6vw,1.75rem);font-weight:700;margin:50px 0 6px}
+.h3{font-size:1.2rem;font-weight:700;margin:30px 0 6px}
+.sub{color:var(--muted);margin-bottom:20px;max-width:62ch}
+p{margin:0 0 16px}
+strong{font-weight:700;color:var(--ink)}
+
+/* legal ref (small) */
+.ref{display:inline-block;font-size:12px;color:var(--muted);font-style:italic;font-weight:500}
+.refline{font-size:12px;color:var(--muted);font-style:italic;margin-top:-6px;margin-bottom:18px}
+
+/* hero */
+.hero{position:relative;border-radius:22px;overflow:hidden;padding:clamp(32px,5vw,56px);color:#fff;box-shadow:var(--shadow);margin-bottom:24px}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(130deg,#0a5e69,#0e7d8a 50%,#2a6fa8)}
+.hero::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.5;background:radial-gradient(40% 50% at 84% 14%,rgba(201,122,18,.6),transparent 60%),radial-gradient(42% 46% at 6% 92%,rgba(31,157,99,.5),transparent 62%)}
+.hero .eyebrow{color:#fff;background:rgba(255,255,255,.16)}
+.hero h1{font-size:clamp(2rem,5vw,3.2rem);font-weight:800;max-width:18ch;margin-bottom:.35em}
+.hero p{font-size:clamp(1.05rem,2.1vw,1.28rem);max-width:52ch;color:rgba(255,255,255,.9)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 22px;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;border:0;font-family:var(--sans);transition:.2s}
+.btn-p{background:#fff;color:var(--brand-d)}.btn-p:hover{transform:translateY(-2px)}
+.btn-g{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.32)}.btn-g:hover{background:rgba(255,255,255,.24)}
+
+/* stat row */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:6px 0 8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+.stat b{font-family:var(--disp);font-size:1.7rem;font-weight:800;display:block;line-height:1;color:var(--brand-d)}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* cards */
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:22px;box-shadow:var(--shadow-sm);transition:.2s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.card .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:13px;background:var(--brand-soft);color:var(--brand-d)}
+.card h3{font-size:1.1rem;margin-bottom:7px}
+.card p{font-size:14.5px;color:var(--ink2);margin:0}
+
+/* callouts */
+.call{border-radius:14px;padding:18px 20px;margin:22px 0;display:flex;gap:14px;align-items:flex-start;border:1px solid}
+.call .ci{flex:0 0 auto;margin-top:1px}
+.call p{margin:0;font-size:15px}.call p+p{margin-top:8px}
+.call.info{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 26%,transparent)}.call.info .ci{color:var(--brand-d)}
+.call.warn{background:var(--amber-s);border-color:color-mix(in srgb,var(--amber) 34%,transparent)}.call.warn .ci{color:var(--amber)}
+.call.key{background:var(--green-s);border-color:color-mix(in srgb,var(--green) 30%,transparent)}.call.key .ci{color:var(--green)}
+.call.stop{background:var(--red-s);border-color:color-mix(in srgb,var(--red) 32%,transparent)}.call.stop .ci{color:var(--red)}
+
+/* table */
+.tbl-wrap{overflow-x:auto;margin:18px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--surface);border-radius:var(--rad);overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid var(--line)}
+.tbl th,.tbl td{padding:13px 15px;text-align:left;border-bottom:1px solid var(--line2);vertical-align:top}
+.tbl thead th{background:var(--surface2);font-family:var(--disp);font-size:13px;color:var(--ink)}
+.tbl td:first-child{font-weight:700}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--brand-d)}
+
+/* badges */
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:20px;margin:2px 3px 2px 0}
+.t-cap{background:var(--indigo-s);color:var(--indigo)} .t-bac{background:var(--brand-soft);color:var(--brand-d)}
+.t-reg{background:var(--green-s);color:var(--green)} .t-int{background:var(--amber-s);color:var(--amber)}
+
+/* actor / accordion */
+.acc{border:1px solid var(--line);border-radius:14px;margin-bottom:11px;background:var(--surface);overflow:hidden}
+.acc-h{padding:17px 20px;cursor:pointer;display:flex;align-items:center;gap:13px;font-weight:700;font-size:1.02rem}
+.acc-h .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-d);flex:0 0 auto}
+.acc-h .chev{margin-left:auto;transition:.3s;color:var(--muted)}
+.acc.open .chev{transform:rotate(180deg)}
+.acc-b{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.acc-b .in{padding:0 20px 20px 69px;font-size:14.8px;color:var(--ink2)}
+.acc-b .in b{color:var(--ink)}
+.acc-b .in .ref{display:block;margin-top:8px}
+
+/* timeline */
+.tl{position:relative;margin:24px 0;padding-left:38px}
+.tl::before{content:"";position:absolute;left:14px;top:6px;bottom:6px;width:2px;background:linear-gradient(var(--brand),var(--amber))}
+.tl-s{position:relative;margin-bottom:22px}
+.tl-s .n{position:absolute;left:-38px;top:0;width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:13px;font-weight:700;box-shadow:0 0 0 4px var(--bg)}
+.tl-s h4{font-size:1.08rem;margin-bottom:3px}
+.tl-s p{font-size:14.5px;color:var(--ink2);margin:0}
+.tl-s .who{display:inline-block;font-size:11.5px;font-weight:700;color:var(--brand-d);background:var(--brand-soft);padding:3px 10px;border-radius:14px;margin-top:6px}
+
+/* two col */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.box{border-radius:14px;padding:20px;border:1px solid var(--line);background:var(--surface)}
+.box.do{background:var(--green-s);border-color:color-mix(in srgb,var(--green) 28%,transparent)}
+.box.dont{background:var(--red-s);border-color:color-mix(in srgb,var(--red) 28%,transparent)}
+.box h4{font-size:1.05rem;margin-bottom:10px;display:flex;gap:8px;align-items:center}
+.box ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--ink2)} .box li{margin-bottom:7px}
+
+/* glossary */
+.gsearch{width:100%;max-width:420px;padding:13px 18px;border:1px solid var(--line);border-radius:30px;background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:15px;margin-bottom:20px}
+.gsearch:focus{outline:2px solid var(--brand);border-color:transparent}
+.gitem{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:11px;padding:14px 18px;margin-bottom:9px}
+.gitem h4{font-size:1.02rem;color:var(--brand-d);margin-bottom:2px}
+.gitem p{font-size:14px;color:var(--ink2);margin:0}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:54px;padding-top:24px;border-top:1px solid var(--line)}
+.pagenav a{flex:1;padding:16px 20px;border:1px solid var(--line);border-radius:13px;background:var(--surface);cursor:pointer;transition:.2s;text-decoration:none}
+.pagenav a:hover{border-color:var(--brand);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.07em}
+.pagenav b{display:block;font-family:var(--disp);font-size:1.02rem;margin-top:3px;color:var(--ink)}
+.pagenav .nx{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(8,16,22,.55);z-index:110;opacity:0;pointer-events:none;transition:.3s}
+.scrim.show{opacity:1;pointer-events:auto}
+
+@media(max-width:960px){
+  .top{display:flex}
+  .side{position:fixed;left:0;top:0;transform:translateX(-100%);transition:.32s;z-index:130;box-shadow:var(--shadow);padding-top:20px}
+  .side.open{transform:none}
+  .main{padding-top:58px}
+  .wrap{padding:32px 20px 70px}
+  .two{grid-template-columns:1fr}
+}
+@media(max-width:560px){ body{font-size:16.5px} .hero{padding:28px 22px} }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<header class="top">
+  <div class="mk"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+  <b>Guide des PFMP</b>
+  <button class="burger" id="burger"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="side" id="side">
+    <div class="brand" data-go="accueil">
+      <div class="mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+      <div><b>Guide des PFMP</b><small>Périodes de formation en milieu pro</small></div>
+    </div>
+    <div class="side-g">Comprendre</div>
+    <a class="nav-link" data-go="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg> Vue d'ensemble</a>
+    <a class="nav-link" data-go="cadre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg> Cadre &amp; durées</a>
+    <a class="nav-link" data-go="convention"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg> La convention</a>
+    <div class="side-g">Faire fonctionner</div>
+    <a class="nav-link" data-go="acteurs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg> Les acteurs</a>
+    <a class="nav-link" data-go="procedure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> La procédure</a>
+    <a class="nav-link" data-go="visite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg> Visite &amp; évaluation</a>
+    <a class="nav-link" data-go="bde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 9h.01M9 13h.01M9 17h.01M15 9h.01M15 13h.01"/></svg> Bureau des entreprises</a>
+    <div class="side-g">Argent &amp; cas concrets</div>
+    <a class="nav-link" data-go="allocation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9.5a3 3 0 0 0-3-2c-1.7 0-3 1-3 2.3 0 3 6 1.7 6 4.7 0 1.3-1.3 2.3-3 2.3a3 3 0 0 1-3-2M12 6v1.5M12 16.5V18"/></svg> L'allocation</a>
+    <a class="nav-link" data-go="cas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 8v5M12 16h.01"/></svg> Cas particuliers &amp; FAQ</a>
+    <div class="side-g">Référence</div>
+    <a class="nav-link" data-go="glossaire"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/></svg> Glossaire &amp; textes</a>
+    <button class="tbtn" id="theme"><svg id="ti" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg> Mode sombre</button>
+    <div class="side-foot">Guide d'information à destination des enseignants. Les références réglementaires sont indiquées en petit, en italique.</div>
+  </aside>
+
+  <main class="main">
+  <div class="wrap">
+
+  <!-- ============ ACCUEIL ============ -->
+  <section class="page active" id="accueil">
+    <div class="hero reveal">
+      <div class="eyebrow">Tout savoir, simplement</div>
+      <h1>Les PFMP, de A à Z</h1>
+      <p>Durées, convention, acteurs, allocation, absences, textes officiels : le guide complet pour que toute personne qui encadre une période de formation en milieu professionnel sache exactement comment ça marche.</p>
+      <div class="cta">
+        <button class="btn btn-p" data-go="cadre">Commencer
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <button class="btn btn-g" data-go="allocation">Voir l'allocation</button>
+      </div>
+    </div>
+
+    <p class="lead reveal">La <strong>PFMP</strong> (période de formation en milieu professionnel) est le temps que l'élève de la voie professionnelle passe en entreprise, <strong>sous statut scolaire</strong>, pour acquérir des compétences et préparer son diplôme. <span class="ref">Art. L124-1 du Code de l'éducation</span></p>
+
+    <div class="stats reveal">
+      <div class="stat"><b>12-14</b><span>semaines en CAP (cycle 2 ans)</span></div>
+      <div class="stat"><b>~18-22</b><span>semaines en bac pro (3 ans)*</span></div>
+      <div class="stat"><b>50-100€</b><span>d'allocation / semaine (État)</span></div>
+      <div class="stat"><b>≤ 16</b><span>élèves par enseignant référent</span></div>
+    </div>
+    <p class="refline reveal">*Durée fixée par l'arrêté de chaque spécialité ; en évolution depuis la réforme du lycée pro (2023). Voir « Cadre &amp; durées ».</p>
+
+    <h2 class="h2 reveal">Les 5 choses à retenir</h2>
+    <div class="grid g2">
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></div><h3>L'élève reste élève</h3><p>Statut scolaire, pas salarié. Il ne peut être rémunéré par l'entreprise, mais perçoit une allocation de l'État. <span class="ref">Conv.-type, art. 4-5</span></p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><h3>Pas de convention, pas de départ</h3><p>Toute PFMP exige une <strong>convention tripartite</strong> signée par toutes les parties. C'est la règle d'or. <span class="ref">Art. L124-1</span></p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9.5A3 3 0 0 1 12 7.5M12 16.5V18M12 6v1.5"/></svg></div><h3>Une allocation de l'État</h3><p>50 à 100 €/semaine selon l'année, versée par l'ASP, pour chaque jour de PFMP réellement effectué. <span class="ref">Décret n° 2023-765</span></p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><h3>Un enseignant référent par élève</h3><p>Il suit l'élève, fait la visite et l'évaluation. Maximum 16 élèves à la fois. <span class="ref">Art. D124-3</span></p></div>
+      <div class="card reveal" style="grid-column:1/-1"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></div><h3>Tout passe par l'établissement</h3><p>Le chef d'établissement est responsable : il signe la convention, assure l'élève, et attribue l'allocation. La PFMP s'organise à partir de la <strong>convention-type approuvée par le conseil d'administration</strong> de l'établissement.</p></div>
+    </div>
+
+    <div class="pagenav"><span></span><a class="nx" data-go="cadre"><small>Étape 1 →</small><b>Cadre &amp; durées</b></a></div>
+  </section>
+
+  <!-- ============ CADRE ============ -->
+  <section class="page" id="cadre">
+    <div class="eyebrow reveal">Le socle</div>
+    <h1 class="h1 reveal">Cadre, statut &amp; durées</h1>
+    <p class="lead reveal">Ce qu'est une PFMP, le statut de l'élève, et — le point le plus consulté — combien de semaines, à quel niveau.</p>
+
+    <h2 class="h2 reveal">Définition &amp; objectifs</h2>
+    <p class="reveal">Les PFMP « correspondent à des périodes temporaires de mise en situation en milieu professionnel au cours desquelles l'élève acquiert des compétences professionnelles et met en œuvre les acquis de sa formation, en vue de l'obtention d'un diplôme et de favoriser son insertion professionnelle ».</p>
+    <p class="refline reveal">Art. L124-1 du Code de l'éducation — repris par la circulaire n° 2016-053 du 29 mars 2016.</p>
+    <p class="reveal">Elles sont <strong>obligatoires</strong> dans les formations sous statut scolaire conduisant à un diplôme professionnel : <span class="tag t-cap">CAP / CAPa</span> <span class="tag t-bac">Baccalauréat professionnel</span> (ainsi que BMA, certificats de spécialisation, FCIL…).</p>
+
+    <h2 class="h2 reveal">Le statut de l'élève</h2>
+    <div class="grid g2">
+      <div class="card reveal"><h3>Sous statut scolaire</h3><p>L'élève demeure élève pendant toute la PFMP et reste sous la responsabilité du chef d'établissement. Il n'est <strong>ni apprenti, ni salarié</strong>, et n'est pas compté dans l'effectif de l'entreprise. <span class="ref">Conv.-type, art. 4</span></p></div>
+      <div class="card reveal"><h3>Pas de rémunération d'entreprise</h3><p>L'entreprise ne le rémunère pas. Une <strong>gratification</strong> n'est obligatoire qu'au-delà de 2 mois dans le même organisme. En revanche l'<strong>État verse une allocation</strong> (voir page dédiée). <span class="ref">Art. L124-6</span></p></div>
+    </div>
+
+    <h2 class="h2 reveal">Les durées — le point clé</h2>
+    <div class="call warn reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h16.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg></div><p><strong>La durée exacte est fixée par l'arrêté de chaque spécialité.</strong> Depuis la réforme du lycée professionnel (2023), le bac pro évolue (arrêtés de 2024-2026), notamment en terminale. Les valeurs ci-dessous sont les repères courants ; <strong>vérifiez toujours le référentiel et le règlement d'examen de la spécialité</strong>.</p></div>
+
+    <div class="tbl-wrap reveal">
+      <table class="tbl">
+        <thead><tr><th>Diplôme</th><th>Durée totale (cycle)</th><th>Répartition indicative</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag t-cap">CAP</span></td><td><strong>12 à 14 semaines</strong> (cycle 2 ans) — 5 sem. minimum si CAP en 1 an</td><td>≈ 6-7 sem. en 1<sup>re</sup> année · 6-7 sem. en 2<sup>e</sup> année</td></tr>
+          <tr><td><span class="tag t-bac">Bac pro</span></td><td><strong>≈ 18 à 22 semaines</strong> sur les 3 ans (selon la spécialité)</td><td>2<sup>de</sup> ≈ 4-6 sem. · 1<sup>re</sup> ≈ 6-8 sem. · Terminale ≈ 6-8 sem.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="refline reveal">Arrêtés du 21 novembre 2018 (CAP et bac pro), modifiés. La durée du bac pro a été ajustée par la réforme : selon les textes, on cite 16 à 20 semaines « obligatoires pour l'examen » + des semaines dédiées en terminale au titre du parcours différencié (insertion ou poursuite d'études). Donnée à confirmer dans l'arrêté en vigueur de la spécialité.</p>
+
+    <div class="call key reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><p><strong>Réforme du lycée pro (2023) — la terminale :</strong> en terminale, un <strong>parcours différencié</strong> est proposé en fin d'année (après les épreuves) : préparer son <strong>insertion professionnelle</strong> (semaines de PFMP supplémentaires, gratifiées par l'allocation) ou une <strong>poursuite d'études</strong>.</p></div>
+
+    <h2 class="h2 reveal">Périodes &amp; calendrier</h2>
+    <ul class="reveal" style="color:var(--ink2);font-size:15.5px">
+      <li>Chaque <strong>période ne peut être inférieure à 3 semaines</strong> (bac pro). <span class="ref">Note de service 2019-023</span></li>
+      <li>La répartition relève de l'<strong>autonomie de l'établissement</strong>, sous la coordination du DDFPT, dans le respect de la durée totale du cycle.</li>
+      <li>Une <strong>semaine de préparation</strong> à la première PFMP est prévue pour tous les entrants en 2<sup>de</sup> pro / CAP. <span class="ref">Circulaire 2016-055</span></li>
+      <li>En terminale, les PFMP obligatoires pour l'examen se déroulent <strong>avant les épreuves ponctuelles</strong> d'enseignement général.</li>
+    </ul>
+
+    <h2 class="h2 reveal">Lien avec l'examen &amp; évaluation</h2>
+    <p class="reveal">La durée de PFMP fixée par l'arrêté de spécialité est <strong>obligatoire pour se présenter à l'examen</strong>. En cas de durée insuffisante (maladie, interruption…), l'établissement propose une <strong>modalité alternative de validation</strong> ou un report ; le règlement d'examen de la spécialité fixe les conséquences précises. <span class="ref">Conv.-type, art. 17</span></p>
+    <p class="reveal">L'évaluation s'appuie sur le <strong>contrôle en cours de formation (CCF)</strong> conduit par l'enseignant de spécialité, avec la participation du tuteur. <strong>Aucune évaluation certificative</strong> n'est organisée en 2<sup>de</sup> pro ou en 1<sup>re</sup> année de CAP. À l'issue de chaque période, l'entreprise délivre une <strong>attestation de PFMP</strong> mentionnant la durée effective. <span class="ref">Circ. 2016-053 §3.5 · Art. D124-9</span></p>
+
+    <div class="pagenav"><a data-go="accueil"><small>← Précédent</small><b>Vue d'ensemble</b></a><a class="nx" data-go="convention"><small>Suivant →</small><b>La convention</b></a></div>
+  </section>
+
+  <!-- ============ CONVENTION ============ -->
+  <section class="page" id="convention">
+    <div class="eyebrow reveal">Le document fondateur</div>
+    <h1 class="h1 reveal">La convention de PFMP</h1>
+    <p class="lead reveal">Sans elle, rien n'est possible — ni le départ, ni l'assurance, ni l'allocation. Voici qui la signe, ce qu'elle contient, et le rôle de la convention-type de l'établissement.</p>
+
+    <div class="call stop reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div><p><strong>Règle d'or :</strong> un élève ne part en PFMP que si la convention est <strong>complète et signée par toutes les parties</strong>. Une convention manquante, c'est aussi pas d'assurance et pas d'allocation.</p></div>
+
+    <h2 class="h2 reveal">Qui signe la convention&nbsp;?</h2>
+    <p class="sub reveal">Une convention <strong>tripartite</strong> (établissement – entreprise – élève), signée par cinq acteurs. <span class="ref">Conv.-type, art. 3</span></p>
+    <div class="grid g3 reveal">
+      <div class="card"><h3 style="font-size:1rem">1 · L'entreprise</h3><p>Le représentant de l'organisme d'accueil.</p></div>
+      <div class="card"><h3 style="font-size:1rem">2 · Le tuteur</h3><p>Le tuteur désigné dans l'entreprise.</p></div>
+      <div class="card"><h3 style="font-size:1rem">3 · L'élève</h3><p>L'élève s'il est majeur, sinon <strong>son représentant légal</strong>.</p></div>
+      <div class="card"><h3 style="font-size:1rem">4 · L'enseignant référent</h3><p>Sa signature ne l'engage que pour le volet pédagogique.</p></div>
+      <div class="card"><h3 style="font-size:1rem">5 · Le chef d'établissement</h3><p>Il signe en dernier et engage l'établissement.</p></div>
+    </div>
+
+    <h2 class="h2 reveal">Ce qu'elle contient — et ses 4 annexes</h2>
+    <p class="reveal">La convention regroupe les dispositions générales (statut, durée et horaires, santé-sécurité, travaux des mineurs, accidents, assurance, suspension/résiliation, attestation…) et quatre annexes :</p>
+    <div class="grid g2 reveal">
+      <div class="card"><h3 style="font-size:1.05rem">Annexe pédagogique</h3><p>Objectifs, compétences/activités confiées, modalités d'encadrement, de suivi et d'évaluation, travaux soumis à dérogation.</p></div>
+      <div class="card"><h3 style="font-size:1.05rem">Annexe financière</h3><p>Prise en charge des frais (restauration, transport, hébergement), gratification éventuelle, assurances. <span class="ref">Note de service 93-179</span></p></div>
+      <div class="card"><h3 style="font-size:1.05rem">Attestation de PFMP</h3><p>Modèle remis à l'élève et à l'établissement, mentionnant la durée effective. <span class="ref">Art. D124-9</span></p></div>
+      <div class="card"><h3 style="font-size:1.05rem">Évaluation de la qualité d'accueil</h3><p>Remplie par l'élève en fin de période ; sans incidence sur sa note ou son diplôme. <span class="ref">Art. L124-4</span></p></div>
+    </div>
+
+    <h2 class="h2 reveal">Convention-type &amp; convention de l'établissement</h2>
+    <div class="call info reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div><p>Il existe une <strong>convention-type nationale</strong> (annexée à la circulaire 2016-053). Le <strong>conseil d'administration de l'établissement approuve cette convention-type</strong> et autorise le chef d'établissement à conclure toute convention conforme à ce modèle. Concrètement, l'établissement décline ce modèle (souvent saisi dans Pronote) : ce n'est pas un document réécrit librement, mais la convention-type approuvée en CA.</p></div>
+
+    <div class="call key reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><p><strong>Élève mineur :</strong> c'est le <strong>représentant légal</strong> qui signe. Des règles de protection s'appliquent et ne sont pas négociables (voir « Cas particuliers » : durée du travail, repos, travail de nuit interdit).</p></div>
+
+    <div class="pagenav"><a data-go="cadre"><small>← Précédent</small><b>Cadre &amp; durées</b></a><a class="nx" data-go="acteurs"><small>Suivant →</small><b>Les acteurs</b></a></div>
+  </section>
+
+  <!-- ============ ACTEURS ============ -->
+  <section class="page" id="acteurs">
+    <div class="eyebrow reveal">Qui fait quoi</div>
+    <h1 class="h1 reveal">Les acteurs de la PFMP</h1>
+    <p class="lead reveal">Sept rôles, à ne pas confondre. <strong>Cliquez</strong> sur chacun pour le détail.</p>
+
+    <div class="reveal" style="margin-top:22px">
+      <div class="acc"><div class="acc-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg></span>L'élève / stagiaire<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Acteur de la recherche de son lieu de stage. Il respecte le règlement et les consignes de sécurité de l'entreprise, est tenu au secret professionnel, et signale à son référent toute situation de discrimination ou de harcèlement. En fin de période, il remplit la fiche d'évaluation de la qualité de l'accueil. En cas d'absence, il prévient <strong>immédiatement l'entreprise ET le lycée</strong>.<span class="ref">Conv.-type art. 5 · Art. L124-4</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></span>Le tuteur en entreprise<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Désigné par l'entreprise, il accueille, informe, suit et conseille l'élève, lui confie les activités prévues à la convention, et veille à son intégration et à sa sécurité. Il <strong>participe à l'évaluation</strong> (formative et certificative), avec l'enseignant référent et en présence de l'élève, et signale au référent toute difficulté (absences, retards…).<span class="ref">Circ. 2016-053 §3.1</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--indigo-s);color:var(--indigo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5zM6 12v5c3 3 9 3 12 0v-5"/></svg></span>L'enseignant référent — le pivot du suivi<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Désigné <strong>pour chaque élève et chaque période</strong> (la charge est répartie entre les enseignants de la division). Il fixe avec le tuteur les activités, signe le volet pédagogique de la convention, assure le <strong>suivi et les visites</strong>, et conduit l'évaluation formative avec le tuteur. Un référent ne peut suivre <strong>plus de 16 élèves</strong> en même temps.<span class="ref">Art. L124-2, D124-3 · Circ. 2016-053 §3.3</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg></span>Le professeur principal<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><strong>Rôle de coordination</strong> (organisation interne — non défini par la réglementation PFMP). Il suit l'avancée de la classe, <strong>repère les élèves sans stage</strong> et alerte, fait circuler l'information avec les familles, et transmet en début d'année au DDFPT la liste des référents. <strong>Attention :</strong> le professeur principal n'est pas, par défaut, l'enseignant référent de ses élèves.<span class="ref">Organisation interne</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></span>Le DDFPT (ex « chef de travaux »)<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Directeur délégué aux formations professionnelles et technologiques. Il <strong>coordonne</strong>, sous l'autorité du chef d'établissement : la recherche des lieux d'accueil, le calendrier des périodes, le conventionnement, le suivi des situations difficiles. Il fait signer les conventions par le chef d'établissement, organise les copies et l'archivage. Il <strong>n'est pas</strong> l'autorité de signature.<span class="ref">Circ. 2016-053 §3.2 · BOEN n°37 du 13/10/2016</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--violet-s);color:var(--violet)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 9h.01M9 13h.01"/></svg></span>Le bureau des entreprises (BDE)<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Créé dans chaque lycée pro par la <strong>réforme de 2023</strong>. Il aide à trouver des lieux d'accueil, entretient le lien avec les entreprises, suit les conventions, et <strong>gère les démarches liées à l'allocation</strong> (récupère et vérifie l'attestation, demande le paiement).<span class="ref">Réforme du LP 2023</span><br><a data-go="bde" style="display:inline-block;margin-top:8px;font-weight:600">→ Voir la page dédiée « Le bureau des entreprises »</a></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--green-s);color:var(--green)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>Le chef d'établissement<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><strong>Responsable de l'ensemble.</strong> Il signe toutes les conventions, désigne les référents, contracte l'<strong>assurance responsabilité civile</strong> de l'élève, établit l'ordre de mission pour chaque visite, et — pour l'allocation — agit comme <strong>ordonnateur</strong> : il attribue l'allocation et valide le service fait. L'élève reste sous sa responsabilité durant toute la PFMP.<span class="ref">Circ. 2016-053 §3.1 · Décret 2023-765</span></div></div></div>
+    </div>
+
+    <h2 class="h2 reveal">En un coup d'œil</h2>
+    <div class="tbl-wrap reveal">
+      <table class="tbl">
+        <thead><tr><th>Besoin</th><th>Le bon interlocuteur</th></tr></thead>
+        <tbody>
+          <tr><td>Suivi pédagogique d'un élève, visite, évaluation</td><td>Enseignant référent</td></tr>
+          <tr><td>Élève sans stage, coordination de la classe</td><td>Professeur principal</td></tr>
+          <tr><td>Organisation générale, calendrier, conventionnement</td><td>DDFPT</td></tr>
+          <tr><td>Recherche d'entreprises, allocation</td><td>Bureau des entreprises</td></tr>
+          <tr><td>Signature, assurance, responsabilité</td><td>Chef d'établissement</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagenav"><a data-go="convention"><small>← Précédent</small><b>La convention</b></a><a class="nx" data-go="procedure"><small>Suivant →</small><b>La procédure</b></a></div>
+  </section>
+
+  <!-- ============ PROCEDURE ============ -->
+  <section class="page" id="procedure">
+    <div class="eyebrow reveal">Pas à pas</div>
+    <h1 class="h1 reveal">La procédure, de la recherche à l'attestation</h1>
+    <p class="lead reveal">Le circuit complet. La trame pédagogique (recherche, suivi, exploitation) est réglementaire ; le circuit administratif détaillé relève de l'organisation de chaque établissement.</p>
+
+    <div class="tl reveal">
+      <div class="tl-s"><div class="n">1</div><h4>Recherche du lieu</h4><p>Sous la responsabilité de l'équipe, coordonnée par le DDFPT ; l'élève est acteur, accompagné par ses enseignants.</p><span class="who">Élève · équipe · DDFPT · BDE</span></div>
+      <div class="tl-s"><div class="n">2</div><h4>Pré-convention</h4><p>Remise à l'élève, remplie avec son aide. On vérifie : entreprise, dates, tuteur, horaires, cohérence des activités avec la formation.</p><span class="who">Référent · prof principal</span></div>
+      <div class="tl-s"><div class="n">3</div><h4>Création de la convention</h4><p>Saisie (souvent dans Pronote) à partir de la pré-convention, puis impression avec l'attestation à la suite.</p><span class="who">Référent · DDFPT</span></div>
+      <div class="tl-s"><div class="n">4</div><h4>Signatures</h4><p>Élève (ou représentant légal), enseignant référent, entreprise et tuteur — puis transmission au bureau des entreprises.</p><span class="who">Toutes les parties</span></div>
+      <div class="tl-s"><div class="n">5</div><h4>Signature du chef d'établissement</h4><p>Il signe <strong>en dernier</strong>, après vérification du dossier. La convention est alors complète.</p><span class="who">Chef d'établissement</span></div>
+      <div class="tl-s"><div class="n">6</div><h4>Copies &amp; transmission</h4><p>Une copie aux parents, une à l'entreprise (avec l'attestation). Vérification finale avant le départ.</p><span class="who">DDFPT · prof principal · BDE</span></div>
+      <div class="tl-s"><div class="n">7</div><h4>Départ en PFMP</h4><p>Uniquement si la convention est complète et signée par toutes les parties (règle d'or).</p><span class="who">Élève</span></div>
+      <div class="tl-s"><div class="n">8</div><h4>Visite de suivi &amp; d'évaluation</h4><p>L'enseignant référent contacte le tuteur en début de période, puis conduit le bilan et l'évaluation formative.</p><span class="who">Enseignant référent</span></div>
+      <div class="tl-s"><div class="n">9</div><h4>Attestation &amp; allocation</h4><p>L'entreprise remplit l'attestation (durée réelle). Le bureau des entreprises la vérifie et déclenche le paiement de l'allocation. Archivage.</p><span class="who">Entreprise · BDE · chef d'établissement</span></div>
+    </div>
+
+    <div class="call info reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div><p><strong>Élève sans lieu de stage :</strong> il est accueilli et encadré dans l'établissement (activités pédagogiques) ; sa situation est suivie par le professeur principal et le DDFPT jusqu'à ce qu'une solution soit trouvée.</p></div>
+
+    <div class="pagenav"><a data-go="acteurs"><small>← Précédent</small><b>Les acteurs</b></a><a class="nx" data-go="visite"><small>Suivant →</small><b>Visite &amp; évaluation</b></a></div>
+  </section>
+
+  <!-- ============ VISITE ============ -->
+  <section class="page" id="visite">
+    <div class="eyebrow reveal">Le suivi en entreprise</div>
+    <h1 class="h1 reveal">La visite &amp; l'évaluation</h1>
+    <p class="lead reveal">Le cœur du rôle de l'enseignant référent pendant la période.</p>
+
+    <h2 class="h2 reveal">La visite de stage</h2>
+    <div class="grid g3 reveal">
+      <div class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></div><h3>Quand</h3><p>Une prise de contact en <strong>première partie de la période</strong> (souvent dès la 1<sup>re</sup> semaine), puis un suivi régulier. <span class="ref">Conv.-type art. 18</span></p></div>
+      <div class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>Par qui</h3><p>L'<strong>enseignant référent</strong>, muni d'un <strong>ordre de mission</strong> établi par le chef d'établissement. Sur site ou à distance.</p></div>
+      <div class="card"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div><h3>Pour quoi</h3><p>Vérifier le bon déroulement et l'assiduité, recadrer les objectifs, et conduire le <strong>bilan / l'évaluation</strong> avec le tuteur et l'élève.</p></div>
+    </div>
+
+    <h2 class="h2 reveal">Évaluation : formative vs certificative</h2>
+    <div class="two reveal">
+      <div class="box"><h4>Évaluation formative</h4><p style="margin:0;font-size:14.5px;color:var(--ink2)">Conduite pour <strong>toutes les séquences</strong> de stage, sous forme de bilan avec le tuteur et l'élève. Elle ne « compte » pas pour le diplôme, mais guide les progrès.</p></div>
+      <div class="box"><h4>Évaluation certificative (CCF)</h4><p style="margin:0;font-size:14.5px;color:var(--ink2)">Quand une situation d'évaluation est organisée en entreprise, elle est assurée par l'<strong>enseignant de spécialité</strong>, avec le tuteur. <strong>Jamais</strong> en 2<sup>de</sup> pro ni en 1<sup>re</sup> année de CAP.</p></div>
+    </div>
+    <p class="refline reveal">Circulaire n° 2016-053 du 29 mars 2016, §3.4 et §3.5.</p>
+
+    <div class="call key reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><p><strong>Au retour :</strong> une <strong>exploitation pédagogique</strong> est organisée dans l'établissement (restitution orale, questionnaire d'explicitation…). C'est un temps réflexif, formateur en soi.</p></div>
+
+    <div class="pagenav"><a data-go="procedure"><small>← Précédent</small><b>La procédure</b></a><a class="nx" data-go="bde"><small>Suivant →</small><b>Le bureau des entreprises</b></a></div>
+  </section>
+
+  <!-- ============ BDE ============ -->
+  <section class="page" id="bde">
+    <div class="eyebrow reveal">Réforme du lycée professionnel · 2023</div>
+    <h1 class="h1 reveal">Le bureau des entreprises</h1>
+    <p class="lead reveal">Depuis la rentrée 2023, chaque lycée professionnel dispose d'un <strong>bureau des entreprises</strong> : le point d'entrée du lycée pour le monde économique, et un appui décisif pour organiser les PFMP.</p>
+    <p class="refline reveal">Circulaire du 24 mai 2023 (BO n° 21 du 25 mai 2023) — NOR : MENE2311700C.</p>
+
+    <div class="call info reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div><p>Installé dans le cadre de la réforme des lycées professionnels, il vise à <strong>renforcer les liens avec le monde économique</strong> au bénéfice des élèves, des apprentis et des stagiaires. Ses actions servent l'attractivité des formations, la réussite des parcours, l'insertion professionnelle et l'adaptation des formations aux besoins du territoire.</p></div>
+
+    <h2 class="h2 reveal">Où il se situe dans l'établissement</h2>
+    <div class="grid g3">
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></div><h3>Sous l'autorité du proviseur</h3><p>Le bureau des entreprises est placé sous la responsabilité du chef d'établissement.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg></div><h3>Coordonné par le DDFPT</h3><p>Le directeur délégué aux formations pro coordonne son action, en cohérence avec l'organisation des PFMP.</p></div>
+      <div class="card reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a7 7 0 0 1 13 0"/></svg></div><h3>Animé par un responsable dédié</h3><p>Un responsable (RBDE) garant d'une activité sur toute la semaine, pleinement dédié à cette mission.</p></div>
+    </div>
+
+    <h2 class="h2 reveal">Ses trois axes de mission</h2>
+    <p class="sub reveal">Le contenu officiel de la circulaire. Les éléments en lien direct avec les PFMP sont signalés.</p>
+
+    <div class="acc-wrap reveal">
+      <div class="acc open"><div class="acc-h"><span class="ic" style="background:var(--indigo-s);color:var(--indigo)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></span>Axe 1 — Développer des partenariats sur le territoire<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b" style="max-height:400px"><div class="in"><ul style="margin:0;padding-left:18px"><li>Recherche, formalisation et suivi des <strong>partenariats</strong> avec les acteurs économiques.</li><li>Organisation d'<strong>événements</strong> (forums des métiers, réception des tuteurs, remise des diplômes, tutorat, projets pédagogiques communs…).</li><li>Contribution à l'évolution de la <strong>carte des formations</strong> en recensant les besoins des partenaires.</li><li>Participation à la collecte du <strong>solde de la taxe d'apprentissage</strong>.</li></ul></div></div></div>
+
+      <div class="acc open"><div class="acc-h"><span class="ic" style="background:var(--violet-s);color:var(--violet)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5zM6 12v5c3 3 9 3 12 0v-5"/></svg></span>Axe 2 — Faire vivre la relation école/entreprise dans les parcours<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b" style="max-height:400px"><div class="in"><ul style="margin:0;padding-left:18px"><li><span class="tag t-bac">PFMP</span> Appui à la <strong>préparation des temps de formation en milieu professionnel</strong>.</li><li><span class="tag t-bac">PFMP</span> Appui à la <strong>valorisation pédagogique des compétences</strong> acquises (documents de suivi, livrets d'alternance).</li><li>Appui à l'<strong>insertion professionnelle des élèves de terminale</strong>, aux côtés des conseillers France Travail.</li><li>Suivi de l'insertion des sortants ; développement du sentiment d'appartenance et d'un <strong>réseau d'anciens élèves</strong> (« les élèves d'aujourd'hui sont les tuteurs de demain »).</li></ul></div></div></div>
+
+      <div class="acc open"><div class="acc-h"><span class="ic" style="background:var(--brand-soft);color:var(--brand-d)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>Axe 3 — Organiser les temps de formation en milieu professionnel<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b" style="max-height:440px"><div class="in"><p style="margin:0 0 8px;font-weight:600;color:var(--ink)">C'est l'axe le plus directement lié aux PFMP :</p><ul style="margin:0;padding-left:18px"><li>Recensement, actualisation et <strong>suivi de la qualité des sites d'accueil</strong>.</li><li>Communication auprès des entreprises (réglementation, documents de suivi et d'accompagnement).</li><li>Appui aux élèves dans la <strong>recherche des lieux d'accueil</strong>, en concertation avec l'équipe pédagogique.</li><li>Appui à l'organisation du suivi : <strong>convention, professeur référent, lien avec le tuteur, visites</strong>.</li><li><strong>Suivi des allocations de PFMP</strong>.</li><li>Soutien à la <strong>mobilité européenne et internationale</strong>.</li></ul></div></div></div>
+    </div>
+
+    <div class="call key reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div><p><strong>Pourquoi c'est pertinent pour les PFMP.</strong> Le bureau des entreprises <strong>professionnalise et sécurise</strong> tout ce qui entoure la PFMP : il constitue et entretient un <strong>vivier d'entreprises de qualité</strong>, épaule les élèves dans leur recherche, fluidifie le <strong>conventionnement</strong> et le suivi, et <strong>gère les démarches de l'allocation</strong>. Concrètement, il <strong>décharge les enseignants</strong> d'une partie de la logistique pour qu'ils se concentrent sur l'accompagnement pédagogique.</p></div>
+
+    <h2 class="h2 reveal">Qui l'anime, et comment le repérer</h2>
+    <div class="grid g2">
+      <div class="card reveal"><h3>Le responsable (RBDE)</h3><p>Poste pouvant être pourvu en interne (toute catégorie de personnels : enseignants, administratifs…) ou par <strong>recrutement externe</strong> (chambres consulaires, fédérations professionnelles, OPCO, entreprises, agences d'intérim…). Il met en œuvre les missions et en coordonne les activités.</p></div>
+      <div class="card reveal"><h3>Un lieu identifié</h3><p>Un <strong>espace physique</strong> visible et accessible (signalétique, horaires), une adresse dédiée (type <em>bde-LPxxx@ac-academie.fr</em>), valorisé sur le site du lycée. Le bureau et ses actions sont <strong>inscrits au projet d'établissement</strong>.</p></div>
+    </div>
+
+    <h2 class="h2 reveal">Les 8 attendus, en synthèse</h2>
+    <div class="tbl-wrap reveal">
+      <table class="tbl">
+        <tbody>
+          <tr><td class="num">1</td><td>Un lieu physique identifié et accessible dans le lycée</td></tr>
+          <tr><td class="num">2</td><td>Le point d'entrée du lycée pour chaque partenaire professionnel</td></tr>
+          <tr><td class="num">3</td><td>L'appui aux enseignants dans leurs interactions avec le monde professionnel</td></tr>
+          <tr><td class="num">4</td><td>Le facilitateur des actions conjointes lycée / milieu professionnel</td></tr>
+          <tr><td class="num">5</td><td>Un engagement pour des stages, PFMP et alternances de qualité</td></tr>
+          <tr><td class="num">6</td><td>Des actions école/entreprise intégrées au territoire et au réseau d'établissements</td></tr>
+          <tr><td class="num">7</td><td>Le développement du sentiment d'appartenance et d'un réseau d'anciens élèves</td></tr>
+          <tr><td class="num">8</td><td>Le suivi des réussites de parcours et d'insertion de chaque personne formée</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagenav"><a data-go="visite"><small>← Précédent</small><b>Visite &amp; évaluation</b></a><a class="nx" data-go="allocation"><small>Suivant →</small><b>L'allocation</b></a></div>
+  </section>
+
+  <!-- ============ ALLOCATION ============ -->
+  <section class="page" id="allocation">
+    <div class="eyebrow reveal">L'argent</div>
+    <h1 class="h1 reveal">L'allocation de l'État</h1>
+    <p class="lead reveal">Depuis la rentrée 2023, l'État verse une allocation aux lycéens de la voie professionnelle pour chaque jour de PFMP réellement effectué.</p>
+    <p class="refline reveal">Décret n° 2023-765 du 11 août 2023 et arrêté du 11 août 2023 (montants régulièrement actualisés).</p>
+
+    <div class="grid g3 reveal">
+      <div class="card"><div class="ic" style="background:var(--green-s);color:var(--green)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9.5A3 3 0 0 0 12 7.5M12 16.5V18M12 6v1.5"/></svg></div><h3>Qui paie</h3><p>L'<strong>État</strong>, via l'<strong>ASP</strong> (Agence de services et de paiement). L'établissement attribue, l'ASP verse.</p></div>
+      <div class="card"><div class="ic" style="background:var(--green-s);color:var(--green)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg></div><h3>Pour qui</h3><p>Les élèves <strong>sous statut scolaire</strong> en CAP / bac pro (et assimilés). <strong>Pas</strong> les apprentis ni les BTS.</p></div>
+      <div class="card"><div class="ic" style="background:var(--green-s);color:var(--green)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></div><h3>Combien</h3><p>Un <strong>forfait par jour</strong> effectué, dans la limite d'un plafond annuel. Les absences ne sont pas payées.</p></div>
+    </div>
+
+    <h2 class="h2 reveal">Les montants (Éducation nationale)</h2>
+    <div class="tbl-wrap reveal">
+      <table class="tbl">
+        <thead><tr><th>Niveau</th><th class="num">Par jour</th><th class="num">≈ Par semaine</th><th class="num">Plafond annuel</th></tr></thead>
+        <tbody>
+          <tr><td>CAP 1<sup>re</sup> année · 2<sup>de</sup> bac pro</td><td class="num">10 €</td><td class="num">50 €</td><td class="num">300-350 €</td></tr>
+          <tr><td>CAP 2<sup>e</sup> année · 1<sup>re</sup> bac pro</td><td class="num">15 €</td><td class="num">75 €</td><td class="num">525-600 €</td></tr>
+          <tr><td>Terminale bac pro</td><td class="num">20 €</td><td class="num">100 €</td><td class="num">≈ 1 000 €</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="refline reveal">Barème indicatif (fiche officielle de fin 2025). Le plafond de terminale a évolué chaque année (800 € → 1 200 € → 1 000 €). Des barèmes spécifiques existent pour l'agriculture, la mer, BMA, FCIL… Vérifiez la fiche en vigueur.</p>
+
+    <div class="call warn reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 8v5M12 16h.01"/></svg></div><p><strong>À ne pas confondre — gratification ≠ allocation.</strong> La <strong>gratification</strong> est versée par <em>l'entreprise</em>, uniquement si la PFMP dépasse <strong>2 mois</strong> dans le même organisme (15 % du plafond horaire de la Sécurité sociale) — rare en lycée pro. <span class="ref">Art. L124-6</span> L'<strong>allocation</strong> est versée par <em>l'État</em>, pour chaque semaine de PFMP, sans condition de durée. Les deux sont <strong>cumulables</strong>.</p></div>
+
+    <h2 class="h2 reveal">Comment elle est versée</h2>
+    <ul class="reveal" style="color:var(--ink2);font-size:15.5px">
+      <li>Gestion via l'application <strong>ApLyPro</strong> : dossiers pré-remplis, planning des PFMP, états liquidatifs.</li>
+      <li>Versement sur le compte de l'<strong>élève</strong> (avec autorisation du représentant légal si mineur) ou des parents ; compte en zone SEPA.</li>
+      <li>Versement <strong>à l'issue de chaque PFMP</strong>, sur la base des <strong>jours réellement effectués</strong> attestés. L'état liquidatif doit être édité dans les <strong>2 mois</strong>.</li>
+      <li>Allocation <strong>non imposable</strong>, incessible et insaisissable, sans impact sur les autres aides de la famille.</li>
+    </ul>
+    <p class="refline reveal">Décret n° 2023-765, art. 4 · Arrêté du 11 août 2023, art. 3-4 · FAQ allocation (DGESCO).</p>
+
+    <div class="pagenav"><a data-go="bde"><small>← Précédent</small><b>Le bureau des entreprises</b></a><a class="nx" data-go="cas"><small>Suivant →</small><b>Cas particuliers &amp; FAQ</b></a></div>
+  </section>
+
+  <!-- ============ CAS ============ -->
+  <section class="page" id="cas">
+    <div class="eyebrow reveal">Les situations réelles</div>
+    <h1 class="h1 reveal">Cas particuliers &amp; FAQ</h1>
+    <p class="lead reveal">Les questions que tout enseignant se pose. <strong>Cliquez</strong> pour la réponse.</p>
+
+    <div class="reveal" style="margin-top:22px">
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--red-s);color:var(--red)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Un élève est absent pendant la PFMP&nbsp;: que faire&nbsp;?<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">L'élève doit prévenir <strong>immédiatement l'entreprise ET le lycée</strong>. Les jours d'absence ne sont <strong>pas indemnisés</strong> (seuls les jours réellement effectués comptent) et peuvent devoir être <strong>récupérés</strong> : prolongation de la période, nouvelle PFMP (nouvelle convention), ou report. Si la durée totale devient insuffisante pour l'examen, l'établissement propose une modalité de validation alternative.<span class="ref">Arrêté 11 août 2023, art. 1 · Conv.-type art. 17</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>Un élève ne trouve pas de stage<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Il est <strong>accueilli et encadré dans l'établissement</strong> avec des activités pédagogiques, pendant que la recherche se poursuit (équipe, bureau des entreprises, DDFPT). Le professeur principal repère ces élèves tôt et alerte. L'objectif reste de trouver un lieu pour valider la durée réglementaire.</div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--red-s);color:var(--red)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></span>La PFMP est interrompue / l'élève abandonne<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Les <strong>jours réellement effectués restent dus</strong> (attestation de fin de stage). En cas d'interruption (maladie, accident, rupture à l'initiative de l'entreprise…), l'établissement propose un report de tout ou partie de la période, ou une modalité alternative de validation.<span class="ref">Conv.-type art. 17 · FAQ allocation</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span>Accident, assurance, responsabilité<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">L'élève bénéficie de la <strong>législation sur les accidents du travail</strong> pour les accidents liés à l'activité de l'entreprise ; en cas d'accident, le <strong>chef d'établissement</strong> établit la déclaration à la CPAM. Il contracte aussi l'<strong>assurance responsabilité civile</strong> de l'élève. Hors activité professionnelle, c'est l'assurance de la famille qui joue.<span class="ref">Code de la séc. sociale, art. D412-6 · Conv.-type</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--violet-s);color:var(--violet)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a7 7 0 0 1 13 0"/></svg></span>Élève en situation de handicap<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Le lieu (milieu ordinaire ou protégé : entreprise adaptée, ESAT) et les aménagements sont choisis <strong>en référence au PPS</strong> et formalisés dans la convention (annexe handicap). L'<strong>aide humaine (AESH)</strong> attribuée par la CDAPH peut intervenir pendant la PFMP — à mentionner dans la convention. L'enseignant référent propose la <strong>RQTH</strong> (dès 16 ans), qui facilite l'insertion.<span class="ref">Circ. 2016-186 · Art. L351-3 · Code du travail L5212-7</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--amber-s);color:var(--amber)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Travail des mineurs : horaires &amp; travaux interdits<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Pour un élève mineur : <strong>8 h/jour et 35 h/semaine maximum</strong> ; repos hebdomadaire de 2 jours consécutifs incluant le dimanche ; repos quotidien de 14 h (moins de 16 ans) ou 12 h (16-18 ans) ; <strong>travail de nuit interdit</strong>. Les <strong>travaux réglementés</strong> ne sont possibles, dès 15 ans, qu'après <strong>déclaration de dérogation</strong> de l'entreprise à l'inspection du travail, sous contrôle du tuteur, avec avis médical d'aptitude.<span class="ref">Conv.-type art. 8-13 · Code du travail R4153-38 et s.</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20"/></svg></span>PFMP à l'étranger<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in">Possible (et non obligatoire). Autorisation du chef d'établissement (et de la famille si mineur). L'élève est <strong>soumis à la législation du travail du pays d'accueil</strong> ; la couverture « accident du travail » française est maintenue pour les stages <strong>n'excédant pas 6 mois</strong>. Attestations Europass / Europro. L'allocation est due aux mêmes conditions.<span class="ref">Circ. 2003-203 · BO n°44 du 27/11/2003</span></div></div></div>
+
+      <div class="acc"><div class="acc-h"><span class="ic" style="background:var(--green-s);color:var(--green)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M15 9.5A3 3 0 0 0 12 7.5"/></svg></span>L'allocation : apprenti, redoublant, mineur…<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><strong>Apprentis et BTS : pas d'allocation</strong> (l'apprenti est salarié, le BTS est post-bac). <strong>Redoublants : éligibles.</strong> Un élève <strong>mineur</strong> peut percevoir sur son propre compte avec l'accord écrit du représentant légal (à recueillir chaque année). Une PFMP rattrapée l'année suivante est payée <strong>au tarif de l'année d'origine</strong>. Le cumul avec la gratification d'entreprise est autorisé.<span class="ref">FAQ allocation (DGESCO), oct.-déc. 2025</span></div></div></div>
+    </div>
+
+    <div class="pagenav"><a data-go="allocation"><small>← Précédent</small><b>L'allocation</b></a><a class="nx" data-go="glossaire"><small>Suivant →</small><b>Glossaire &amp; textes</b></a></div>
+  </section>
+
+  <!-- ============ GLOSSAIRE ============ -->
+  <section class="page" id="glossaire">
+    <div class="eyebrow reveal">Référence</div>
+    <h1 class="h1 reveal">Glossaire &amp; textes officiels</h1>
+    <p class="lead reveal" style="margin-bottom:20px">Tous les sigles, et les textes à citer. Tapez pour filtrer le glossaire.</p>
+    <input class="gsearch reveal" id="gs" placeholder="🔍  Rechercher (ex. PFMP, ASP, DDFPT, RQTH…)">
+    <div id="glist" class="reveal"></div>
+
+    <h2 class="h2 reveal">Les textes de référence</h2>
+    <div class="tbl-wrap reveal">
+      <table class="tbl">
+        <thead><tr><th>Texte</th><th>Objet</th></tr></thead>
+        <tbody>
+          <tr><td>Code de l'éducation, art. L124-1</td><td>Définition des PFMP, convention obligatoire</td></tr>
+          <tr><td>Art. L124-2 · D124-3</td><td>Enseignant référent ; maximum 16 élèves suivis</td></tr>
+          <tr><td>Art. L124-4</td><td>Évaluation de la qualité de l'accueil par l'élève</td></tr>
+          <tr><td>Art. L124-6 · D124-6 · D124-8</td><td>Gratification (seuil 2 mois, 15 % du plafond horaire SS)</td></tr>
+          <tr><td>Art. D124-9</td><td>Attestation de stage</td></tr>
+          <tr><td>Loi n° 2014-788 du 10 juillet 2014</td><td>Encadrement des stages et PFMP, statut du stagiaire</td></tr>
+          <tr><td>Circulaire n° 2016-053 du 29 mars 2016</td><td>Organisation et accompagnement des PFMP (+ convention-type, annexe handicap)</td></tr>
+          <tr><td>Circulaire n° 2016-055 du 29 mars 2016</td><td>Réussir l'entrée au lycée professionnel</td></tr>
+          <tr><td>Arrêtés du 21 novembre 2018 (modifiés)</td><td>Organisation CAP et bac pro, durées de PFMP</td></tr>
+          <tr><td>Décret n° 2023-765 &amp; arrêté du 11 août 2023</td><td>Allocation de l'État aux lycéens pro</td></tr>
+          <tr><td>Circulaire n° 2016-186 du 30 novembre 2016</td><td>Formation et insertion des élèves en situation de handicap</td></tr>
+          <tr><td>Circulaire n° 2003-203 du 17 novembre 2003</td><td>PFMP à l'étranger (convention-type)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="call info reveal"><div class="ci"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></div><p>Ce guide synthétise des sources officielles à des fins d'information. Pour une décision sur une situation précise, référez-vous au <strong>référentiel et au règlement d'examen de la spécialité</strong>, aux textes en vigueur sur Légifrance, et au DDFPT de votre établissement. Les montants de l'allocation et certaines durées du bac pro sont susceptibles d'évoluer.</p></div>
+
+    <div class="pagenav"><a data-go="cas"><small>← Précédent</small><b>Cas particuliers &amp; FAQ</b></a><a class="nx" data-go="accueil"><small>Retour →</small><b>Vue d'ensemble</b></a></div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')], links=[...document.querySelectorAll('.nav-link')];
+function go(id){
+  const pg=document.getElementById(id); if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active')); pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);
+  document.querySelector('.main').scrollIntoView({block:'start'});
+  window.scrollTo({top:0,behavior:'instant'});
+  closeMenu(); requestAnimationFrame(()=>scan(pg));
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+
+const side=document.getElementById('side'),scrim=document.getElementById('scrim');
+function closeMenu(){side.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('burger').onclick=()=>{side.classList.toggle('open');scrim.classList.toggle('show');};
+scrim.onclick=closeMenu;
+
+const tb=document.getElementById('theme'),ti=document.getElementById('ti');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false; tb.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');ti.innerHTML=dark?sun:moon;tb.lastChild.textContent=dark?' Mode clair':' Mode sombre';};
+
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.06});
+function scan(s){(s||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));} scan();
+
+const bar=document.getElementById('bar');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+
+document.querySelectorAll('.acc-h').forEach(h=>h.onclick=()=>{const a=h.parentElement,b=a.querySelector('.acc-b');const o=a.classList.toggle('open');b.style.maxHeight=o?b.scrollHeight+'px':0;});
+
+const GLOSS=[
+ ['PFMP','Période de formation en milieu professionnel : temps de formation en entreprise, sous statut scolaire, obligatoire pour le diplôme professionnel.'],
+ ['CAP','Certificat d\'aptitude professionnelle (cycle de 2 ans, parfois 1 an).'],
+ ['Bac pro','Baccalauréat professionnel (cycle de 3 ans : 2de, 1re, terminale pro).'],
+ ['Convention de PFMP','Document tripartite obligatoire (établissement – entreprise – élève) signé par toutes les parties avant le départ.'],
+ ['Convention-type','Modèle national de convention, approuvé par le conseil d\'administration de l\'établissement.'],
+ ['Tuteur','Professionnel de l\'entreprise qui encadre et accompagne l\'élève, et participe à son évaluation.'],
+ ['Enseignant référent','Enseignant désigné pour suivre un élève pendant une période : visite, évaluation. Maximum 16 élèves à la fois.'],
+ ['Professeur principal','Enseignant qui coordonne le suivi de la classe et repère les élèves sans stage (rôle d\'organisation interne).'],
+ ['DDFPT','Directeur délégué aux formations professionnelles et technologiques (ex « chef de travaux ») : coordonne l\'organisation des PFMP.'],
+ ['BDE','Bureau des entreprises : créé dans chaque lycée pro (réforme 2023) ; lien avec les entreprises et gestion de l\'allocation.'],
+ ['Chef d\'établissement','Responsable de l\'organisation ; signe les conventions, assure l\'élève, ordonnateur de l\'allocation.'],
+ ['Allocation','Aide versée par l\'État (ASP) pour chaque jour de PFMP effectué : 50 à 100 €/semaine selon le niveau.'],
+ ['ASP','Agence de services et de paiement : organisme qui verse l\'allocation pour le compte de l\'État.'],
+ ['ApLyPro','Application de gestion de l\'allocation des PFMP (dossiers, planning, états liquidatifs).'],
+ ['Gratification','Somme versée par l\'entreprise, obligatoire seulement au-delà de 2 mois dans le même organisme (≠ allocation).'],
+ ['CCF','Contrôle en cours de formation : évaluation certificative, dont certaines situations se déroulent en entreprise.'],
+ ['Attestation de PFMP','Document remis par l\'entreprise en fin de période, indiquant la durée effective réalisée.'],
+ ['Ordre de mission','Document établi par le chef d\'établissement autorisant l\'enseignant à se déplacer pour une visite.'],
+ ['Pré-convention','Document préparatoire récupérant les informations de l\'entreprise avant la rédaction de la convention.'],
+ ['État liquidatif','Document validant les jours réellement effectués, transmis à l\'ASP pour déclencher le paiement.'],
+ ['RQTH','Reconnaissance de la qualité de travailleur handicapé : facilite stages et insertion, dès 16 ans.'],
+ ['AESH','Accompagnant d\'élève en situation de handicap : peut intervenir pendant la PFMP si notifié.'],
+ ['PPS','Projet personnalisé de scolarisation de l\'élève en situation de handicap (réf. pour aménager la PFMP).'],
+ ['ESAT','Établissement et service d\'aide par le travail (milieu protégé), lieu possible de PFMP.'],
+ ['Pôle de stages','Structure de mutualisation entre établissements pour développer un vivier d\'entreprises.'],
+ ['Travaux réglementés','Travaux dangereux interdits aux mineurs, possibles dès 15 ans après déclaration de dérogation de l\'entreprise.']
+];
+const glist=document.getElementById('glist'),gs=document.getElementById('gs');
+function rg(f=''){const q=f.trim().toLowerCase();
+ glist.innerHTML=GLOSS.filter(([k,v])=>!q||k.toLowerCase().includes(q)||v.toLowerCase().includes(q)).map(([k,v])=>`<div class="gitem"><h4>${k}</h4><p>${v}</p></div>`).join('')||'<p style="color:var(--muted)">Aucun résultat.</p>';}
+rg(); gs.addEventListener('input',e=>rg(e.target.value));
+
+const start=location.hash.replace('#','');
+if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

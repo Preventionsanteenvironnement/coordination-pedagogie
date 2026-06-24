@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide du professeur principal — missions, suivi, orientation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6fc; --bg2:#e9edf8; --surface:#ffffff; --ink:#15203b; --ink2:#3c4868; --muted:#6f7a98;
+  --blue:#3a5bd9; --blue-d:#2c45ad; --blue-s:#e4e9fc;
+  --amber:#ef8e2c; --amber-s:#fcecd8; --emerald:#13a06a; --emerald-s:#d7f3e7;
+  --rose:#e0457b; --rose-s:#fbe2ec; --cyan:#1397c4; --cyan-s:#d8f0f8;
+  --line:#e1e7f3; --line2:#eef2fa; --shadow:0 22px 54px -26px rgba(30,50,120,.45); --shadow-sm:0 10px 26px -16px rgba(30,50,120,.38);
+  --rad:18px; --disp:'Space Grotesk',system-ui,sans-serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#0c1020; --bg2:#121732; --surface:#161d33; --ink:#e9edf8; --ink2:#c2cbe2; --muted:#8590ad;
+  --blue:#7e95ff; --blue-d:#9bafff; --blue-s:#1a234a;
+  --amber:#f3a857; --amber-s:#352611; --emerald:#43c48e; --emerald-s:#0f2f22; --rose:#f06ba0; --rose-s:#37182a; --cyan:#49b9df; --cyan-s:#0f2c39;
+  --line:#26304f; --line2:#192038; --shadow:0 26px 64px -30px rgba(0,0,0,.85); --shadow-sm:0 14px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17.5px;line-height:1.68;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--disp);line-height:1.14;margin:0;font-weight:700;letter-spacing:-.01em}
+a{color:var(--blue)}
+::selection{background:var(--blue);color:#fff}
+svg text{font-family:'Inter',sans-serif}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:linear-gradient(90deg,var(--blue),var(--amber),var(--emerald))}
+
+.hd{position:fixed;top:0;left:0;right:0;z-index:200;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hd-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:11px 22px}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer;flex:0 0 auto}
+.logo .mk{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm)}
+.logo b{font-family:var(--disp);font-size:16px;font-weight:700;line-height:1}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.nav{display:flex;gap:3px;margin-left:auto;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 12px;border-radius:11px;color:var(--ink2);font-size:13.5px;font-weight:600;white-space:nowrap;cursor:pointer;transition:.15s}
+.nav a:hover{background:var(--blue-s);color:var(--blue-d)}
+.nav a.active{background:var(--blue);color:#fff}
+.tbtn{flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.burger{display:none;flex:0 0 auto;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
+.wrap{max-width:920px;margin:0 auto;padding:100px 26px 96px}
+.page{display:none;animation:fade .45s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(20px);transition:.6s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.kick{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue-d);background:var(--blue-s);padding:7px 14px;border-radius:30px;margin-bottom:18px}
+.h1{font-size:clamp(2rem,4.6vw,3rem);font-weight:700;margin-bottom:.4em;letter-spacing:-.02em;max-width:18ch}
+.lead{font-size:clamp(1.1rem,2vw,1.32rem);color:var(--ink2);max-width:62ch;line-height:1.6}
+.h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700;margin:56px 0 8px}
+.h3{font-size:1.26rem;font-weight:700;margin:32px 0 8px}
+.sub{color:var(--muted);margin-bottom:22px;max-width:64ch}
+p{margin:0 0 17px}strong{font-weight:700;color:var(--ink)}
+
+.hero{position:relative;border-radius:28px;overflow:hidden;padding:clamp(34px,5vw,62px);color:#fff;box-shadow:var(--shadow);margin-bottom:26px}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(130deg,#2c45ad,#3a5bd9 46%,#1397c4)}
+.hero::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.5;background:radial-gradient(40% 50% at 84% 12%,rgba(239,142,44,.65),transparent 60%),radial-gradient(42% 46% at 6% 92%,rgba(19,160,106,.55),transparent 62%)}
+.hero .kick{color:#fff;background:rgba(255,255,255,.18)}
+.hero h1{font-size:clamp(2.1rem,5.4vw,3.5rem);font-weight:700;max-width:18ch;margin-bottom:.35em}
+.hero p{font-size:clamp(1.08rem,2.2vw,1.3rem);max-width:52ch;color:rgba(255,255,255,.92)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:30px;font-weight:600;font-size:15px;cursor:pointer;border:0;font-family:var(--sans);transition:.2s}
+.btn-p{background:#fff;color:var(--blue-d)}.btn-p:hover{transform:translateY(-2px)}
+.btn-g{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.34)}.btn-g:hover{background:rgba(255,255,255,.26)}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:6px 0 8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+.stat b{font-family:var(--disp);font-size:1.5rem;font-weight:700;display:block;line-height:1.1;color:var(--blue-d)}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:24px;box-shadow:var(--shadow-sm);transition:.22s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.card .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px;font-size:1.5rem}
+.card h3{font-size:1.15rem;margin-bottom:8px}
+.card p{font-size:14.6px;color:var(--ink2);margin:0}
+.ic-b{background:var(--blue-s);color:var(--blue-d)} .ic-a{background:var(--amber-s);color:var(--amber)} .ic-e{background:var(--emerald-s);color:var(--emerald)} .ic-r{background:var(--rose-s);color:var(--rose)} .ic-c{background:var(--cyan-s);color:var(--cyan)}
+
+.call{border-radius:16px;padding:20px 24px;margin:24px 0;border-left:5px solid;background:var(--surface);box-shadow:var(--shadow-sm)}
+.call .lbl{font-family:var(--disp);font-weight:700;font-size:1.02rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.call p{margin:0;font-size:15.5px;color:var(--ink2)}
+.call.info{border-color:var(--blue)}.call.info .lbl{color:var(--blue-d)}
+.call.do{border-color:var(--emerald)}.call.do .lbl{color:var(--emerald)}
+.call.warn{border-color:var(--amber)}.call.warn .lbl{color:var(--amber)}
+.call.stop{border-color:var(--rose)}.call.stop .lbl{color:var(--rose)}
+
+.quote{margin:34px 0;padding:26px 30px;border-radius:18px;background:linear-gradient(135deg,var(--blue-s),var(--cyan-s));position:relative}
+.quote p{font-family:var(--disp);font-weight:600;font-size:clamp(1.15rem,2.5vw,1.5rem);line-height:1.4;margin:0;color:var(--ink)}
+.quote .src{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:10px;font-weight:500}
+
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:26px 24px;margin:26px 0;box-shadow:var(--shadow-sm)}
+.diagram .dt{font-family:var(--disp);font-weight:700;font-size:1.05rem;margin-bottom:4px;text-align:center}
+.diagram .dd{font-size:13px;color:var(--muted);text-align:center;margin-bottom:18px}
+.diagram svg{display:block;width:100%;height:auto}
+
+.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.steps li{position:relative;padding:0 0 15px 46px;counter-increment:s;font-size:15.5px;color:var(--ink2)}
+.steps li::before{content:counter(s);position:absolute;left:0;top:-2px;width:30px;height:30px;border-radius:10px;background:var(--blue-s);color:var(--blue-d);font-family:var(--disp);font-weight:700;display:grid;place-items:center;font-size:14px}
+.steps li b{color:var(--ink)}
+
+.chk{list-style:none;margin:0;padding:0}
+.chk li{position:relative;padding:8px 0 8px 32px;font-size:15.5px;color:var(--ink2);border-bottom:1px solid var(--line2)}
+.chk li:last-child{border-bottom:0}
+.chk li::before{content:"";position:absolute;left:0;top:13px;width:18px;height:18px;border-radius:6px;background:var(--emerald-s);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2313a06a' stroke-width='3'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");background-size:14px;background-repeat:no-repeat;background-position:center}
+.chk li b{color:var(--ink)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0}
+.box{border-radius:16px;padding:22px;border:1px solid var(--line)}
+.box.yes{background:var(--emerald-s);border-color:color-mix(in srgb,var(--emerald) 30%,transparent)}
+.box.no{background:var(--rose-s);border-color:color-mix(in srgb,var(--rose) 30%,transparent)}
+.box h4{font-size:1.08rem;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.box ul{margin:0;padding-left:18px;font-size:14.6px;color:var(--ink2)}.box li{margin-bottom:7px}
+
+.tbl-wrap{overflow-x:auto;margin:18px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--surface);border-radius:var(--rad);overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid var(--line)}
+.tbl th,.tbl td{padding:13px 15px;text-align:left;border-bottom:1px solid var(--line2);vertical-align:top}
+.tbl thead th{background:var(--bg2);font-family:var(--disp);font-size:13px;color:var(--ink)}
+.tbl td:first-child{font-weight:700}.tbl tr:last-child td{border-bottom:0}
+.ref{display:inline-block;font-size:12px;color:var(--muted);font-style:italic}
+.refline{font-size:12px;color:var(--muted);font-style:italic;margin:-8px 0 16px}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
+.pagenav a{flex:1;padding:16px 22px;border:1px solid var(--line);border-radius:14px;background:var(--surface);cursor:pointer;transition:.2s;text-decoration:none}
+.pagenav a:hover{border-color:var(--blue);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.07em}
+.pagenav b{display:block;font-family:var(--disp);font-size:1.04rem;margin-top:3px;color:var(--ink)}
+.pagenav .nx{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(10,16,30,.55);z-index:150;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(max-width:920px){
+  .burger{display:grid}
+  .nav{position:fixed;top:0;right:-300px;width:280px;height:100vh;flex-direction:column;background:var(--surface);padding:78px 16px;gap:5px;transition:.32s;z-index:160;box-shadow:var(--shadow);overflow-y:auto}
+  .nav.open{right:0}.nav a{font-size:15px;padding:12px 16px}
+  .two{grid-template-columns:1fr}
+}
+@media(max-width:560px){ body{font-size:16.5px} .wrap{padding:92px 16px 70px} .hero{padding:30px 22px} .logo small{display:none} }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<header class="hd">
+  <div class="hd-in">
+    <div class="logo" data-go="accueil">
+      <div class="mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M16 8l-5 2-2 5 5-2z"/></svg></div>
+      <div><b>Professeur principal</b><small>Le guide de la mission</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a data-go="accueil">Accueil</a>
+      <a data-go="coordonner">Coordonner</a>
+      <a data-go="suivre">Suivre &amp; évaluer</a>
+      <a data-go="bep">Besoins particuliers</a>
+      <a data-go="vie">Vie de classe</a>
+      <a data-go="orientation">Orientation</a>
+      <a data-go="familles">Les familles</a>
+      <a data-go="appuis">Vos appuis</a>
+      <a data-go="memo">À retenir</a>
+    </nav>
+    <button class="tbtn" id="theme"><svg id="ti" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="burger" id="burger"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="wrap">
+
+<!-- ACCUEIL -->
+<section class="page active" id="accueil">
+  <div class="hero reveal">
+    <div class="kick">Une mission de coordination &amp; d'accompagnement</div>
+    <h1>Professeur principal&nbsp;: la boussole de la classe.</h1>
+    <p>Coordonner le suivi, animer la vie de classe, accompagner l'orientation. Tout ce qu'il faut savoir pour exercer la mission sereinement — fondé sur les textes officiels.</p>
+    <div class="cta">
+      <button class="btn btn-p" data-go="coordonner">Découvrir la mission
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="btn btn-g" data-go="orientation">L'orientation</button>
+    </div>
+  </div>
+
+  <p class="lead reveal">Le professeur principal est désigné par le chef d'établissement, <strong>avec son accord</strong>, pour ses qualités pédagogiques et ses aptitudes à l'organisation, au travail en équipe et au dialogue. Sa mission concerne <strong>tous les niveaux, de la 6<sup>e</sup> à la terminale</strong>.</p>
+  <p class="refline reveal">Circulaire n° 2018-108 du 10 octobre 2018 (BO n° 37) — référence du rôle du professeur principal.</p>
+
+  <h2 class="h2 reveal">Trois grandes missions</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic ic-b">🧭</div><h3>Coordonner &amp; suivre</h3><p>Faire le lien entre tous ceux qui suivent l'élève, et assurer le suivi des acquis et de l'évaluation.</p></div>
+    <div class="card reveal"><div class="ic ic-a">🤝</div><h3>Animer la vie de classe</h3><p>Accueillir, favoriser la communication, gérer les heures de vie de classe et les délégués.</p></div>
+    <div class="card reveal"><div class="ic ic-e">🎯</div><h3>Accompagner l'orientation</h3><p>Aider chaque élève à construire progressivement son projet d'avenir, avec sa famille.</p></div>
+  </div>
+
+  <div class="stats reveal">
+    <div class="stat"><b>6<sup>e</sup> → Tle</b><span>tous les niveaux concernés</span></div>
+    <div class="stat"><b>ISOE</b><span>part modulable (reconnaissance financière)</span></div>
+    <div class="stat"><b>2 PP</b><span>en terminale (préparation au sup)</span></div>
+    <div class="stat"><b>2026</b><span>certification « Orientation, parcours, insertion »</span></div>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">📌 Le cadre</div><p>Le professeur principal agit <strong>sous la responsabilité du chef d'établissement</strong>. Il fait le lien <strong>sans intervenir</strong> sur les champs disciplinaires des autres professeurs. Le chef d'établissement le réunit régulièrement avec les autres PP.</p></div>
+
+  <div class="pagenav"><span></span><a class="nx" data-go="coordonner"><small>Étape 1 →</small><b>Coordonner &amp; faire le lien</b></a></div>
+</section>
+
+<!-- COORDONNER -->
+<section class="page" id="coordonner">
+  <div class="kick reveal">Le pivot</div>
+  <h1 class="h1 reveal">Coordonner &amp; faire le lien</h1>
+  <p class="lead reveal">Le professeur principal est le point de jonction de la classe : il met en relation tous ceux qui suivent l'élève, et reste l'interlocuteur privilégié de la famille.</p>
+
+  <div class="diagram reveal">
+    <div class="dt">La constellation du professeur principal</div>
+    <div class="dd">Au centre de la classe, il relie les élèves, les familles et toute l'équipe.</div>
+    <svg viewBox="0 0 720 320" role="img" aria-label="Le professeur principal au centre des acteurs">
+      <g stroke="var(--line)" stroke-width="2">
+        <line x1="360" y1="160" x2="360" y2="56"/><line x1="360" y1="160" x2="560" y2="90"/><line x1="360" y1="160" x2="600" y2="220"/>
+        <line x1="360" y1="160" x2="440" y2="280"/><line x1="360" y1="160" x2="280" y2="280"/><line x1="360" y1="160" x2="120" y2="220"/><line x1="360" y1="160" x2="160" y2="90"/>
+      </g>
+      <g text-anchor="middle" font-size="12" font-weight="700">
+        <g><rect x="300" y="30" width="120" height="40" rx="20" fill="var(--blue-s)"/><text x="360" y="55" fill="var(--blue-d)">Élèves</text></g>
+        <g><rect x="500" y="68" width="120" height="40" rx="20" fill="var(--amber-s)"/><text x="560" y="93" fill="var(--amber)">Familles</text></g>
+        <g><rect x="540" y="200" width="120" height="40" rx="20" fill="var(--emerald-s)"/><text x="600" y="225" fill="var(--emerald)">Professeurs</text></g>
+        <g><rect x="380" y="262" width="120" height="40" rx="20" fill="var(--rose-s)"/><text x="440" y="287" fill="var(--rose)">CPE</text></g>
+        <g><rect x="220" y="262" width="120" height="40" rx="20" fill="var(--cyan-s)"/><text x="280" y="287" fill="var(--cyan)">PsyEN</text></g>
+        <g><rect x="60" y="200" width="120" height="40" rx="20" fill="var(--amber-s)"/><text x="120" y="219" fill="var(--amber)">Santé /</text><text x="120" y="233" fill="var(--amber)">social</text></g>
+        <g><rect x="100" y="68" width="120" height="40" rx="20" fill="var(--emerald-s)"/><text x="160" y="87" fill="var(--emerald)">Équipe de</text><text x="160" y="101" fill="var(--emerald)">direction</text></g>
+      </g>
+      <circle cx="360" cy="160" r="48" fill="var(--blue)"/>
+      <text x="360" y="156" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Prof.</text>
+      <text x="360" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">principal</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Ce que « coordonner » veut dire</h2>
+  <ul class="chk reveal">
+    <li><b>Relier sans se substituer</b> : faire circuler l'information entre professeurs, CPE, personnels sociaux et de santé, psychologue de l'Éducation nationale et direction — sans empiéter sur les disciplines.</li>
+    <li><b>Être l'interlocuteur privilégié de la famille</b> et un référent pour les représentants légaux des élèves de la classe.</li>
+    <li><b>Synthétiser</b> : préparer et exposer en conseil de classe une vue d'ensemble du parcours de chaque élève.</li>
+    <li><b>Assurer les liaisons</b> entre les temps de travail (en classe, hors la classe, « Devoirs faits »).</li>
+  </ul>
+
+  <div class="call info reveal"><div class="lbl">🔎 À noter</div><p>Le professeur principal ne « note » pas le travail des autres disciplines et ne décide pas seul : il <strong>coordonne</strong>, <strong>synthétise</strong> et <strong>fait le lien</strong>, toujours sous l'autorité du chef d'établissement.</p></div>
+
+  <div class="pagenav"><a data-go="accueil"><small>← Précédent</small><b>Accueil</b></a><a class="nx" data-go="suivre"><small>Suivant →</small><b>Suivre &amp; évaluer</b></a></div>
+</section>
+
+<!-- SUIVRE -->
+<section class="page" id="suivre">
+  <div class="kick reveal">Le suivi des élèves</div>
+  <h1 class="h1 reveal">Suivre les acquis &amp; l'évaluation</h1>
+  <p class="lead reveal">Le professeur principal suit la progression de chaque élève, en fait la synthèse, et la partage avec l'élève et sa famille.</p>
+
+  <h2 class="h2 reveal">Le conseil de classe, moment central</h2>
+  <ol class="steps reveal">
+    <li><b>Préparer</b> : recueillir, avec l'équipe, les appréciations et conseils ; élaborer les synthèses.</li>
+    <li><b>Exposer</b> : présenter les résultats de chaque élève et une appréciation sur ses capacités scolaires.</li>
+    <li><b>Conseiller</b> : formuler des conseils pour une meilleure réussite, et — aux paliers — un avis tenant compte du projet d'orientation.</li>
+    <li><b>Restituer</b> : transmettre régulièrement une synthèse à l'élève et à ses représentants légaux, avec des objectifs.</li>
+  </ol>
+  <div class="call info reveal"><div class="lbl">🗳️ Les délégués au conseil</div><p>Les élèves délégués siègent au conseil de classe : ils y représentent leurs camarades. Le professeur principal participe à l'organisation de leur élection et leur rappelle leur rôle.</p></div>
+
+  <h2 class="h2 reveal">Les outils du suivi</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-b">📒</div><h3>Le LSU (au collège)</h3><p>Le livret scolaire unique rend compte de l'évolution des acquis et sert de liaison enseignants–élève–famille. Le PP veille à sa bonne appropriation.</p></div>
+    <div class="card reveal"><div class="ic ic-e">📝</div><h3>« Devoirs faits »</h3><p>Le PP facilite les liaisons entre les temps de travail et assure le suivi des élèves concernés.</p></div>
+    <div class="card reveal"><div class="ic ic-a">📊</div><h3>Tests de positionnement (2<sup>de</sup>)</h3><p>Au lycée, il exploite les résultats pour repérer les besoins urgents et suit les groupes d'accompagnement personnalisé.</p></div>
+    <div class="card reveal"><div class="ic ic-c">🎓</div><h3>Choix de spécialités (LGT)</h3><p>Il guide l'élève dans le choix de ses spécialités, de sa série ou de ses options, avec le PsyEN.</p></div>
+  </div>
+
+  <div class="call do reveal"><div class="lbl">🏭 En lycée professionnel</div><p>Le PP assure la <strong>coordination pédagogique entre enseignement général et professionnel</strong>, et veille à la coordination des <strong>périodes de formation en milieu professionnel (PFMP)</strong> : préparation, suivi, évaluation.</p></div>
+
+  <div class="pagenav"><a data-go="coordonner"><small>← Précédent</small><b>Coordonner</b></a><a class="nx" data-go="bep"><small>Suivant →</small><b>Besoins particuliers</b></a></div>
+</section>
+
+<!-- BEP -->
+<section class="page" id="bep">
+  <div class="kick reveal">Une attention pour chacun</div>
+  <h1 class="h1 reveal">Les élèves à besoins éducatifs particuliers</h1>
+  <p class="lead reveal">Qu'il s'agisse de difficultés importantes ou de capacités singulières, le professeur principal suit l'accompagnement mis en place — en associant l'élève et sa famille.</p>
+
+  <h2 class="h2 reveal">Sa contribution aux dispositifs</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-b">📋</div><h3>PAP · PAI · PPS</h3><p>Il <strong>participe à l'élaboration</strong> de ces projets dans le cadre des réunions d'équipe éducative, et suit leur mise en œuvre pour sa classe.</p></div>
+    <div class="card reveal"><div class="ic ic-e">🎯</div><h3>PPRE</h3><p>Il peut <strong>coordonner</strong> un programme personnalisé de réussite éducative (ou un contrat de réussite) lorsqu'un élève risque de ne pas atteindre le niveau attendu.</p></div>
+    <div class="card reveal"><div class="ic ic-a">🪜</div><h3>Remise à niveau</h3><p>Il peut suivre les stages de remise à niveau de ses élèves.</p></div>
+    <div class="card reveal"><div class="ic ic-c">🔀</div><h3>Stages passerelles (lycée)</h3><p>Il informe l'élève et sa famille sur les dispositifs destinés à éviter un redoublement et sur les passerelles lors d'un changement de voie.</p></div>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">🔗 Pour aller plus loin</div><p>Les dispositifs PAP, PAI, PPS, PPRE et le rôle des acteurs (enseignant référent, MDPH…) sont détaillés dans le guide « École inclusive ». Le professeur principal en est un relais de proximité pour sa classe.</p></div>
+
+  <div class="pagenav"><a data-go="suivre"><small>← Précédent</small><b>Suivre &amp; évaluer</b></a><a class="nx" data-go="vie"><small>Suivant →</small><b>Vie de classe</b></a></div>
+</section>
+
+<!-- VIE DE CLASSE -->
+<section class="page" id="vie">
+  <div class="kick reveal">Le climat &amp; le collectif</div>
+  <h1 class="h1 reveal">Animer la vie de la classe</h1>
+  <p class="lead reveal">Le professeur principal est attentif à l'accueil de tous les élèves et favorise la communication. Il fait vivre la classe comme un collectif.</p>
+
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-b">👋</div><h3>Accueillir tous les élèves</h3><p>Veiller à ce que chacun trouve sa place, favoriser la communication et un climat serein.</p></div>
+    <div class="card reveal"><div class="ic ic-a">🕐</div><h3>Les heures de vie de classe</h3><p>Les organiser et les animer : échanges, projets, préparation de l'orientation, régulation du groupe.</p></div>
+    <div class="card reveal"><div class="ic ic-r">⚖️</div><h3>Gérer les conflits</h3><p>Avec le CPE et la direction, intervenir sur les tensions concernant les élèves de la classe.</p></div>
+    <div class="card reveal"><div class="ic ic-e">🗳️</div><h3>Les délégués</h3><p>Participer à l'organisation des élections, rappeler les attributions du conseil de classe et le rôle des délégués.</p></div>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">🏛️ Le conseil pédagogique</div><p>Au moins un professeur principal de chaque niveau participe au conseil pédagogique, présidé par le chef d'établissement. Les PP y font remonter les besoins et les projets des équipes.</p></div>
+
+  <div class="quote reveal"><p>Le bon déroulement de ses missions « conditionne le fonctionnement de l'établissement et participe à la construction du futur adulte responsable et citoyen ».</p><div class="src">Circulaire n° 2018-108 du 10 octobre 2018</div></div>
+
+  <div class="pagenav"><a data-go="bep"><small>← Précédent</small><b>Besoins particuliers</b></a><a class="nx" data-go="orientation"><small>Suivant →</small><b>L'orientation</b></a></div>
+</section>
+
+<!-- ORIENTATION -->
+<section class="page" id="orientation">
+  <div class="kick reveal">La mission phare</div>
+  <h1 class="h1 reveal">Accompagner l'orientation</h1>
+  <p class="lead reveal">S'orienter, ça s'apprend — et donc ça s'enseigne. L'orientation n'est pas une affectation : c'est la construction progressive d'un projet d'avenir, au croisement de la connaissance de soi, des métiers et des formations.</p>
+
+  <div class="diagram reveal">
+    <div class="dt">Les 3 axes de l'éducation à l'orientation</div>
+    <div class="dd">Toutes les disciplines y contribuent.</div>
+    <svg viewBox="0 0 720 220" role="img" aria-label="Les trois axes de l'orientation">
+      <g text-anchor="middle">
+        <circle cx="170" cy="90" r="74" fill="var(--blue-s)"/><text x="170" y="80" font-size="14" font-weight="700" fill="var(--blue-d)">Connaissance</text><text x="170" y="100" font-size="14" font-weight="700" fill="var(--blue-d)">de soi</text>
+        <circle cx="360" cy="90" r="74" fill="var(--amber-s)"/><text x="360" y="74" font-size="14" font-weight="700" fill="var(--amber)">Connaissance</text><text x="360" y="94" font-size="14" font-weight="700" fill="var(--amber)">des métiers</text><text x="360" y="112" font-size="11.5" fill="var(--ink2)">&amp; du monde pro</text>
+        <circle cx="550" cy="90" r="74" fill="var(--emerald-s)"/><text x="550" y="80" font-size="14" font-weight="700" fill="var(--emerald)">Connaissance</text><text x="550" y="100" font-size="14" font-weight="700" fill="var(--emerald)">des formations</text>
+      </g>
+      <text x="360" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink2)">= des choix éclairés, construits dans le temps</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">La bonne posture : accompagner, pas décider à la place</h2>
+  <div class="two reveal">
+    <div class="box yes"><h4>✓ Accompagner, c'est…</h4><ul>
+      <li><strong>Écouter</strong> l'élève et sa famille</li>
+      <li><strong>Dialoguer</strong> en introduisant les contraintes réelles des choix</li>
+      <li><strong>Transmettre</strong> connaissances sur les métiers, stages, visites</li>
+      <li>Faire un « <strong>pas de côté</strong> » et travailler les représentations (souvent liées au milieu social et au genre)</li>
+    </ul></div>
+    <div class="box no"><h4>✗ À éviter</h4><ul>
+      <li>Le <strong>jugement</strong></li>
+      <li>L'<strong>interrogatoire</strong></li>
+      <li>L'<strong>interprétation</strong></li>
+      <li>Réduire l'orientation aux seuls <strong>résultats scolaires</strong> ou aux procédures (Affelnet, Parcoursup)</li>
+    </ul></div>
+  </div>
+
+  <h2 class="h2 reveal">Les temps forts &amp; les outils</h2>
+  <ul class="chk reveal">
+    <li><b>Des entretiens personnalisés d'orientation</b> dès la 3<sup>e</sup>, le plus tôt possible et à tout moment selon les besoins.</li>
+    <li><b>La plateforme Avenir(s)</b> (Onisep) : socle de l'éducation à l'orientation de la 5<sup>e</sup> à la terminale — activités, ressources, et un <strong>portfolio</strong> personnel suivi tout au long du parcours.</li>
+    <li><b>4 demi-journées par an</b> (depuis la rentrée 2025) dédiées à l'orientation, en plus des heures de vie de classe.</li>
+    <li><b>Semaines de l'orientation</b>, rencontres avec des professionnels, immersions et visites de lieux de formation.</li>
+  </ul>
+
+  <h2 class="h2 reveal">Orientation, affectation, admission : qui décide&nbsp;?</h2>
+  <div class="tbl-wrap reveal">
+    <table class="tbl">
+      <thead><tr><th>Étape</th><th>Qui décide</th></tr></thead>
+      <tbody>
+        <tr><td>Décision d'<strong>orientation</strong></td><td>Le chef d'établissement (au vu des demandes des familles et des propositions du conseil de classe). Appel possible.</td></tr>
+        <tr><td><strong>Affectation</strong> en lycée public</td><td>L'inspecteur d'académie – DASEN.</td></tr>
+        <tr><td><strong>Admission</strong> (privé, ou supérieur pour les terminales)</td><td>Le chef d'établissement.</td></tr>
+        <tr><td><strong>Inscription</strong></td><td>La famille (choix des enseignements / options ; en apprentissage, signature d'un contrat).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="call do reveal"><div class="lbl">🎓 En terminale</div><p>Deux professeurs principaux sont nommés pour mieux préparer le conseil de classe et accompagner les vœux vers l'enseignement supérieur (fiches Avenir, Parcoursup). <span class="ref">Décret n° 2018-120 du 20 février 2018</span></p></div>
+
+  <div class="pagenav"><a data-go="vie"><small>← Précédent</small><b>Vie de classe</b></a><a class="nx" data-go="familles"><small>Suivant →</small><b>Les familles</b></a></div>
+</section>
+
+<!-- FAMILLES -->
+<section class="page" id="familles">
+  <div class="kick reveal">La coéducation</div>
+  <h1 class="h1 reveal">Travailler avec les familles</h1>
+  <p class="lead reveal">Le professeur principal est l'interlocuteur privilégié des parents. Les associer tôt et régulièrement, c'est dédramatiser et réussir ensemble.</p>
+
+  <div class="quote reveal"><p>« Il n'y a pas de projet réussi sans l'adhésion des parents et un dialogue constructif. »</p><div class="src">Guide des professeurs principaux — Onisep</div></div>
+
+  <h2 class="h2 reveal">Les principes</h2>
+  <ul class="chk reveal">
+    <li><b>Associer les familles tôt</b> : un dialogue continu, instauré dès la fin du 1<sup>er</sup> trimestre, réduit fortement les désaccords.</li>
+    <li><b>Les parents sont les premiers conseillers</b> de leur enfant : en faire des partenaires de l'orientation.</li>
+    <li><b>Dédramatiser les procédures</b> (Affelnet, Parcoursup) et inscrire l'orientation dans une démarche progressive de la 5<sup>e</sup> à la terminale.</li>
+    <li><b>Proposer des temps de dialogue individuel</b> et des objectifs partagés.</li>
+  </ul>
+
+  <div class="call info reveal"><div class="lbl">📅 Une nouveauté (2025/2026)</div><p>Des <strong>rencontres parents–élèves–professeurs</strong> consacrées au projet d'orientation sont organisées systématiquement pour tous les élèves de <strong>3<sup>e</sup> et de 2<sup>de</sup></strong>, <strong>avant le conseil de classe du 2<sup>e</sup> trimestre</strong>.</p></div>
+
+  <div class="call do reveal"><div class="lbl">🧰 Des appuis pour la coéducation</div><p>Des guides gratuits Onisep (2025) : le « <strong>Guide des parents – Accompagner l'orientation</strong> » et « <strong>Coéduquer en orientation</strong> », plus une rubrique Avenir(s) dédiée aux parents.</p></div>
+
+  <div class="pagenav"><a data-go="orientation"><small>← Précédent</small><b>L'orientation</b></a><a class="nx" data-go="appuis"><small>Suivant →</small><b>Vos appuis</b></a></div>
+</section>
+
+<!-- APPUIS -->
+<section class="page" id="appuis">
+  <div class="kick reveal">Vous n'êtes pas seul</div>
+  <h1 class="h1 reveal">Vos appuis &amp; vos ressources</h1>
+  <p class="lead reveal">Exercer cette mission ne signifie pas tout connaître. Il s'agit d'identifier les bons relais et les bonnes ressources.</p>
+
+  <h2 class="h2 reveal">Les personnes qui peuvent aider</h2>
+  <div class="grid g2">
+    <div class="card reveal"><div class="ic ic-c">🧠</div><h3>Le psychologue de l'Éducation nationale</h3><p>Spécialité orientation : expertise sur le développement de l'adolescent, l'ingénierie des activités d'orientation, les voies de formation et leurs débouchés.</p></div>
+    <div class="card reveal"><div class="ic ic-b">🧑‍🏫</div><h3>L'équipe &amp; la direction</h3><p>Collègues, équipe de direction, CPE, professeur-documentaliste : des relais au quotidien.</p></div>
+    <div class="card reveal"><div class="ic ic-a">🔭</div><h3>Le référent « découverte des métiers » (collège)</h3><p>Il coordonne des activités concrètes avec les partenaires (lycées, région, monde économique).</p></div>
+    <div class="card reveal"><div class="ic ic-e">🏭</div><h3>Le bureau des entreprises (LP)</h3><p>En lycée professionnel, il appuie les enseignants dans les interactions avec le monde professionnel.</p></div>
+    <div class="card reveal"><div class="ic ic-r">🗺️</div><h3>La Région</h3><p>Information sur les métiers et formations, guides (post-3<sup>e</sup>, post-bac, apprentissage), stages, ambassadeurs métiers.</p></div>
+    <div class="card reveal"><div class="ic ic-c">☎️</div><h3>L'Onisep</h3><p>« Mon orientation en ligne » et AllOnisep (01&nbsp;77&nbsp;77&nbsp;12&nbsp;44, du lundi au vendredi 16 h–18 h) pour des réponses aux élèves, aux familles… et à vous.</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Les ressources &amp; la formation</h2>
+  <ul class="chk reveal">
+    <li><b>La plateforme Avenir(s)</b> : catalogue de 700+ activités, tableau de bord, portfolio, « Rencontres avec des pros », « MonProjetSup », « Horizons 21 ».</li>
+    <li><b>Les Référentiels des compétences à s'orienter</b> (collège et lycée) : un cadre structurant en 3 axes de développement.</li>
+    <li><b>Se former</b> : parcours M@gistère, webinaires, « Rendez-vous de l'orientation », plan Avenir (eduscol.education.fr/planavenir).</li>
+    <li><b>La reconnaissance</b> : la part modulable de l'<strong>ISOE</strong> ; et, à partir de la rentrée 2026, une certification « Orientation, parcours, insertion ».</li>
+  </ul>
+
+  <div class="pagenav"><a data-go="familles"><small>← Précédent</small><b>Les familles</b></a><a class="nx" data-go="memo"><small>Suivant →</small><b>À retenir</b></a></div>
+</section>
+
+<!-- MEMO -->
+<section class="page" id="memo">
+  <div class="kick reveal">La synthèse</div>
+  <h1 class="h1 reveal">À retenir</h1>
+  <p class="lead reveal">L'essentiel de la mission, en une page.</p>
+
+  <h2 class="h2 reveal">Le professeur principal en 7 points</h2>
+  <ul class="chk reveal">
+    <li><b>Désigné</b> par le chef d'établissement, avec son accord, et placé sous sa responsabilité.</li>
+    <li><b>Coordonne</b> le suivi de l'élève en reliant toute l'équipe — sans empiéter sur les disciplines.</li>
+    <li><b>Suit les acquis</b> et l'évaluation, et prépare/anime le conseil de classe.</li>
+    <li><b>Relaie</b> l'accompagnement des élèves à besoins particuliers (PAP, PAI, PPS, PPRE).</li>
+    <li><b>Anime la vie de classe</b> : accueil, heures de vie de classe, conflits, délégués.</li>
+    <li><b>Accompagne l'orientation</b> : posture d'écoute, entretiens, Avenir(s), avec le PsyEN et la famille.</li>
+    <li><b>Interlocuteur privilégié des familles</b>, dans une logique de coéducation.</li>
+  </ul>
+
+  <h2 class="h2 reveal">Trois réflexes</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="ic ic-b">🤝</div><h3>Relier, pas remplacer</h3><p>Coordonner et synthétiser, sans décider seul ni juger les disciplines.</p></div>
+    <div class="card reveal"><div class="ic ic-e">👂</div><h3>Accompagner, pas orienter</h3><p>Écouter et informer pour que l'élève construise <em>son</em> choix.</p></div>
+    <div class="card reveal"><div class="ic ic-a">⏳</div><h3>Anticiper le dialogue</h3><p>Associer les familles dès le 1<sup>er</sup> trimestre pour éviter les désaccords.</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Sources officielles</h2>
+  <ul class="chk reveal">
+    <li><b>Circulaire n° 2018-108 du 10 octobre 2018</b> — Rôle du professeur principal dans les collèges et les lycées (BO n° 37).</li>
+    <li><b>Guide des professeurs principaux — Accompagner à l'orientation</b> (ministère de l'Éducation nationale / Onisep, 2025).</li>
+    <li>Repères : article R. 421-10 et R. 421-49 du Code de l'éducation · parcours Avenir (art. L. 331-7) · ISOE (décret n° 93-55) · décret n° 2018-120 (terminale).</li>
+  </ul>
+  <p class="reveal" style="color:var(--muted);font-size:14px">Guide d'information synthétisant les textes officiels. Certaines modalités (4 demi-journées, certification 2026, rencontres 2025/2026) évoluent ; vérifiez les consignes académiques en vigueur.</p>
+
+  <div class="pagenav"><a data-go="appuis"><small>← Précédent</small><b>Vos appuis</b></a><a class="nx" data-go="accueil"><small>Retour →</small><b>Accueil</b></a></div>
+</section>
+
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')], links=[...document.querySelectorAll('.nav a')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>scan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const nav=document.getElementById('nav'),scrim=document.getElementById('scrim');
+function closeMenu(){nav.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('burger').onclick=()=>{nav.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tb=document.getElementById('theme'),ti=document.getElementById('ti');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tb.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');ti.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.06});
+function scan(s){(s||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}scan();
+const bar=document.getElementById('bar');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

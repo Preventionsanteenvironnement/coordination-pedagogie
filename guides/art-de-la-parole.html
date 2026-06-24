@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'art de la parole</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================= TOKENS ================= */
+:root{
+  --paper:#f1ece1;
+  --paper2:#e9e2d3;
+  --card:#f8f4ea;
+  --ink:#23241d;
+  --ink-soft:#42453a;
+  --muted:#787a6c;
+  --primary:#17483c;
+  --primary-2:#236253;
+  --accent:#b06a38;
+  --accent-2:#c47e4a;
+  --gold:#9a7d3c;
+  --rouge:#8a3a30;
+  --line:rgba(35,36,29,.14);
+  --line-soft:rgba(35,36,29,.075);
+  --shadow:0 24px 64px -32px rgba(23,72,60,.5);
+  --shadow-sm:0 12px 32px -22px rgba(23,72,60,.45);
+  --display:'Cormorant Garamond',Georgia,serif;
+  --body:'Spectral',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --measure:43rem;
+}
+[data-theme="dark"]{
+  --paper:#0d0f0c;
+  --paper2:#12150f;
+  --card:#171b14;
+  --ink:#e9e7da;
+  --ink-soft:#c3c2b2;
+  --muted:#8b8d7c;
+  --primary:#7fc4ad;
+  --primary-2:#a6dcc8;
+  --accent:#d2945c;
+  --accent-2:#e0a872;
+  --gold:#c4a866;
+  --rouge:#d98679;
+  --line:rgba(233,231,218,.15);
+  --line-soft:rgba(233,231,218,.07);
+  --shadow:0 28px 72px -34px rgba(0,0,0,.85);
+  --shadow-sm:0 14px 36px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18.5px;line-height:1.76;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--display);line-height:1.08;font-weight:600;margin:0}
+::selection{background:var(--accent);color:#fff}
+em{font-style:italic}
+
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:200;background:linear-gradient(90deg,var(--accent),var(--gold))}
+
+/* ============ TOPBAR ============ */
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;z-index:120;display:flex;align-items:center;gap:14px;
+  padding:0 22px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:13px;cursor:pointer}
+.brand .mk{width:34px;height:34px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;color:var(--paper);
+  font-family:var(--display);font-weight:700;font-size:19px;background:radial-gradient(circle at 32% 28%,var(--primary-2),var(--primary));box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--display);font-weight:600;font-size:21px;letter-spacing:.01em}
+.spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-btn{display:none}
+
+/* ============ LAYOUT ============ */
+.shell{display:flex;min-height:100vh;padding-top:60px}
+.sidebar{width:290px;flex:0 0 auto;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  padding:26px 16px 50px;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.toc-t{font-family:var(--sans);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:6px 16px 16px;font-weight:600}
+.nav-link{display:flex;align-items:baseline;gap:13px;padding:9px 15px;border-radius:8px;color:var(--ink-soft);text-decoration:none;
+  cursor:pointer;transition:.16s;font-family:var(--sans);font-size:14px;font-weight:500;line-height:1.35}
+.nav-link .rn{font-family:var(--display);font-weight:700;font-size:15px;color:var(--accent);flex:0 0 24px}
+.nav-link:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink)}
+.nav-link.active{background:var(--primary);color:var(--paper)}
+.nav-link.active .rn{color:var(--paper)}
+[data-theme="dark"] .nav-link.active{color:#0d0f0c}
+[data-theme="dark"] .nav-link.active .rn{color:#0d0f0c}
+
+.content{flex:1;min-width:0}
+.wrap{max-width:62rem;margin:0 auto;padding:52px 40px 100px}
+.page{display:none;animation:fade .5s ease both}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ============ SECTION OPENER ============ */
+.opener{position:relative;margin-bottom:30px;padding-bottom:26px;border-bottom:1px solid var(--line)}
+.opener .big{font-family:var(--display);font-weight:500;font-size:clamp(4rem,13vw,8rem);line-height:.8;color:var(--primary);opacity:.13;
+  position:absolute;right:0;top:-10px;pointer-events:none}
+[data-theme="dark"] .opener .big{color:var(--primary-2)}
+.kicker{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);
+  display:flex;align-items:center;gap:11px;margin-bottom:16px}
+.kicker::before{content:"";width:28px;height:1.5px;background:var(--accent)}
+.opener h1{font-size:clamp(2.4rem,5.4vw,4rem);font-weight:600;max-width:19ch;letter-spacing:-.01em}
+.epigraph{font-family:var(--body);font-style:italic;color:var(--ink-soft);font-size:clamp(1.05rem,2vw,1.3rem);margin-top:20px;
+  max-width:46ch;line-height:1.5;padding-left:20px;border-left:2px solid var(--accent)}
+
+/* ============ PROSE ============ */
+.prose{max-width:var(--measure)}
+.prose p{margin:0 0 22px}
+.prose h3{font-family:var(--display);font-size:1.85rem;font-weight:600;margin:52px 0 8px;color:var(--ink);letter-spacing:-.005em}
+.prose h3 .hn{color:var(--accent);font-weight:500;font-size:.7em;margin-right:.5rem;font-variant-numeric:tabular-nums}
+.dropcap::first-letter{font-family:var(--display);font-weight:600;float:left;font-size:4.8rem;line-height:.74;padding:8px 14px 0 0;color:var(--primary)}
+[data-theme="dark"] .dropcap::first-letter{color:var(--primary-2)}
+strong{font-weight:600;color:var(--ink)}
+.term{font-style:italic;color:var(--primary)}
+[data-theme="dark"] .term{color:var(--primary-2)}
+.lat{font-style:italic;color:var(--muted)}
+
+/* principe */
+.principe{margin:30px 0;padding:4px 0 4px 26px;border-left:3px solid var(--gold)}
+.principe .pl{font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}
+.principe p{margin:0;font-family:var(--display);font-style:italic;font-size:1.55rem;line-height:1.35;font-weight:500;color:var(--ink)}
+
+/* méthode box */
+.methode{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:24px 28px;margin:30px 0;box-shadow:var(--shadow-sm)}
+.methode .mt{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);font-weight:700;
+  margin-bottom:14px;display:flex;align-items:center;gap:9px}
+[data-theme="dark"] .methode .mt{color:var(--primary-2)}
+.methode .mt::before{content:"";width:18px;height:1.5px;background:var(--accent)}
+.methode ul{list-style:none;margin:0;padding:0}
+.methode li{position:relative;padding:9px 0 9px 26px;font-size:16.5px;color:var(--ink-soft);border-bottom:1px solid var(--line-soft)}
+.methode li:last-child{border-bottom:0}
+.methode li::before{content:"—";position:absolute;left:0;color:var(--accent);font-weight:600}
+.methode li b{color:var(--ink);font-weight:600}
+
+/* repère éthique */
+.ethique{background:color-mix(in srgb,var(--primary) 8%,transparent);border:1px solid color-mix(in srgb,var(--primary) 24%,transparent);
+  border-radius:6px;padding:22px 26px;margin:32px 0}
+.ethique .et{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:9px}
+[data-theme="dark"] .ethique .et{color:var(--primary-2)}
+.ethique .et svg{width:15px;height:15px}
+.ethique p{margin:0;font-size:16.5px;color:var(--ink-soft)}
+.ethique p+p{margin-top:12px}
+
+/* nuance/caveat */
+.nuance{border:1px dashed color-mix(in srgb,var(--rouge) 40%,var(--line));border-radius:6px;padding:18px 24px;margin:28px 0;
+  background:color-mix(in srgb,var(--rouge) 5%,transparent)}
+.nuance .nt{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--rouge);font-weight:700;margin-bottom:7px}
+.nuance p{margin:0;font-size:15.5px;color:var(--ink-soft)}
+.nuance p+p{margin-top:10px}
+
+/* pull quote */
+.pull{margin:44px 0;text-align:center;max-width:54ch;margin-left:auto;margin-right:auto}
+.pull q{font-family:var(--display);font-style:italic;font-weight:500;font-size:clamp(1.6rem,3.4vw,2.2rem);line-height:1.3;quotes:none;color:var(--primary)}
+[data-theme="dark"] .pull q{color:var(--primary-2)}
+.pull q::before{content:"« "}.pull q::after{content:" »"}
+
+/* cover */
+.cover{position:relative;border-radius:10px;overflow:hidden;padding:clamp(40px,6vw,80px);color:var(--paper);margin-bottom:14px;box-shadow:var(--shadow)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(155deg,#0e3329,#17483c 52%,#2a3b32)}
+.cover::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.42;
+  background:radial-gradient(40% 48% at 82% 16%,rgba(176,106,56,.6),transparent 60%),radial-gradient(42% 44% at 12% 92%,rgba(154,125,60,.45),transparent 62%)}
+.cover .kicker{color:var(--accent-2)}.cover .kicker::before{background:var(--accent-2)}
+.cover h1{font-size:clamp(2.6rem,7vw,5rem);font-weight:600;max-width:16ch;letter-spacing:-.01em}
+.cover .csub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);color:rgba(255,255,255,.86);margin-top:18px;max-width:42ch;line-height:1.5}
+
+/* abstract */
+.abstract{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:26px 30px;margin:30px 0 6px;box-shadow:var(--shadow-sm)}
+.abstract .at{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.abstract p{margin:0;font-size:17px;color:var(--ink-soft)}
+
+/* biblio */
+.biblio{margin-top:50px;padding-top:30px;border-top:1px solid var(--line);max-width:60rem}
+.biblio h3{font-family:var(--display);font-size:1.7rem;font-weight:600;margin-bottom:4px}
+.biblio .bs{font-family:var(--body);font-style:italic;color:var(--muted);margin:0 0 18px;font-size:1rem}
+.biblio ul{list-style:none;margin:0;padding:0}
+.biblio li{font-family:var(--sans);font-size:14.5px;color:var(--ink-soft);padding:10px 0 10px 24px;position:relative;border-bottom:1px solid var(--line-soft)}
+.biblio li:last-child{border-bottom:0}
+.biblio li::before{content:"—";position:absolute;left:0;color:var(--accent)}
+.biblio li b{color:var(--ink);font-weight:600}
+
+/* page nav */
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line);max-width:62rem}
+.pagenav a{flex:1;padding:18px 24px;border:1px solid var(--line);border-radius:6px;text-decoration:none;background:var(--card);transition:.2s;cursor:pointer;font-family:var(--sans)}
+.pagenav a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.pagenav b{display:block;font-family:var(--display);font-size:1.2rem;font-weight:600;margin-top:3px}
+.pagenav .next{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(6,8,6,.5);z-index:110;opacity:0;pointer-events:none;transition:.3s}
+.scrim.show{opacity:1;pointer-events:auto}
+
+@media(max-width:900px){
+  .menu-btn{display:grid}
+  .sidebar{position:fixed;left:0;top:60px;transform:translateX(-100%);transition:.35s;z-index:115;width:300px;box-shadow:var(--shadow)}
+  .sidebar.open{transform:none}
+  .wrap{padding:36px 22px 80px}
+  .pagenav{flex-direction:column}
+}
+@media(max-width:560px){
+  body{font-size:17px}
+  .cover{padding:32px 24px}
+  .dropcap::first-letter{font-size:3.8rem}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Sommaire">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand" data-go="ouverture">
+    <div class="mk">P</div>
+    <b>L'art de la parole</b>
+  </div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Thème">
+    <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="toc-t">Sommaire</div>
+    <a class="nav-link" data-go="ouverture"><span class="rn">0</span> La parole, un art et une responsabilité</a>
+    <a class="nav-link" data-go="don"><span class="rn">I</span> Le don n'existe pas</a>
+    <a class="nav-link" data-go="instrument"><span class="rn">II</span> L'instrument : le corps et la voix</a>
+    <a class="nav-link" data-go="architecture"><span class="rn">III</span> L'architecture du discours</a>
+    <a class="nav-link" data-go="convaincre"><span class="rn">IV</span> Convaincre : logos, ethos, pathos</a>
+    <a class="nav-link" data-go="ecouter"><span class="rn">V</span> Écouter : la parole comme relation</a>
+    <a class="nav-link" data-go="affirmer"><span class="rn">VI</span> S'affirmer sans dominer</a>
+    <a class="nav-link" data-go="vive"><span class="rn">VII</span> La parole vive</a>
+    <a class="nav-link" data-go="mot"><span class="rn">VIII</span> Le mot juste</a>
+    <a class="nav-link" data-go="ethique"><span class="rn">IX</span> Une éthique de la parole</a>
+  </aside>
+
+  <main class="content">
+  <div class="wrap">
+
+  <!-- ===== 0 OUVERTURE ===== -->
+  <section class="page active" id="ouverture">
+    <div class="cover reveal">
+      <div class="kicker">Ouverture</div>
+      <h1>La parole, un art et une responsabilité</h1>
+      <p class="csub">Reprendre, contre la mode des recettes et de la séduction à tout prix, l'antique exigence de l'art oratoire : parler vrai, parler juste, parler pour relier.</p>
+    </div>
+
+    <div class="abstract reveal">
+      <div class="at">Propos</div>
+      <p>On lit partout des manuels qui promettent de « capter », d'« influencer », de « faire céder ». Cet ensemble prend le parti inverse. Bien parler n'est ni un don réservé à quelques-uns, ni un arsenal de procédés pour emporter l'adhésion par tous les moyens. C'est un <strong>art</strong> — ancien, raisonné, exigeant — et cet art engage une <strong>éthique</strong> : la frontière, ténue mais décisive, entre <em>convaincre</em> et <em>manipuler</em>. On parcourt ici cet art par ses grandes dimensions — la voix, l'architecture du discours, la conviction, l'écoute, la présence — en expliquant chaque fois le <em>pourquoi</em> derrière le <em>comment</em>.</p>
+    </div>
+
+    <div class="opener reveal" style="margin-top:46px">
+      <span class="big">0</span>
+      <div class="kicker">Le parti pris</div>
+      <h1>Pourquoi un art, et non des recettes</h1>
+      <p class="epigraph">La parole est moitié à celui qui parle, moitié à celui qui écoute.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Deux malentendus pèsent sur l'art de parler, et ils se renforcent l'un l'autre. Le premier en fait un <em>don</em> : on l'aurait reçu en naissant, ou l'on en serait privé pour toujours ; il n'y aurait rien à y faire. Le second, plus insidieux, en fait une <em>technique de pouvoir</em> : un répertoire de ficelles pour séduire, impressionner, obtenir — une mécanique de l'influence. Le premier malentendu décourage : il dispense d'apprendre ce qu'il déclare inné. Le second corrompt : il réduit la parole à un instrument de capture. On voudrait ici les écarter ensemble, et rendre à la parole sa vérité, qui tient en peu de mots : c'est un art, donc il s'apprend ; et il ne vaut que par l'usage qu'on en fait.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>Un art que l'on a longtemps su nommer</h3>
+      <p class="reveal">Cet art porte un nom ancien — la <strong>rhétorique</strong> — et une tradition de vingt-cinq siècles l'a patiemment structuré, avant que la modernité ne le tienne en suspicion. Cette suspicion n'est pas sans cause : on a reproché à la rhétorique d'apprendre à « faire valoir le faible argument », à plaire plutôt qu'à dire vrai. Mais c'est confondre l'art avec sa contrefaçon. La rhétorique sérieuse n'a jamais été l'art de mentir avec élégance ; elle était l'art de rendre la vérité <em>efficace</em> — de faire qu'une chose juste, mais aride, atteigne et touche ceux à qui elle s'adresse. La réhabiliter, c'est se donner les moyens de distinguer le bon usage du mauvais, au lieu de laisser le champ libre aux seuls techniciens de l'influence.</p>
+
+      <p class="reveal">Cette tradition a légué deux acquis dont tout le reste découle. Elle a d'abord distingué les trois moyens de toucher un auditoire : la <em>raison</em> du discours, le <em>caractère</em> de celui qui parle, l'<em>émotion</em> qu'il éveille — le <span class="lat">logos</span>, l'<span class="lat">ethos</span>, le <span class="lat">pathos</span>. Elle a ensuite ordonné le travail de l'orateur en cinq grandes opérations : <strong>trouver</strong> les idées et les preuves, les <strong>disposer</strong> dans un ordre efficace, les <strong>formuler</strong> dans une langue juste, les <strong>mémoriser</strong>, et enfin les <strong>dire</strong> — par la voix et le corps. Les « techniques » que l'on présentera plus loin ne sont, pour la plupart, que des reformulations contemporaines de ces cinq canons. Les reconnaître comme telles, c'est déjà sortir du registre du gadget et entrer dans celui d'un savoir.</p>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Le partage éthique</div>
+        <p>Une même technique peut servir deux fins opposées. Capter l'attention, raconter, émouvoir : ces moyens permettent de <strong>convaincre</strong> — c'est-à-dire d'amener l'autre à partager une position pour de bonnes raisons, qu'il pourrait à son tour défendre ; ou de <strong>manipuler</strong> — c'est-à-dire de le faire adhérer ou agir contre son propre jugement, en le traitant comme un moyen au service d'une fin qui n'est pas la sienne.</p>
+        <p>Le critère ne réside pas dans le procédé, mais dans le rapport que l'on entretient avec autrui. Deux questions le résument : <em>est-ce que je m'expose à la contestation, ou est-ce que je la verrouille ? est-ce que je respecte la liberté de juger de l'autre, ou est-ce que je la contourne ?</em> Là où la parole laisse à celui qui la reçoit les moyens de dire non, elle reste éthique ; là où elle les lui retire, elle bascule. Tout ce qui suit se lit à la lumière de ce partage.</p>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§2</span>La parole est d'abord relation</h3>
+      <p class="reveal">Il existe une troisième voie, que la tradition oratoire connaissait et que les manuels d'efficacité oublient : la parole est, avant d'être un instrument, une <strong>relation</strong>. On ne parle jamais dans le vide. Tout énoncé s'adresse à quelqu'un, répond à ce qui l'a précédé, anticipe une réponse. « La parole est moitié à celui qui écoute » : la formule n'est pas une politesse, c'est une description. Le sens d'un discours ne se forme pas dans la seule tête de celui qui parle ; il se construit <em>entre</em> les interlocuteurs, et l'auditoire y a sa part. Celui qui l'oublie peut parler avec brio — il parle pourtant à côté.</p>
+
+      <p class="reveal">De cette nature relationnelle découle l'orientation de tout l'ouvrage. Le but le plus haut de la parole n'est pas d'imposer une idée, mais de la <em>partager</em> — de la faire exister dans un autre esprit, et d'accepter qu'en retour cet esprit nous réponde, voire nous fasse changer d'avis. C'est pourquoi l'écoute y occupera une place centrale, à égalité avec l'art de dire ; et c'est pourquoi l'éthique n'y sera pas un appendice moral plaqué à la fin, mais le fil qui traverse chaque dimension.</p>
+
+      <div class="pull reveal"><q>Parler, ce n'est pas vaincre un auditoire : c'est se rendre digne de son attention.</q></div>
+
+      <p class="reveal">Le parcours qui suit s'ordonne par dimensions, des plus matérielles aux plus hautes. On commencera par lever le mythe du don, qui paralyse avant même qu'on ait essayé (I), puis par l'instrument même de la parole — le corps et la voix (II). On étudiera l'architecture du discours (III), puis les moyens de la conviction (IV), avant de placer au cœur l'écoute et la relation (V). On abordera l'affirmation de soi comme un équilibre proprement éthique (VI), la présence d'esprit et l'à-propos (VII), enfin la matière première qu'est la langue (VIII). Une dernière section nouera l'ensemble autour de l'éthique de la parole (IX), qui en aura été, du premier au dernier mot, la basse continue.</p>
+    </div>
+
+    <div class="pagenav">
+      <span></span>
+      <a class="next" data-go="don"><small>Section I →</small><b>Le don n'existe pas</b></a>
+    </div>
+  </section>
+
+  <!-- ===== I LE DON ===== -->
+  <section class="page" id="don">
+    <div class="opener">
+      <span class="big">I</span>
+      <div class="kicker">Section I</div>
+      <h1>Le don n'existe pas</h1>
+      <p class="epigraph">Un discours improvisé a été réécrit trois fois.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">Croire au don de la parole est commode, car cette croyance dispense de travailler : si l'éloquence est innée, celui qui ne l'a pas reçue est exempté d'effort, et celui qui croit la posséder l'est tout autant. C'est une commodité trompeuse. L'observation des orateurs accomplis dément la légende du don. Ce qui passe pour une aisance naturelle est presque toujours le résidu d'un long travail devenu invisible. L'aisance n'est pas le point de départ de l'art oratoire ; elle en est le point d'arrivée — le moment où le travail, suffisamment accompli, cesse de se voir.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>L'éloquence comme métier</h3>
+      <p class="reveal">L'analogie la plus juste n'est donc pas celle de l'inspiration, mais celle de l'<strong>artisanat</strong> et du <strong>sport</strong>. On apprend à parler comme on apprend un geste technique : par la décomposition, la répétition, la correction, jusqu'à ce que le geste s'automatise et libère l'attention pour autre chose. Le musicien fait ses gammes non pour les jouer en concert, mais pour que ses doigts, devenus libres, servent la musique ; l'orateur travaille sa voix, sa structure, ses transitions, pour que son esprit, déchargé de ces soins, se consacre au sens et à l'auditoire. Cette idée, décevante pour qui rêvait de facilité, est en réalité la plus libératrice qui soit : si la parole se travaille, alors elle est <em>accessible</em>, et son inégale répartition n'est pas une fatalité de naissance mais le produit d'inégalités d'exposition, d'entraînement et d'encouragement — que le travail peut corriger.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>Le naturel, à l'oral, n'est pas l'absence de travail : c'est le travail rendu imperceptible.</p>
+      </div>
+
+      <p class="reveal">Cette conviction a une portée qui dépasse la technique. Faire de la parole un don, c'est en faire un privilège ; en faire un art qui s'apprend, c'est la rendre démocratique. Là où l'on croit au don, on laisse parler ceux qui ont toujours parlé, et l'on tient les autres pour incapables ; là où l'on sait que cela s'enseigne, on rend à chacun la possibilité de prendre la parole — et donc, dans une certaine mesure, le pouvoir qui s'y attache. La maîtrise du verbe n'est pas un ornement social : elle conditionne l'accès à la délibération, à la défense de ses intérêts, à la participation. Affirmer que le don n'existe pas n'est pas un slogan d'encouragement ; c'est une thèse sur la justice.</p>
+
+      <h3 class="reveal"><span class="hn">§2</span>Le paradoxe de l'improvisation</h3>
+      <p class="reveal">On oppose volontiers la spontanéité brillante au discours laborieusement préparé, comme si la première était le signe du don et le second l'aveu du manque. C'est une illusion, et l'une des plus tenaces. L'improvisation réussie n'est pas le contraire du travail : elle en est la forme la plus accomplie. « Improviser ne s'improvise pas. » Celui qui paraît trouver ses mots sur l'instant a, en vérité, accumulé des réserves — des idées arrêtées, des formules ciselées, des structures éprouvées — dans lesquelles il puise à vue, si vite que l'on croit à la trouvaille. Le mot fameux selon lequel « un discours improvisé a été réécrit trois fois » dit exactement cela : la spontanéité est une <em>disponibilité construite</em>, jamais une chance.</p>
+
+      <p class="reveal">Il faut en tirer une conséquence pratique sur la mémoire. Faut-il apprendre son discours par cœur, ou parler librement ? Les deux écueils sont connus : le par-cœur récité sonne mécanique et rompt le lien avec l'auditoire ; l'improvisation sans préparation s'égare et se répète. La voie juste tient en une règle simple : on mémorise <strong>l'ouverture et la chute</strong> — les deux moments où la moindre hésitation se paie cher — et l'on improvise le reste sur une <em>structure</em> solidement tenue. On fixe les points de passage ; on garde la liberté du tracé entre eux. Ainsi la préparation ne tue pas le naturel : elle le rend possible.</p>
+
+      <div class="methode reveal">
+        <div class="mt">Ce que « travailler sa parole » veut dire</div>
+        <ul>
+          <li><b>S'exposer régulièrement.</b> La compétence ne naît pas de la lecture mais de la pratique répétée : prendre la parole souvent, dans des cadres variés, et faire de chaque occasion un exercice.</li>
+          <li><b>S'observer en différé.</b> S'enregistrer, se filmer, se chronométrer : l'écart entre ce qu'on croit produire et ce qu'on produit effectivement ne se réduit que par l'observation de soi à froid.</li>
+          <li><b>Constituer des réserves.</b> Tenir en mémoire un fonds d'exemples, de chiffres rapportés au concret, d'anecdotes et de formules : c'est la matière première où puise l'improvisation.</li>
+          <li><b>Répéter jusqu'au naturel.</b> Un texte appris se récite ; il faut le répéter assez pour retrouver, par-dessus la mémoire, le ton vivant de la conversation.</li>
+          <li><b>Fixer les seuils.</b> Mémoriser au mot près l'entrée en matière et la conclusion ; laisser le corps du propos respirer dans l'improvisation guidée.</li>
+        </ul>
+      </div>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Une exigence, non une promesse</div>
+        <p>Affirmer que la parole se travaille, c'est refuser deux facilités symétriques : la résignation de qui se croit « mauvais orateur par nature », et la séduction des méthodes qui promettent un charisme en dix leçons. L'art oratoire n'offre pas de raccourci ; il offre une <em>discipline</em>, c'est-à-dire un chemin long mais sûr.</p>
+        <p>C'est précisément ce qui le sépare du développement personnel : celui-ci flatte en promettant une transformation rapide ; celui-là engage en demandant un travail durable. La première posture infantilise ; la seconde tient son lecteur pour un adulte capable d'effort. Il y a déjà, dans ce choix, une forme de respect.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="ouverture"><small>← Ouverture</small><b>La parole, un art</b></a>
+      <a class="next" data-go="instrument"><small>Section II →</small><b>L'instrument : le corps et la voix</b></a>
+    </div>
+  </section>
+
+  <!-- ===== II INSTRUMENT ===== -->
+  <section class="page" id="instrument">
+    <div class="opener">
+      <span class="big">II</span>
+      <div class="kicker">Section II</div>
+      <h1>L'instrument : le corps et la voix</h1>
+      <p class="epigraph">Un orateur est d'abord vu, ensuite entendu, et enfin seulement compris.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">Avant d'être un assemblage d'idées, la parole est un phénomène physique. Un souffle met une voix en vibration ; un corps occupe un espace, oriente un regard, marque un silence. Cette matérialité n'est pas le décor de la pensée : elle en est le véhicule, et parfois l'obstacle. On peut tenir le propos le plus juste et le rendre inaudible par une voix qui tremble, une posture qui se rétracte, un regard qui fuit. C'est la dernière des cinq opérations de la rhétorique — l'<span class="lat">actio</span>, le « jeu » de l'orateur — et les Anciens la tenaient pour si décisive qu'on prêtait à l'un d'eux, interrogé sur ce qui comptait le plus dans l'éloquence, cette réponse répétée trois fois : « le jeu, le jeu, le jeu ».</p>
+
+      <p class="reveal">L'ordre même de la perception en donne la raison. L'auditoire <em>voit</em> l'orateur avant de l'entendre, et l'<em>entend</em> avant de le comprendre. Les premières secondes ne se jouent donc pas sur les arguments — qui ne sont pas encore parvenus — mais sur la présence : la posture, l'assurance du souffle, la qualité du regard. Travailler l'instrument n'est pas se composer un personnage ni « faire de l'effet » ; c'est lever les obstacles physiques qui empêchent la pensée de passer, et accorder le corps au propos pour qu'il le serve au lieu de le démentir.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>La voix et le souffle</h3>
+      <p class="reveal">Tout part du <strong>souffle</strong>. La voix n'est qu'un souffle mis en forme ; sans une respiration ample, prise par le ventre plutôt que par le haut de la poitrine, elle reste courte, fragile, sujette au tremblement. La respiration profonde remplit une double fonction : elle alimente la voix en lui donnant assise et portée, et elle apaise le corps, car la même tension qui serre la gorge nourrit le trac. Apprendre à respirer, c'est donc à la fois gagner en présence vocale et en calme intérieur — les deux étant, physiologiquement, la même chose.</p>
+
+      <p class="reveal">Sur cette assise, trois réglages font la différence. Le premier est le <strong>débit</strong> : il est presque toujours, sous l'effet de la tension, trop rapide. Le ralentir sensiblement — et ralentir encore sur les idées difficiles, quitte à accélérer sur les exemples — donne au sens le temps de se déposer dans l'esprit de l'auditeur, qui ne dispose pas, comme le lecteur, du loisir de revenir en arrière. Le deuxième est la <strong>modulation</strong> : une voix qui ne varie ni de hauteur, ni de volume, ni de rythme endort, quel que soit le propos ; un discours se conduit comme une partition, où le relief naît du contraste. Le troisième est l'<strong>articulation</strong> : la clarté ne vient pas de la force mais de la netteté des consonnes, qui se travaille en exagérant à l'exercice ce qu'on atténuera en situation.</p>
+
+      <div class="methode reveal">
+        <div class="mt">Régler l'instrument vocal</div>
+        <ul>
+          <li><b>Respirer par le ventre.</b> Installer une colonne d'air basse et stable avant de parler ; c'est elle qui porte la voix et contient le trac.</li>
+          <li><b>Ralentir le débit.</b> Diminuer la vitesse spontanée, ralentir sur les idées complexes, accélérer sur les exemples : le rythme épouse la difficulté.</li>
+          <li><b>Moduler sans cesse.</b> Varier volume, hauteur et tempo ; fuir la monotonie qui éteint même un beau propos.</li>
+          <li><b>Articuler nettement.</b> Soigner surtout les premières consonnes ; la clarté est affaire de précision, non de puissance.</li>
+        </ul>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§2</span>Le corps, le regard, le silence</h3>
+      <p class="reveal">Le corps parle avant les mots, et il faut d'abord qu'il cesse de <em>contredire</em> le propos. La règle première est l'<strong>ancrage</strong> : des appuis stables — pieds posés, jambes non bloquées, dos droit, épaules ouvertes — libèrent le souffle et signalent le calme, là où le balancement, les bras refermés sur le torse et les mains cachées trahissent l'inquiétude. Les mains, justement, doivent rester visibles et disponibles : un geste ample, partant des épaules vers l'auditoire, accompagne et souligne ; un geste parasite — se gratter, jouer avec un objet — disperse.</p>
+
+      <p class="reveal">Le <strong>regard</strong> est l'organe du lien. C'est par lui que l'orateur sort de son monologue intérieur et rejoint l'auditoire : le porter sur les visages, le promener d'un point à un autre, c'est tenir la salle. À l'inverse, le regard fixé sur ses notes, sur le plafond ou sur le vide rompt le contact et signale l'absence. Tout regard qui n'est pas adressé est une part d'attention perdue — pour l'auditoire comme pour celui qui parle, car c'est aussi en regardant qu'on lit les réactions et qu'on ajuste.</p>
+
+      <p class="reveal">Reste le <strong>silence</strong>, le plus mésestimé des moyens. On le redoute comme un vide ou un trou de mémoire ; il est, bien employé, l'un des plus puissants outils de l'orateur. Il ponctue le discours comme la respiration ponctue la phrase ; il met en relief le mot qui le suit ou le précède ; il crée l'attente et capte l'attention mieux qu'aucune élévation de voix. Surtout, il remplace avantageusement les hésitations sonores — ces « euh » qui parasitent et trahissent — en signalant non le vide mais la maîtrise : celui qui sait se taire montre qu'il n'est pas débordé par sa parole.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>Le silence n'est pas l'interruption de la parole : il en fait partie, comme le blanc fait partie de la phrase.</p>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§3</span>Le trac, et ce qu'il faut en faire</h3>
+      <p class="reveal">Le trac n'est pas une anomalie à supprimer : il est la réponse normale d'un corps à un enjeu. Vouloir l'abolir est vain ; on peut, en revanche, le <em>canaliser</em>. Le nommer, d'abord — fût-ce intérieurement, parfois à voix haute —, le désamorce, car l'aveu de sa propre émotion désarme l'auditoire et lui donne envie d'aider plutôt que de juger. La respiration, ensuite, le tempère en agissant directement sur sa source physiologique. L'ancrage, enfin, le contient en donnant au corps une stabilité qui rejaillit sur l'esprit. Bien réglé, le trac cesse d'être un poison pour devenir un carburant : l'orateur sans aucune appréhension est souvent l'orateur sans aucune intensité.</p>
+
+      <div class="nuance reveal">
+        <div class="nt">Une nuance nécessaire</div>
+        <p>On entend répéter que « 7 % d'un message passerait par les mots, 38 % par la voix, 55 % par le corps ». Il faut s'arrêter sur ce chiffre, car son usage est presque toujours abusif. L'expérience dont il est tiré portait sur un cas très particulier : la perception de sentiments lorsque les mots <em>contredisent</em> le ton et l'expression. Elle ne dit nullement que, dans un discours d'idées, le contenu compterait pour 7 % — ce serait absurde : on ne transmet pas une démonstration par la seule posture.</p>
+        <p>Ce que cette donnée établit, correctement comprise, est plus modeste et plus juste : lorsqu'il y a <em>dissonance</em> entre ce qu'on dit et ce que montre le corps, c'est le corps qu'on croit. Autrement dit, le non-verbal conditionne la <strong>réception</strong> et la confiance ; les mots, eux, portent la <strong>substance</strong>. L'instrument sert le propos ; il ne le remplace jamais.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="don"><small>← Section I</small><b>Le don n'existe pas</b></a>
+      <a class="next" data-go="architecture"><small>Section III →</small><b>L'architecture du discours</b></a>
+    </div>
+  </section>
+
+  <!-- ===== III ARCHITECTURE ===== -->
+  <section class="page" id="architecture">
+    <div class="opener">
+      <span class="big">III</span>
+      <div class="kicker">Section III</div>
+      <h1>L'architecture du discours</h1>
+      <p class="epigraph">Ce que l'on conçoit clairement s'ordonne aisément, et les mots pour le dire viennent ensuite.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">Un discours n'est pas une suite d'idées : c'est une idée <em>conduite</em>. La rhétorique nommait <span class="lat">dispositio</span> cet ordre par lequel un propos mène l'auditeur d'un point à un autre, et la tenait pour aussi importante que l'invention même des arguments — car les meilleures idées mal disposées s'annulent, tandis qu'une idée simple bien conduite acquiert force et mémoire. Construire un discours, c'est anticiper le chemin que l'esprit de l'autre devra parcourir, et l'aménager de sorte qu'il ne se perde ni ne se lasse.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>L'unité avant tout : le fil conducteur</h3>
+      <p class="reveal">La première décision n'est pas de style mais d'<strong>unité</strong>. Avant de se demander comment bien dire, il faut savoir ce que l'on veut, au juste, que l'auditoire emporte. Un discours efficace tient à une seule idée directrice — un <em>fil conducteur</em> — auquel tout le reste se subordonne : exemples, digressions, traits d'esprit ne valent que reliés à elle. L'épreuve en est simple : pouvoir énoncer cette idée en une phrase. Ce qui ne s'y rattache pas, si séduisant soit-il, doit être retranché sans regret.</p>
+
+      <p class="reveal">Cette discipline du retranchement est la plus difficile, car elle exige de sacrifier ce à quoi l'on tient. Mais c'est là son prix et sa vertu : on gagne en force ce que l'on perd en variété. Un discours qui veut tout dire ne dit rien ; un discours qui tient un fil et le suit jusqu'au bout laisse une trace. La richesse apparente d'un propos foisonnant est souvent la marque d'une pensée qui n'a pas choisi ; la sobriété d'un propos tenu est celle d'une pensée qui sait ce qu'elle veut.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>Avant de chercher comment bien dire, il faut savoir ce que l'on veut qu'il reste.</p>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§2</span>Les moments du discours</h3>
+      <p class="reveal">L'ordre des parties a été fixé par une longue tradition, et l'on peut le reformuler sans le trahir : <strong>ouvrir, raconter, démontrer, répondre aux objections, conclure</strong>. Chacun de ces moments a une fonction propre, et les confondre fait perdre au discours sa progression. Le premier, surtout, est décisif — car c'est dans les premières secondes que se gagne ou se perd l'attention, dans une économie où elle est devenue le bien le plus rare.</p>
+
+      <div class="methode reveal">
+        <div class="mt">La fonction de chaque moment</div>
+        <ul>
+          <li><b>L'ouverture.</b> Sa tâche n'est ni de saluer ni de s'annoncer, mais de capter l'attention, d'établir un lien et de faire désirer la suite — par une question, un fait surprenant, une image, une histoire. C'est l'antique <span class="lat">exorde</span> et sa « conquête de bienveillance » : on ne réclame pas l'attention, on la mérite d'emblée.</li>
+          <li><b>La narration.</b> Incarner l'idée abstraite dans un récit ou un exemple concret. L'esprit retient une histoire mieux qu'une thèse : raconter, c'est faire entrer l'idée par l'expérience avant de la faire valoir par la preuve.</li>
+          <li><b>L'argumentation.</b> Disposer les preuves dans un ordre réfléchi — les plus fortes à l'entrée et à la sortie, les moindres au centre, là où l'attention faiblit naturellement. On commence et l'on finit sur du solide.</li>
+          <li><b>La réfutation.</b> Anticiper l'objection et y répondre soi-même, avant qu'un autre ne la formule. C'est se montrer honnête, occuper le terrain, et priver le contradicteur de son meilleur argument.</li>
+          <li><b>La conclusion.</b> Resserrer sur l'idée directrice et clore sans flottement — souvent en renouant avec l'image de l'ouverture, pour donner au discours la forme d'un cercle accompli. On ne termine jamais sur un « voilà » qui s'éteint.</li>
+        </ul>
+      </div>
+
+      <p class="reveal">L'ordre des arguments mérite qu'on s'y arrête, car il obéit à une logique de l'attention. Celle-ci n'est pas constante : forte au début, où la curiosité est neuve, elle décline au milieu, puis se ravive à l'approche de la fin, que l'on pressent. Disposer ses preuves en conséquence — encadrer les plus faibles par les plus fortes — n'est pas une ruse : c'est tenir compte de la manière dont un auditoire écoute réellement, et non de la manière dont on voudrait qu'il écoute.</p>
+
+      <div class="pull reveal"><q>Une idée juste sans ordre se dissipe ; une idée juste bien conduite se grave.</q></div>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Structurer n'est pas dissimuler</div>
+        <p>Anticiper l'objection, ménager son ouverture, ordonner ses preuves : ces soins peuvent servir la clarté — aider l'auditeur à suivre, à comprendre, à juger — ou la ruse — l'enfermer dans un parcours dont il ne perçoit pas les détours et qui lui interdit la sortie.</p>
+        <p>La probité consiste à rendre sa structure <em>traversable</em> : que l'auditeur puisse, à tout instant, savoir où on le mène, reconnaître les étapes, et refuser de suivre s'il le veut. Un discours honnête ne cache pas son architecture ; il la rend lisible. La différence entre conduire et égarer tient tout entière dans cette transparence.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="instrument"><small>← Section II</small><b>L'instrument</b></a>
+      <a class="next" data-go="convaincre"><small>Section IV →</small><b>Convaincre : logos, ethos, pathos</b></a>
+    </div>
+  </section>
+
+  <!-- ===== IV CONVAINCRE ===== -->
+  <section class="page" id="convaincre">
+    <div class="opener">
+      <span class="big">IV</span>
+      <div class="kicker">Section IV</div>
+      <h1>Convaincre : logos, ethos, pathos</h1>
+      <p class="epigraph">On ne touche pas un esprit par la seule rigueur : il faut aussi qu'il vous croie, et qu'il sente.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">La tradition oratoire a légué une analyse de la persuasion qui n'a pas vieilli, parce qu'elle décrit la manière dont un esprit humain se laisse, en fait, convaincre. On emporte l'adhésion par trois voies conjointes, les trois <span class="lat">pisteis</span> ou « moyens de preuve ». Par le <strong>logos</strong> — la solidité du raisonnement et des faits. Par l'<strong>ethos</strong> — le caractère qu'inspire celui qui parle, sa crédibilité, sa droiture perçue. Par le <strong>pathos</strong> — les émotions justes que le propos éveille. Aucune ne suffit seule : un argument vrai mais froid laisse indifférent ; une émotion sans raison s'évapore aussitôt éprouvée ; une autorité sans preuve finit par indisposer. L'art consiste à les tenir ensemble.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>Le logos, ou la preuve incarnée</h3>
+      <p class="reveal">Le <em>logos</em> ne se réduit pas à l'accumulation d'arguments. Il les <strong>ordonne</strong> — comme on l'a vu — et, surtout, il les <strong>incarne</strong>. Une preuve gagne à être appuyée sur un fait précis, illustrée par un exemple, mise en perspective par opposition à l'idée adverse. Car la conviction passe rarement par l'abstraction pure : on adhère à une idée quand on la <em>voit</em>. Une statistique reste lettre morte tant qu'on ne l'a pas rapportée à une échelle humaine ; un principe demeure inerte tant qu'un cas ne l'a pas rendu sensible. Le concret n'est pas l'ennemi de la rigueur : il en est le passeur.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>On ne persuade pas avec des concepts, mais avec des images qui les rendent visibles.</p>
+      </div>
+
+      <p class="reveal">De là découlent quelques mouvements éprouvés. On gagne à préparer le terrain avant d'asséner la thèse : une image, une histoire bien choisie rendent l'idée plausible, de sorte que l'auditeur l'accueille comme une évidence qu'il aurait pu former lui-même, et non comme une sommation venue du dehors. On gagne à procéder par degrés, en construisant l'idée difficile pas à pas, à partir de ce que l'auditeur sait déjà — et non de ce qu'il ignore. On gagne enfin à creuser d'abord la <em>question</em>, à faire sentir le manque, l'énigme, l'anomalie : car on n'écoute vraiment une réponse que si l'on s'est d'abord mis à désirer la question.</p>
+
+      <div class="methode reveal">
+        <div class="mt">Les ressorts de la conviction</div>
+        <ul>
+          <li><b>Préparer le terrain.</b> Amener la thèse par une image ou un récit qui la rende plausible, avant de l'énoncer ; l'auditeur l'accueille alors comme une évidence.</li>
+          <li><b>Procéder par degrés.</b> Construire l'idée difficile étape par étape, en partant du connu, sans présumer ce que l'auditeur ne sait pas — c'est déjouer la « malédiction du savoir », ce biais qui fait oublier à l'expert ce que le novice ignore.</li>
+          <li><b>Éveiller la curiosité.</b> Creuser une question, un manque, une énigme avant d'y répondre : le désir de comprendre précède l'attention à la réponse.</li>
+          <li><b>Varier les preuves.</b> Faits, chiffres rapportés à l'échelle humaine, témoignages, analogies : chaque type de preuve atteint un auditoire différent.</li>
+          <li><b>Soigner l'ethos.</b> La crédibilité se gagne par la cohérence entre ce qu'on dit et ce qu'on fait, et par l'aveu honnête de ses limites — jamais par le seul aplomb.</li>
+        </ul>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§2</span>L'ethos et le pathos, ou l'orateur et l'auditoire</h3>
+      <p class="reveal">L'<strong>ethos</strong> est ce que l'auditoire perçoit de celui qui parle — non sa valeur réelle, mais l'image de droiture, de compétence et de bienveillance qu'il dégage. Cette image ne se décrète pas par l'assurance : elle se construit par la <em>cohérence</em>. Rien ne ruine plus sûrement un discours que l'écart entre les mots et la conduite ; rien ne fonde mieux la confiance que l'aveu lucide de ce qu'on ignore ou de ce qui résiste à sa propre thèse. Reconnaître la part de vrai de l'adversaire, avouer une incertitude, n'affaiblit pas l'orateur : cela le crédite. L'ethos le plus solide n'est pas celui qui ne doute jamais, mais celui qui doute au bon endroit.</p>
+
+      <p class="reveal">Le <strong>pathos</strong> est l'émotion que le discours éveille, et c'est l'endroit le plus délicat de tout l'art. L'émotion n'est pas l'ennemie de la raison : elle est ce qui donne à une vérité son poids, ce qui fait qu'on ne se contente pas de l'admettre mais qu'on s'en soucie. Une injustice qu'on démontre sans la faire sentir reste une abstraction ; une injustice qu'on fait éprouver devient un motif d'agir. Émouvoir, ici, n'est pas tricher : c'est restituer à la vérité sa dimension vécue. Tout dépend de ce que l'émotion sert — et c'est précisément là que se joue le partage éthique.</p>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Convaincre, persuader, manipuler</div>
+        <p>Trois actes qu'il faut distinguer avec soin. <strong>Convaincre</strong> s'adresse à la raison et expose ses preuves à l'examen : l'autre peut les vérifier et les contester. <strong>Persuader</strong> mobilise aussi l'émotion et le caractère — ce qui est légitime tant que l'émotion <em>sert</em> la vérité du propos au lieu de s'y substituer. <strong>Manipuler</strong> commence là où l'on suscite une émotion <em>fausse</em>, où l'on dissimule ses prémisses, où l'on prive l'autre des moyens de juger.</p>
+        <p>Le critère pratique tient en une question : l'émotion que j'éveille <em>aide-t-elle</em> à voir ce qui est, ou <em>empêche-t-elle</em> de le penser ? Émouvoir pour faire sentir le vrai est le sommet de l'éloquence ; émouvoir pour court-circuiter le jugement — par la peur, la flatterie, l'indignation fabriquée — en est la contrefaçon. La même larme peut ouvrir les yeux ou les fermer.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="architecture"><small>← Section III</small><b>L'architecture du discours</b></a>
+      <a class="next" data-go="ecouter"><small>Section V →</small><b>Écouter : la parole comme relation</b></a>
+    </div>
+  </section>
+
+  <!-- ===== V ECOUTER ===== -->
+  <section class="page" id="ecouter">
+    <div class="opener">
+      <span class="big">V</span>
+      <div class="kicker">Section V · le cœur</div>
+      <h1>Écouter : la parole comme relation</h1>
+      <p class="epigraph">On ne comprend jamais vraiment tant qu'on ne peut redire à l'autre, à sa satisfaction, ce qu'il a voulu dire.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">Les manuels d'éloquence s'arrêtent souvent au seuil de l'écoute, comme si parler était l'essentiel et écouter un préliminaire poli. C'est l'erreur capitale, celle qui sépare l'art de la parole de l'art de l'emprise. Car la parole n'existe que dans une relation : tout énoncé s'adresse à quelqu'un, répond à ce qui précède, appelle une réponse à venir. L'auditoire n'est pas une cible passive sur laquelle on dirige des effets ; il est, selon le mot ancien, « pour moitié dans le discours ». Le négliger, c'est parler dans le vide, fût-ce avec éclat.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>Écouter est un acte</h3>
+      <p class="reveal">Écouter, au sens fort, n'est pas se taire en attendant son tour de parler — ce qui n'est qu'une politesse, et souvent une feinte. C'est un acte exigeant, qui mobilise autant d'énergie que la parole, et peut-être davantage. Il s'agit d'abord de saisir non seulement le contenu d'un propos, mais le <em>sentiment</em> qui le porte : sous les mots, il y a une intention, une émotion, parfois une demande que les mots déguisent. Répondre au seul contenu en ignorant l'affect, c'est passer à côté de l'essentiel — et l'autre le sent aussitôt.</p>
+
+      <p class="reveal">Il s'agit ensuite de suspendre le réflexe d'<strong>évaluer</strong> pour comprendre d'abord. Notre pente naturelle, dès qu'on nous parle, est de juger : approuver, contredire, conseiller. Or l'évaluation prématurée ferme la parole de l'autre, même quand elle est favorable — car être loué, c'est encore être jugé, donc être tenu de se conformer. Créer un climat sans menace, où l'autre peut se dire sans craindre la sentence, est la condition pour qu'il se dise vraiment. Il s'agit enfin de <strong>vérifier</strong> sa compréhension en la restituant : c'est la <em>reformulation</em>, l'épreuve même de l'écoute. On ne sait qu'on a compris que lorsque l'autre se reconnaît dans ce qu'on lui renvoie ; tant qu'il corrige, on n'avait pas encore compris.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>La première compétence de l'orateur n'est pas de bien dire, mais de bien entendre.</p>
+      </div>
+
+      <div class="methode reveal">
+        <div class="mt">Écouter, concrètement</div>
+        <ul>
+          <li><b>Viser le sens entier.</b> Percevoir, sous les mots, l'émotion et l'intention ; répondre parfois au sentiment plutôt qu'au seul contenu — c'est souvent là que l'autre attend d'être rejoint.</li>
+          <li><b>Reformuler.</b> Redire avec ses propres mots ce qu'on a compris du sens et du sentiment, et laisser l'autre corriger, jusqu'à ce qu'il se sente compris.</li>
+          <li><b>Suspendre le jugement.</b> Différer l'évaluation — même favorable —, car louer ou blâmer trop tôt referme l'échange ; comprendre d'abord, juger ensuite, s'il le faut.</li>
+          <li><b>Lire l'auditoire en parlant.</b> Ajuster son propos aux signes vivants de ceux qui écoutent ; le bon orateur ne récite pas, il converse, même seul à la tribune.</li>
+          <li><b>S'écouter écouter.</b> Repérer en soi les signes de l'impatience, de l'agacement, de la défense : on n'écoute autrui que dans la mesure exacte où l'on se connaît soi-même.</li>
+        </ul>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§2</span>Pourquoi la pensée elle-même est dialogue</h3>
+      <p class="reveal">Cette primauté de l'écoute n'est pas une exigence morale ajoutée du dehors ; elle tient à la nature même de la parole et de la pensée. Tout ce que nous disons est tissé des paroles d'autrui : nous parlons avec des mots qui ont déjà servi, nous répondons à des discours antérieurs, nous anticipons des objections que nous n'avons pas encore entendues. Notre pensée intérieure elle-même a la forme d'un dialogue — un débat de voix que nous avons d'abord entendues au-dehors, puis intériorisées. Nous ne pensons pas seuls : nous nous tenons à nous-mêmes un discours appris des autres. C'est pourquoi le regard d'autrui n'est pas un luxe, mais la condition de notre propre lucidité : il nous donne de nous-mêmes une vue que nous ne pouvons atteindre seuls.</p>
+
+      <p class="reveal">Il suit de là que comprendre autrui n'est ni se transposer naïvement en lui — comme si l'on pouvait sortir de soi — ni le réduire à ses propres mesures. C'est élargir son horizon jusqu'à ce qu'il rejoigne le sien, dans un échange où aucun des deux ne reste tout à fait ce qu'il était. La vraie conversation transforme ceux qui s'y engagent : on n'en sort pas identique à celui qu'on y est entré. Cette ouverture au fait que l'autre <em>puisse avoir raison</em> est la marque d'une écoute véritable — et l'exact contraire de la posture de celui qui n'écoute que pour mieux répliquer.</p>
+
+      <div class="pull reveal"><q>Se sentir écouté sans être jugé est l'une des expériences les plus transformatrices qui soient.</q></div>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Parler pour relier</div>
+        <p>C'est ici que l'art de la parole se sépare le plus nettement de l'art de l'emprise. Manipuler suppose de réduire l'autre à un objet prévisible, dont on anticipe et déclenche les réactions ; comprendre suppose au contraire de renoncer à le maîtriser, et d'accepter qu'il puisse, en retour, nous faire changer d'avis.</p>
+        <p>L'écoute introduit ainsi dans la parole une <strong>réciprocité</strong> : je m'expose autant que j'agis, je me rends vulnérable à ce que l'autre me dira. Une communication n'est pleinement humaine que lorsque chacun y demeure un sujet — un partenaire d'enquête —, et non l'instrument du dessein de l'autre. Le but le plus haut de la parole n'est pas d'imposer une vérité, mais de la chercher à deux : non pas convaincre <em>contre</em>, mais penser <em>avec</em>.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="convaincre"><small>← Section IV</small><b>Convaincre</b></a>
+      <a class="next" data-go="affirmer"><small>Section VI →</small><b>S'affirmer sans dominer</b></a>
+    </div>
+  </section>
+
+  <!-- ===== VI AFFIRMER ===== -->
+  <section class="page" id="affirmer">
+    <div class="opener">
+      <span class="big">VI</span>
+      <div class="kicker">Section VI</div>
+      <h1>S'affirmer sans dominer</h1>
+      <p class="epigraph">Dire ce que l'on pense sans écraser, entendre l'autre sans se renier.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">Il est une part de la parole qui ne relève ni du discours public ni de l'art de convaincre, et qui décide pourtant de la qualité de toute relation : la capacité à exprimer ce qu'on pense, ce qu'on ressent, ce dont on a besoin, sans agresser l'autre ni se soumettre à lui. On la nomme <strong>affirmation de soi</strong>. Elle paraît modeste au regard de l'éloquence des tribunes ; elle en est pourtant le fondement quotidien, car celui qui ne sait pas dire « non », poser une limite ou exprimer un désaccord ne possède pas vraiment sa parole, quel que soit son talent pour les grandes occasions.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>Un équilibre entre trois conduites</h3>
+      <p class="reveal">L'affirmation de soi se définit le mieux par ce qu'elle n'est pas — par les trois conduites qui s'opposent à elle et entre elles. La <strong>passivité</strong> tait son besoin et fait passer celui des autres avant le sien ; elle évite le conflit, mais au prix de soi, et l'on découvre que ce sacrifice n'achète ni l'estime ni la paix, seulement le ressentiment accumulé. L'<strong>agressivité</strong> impose son besoin en niant celui d'autrui ; elle obtient peut-être, mais au prix du lien, et fabrique autour d'elle la défiance. La <strong>manipulation</strong>, plus retorse, obtient par le détour ce qu'elle n'ose demander en face — par la culpabilisation, la plainte, le chantage affectif.</p>
+
+      <p class="reveal">L'affirmation de soi est le point d'équilibre entre ces écueils : elle défend ses droits <em>dans le respect</em> de ceux de l'autre. Ni soumise, ni dominatrice, ni biaisée, elle pose que les deux interlocuteurs ont une égale dignité, et donc un droit égal à dire ce qu'ils pensent et à être entendus. Elle n'est pas l'art d'avoir raison ; elle suppose même qu'on puisse avoir tort, et le reconnaître. Sa visée n'est pas la victoire mais la justesse de la relation : que chacun y existe sans que ce soit aux dépens de l'autre.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>S'affirmer, ce n'est pas avoir raison contre l'autre : c'est exister en face de lui sans le nier.</p>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§2</span>Les formes de la parole affirmée</h3>
+      <p class="reveal">Cette posture se traduit dans des manières de dire précises, dont la plus féconde est le <strong>message en « je »</strong>. Au lieu d'attribuer à l'autre un défaut — « tu es négligent », « tu ne m'écoutes jamais » —, qui le met aussitôt sur la défensive et déclenche la riposte, on décrit le fait et l'on exprime son propre ressenti : « lorsque cela se produit, je me sens… ». Le mécanisme est limpide : on ne parle plus de ce que l'autre <em>est</em>, jugement qu'il doit contester, mais de ce que l'on <em>éprouve</em>, fait qu'il ne peut nier. L'autre n'a plus à se défendre ; il peut entendre. Ce déplacement, du « tu » accusateur au « je » qui s'expose, est sans doute la plus grande économie de conflits que connaisse l'art de la parole.</p>
+
+      <div class="methode reveal">
+        <div class="mt">Les formes de la parole affirmée</div>
+        <ul>
+          <li><b>Le message en « je ».</b> Décrire le fait, exprimer son ressenti, formuler une demande, sans accuser ni prêter d'intention : « je ressens… quand… ; je préférerais… » plutôt que « tu es… ».</li>
+          <li><b>La demande explicite.</b> Énoncer clairement ce que l'on souhaite voir changer, et le bénéfice qu'on en attend, plutôt que de l'espérer en silence puis d'en vouloir à l'autre de n'avoir pas deviné.</li>
+          <li><b>Le refus tenu.</b> Savoir dire non, avec calme et sans se justifier indéfiniment ; répéter au besoin sans s'énerver. On n'a pas à fournir d'excuse pour disposer de soi.</li>
+          <li><b>L'accueil de la critique.</b> Ne pas la prendre pour une attaque de sa personne ; distinguer le reproche fait à un acte de celui fait à l'être ; en demander la précision, puis décider librement d'en tenir compte ou non.</li>
+        </ul>
+      </div>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>L'affirmation contre la manipulation</div>
+        <p>L'affirmation de soi est l'exact contraire de la manipulation, alors qu'on les confond parfois sous le nom vague d'« influence ». La manipulation obtient en contournant la conscience de l'autre — par la culpabilité, la séduction, la menace voilée ; elle réussit d'autant mieux qu'elle reste invisible. L'affirmation, elle, obtient ou renonce <em>à découvert</em> : elle dit ce qu'elle veut, expose ses raisons, et laisse l'autre pleinement libre de refuser.</p>
+        <p>C'est pourquoi elle est, de tout l'art de la parole, la dimension la plus directement morale. Elle ne repose pas sur une technique d'emprise, mais sur une conviction : que l'autre est mon égal, et que sa liberté de me dire non est la condition même d'un accord qui vaille. Là où la manipulation a besoin que l'autre ne voie pas, l'affirmation a besoin qu'il voie clair.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="ecouter"><small>← Section V</small><b>Écouter</b></a>
+      <a class="next" data-go="vive"><small>Section VII →</small><b>La parole vive</b></a>
+    </div>
+  </section>
+
+  <!-- ===== VII PAROLE VIVE ===== -->
+  <section class="page" id="vive">
+    <div class="opener">
+      <span class="big">VII</span>
+      <div class="kicker">Section VII</div>
+      <h1>La parole vive</h1>
+      <p class="epigraph">L'esprit de repartie, c'est l'art de penser deux fois en parlant une.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">Tout ne se prépare pas. La parole vive — celle de l'échange imprévu, de la question inattendue, de la contradiction soudaine — exige une autre qualité que la composition patiente : la <strong>présence d'esprit</strong>. On la prend volontiers pour une vivacité innée, un don du « tac au tac » que l'on aurait ou non. C'est, une fois encore, une illusion. L'à-propos se cultive, et il obéit à des principes qu'on peut nommer et exercer. Ceux qui semblent répondre sans effort sont ceux qui ont compris ces principes, et qui se sont entraînés à en faire des réflexes.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>Le temps que l'on croit ne pas avoir</h3>
+      <p class="reveal">Le premier principe est qu'il n'existe aucune obligation de répondre <em>à l'instant</em>. La hantise du tac au tac paralyse plus qu'elle n'aide : à vouloir riposter dans la seconde, on dit n'importe quoi. Or le temps se gagne sans qu'il y paraisse — par un silence assumé, par la reformulation de la question, par une demande de précision. Reformuler n'est pas se dérober : c'est s'assurer du sens de ce qui est demandé, et se donner, dans le même geste, le délai de penser. Mieux vaut une réponse juste différée d'une seconde qu'une riposte vive et fausse, que l'on regrettera. Le silence, ici encore, est un allié : il fait paraître réfléchi celui qui le tient, là où la précipitation fait paraître débordé.</p>
+
+      <h3 class="reveal"><span class="hn">§2</span>La bataille des cadres</h3>
+      <p class="reveal">Le second principe touche au <strong>cadre</strong>. Une question, une attaque enferment souvent dans des termes qu'on n'a pas choisis : elles présupposent ce qu'elles feignent de demander, et y répondre tels quels, c'est déjà avoir cédé l'essentiel. L'exemple classique est la question qui contient son piège — « pourquoi avez-vous échoué ? » suppose l'échec avant de le faire reconnaître. L'agilité consiste à percevoir ce cadre imposé, à se demander <em>« qu'est-ce qu'on cherche à me faire dire ? »</em>, et, au besoin, à le déplacer : élargir la question, la recentrer sur ce qui compte vraiment, en exposer le présupposé. Ce n'est pas une esquive — l'esquive fuit la question —, c'est une reprise : on rétablit les termes justes du débat avant d'y entrer.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>Avant d'être une bataille de mots, la repartie est une bataille de cadres.</p>
+      </div>
+
+      <div class="methode reveal">
+        <div class="mt">L'art de l'à-propos</div>
+        <ul>
+          <li><b>Gagner du temps sans le montrer.</b> Marquer un silence, reformuler la question, en demander une précision : autant de délais légitimes pour penser, qui passent pour de la maîtrise.</li>
+          <li><b>Examiner le cadre.</b> Repérer le présupposé d'une question piège avant d'y répondre ; le nommer et le déplacer plutôt que le subir.</li>
+          <li><b>Préparer la spontanéité.</b> Anticiper les objections probables et tenir prêtes quelques réponses : l'« esprit de l'escalier » — la réplique qui ne vient qu'après coup — se déjoue par la préparation, non par le génie.</li>
+          <li><b>Répondre clair et court.</b> Une réponse vive est claire, courte, concrète ; la longueur dilue et expose, la concision frappe et protège.</li>
+        </ul>
+      </div>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>L'à-propos sans l'humiliation</div>
+        <p>La parole vive a sa tentation propre : la pointe qui blesse, le trait qui ridiculise, la victoire arrachée aux dépens de l'autre. Elle est d'autant plus tentante qu'elle est gratifiante sur l'instant — on jouit d'avoir « eu » son contradicteur. Mais c'est un gain trompeur : l'auditoire qui rit d'une humiliation s'en méfie aussitôt, et reporte sur celui qui l'inflige le malaise qu'elle suscite.</p>
+        <p>La repartie la plus haute n'écrase pas l'adversaire : elle déplace le terrain, rétablit la justesse, et lui laisse une issue. L'esprit, ici, se mesure moins à la capacité de faire mal qu'à celle de garder, dans la vivacité même, la maîtrise de soi. Le sommet de l'à-propos n'est pas la cruauté rapide — c'est la liberté gardée sous la pression.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="affirmer"><small>← Section VI</small><b>S'affirmer sans dominer</b></a>
+      <a class="next" data-go="mot"><small>Section VIII →</small><b>Le mot juste</b></a>
+    </div>
+  </section>
+
+  <!-- ===== VIII MOT JUSTE ===== -->
+  <section class="page" id="mot">
+    <div class="opener">
+      <span class="big">VIII</span>
+      <div class="kicker">Section VIII</div>
+      <h1>Le mot juste</h1>
+      <p class="epigraph">L'affadissement du langage va de pair avec l'appauvrissement des idées.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">On a longtemps tenu la richesse du vocabulaire pour un ornement — une élégance de surface, voire une coquetterie. C'est une méprise, et lourde de conséquences. Le mot n'habille pas une pensée qui existerait avant lui ; il la rend possible. Nous ne pensons pas d'abord pour mettre ensuite en mots : c'est dans les mots, et grâce à eux, que la pensée se forme et se précise. Qui ne dispose que de termes vagues — les universels « être », « avoir », « faire », « chose », « truc » — ne pense que vaguement, non par paresse mais par défaut d'outils. La précision de la langue et la précision de l'esprit montent et descendent ensemble.</p>
+
+      <p class="reveal">De là une conséquence que les Anciens connaissaient et que l'on redécouvre : appauvrir la langue, c'est appauvrir la pensée, et ce mouvement n'est jamais innocent. Là où les mots manquent, les distinctions s'effacent ; là où les distinctions s'effacent, le jugement s'émousse. Travailler son vocabulaire n'est donc pas se parer pour « parler bien » : c'est aiguiser son discernement, se rendre capable de saisir et de dire des nuances que les mots grossiers laissent échapper. C'est, au sens propre, penser mieux.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>Les deux défauts que l'oral trahit</h3>
+      <p class="reveal">À l'oral, où l'on ne peut ni effacer ni reprendre, deux défauts trahissent immédiatement la pauvreté lexicale. Le premier est la <strong>répétition</strong> : le même mot revient parce qu'on n'en connaît pas d'autre, et cette insistance involontaire alourdit le propos et lasse l'oreille. Le second, plus grave, est l'<strong>impropriété</strong> : l'emploi d'un terme approchant à la place du terme exact, parce que le mot juste manquait au moment voulu. L'un et l'autre s'entendent ; l'un et l'autre se corrigent — non par l'étalage de mots rares, mais par la fréquentation patiente de la langue, qui met à disposition, le moment venu, le terme précis plutôt que l'à-peu-près.</p>
+
+      <div class="principe reveal">
+        <div class="pl">Principe</div>
+        <p>Chercher le mot juste, ce n'est pas enjoliver : c'est refuser le flou de l'à-peu-près.</p>
+      </div>
+
+      <div class="methode reveal">
+        <div class="mt">Enrichir et préciser la langue</div>
+        <ul>
+          <li><b>Aller de l'idée au mot.</b> Un dictionnaire analogique — qui regroupe les mots non par ordre alphabétique mais par idées — répond au cas le plus fréquent à l'oral : on a l'idée, on cherche le terme exact.</li>
+          <li><b>Cultiver la nuance.</b> Pour une même notion, disposer de la gamme entière, du mot courant au terme rare, et choisir selon le sens précis voulu et le registre de l'auditoire.</li>
+          <li><b>Bannir les mots vides.</b> Traquer « être », « avoir », « faire », « chose », « truc » : chacun masque un terme plus exact qu'un peu d'effort fait remonter.</li>
+          <li><b>Garder la justesse, non la rareté.</b> Le mot juste n'est pas le mot savant : c'est celui qui dit exactement la chose, fût-il le plus simple. La pédanterie est l'inverse de la précision.</li>
+        </ul>
+      </div>
+
+      <div class="ethique reveal">
+        <div class="et"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>La précision comme honnêteté</div>
+        <p>Le flou du langage n'est pas neutre : il est souvent commode. Il permet de ne pas s'engager, de laisser entendre sans affirmer, de promettre sans rien dire, de séduire sans se compromettre. Le vague est le refuge de qui ne veut pas être tenu pour ce qu'il dit. La recherche du mot exact est, à l'inverse, une forme de probité : elle oblige à savoir ce que l'on pense, et à le soumettre clairement au jugement de l'autre.</p>
+        <p>Bien nommer les choses est ainsi plus qu'une élégance : c'est une manière de respecter celui qui écoute, en lui donnant prise sur ce qu'on avance. Une parole précise s'offre à la contestation ; une parole floue s'y dérobe. Il y a, dans le mot juste, une éthique discrète : celle de qui consent à dire exactement, donc à pouvoir être contredit.</p>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="vive"><small>← Section VII</small><b>La parole vive</b></a>
+      <a class="next" data-go="ethique"><small>Section IX →</small><b>Une éthique de la parole</b></a>
+    </div>
+  </section>
+
+  <!-- ===== IX ETHIQUE ===== -->
+  <section class="page" id="ethique">
+    <div class="opener">
+      <span class="big">IX</span>
+      <div class="kicker">Section IX</div>
+      <h1>Une éthique de la parole</h1>
+      <p class="epigraph">La parole est action, ou elle n'est rien.</p>
+    </div>
+    <div class="prose">
+      <p class="dropcap reveal">Au terme de ce parcours, les dimensions de l'art oratoire se laissent rassembler en une figure cohérente. Parler est un acte du <em>corps</em> autant que de l'esprit ; un acte <em>construit</em>, qui ordonne la pensée pour la rendre audible ; un acte de <em>conviction</em>, qui mêle la raison, le caractère et l'émotion ; un acte de <em>relation</em>, qui n'a de sens que tourné vers un autre et ouvert à sa réponse ; un acte enfin <em>responsable</em>, dont on répond. C'est ce dernier trait qui donne à tous les autres leur mesure, et qui aura été, d'un bout à l'autre, la basse continue de cet ouvrage.</p>
+
+      <h3 class="reveal"><span class="hn">§1</span>La ligne de partage</h3>
+      <p class="reveal">Car le même savoir-faire sert deux usages opposés, et c'est ce qui rend l'art de la parole moralement sérieux. Les mêmes ressorts — capter l'attention, raconter, émouvoir, structurer, répondre — permettent d'éclairer ou d'abuser, de relier ou d'asservir. Aucune technique, prise en elle-même, ne tranche : le silence peut donner à penser ou imposer un malaise, le récit peut faire comprendre ou détourner, l'émotion peut ouvrir les yeux ou les fermer. La ligne de partage ne passe pas entre les procédés, mais à l'intérieur de chacun — dans le rapport que l'on entretient avec celui qui écoute. La voici, telle qu'elle a traversé chaque section.</p>
+
+      <div class="methode reveal">
+        <div class="mt">La ligne de partage</div>
+        <ul>
+          <li><b>S'exposer plutôt que verrouiller.</b> Avancer des raisons que l'autre peut examiner et contester, non des certitudes qu'on lui interdit de discuter.</li>
+          <li><b>Émouvoir le vrai, non le faux.</b> Faire sentir ce qui est, pour aider à le penser — jamais susciter une émotion fabriquée pour empêcher de penser.</li>
+          <li><b>Demander à découvert.</b> Dire ce que l'on veut et laisser l'autre libre de refuser, plutôt que d'obtenir par le détour ce qu'on n'ose réclamer en face.</li>
+          <li><b>Écouter autant que dire.</b> Accepter que la parole soit réciproque, et qu'elle puisse, en retour, nous changer ; demeurer, l'un et l'autre, des sujets et non des moyens.</li>
+        </ul>
+      </div>
+
+      <h3 class="reveal"><span class="hn">§2</span>L'alternative</h3>
+      <p class="reveal">Telle est l'<strong>alternative</strong> que cet ensemble voulait soutenir, contre la littérature de l'influence à tout prix qui réduit la parole à une mécanique de capture. La parole peut être un instrument de domination — l'histoire ne le montre que trop, et les démagogues n'ont jamais manqué de talent. Mais elle est aussi, et plus noblement, le moyen par lequel des esprits parviennent à <em>penser ensemble</em> : à confronter leurs raisons, à corriger leurs erreurs, à former en commun un jugement qu'aucun n'aurait atteint seul. C'est cette seconde vocation que l'art oratoire, bien compris, sert et protège.</p>
+
+      <p class="reveal">Bien parler, au sens plein, ce n'est donc pas l'art de faire céder : c'est l'art de se rendre digne de l'attention d'autrui, et de la lui rendre. La maîtrise technique n'y est jamais une fin — seulement le moyen d'une parole plus claire, plus juste, et plus respectueuse de celui qu'elle vise. L'orateur accompli n'est pas celui qui l'emporte toujours ; c'est celui qui, l'emportât-il, laisse à l'autre sa liberté entière.</p>
+
+      <div class="pull reveal"><q>Le critère de l'éloquence n'est pas qu'elle l'emporte, mais qu'elle laisse l'autre libre.</q></div>
+
+      <p class="reveal">Reste l'essentiel, qui ne s'enseigne pas mais se cultive : avoir quelque chose à dire. Toutes les méthodes du monde ne suppléent pas à l'absence de pensée ; elles n'ajoutent rien à qui n'a rien à transmettre, et peuvent même, en habillant le vide, le rendre plus trompeur. Les techniques ne valent que portées par une intention sincère et un propos qui mérite d'être partagé. L'art commence là où le procédé s'efface devant ce qu'il sert — et la plus haute éloquence est celle qu'on oublie, parce qu'on n'a retenu que ce qu'elle disait.</p>
+
+      <div class="biblio reveal">
+        <h3>Repères</h3>
+        <p class="bs">Pour qui veut remonter aux sources de cet art.</p>
+        <ul>
+          <li><b>Aristote</b>, <em>Rhétorique</em> (IV<sup>e</sup> siècle av. J.-C.).</li>
+          <li><b>Cicéron</b>, <em>De l'orateur</em> (55 av. J.-C.).</li>
+          <li><b>Quintilien</b>, <em>Institution oratoire</em> (I<sup>er</sup> siècle).</li>
+          <li><b>Olivier Reboul</b>, <em>Introduction à la rhétorique</em> (1991).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pagenav">
+      <a data-go="mot"><small>← Section VIII</small><b>Le mot juste</b></a>
+      <a class="next" data-go="ouverture"><small>Retour →</small><b>Au commencement</b></a>
+    </div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];
+const links=[...document.querySelectorAll('.nav-link')];
+function go(id){
+  const pg=document.getElementById(id); if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));
+  pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);
+  window.scrollTo({top:0,behavior:'instant'});
+  closeMenu();
+  requestAnimationFrame(()=>revealScan(pg));
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+
+const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeMenu(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('menuBtn').onclick=()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show');};
+scrim.onclick=closeMenu;
+
+const tBtn=document.getElementById('themeBtn'),tIcon=document.getElementById('themeIcon');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;
+tBtn.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');tIcon.innerHTML=dark?sun:moon;};
+
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.1});
+function revealScan(scope){(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}
+revealScan();
+
+const bar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+
+const start=location.hash.replace('#','');
+if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

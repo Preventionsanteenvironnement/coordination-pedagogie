@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La réflexivité</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  --paper:#f4efe4;
+  --paper2:#ece5d6;
+  --card:#fbf8f1;
+  --ink:#23252f;
+  --ink-soft:#3f4250;
+  --muted:#797b8a;
+  --primary:#143a63;
+  --primary-2:#1d5290;
+  --accent:#9c6b2f;
+  --accent-2:#b9863f;
+  --rouge:#7d3b35;
+  --teal:#2c5d59;
+  --line:rgba(35,37,47,.14);
+  --line-soft:rgba(35,37,47,.08);
+  --shadow:0 22px 60px -30px rgba(20,58,99,.5);
+  --shadow-sm:0 10px 30px -20px rgba(20,58,99,.45);
+  --serif:'Fraunces',Georgia,serif;
+  --body:'Spectral',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --measure:42rem;
+  --gutter:15rem;
+}
+[data-theme="dark"]{
+  --paper:#0e1016;
+  --paper2:#13161f;
+  --card:#171b25;
+  --ink:#e8e6dd;
+  --ink-soft:#c2c2cf;
+  --muted:#8a8c9c;
+  --primary:#8bb6ea;
+  --primary-2:#a9cdf4;
+  --accent:#d2a05c;
+  --accent-2:#e0b06a;
+  --rouge:#d28a82;
+  --teal:#6cbab2;
+  --line:rgba(232,230,221,.15);
+  --line-soft:rgba(232,230,221,.08);
+  --shadow:0 26px 70px -34px rgba(0,0,0,.85);
+  --shadow-sm:0 12px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-size:18.5px;line-height:1.74;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+  transition:background .4s,color .4s}
+h1,h2,h3,h4,h5{font-family:var(--serif);line-height:1.15;font-weight:600;margin:0;letter-spacing:-.012em}
+::selection{background:var(--accent);color:#fff}
+em{font-style:italic}
+
+/* ===================== PROGRESS ===================== */
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:200;
+  background:linear-gradient(90deg,var(--accent),var(--rouge))}
+
+/* ===================== TOPBAR ===================== */
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;z-index:120;display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand .mk{width:32px;height:32px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;color:#fff;
+  font-family:var(--serif);font-weight:700;background:linear-gradient(140deg,var(--primary),var(--accent));box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.01em}
+.brand small{display:block;font-family:var(--sans);font-weight:500;font-size:10.5px;color:var(--muted);
+  letter-spacing:.18em;text-transform:uppercase;margin-top:1px}
+.spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-btn{display:none}
+
+/* ===================== LAYOUT ===================== */
+.shell{display:flex;min-height:100vh;padding-top:60px}
+.sidebar{width:282px;flex:0 0 auto;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  padding:24px 14px 50px;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.toc-title{font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  margin:8px 14px 14px;font-weight:600}
+.nav-link{display:flex;align-items:baseline;gap:12px;padding:9px 14px;border-radius:9px;color:var(--ink-soft);
+  text-decoration:none;cursor:pointer;transition:.16s;font-family:var(--sans);font-size:14px;font-weight:500;line-height:1.3}
+.nav-link .rn{font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--accent);flex:0 0 26px;opacity:.85}
+.nav-link:hover{background:color-mix(in srgb,var(--accent) 11%,transparent);color:var(--ink)}
+.nav-link.active{background:var(--primary);color:#fff}
+.nav-link.active .rn{color:#fff;opacity:.9}
+[data-theme="dark"] .nav-link.active{color:#0e1016}
+[data-theme="dark"] .nav-link.active .rn{color:#0e1016}
+
+.content{flex:1;min-width:0}
+.wrap{max-width:60rem;margin:0 auto;padding:50px 40px 100px}
+
+/* ===================== PAGES ===================== */
+.page{display:none;animation:fade .5s ease both}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* page head */
+.phead{margin-bottom:34px;position:relative}
+.sec-num{font-family:var(--serif);font-weight:300;font-size:clamp(3rem,9vw,6rem);line-height:.8;
+  color:var(--accent);opacity:.16;position:absolute;top:-14px;right:0;pointer-events:none}
+.kicker{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.kicker::before{content:"";width:30px;height:1.5px;background:var(--accent)}
+.ptitle{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:600;max-width:20ch;letter-spacing:-.02em}
+.psub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2vw,1.35rem);color:var(--ink-soft);
+  margin-top:14px;max-width:48ch;font-weight:400;line-height:1.5}
+
+/* prose with sidenote gutter */
+.prose{max-width:var(--measure)}
+.prose p{margin:0 0 22px}
+.prose h3{font-size:1.45rem;margin:46px 0 4px;font-weight:600;color:var(--ink)}
+.prose h3 .h-n{color:var(--accent);font-weight:500;margin-right:.5rem}
+.prose h4{font-size:1.12rem;font-family:var(--serif);margin:30px 0 2px;color:var(--primary)}
+[data-theme="dark"] .prose h4{color:var(--primary-2)}
+.prose .sub{color:var(--muted);font-style:italic;margin:2px 0 18px;font-size:1rem}
+.dropcap::first-letter{font-family:var(--serif);font-weight:600;float:left;font-size:4.4rem;line-height:.82;
+  padding:6px 12px 0 0;color:var(--primary)}
+[data-theme="dark"] .dropcap::first-letter{color:var(--primary-2)}
+strong{font-weight:600;color:var(--ink)}
+.term{font-style:italic;color:var(--primary);font-weight:500}
+[data-theme="dark"] .term{color:var(--primary-2)}
+
+/* sidenote (margin note) */
+.sidenote{display:block;margin:14px 0;padding:14px 16px;background:var(--card);border:1px solid var(--line-soft);
+  border-left:2px solid var(--accent);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:13px;line-height:1.55;
+  color:var(--muted)}
+.sidenote b{color:var(--ink-soft);font-weight:600}
+.sidenote .sn-k{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;font-weight:600}
+
+/* definition / repère box */
+.def{background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 6%,transparent),transparent);
+  border:1px solid var(--line);border-top:3px solid var(--primary);border-radius:12px;padding:22px 24px;margin:26px 0}
+.def .dt{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);
+  font-weight:700;margin-bottom:8px}
+[data-theme="dark"] .def .dt{color:var(--primary-2)}
+.def p{margin:0;font-size:17px}
+.def p+p{margin-top:12px}
+
+/* controverse box */
+.contro{background:color-mix(in srgb,var(--rouge) 7%,transparent);border:1px solid color-mix(in srgb,var(--rouge) 26%,transparent);
+  border-radius:12px;padding:22px 24px;margin:26px 0}
+.contro .ct{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--rouge);
+  font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.contro p{margin:0;font-size:16.5px}
+
+/* pull quote */
+.pull{margin:40px 0;padding:6px 0 6px 28px;border-left:3px solid var(--accent)}
+.pull q{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(1.35rem,2.6vw,1.7rem);
+  line-height:1.4;quotes:none;color:var(--ink)}
+.pull q::before{content:"“";color:var(--accent)}.pull q::after{content:"”";color:var(--accent)}
+
+/* abstract */
+.abstract{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin:30px 0 10px;
+  box-shadow:var(--shadow-sm)}
+.abstract .at{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);
+  font-weight:700;margin-bottom:10px}
+.abstract p{margin:0;font-size:17px;color:var(--ink-soft)}
+
+/* cover */
+.cover{position:relative;border-radius:20px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;margin-bottom:8px;box-shadow:var(--shadow)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(150deg,#0c2742,#143a63 55%,#2c2f4e)}
+.cover::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.4;
+  background:radial-gradient(38% 46% at 80% 18%,rgba(156,107,47,.6),transparent 60%),
+            radial-gradient(40% 42% at 14% 90%,rgba(125,59,53,.5),transparent 62%)}
+.cover .kicker{color:var(--accent-2)}.cover .kicker::before{background:var(--accent-2)}
+.cover h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:600;max-width:18ch;letter-spacing:-.02em}
+.cover .csub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);color:rgba(255,255,255,.85);
+  margin-top:16px;max-width:40ch}
+.cover .meta{font-family:var(--sans);font-size:12.5px;letter-spacing:.06em;color:rgba(255,255,255,.6);margin-top:28px;
+  display:flex;flex-wrap:wrap;gap:8px 22px}
+
+/* concept grid (lexique) */
+.lex{display:grid;gap:0}
+.lex-item{padding:24px 0;border-bottom:1px solid var(--line)}
+.lex-item:last-child{border:0}
+.lex-item h4{font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--primary);margin-bottom:2px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+[data-theme="dark"] .lex-item h4{color:var(--primary-2)}
+.lex-item .etym{font-family:var(--body);font-style:italic;font-size:.92rem;color:var(--muted);font-weight:400}
+.lex-item p{margin:8px 0 0;max-width:62rem;font-size:16.5px;color:var(--ink-soft)}
+/* bibliographie */
+.biblio{margin-top:50px;padding-top:32px;border-top:1px solid var(--line);max-width:62rem}
+.biblio-t{font-size:1.5rem;font-weight:600;margin-bottom:6px}
+.biblio-sub{font-family:var(--body);font-style:italic;color:var(--muted);margin:0 0 18px;font-size:1rem}
+.biblio ul{list-style:none;margin:0;padding:0}
+.biblio li{font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink-soft);padding:11px 0 11px 24px;position:relative;border-bottom:1px solid var(--line-soft)}
+.biblio li:last-child{border-bottom:0}
+.biblio li::before{content:"—";position:absolute;left:0;color:var(--accent)}
+.biblio li b{font-weight:600;color:var(--ink)}
+.biblio li em{font-style:italic}
+
+/* page nav */
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line);max-width:62rem}
+.pagenav a{flex:1;padding:18px 22px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--card);
+  transition:.2s;cursor:pointer;font-family:var(--sans)}
+.pagenav a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.pagenav b{display:block;font-family:var(--serif);font-size:1.04rem;font-weight:600;margin-top:4px}
+.pagenav .next{text-align:right}
+.foot{color:var(--muted);font-family:var(--sans);font-size:12.5px;text-align:center;padding:30px;border-top:1px solid var(--line);line-height:1.7}
+
+.scrim{position:fixed;inset:0;background:rgba(8,10,16,.5);z-index:110;opacity:0;pointer-events:none;transition:.3s}
+.scrim.show{opacity:1;pointer-events:auto}
+
+/* sidenote floats into right gutter on wide screens */
+@media(min-width:1320px){
+  .wrap{max-width:64rem}
+  .prose{position:relative}
+  .sidenote{float:right;clear:right;width:14rem;margin:.35rem calc(-14rem - 1.8rem) 1rem 1.8rem;
+    background:transparent;border-left:2px solid var(--accent);border-radius:0;padding:2px 0 2px 14px}
+}
+
+@media(max-width:900px){
+  .menu-btn{display:grid}
+  .sidebar{position:fixed;left:0;top:60px;transform:translateX(-100%);transition:.35s;z-index:115;width:300px;box-shadow:var(--shadow)}
+  .sidebar.open{transform:none}
+  .wrap{padding:36px 22px 80px}
+  .pagenav{flex-direction:column}
+}
+@media(max-width:560px){
+  body{font-size:17px}
+  .brand small{display:none}
+  .cover{padding:30px 22px;border-radius:16px}
+  .dropcap::first-letter{font-size:3.6rem}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Sommaire">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <div class="brand" data-go="ouverture">
+    <div class="mk">R</div>
+    <div><b>La réflexivité</b></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Thème">
+    <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="toc-title">Sommaire</div>
+    <a class="nav-link" data-go="ouverture"><span class="rn">0</span> Le problème de la réflexivité</a>
+    <a class="nav-link" data-go="genealogie"><span class="rn">I</span> Généalogie du concept</a>
+    <a class="nav-link" data-go="epistemologie"><span class="rn">II</span> La critique de la rationalité technique</a>
+    <a class="nav-link" data-go="dialogique"><span class="rn">III</span> La structure dialogique de la pensée</a>
+    <a class="nav-link" data-go="critique"><span class="rn">IV</span> Réflexion critique et transformation</a>
+    <a class="nav-link" data-go="fondements"><span class="rn">V</span> Les fondements du dialogue</a>
+    <a class="nav-link" data-go="politique"><span class="rn">VI</span> Portée critique et politique</a>
+    <a class="nav-link" data-go="controverses"><span class="rn">VII</span> Controverses et limites</a>
+    <a class="nav-link" data-go="synthese"><span class="rn">VIII</span> Synthèse</a>
+    <a class="nav-link" data-go="lexique"><span class="rn">IX</span> Lexique analytique</a>
+  </aside>
+
+  <main class="content">
+  <div class="wrap">
+
+  <!-- ============ 0 OUVERTURE ============ -->
+  <section class="page active" id="ouverture">
+    <div class="cover reveal">
+      <h1>La réflexivité, ou l'art de se rendre étranger à ses propres évidences</h1>
+      <p class="csub">Genèse, mécanismes et controverses d'une notion.</p>
+    </div>
+
+    <div class="abstract reveal">
+      <div class="at">Résumé</div>
+      <p>On se propose d'examiner la notion de réflexivité non comme un « outil » de développement personnel, mais comme un <em>problème</em> théorique. Derrière l'apparente évidence du mot — réfléchir sur ce que l'on fait — se cache une longue histoire conceptuelle, une épistémologie de l'action et une thèse forte sur la nature de la pensée. L'hypothèse directrice est la suivante : loin d'être un repli solitaire de la conscience sur elle-même, la réflexivité possède une <strong>structure fondamentalement dialogique et sociale</strong>. On en suivra la généalogie, on en exposera les mécanismes, puis on en interrogera les limites.</p>
+    </div>
+
+    <div class="phead reveal" style="margin-top:46px">
+      <span class="sec-num">0</span>
+      <div class="kicker">Ouverture</div>
+      <h2 class="ptitle">Le problème de la réflexivité</h2>
+      <p class="psub">Pourquoi un mot apparemment simple constitue un véritable objet d'analyse.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">La réflexivité est partout. On l'exige du soignant, de l'enseignant, du cadre, du travailleur social ; elle figure dans les référentiels de compétences, structure les dispositifs d'analyse de pratiques, sert d'horizon à la formation continue. Cette omniprésence est précisément ce qui doit éveiller la vigilance : un terme aussi sollicité risque de se vider de sa substance et de fonctionner comme un mot d'ordre — une <em>injonction</em> dont on ne sait plus très bien ce qu'elle recouvre. Restituer à la réflexivité son épaisseur conceptuelle suppose donc d'abord de la dégager de son usage incantatoire.</p>
+
+      <p class="reveal">Une difficulté tient à la <strong>polysémie</strong> du terme. L'étymologie en livre déjà la tension : <em>reflectere</em>, « plier en arrière », « retourner » ; la même racine donne le <em>speculum</em>, le miroir. Réfléchir, c'est faire revenir la pensée sur son propre parcours. Mais sur quoi, exactement, porte ce retour ?</p>
+
+      <div class="def reveal">
+        <div class="dt">Distinction liminaire</div>
+        <p><strong>Réflexion</strong> — retour de la pensée sur un <em>contenu</em> : on examine une croyance, une action, un raisonnement pour en éprouver la valeur. C'est le sens hérité de la tradition pragmatiste.</p>
+        <p><strong>Réflexivité</strong> — retour du <em>sujet</em> sur lui-même et sur les <em>conditions</em> de son activité : non plus « est-ce vrai ? », mais « d'où est-ce que je parle, et qu'est-ce qui, en moi, me fait voir ainsi ? ». C'est le sens que lui donnent la sociologie et la théorie critique.</p>
+      </div>
+
+      <p class="reveal">Cette distinction n'est pas une subtilité de vocabulaire. Elle commande tout le reste, car elle départage deux familles de questions : celle de la <em>logique de l'enquête</em> (comment bien penser un problème ?) et celle de la <em>lucidité du sujet sur ses propres déterminations</em> (comment penser ce qui pense en moi ?). On verra que les traditions convoquées dans cette étude se répartissent selon cet axe, et que leur richesse tient à la manière dont elles l'articulent.</p>
+
+      <p class="reveal">Le problème directeur peut alors se formuler ainsi. Le modèle spontané — celui que véhicule le sens commun, et qu'a longtemps porté la philosophie du sujet — conçoit la réflexivité comme un acte <strong>solitaire</strong> : une conscience se retire du monde et s'examine elle-même, transparente à ses propres opérations. Or, c'est précisément ce modèle introspectif que les œuvres examinées ici viennent contester. Toutes, par des voies distinctes, font apparaître que le retour sur soi n'est possible que par la <strong>médiation d'autrui</strong> — réel ou intériorisé. Le sujet réflexif n'est pas donné avant le dialogue : il s'y constitue.</p>
+
+      <div class="pull reveal"><q>Réfléchir, ce n'est pas s'isoler dans une intériorité transparente : c'est se diviser, devenir autre pour soi — ce qui suppose, en droit, la présence d'un autre.</q></div>
+
+      <p class="reveal">Telle est la thèse que cette étude voudrait étayer. On en suivra d'abord la <em>généalogie</em> (I), depuis l'invention pragmatiste de la pensée réflexive jusqu'à son inscription sociologique. On exposera ensuite l'<em>épistémologie</em> qui en constitue le cœur — la critique de la rationalité technique (II). On établira alors le mécanisme central : la <em>structure dialogique</em> de la pensée elle-même (III). On analysera la profondeur de la <em>réflexion critique</em> et le mécanisme de la transformation des cadres (IV), avant d'en exposer les <em>fondements</em> dans une théorie de la communication et de la compréhension (V). On en mesurera la <em>portée politique et relationnelle</em> (VI), puis on en éprouvera les <em>controverses et les limites</em> (VII), conditions d'un usage critique. Une synthèse (VIII) et un lexique analytique (IX) referont enfin le parcours.</p>
+    </div>
+
+    <div class="pagenav">
+      <span></span>
+      <a class="next" data-go="genealogie"><small>Section I →</small><b>Généalogie du concept</b></a>
+    </div>
+  </section>
+
+  <!-- ============ I GENEALOGIE ============ -->
+  <section class="page" id="genealogie">
+    <div class="phead">
+      <span class="sec-num">I</span>
+      <div class="kicker">Section I</div>
+      <h2 class="ptitle">Généalogie : de la pensée réflexive à la pratique réflexive</h2>
+      <p class="psub">Comment une notion née de la logique de l'enquête est devenue une épistémologie de l'action et une disposition professionnelle.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">L'invention de la <em>pensée réflexive</em> revient au pragmatisme. Dans sa logique de l'enquête, la pensée n'est ni contemplation ni association libre d'idées : elle est une activité instrumentale, suscitée par un trouble et orientée vers sa résolution. La réflexion s'y définit comme « l'examen actif, persistant et attentif d'une croyance à la lumière des raisons qui la fondent et des conclusions auxquelles elle tend ». Trois traits méritent d'être relevés, car ils traverseront tout le corpus.</p>
+
+      <p class="reveal">Le premier est l'<strong>origine de la pensée dans le doute</strong>. On ne réfléchit pas par décision ni par habitude, mais parce qu'une situation devient indéterminée — « la pensée n'est pas un cas de combustion spontanée ». La perplexité n'est pas l'obstacle de la réflexion : elle en est la condition. Le second est sa <strong>structure expérimentale</strong> : la pensée déploie un cycle — difficulté ressentie, définition du problème, hypothèse, déduction des conséquences, mise à l'épreuve — où l'idée se valide par ses effets dans l'action. Apprendre par l'expérience, c'est tisser le lien entre ce que l'on fait et ce que l'on subit en retour.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La notion de <b>pensée réflexive</b> (<em>reflective thinking</em>) est élaborée par <b>John Dewey</b> (<em>How We Think</em>, 1910 ; <em>Démocratie et éducation</em>, 1916). Elle est la matrice historique dont dériveront les usages ultérieurs.</div>
+
+      <p class="reveal">Le troisième trait est décisif pour notre propos : la pensée réflexive est d'emblée nouée à la <strong>communication</strong>. Pour formuler une expérience et la transmettre, il faut s'en déprendre, la considérer comme un autre la considérerait. Là où la philosophie classique faisait de la réflexion un acte intérieur, le pragmatisme la lie à un décentrement : « un être qui vivrait réellement seul n'aurait presque aucune occasion de réfléchir ». La communication n'est pas un canal par lequel transiterait une pensée déjà faite ; elle est le milieu où des esprits parviennent à posséder en commun, et donc à objectiver, leur expérience.</p>
+
+      <h3 class="reveal"><span class="h-n">§1.</span>Trois usages à ne pas confondre</h3>
+      <p class="reveal">Une analyse rigoureuse doit distinguer trois emplois que le langage courant fond en un seul. La <em>pensée réflexive</em> au sens pragmatiste désigne une logique de l'enquête. La <em>pratique réflexive</em>, dont il sera question plus loin, désigne une épistémologie de l'action professionnelle. La <em>réflexivité</em> au sens sociologique désigne le retour critique de l'agent — ou du savant — sur les conditions sociales de sa propre pratique et de son propre savoir. Les trois se recoupent sans se confondre : la première interroge la validité d'une croyance, la deuxième la compétence en situation, la troisième les déterminations qui façonnent le regard lui-même.</p>
+
+      <div class="pull reveal"><q>On peut réfléchir longtemps, et fort bien, sans être réflexif : tant que l'on n'interroge pas le cadre depuis lequel on pense.</q></div>
+
+      <h3 class="reveal"><span class="h-n">§2.</span>Le tournant praxéologique</h3>
+      <p class="reveal">Le déplacement majeur consiste à transporter la pensée réflexive du laboratoire de la logique vers le terrain de l'<strong>action professionnelle</strong>. La question n'est plus « comment pense-t-on en général ? », mais « comment les praticiens compétents pensent-ils <em>en agissant</em> ? ». Ce passage donne naissance à la notion de <em>pratique réflexive</em>, qui sera analysée en détail à la section suivante. Il suffit ici d'en marquer la rupture : la réflexivité cesse d'être une opération mentale abstraite pour devenir une modalité de l'agir expert, indissociable de l'incertitude des situations réelles.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le tournant praxéologique est l'œuvre de <b>Donald Schön</b> (<em>The Reflective Practitioner</em>, 1983), prolongée dans ses travaux avec <b>Chris Argyris</b> sur les « théories de l'action » et l'apprentissage en double boucle.</div>
+
+      <h3 class="reveal"><span class="h-n">§3.</span>L'inscription sociologique : la réflexivité comme disposition</h3>
+      <p class="reveal">Un dernier moment de la généalogie réinscrit la pratique réflexive dans une sociologie des dispositions. Sa thèse la plus originale est que la réflexivité ne s'enseigne pas comme un savoir : elle relève d'un <strong>habitus</strong>, c'est-à-dire d'un système de schèmes intériorisés qui engendrent les pratiques « sans jamais se constituer en principes explicites ». Développer une posture réflexive, ce n'est donc pas transmettre une méthode, mais favoriser l'installation de <em>schèmes réflexifs</em> — un travail lent sur l'inconscient pratique, qui rapproche la formation du travail clinique.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Cette reformulation francophone est portée par <b>Philippe Perrenoud</b> (<em>Développer la pratique réflexive dans le métier d'enseignant</em>, 2001), qui articule la pratique réflexive à l'<b>habitus</b> (Bourdieu) et à la <b>prise de conscience</b> (Piaget).</p></div>
+
+      <p class="reveal">On comprend dès lors pourquoi la réflexivité engage l'identité du sujet et non sa seule cognition : il ne s'agit pas seulement d'« être prêt à agir autrement la prochaine fois », mais de devenir, à certains égards, <em>quelqu'un d'autre</em>. Cette dimension identitaire — et son projet corrélatif de professionnalisation — prépare les enjeux critiques et politiques que l'on retrouvera plus loin.</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="ouverture"><small>← Ouverture</small><b>Le problème de la réflexivité</b></a>
+      <a class="next" data-go="epistemologie"><small>Section II →</small><b>La critique de la rationalité technique</b></a>
+    </div>
+  </section>
+
+  <!-- ============ II EPISTEMOLOGIE ============ -->
+  <section class="page" id="epistemologie">
+    <div class="phead">
+      <span class="sec-num">II</span>
+      <div class="kicker">Section II</div>
+      <h2 class="ptitle">L'épistémologie : la critique de la rationalité technique</h2>
+      <p class="psub">Pourquoi le savoir savant ne suffit pas à agir, et comment le praticien devient chercheur de sa propre pratique.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Le cœur épistémologique de la pratique réflexive réside dans une polémique contre ce qu'on peut nommer la <em>rationalité technique</em> : le modèle, d'inspiration positiviste, selon lequel bien agir consisterait à appliquer une théorie scientifique ou des procédures éprouvées à des problèmes donnés, en vue de fins fixées d'avance. Ce modèle hiérarchise les savoirs — la science fondamentale en haut, l'application en bas — et réduit la pratique à une exécution. La critique qui lui est opposée n'est pas marginale : elle conteste l'image même que la culture savante se fait de la compétence.</p>
+
+      <p class="reveal">L'argument décisif tient en une métaphore topographique. Il existe une « terre haute et ferme », surplombant un « marécage ». Sur la terre haute, des problèmes relativement maîtrisables se laissent traiter par la technique ; mais c'est dans la <strong>zone marécageuse</strong> — confuse, instable, singulière — que se logent « les problèmes de la plus grande préoccupation humaine ». D'où un dilemme : ou bien le praticien reste sur les hauteurs de la rigueur, au prix de la pertinence ; ou bien il descend dans le marécage des questions qui importent, au prix de la rigueur méthodique. La pratique réflexive est la tentative de penser une rigueur propre au marécage.</p>
+
+      <div class="def reveal">
+        <div class="dt">Mécanisme — poser le problème avant de le résoudre</div>
+        <p>Dans les situations réelles, les problèmes ne sont pas <em>donnés</em> : ils doivent être <strong>construits</strong>. Avant de résoudre (<em>problem solving</em>), le praticien <strong>nomme</strong> les éléments auxquels il prêtera attention et <strong>cadre</strong> le contexte dans lequel il les traitera (<em>problem setting</em>). Or ce cadrage n'est lui-même ni déductible d'une théorie, ni neutre : il oriente d'avance ce qui pourra compter comme solution.</p>
+      </div>
+
+      <h3 class="reveal"><span class="h-n">§1.</span>Le savoir tacite et la réflexion dans l'action</h3>
+      <p class="reveal">La compétence experte repose d'abord sur un <strong>savoir tacite</strong> — un <em>knowing-in-action</em> révélé dans le geste plus que formulable en mots : « nous en savons plus que nous ne pouvons en dire ». Ce savoir spontané suffit tant que la situation demeure familière. Mais lorsqu'elle <em>surprend</em> — qu'un résultat inattendu résiste aux anticipations —, le praticien peut, au lieu d'écarter la surprise, s'y arrêter : il réfléchit alors <strong>dans</strong> l'action, restructurant son savoir tacite au cours même de l'agir. C'est cette opération, et non la délibération à froid, qui fait la singularité de l'analyse.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Filiation</span>La notion de <b>savoir tacite</b> prolonge les analyses de <b>Michael Polanyi</b> (« we know more than we can tell ») et de Gilbert Ryle sur le « savoir-comment ».</div>
+
+      <h3 class="reveal"><span class="h-n">§2.</span>La conversation réflexive avec la situation</h3>
+      <p class="reveal">Le mécanisme central porte un nom remarquable : <strong>la conversation réflexive avec la situation</strong>. Le praticien impose à la situation un cadrage initial ; la situation « répond » (<em>back-talk</em>) — elle résiste, révèle de l'inattendu, déjoue l'anticipation ; le praticien réinterprète et réajuste son cadre. L'action prend ainsi la forme d'un <em>dialogue</em> : non avec un interlocuteur humain, mais avec un matériau, une situation, un cas qui se comportent comme une instance répondante. On retrouve, transposée dans l'agir, la structure que la section suivante établira au plan de la pensée elle-même.</p>
+
+      <p class="reveal">Cette conversation procède par <strong>expériences sur le vif</strong> : sonder pour « éprouver » la situation, tester un coup en jugeant ses conséquences, mettre une hypothèse à l'épreuve d'une éventuelle réfutation. Chaque cas nouveau enrichit un <em>répertoire</em> d'exemples et d'images, à partir duquel le praticien perçoit la situation inédite « comme » une situation déjà rencontrée, sans pour autant la réduire à une catégorie standard.</p>
+
+      <div class="pull reveal"><q>Lorsqu'il réfléchit dans l'action, le praticien devient un chercheur dans le contexte de la pratique : il construit la théorie du cas unique.</q></div>
+
+      <h3 class="reveal"><span class="h-n">§3.</span>La portée critique : réhabiliter l'art et le tacite</h3>
+      <p class="reveal">L'enjeu dépasse la pédagogie professionnelle. En montrant que l'intuition, l'art et le savoir tacite sont des formes de <strong>rigueur</strong>, et non des résidus pré-scientifiques, cette épistémologie conteste la hiérarchie positiviste des savoirs. Le geste est critique au sens fort : il porte sur le <em>savoir lui-même</em> et sur l'autorité qui s'en réclame. Reste que cette réhabilitation expose à une objection — la part tacite de la compétence est-elle vraiment accessible à la réflexion, ou demeure-t-elle, pour une part, opaque à elle-même ? On y reviendra parmi les controverses (section VII).</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="genealogie"><small>← Section I</small><b>Généalogie du concept</b></a>
+      <a class="next" data-go="dialogique"><small>Section III →</small><b>La structure dialogique de la pensée</b></a>
+    </div>
+  </section>
+
+  <!-- ============ III DIALOGIQUE ============ -->
+  <section class="page" id="dialogique">
+    <div class="phead">
+      <span class="sec-num">III</span>
+      <div class="kicker">Section III</div>
+      <h2 class="ptitle">La structure dialogique de la pensée</h2>
+      <p class="psub">Le mécanisme qui dissout le modèle introspectif : penser sur soi suppose d'avoir d'abord parlé avec d'autres.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Si la réflexion dans l'action prend la forme d'une conversation, c'est qu'une structure plus profonde la rend possible : la pensée elle-même est dialogique. Cette thèse, qui constitue le pivot de l'étude, se laisse établir par deux voies convergentes — l'une génétique, qui décrit <em>comment</em> la pensée réflexive se forme ; l'autre théorique, qui montre <em>pourquoi</em> le sens et la conscience sont par nature relationnels. Ensemble, elles défont le présupposé d'une intériorité souveraine.</p>
+
+      <h3 class="reveal"><span class="h-n">§1.</span>La genèse : du langage social au langage intérieur</h3>
+      <p class="reveal">La première voie est celle de la psychologie du développement. Sa loi fondamentale énonce que toute fonction mentale supérieure « apparaît deux fois : d'abord au niveau social, entre les personnes, puis au niveau individuel, à l'intérieur de l'enfant ». L'<strong>interpsychique précède l'intrapsychique</strong> : ce qui était échange entre deux sujets devient, par intériorisation, opération d'un seul. La pensée n'est pas un donné originaire que le langage viendrait ensuite habiller ; elle se constitue dans et par l'appropriation de la parole sociale.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Ce modèle génétique est celui de <b>Lev Vygotski</b> (<em>Pensée et langage</em>, 1934) : langage égocentrique, intériorisation, langage intérieur, zone proximale de développement.</div>
+
+      <p class="reveal">Le maillon précis se nomme <strong>langage intérieur</strong>. Le langage que l'enfant adresse d'abord à autrui, puis à lui-même à voix haute (langage « égocentrique »), s'intériorise progressivement pour devenir l'instrument de la pensée pour soi. Ce langage intérieur n'est pas « de la parole moins le son » : il a sa syntaxe propre — abrégé, prédicatif, condensé, « une pensée en significations pures ». Le mécanisme est ici d'une grande portée : <strong>se parler à soi-même — opération même de la réflexion — est un dialogue social devenu intérieur</strong>. La capacité de retour sur soi n'a rien d'une faculté première : elle est le précipité d'échanges avec d'autres.</p>
+
+      <div class="pull reveal"><q>Dans le langage intérieur, les mots meurent en faisant naître la pensée. Réfléchir, c'est se tenir à soi-même un discours hérité d'autrui.</q></div>
+
+      <h3 class="reveal"><span class="h-n">§2.</span>La constitution dialogique du sens et du sujet</h3>
+      <p class="reveal">La seconde voie est celle d'une théorie de l'énoncé. Contre l'idée d'une langue close sur elle-même, elle pose que l'unité réelle du langage est l'<strong>énoncé</strong>, toujours <em>adressé</em> : il répond à des discours antérieurs et anticipe une réponse à venir. Aucune parole ne surgit d'un sol vierge ; « le discours rencontre le discours d'autrui sur tous les chemins qui mènent vers son objet ». Il s'ensuit que l'auditeur n'est jamais passif : il est <strong>co-auteur</strong> du sens, qui se construit <em>entre</em> les interlocuteurs et non dans la tête de l'un d'eux.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le <b>principe dialogique</b> est dégagé par les travaux de <b>Mikhaïl Bakhtine</b> (lus et systématisés par Tzvetan Todorov, 1981) : énoncé, polyphonie, altérité constitutive.</div>
+
+      <p class="reveal">Cette analyse atteint la conscience elle-même. Le sujet « ne possède pas de territoire intérieur souverain » ; il est « toujours sur une frontière » et, « en regardant à l'intérieur de soi, il regarde dans les yeux d'autrui ». Le discours intérieur prend la forme d'un débat — par questions et réponses —, surtout au moment de décider : « notre conscience semble nous parler par deux voix ». Réfléchir n'est donc pas se replier sur une intériorité pleine, mais activer une <strong>polyphonie de voix sociales intériorisées</strong> (éducateurs, lectures, groupes d'appartenance). Le regard d'autrui n'est pas accessoire : seul il me donne de moi une vue « comme totalité » que je ne puis atteindre seul.</p>
+
+      <h3 class="reveal"><span class="h-n">§3.</span>Conséquence : la fin du modèle introspectif</h3>
+      <p class="reveal">Les deux voies convergent vers une même conclusion, qui justifie la thèse de l'étude. Le « retour du sujet sur lui-même » n'est possible que parce que le sujet est <em>déjà</em> dédoublé par l'autre — génétiquement (la pensée naît de l'intériorisation du social) et structurellement (la conscience est constituée d'altérité). La réflexivité n'est donc pas le privilège d'un <em>cogito</em> solitaire et transparent : elle est un <strong>effet de l'intériorisation de l'altérité sociale</strong>. C'est cette structure qui explique, en retour, pourquoi la réflexion a besoin du dialogue — réel ou intériorisé — pour s'exercer, et pourquoi les situations d'isolement appauvrissent la pensée plutôt qu'elles ne la concentrent.</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="epistemologie"><small>← Section II</small><b>La rationalité technique</b></a>
+      <a class="next" data-go="critique"><small>Section IV →</small><b>Réflexion critique et transformation</b></a>
+    </div>
+  </section>
+
+  <!-- ============ IV CRITIQUE/TRANSFORMATION ============ -->
+  <section class="page" id="critique">
+    <div class="phead">
+      <span class="sec-num">IV</span>
+      <div class="kicker">Section IV</div>
+      <h2 class="ptitle">Réflexion critique et transformation des cadres</h2>
+      <p class="psub">Pourquoi un seul niveau de réflexion transforme réellement, et selon quel mécanisme.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Toutes les réflexions n'ont pas la même portée. On peut réfléchir intensément en demeurant prisonnier du cadre depuis lequel on réfléchit. La théorie de l'apprentissage adulte fournit ici l'outil d'analyse le plus précis : une <strong>typologie de la profondeur réflexive</strong>, adossée à une théorie des cadres de sens. Elle permet de comprendre <em>pourquoi</em> certaines réflexions ne font qu'ajuster, tandis que d'autres transforment.</p>
+
+      <div class="def reveal">
+        <div class="dt">Mécanisme — les cadres de sens</div>
+        <p>Nos interprétations sont structurées par des <strong>perspectives de sens</strong> : des cadres de référence largement tacites, hérités de la socialisation, qui orientent ce que nous percevons et évaluons. Ils se manifestent dans des <strong>schèmes de sens</strong> plus particuliers. Ces cadres peuvent être partiels, déformés, voire aliénants — et nous les tenons d'ordinaire pour la réalité même.</p>
+      </div>
+
+      <p class="reveal">Sur cette base se distinguent trois <strong>fonctions de la réflexion</strong>. La réflexion sur le <em>contenu</em> porte sur <em>ce que</em> l'on perçoit ou pense ; la réflexion sur le <em>processus</em> porte sur <em>comment</em> l'on s'y prend ; la réflexion sur les <em>prémisses</em> porte sur <em>pourquoi</em> — c'est-à-dire sur les présupposés eux-mêmes. Les deux premières opèrent <strong>à l'intérieur</strong> du cadre : elles améliorent une réponse ou une méthode sans interroger ce qui rend la question pensable. Seule la troisième opère <strong>sur le cadre</strong>.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Cette typologie (<em>content / process / premise reflection</em>) et la théorie de l'<b>apprentissage transformateur</b> sont l'œuvre de <b>Jack Mezirow</b> (<em>Transformative Dimensions of Adult Learning</em>, 1991).</div>
+
+      <h3 class="reveal"><span class="h-n">§1.</span>Pourquoi la réflexion sur les prémisses transforme</h3>
+      <p class="reveal">Le mécanisme de la transformation devient alors intelligible. Modifier un contenu ou une méthode laisse intacte la structure qui détermine ce qui peut apparaître ; en revanche, soumettre à la critique les <strong>présupposés</strong> revient à modifier les <em>conditions de la perception</em> elles-mêmes — donc à changer ce qui peut être perçu. C'est pourquoi seule la <em>réflexion sur les prémisses</em> peut restructurer une perspective de sens entière, vers un cadre plus inclusif, plus différencié, plus perméable et plus intégrateur. Elle exige un <strong>hiatus</strong> — un moment de suspension où le problème se redéfinit avant que l'action ne se réoriente.</p>
+
+      <div class="pull reveal"><q>Tant que l'on réfléchit dans le cadre, on perfectionne ; ce n'est qu'en réfléchissant sur le cadre que l'on se transforme.</q></div>
+
+      <p class="reveal">On reconnaît ici la parenté avec une autre formulation, issue de la théorie des organisations : l'apprentissage en <em>simple boucle</em> corrige l'action pour atteindre un but inchangé ; l'apprentissage en <strong>double boucle</strong> remet en question les buts et les variables directrices eux-mêmes. La transformation suppose toujours ce passage à la boucle supérieure — du <em>quoi</em> et du <em>comment</em> vers le <em>pourquoi</em>.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Filiation</span>L'apprentissage en <b>double boucle</b> (<em>double-loop learning</em>) est conceptualisé par <b>Chris Argyris</b> et <b>Donald Schön</b> ; il offre l'équivalent organisationnel de la réflexion sur les prémisses.</div>
+
+      <h3 class="reveal"><span class="h-n">§2.</span>Le déclencheur et la condition dialogique</h3>
+      <p class="reveal">Une telle transformation ne se décrète pas. Son déclencheur typique est un <strong>dilemme désorientant</strong> : une crise, une contradiction vécue, un déséquilibre que les schèmes disponibles ne parviennent plus à intégrer. Mais le déclenchement ne suffit pas : la validation des nouvelles interprétations passe par le <strong>discours</strong>. On ne valide pas seul ses propres cadres ; il faut les exposer à d'autres perspectives, pouvoir « défier, questionner, réfuter » et entendre l'autre faire de même, dans des conditions approchant l'égalité de participation. La réflexion critique rejoint ici la thèse dialogique : elle est, structurellement, une <em>délibération</em>.</p>
+
+      <p class="reveal">De là une conséquence éthique et politique : la transformation des perspectives ne peut être imposée. « On ne devient pas émancipé par endoctrinement. » L'intérêt émancipatoire — celui qui pousse à identifier et à contester les cadres déformants — exige précisément la liberté du dialogue. Cette articulation entre réflexion critique, communication et émancipation appelle l'examen de ses fondements, objet de la section suivante.</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="dialogique"><small>← Section III</small><b>La structure dialogique</b></a>
+      <a class="next" data-go="fondements"><small>Section V →</small><b>Les fondements du dialogue</b></a>
+    </div>
+  </section>
+
+  <!-- ============ V FONDEMENTS ============ -->
+  <section class="page" id="fondements">
+    <div class="phead">
+      <span class="sec-num">V</span>
+      <div class="kicker">Section V</div>
+      <h2 class="ptitle">Les fondements du dialogue : validité et compréhension</h2>
+      <p class="psub">Deux théories — l'une normative, l'autre ontologique — de ce qu'est un échange authentique.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Si la réflexivité culmine dans la délibération, encore faut-il une théorie de ce qui distingue un véritable dialogue d'une simple négociation de forces. Deux constructions, partiellement opposées, en fournissent les fondements. La première est <em>normative</em> : elle définit les conditions d'un accord rationnel. La seconde est <em>ontologique</em> : elle décrit la compréhension comme un événement qui transforme ceux qui s'y engagent. Leur tension est elle-même instructive.</p>
+
+      <h3 class="reveal"><span class="h-n">§1.</span>La validité : agir communicationnel contre agir stratégique</h3>
+      <p class="reveal">La première construction part d'une distinction entre deux orientations de l'action. Dans l'<strong>agir stratégique</strong>, orienté vers le <em>succès</em>, autrui est traité comme un moyen : on cherche à influencer sa décision par la contrainte, la menace ou la récompense. Dans l'<strong>agir communicationnel</strong>, orienté vers l'<em>intercompréhension</em>, les participants coordonnent leurs projets en s'engageant sur des prétentions qu'ils acceptent de justifier. La fonction première du langage n'y est pas la transmission d'informations, mais la recherche d'un accord rationnellement motivé.</p>
+
+      <div class="def reveal">
+        <div class="dt">Mécanisme — les prétentions à la validité</div>
+        <p>Tout énoncé sérieux engage trois <strong>prétentions à la validité</strong> que l'interlocuteur peut contester par des raisons : la <strong>vérité</strong> (l'énoncé porte sur le monde objectif), la <strong>justesse</strong> (l'acte est légitime au regard d'un monde normatif partagé), la <strong>sincérité</strong> (le locuteur exprime véridiquement son monde subjectif). C'est la possibilité de <em>racheter</em> ces prétentions par l'argumentation — et non l'autorité — qui donne au discours sa « force » : un accord qui lie sans contraindre.</p>
+      </div>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La <b>théorie de l'agir communicationnel</b> est celle de <b>Jürgen Habermas</b> (1981). Ses trois domaines d'apprentissage (instrumental, communicationnel, émancipatoire) fondent la typologie de la section IV.</div>
+
+      <p class="reveal">Cette théorie fournit un critère d'évaluation des échanges : un dialogue est d'autant plus réussi qu'il vise l'entente et non l'emprise, que ses prétentions y sont rendues contestables, et que « le meilleur argument » — et non le rapport de force — l'emporte. Elle débouche aussi sur une critique sociale : les sphères régies par l'argent et le pouvoir tendent à <em>coloniser</em> les domaines qui ne se reproduisent que par la communication, étouffant la parole orientée vers l'entente sous les impératifs fonctionnels.</p>
+
+      <h3 class="reveal"><span class="h-n">§2.</span>La compréhension : préjugés, horizons, primauté de la question</h3>
+      <p class="reveal">La seconde construction renverse le présupposé méthodologique. Comprendre n'est pas une opération qu'un sujet maîtriserait depuis une position neutre ; c'est le mode d'être même d'une existence finie et historique. Loin d'être des obstacles à éliminer, les <strong>préjugés</strong> — au sens de pré-jugements hérités d'une tradition — sont les <em>conditions positives</em> de toute compréhension : ils constituent l'anticipation de sens à partir de laquelle quelque chose peut nous apparaître. La tâche n'est pas de les abolir (illusion d'un regard « sans présupposés »), mais de les <em>mettre en jeu</em>.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'<b>herméneutique philosophique</b> est développée par <b>Hans-Georg Gadamer</b> (<em>Vérité et méthode</em>, 1960) : préjugés, cercle herméneutique, fusion des horizons, primauté de la question.</div>
+
+      <p class="reveal">Le mécanisme de la compréhension se nomme <strong>fusion des horizons</strong>. Comprendre autrui ou un texte, ce n'est ni se transposer naïvement en lui, ni le réduire à ses propres mesures : c'est élargir son propre horizon jusqu'à ce qu'il rejoigne le sien, dans une instance plus large où aucun des deux ne demeure inchangé. Cette fusion suppose la <strong>primauté de la question</strong> : comprendre une parole, c'est reconstruire la question à laquelle elle répond ; et questionner vraiment exige de « savoir que l'on ne sait pas ». S'y ajoute une présomption d'autrui : tenir d'abord ce qu'il dit pour vrai et cohérent, et accepter qu'il « puisse avoir raison » contre soi.</p>
+
+      <div class="pull reveal"><q>Dans un dialogue réussi, nous ne restons pas ce que nous étions : être transformé en une communauté est le mode propre de la compréhension.</q></div>
+
+      <h3 class="reveal"><span class="h-n">§3.</span>Deux fondements, une même exigence</h3>
+      <p class="reveal">On aurait tort de fondre ces deux théories : l'une fait de la <em>raison argumentative</em> et du consensus le télos du dialogue ; l'autre, de l'<em>ouverture</em> et de la transformation réciproque. Leur écart sera repris parmi les controverses. Mais elles s'accordent sur l'essentiel pour notre propos : dialoguer suppose de <strong>savoir d'où l'on parle</strong> et de <strong>mettre ses propres prémisses en jeu devant l'autre</strong>. La réflexivité, ici, n'est plus seulement une affaire individuelle : elle réside dans la structure intersubjective de l'échange où chacun se rend redevable de raisons.</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="critique"><small>← Section IV</small><b>Réflexion critique</b></a>
+      <a class="next" data-go="politique"><small>Section VI →</small><b>Portée critique et politique</b></a>
+    </div>
+  </section>
+
+  <!-- ============ VI POLITIQUE/RELATION ============ -->
+  <section class="page" id="politique">
+    <div class="phead">
+      <span class="sec-num">VI</span>
+      <div class="kicker">Section VI</div>
+      <h2 class="ptitle">Portée critique, politique et relationnelle</h2>
+      <p class="psub">La réflexivité comme acte collectif d'émancipation, et comme éthique de la relation.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Réduire la réflexivité à une opération cognitive de l'individu en manquerait deux dimensions essentielles, que le corpus met en pleine lumière. La première est <em>politique</em> : réfléchir, c'est aussi prendre conscience des structures qui déterminent sa situation, et cette prise de conscience est inséparable de l'action. La seconde est <em>relationnelle</em> : la réflexivité s'éprouve d'abord dans la qualité de l'écoute accordée à autrui.</p>
+
+      <h3 class="reveal"><span class="h-n">§1.</span>Conscientisation et praxis</h3>
+      <p class="reveal">Une pédagogie critique soutient que l'éducation n'est jamais neutre : elle reconduit l'ordre établi ou elle libère. Elle oppose deux modèles. Le modèle « <strong>bancaire</strong> » conçoit le savoir comme un dépôt que l'éducateur verse dans des apprenants traités comme des récipients passifs ; la relation y est verticale et réifiante — « au lieu d'établir une communication, l'éducateur fait des communiqués ». Le modèle <strong>problématisant</strong>, dialogique, présente au contraire la réalité comme un problème à interroger ensemble, et restitue aux apprenants leur statut de sujets.</p>
+
+      <div class="def reveal">
+        <div class="dt">Deux concepts solidaires</div>
+        <p><strong>Conscientisation</strong> — passage d'une conscience « naïve », qui subit sa situation, à une conscience <em>critique</em> qui en saisit le caractère structurel ; passage d'objet à sujet de son histoire.</p>
+        <p><strong>Praxis</strong> — unité indissociable de la <em>réflexion</em> et de l'<em>action</em> transformant le monde. Séparées, elles dégénèrent : la réflexion sans action devient verbalisme, l'action sans réflexion, activisme.</p>
+      </div>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Conscientisation, praxis et critique de l'éducation « bancaire » sont l'apport de <b>Paulo Freire</b> (<em>Pédagogie des opprimés</em>, 1968).</div>
+
+      <p class="reveal">Ici, la parole elle-même est conçue comme un <strong>acte</strong> : « toute véritable parole est praxis », « exister humainement, c'est prononcer le monde, le modifier ». La réflexivité cesse d'être un retour intérieur pour devenir une <em>co-réflexion critique sur le monde</em>, nécessairement partagée : « personne ne s'éduque seul ; les êtres humains s'éduquent entre eux, médiatisés par le monde ». On retrouve, au plan politique, la thèse dialogique de la section III. Une variante institutionnalisée en propose la forme du collectif : la <strong>communauté de recherche</strong>, où un groupe apprend à raisonner ensemble — donner et évaluer des raisons, construire sur la parole d'autrui, se corriger mutuellement —, de sorte que les procédures du dialogue, intériorisées, deviennent les « habitudes réflexives » de chacun.</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La <b>communauté de recherche</b> (<em>community of inquiry</em>) est formalisée par <b>Matthew Lipman</b> (<em>Philosophy in the Classroom</em>, 1980), dans la filiation de Dewey, Mead et Vygotski.</div>
+
+      <h3 class="reveal"><span class="h-n">§2.</span>L'écoute comme acte réflexif</h3>
+      <p class="reveal">La dimension relationnelle déplace l'attention du locuteur vers le <em>récepteur</em>. Une psychologie de la relation d'aide soutient qu'une écoute véritable — non évaluative, attentive au sens autant qu'au sentiment — est « le plus puissant des agents de changement ». Sa condition n'est pas un répertoire de techniques, mais un ensemble d'attitudes : l'<strong>empathie</strong> (entrer dans le cadre de référence de l'autre), la <strong>congruence</strong> (l'accord entre ce que l'on éprouve, ce dont on a conscience et ce que l'on exprime) et le <strong>regard positif inconditionnel</strong> (accueillir sans condition).</p>
+
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Les conditions de la relation d'aide et l'écoute « active » sont théorisées par <b>Carl Rogers</b> (<em>Le développement de la personne</em>, 1961 ; <em>Active Listening</em>, 1957).</div>
+
+      <p class="reveal">Or ces attitudes font de l'écoute un acte <strong>doublement réflexif</strong>. D'une part, la reformulation renvoie au locuteur un miroir qui l'aide à mieux entendre sa propre pensée : « on ne comprend jamais vraiment tant qu'on ne peut pas le communiquer à la satisfaction de l'autre ». D'autre part, écouter exige du récepteur un travail sur lui-même — repérer ses propres signaux de défensivité, suspendre l'évaluation, accepter d'être touché. « Si je peux former une relation d'aide avec moi-même, alors je pourrai en former une avec autrui. » La réflexivité s'avère ainsi la condition d'une écoute qui n'instrumentalise pas l'autre — une <em>éthique de la réception</em>.</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="fondements"><small>← Section V</small><b>Les fondements du dialogue</b></a>
+      <a class="next" data-go="controverses"><small>Section VII →</small><b>Controverses et limites</b></a>
+    </div>
+  </section>
+
+  <!-- ============ VII CONTROVERSES ============ -->
+  <section class="page" id="controverses">
+    <div class="phead">
+      <span class="sec-num">VII</span>
+      <div class="kicker">Section VII</div>
+      <h2 class="ptitle">Controverses, limites et points aveugles</h2>
+      <p class="psub">Une notion ne devient rigoureuse qu'au prix de la critique qu'elle s'adresse à elle-même.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Exposer la réflexivité sans en interroger les limites serait reconduire l'usage incantatoire dénoncé en ouverture. Une analyse de niveau avancé doit au contraire en éprouver les tensions internes et les angles morts. On en retiendra cinq, qui ne se résolvent pas mais délimitent les conditions d'un usage lucide.</p>
+
+      <div class="contro reveal">
+        <div class="ct">Controverse 1 — l'injonction à la réflexivité</div>
+        <p>Devenue norme institutionnelle — inscrite dans les référentiels, attendue de tout professionnel —, la réflexivité peut se retourner en <strong>injonction</strong>. Le risque est double : la <em>psychologisation</em> (ramener à un défaut de réflexion personnelle ce qui relève de conditions structurelles) et la <em>responsabilisation individuelle</em> (charger le sujet de s'adapter sans fin, au lieu de transformer l'organisation). L'obligation d'« être réflexif » peut alors fonctionner comme une nouvelle conformité, qui neutralise la charge critique qu'elle prétend porter.</p>
+      </div>
+
+      <div class="contro reveal">
+        <div class="ct">Controverse 2 — l'accès au tacite est-il possible ?</div>
+        <p>Toute l'épistémologie de la pratique réflexive repose sur l'idée que le savoir tacite peut être ressaisi par la réflexion. Mais le tacite est, par définition, ce qui excède la formulation. La <em>prise de conscience</em> d'un schème n'abolit pas le schème ; et l'introspection se sait exposée à l'illusion. Jusqu'où peut-on vraiment expliciter ses propres présupposés, alors même que c'est par eux que l'on regarde ? La réflexivité bute ici sur une <strong>opacité constitutive</strong> du sujet à lui-même.</p>
+      </div>
+
+      <div class="contro reveal">
+        <div class="ct">Controverse 3 — méthode ou événement ?</div>
+        <p>Une tradition donne des <em>dispositifs</em> : protocoles d'analyse, étapes, entraînement de l'habitus. Une autre conteste le primat même de la méthode : comprendre n'est pas un savoir-faire qu'un sujet maîtrise, mais un <strong>événement</strong> qui lui advient et le dépossède. Faut-il alors penser la réflexivité comme une <em>compétence</em> à outiller, ou comme une <em>disposition</em> à accueillir ? Les deux réponses commandent des pratiques de formation opposées.</p>
+      </div>
+
+      <div class="contro reveal">
+        <div class="ct">Controverse 4 — consensus ou polyphonie ?</div>
+        <p>Le dialogue a-t-il pour fin l'<strong>accord</strong> rationnel, ou la préservation d'une <strong>pluralité</strong> irréductible de voix ? Une théorie normative de la communication tend vers le consensus comme idéal régulateur ; une pensée de l'énoncé valorise au contraire le dissensus et la polyphonie comme richesse. Trop d'orientation vers l'entente risque d'écraser les différences ; trop de célébration de la différence, de renoncer à la possibilité même de se comprendre.</p>
+      </div>
+
+      <div class="contro reveal">
+        <div class="ct">Controverse 5 — individuel ou collectif ?</div>
+        <p>La réflexivité du praticien isolé suffit-elle ? Plusieurs analyses la jugent insuffisante : sans dispositif collectif et sans interrogation des structures, le retour sur soi plafonne et peut servir d'alibi. Mais une réflexivité entièrement rabattue sur le collectif risque, à l'inverse, de dissoudre la responsabilité du sujet. L'enjeu est d'<em>articuler</em> les deux échelles plutôt que de les opposer.</p>
+      </div>
+
+      <p class="reveal">Ces controverses ne disqualifient pas la notion ; elles en dessinent l'usage critique. Elles rappellent que la réflexivité n'est pas une vertu que l'on posséderait une fois pour toutes, mais un <strong>processus toujours inachevé</strong>, exposé à ses propres illusions — y compris celle de se croire enfin lucide. Sa probité consiste à inclure dans son champ l'examen de ses propres conditions : une réflexivité de la réflexivité.</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="politique"><small>← Section VI</small><b>Portée critique et politique</b></a>
+      <a class="next" data-go="synthese"><small>Section VIII →</small><b>Synthèse</b></a>
+    </div>
+  </section>
+
+  <!-- ============ VIII SYNTHESE ============ -->
+  <section class="page" id="synthese">
+    <div class="phead">
+      <span class="sec-num">VIII</span>
+      <div class="kicker">Section VIII</div>
+      <h2 class="ptitle">Synthèse : ce que le parcours établit</h2>
+      <p class="psub">Une notion à cinq dimensions, tenue par une seule thèse.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Au terme de ce parcours, la réflexivité n'apparaît plus comme un mot d'ordre, mais comme une notion articulée, dont on peut ressaisir l'unité sans en gommer les tensions. Elle se laisse définir par une opération centrale et se déploie selon plusieurs dimensions solidaires.</p>
+
+      <p class="reveal">L'opération centrale est celle-ci : <strong>se rendre étranger à ses propres évidences</strong>. Réfléchir, au sens fort, ce n'est pas perfectionner une réponse à l'intérieur d'un cadre acquis, mais porter l'attention sur le cadre lui-même — sur ce qui, en nous, décide d'avance de ce que nous percevons et tenons pour réel. Cette opération suppose un dédoublement : devenir autre pour soi.</p>
+
+      <p class="reveal">Or — et c'est la thèse que les cinq dimensions confirment — ce dédoublement n'est pas le fait d'une conscience solitaire. Il est <strong>structurellement médiatisé par l'altérité</strong>, réelle ou intériorisée. C'est ce qui relie les analyses parcourues :</p>
+
+      <h4 class="reveal">La dimension cognitive</h4>
+      <p class="reveal sub">La pensée réflexive naît d'un trouble et procède par enquête ; elle suppose de supporter le doute au lieu de le clore prématurément.</p>
+      <h4 class="reveal">La dimension épistémologique</h4>
+      <p class="reveal sub">Contre la rationalité technique, la compétence en situation se révèle un art : un dialogue avec la situation, où le praticien construit la théorie du cas unique.</p>
+      <h4 class="reveal">La dimension dialogique</h4>
+      <p class="reveal sub">La pensée elle-même a la forme d'une conversation intériorisée ; le sujet réflexif est l'effet, et non la condition préalable, de l'intériorisation du social.</p>
+      <h4 class="reveal">La dimension critique et politique</h4>
+      <p class="reveal sub">Réfléchir, c'est interroger les présupposés et les structures ; cette critique, indissociable de l'action, ne s'accomplit que dans la délibération partagée.</p>
+      <h4 class="reveal">La dimension relationnelle</h4>
+      <p class="reveal sub">La réflexivité s'éprouve dans l'écoute : un travail sur soi qui conditionne la possibilité de ne pas instrumentaliser autrui.</p>
+
+      <div class="pull reveal" style="margin-top:36px"><q>Apprendre à réfléchir et apprendre à parler-écouter ne sont pas deux éducations, mais une seule : celle de la mise en jeu de ses propres évidences devant un autre.</q></div>
+
+      <p class="reveal">Cette conclusion éclaire la place centrale qu'occupe la réflexivité dans la formation des adultes et des professionnels. Elle n'y figure pas comme une technique de plus, mais comme une <strong>transformation du rapport à son propre savoir</strong> : condition de l'autonomie, parce qu'elle libère du seul suivi des procédures ; condition de l'apprentissage par l'expérience, parce qu'elle convertit l'erreur en objet d'analyse plutôt qu'en faute à défendre ; condition, enfin, d'une communication qui cherche l'entente plutôt que l'emprise. Reste que sa valeur tient à sa <em>probité critique</em> : une réflexivité qui ne s'interrogerait pas elle-même retomberait dans l'évidence qu'elle prétend défaire. Son achèvement est de demeurer un processus ouvert.</p>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="controverses"><small>← Section VII</small><b>Controverses et limites</b></a>
+      <a class="next" data-go="lexique"><small>Section IX →</small><b>Lexique analytique</b></a>
+    </div>
+  </section>
+
+  <!-- ============ IX LEXIQUE ============ -->
+  <section class="page" id="lexique">
+    <div class="phead">
+      <span class="sec-num">IX</span>
+      <div class="kicker">Section IX</div>
+      <h2 class="ptitle">Lexique analytique</h2>
+      <p class="psub">Les concepts opératoires de l'étude, définis avec leur portée et leurs nuances.</p>
+    </div>
+
+    <div class="lex">
+      <div class="lex-item reveal"><h4>Pensée réflexive <span class="etym">(lat. reflectere, « plier en arrière »)</span></h4><p>Examen actif, persistant et attentif d'une croyance à la lumière des raisons qui la fondent et des conséquences auxquelles elle conduit. Naît d'un doute, procède par enquête expérimentale. À distinguer de la simple rumination ou de l'association d'idées.</p></div>
+      <div class="lex-item reveal"><h4>Réflexivité</h4><p>Retour du sujet sur lui-même et sur les conditions — sociales, tacites, biographiques — de son activité et de son savoir. Plus exigeante que la réflexion sur un contenu : elle interroge le cadre depuis lequel on pense.</p></div>
+      <div class="lex-item reveal"><h4>Rationalité technique</h4><p>Modèle positiviste de la pratique comme application instrumentale d'une théorie ou de procédures à des problèmes donnés, pour des fins fixées d'avance. Critiqué pour son inadéquation aux situations réelles, incertaines et singulières.</p></div>
+      <div class="lex-item reveal"><h4>Savoir tacite <span class="etym">(knowing-in-action)</span></h4><p>Savoir spontané révélé dans le geste compétent et excédant sa formulation : « nous en savons plus que nous ne pouvons en dire ». Socle de l'expertise, mais partiellement opaque à la réflexion.</p></div>
+      <div class="lex-item reveal"><h4>Réflexion dans / sur l'action</h4><p>Réfléchir <em>pendant</em> l'action pour l'ajuster sur le vif (déclenchée par la surprise) ; et réfléchir <em>après</em>, à froid, en prenant son action pour objet. Deux temporalités complémentaires.</p></div>
+      <div class="lex-item reveal"><h4>Cadrage / recadrage <span class="etym">(problem setting)</span></h4><p>Opération par laquelle on construit un problème — en nommant ce qui compte et en délimitant le contexte — avant de le résoudre. Le cadrage n'est pas neutre ; le recadrage le révise à l'épreuve de la situation.</p></div>
+      <div class="lex-item reveal"><h4>Conversation réflexive avec la situation</h4><p>Modèle de l'agir compétent : le praticien impose un cadre, la situation « répond » en résistant ou en surprenant, il réinterprète. L'action prend la forme d'un dialogue avec un matériau répondant.</p></div>
+      <div class="lex-item reveal"><h4>Habitus</h4><p>Système de schèmes intériorisés engendrant les pratiques « sans se constituer en principes explicites ». La posture réflexive relève de l'habitus : elle ne s'enseigne pas, elle s'installe par entraînement.</p></div>
+      <div class="lex-item reveal"><h4>Langage intérieur</h4><p>Parole pour soi, abrégée et prédicative, instrument de la pensée. Issu de l'intériorisation du langage social : se parler à soi-même dérive d'avoir parlé avec d'autres.</p></div>
+      <div class="lex-item reveal"><h4>Principe dialogique</h4><p>Tout énoncé répond à des discours antérieurs et anticipe une réponse ; l'auditeur est co-auteur du sens. La conscience elle-même est constituée d'altérité, « toujours sur une frontière ».</p></div>
+      <div class="lex-item reveal"><h4>Réflexion sur les prémisses</h4><p>Niveau le plus profond de la réflexion : porte sur les présupposés eux-mêmes (le <em>pourquoi</em>), non sur le contenu ni la méthode. Seul niveau capable de transformer une perspective de sens. Équivalent de l'apprentissage en « double boucle ».</p></div>
+      <div class="lex-item reveal"><h4>Perspective de sens</h4><p>Cadre de référence tacite, hérité de la socialisation, qui oriente l'interprétation et l'évaluation de l'expérience. Souvent tenu pour la réalité même ; peut être partiel ou déformant.</p></div>
+      <div class="lex-item reveal"><h4>Dilemme désorientant</h4><p>Crise ou contradiction vécue que les schèmes disponibles ne parviennent plus à intégrer. Déclencheur typique d'une transformation des cadres.</p></div>
+      <div class="lex-item reveal"><h4>Agir communicationnel / stratégique</h4><p>Action orientée vers l'<em>entente</em> (autrui comme interlocuteur que l'on cherche à convaincre par des raisons) contre action orientée vers le <em>succès</em> (autrui comme moyen que l'on cherche à influencer).</p></div>
+      <div class="lex-item reveal"><h4>Prétentions à la validité</h4><p>Exigences contestables attachées à tout énoncé sérieux : vérité, justesse normative, sincérité. Leur rachat par l'argumentation — non par l'autorité — fonde un accord qui lie sans contraindre.</p></div>
+      <div class="lex-item reveal"><h4>Fusion des horizons</h4><p>Mécanisme de la compréhension : non se transposer en l'autre ni le réduire à soi, mais élargir son horizon jusqu'à le rejoindre, dans une instance où aucun des deux ne demeure inchangé. Suppose la primauté de la question.</p></div>
+      <div class="lex-item reveal"><h4>Conscientisation</h4><p>Passage d'une conscience naïve, qui subit sa situation, à une conscience critique qui en saisit le caractère structurel ; passage d'objet à sujet de son histoire.</p></div>
+      <div class="lex-item reveal"><h4>Praxis</h4><p>Unité indissociable de la réflexion et de l'action transformatrice. Séparées, elles dégénèrent en verbalisme (réflexion sans action) ou en activisme (action sans réflexion).</p></div>
+    </div>
+
+    <div class="biblio reveal">
+      <h3 class="biblio-t">Bibliographie</h3>
+      <p class="biblio-sub">Quelques sources sur lesquelles s'appuie cette étude.</p>
+      <ul>
+        <li><b>John Dewey</b>, <em>How We Think</em> (1910) ; <em>Démocratie et éducation</em> (1916).</li>
+        <li><b>Lev Vygotski</b>, <em>Pensée et langage</em> (1934).</li>
+        <li><b>Donald A. Schön</b>, <em>The Reflective Practitioner</em> (1983).</li>
+        <li><b>Jürgen Habermas</b>, <em>Théorie de l'agir communicationnel</em> (1981).</li>
+        <li><b>Hans-Georg Gadamer</b>, <em>Vérité et méthode</em> (1960).</li>
+        <li><b>Jack Mezirow</b>, <em>Transformative Dimensions of Adult Learning</em> (1991).</li>
+      </ul>
+    </div>
+
+    <div class="pagenav">
+      <a data-go="synthese"><small>← Section VIII</small><b>Synthèse</b></a>
+      <a class="next" data-go="ouverture"><small>Retour →</small><b>Au début de l'étude</b></a>
+    </div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];
+const links=[...document.querySelectorAll('.nav-link')];
+function go(id){
+  const pg=document.getElementById(id); if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));
+  pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);
+  window.scrollTo({top:0,behavior:'instant'});
+  closeMenu();
+  requestAnimationFrame(()=>revealScan(pg));
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+
+const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeMenu(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('menuBtn').onclick=()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show');};
+scrim.onclick=closeMenu;
+
+const tBtn=document.getElementById('themeBtn'),tIcon=document.getElementById('themeIcon');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;
+tBtn.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');tIcon.innerHTML=dark?sun:moon;};
+
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.1});
+function revealScan(scope){(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}
+revealScan();
+
+const bar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+
+const start=location.hash.replace('#','');
+if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

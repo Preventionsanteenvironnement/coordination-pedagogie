@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le référentiel des compétences professionnelles — guide interactif</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ee; --bg2:#ece8de; --surface:#fffdf8; --ink:#222033; --ink2:#454258; --muted:#777390;
+  --indigo:#3b4a9e; --indigo-d:#2d3a82; --indigo-s:#e6e9f7;
+  --gold:#c4892a; --gold-d:#a87018; --gold-s:#f8edd5; --gold-g:linear-gradient(135deg,#d99a2b,#b8771a);
+  --teal:#127f7a; --teal-s:#d6efed; --rose:#bd457a; --rose-s:#f9e2ec; --green:#3f9c5a; --green-s:#ddf0e2; --sky:#2f8fb3; --sky-s:#dceef6;
+  --line:#e6e1d6; --line2:#f0ece3; --shadow:0 22px 54px -28px rgba(40,40,90,.42); --shadow-sm:0 10px 26px -16px rgba(40,40,90,.34);
+  --rad:16px; --disp:'Newsreader',Georgia,serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#121119; --bg2:#1a1824; --surface:#1d1b29; --ink:#ece9f5; --ink2:#c5c1d6; --muted:#8b86a0;
+  --indigo:#8a98e8; --indigo-d:#a6b1f0; --indigo-s:#1d2142;
+  --gold:#e0a850; --gold-d:#edb96a; --gold-s:#352a12; --gold-g:linear-gradient(135deg,#e0a850,#c4892a);
+  --teal:#43bdb6; --teal-s:#0f302e; --rose:#e077a6; --rose-s:#371c2a; --green:#5cbf78; --green-s:#13301d; --sky:#5bb6d6; --sky-s:#0f2c39;
+  --line:#2a2738; --line2:#201e2c; --shadow:0 26px 64px -30px rgba(0,0,0,.85); --shadow-sm:0 14px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17.5px;line-height:1.68;-webkit-font-smoothing:antialiased;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--disp);line-height:1.16;margin:0;font-weight:600;letter-spacing:-.01em}
+a{color:var(--indigo)}::selection{background:var(--gold);color:#fff}
+svg text{font-family:'Inter',sans-serif}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:300;background:linear-gradient(90deg,var(--indigo),var(--gold),var(--teal))}
+
+.hd{position:fixed;top:0;left:0;right:0;z-index:200;background:color-mix(in srgb,var(--bg) 87%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.hd-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:11px 22px}
+.logo{display:flex;align-items:center;gap:11px;cursor:pointer;flex:0 0 auto}
+.logo .mk{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--indigo),var(--gold));display:grid;place-items:center;color:#fff;box-shadow:var(--shadow-sm)}
+.logo b{font-family:var(--disp);font-size:17px;font-weight:600;line-height:1.05}
+.logo small{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.nav{display:flex;gap:3px;margin-left:auto;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+.nav a{padding:8px 12px;border-radius:10px;color:var(--ink2);font-size:13.5px;font-weight:600;white-space:nowrap;cursor:pointer;transition:.15s}
+.nav a:hover{background:var(--indigo-s);color:var(--indigo-d)}
+.nav a.active{background:var(--indigo);color:#fff}
+.nav a.star{color:var(--gold-d)} .nav a.star.active{background:var(--gold-d);color:#fff}
+.tbtn{flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.burger{display:none;flex:0 0 auto;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+
+.wrap{max-width:920px;margin:0 auto;padding:100px 26px 96px}
+.page{display:none;animation:fade .45s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(22px) scale(.985);transition:.65s cubic-bezier(.2,.8,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.kick{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--indigo-d);background:var(--indigo-s);padding:7px 14px;border-radius:30px;margin-bottom:18px}
+.h1{font-size:clamp(2rem,4.6vw,3rem);font-weight:600;margin-bottom:.4em;letter-spacing:-.01em;max-width:19ch}
+.lead{font-size:clamp(1.1rem,2vw,1.32rem);color:var(--ink2);max-width:62ch;line-height:1.6}
+.h2{font-size:clamp(1.55rem,3vw,2.05rem);font-weight:600;margin:54px 0 8px}
+.h3{font-size:1.3rem;font-weight:600;margin:34px 0 10px}
+.sub{color:var(--muted);margin-bottom:20px;max-width:64ch}
+p{margin:0 0 17px}strong{font-weight:700;color:var(--ink)}
+.refline{font-size:12.5px;color:var(--muted);font-style:italic;margin:-6px 0 18px}
+
+/* HERO with floating shapes */
+.hero{position:relative;border-radius:24px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;box-shadow:var(--shadow);margin-bottom:26px}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(130deg,#2d3a82,#3b4a9e 46%,#7a5fae)}
+.float{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5;z-index:-1;animation:fl 9s ease-in-out infinite alternate}
+.float.f1{width:150px;height:150px;background:radial-gradient(circle,#e7b765,transparent 70%);top:-30px;right:6%;animation-delay:0s}
+.float.f2{width:120px;height:120px;background:radial-gradient(circle,#37b3a9,transparent 70%);bottom:-20px;left:8%;animation-delay:1.5s}
+.float.f3{width:90px;height:90px;background:radial-gradient(circle,#d76c9a,transparent 70%);top:40%;right:30%;animation-delay:3s}
+@keyframes fl{from{transform:translate(0,0) scale(1)}to{transform:translate(18px,-22px) scale(1.15)}}
+.hero .kick{color:#fff;background:rgba(255,255,255,.18)}
+.hero h1{font-size:clamp(2.1rem,5.2vw,3.5rem);font-weight:600;max-width:19ch;margin-bottom:.35em}
+.hero p{font-size:clamp(1.08rem,2.2vw,1.3rem);max-width:54ch;color:rgba(255,255,255,.92)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;font-weight:600;font-size:15px;cursor:pointer;border:0;font-family:var(--sans);transition:.2s}
+.btn-p{background:#fff;color:var(--indigo-d)}.btn-p:hover{transform:translateY(-2px)}
+.btn-g{background:var(--gold-g);color:#fff}.btn-g:hover{transform:translateY(-2px)}
+
+/* count stat */
+.statrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin:24px 0}
+.statc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center;box-shadow:var(--shadow-sm);transition:.2s}
+.statc:hover{transform:translateY(-3px)}
+.statc .n{font-family:var(--disp);font-weight:700;font-size:2.4rem;line-height:1;color:var(--indigo-d)}
+.statc.gold .n{color:var(--gold-d)} .statc.teal .n{color:var(--teal)} .statc.rose .n{color:var(--rose)}
+.statc .l{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:24px;box-shadow:var(--shadow-sm);transition:.22s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.card .badge{display:inline-grid;place-items:center;min-width:42px;height:42px;border-radius:11px;font-family:var(--disp);font-weight:700;font-size:1.05rem;padding:0 8px;margin-bottom:13px}
+.card h3{font-size:1.12rem;margin-bottom:7px}.card p{font-size:14.5px;color:var(--ink2);margin:0}
+.bg-com{background:var(--indigo-s);color:var(--indigo-d)} .bg-p{background:var(--gold-s);color:var(--gold-d)} .bg-d{background:var(--teal-s);color:var(--teal)} .bg-c{background:var(--rose-s);color:var(--rose)}
+
+.call{border-radius:16px;padding:20px 24px;margin:24px 0;border-left:5px solid;background:var(--surface);box-shadow:var(--shadow-sm)}
+.call .lbl{font-family:var(--disp);font-weight:600;font-size:1.06rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.call p{margin:0;font-size:15.5px;color:var(--ink2)}.call p+p{margin-top:8px}
+.call.info{border-color:var(--indigo)}.call.info .lbl{color:var(--indigo-d)}
+.call.gold{border-color:var(--gold);background:var(--gold-s)}.call.gold .lbl{color:var(--gold-d)}
+
+.quote{margin:34px 0;padding:26px 32px;border-radius:18px;background:linear-gradient(135deg,var(--indigo-s),var(--gold-s));position:relative}
+.quote p{font-family:var(--disp);font-style:italic;font-weight:500;font-size:clamp(1.2rem,2.6vw,1.55rem);line-height:1.36;margin:0;color:var(--ink)}
+.quote .src{font-family:var(--sans);font-size:13px;color:var(--muted);margin-top:10px;font-weight:500;font-style:normal}
+
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:var(--rad);padding:26px 24px;margin:26px 0;box-shadow:var(--shadow-sm)}
+.diagram .dt{font-family:var(--disp);font-weight:600;font-size:1.12rem;margin-bottom:4px;text-align:center}
+.diagram .dd{font-size:13px;color:var(--muted);text-align:center;margin-bottom:18px}
+.diagram svg{display:block;width:100%;height:auto}
+
+/* progress */
+.prog-wrap{display:flex;align-items:center;gap:20px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px 24px;margin:22px 0;box-shadow:var(--shadow-sm);flex-wrap:wrap}
+.ring{flex:0 0 auto;position:relative;width:84px;height:84px}
+.ring svg{transform:rotate(-90deg)}
+.ring .rc{fill:none;stroke:var(--bg2);stroke-width:9}
+.ring .rp{fill:none;stroke:var(--gold);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.ring .rt{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--disp);font-weight:700;font-size:1.15rem;color:var(--ink)}
+.prog-info{flex:1;min-width:200px}
+.prog-info h3{font-size:1.15rem;margin-bottom:8px}
+.bars{display:flex;flex-direction:column;gap:7px}
+.barrow{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink2)}
+.barrow .bl{width:96px;flex:0 0 auto;font-weight:600}
+.barrow .bt{flex:1;height:8px;border-radius:6px;background:var(--bg2);overflow:hidden}
+.barrow .bf{height:100%;border-radius:6px;width:0;transition:width .6s ease}
+.bf.com{background:var(--indigo)} .bf.p{background:var(--gold)} .bf.d{background:var(--teal)} .bf.c{background:var(--rose)}
+.barrow .bn{width:42px;text-align:right;flex:0 0 auto;color:var(--muted)}
+.reset-b{font-size:12px;font-weight:600;padding:6px 12px;border-radius:18px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.reset-b:hover{color:var(--rose);border-color:var(--rose)}
+
+/* filter */
+.filter{width:100%;max-width:360px;padding:12px 18px;border:1px solid var(--line);border-radius:30px;background:var(--surface);color:var(--ink);font-family:var(--sans);font-size:15px;margin-bottom:18px}
+.filter:focus{outline:2px solid var(--indigo);border-color:transparent}
+
+/* MOSAIC tiles */
+.mosaic{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:12px}
+.tile{position:relative;aspect-ratio:1;border-radius:15px;border:1px solid var(--line);background:var(--surface);cursor:pointer;padding:12px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transition:.2s;box-shadow:var(--shadow-sm)}
+.tile:hover{transform:translateY(-4px) scale(1.03);box-shadow:var(--shadow)}
+.tile::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+.tile.t-com::before{background:var(--indigo)} .tile.t-p::before{background:var(--gold)} .tile.t-d::before{background:var(--teal)} .tile.t-c::before{background:var(--rose)}
+.tile .tn{font-family:var(--disp);font-weight:700;font-size:1.7rem;line-height:1}
+.tile.t-com .tn{color:var(--indigo-d)} .tile.t-p .tn{color:var(--gold-d)} .tile.t-d .tn{color:var(--teal)} .tile.t-c .tn{color:var(--rose)}
+.tile .tt{font-size:11px;color:var(--ink2);line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tile .tc{position:absolute;top:9px;right:9px;width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;transition:.2s}
+.tile.done{border-color:var(--green)}
+.tile.done .tc{background:var(--green);border-color:var(--green)}
+.tile.done .tc::after{content:"✓";color:#fff;font-size:12px;font-weight:800}
+.tile.hide{display:none}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0 4px;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:13px;height:13px;border-radius:4px;display:inline-block}
+
+/* family heading */
+.fam{display:flex;align-items:center;gap:14px;margin:40px 0 16px}
+.fam .fi{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;font-size:1.2rem}
+.fam h3{font-size:1.32rem;font-weight:600}
+.fam .fs{font-size:12.5px;color:var(--muted);display:block;margin-top:1px}
+
+/* accordion */
+.acc{border:1px solid var(--line);border-radius:13px;margin-bottom:11px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow-sm);transition:.2s}
+.acc:hover{border-color:color-mix(in srgb,var(--indigo) 30%,var(--line))}
+.acc-h{padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:15px;font-weight:600;font-size:1.04rem}
+.acc-h .num{flex:0 0 auto;min-width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-family:var(--disp);font-weight:700;font-size:1.02rem;padding:0 7px}
+.acc-h .ttl{flex:1;line-height:1.25}
+.acc-h .chev{margin-left:auto;transition:.3s;color:var(--muted);flex:0 0 auto}
+.acc.open .chev{transform:rotate(180deg)}
+.acc-b{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.acc-b .in{padding:2px 22px 20px 77px}
+.acc-b ul{margin:0;padding-left:18px;font-size:14.8px;color:var(--ink2)}
+.acc-b li{margin-bottom:8px}
+.acc-b .part{margin-top:14px;padding:12px 16px;border-radius:10px;background:var(--bg2);font-size:14px}
+.acc-b .part b{color:var(--ink);font-family:var(--disp);font-weight:600}
+.n-com{background:var(--indigo-s);color:var(--indigo-d)} .n-p{background:var(--gold-g);color:#fff} .n-d{background:var(--teal-s);color:var(--teal)} .n-c{background:var(--rose-s);color:var(--rose)}
+.acc.flash{animation:flash 1.2s ease}
+@keyframes flash{0%,100%{box-shadow:var(--shadow-sm)}30%{box-shadow:0 0 0 3px var(--gold)}}
+
+.tools{display:flex;gap:8px;margin:14px 0 4px;flex-wrap:wrap}
+.tbtn2{font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--surface);color:var(--ink2);cursor:pointer;font-family:var(--sans)}
+.tbtn2:hover{border-color:var(--indigo);color:var(--indigo-d)}
+
+/* DRAWER */
+.drawer{position:fixed;top:0;right:-460px;width:440px;max-width:92vw;height:100vh;background:var(--surface);z-index:260;box-shadow:-20px 0 60px -20px rgba(0,0,0,.4);transition:right .36s cubic-bezier(.3,.8,.3,1);overflow-y:auto;padding:26px 26px 40px}
+.drawer.open{right:0}
+.dr-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dr-num{min-width:48px;height:48px;border-radius:13px;display:grid;place-items:center;font-family:var(--disp);font-weight:700;font-size:1.15rem;padding:0 9px}
+.dr-x{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-size:18px}
+.dr-grp{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.dr-title{font-size:1.4rem;font-weight:600;margin-bottom:14px;line-height:1.22}
+.dr-body ul{padding-left:18px;font-size:15px;color:var(--ink2)}.dr-body li{margin-bottom:9px}
+.dr-body .part{margin-top:14px;padding:13px 16px;border-radius:10px;background:var(--bg2);font-size:14px}.dr-body .part b{color:var(--ink);font-family:var(--disp);font-weight:600}
+.dr-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.dr-acq{flex:1;min-width:150px;padding:12px;border-radius:11px;border:1.5px solid var(--green);background:transparent;color:var(--green);font-weight:600;cursor:pointer;font-family:var(--sans);font-size:14.5px;transition:.2s}
+.dr-acq.on{background:var(--green);color:#fff}
+.dr-goto{flex:0 0 auto;padding:12px 16px;border-radius:11px;border:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;font-weight:600;font-family:var(--sans);font-size:14px;text-decoration:none;display:inline-flex;align-items:center}
+.drawer-scrim{position:fixed;inset:0;background:rgba(14,12,24,.5);z-index:255;opacity:0;pointer-events:none;transition:.3s}
+.drawer-scrim.open{opacity:1;pointer-events:auto}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
+.pagenav a{flex:1;padding:16px 22px;border:1px solid var(--line);border-radius:13px;background:var(--surface);cursor:pointer;transition:.2s;text-decoration:none}
+.pagenav a:hover{border-color:var(--indigo);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.07em}
+.pagenav b{display:block;font-family:var(--disp);font-size:1.04rem;font-weight:600;margin-top:3px;color:var(--ink)}
+.pagenav .nx{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(14,12,24,.55);z-index:150;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(max-width:920px){
+  .burger{display:grid}
+  .nav{position:fixed;top:0;right:-300px;width:286px;height:100vh;flex-direction:column;background:var(--surface);padding:78px 16px;gap:5px;transition:.32s;z-index:160;box-shadow:var(--shadow);overflow-y:auto}
+  .nav.open{right:0}.nav a{font-size:15px;padding:12px 16px}
+}
+@media(max-width:560px){ body{font-size:16.5px} .wrap{padding:92px 16px 70px} .hero{padding:30px 22px} .logo small{display:none} .acc-b .in{padding-left:22px} }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+
+<header class="hd">
+  <div class="hd-in">
+    <div class="logo" data-go="accueil">
+      <div class="mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div><b>Référentiel de compétences</b><small>Métiers du professorat et de l'éducation</small></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a data-go="accueil">Présentation</a>
+      <a data-go="carte">✦ La carte</a>
+      <a data-go="structure">L'architecture</a>
+      <a data-go="commun">Tronc commun (1-14)</a>
+      <a class="star" data-go="professeur">★ Le professeur (P)</a>
+      <a data-go="documentaliste">Documentaliste (D)</a>
+      <a data-go="cpe">CPE (C)</a>
+      <a data-go="memo">À retenir</a>
+    </nav>
+    <button class="tbtn" id="theme"><svg id="ti" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button class="burger" id="burger"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  </div>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<!-- DRAWER -->
+<div class="drawer-scrim" id="drawerScrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="dr-head"><span class="dr-num" id="drNum"></span><button class="dr-x" id="drX">✕</button></div>
+  <div class="dr-grp" id="drGrp"></div>
+  <h3 class="dr-title" id="drTitle"></h3>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-actions">
+    <button class="dr-acq" id="drAcq">○ Marquer comme acquis</button>
+    <a class="dr-goto" id="drGoto">Voir dans la page →</a>
+  </div>
+</aside>
+
+<div class="wrap">
+
+<!-- PRESENTATION -->
+<section class="page active" id="accueil">
+  <div class="hero reveal">
+    <span class="float f1"></span><span class="float f2"></span><span class="float f3"></span>
+    <div class="kick">La référence du métier</div>
+    <h1>Le référentiel des compétences professionnelles</h1>
+    <p>La carte d'identité professionnelle des professeurs et des personnels d'éducation. Une boussole, de la formation initiale à toute la carrière.</p>
+    <div class="cta">
+      <button class="btn btn-g" data-go="carte">✦ Explorer la carte interactive
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="btn btn-p" data-go="professeur">★ Les compétences du professeur</button>
+    </div>
+  </div>
+
+  <p class="lead reveal">Ce référentiel énonce la <strong>liste des compétences que les professeurs, professeurs documentalistes et conseillers principaux d'éducation doivent maîtriser</strong> pour l'exercice de leur métier.</p>
+  <p class="refline reveal">Arrêté du 1ᵉʳ juillet 2013 (NOR&nbsp;: MENE1315928A) · J.O. du 18 juillet 2013 · Bulletin officiel n°&nbsp;30 du 25 juillet 2013. Entrée en vigueur le 1ᵉʳ septembre 2013.</p>
+
+  <div class="statrow reveal">
+    <div class="statc"><div class="n count" data-to="31">0</div><div class="l">compétences au total</div></div>
+    <div class="statc"><div class="n count" data-to="14">0</div><div class="l">communes à tous</div></div>
+    <div class="statc gold"><div class="n count" data-to="5">0</div><div class="l">propres au professeur</div></div>
+    <div class="statc teal"><div class="n count" data-to="4">0</div><div class="l">documentaliste</div></div>
+    <div class="statc rose"><div class="n count" data-to="8">0</div><div class="l">CPE</div></div>
+  </div>
+
+  <h2 class="h2 reveal">Ce que vise le référentiel</h2>
+  <p class="sub reveal">Le texte lui-même fixe trois objectifs.</p>
+  <div class="grid g3">
+    <div class="card reveal"><div class="badge bg-com">1</div><h3>Une culture commune</h3><p>Affirmer que <strong>tous les personnels concourent à des objectifs communs</strong> et se réfèrent à la culture d'une même profession.</p></div>
+    <div class="card reveal"><div class="badge bg-com">2</div><h3>Des métiers spécifiques</h3><p>Reconnaître la <strong>spécificité des métiers</strong> du professorat et de l'éducation, dans leur contexte d'exercice.</p></div>
+    <div class="card reveal"><div class="badge bg-com">3</div><h3>Des compétences identifiées</h3><p>Identifier les compétences attendues, qui s'acquièrent <strong>tout au long</strong> d'un processus continu (formation initiale, expérience, formation continue).</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Qu'est-ce qu'une « compétence »&nbsp;?</h2>
+  <p class="reveal">Le référentiel reprend la définition européenne&nbsp;: une compétence est un «&nbsp;<strong>ensemble de connaissances, d'aptitudes et d'attitudes appropriées au contexte</strong>&nbsp;».</p>
+  <div class="diagram reveal">
+    <div class="dt">Les trois composantes d'une compétence</div>
+    <div class="dd">D'après la recommandation 2006/962/CE du Parlement européen.</div>
+    <svg viewBox="0 0 720 200" role="img" aria-label="Connaissances, aptitudes, attitudes">
+      <g text-anchor="middle">
+        <circle cx="180" cy="80" r="62" fill="var(--indigo-s)"/><text x="180" y="76" font-size="15" font-weight="700" fill="var(--indigo-d)">Connaissances</text><text x="180" y="96" font-size="11.5" fill="var(--ink2)">savoirs</text>
+        <circle cx="360" cy="80" r="62" fill="var(--gold-s)"/><text x="360" y="76" font-size="15" font-weight="700" fill="var(--gold-d)">Aptitudes</text><text x="360" y="96" font-size="11.5" fill="var(--ink2)">savoir-faire</text>
+        <circle cx="540" cy="80" r="62" fill="var(--teal-s)"/><text x="540" y="76" font-size="15" font-weight="700" fill="var(--teal)">Attitudes</text><text x="540" y="96" font-size="11.5" fill="var(--ink2)">savoir-être</text>
+      </g>
+      <text x="360" y="180" text-anchor="middle" font-size="13.5" font-weight="700" fill="var(--ink2)">= une compétence « appropriée au contexte »</text>
+    </svg>
+  </div>
+
+  <div class="call info reveal"><div class="lbl">📎 Comment lire les « items »</div><p>Chaque compétence est accompagnée d'<strong>items</strong> qui en détaillent les composantes. Le texte le précise&nbsp;: «&nbsp;les items ne constituent pas une somme de prescriptions mais différentes <strong>mises en œuvre possibles</strong> d'une compétence dans des situations diverses&nbsp;».</p></div>
+
+  <div class="pagenav"><span></span><a class="nx" data-go="carte"><small>Suivant →</small><b>✦ La carte interactive</b></a></div>
+</section>
+
+<!-- CARTE -->
+<section class="page" id="carte">
+  <div class="kick reveal">Tout, d'un coup d'œil</div>
+  <h1 class="h1 reveal">La carte des compétences</h1>
+  <p class="lead reveal">Les 31 compétences réunies. <strong>Cliquez sur une tuile</strong> pour ouvrir son détail. Cochez celles que vous maîtrisez&nbsp;: votre progression se mémorise.</p>
+
+  <div class="prog-wrap reveal">
+    <div class="ring"><svg width="84" height="84" viewBox="0 0 84 84"><circle class="rc" cx="42" cy="42" r="36"/><circle class="rp" id="ringP" cx="42" cy="42" r="36"/></svg><div class="rt" id="ringT">0%</div></div>
+    <div class="prog-info">
+      <h3>Votre progression <span style="font-weight:400;color:var(--muted);font-size:.9rem">— <span id="progCount">0</span>/31</span></h3>
+      <div class="bars">
+        <div class="barrow"><span class="bl">Communes</span><span class="bt"><span class="bf com" id="bf-com"></span></span><span class="bn" id="bn-com">0/14</span></div>
+        <div class="barrow"><span class="bl">★ Professeur</span><span class="bt"><span class="bf p" id="bf-p"></span></span><span class="bn" id="bn-p">0/5</span></div>
+        <div class="barrow"><span class="bl">Documentaliste</span><span class="bt"><span class="bf d" id="bf-d"></span></span><span class="bn" id="bn-d">0/4</span></div>
+        <div class="barrow"><span class="bl">CPE</span><span class="bt"><span class="bf c" id="bf-c"></span></span><span class="bn" id="bn-c">0/8</span></div>
+      </div>
+    </div>
+    <button class="reset-b" id="resetAcq">Réinitialiser</button>
+  </div>
+
+  <input class="filter reveal" id="filter" placeholder="🔍  Filtrer les compétences (ex. évaluer, parents, numérique…)">
+  <div class="legend reveal">
+    <span><i style="background:var(--indigo)"></i> Communes (1-14)</span>
+    <span><i style="background:var(--gold)"></i> ★ Professeur (P)</span>
+    <span><i style="background:var(--teal)"></i> Documentaliste (D)</span>
+    <span><i style="background:var(--rose)"></i> CPE (C)</span>
+  </div>
+  <div class="mosaic reveal" id="mosaic"></div>
+
+  <h2 class="h2 reveal">La roue des 14 compétences communes</h2>
+  <p class="sub reveal">Le socle partagé par tous, organisé selon les trois grandes postures du texte. Cliquez sur un pétale.</p>
+  <div class="diagram reveal">
+    <div class="legend" style="justify-content:center">
+      <span><i style="background:var(--indigo)"></i> Acteurs du service public (1-2)</span>
+      <span><i style="background:var(--sky)"></i> Pédagogues &amp; éducateurs (3-9)</span>
+      <span><i style="background:var(--green)"></i> Communauté éducative (10-14)</span>
+    </div>
+    <svg id="wheel" viewBox="0 0 460 460" role="img" aria-label="Roue des 14 compétences communes"></svg>
+  </div>
+
+  <div class="pagenav"><a data-go="accueil"><small>← Précédent</small><b>Présentation</b></a><a class="nx" data-go="structure"><small>Suivant →</small><b>L'architecture</b></a></div>
+</section>
+
+<!-- STRUCTURE -->
+<section class="page" id="structure">
+  <div class="kick reveal">La carte d'ensemble</div>
+  <h1 class="h1 reveal">Comment le référentiel est organisé</h1>
+  <p class="lead reveal">Le texte distingue <strong>trois ensembles</strong> de compétences : un tronc commun à tous, puis des compétences propres à chaque métier.</p>
+
+  <div class="diagram reveal">
+    <div class="dt">L'architecture en un coup d'œil</div>
+    <div class="dd">Tout le monde partage les 14 compétences communes ; chaque métier y ajoute les siennes.</div>
+    <svg viewBox="0 0 720 290" role="img" aria-label="Architecture du référentiel">
+      <rect x="170" y="14" width="380" height="56" rx="14" fill="var(--indigo)"/>
+      <text x="360" y="40" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">Compétences communes à tous</text>
+      <text x="360" y="58" text-anchor="middle" font-size="12.5" fill="#dfe3f7">professeurs ET personnels d'éducation · n° 1 à 14</text>
+      <line x1="360" y1="70" x2="160" y2="130" stroke="var(--line)" stroke-width="2"/>
+      <line x1="360" y1="70" x2="360" y2="130" stroke="var(--line)" stroke-width="2"/>
+      <line x1="360" y1="70" x2="560" y2="130" stroke="var(--line)" stroke-width="2"/>
+      <rect x="40" y="130" width="240" height="130" rx="16" fill="var(--gold-s)" stroke="var(--gold)" stroke-width="2.5"/>
+      <text x="160" y="160" text-anchor="middle" font-size="15" font-weight="700" fill="var(--gold-d)">★ Le professeur</text>
+      <text x="160" y="183" text-anchor="middle" font-size="13" fill="var(--ink2)">+ compétences P1 à P5</text>
+      <text x="160" y="222" text-anchor="middle" font-size="22" font-weight="800" font-family="var(--disp)" fill="var(--gold-d)">14 + 5 = 19</text>
+      <text x="160" y="242" text-anchor="middle" font-size="11.5" fill="var(--muted)">le profil complet du professeur</text>
+      <rect x="300" y="150" width="160" height="90" rx="14" fill="var(--teal-s)" stroke="var(--teal)" stroke-width="1.5"/>
+      <text x="380" y="186" text-anchor="middle" font-size="13.5" font-weight="700" fill="var(--teal)">Documentaliste</text>
+      <text x="380" y="208" text-anchor="middle" font-size="12.5" fill="var(--ink2)">+ D1 à D4</text>
+      <rect x="480" y="150" width="200" height="90" rx="14" fill="var(--rose-s)" stroke="var(--rose)" stroke-width="1.5"/>
+      <text x="580" y="186" text-anchor="middle" font-size="13.5" font-weight="700" fill="var(--rose)">CPE</text>
+      <text x="580" y="208" text-anchor="middle" font-size="12.5" fill="var(--ink2)">+ C1 à C8</text>
+    </svg>
+  </div>
+
+  <h2 class="h2 reveal">Le tronc commun se lit selon trois grandes postures</h2>
+  <p class="sub reveal">Les 14 compétences communes sont elles-mêmes regroupées par le texte en trois familles.</p>
+  <div class="grid g3">
+    <div class="card reveal"><div class="badge bg-com">⚖️</div><h3>Acteurs du service public</h3><p>Transmettre les valeurs de la République et agir dans le cadre institutionnel <em>(compétences 1-2)</em>.</p></div>
+    <div class="card reveal"><div class="badge bg-com">📚</div><h3>Pédagogues &amp; éducateurs</h3><p>Au service de la réussite de tous les élèves <em>(compétences 3-9)</em>.</p></div>
+    <div class="card reveal"><div class="badge bg-com">🤝</div><h3>Acteurs de la communauté éducative</h3><p>Coopérer, avec l'équipe, les parents, les partenaires <em>(compétences 10-14)</em>.</p></div>
+  </div>
+
+  <div class="call gold reveal"><div class="lbl">★ Pour un professeur</div><p>Le professeur maîtrise les <strong>14 compétences communes</strong> à tous <strong>et</strong> les <strong>5 compétences P</strong> qui lui sont propres — soit <strong>19 compétences</strong> au total. C'est le cœur du métier d'enseignant.</p></div>
+
+  <div class="pagenav"><a data-go="carte"><small>← Précédent</small><b>La carte</b></a><a class="nx" data-go="commun"><small>Suivant →</small><b>Le tronc commun (1-14)</b></a></div>
+</section>
+
+<!-- COMMUN -->
+<section class="page" id="commun">
+  <div class="kick reveal">Partagées par tous</div>
+  <h1 class="h1 reveal">Les 14 compétences communes</h1>
+  <p class="lead reveal">Le socle partagé par tous les professeurs et personnels d'éducation. <strong>Cliquez</strong> sur une compétence pour déplier ses items.</p>
+  <div class="tools reveal"><button class="tbtn2" data-open="commun">Tout déplier</button><button class="tbtn2" data-close="commun">Tout replier</button></div>
+
+  <div class="fam reveal"><span class="fi bg-com">⚖️</span><div><h3>Acteurs du service public d'éducation</h3><span class="fs">Transmettre et faire respecter les valeurs de la République</span></div></div>
+  <div id="commun">
+    <div class="acc" id="c-1" data-id="1" data-grp="com"><div class="acc-h"><span class="num n-com">1</span><span class="ttl">Faire partager les valeurs de la République</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Savoir transmettre et faire partager les principes de la vie démocratique ainsi que les valeurs de la République : la liberté, l'égalité, la fraternité ; la laïcité ; le refus de toutes les discriminations.</li><li>Aider les élèves à développer leur esprit critique, à distinguer les savoirs des opinions ou des croyances, à savoir argumenter et à respecter la pensée des autres.</li></ul></div></div></div>
+    <div class="acc" id="c-2" data-id="2" data-grp="com"><div class="acc-h"><span class="num n-com">2</span><span class="ttl">Inscrire son action dans le cadre des principes fondamentaux du système éducatif et dans le cadre réglementaire de l'école</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Connaître la politique éducative de la France, les principales étapes de l'histoire de l'École, ses enjeux et ses défis, les principes fondamentaux du système éducatif et de son organisation en comparaison avec d'autres pays européens.</li><li>Connaître les grands principes législatifs qui régissent le système éducatif, le cadre réglementaire de l'École et de l'établissement scolaire, les droits et obligations des fonctionnaires ainsi que les statuts des professeurs et des personnels d'éducation.</li></ul></div></div></div>
+
+    <div class="fam reveal"><span class="fi bg-com">📚</span><div><h3>Pédagogues et éducateurs au service de la réussite de tous les élèves</h3><span class="fs">Le cœur pédagogique et éducatif, condition d'une culture partagée</span></div></div>
+    <div class="acc" id="c-3" data-id="3" data-grp="com"><div class="acc-h"><span class="num n-com">3</span><span class="ttl">Connaître les élèves et les processus d'apprentissage</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Connaître les concepts fondamentaux de la psychologie de l'enfant, de l'adolescent et du jeune adulte.</li><li>Connaître les processus et les mécanismes d'apprentissage, en prenant en compte les apports de la recherche.</li><li>Tenir compte des dimensions cognitive, affective et relationnelle de l'enseignement et de l'action éducative.</li></ul></div></div></div>
+    <div class="acc" id="c-4" data-id="4" data-grp="com"><div class="acc-h"><span class="num n-com">4</span><span class="ttl">Prendre en compte la diversité des élèves</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Adapter son enseignement et son action éducative à la diversité des élèves.</li><li>Travailler avec les personnes ressources en vue de la mise en œuvre du « projet personnalisé de scolarisation » des élèves en situation de handicap.</li><li>Déceler les signes du décrochage scolaire afin de prévenir les situations difficiles.</li></ul></div></div></div>
+    <div class="acc" id="c-5" data-id="5" data-grp="com"><div class="acc-h"><span class="num n-com">5</span><span class="ttl">Accompagner les élèves dans leur parcours de formation</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Participer à la construction des parcours des élèves sur les plans pédagogique et éducatif.</li><li>Contribuer à la maîtrise par les élèves du socle commun de connaissances, de compétences et de culture.</li><li>Participer aux travaux de différents conseils (conseil des maîtres, conseil de cycle, conseil de classe, conseil pédagogique, etc.), en contribuant à la réflexion sur la coordination des enseignements et des actions éducatives.</li><li>Participer à la conception et à l'animation, au sein d'une équipe pluri-professionnelle, des séquences pédagogiques et éducatives permettant aux élèves de construire leur projet de formation et leur orientation.</li></ul></div></div></div>
+    <div class="acc" id="c-6" data-id="6" data-grp="com"><div class="acc-h"><span class="num n-com">6</span><span class="ttl">Agir en éducateur responsable et selon des principes éthiques</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Accorder à tous les élèves l'attention et l'accompagnement appropriés.</li><li>Éviter toute forme de dévalorisation à l'égard des élèves, des parents, des pairs et de tout membre de la communauté éducative.</li><li>Apporter sa contribution aux éducations transversales (santé, citoyenneté, développement durable, artistique et culturelle).</li><li>Se mobiliser et mobiliser les élèves contre les stéréotypes et les discriminations ; promouvoir l'égalité entre les filles et les garçons.</li><li>Contribuer au bien-être, à la sécurité et à la sûreté des élèves ; prévenir et gérer les violences scolaires ; identifier l'exclusion, la grande difficulté sociale ou la maltraitance.</li><li>Contribuer à identifier tout signe de comportement à risque et à sa résolution.</li><li>Respecter et faire respecter le règlement intérieur et les chartes d'usage.</li><li>Respecter la confidentialité des informations individuelles concernant les élèves et leurs familles.</li></ul></div></div></div>
+    <div class="acc" id="c-7" data-id="7" data-grp="com"><div class="acc-h"><span class="num n-com">7</span><span class="ttl">Maîtriser la langue française à des fins de communication</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Utiliser un langage clair et adapté aux différents interlocuteurs rencontrés dans son activité professionnelle.</li><li>Intégrer dans son activité l'objectif de maîtrise de la langue orale et écrite par les élèves.</li></ul></div></div></div>
+    <div class="acc" id="c-8" data-id="8" data-grp="com"><div class="acc-h"><span class="num n-com">8</span><span class="ttl">Utiliser une langue vivante étrangère dans les situations exigées par son métier</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Maîtriser au moins une langue vivante étrangère au niveau B2 du cadre européen commun de référence pour les langues.</li><li>Participer au développement d'une compétence interculturelle chez les élèves.</li></ul></div></div></div>
+    <div class="acc" id="c-9" data-id="9" data-grp="com"><div class="acc-h"><span class="num n-com">9</span><span class="ttl">Intégrer les éléments de la culture numérique nécessaires à l'exercice de son métier</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Tirer le meilleur parti des outils, ressources et usages numériques, en particulier pour l'individualisation des apprentissages et les apprentissages collaboratifs.</li><li>Aider les élèves à s'approprier les outils et usages numériques de manière critique et créative.</li><li>Participer à l'éducation des élèves à un usage responsable d'internet.</li><li>Utiliser efficacement les technologies pour échanger et se former.</li></ul></div></div></div>
+
+    <div class="fam reveal"><span class="fi bg-com">🤝</span><div><h3>Acteurs de la communauté éducative</h3><span class="fs">Une action cohérente et coordonnée, au service de la réussite de tous</span></div></div>
+    <div class="acc" id="c-10" data-id="10" data-grp="com"><div class="acc-h"><span class="num n-com">10</span><span class="ttl">Coopérer au sein d'une équipe</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Inscrire son intervention dans un cadre collectif, au service de la complémentarité et de la continuité des enseignements comme des actions éducatives.</li><li>Collaborer à la définition des objectifs et à leur évaluation.</li><li>Participer à la conception et à la mise en œuvre de projets collectifs, notamment le parcours d'information et d'orientation proposé à tous les élèves.</li></ul></div></div></div>
+    <div class="acc" id="c-11" data-id="11" data-grp="com"><div class="acc-h"><span class="num n-com">11</span><span class="ttl">Contribuer à l'action de la communauté éducative</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Savoir conduire un entretien, animer une réunion et pratiquer une médiation en utilisant un langage clair et adapté à la situation.</li><li>Prendre part à l'élaboration du projet d'école ou d'établissement et à sa mise en œuvre.</li><li>Prendre en compte les caractéristiques de l'école ou de l'établissement, ses publics, son environnement socio-économique et culturel, et identifier le rôle de tous les acteurs.</li><li>Coordonner ses interventions avec les autres membres de la communauté éducative.</li></ul></div></div></div>
+    <div class="acc" id="c-12" data-id="12" data-grp="com"><div class="acc-h"><span class="num n-com">12</span><span class="ttl">Coopérer avec les parents d'élèves</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Œuvrer à la construction d'une relation de confiance avec les parents.</li><li>Analyser avec les parents les progrès et le parcours de leur enfant pour identifier ses capacités, repérer ses difficultés et coopérer avec eux dans l'élaboration de son projet personnel, voire professionnel.</li><li>Entretenir un dialogue constructif avec les représentants des parents d'élèves.</li></ul></div></div></div>
+    <div class="acc" id="c-13" data-id="13" data-grp="com"><div class="acc-h"><span class="num n-com">13</span><span class="ttl">Coopérer avec les partenaires de l'école</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Coopérer, sur la base du projet d'école ou d'établissement (le cas échéant en prenant en compte le projet éducatif territorial), avec les autres services de l'État, les collectivités territoriales, les associations, les structures culturelles et les acteurs socio-économiques, en identifiant le rôle de chacun.</li><li>Connaître les possibilités d'échanges et de collaborations avec d'autres écoles ou établissements, et les partenariats locaux, nationaux, européens et internationaux.</li><li>Coopérer avec les équipes d'autres écoles ou établissements, notamment via un environnement numérique de travail, pour favoriser la relation entre les cycles et les degrés.</li></ul></div></div></div>
+    <div class="acc" id="c-14" data-id="14" data-grp="com"><div class="acc-h"><span class="num n-com">14</span><span class="ttl">S'engager dans une démarche individuelle et collective de développement professionnel</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Compléter et actualiser ses connaissances scientifiques, didactiques et pédagogiques.</li><li>Se tenir informé des acquis de la recherche pour s'engager dans des projets et démarches d'innovation pédagogique.</li><li><strong>Réfléchir sur sa pratique — seul et entre pairs — et réinvestir les résultats de sa réflexion dans l'action.</strong></li><li>Identifier ses besoins de formation et mettre en œuvre les moyens de développer ses compétences.</li></ul></div></div></div>
+  </div>
+
+  <div class="pagenav"><a data-go="structure"><small>← Précédent</small><b>L'architecture</b></a><a class="nx" data-go="professeur"><small>Suivant →</small><b>★ Le professeur</b></a></div>
+</section>
+
+<!-- PROFESSEUR -->
+<section class="page" id="professeur">
+  <div class="kick reveal" style="color:var(--gold-d);background:var(--gold-s)">★ Le cœur du métier d'enseignant</div>
+  <h1 class="h1 reveal">Les compétences du professeur</h1>
+  <p class="lead reveal">En plus des 14 compétences communes, <strong>tous les professeurs</strong> maîtrisent ces 5 compétences spécifiques (P1 à P5).</p>
+  <div class="call gold reveal"><div class="lbl">★ À retenir</div><p>Profil complet du professeur = <strong>14 compétences communes</strong> (page précédente) <strong>+ 5 compétences P</strong> ci-dessous. Le texte rappelle que le professeur dispose d'une <strong>liberté pédagogique reconnue par la loi</strong>, exercée dans le respect des programmes et du projet d'établissement.</p></div>
+  <div class="tools reveal"><button class="tbtn2" data-open="prof">Tout déplier</button><button class="tbtn2" data-close="prof">Tout replier</button></div>
+
+  <div class="fam reveal"><span class="fi bg-p">📖</span><div><h3>Professionnels porteurs de savoirs et d'une culture commune</h3><span class="fs">La maîtrise des savoirs, condition nécessaire de l'enseignement</span></div></div>
+  <div id="prof">
+    <div class="acc" id="c-P1" data-id="P1" data-grp="p"><div class="acc-h"><span class="num n-p">P1</span><span class="ttl">Maîtriser les savoirs disciplinaires et leur didactique</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Connaître de manière approfondie sa discipline ou ses domaines d'enseignement. En situer les repères fondamentaux, les enjeux épistémologiques et les problèmes didactiques.</li><li>Maîtriser les objectifs et contenus d'enseignement, les exigences du socle commun, ainsi que les acquis du cycle précédent et du cycle suivant.</li><li>Contribuer à la mise en place de projets interdisciplinaires au service des objectifs des programmes.</li></ul><div class="part"><b>En particulier, à l'école</b> — tirer parti de sa polyvalence pour favoriser les continuités à la maternelle et la cohésion du parcours à l'élémentaire ; ancrer les apprentissages sur une bonne maîtrise des savoirs fondamentaux du socle.<br><b>Au collège</b> — accompagner le passage d'un maître polyvalent à une pluralité d'enseignants spécialistes.<br><b>Au lycée général et technologique</b> — articuler les champs disciplinaires avec les exigences de l'enseignement supérieur.</div></div></div></div>
+    <div class="acc" id="c-P2" data-id="P2" data-grp="p"><div class="acc-h"><span class="num n-p">P2</span><span class="ttl">Maîtriser la langue française dans le cadre de son enseignement</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Utiliser un langage clair et adapté aux capacités de compréhension des élèves.</li><li>Intégrer dans son enseignement l'objectif de maîtrise par les élèves de la langue orale et écrite.</li><li>Décrire et expliquer simplement son enseignement à un membre de la communauté éducative ou à un parent d'élève.</li></ul><div class="part"><b>En particulier, à l'école</b> — offrir un modèle linguistique pertinent ; repérer les difficultés de langage oral et écrit (la lecture notamment) pour construire des séquences adaptées ou alerter des personnels spécialisés.<br><b>Au lycée professionnel</b> — utiliser le vocabulaire professionnel approprié selon les situations et le niveau des élèves.</div></div></div></div>
+
+    <div class="fam reveal"><span class="fi bg-p">🛠️</span><div><h3>Praticiens experts des apprentissages</h3><span class="fs">Concevoir, animer et évaluer les situations d'apprentissage</span></div></div>
+    <div class="acc" id="c-P3" data-id="P3" data-grp="p"><div class="acc-h"><span class="num n-p">P3</span><span class="ttl">Construire, mettre en œuvre et animer des situations d'enseignement et d'apprentissage prenant en compte la diversité des élèves</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Savoir préparer les séquences de classe : définir programmations et progressions ; identifier objectifs, contenus, dispositifs, obstacles didactiques, stratégies d'étayage, modalités d'entraînement et d'évaluation.</li><li>Différencier son enseignement selon les rythmes et les besoins de chacun ; adapter son enseignement aux élèves à besoins éducatifs particuliers.</li><li>Prendre en compte les préalables et les représentations sociales (genre, origine ethnique, socio-économique, culturelle) pour traiter les difficultés d'accès aux connaissances.</li><li>Sélectionner des approches didactiques appropriées aux compétences visées.</li><li>Favoriser l'intégration de compétences transversales (créativité, responsabilité, collaboration) et le transfert des apprentissages.</li></ul><div class="part"><b>À l'école</b> — tirer parti du jeu ; maîtriser les approches spécifiques à la maternelle (langage, numération). <b>Au lycée</b> — faire acquérir des méthodes préparant au supérieur ; informer sur les filières. <b>Au lycée professionnel</b> — construire des situations liées au métier visé (situations professionnelles réelles ou construites) ; entretenir des relations avec le secteur économique.</div></div></div></div>
+    <div class="acc" id="c-P4" data-id="P4" data-grp="p"><div class="acc-h"><span class="num n-p">P4</span><span class="ttl">Organiser et assurer un mode de fonctionnement du groupe favorisant l'apprentissage et la socialisation des élèves</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Installer avec les élèves une relation de confiance et de bienveillance.</li><li>Maintenir un climat propice à l'apprentissage et un mode de fonctionnement efficace.</li><li><strong>Rendre explicites pour les élèves les objectifs visés et construire avec eux le sens des apprentissages.</strong></li><li>Favoriser la participation et l'implication de tous les élèves ; créer une dynamique d'échanges et de collaboration entre pairs.</li><li>Instaurer un cadre et des règles assurant la sécurité (plateformes techniques, laboratoires, équipements sportifs et artistiques).</li><li>Recourir à des stratégies adéquates pour prévenir les comportements inappropriés et intervenir efficacement s'ils se manifestent.</li></ul><div class="part"><b>À l'école</b> — accompagner l'enfant et ses parents dans la découverte de l'école ; adapter les formes de communication ; apporter les aides tout en laissant la part d'initiative et de tâtonnement ; gérer le temps et l'espace, spécialement pour les plus jeunes. <b>Au lycée professionnel</b> — favoriser les partages d'expériences professionnelles ; contribuer aux parcours de professionnalisation ; faciliter l'accès au supérieur.</div></div></div></div>
+    <div class="acc" id="c-P5" data-id="P5" data-grp="p"><div class="acc-h"><span class="num n-p">P5</span><span class="ttl">Évaluer les progrès et les acquisitions des élèves</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>En situation d'apprentissage, repérer les difficultés des élèves pour mieux assurer la progression.</li><li>Construire et utiliser des outils permettant d'évaluer les besoins, les progrès et le degré d'acquisition des savoirs et compétences.</li><li>Analyser les réussites et les erreurs ; concevoir et mettre en œuvre des activités de remédiation et de consolidation.</li><li>Faire comprendre aux élèves les principes de l'évaluation pour développer leurs capacités d'auto-évaluation.</li><li>Communiquer aux élèves et aux parents les résultats attendus au regard des objectifs des programmes.</li><li>Inscrire l'évaluation dans une perspective de réussite du projet d'orientation de l'élève.</li></ul></div></div></div>
+  </div>
+
+  <div class="pagenav"><a data-go="commun"><small>← Précédent</small><b>Le tronc commun</b></a><a class="nx" data-go="documentaliste"><small>Suivant →</small><b>Le professeur documentaliste</b></a></div>
+</section>
+
+<!-- DOCUMENTALISTE -->
+<section class="page" id="documentaliste">
+  <div class="kick reveal" style="color:var(--teal);background:var(--teal-s)">Spécifiques</div>
+  <h1 class="h1 reveal">Le professeur documentaliste</h1>
+  <p class="lead reveal">Membre à part entière de l'équipe pédagogique, responsable du <strong>CDI</strong> (centre de documentation et d'information). Outre les compétences communes aux professeurs, il maîtrise 4 compétences spécifiques (D1 à D4).</p>
+  <div class="tools reveal"><button class="tbtn2" data-open="doc">Tout déplier</button><button class="tbtn2" data-close="doc">Tout replier</button></div>
+
+  <div id="doc">
+    <div class="fam reveal"><span class="fi bg-d">📡</span><div><h3>Enseignants de la culture de l'information et des médias</h3></div></div>
+    <div class="acc" id="c-D1" data-id="D1" data-grp="d"><div class="acc-h"><span class="num n-d">D1</span><span class="ttl">Maîtriser les connaissances et compétences propres à l'éducation aux médias et à l'information</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Connaître les principaux éléments des théories de l'information et de la communication.</li><li>Connaître la réglementation des outils et ressources numériques, le droit de l'information, la protection des données personnelles et de la vie privée.</li><li>Connaître les principaux concepts et analyses en sociologie des médias et de la culture.</li><li>Définir une stratégie pédagogique pour l'éducation aux médias et à l'information, en concertation avec les autres professeurs.</li><li>Faciliter des travaux disciplinaires ou interdisciplinaires faisant appel à la recherche et à la maîtrise de l'information.</li><li>Accompagner la production d'un travail personnel d'un élève et l'aider vers l'autonomie.</li></ul></div></div></div>
+
+    <div class="fam reveal"><span class="fi bg-d">🗃️</span><div><h3>Maîtres d'œuvre de l'organisation des ressources pédagogiques</h3></div></div>
+    <div class="acc" id="c-D2" data-id="D2" data-grp="d"><div class="acc-h"><span class="num n-d">D2</span><span class="ttl">Mettre en œuvre la politique documentaire de l'établissement qu'il contribue à définir</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Maîtriser les connaissances et compétences bibliothéconomiques : gestion d'une organisation documentaire et d'un système d'information, politique d'acquisition, veille stratégique, accueil et accompagnement des publics, animation et formation, politique de lecture, évaluation.</li><li>Recenser et analyser les besoins de la communauté éducative en ressources documentaires et informationnelles.</li></ul></div></div></div>
+    <div class="acc" id="c-D3" data-id="D3" data-grp="d"><div class="acc-h"><span class="num n-d">D3</span><span class="ttl">Assurer la responsabilité du centre de ressources et de la diffusion de l'information</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Organiser et gérer le CDI en veillant à la diversité des ressources et des outils, selon la situation particulière de chaque établissement.</li><li>Organiser, avec l'équipe, la complémentarité des espaces de travail et les faire évoluer pour favoriser l'accès progressif des élèves à l'autonomie.</li><li>Maîtriser les étapes du traitement documentaire, les logiciels documentaires et les outils de recherche d'informations.</li><li>Participer à la définition du volet numérique du projet d'établissement et faciliter l'intégration des ressources numériques dans les pratiques.</li><li>Agir au sein d'un réseau de documentation scolaire pour assurer les relations entre niveaux et optimiser les ressources.</li></ul></div></div></div>
+
+    <div class="fam reveal"><span class="fi bg-d">🌍</span><div><h3>Acteurs de l'ouverture de l'établissement</h3></div></div>
+    <div class="acc" id="c-D4" data-id="D4" data-grp="d"><div class="acc-h"><span class="num n-d">D4</span><span class="ttl">Contribuer à l'ouverture de l'établissement sur l'environnement éducatif, culturel et professionnel (local, régional, national, européen et international)</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Concourir à la définition du programme d'action culturelle de l'établissement, selon les besoins des élèves, les ressources locales et le projet d'établissement.</li><li>Mettre en place des projets stimulant l'intérêt pour la lecture et la découverte des cultures artistique, scientifique et technique ; développer une politique de lecture avec les professeurs.</li><li>Utiliser les outils et dispositifs numériques pour faciliter l'ouverture de l'établissement sur l'extérieur.</li></ul></div></div></div>
+  </div>
+
+  <div class="pagenav"><a data-go="professeur"><small>← Précédent</small><b>Le professeur</b></a><a class="nx" data-go="cpe"><small>Suivant →</small><b>Le CPE</b></a></div>
+</section>
+
+<!-- CPE -->
+<section class="page" id="cpe">
+  <div class="kick reveal" style="color:var(--rose);background:var(--rose-s)">Spécifiques</div>
+  <h1 class="h1 reveal">Le conseiller principal d'éducation (CPE)</h1>
+  <p class="lead reveal">Son action se situe dans le cadre de la « vie scolaire » : <em>« placer les adolescents dans les meilleures conditions de vie individuelle et collective d'épanouissement personnel ».</em> Il maîtrise 8 compétences spécifiques (C1 à C8).</p>
+  <p class="refline reveal">Référence citée par le référentiel : circulaire du 28 octobre 1982.</p>
+  <div class="tools reveal"><button class="tbtn2" data-open="cpe">Tout déplier</button><button class="tbtn2" data-close="cpe">Tout replier</button></div>
+
+  <div id="cpe">
+    <div class="fam reveal"><span class="fi bg-c">🏛️</span><div><h3>Conseillers de la communauté éducative et animateurs de la politique éducative</h3></div></div>
+    <div class="acc" id="c-C1" data-id="C1" data-grp="c"><div class="acc-h"><span class="num n-c">C1</span><span class="ttl">Organiser les conditions de vie des élèves dans l'établissement, leur sécurité, l'organisation matérielle et la gestion du temps</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Veiller au respect des rythmes de travail des élèves et organiser leur sécurité.</li><li>Organiser l'accueil, les entrées et sorties, les déplacements et la surveillance ; les zones de travail et récréatives, avec le souci du bien-être des élèves.</li><li>Maîtriser des circuits d'information efficaces pour le suivi individuel et collectif des élèves.</li><li>Faciliter le traitement et la transmission des informations (équipe de direction, personnels, élèves, parents), notamment par le numérique.</li></ul></div></div></div>
+    <div class="acc" id="c-C2" data-id="C2" data-grp="c"><div class="acc-h"><span class="num n-c">C2</span><span class="ttl">Garantir, en lien avec les autres personnels, le respect des règles de vie et de droit dans l'établissement</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Participer à l'élaboration du règlement intérieur et à son application.</li><li>Promouvoir, auprès des élèves et des parents, les règles de vie dans un esprit éducatif.</li><li>Contribuer à l'enseignement civique et moral de l'élève et à la qualité du cadre de vie.</li><li>Identifier les conduites à risque, les addictions, les comportements dégradants et délictueux, avec les personnels sociaux et de santé, et contribuer à leur résolution.</li><li>Conseiller le chef d'établissement et les personnels dans l'appréciation des punitions et sanctions.</li><li>Prévenir, gérer et dépasser les conflits en privilégiant le dialogue et la médiation.</li></ul></div></div></div>
+    <div class="acc" id="c-C3" data-id="C3" data-grp="c"><div class="acc-h"><span class="num n-c">C3</span><span class="ttl">Impulser et coordonner le volet éducatif du projet d'établissement</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Recueillir et communiquer les informations pour suivre l'assiduité et lutter contre l'absentéisme.</li><li>Contribuer au repérage des incivilités, des violences et du harcèlement, et aux mesures pour les faire cesser.</li><li>Élaborer des démarches de prévention et connaître les missions des partenaires (CESC).</li><li>Conseiller sur l'aménagement des espaces pour la sérénité du climat scolaire.</li><li>Contribuer à l'animation socio-éducative et à une politique de formation à la responsabilité.</li></ul></div></div></div>
+    <div class="acc" id="c-C4" data-id="C4" data-grp="c"><div class="acc-h"><span class="num n-c">C4</span><span class="ttl">Assurer la responsabilité de l'organisation et de l'animation de l'équipe de vie scolaire</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Organiser les activités et emplois du temps des personnels de vie scolaire (continuité, cohérence, efficacité du service).</li><li>Préparer et conduire les réunions de coordination de l'équipe et en formaliser les conclusions.</li><li>Évaluer les besoins de formation des membres de l'équipe et proposer des formations.</li></ul></div></div></div>
+
+    <div class="fam reveal"><span class="fi bg-c">🧭</span><div><h3>Accompagnateurs du parcours de formation des élèves</h3></div></div>
+    <div class="acc" id="c-C5" data-id="C5" data-grp="c"><div class="acc-h"><span class="num n-c">C5</span><span class="ttl">Accompagner le parcours de l'élève sur les plans pédagogique et éducatif</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Savoir mener un entretien d'écoute dans le cadre du suivi individuel et de la médiation.</li><li>Œuvrer à la continuité de la relation avec les parents et collaborer avec tous les personnels (comportement, résultats, conditions de travail, assiduité) pour aider les élèves à surmonter leurs difficultés.</li><li>Contribuer au suivi de la vie de la classe (réunions d'équipes, conseil des professeurs, conseil de classe, projets).</li><li>Participer aux travaux du conseil pédagogique.</li><li>Connaître les compétences des différents intervenants dans la prévention du décrochage.</li></ul></div></div></div>
+    <div class="acc" id="c-C6" data-id="C6" data-grp="c"><div class="acc-h"><span class="num n-c">C6</span><span class="ttl">Accompagner les élèves, notamment dans leur formation à une citoyenneté participative</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Encourager et coordonner les initiatives des élèves dans le cadre de la vie lycéenne ou collégienne.</li><li>Veiller à la complémentarité des dispositifs de citoyenneté participative et représentative ; favoriser la participation des élèves aux instances (CVL, CESC, délégués de classe, conférence des délégués, conseil d'administration, commission permanente, conseil de discipline…).</li><li><strong>Assurer la formation des délégués élèves.</strong></li><li>Accompagner les élèves dans la prise de responsabilités (foyer socio-éducatif, maison des lycéens) ; impulser la vie associative et culturelle.</li></ul></div></div></div>
+    <div class="acc" id="c-C7" data-id="C7" data-grp="c"><div class="acc-h"><span class="num n-c">C7</span><span class="ttl">Participer à la construction des parcours des élèves</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Contribuer, avec les enseignants et les assistants d'éducation, aux dispositifs d'accompagnement des élèves.</li><li>Assurer la liaison avec les responsables de la prise en charge hors temps scolaire (classes à horaires aménagés, sections sportives, pôles de haut niveau).</li><li>Contribuer, avec les enseignants, les documentalistes et les COP, à l'accompagnement des élèves dans leur projet personnel.</li></ul></div></div></div>
+
+    <div class="fam reveal"><span class="fi bg-c">🤝</span><div><h3>Acteurs de la communauté éducative</h3></div></div>
+    <div class="acc" id="c-C8" data-id="C8" data-grp="c"><div class="acc-h"><span class="num n-c">C8</span><span class="ttl">Travailler dans une équipe pédagogique</span><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></div><div class="acc-b"><div class="in"><ul><li>Coopérer avec les professeurs pour élaborer des situations d'apprentissage et évaluer les compétences visées (socle commun, référentiels professionnels…).</li><li>Contribuer à l'élaboration du volet éducatif du projet d'établissement.</li><li>Faciliter la continuité des parcours et la prise en compte des transitions d'un cycle à l'autre.</li><li>Conseiller le chef d'établissement pour organiser les partenariats (services de l'État, collectivités, associations, acteurs socio-économiques).</li></ul></div></div></div>
+  </div>
+
+  <div class="pagenav"><a data-go="documentaliste"><small>← Précédent</small><b>Le documentaliste</b></a><a class="nx" data-go="memo"><small>Suivant →</small><b>À retenir</b></a></div>
+</section>
+
+<!-- MEMO -->
+<section class="page" id="memo">
+  <div class="kick reveal">La synthèse</div>
+  <h1 class="h1 reveal">À retenir</h1>
+  <p class="lead reveal">Le référentiel en quelques repères.</p>
+
+  <h2 class="h2 reveal">Le compte des compétences</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="badge bg-com">14</div><h3>Communes à tous</h3><p>Professeurs ET personnels d'éducation (n° 1 à 14).</p></div>
+    <div class="card reveal" style="border-color:var(--gold)"><div class="badge bg-p">5</div><h3>Le professeur</h3><p>P1 à P5, en plus des 14 communes → <strong>19 pour un professeur</strong>.</p></div>
+    <div class="card reveal"><div class="badge bg-d">4</div><h3>Le documentaliste</h3><p>D1 à D4, en plus des compétences des professeurs.</p></div>
+    <div class="card reveal"><div class="badge bg-c">8</div><h3>Le CPE</h3><p>C1 à C8, en plus des 14 communes.</p></div>
+  </div>
+
+  <h2 class="h2 reveal">Trois idées clés</h2>
+  <div class="grid g3">
+    <div class="card reveal"><div class="badge bg-com">🌱</div><h3>Une acquisition continue</h3><p>Les compétences s'acquièrent et s'approfondissent de la formation initiale à toute la carrière.</p></div>
+    <div class="card reveal"><div class="badge bg-com">🧭</div><h3>Des items, pas des recettes</h3><p>Les items illustrent des mises en œuvre possibles, pas une liste de prescriptions.</p></div>
+    <div class="card reveal"><div class="badge bg-com">🤝</div><h3>Une culture commune</h3><p>Tous les personnels concourent à des objectifs communs : instruire et éduquer pour la réussite de tous.</p></div>
+  </div>
+
+  <div class="quote reveal"><p>« Les métiers du professorat et de l'éducation s'apprennent progressivement dans un processus intégrant des savoirs théoriques et des savoirs pratiques fortement articulés les uns aux autres. »</p><div class="src">Référentiel des compétences professionnelles, 2013</div></div>
+
+  <h2 class="h2 reveal">La source</h2>
+  <ul class="card reveal" style="list-style:none;padding:22px 24px;margin:0"><li style="font-size:15.5px;color:var(--ink2)"><strong>Arrêté du 1ᵉʳ juillet 2013</strong> portant référentiel des compétences professionnelles des métiers du professorat et de l'éducation — NOR&nbsp;: MENE1315928A · J.O. du 18 juillet 2013 · Bulletin officiel n°&nbsp;30 du 25 juillet 2013. Entré en vigueur le 1ᵉʳ septembre 2013 (il a abrogé l'arrêté du 12 mai 2010).</li></ul>
+  <p class="reveal" style="color:var(--muted);font-size:13.5px;margin-top:14px">Ce guide restitue fidèlement le texte de l'arrêté. Les intitulés des compétences sont repris à l'identique ; les items sont présentés au plus près du texte officiel.</p>
+
+  <div class="pagenav"><a data-go="cpe"><small>← Précédent</small><b>Le CPE</b></a><a class="nx" data-go="accueil"><small>Retour →</small><b>Présentation</b></a></div>
+</section>
+
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')], links=[...document.querySelectorAll('.nav a')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>scan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const nav=document.getElementById('nav'),scrim=document.getElementById('scrim');
+function closeMenu(){nav.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('burger').onclick=()=>{nav.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tb=document.getElementById('theme'),ti=document.getElementById('ti');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tb.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');ti.innerHTML=dark?sun:moon;};
+
+/* stagger grids */
+document.querySelectorAll('.grid,.statrow,.mosaic').forEach(g=>[...g.children].forEach((c,i)=>{c.style.transitionDelay=(Math.min(i,8)*60)+'ms';}));
+/* reveal + count-up */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');e.target.querySelectorAll&&e.target.querySelectorAll('.count').forEach(countUp);if(e.target.classList.contains('count'))countUp(e.target);io.unobserve(e.target);}}),{threshold:.12});
+function scan(s){(s||document).querySelectorAll('.reveal:not(.in),.count').forEach(el=>io.observe(el));}
+function countUp(el){if(el._done)return;el._done=1;const to=+el.dataset.to||0;let t0=null;const d=900;function step(t){if(!t0)t0=t;const p=Math.min((t-t0)/d,1);el.textContent=Math.round(to*(p<1?1-Math.pow(1-p,3):1));if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);}
+scan();
+
+const bar=document.getElementById('bar');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+
+/* accordions */
+function setH(acc){const b=acc.querySelector('.acc-b');b.style.maxHeight=acc.classList.contains('open')?b.scrollHeight+'px':0;}
+document.querySelectorAll('.acc-h').forEach(h=>h.onclick=()=>{const a=h.parentElement;a.classList.toggle('open');setH(a);});
+document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{document.querySelectorAll('#'+b.dataset.open+' .acc').forEach(a=>{a.classList.add('open');setH(a);});});
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>{document.querySelectorAll('#'+b.dataset.close+' .acc').forEach(a=>{a.classList.remove('open');setH(a);});});
+
+/* ===== competences data from DOM ===== */
+const COMPS=[...document.querySelectorAll('.acc')].map(a=>({id:a.dataset.id,grp:a.dataset.grp,title:a.querySelector('.ttl').textContent,el:a}));
+const GRP_PAGE={com:'commun',p:'professeur',d:'documentaliste',c:'cpe'};
+const GRP_NAME={com:'Compétence commune',p:'★ Compétence du professeur',d:'Compétence du documentaliste',c:'Compétence du CPE'};
+const GRP_TOT={com:14,p:5,d:4,c:8};
+
+/* ===== progress (localStorage) ===== */
+let ACQ=new Set();try{ACQ=new Set(JSON.parse(localStorage.getItem('ref_acq')||'[]'));}catch(e){}
+function saveAcq(){try{localStorage.setItem('ref_acq',JSON.stringify([...ACQ]));}catch(e){}}
+function toggleAcq(id){if(ACQ.has(id))ACQ.delete(id);else ACQ.add(id);saveAcq();refreshAcq();}
+const RING_LEN=2*Math.PI*36;
+document.getElementById('ringP').style.strokeDasharray=RING_LEN;
+function refreshAcq(){
+  // tiles
+  document.querySelectorAll('.tile').forEach(t=>t.classList.toggle('done',ACQ.has(t.dataset.comp)));
+  // counts by group
+  const by={com:0,p:0,d:0,c:0};COMPS.forEach(c=>{if(ACQ.has(c.id))by[c.grp]++;});
+  const tot=COMPS.length, done=ACQ.size;
+  document.getElementById('progCount').textContent=done;
+  const pct=Math.round(done/tot*100);
+  document.getElementById('ringP').style.strokeDashoffset=RING_LEN*(1-done/tot);
+  document.getElementById('ringT').textContent=pct+'%';
+  ['com','p','d','c'].forEach(g=>{document.getElementById('bf-'+g).style.width=(by[g]/GRP_TOT[g]*100)+'%';document.getElementById('bn-'+g).textContent=by[g]+'/'+GRP_TOT[g];});
+  // drawer
+  const da=document.getElementById('drAcq');if(da.dataset.id){const on=ACQ.has(da.dataset.id);da.classList.toggle('on',on);da.textContent=(on?'✓ Acquis':'○ Marquer comme acquis');}
+}
+
+/* ===== mosaic ===== */
+const mos=document.getElementById('mosaic');
+COMPS.forEach(c=>{
+  const t=document.createElement('div');t.className='tile t-'+c.grp;t.dataset.comp=c.id;t.dataset.search=(c.id+' '+c.title).toLowerCase();
+  t.innerHTML=`<div class="tc"></div><div class="tn">${c.id}</div><div class="tt">${c.title}</div>`;
+  t.onclick=e=>{if(e.target.closest('.tc')){toggleAcq(c.id);}else{openDrawer(c.id);}};
+  mos.appendChild(t);
+});
+document.querySelectorAll('.mosaic .tile').forEach((c,i)=>c.style.transitionDelay=(Math.min(i,12)*30)+'ms');
+/* filter */
+document.getElementById('filter').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.tile').forEach(t=>t.classList.toggle('hide',q&&!t.dataset.search.includes(q)));});
+
+/* ===== drawer ===== */
+const drawer=document.getElementById('drawer'),drScrim=document.getElementById('drawerScrim');
+function openDrawer(id){const c=COMPS.find(x=>x.id===id);if(!c)return;
+  const num=document.getElementById('drNum');num.textContent=id;num.className='dr-num n-'+c.grp;
+  document.getElementById('drGrp').textContent=GRP_NAME[c.grp];
+  document.getElementById('drTitle').textContent=c.title;
+  document.getElementById('drBody').innerHTML=c.el.querySelector('.acc-b .in').innerHTML;
+  const da=document.getElementById('drAcq');da.dataset.id=id;
+  const goto=document.getElementById('drGoto');goto.onclick=ev=>{ev.preventDefault();closeDrawer();go(GRP_PAGE[c.grp]);const acc=c.el;setTimeout(()=>{if(!acc.classList.contains('open')){acc.classList.add('open');setH(acc);}acc.scrollIntoView({behavior:'smooth',block:'center'});acc.classList.add('flash');setTimeout(()=>acc.classList.remove('flash'),1300);},120);};
+  refreshAcq();
+  drawer.classList.add('open');drScrim.classList.add('open');
+}
+function closeDrawer(){drawer.classList.remove('open');drScrim.classList.remove('open');}
+document.getElementById('drX').onclick=closeDrawer;drScrim.onclick=closeDrawer;
+document.getElementById('drAcq').onclick=()=>{const id=document.getElementById('drAcq').dataset.id;if(id)toggleAcq(id);};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+document.getElementById('resetAcq').onclick=()=>{ACQ.clear();saveAcq();refreshAcq();};
+
+/* ===== wheel of the 14 common ===== */
+(function(){
+  const svg=document.getElementById('wheel');const cx=230,cy=230,R=160;
+  const com=COMPS.filter(c=>c.grp==='com');
+  const famColor=id=>{const n=+id;return n<=2?'var(--indigo)':(n<=9?'var(--sky)':'var(--green)');};
+  let html=`<circle cx="${cx}" cy="${cy}" r="58" fill="var(--indigo-s)"/><text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="15" font-weight="700" fill="var(--indigo-d)">14</text><text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="11" fill="var(--ink2)">communes</text>`;
+  com.forEach((c,i)=>{const a=(-90+i*(360/com.length))*Math.PI/180;const x=cx+R*Math.cos(a),y=cy+R*Math.sin(a);
+    html+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)" stroke-width="1.5"/>`;
+    html+=`<g class="wn" data-comp="${c.id}" style="cursor:pointer;opacity:0"><circle cx="${x}" cy="${y}" r="24" fill="${famColor(c.id)}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">${c.id}</text></g>`;
+  });
+  svg.innerHTML=html;
+  svg.querySelectorAll('.wn').forEach((g,i)=>{g.style.transition='opacity .4s ease';setTimeout(()=>g.style.opacity=1,200+i*70);g.onclick=()=>openDrawer(g.dataset.comp);});
+})();
+
+refreshAcq();
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>
