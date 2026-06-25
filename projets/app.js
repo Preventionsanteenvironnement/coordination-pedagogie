@@ -681,8 +681,8 @@ function openPromptIA(){
 function exportJSON(){
   if(!projet) return;
   const data={ _format:"atelier-projet", _v:1, exportedAt:dateFr(),
-    project:{ titre:projet.titre||"", contexte:projet.contexte||"", type:projet.type||"peda", typeCustom:projet.typeCustom||"", statut:projet.statut||"brouillon", reperes:projet.reperes||{}, ressources:projet.ressources||[], jalons:projet.jalons||[], enabled:projet.enabled||null, etapeNoms:projet.etapeNoms||{}, locked:projet.locked||[] },
-    contributions:contribs.map(c=>({ etape:c.etape, texte:c.texte, initiales:c.initiales, role:c.role, epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo" })) };
+    project:{ titre:projet.titre||"", contexte:projet.contexte||"", type:projet.type||"peda", typeCustom:projet.typeCustom||"", statut:projet.statut||"brouillon", reperes:projet.reperes||{}, ressources:projet.ressources||[], jalons:projet.jalons||[], enabled:projet.enabled||null, etapeNoms:projet.etapeNoms||{}, locked:projet.locked||[], trame:projet.trame||null, pilote:projet.pilote||null, copilote:projet.copilote||null, directMode:!!projet.directMode, synthese:projet.synthese||{} },
+    contributions:contribs.map(c=>({ id:c.id, etape:c.etape, texte:c.texte, initiales:c.initiales, role:c.role, epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo", votes:c.votes||[], pos:(c.pos!=null?c.pos:null), lr:c.lr||null, precise:!!c.precise })) };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
   a.download="projet-"+String(projet.titre||"sans-titre").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".json";
@@ -698,8 +698,10 @@ function parseLoose(v){
 async function importFromData(data){
   const p=(data&&data.project)||data; if(!p||typeof p!=="object"){toast("Format non reconnu.");return false;}
   try{
-    const ref=await addDoc(collection(db,COL),{ titre:(p.titre||"Projet importé"), contexte:p.contexte||"", type:p.type||"peda", typeCustom:p.typeCustom||"", statut:p.statut||"brouillon", reperes:p.reperes||{}, ressources:p.ressources||[], jalons:p.jalons||[], enabled:Array.isArray(p.enabled)?p.enabled:null, etapeNoms:p.etapeNoms||{}, locked:p.locked||[], createdAt:serverTimestamp() });
-    for(const c of (data.contributions||[])){ await addDoc(collection(db,COL,ref.id,"contributions"),{ etape:c.etape||"constats", texte:c.texte||"", initiales:c.initiales||"", role:c.role||"", epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo", createdAt:serverTimestamp() }); }
+    const ref=await addDoc(collection(db,COL),{ titre:(p.titre||"Projet importé"), contexte:p.contexte||"", type:p.type||"peda", typeCustom:p.typeCustom||"", statut:p.statut||"brouillon", reperes:p.reperes||{}, ressources:p.ressources||[], jalons:p.jalons||[], enabled:Array.isArray(p.enabled)?p.enabled:null, etapeNoms:p.etapeNoms||{}, locked:p.locked||[], trame:p.trame||null, pilote:p.pilote||null, copilote:p.copilote||null, directMode:!!p.directMode, createdAt:serverTimestamp() });
+    const idmap={};
+    for(const c of (data.contributions||[])){ const cref=await addDoc(collection(db,COL,ref.id,"contributions"),{ etape:c.etape||"constats", texte:c.texte||"", initiales:c.initiales||"", role:c.role||"", epingle:!!c.epingle, comments:c.comments||[], lien:c.lien||"", regroupe:!!c.regroupe, ecarte:!!c.ecarte, raison:c.raison||"", resp:c.resp||"", ech:c.ech||"", pst:c.pst||"todo", votes:Array.isArray(c.votes)?c.votes:[], ...(c.pos!=null?{pos:c.pos}:{}), ...(Array.isArray(c.lr)?{lr:c.lr}:{}), ...(c.precise?{precise:true}:{}), createdAt:serverTimestamp() }); if(c.id) idmap[c.id]=cref.id; }
+    if(p.synthese && typeof p.synthese==="object"){ const syn={}; for(const [et,arr] of Object.entries(p.synthese)){ if(Array.isArray(arr)) syn[et]=arr.map(s=>({ ...s, sources:(s.sources||[]).map(id=>idmap[id]).filter(Boolean) })); } if(Object.keys(syn).length){ try{ await updateDoc(doc(db,COL,ref.id),{synthese:syn}); }catch(_){} } }
     toast("Projet importé",true); openProjet(ref.id); return true;
   }catch(e){ console.error(e); toast("Enregistrement impossible."); return false; }
 }
