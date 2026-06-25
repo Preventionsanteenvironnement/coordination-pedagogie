@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2026r4" />
+  <link rel="stylesheet" href="style.css?v=2026r7" />
 </head>
 <body>
   <header class="hero">
@@ -75,7 +75,7 @@
        target="_blank" rel="noopener">Guide — ajouter du contenu</a>
   </footer>
 
-  <script src="data.js?v=2026r6"></script>
+  <script src="data.js?v=2026r7"></script>
   <script>
     const grille = document.getElementById('grille');
     const grilleOutils = document.getElementById('grilleOutils');
@@ -105,6 +105,7 @@
     };
     const SVG = p => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (p || ICONS.file) + '</svg>';
     const iconFor = n => SVG(ICONS[n.icon] || (n.enfants ? ICONS.folder : ICONS.file));
+    const shortTitle = t => String(t || '').replace(/\s*[—–]\s.*$/, '').replace(/\s*\(.*$/, '').trim();
 
     function rendreOutils() {
       grilleOutils.innerHTML = OUTILS.map(o => {
@@ -194,12 +195,14 @@
             </button>`;
         }
         if (n.enfants) {
+          const apercu = n.enfants.map(e => shortTitle(e.titre || e.nom || '')).filter(Boolean).join(' · ');
           return `
             <button class="card branch" data-idx="${idx}" style="--card-accent:${c}">
               ${badge}
               <div class="card-top"><span class="card-ic">${iconFor(n)}</span><span class="arrow" aria-hidden="true">→</span></div>
               <h3>${nom(n)}</h3>
-              <p>${n.desc || ''}</p>
+              ${n.desc ? `<p>${n.desc}</p>` : ''}
+              ${apercu ? `<p class="card-kids">${apercu}</p>` : ''}
               <div class="meta"><span class="type-tag">${(n.enfants ? n.enfants.length + ' élément' + (n.enfants.length > 1 ? 's' : '') : 'Dossier')}</span></div>
             </button>`;
         }
