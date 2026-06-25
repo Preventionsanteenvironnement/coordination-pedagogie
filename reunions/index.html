@@ -189,6 +189,28 @@
       background:var(--bg-2); border:1px dashed var(--line); border-radius:var(--r-sm); padding:13px 15px; margin-top:18px; }
     .back{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; color:var(--soft); font-size:.86rem; text-decoration:none; padding:8px 0; }
     .back:hover{ color:var(--accent); }
+    /* ----- suivi (tableau de bord de toutes les réunions) ----- */
+    .suivi-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:18px 0 14px; flex-wrap:wrap; }
+    .suivi-filters{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .sfilter{ background:var(--card); border:1.5px solid var(--line); color:var(--soft); border-radius:999px; padding:7px 15px; font-size:.85rem; font-weight:650; transition:.13s; }
+    .sfilter:hover{ border-color:var(--accent); }
+    .sfilter.on{ background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 2px 8px rgba(47,143,131,.28); }
+    .sfilter .sfn{ opacity:.7; font-weight:800; margin-left:6px; }
+    .sfilter.on .sfn{ opacity:.85; }
+    .rcard{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow);
+      padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; gap:16px; cursor:pointer;
+      transition:.15s; animation:rise .4s cubic-bezier(.2,.7,.3,1) both; }
+    .rcard:hover{ border-color:var(--accent); transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+    .rcard-main{ flex:1; min-width:0; }
+    .rcard-title{ font-size:1.04rem; font-weight:750; margin-bottom:3px; }
+    .rcard-meta{ font-size:.82rem; color:var(--soft); }
+    .rcard-row{ display:flex; align-items:center; gap:9px; margin-top:11px; flex-wrap:wrap; }
+    .rcount{ font-size:.85rem; color:var(--soft); font-weight:650; }
+    .rcard-best{ font-size:.82rem; font-weight:700; padding:4px 12px; border-radius:999px; display:inline-flex; align-items:center; gap:5px; }
+    .rcard-best.best{ background:var(--oui-bg); color:var(--oui); border:1px solid var(--oui-line); }
+    .rcard-best.ret{ background:var(--gold-bg); color:var(--gold); border:1px solid var(--gold); }
+    .rcard-open{ flex:none; }
+    @media(max-width:560px){ .rcard{ flex-direction:column; align-items:stretch; } .rcard-open{ width:100%; } }
     .hidden{ display:none !important; }
     .center{ text-align:center; }
   </style>
@@ -282,6 +304,17 @@ Préparation conseil de classe" maxlength="1500"></textarea>
       </section>
     </section>
 
+    <!-- ============================ VUE SUIVI ============================ -->
+    <section id="vue-suivi" class="hidden">
+      <div class="suivi-bar">
+        <span class="live"><span class="pulse"></span> mis à jour en direct</span>
+        <a class="btn" href="?">＋ Nouvelle réunion</a>
+      </div>
+      <div class="suivi-filters" id="suivi-filters"></div>
+      <div id="suivi-list"><p class="empty-hint">Chargement…</p></div>
+      <div class="rgpd" style="margin-top:18px"><span aria-hidden="true">🔒</span><span><strong>Espace partagé.</strong> Toutes les réunions de l'équipe apparaissent ici en temps réel. Seul·e l'organisateur·rice d'une réunion peut figer son créneau. Aucun nom complet, pas d'élève.</span></div>
+    </section>
+
     <!-- ============================ VUE SONDAGE ============================ -->
     <section id="vue-sondage" class="hidden">
       <div class="share" id="share-box">
@@ -373,7 +406,12 @@ Préparation conseil de classe" maxlength="1500"></textarea>
 
       <section class="card hidden" id="admin-card">
         <h2>⚙️ Gestion <span class="hint" style="font-weight:400">— vous, l'organisateur·rice</span></h2>
-        <p class="sub">Cliquez «&nbsp;Retenir&nbsp;» sous une colonne pour figer le choix final. Ce panneau n'apparaît que sur votre appareil.</p>
+        <p class="sub">Cliquez «&nbsp;Retenir&nbsp;» sous une colonne pour figer le choix final.</p>
+        <div class="share" id="org-link-box" style="margin:0 0 16px">
+          <div class="lab">🔑 Votre lien organisateur <span class="hint" style="font-weight:400">— gardez-le pour gérer depuis n'importe quel appareil</span></div>
+          <div class="share-row"><input type="text" id="org-url" readonly /><button class="btn" id="btn-copy-org" type="button">Copier</button></div>
+          <p class="muted" style="margin:8px 0 0">Ne le partagez pas : il donne les droits de gestion (retenir, clôturer, supprimer).</p>
+        </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap">
           <button class="btn ghost" id="btn-clear-ret" type="button">Annuler le choix retenu</button>
           <button class="btn ghost" id="btn-close" type="button">Clôturer le vote</button>
@@ -541,7 +579,7 @@ Préparation conseil de classe" maxlength="1500"></textarea>
       });
 
       const pollRef=doc(db,COL,pollId);
-      const isAdmin=()=>localStorage.getItem(lsAdmin(pollId))||params.get("admin");
+      const isAdmin=()=> !!(localStorage.getItem(lsAdmin(pollId)) || params.get("admin") || (poll && poll.adminKey && params.get("k") && params.get("k")===poll.adminKey));
       let poll=null, reponses=[];
       let myChoix={}, dirty=false;
       let myRespId=localStorage.getItem(lsResp(pollId))||null;
@@ -647,6 +685,9 @@ Préparation conseil de classe" maxlength="1500"></textarea>
         if(rc){ b.classList.remove("hidden"); b.innerHTML=`📌 <span><strong>Créneau retenu :</strong> ${esc((rc.jour?rc.jour+" · ":"")+rc.heure)}${poll.lieu?` — ${esc(poll.lieu)}`:""}</span>`; } else b.classList.add("hidden"); }
       let adminReady=false;
       function setupAdmin(){ if(!isAdmin()||adminReady) return; adminReady=true; $("admin-card").classList.remove("hidden");
+        if(poll&&poll.adminKey){ const ou=location.origin+location.pathname+"?id="+pollId+"&k="+poll.adminKey; $("org-url").value=ou;
+          $("btn-copy-org").addEventListener("click", async ()=>{ try{ await navigator.clipboard.writeText(ou); toast("Lien organisateur copié ✓"); $("btn-copy-org").textContent="Copié ✓"; }catch{ $("org-url").select(); toast("Sélectionnez puis copiez."); } }); }
+        else { $("org-link-box").classList.add("hidden"); }
         $("btn-clear-ret").addEventListener("click", async ()=>{ await updateDoc(pollRef,{retenu:""}); toast("Choix annulé."); });
         $("btn-close").addEventListener("click", async ()=>{ await updateDoc(pollRef,{closed:true}); toast("Vote clôturé."); });
         $("btn-reopen").addEventListener("click", async ()=>{ await updateDoc(pollRef,{closed:false}); toast("Vote rouvert."); });
@@ -686,6 +727,7 @@ Préparation conseil de classe" maxlength="1500"></textarea>
       onSnapshot(pollRef, snap=>{
         if(!snap.exists()){ $("vue-sondage").innerHTML=`<div class="card center"><h2>Sondage introuvable</h2><p class="muted">Il a peut-être été supprimé.</p><a class="btn" href="?">Créer un sondage</a></div>`; return; }
         poll=snap.data(); poll.creneaux=poll.creneaux||[];
+        if(params.get("k") && poll.adminKey && params.get("k")===poll.adminKey && !localStorage.getItem(lsAdmin(pollId))) localStorage.setItem(lsAdmin(pollId), poll.adminKey);
         $("s-titre").textContent=poll.titre||"Sondage";
         renderMeta(); renderStatut(); renderOrdre(); setupAdmin(); refreshAdminBtns(); setupOpenAdd(); renderBanners(); renderVoteForm(); renderResults(); renderFinal();
       });
@@ -702,7 +744,59 @@ Préparation conseil de classe" maxlength="1500"></textarea>
       });
     }
 
-    if(pollId) initSondage(); else initCreer();
+    // ====================================================================
+    //  VUE SUIVI — tableau de bord temps réel de TOUTES les réunions
+    // ====================================================================
+    function initSuivi(){
+      $("vue-suivi").classList.remove("hidden");
+      $("hero-titre").textContent="Réunions de l'équipe";
+      $("hero-sous").textContent="Toutes les disponibilités, en temps réel. Cliquez une réunion pour la suivre ou valider.";
+      let polls=[]; const resp={}; const unsubs={}; let filter="all";
+      const statusOf=p=> p.closed?"closed":(p.retenu?"ret":"open");
+      const countOf=p=> (resp[p.id]?resp[p.id].length:0);
+      function bestOf(p){
+        const cr=p.creneaux||[];
+        if(p.retenu){ const c=cr.find(x=>x.id===p.retenu); return c?{label:(c.jour?c.jour+" · ":"")+c.heure,kind:"ret"}:null; }
+        const list=resp[p.id]||[]; if(!list.length||!cr.length) return null;
+        const score={},oui={}; cr.forEach(c=>{score[c.id]=0;oui[c.id]=0;});
+        list.forEach(r=>cr.forEach(c=>{ const v=r.choix?.[c.id]; if(v==="oui"){score[c.id]+=2;oui[c.id]++;} else if(v==="sib")score[c.id]+=1; }));
+        const maxS=Math.max(0,...cr.map(c=>score[c.id])); if(maxS<=0) return null;
+        const c=cr.find(x=>score[x.id]===maxS);
+        return c?{label:(c.jour?c.jour+" · ":"")+c.heure,kind:"best",n:oui[c.id]}:null;
+      }
+      function render(){
+        const cnt=k=> k==="all"?polls.length:polls.filter(p=>statusOf(p)===k).length;
+        $("suivi-filters").innerHTML=[["all","Toutes"],["open","En cours"],["ret","Décidées"],["closed","Clôturées"]]
+          .map(([k,l])=>`<button class="sfilter ${filter===k?"on":""}" data-filter="${k}">${l}<span class="sfn">${cnt(k)}</span></button>`).join("");
+        if(!polls.length){ $("suivi-list").innerHTML=`<div class="card center"><p class="muted">Aucune réunion pour l'instant.</p><a class="btn" href="?" style="margin-top:10px">＋ Créer la première</a></div>`; return; }
+        const order={open:0,ret:1,closed:2};
+        const list=polls.filter(p=> filter==="all"||statusOf(p)===filter)
+          .sort((a,b)=> (order[statusOf(a)]-order[statusOf(b)]) || (((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0)));
+        if(!list.length){ $("suivi-list").innerHTML=`<p class="empty-hint">Aucune réunion dans cette catégorie.</p>`; return; }
+        $("suivi-list").innerHTML=list.map(p=>{
+          const st=statusOf(p); const lab={open:"🟢 En cours",ret:"📌 Créneau retenu",closed:"🔒 Clôturé"}[st];
+          const n=countOf(p); const best=bestOf(p); const nbCr=(p.creneaux||[]).length;
+          const meta=[]; if(p.organisateur) meta.push("✍️ "+esc(p.organisateur)); meta.push(nbCr+" créneau"+(nbCr>1?"x":"")); if(p.lieu) meta.push("📍 "+esc(p.lieu));
+          const bestHtml=best?`<span class="rcard-best ${best.kind}">${best.kind==="ret"?"📌":"👑"} ${esc(best.label)}${best.kind==="best"&&best.n?` · ${best.n} dispo${best.n>1?"s":""}`:""}</span>`:`<span class="rcount">${n?"en cours de vote":"en attente de réponses"}</span>`;
+          return `<div class="rcard" data-open="${p.id}"><div class="rcard-main">
+            <div class="rcard-title">${esc(p.titre||"Sans titre")}</div>
+            <div class="rcard-meta">${meta.join(" · ")}</div>
+            <div class="rcard-row"><span class="statut ${st}">${lab}</span><span class="rcount">👥 ${n} réponse${n>1?"s":""}</span>${bestHtml}</div>
+          </div><a class="btn sec rcard-open" href="?id=${p.id}">Ouvrir →</a></div>`;
+        }).join("");
+      }
+      $("suivi-filters").addEventListener("click",e=>{ const b=e.target.closest("[data-filter]"); if(b){ filter=b.dataset.filter; render(); } });
+      $("suivi-list").addEventListener("click",e=>{ if(e.target.closest(".rcard-open")) return; const c=e.target.closest("[data-open]"); if(c) location.search="?id="+c.dataset.open; });
+      onSnapshot(collection(db,COL), snap=>{
+        polls=snap.docs.map(d=>({id:d.id,...d.data()}));
+        const ids=new Set(polls.map(p=>p.id));
+        polls.forEach(p=>{ if(!unsubs[p.id]) unsubs[p.id]=onSnapshot(collection(db,COL,p.id,"reponses"), rs=>{ resp[p.id]=rs.docs.map(d=>d.data()); render(); }); });
+        Object.keys(unsubs).forEach(id=>{ if(!ids.has(id)){ unsubs[id](); delete unsubs[id]; delete resp[id]; } });
+        render();
+      }, err=>{ console.error(err); $("suivi-list").innerHTML=`<div class="card center"><p class="muted">Lecture impossible — vérifiez la connexion.</p></div>`; });
+    }
+
+    if(pollId) initSondage(); else if(params.has("suivi")) initSuivi(); else initCreer();
   </script>
 </body>
 </html>

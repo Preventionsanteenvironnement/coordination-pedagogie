@@ -246,4 +246,13 @@ const OUTILS = [
     icon: "clock",
     badge: "Nouveau",
   },
+  {
+    titre: "Réunions — suivi",
+    desc: "Toutes les réunions de l'équipe en un coup d'œil : statut, nombre de réponses et meilleur créneau — en temps réel. Cliquez pour suivre ou valider.",
+    lien: "reunions/?suivi",
+    type: "Suivi",
+    couleur: "#2f7d6b",
+    icon: "calendar",
+    badge: "Nouveau",
+  },
 ];
