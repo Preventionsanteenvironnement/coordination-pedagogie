@@ -444,7 +444,7 @@ function initCanevas(){
     const has = id => notes.some(n=>n.bloc===id);
     const dateStr = new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
     let html = `<div class="ap-hero"><h1>${esc(projet.titre||"Projet")}</h1>${projet.contexte?`<p class="ap-ctx">${esc(projet.contexte)}</p>`:""}<div class="ap-meta"><span>${ic("grid")} Canevas de projet</span><span>${ic("calendar")} ${esc(dateStr)}</span><span>${ic("users")} ${notes.length} note${notes.length>1?"s":""}</span></div></div>`;
-    const blocsHtml = BLOCS.filter(has).map(b=>{
+    const blocsHtml = BLOCS.filter(b=>has(b.id)).map(b=>{
       const list=notes.filter(n=>n.bloc===b.id);
       const full = (b.id==="actions"||b.id==="idee"||b.id==="roles") && list.length>3;
       return `<section class="ap-bloc${full?" full":""}"><h3><span class="bi">${ic(b.icon)}</span> ${esc(b.label)}</h3>
