@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Monter un projet — canevas | Coordination &amp; Pédagogie</title>
+<style>
+  :root{
+    --bg:#eef1f6; --surface:#f7f9fc; --card:#ffffff; --ink:#1b2330; --soft:#5c6678;
+    --line:#e3e8f0; --line2:#eef2f7;
+    --accent:#4f5bd5; --accent-d:#3f49b0; --accent-soft:#ebedfb;
+    --ok:#1f9d6b; --ok-soft:#e7f5ef;
+    --r:16px; --r-sm:11px;
+    --shadow:0 1px 2px rgba(18,24,40,.05),0 12px 30px rgba(18,24,40,.07);
+    --shadow-lg:0 10px 44px rgba(18,24,40,.16);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0d1118; --surface:#141a23; --card:#171e29; --ink:#e7ecf3; --soft:#9aa6b6;
+      --line:#283242; --line2:#1e2733;
+      --accent:#7b85ef; --accent-d:#6670e6; --accent-soft:#1c2236;
+      --ok:#46c08a; --ok-soft:#13291f;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px rgba(0,0,0,.42);
+      --shadow-lg:0 12px 50px rgba(0,0,0,.6);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  svg{width:1em;height:1em;flex:none;vertical-align:-2px}
+  a.backlink{position:fixed;top:14px;left:14px;z-index:80;display:inline-flex;align-items:center;gap:6px;
+    background:var(--card);color:var(--ink);text-decoration:none;font-size:.82rem;font-weight:600;
+    padding:8px 13px;border-radius:999px;border:1px solid var(--line);box-shadow:var(--shadow);}
+  a.backlink:hover{border-color:var(--accent);color:var(--accent)}
+  header.hero{background:radial-gradient(120% 150% at 0% 0%,#5965e0 0%,#4f5bd5 45%,#3a4498 100%);
+    color:#fff;padding:54px 20px 60px;text-align:center;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;inset:auto -10% -55% -10%;height:120px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0}
+  .hero-in{max-width:760px;margin:0 auto;position:relative;z-index:1}
+  .kicker{display:inline-block;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;opacity:.92;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px}
+  header.hero h1{margin:.4em 0 .12em;font-size:clamp(1.5rem,4.4vw,2.05rem);font-weight:800;letter-spacing:-.01em}
+  header.hero p{margin:0;opacity:.94;font-size:.97rem}
+  main{max-width:1020px;margin:0 auto;padding:6px 16px 90px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px;margin:18px 0;
+    animation:rise .4s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  h2{font-size:1.15rem;margin:0 0 4px}
+  .muted{color:var(--soft);font-size:.88rem}
+  label{display:block;font-weight:650;font-size:.86rem;margin:14px 0 6px}
+  label .hint{color:var(--soft);font-weight:400}
+  input,textarea{width:100%;padding:11px 13px;font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm)}
+  textarea{resize:vertical;min-height:58px}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  button{font:inherit;cursor:pointer;border:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:var(--r-sm);
+    background:var(--accent);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(79,91,213,.28);transition:.15s}
+  .btn:hover{background:var(--accent-d);transform:translateY(-1px)}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .btn.big{padding:14px 24px;font-size:1.01rem;width:100%}
+  .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--soft);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent);background:transparent}
+  .lnk{background:none;border:none;color:var(--soft);font-size:.82rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:7px 8px;border-radius:8px}
+  .lnk:hover{color:var(--accent);background:var(--accent-soft)}
+  .lnk.danger{color:#c0533f}.lnk.danger:hover{background:#fbe9e5;color:#a8412f}
+  .hidden{display:none!important}
+  .center{text-align:center}
+  /* bandeau identité + outils */
+  .toprow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:18px 0 6px}
+  .titlewrap{flex:1;min-width:0}
+  .titlewrap h2{font-size:1.3rem;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+  .titlewrap .sub{color:var(--soft);font-size:.9rem}
+  .open-pill{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:700;color:var(--ok);background:var(--ok-soft);border:1px solid var(--ok);padding:5px 12px;border-radius:999px}
+  .ident-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 14px;margin:6px 0 4px}
+  .ava{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;color:#fff;font-size:.72rem;font-weight:800;flex:none}
+  .ava.sm{width:22px;height:22px;font-size:.6rem}
+  /* grille de blocs */
+  .blocs{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;margin-top:10px}
+  .bloc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 16px 14px;display:flex;flex-direction:column}
+  .bloc.lead{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shadow)}
+  .bloc-h{display:flex;align-items:flex-start;gap:11px;margin-bottom:12px}
+  .bloc-ic{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--accent-soft);color:var(--accent);font-size:20px;flex:none}
+  .bloc-h h3{margin:0;font-size:1rem;font-weight:750}
+  .bloc-h p{margin:1px 0 0;font-size:.8rem;color:var(--soft)}
+  .notes{display:flex;flex-direction:column;gap:9px;flex:1}
+  .bloc-empty{color:var(--soft);font-size:.84rem;font-style:italic;padding:4px 2px}
+  .note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--nc,var(--accent));border-radius:9px;padding:10px 12px;animation:pop .18s ease}
+  @keyframes pop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+  .note p{margin:0 0 8px;font-size:.92rem;white-space:pre-wrap;word-break:break-word}
+  .note-f{display:flex;align-items:center;gap:7px}
+  .note-by{font-size:.76rem;color:var(--soft);font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .note-x{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:transparent;color:var(--soft);font-size:14px}
+  .note-x:hover{background:#fbe9e5;color:#c0533f}
+  .addrow{display:flex;gap:7px;margin-top:11px}
+  .addrow input{flex:1;padding:9px 11px;font-size:.88rem}
+  .addbtn{display:grid;place-items:center;width:40px;border-radius:var(--r-sm);background:var(--accent);color:#fff;font-size:18px;flex:none}
+  .addbtn:hover{background:var(--accent-d)}
+  .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0 2px}
+  .foot{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:26px;padding-top:14px;border-top:1px solid var(--line);justify-content:center}
+  .banner{background:#fdeecf;color:#8a5a12;border:1.5px solid #f0cd86;border-radius:var(--r-sm);padding:13px 16px;margin:16px 0;font-weight:650;font-size:.9rem;display:flex;gap:10px;align-items:flex-start}
+  /* vue d'ensemble (fiche) */
+  .ap-hero{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:26px 26px 22px;margin:16px 0}
+  .ap-hero h1{margin:0 0 6px;font-size:1.7rem;font-weight:800;letter-spacing:-.01em}
+  .ap-hero .ap-ctx{color:var(--soft);font-size:.98rem;margin:0}
+  .ap-hero .ap-meta{margin-top:12px;font-size:.84rem;color:var(--soft);display:flex;gap:14px;flex-wrap:wrap}
+  .ap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+  .ap-bloc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+  .ap-bloc.full{grid-column:1/-1}
+  .ap-bloc h3{display:flex;align-items:center;gap:9px;margin:0 0 10px;font-size:1.02rem;font-weight:750}
+  .ap-bloc h3 .bi{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--accent-soft);color:var(--accent);font-size:17px}
+  .ap-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+  .ap-list li{display:flex;gap:9px;font-size:.93rem;align-items:flex-start}
+  .ap-list li svg{color:var(--accent);margin-top:3px}
+  .ap-by{color:var(--soft);font-size:.78rem;font-weight:600}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(22px);background:var(--ink);color:var(--bg);
+    padding:11px 20px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;transition:.27s;pointer-events:none;z-index:90;box-shadow:var(--shadow-lg)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .rgpd{display:flex;gap:11px;align-items:flex-start;font-size:.82rem;color:var(--soft);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-sm);padding:13px 15px;margin-top:18px}
+  /* modale identité */
+  .modal-bg{position:fixed;inset:0;background:rgba(15,20,30,.5);display:flex;align-items:center;justify-content:center;padding:18px;z-index:100;opacity:0;transition:.2s}
+  .modal-bg.show{opacity:1}
+  .modal{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:24px;max-width:420px;width:100%}
+  .modal h3{margin:0 0 4px;font-size:1.12rem}
+  .swatches{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
+  .sw{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent}
+  .sw.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+  @media print{
+    a.backlink,header.hero,.toolbar,.foot,.ident-bar,.open-pill,.banner,#toast,#identModal{display:none!important}
+    body{background:#fff}.ap-hero,.ap-bloc{box-shadow:none;border-color:#ddd;break-inside:avoid}
+    main{max-width:100%;padding:0}
+  }
+</style>
+</head>
+<body>
+<a class="backlink" href="../">‹ Portail</a>
+
+<header class="hero">
+  <div class="hero-in">
+    <span class="kicker">Coordination &amp; Pédagogie</span>
+    <h1 id="hero-titre">Monter un projet</h1>
+    <p id="hero-sous">De l'idée à l'action — un canevas à remplir ensemble.</p>
+  </div>
+</header>
+
+<main>
+  <!-- CRÉATION -->
+  <section id="vue-creer" class="hidden">
+    <section class="card">
+      <h2>Un nouveau projet</h2>
+      <p class="muted">Donnez-lui un nom, c'est tout. Vous remplirez le canevas ensuite, à plusieurs.</p>
+      <label for="c-titre">Le projet, en quelques mots</label>
+      <input id="c-titre" maxlength="120" placeholder="ex. Café des familles, sortie au théâtre, projet éco-délégués…" />
+      <label for="c-ctx">Un mot de contexte <span class="hint">— facultatif</span></label>
+      <textarea id="c-ctx" maxlength="500" placeholder="ex. À monter avec l'équipe de 2nde pour la rentrée."></textarea>
+      <div style="margin-top:18px"><button class="btn big" id="create-btn">Créer le canevas</button></div>
+      <div class="rgpd"><span id="rgpd-ic"></span><span><strong>Espace ouvert.</strong> Tout le monde peut écrire (initiales + rôle, jamais de nom complet). Tout est enregistré et se partage par un lien.</span></div>
+    </section>
+    <p class="center"><button class="lnk" id="c-import"></button></p>
+  </section>
+
+  <!-- CANEVAS -->
+  <section id="vue-canevas" class="hidden">
+    <div class="toprow">
+      <div class="titlewrap"><h2 id="ca-titre">…</h2><div class="sub" id="ca-ctx"></div></div>
+      <span class="open-pill" id="ca-open"></span>
+    </div>
+    <div class="ident-bar" id="ident-bar"></div>
+    <div class="toolbar">
+      <button class="btn" id="b-apercu"></button>
+      <button class="btn ghost" id="b-share"></button>
+    </div>
+    <div id="fb-banner"></div>
+    <div class="blocs" id="blocs"></div>
+    <div class="foot" id="ca-foot"></div>
+  </section>
+
+  <!-- VUE D'ENSEMBLE -->
+  <section id="vue-apercu" class="hidden">
+    <div class="toolbar">
+      <button class="btn ghost" id="b-back"></button>
+      <button class="btn" id="b-print"></button>
+      <button class="lnk" id="b-export2"></button>
+    </div>
+    <div id="apercu"></div>
+  </section>
+</main>
+
+<div class="modal-bg hidden" id="identModal">
+  <div class="modal">
+    <h3 id="im-title">Pour écrire, présentez-vous</h3>
+    <p class="muted">Vos initiales suffisent — jamais de nom complet (RGPD).</p>
+    <label for="id-ini">Vos initiales</label>
+    <input id="id-ini" maxlength="6" placeholder="ex. M.D." />
+    <label for="id-role">Votre rôle <span class="hint">— facultatif</span></label>
+    <input id="id-role" list="roles" maxlength="28" placeholder="ex. Prof principal" />
+    <datalist id="roles">
+      <option>Professeur</option><option>Prof principal</option><option>PSE</option><option>CPE</option>
+      <option>Direction</option><option>AESH</option><option>Vie scolaire</option><option>Documentation</option>
+      <option>Éco-gestion</option><option>Enseignement pro</option><option>Partenaire</option>
+    </datalist>
+    <label>Votre couleur</label>
+    <div class="swatches" id="id-swatches"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="id-cancel">Annuler</button>
+      <button class="btn" id="id-save">C'est parti</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com",
+  projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
+  messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55"
+};
+const db = getFirestore(initializeApp(firebaseConfig));
+const COL = "coordination_canevas";
+
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const canevasId = params.get("id");
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random());
+const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+let toastT; function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2100); }
+
+const ICONS = {
+  bulb:'<path d="M9.5 17.5h5"/><path d="M10 21h4"/><path d="M8 14a5 5 0 1 1 8 0c-.8.9-1.2 1.6-1.3 2.5h-5.4c-.1-.9-.5-1.6-1.3-2.5z"/>',
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
+  users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6.1"/><path d="M16.5 14.4a5.5 5.5 0 0 1 4 4.6"/>',
+  list:'<path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
+  usercheck:'<circle cx="9" cy="8" r="3.4"/><path d="M3 19a6 6 0 0 1 11-3.3"/><path d="m15.5 18 1.8 1.8 3.7-3.8"/>',
+  box:'<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
+  partner:'<path d="M16 19v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
+  calendar:'<rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8 3.5v4M16 3.5v4"/>',
+  flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  check:'<path d="M5 12.5l4.2 4.2L19 7"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  grid:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+  edit:'<path d="M4 20h4L18.5 9.5a2 2 0 0 0-3-3L5 17v3z"/><path d="m13.5 6.5 3 3"/>',
+  printer:'<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/>',
+  download:'<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16"/>',
+  upload:'<path d="M12 15V3m0 0 4 4m-4-4L8 7M4 19h16"/>',
+  share:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',
+  trash:'<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/>',
+  back:'<path d="m14 6-6 6 6 6"/>',
+  alert:'<path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>'
+};
+const ic = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||""}</svg>`;
+
+const BLOCS = [
+  { id:"idee",        label:"L'idée",                     icon:"bulb",      hint:"C'est quoi, en une phrase ?",            lead:true },
+  { id:"but",         label:"Le but",                     icon:"target",    hint:"Pourquoi on le fait ?" },
+  { id:"public",      label:"Pour qui",                   icon:"users",     hint:"Qui ça concerne, qui en profite ?" },
+  { id:"actions",     label:"Les actions",                icon:"list",      hint:"On fait quoi, concrètement ?" },
+  { id:"roles",       label:"Qui fait quoi",              icon:"usercheck", hint:"Qui s'occupe de quoi ?" },
+  { id:"moyens",      label:"Les moyens",                 icon:"box",       hint:"De quoi a-t-on besoin ?" },
+  { id:"partenaires", label:"Intervenants & partenaires", icon:"partner",   hint:"Qui, de l'extérieur, peut aider ?" },
+  { id:"quand",       label:"Quand",                      icon:"calendar",  hint:"Pour quand ? Quelles échéances ?" },
+  { id:"reussite",    label:"Réussi si…",                 icon:"flag",      hint:"Comment saura-t-on que c'est réussi ?" }
+];
+const blocLabel = id => (BLOCS.find(b=>b.id===id)||{}).label || id;
+const blocIcon  = id => (BLOCS.find(b=>b.id===id)||{}).icon || "list";
+
+const COLORS = ["#4f5bd5","#0e8a6e","#c9772f","#b5476b","#3f7ab0","#7a5cc0"];
+const lsIdent = "canevas_ident_v1";
+const lsAdmin = id => "canevas_admin_"+id;
+const lsMine  = id => "canevas_mine_"+id;
+let ident=null; try{ ident=JSON.parse(localStorage.getItem(lsIdent)||"null"); }catch(_){}
+function setIdent(o){ ident=o; localStorage.setItem(lsIdent, JSON.stringify(o)); }
+function avatar(ini,color,sm){ return `<span class="ava${sm?" sm":""}" style="background:${color||COLORS[0]}">${esc((ini||"?").slice(0,3))}</span>`; }
+
+function parseLoose(v){
+  v=String(v||"").trim().replace(/^```(?:json)?\s*/i,"").replace(/```\s*$/,"").trim();
+  const slice=s=>{const a=s.indexOf("{"),b=s.lastIndexOf("}");return (a>=0&&b>a)?s.slice(a,b+1):s;};
+  const dq=s=>s.replace(/[“”„″]/g,'"');
+  for(const t of [v, slice(v), dq(v), slice(dq(v))]){ try{ return JSON.parse(t); }catch(_){} }
+  return null;
+}
+
+/* ---------- modale identité ---------- */
+let identCb=null, identPick=COLORS[0];
+function paintSwatches(){
+  $("id-swatches").innerHTML = COLORS.map(c=>`<span class="sw ${c===identPick?"on":""}" data-sw="${c}" style="background:${c}"></span>`).join("");
+}
+function openIdent(cb){
+  identCb=cb||null;
+  identPick = (ident&&ident.color) || COLORS[0];
+  $("id-ini").value = ident?ident.ini:"";
+  $("id-role").value = ident?ident.role:"";
+  paintSwatches();
+  const m=$("identModal"); m.classList.remove("hidden"); requestAnimationFrame(()=>m.classList.add("show"));
+  setTimeout(()=>$("id-ini").focus(),60);
+}
+function closeIdent(){ const m=$("identModal"); m.classList.remove("show"); setTimeout(()=>m.classList.add("hidden"),200); }
+$("id-swatches").addEventListener("click",e=>{ const s=e.target.closest("[data-sw]"); if(s){ identPick=s.dataset.sw; paintSwatches(); } });
+$("id-cancel").addEventListener("click",closeIdent);
+$("id-save").addEventListener("click",()=>{
+  const i=$("id-ini").value.trim(); if(!i){ toast("Indiquez vos initiales."); $("id-ini").focus(); return; }
+  setIdent({ ini:i, role:$("id-role").value.trim(), color:identPick });
+  closeIdent(); const cb=identCb; identCb=null; if(cb) cb();
+});
+
+/* ---------- import (depuis n'importe quelle vue) ---------- */
+function importJSON(){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
+  inp.onchange=async()=>{ const f=inp.files&&inp.files[0]; if(!f) return;
+    const data=parseLoose(await f.text()); if(!data){ toast("Fichier JSON invalide."); return; } await importFromData(data); };
+  inp.click();
+}
+async function importFromData(data){
+  const p=(data&&data.project)||data||{};
+  if(!p.titre && !(data&&data.notes)){ toast("Format non reconnu."); return; }
+  try{
+    const ak=uid();
+    const ref=await addDoc(collection(db,COL),{ titre:p.titre||"Projet importé", contexte:p.contexte||"", adminKey:ak, createdAt:serverTimestamp() });
+    localStorage.setItem(lsAdmin(ref.id), ak);
+    for(const n of ((data&&data.notes)||[])){
+      await addDoc(collection(db,COL,ref.id,"notes"),{ bloc:n.bloc||"idee", texte:n.texte||"", ini:n.ini||"", role:n.role||"", color:n.color||COLORS[0], createdAt:serverTimestamp() });
+    }
+    toast("Projet importé"); location.search="?id="+ref.id;
+  }catch(e){ console.error(e); toast("Import impossible — règle Firestore à publier ?"); }
+}
+
+/* ======================= VUE CRÉATION ======================= */
+function initCreer(){
+  $("vue-creer").classList.remove("hidden");
+  $("rgpd-ic").innerHTML = ic("lock");
+  $("c-import").innerHTML = ic("upload")+" Importer un projet (JSON)";
+  $("c-import").addEventListener("click", importJSON);
+  $("create-btn").addEventListener("click", async ()=>{
+    const titre=$("c-titre").value.trim(); if(!titre){ toast("Donnez un nom au projet."); $("c-titre").focus(); return; }
+    const btn=$("create-btn"); btn.disabled=true; btn.textContent="Création…";
+    try{
+      const ak=uid();
+      const ref=await addDoc(collection(db,COL),{ titre, contexte:$("c-ctx").value.trim()||"", adminKey:ak, createdAt:serverTimestamp() });
+      localStorage.setItem(lsAdmin(ref.id), ak);
+      location.search="?id="+ref.id;
+    }catch(e){ console.error(e); btn.disabled=false; btn.textContent="Créer le canevas"; toast("Enregistrement impossible — règle Firestore à publier ?"); }
+  });
+  $("c-titre").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); $("create-btn").click(); } });
+}
+
+/* ======================= VUE CANEVAS ======================= */
+function initCanevas(){
+  $("vue-canevas").classList.remove("hidden");
+  $("hero-titre").textContent="Le canevas du projet";
+  $("hero-sous").textContent="Chacun ajoute ses notes, en direct. La fiche se compose toute seule.";
+  $("ca-open").innerHTML = ic("users")+" Tout le monde peut écrire";
+  $("b-apercu").innerHTML = ic("grid")+" Vue d'ensemble";
+  $("b-share").innerHTML = ic("share")+" Partager le lien";
+  $("b-back").innerHTML = ic("back")+" Modifier";
+  $("b-print").innerHTML = ic("printer")+" Imprimer / PDF";
+  $("b-export2").innerHTML = ic("download")+" Sauvegarder (JSON)";
+
+  const ref=doc(db,COL,canevasId);
+  let projet=null, notes=[];
+  let mine=new Set(); try{ mine=new Set(JSON.parse(localStorage.getItem(lsMine(canevasId))||"[]")); }catch(_){}
+  const saveMine=()=>localStorage.setItem(lsMine(canevasId), JSON.stringify([...mine]));
+  const isAdmin=()=> !!(localStorage.getItem(lsAdmin(canevasId)) || (projet&&projet.adminKey&&params.get("k")===projet.adminKey));
+
+  const url = location.origin+location.pathname+"?id="+canevasId;
+
+  function renderHeader(){
+    $("ca-titre").textContent = projet.titre || "Projet";
+    $("ca-ctx").textContent = projet.contexte || "";
+    if(projet.contexte){ $("ca-ctx").style.display=""; } else { $("ca-ctx").style.display="none"; }
+    renderFoot();
+  }
+  function renderIdent(){
+    const bar=$("ident-bar");
+    if(ident){
+      bar.innerHTML = `${avatar(ident.ini,ident.color)}<div style="flex:1;min-width:0"><b style="font-size:.9rem">${esc(ident.ini)}</b>${ident.role?`<span class="muted"> · ${esc(ident.role)}</span>`:""}<div class="muted" style="font-size:.78rem">C'est vous — vos notes apparaissent à votre couleur.</div></div><button class="lnk" id="id-edit">${ic("edit")} Changer</button>`;
+      $("id-edit").addEventListener("click",()=>openIdent(()=>{renderIdent();renderBlocs();}));
+    } else {
+      bar.innerHTML = `<span style="flex:1;min-width:0" class="muted">Pour écrire, présentez-vous (initiales + rôle).</span><button class="btn ghost" id="id-set">${ic("edit")} Se présenter</button>`;
+      $("id-set").addEventListener("click",()=>openIdent(()=>{renderIdent();renderBlocs();}));
+    }
+  }
+  function noteCard(n){
+    const can = mine.has(n.id) || isAdmin();
+    return `<div class="note" style="--nc:${n.color||COLORS[0]}"><p>${esc(n.texte)}</p>
+      <div class="note-f">${avatar(n.ini,n.color,true)}<span class="note-by">${esc(n.ini||"—")}${n.role?" · "+esc(n.role):""}</span>${can?`<button class="note-x" data-del="${n.id}" aria-label="Supprimer cette note">${ic("x")}</button>`:""}</div></div>`;
+  }
+  function renderBlocs(){
+    $("blocs").innerHTML = BLOCS.map(b=>{
+      const list = notes.filter(n=>n.bloc===b.id);
+      return `<section class="bloc${b.lead?" lead":""}">
+        <div class="bloc-h"><span class="bloc-ic">${ic(b.icon)}</span><div><h3>${esc(b.label)}</h3><p>${esc(b.hint)}</p></div></div>
+        <div class="notes">${list.length?list.map(noteCard).join(""):`<p class="bloc-empty">À compléter…</p>`}</div>
+        <div class="addrow"><input class="addinput" data-add="${b.id}" placeholder="Ajouter une note…" maxlength="280" /><button class="addbtn" data-addbtn="${b.id}" aria-label="Ajouter">${ic("plus")}</button></div>
+      </section>`;
+    }).join("");
+  }
+  function renderFoot(){
+    $("ca-foot").innerHTML =
+      `<button class="lnk" id="f-export">${ic("download")} Sauvegarder (JSON)</button>`+
+      `<button class="lnk" id="f-import">${ic("upload")} Importer (JSON)</button>`+
+      (isAdmin()?`<button class="lnk danger" id="f-del">${ic("trash")} Supprimer le projet</button>`:"");
+    $("f-export").addEventListener("click",exportJSON);
+    $("f-import").addEventListener("click",importJSON);
+    if($("f-del")) $("f-del").addEventListener("click",delProjet);
+  }
+  function showFb(){
+    $("fb-banner").innerHTML = `<div class="banner">${ic("alert")}<span><b>Activation Firestore requise.</b> La règle de la collection <code>coordination_canevas</code> n'est pas encore publiée — l'enregistrement est en attente.</span></div>`;
+  }
+
+  function exportJSON(){
+    if(!projet) return;
+    const data={ _format:"canevas-projet", _v:1, exportedAt:new Date().toLocaleDateString("fr-FR"),
+      project:{ titre:projet.titre||"", contexte:projet.contexte||"" },
+      notes:notes.map(n=>({ bloc:n.bloc, texte:n.texte, ini:n.ini, role:n.role, color:n.color })) };
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+    a.download="projet-"+String(projet.titre||"canevas").replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".json";
+    a.click(); URL.revokeObjectURL(a.href); toast("Sauvegarde téléchargée");
+  }
+  async function delProjet(){
+    if(!isAdmin()) return;
+    if(!confirm("Supprimer définitivement ce projet et toutes ses notes ?\n\nPensez à « Sauvegarder (JSON) » avant si besoin.")) return;
+    try{ for(const n of notes){ await deleteDoc(doc(db,COL,canevasId,"notes",n.id)); } await deleteDoc(ref);
+      localStorage.removeItem(lsAdmin(canevasId)); toast("Projet supprimé."); setTimeout(()=>location.search="?",700);
+    }catch(e){ console.error(e); toast("Suppression impossible."); }
+  }
+
+  async function addNote(blocId, texte){
+    texte=(texte||"").trim(); if(!texte) return;
+    if(!ident){ openIdent(()=>{ renderIdent(); addNote(blocId, texte); }); return; }
+    try{ const r=await addDoc(collection(db,COL,canevasId,"notes"),{ bloc:blocId, texte, ini:ident.ini, role:ident.role||"", color:ident.color||COLORS[0], createdAt:serverTimestamp() });
+      mine.add(r.id); saveMine();
+    }catch(e){ console.error(e); toast("Enregistrement impossible."); }
+  }
+  async function delNote(nid){ try{ await deleteDoc(doc(db,COL,canevasId,"notes",nid)); mine.delete(nid); saveMine(); }catch(e){ console.error(e); } }
+
+  /* vue d'ensemble */
+  function renderApercu(){
+    const has = id => notes.some(n=>n.bloc===id);
+    const dateStr = new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});
+    let html = `<div class="ap-hero"><h1>${esc(projet.titre||"Projet")}</h1>${projet.contexte?`<p class="ap-ctx">${esc(projet.contexte)}</p>`:""}<div class="ap-meta"><span>${ic("grid")} Canevas de projet</span><span>${ic("calendar")} ${esc(dateStr)}</span><span>${ic("users")} ${notes.length} note${notes.length>1?"s":""}</span></div></div>`;
+    const blocsHtml = BLOCS.filter(has).map(b=>{
+      const list=notes.filter(n=>n.bloc===b.id);
+      const full = (b.id==="actions"||b.id==="idee"||b.id==="roles") && list.length>3;
+      return `<section class="ap-bloc${full?" full":""}"><h3><span class="bi">${ic(b.icon)}</span> ${esc(b.label)}</h3>
+        <ul class="ap-list">${list.map(n=>`<li>${ic("check")}<span>${esc(n.texte)} <span class="ap-by">— ${esc(n.ini||"")}${n.role?" ("+esc(n.role)+")":""}</span></span></li>`).join("")}</ul></section>`;
+    }).join("");
+    html += notes.length ? `<div class="ap-grid">${blocsHtml}</div>` : `<div class="card center"><p class="muted">Le canevas est encore vide. Revenez le remplir, puis revenez ici.</p></div>`;
+    $("apercu").innerHTML = html;
+  }
+  function showApercu(){ renderApercu(); $("vue-canevas").classList.add("hidden"); $("vue-apercu").classList.remove("hidden"); window.scrollTo(0,0); }
+  function showCanevas(){ $("vue-apercu").classList.add("hidden"); $("vue-canevas").classList.remove("hidden"); window.scrollTo(0,0); }
+
+  /* events */
+  $("vue-canevas").addEventListener("click", e=>{
+    const ab=e.target.closest("[data-addbtn]"); if(ab){ const inp=document.querySelector(`.addinput[data-add="${ab.dataset.addbtn}"]`); const v=inp?inp.value:""; if(inp)inp.value=""; return addNote(ab.dataset.addbtn,v); }
+    const dl=e.target.closest("[data-del]"); if(dl) return delNote(dl.dataset.del);
+  });
+  $("vue-canevas").addEventListener("keydown", e=>{ const inp=e.target.closest(".addinput[data-add]"); if(inp && e.key==="Enter"){ e.preventDefault(); const v=inp.value; inp.value=""; addNote(inp.dataset.add, v); } });
+  $("b-apercu").addEventListener("click", showApercu);
+  $("b-back").addEventListener("click", showCanevas);
+  $("b-print").addEventListener("click", ()=>window.print());
+  $("b-export2").addEventListener("click", exportJSON);
+  $("b-share").addEventListener("click", async ()=>{ try{ await navigator.clipboard.writeText(url); toast("Lien copié — vos collègues pourront écrire."); }catch{ toast(url); } });
+
+  renderIdent();
+  onSnapshot(ref, snap=>{
+    if(!snap.exists()){ $("vue-canevas").innerHTML=`<div class="card center"><h2>Projet introuvable</h2><p class="muted">Il a peut-être été supprimé.</p><a class="btn" href="?" style="margin-top:8px">Nouveau projet</a></div>`; return; }
+    projet=snap.data(); renderHeader();
+  }, err=>{ console.error(err); showFb(); });
+  onSnapshot(collection(db,COL,canevasId,"notes"), snap=>{
+    notes=snap.docs.map(d=>({id:d.id,...d.data()}));
+    notes.sort((a,b)=>(((a.createdAt&&a.createdAt.seconds)||0)-((b.createdAt&&b.createdAt.seconds)||0)));
+    renderBlocs();
+    if(!$("vue-apercu").classList.contains("hidden")) renderApercu();
+  }, err=>{ console.error(err); showFb(); });
+}
+
+/* ======================= ROUTAGE ======================= */
+if(canevasId) initCanevas(); else initCreer();
+</script>
+</body>
+</html>

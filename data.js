@@ -181,10 +181,17 @@ const THEMATIQUES = [
     icon: "target",
     enfants: [
       {
-        titre: "Atelier projet — construire à plusieurs",
-        desc: "Élaborer un projet d'équipe à plusieurs mains, étape par étape (constat → diagnostic → problématique → objectifs → actions → évaluation). Chacun contribue en temps réel ; la fiche-projet se compose toute seule et s'imprime. Anonyme : initiales + rôle, jamais de nom.",
+        titre: "Atelier projet — la démarche pas à pas",
+        desc: "La démarche de projet rigoureuse : on part d'un constat, puis diagnostic → problématique → objectifs → actions → évaluation. Idéal pour un projet à problématiser et justifier (dossier, projet formalisé). Chacun contribue en temps réel ; la fiche se compose et s'imprime. Anonyme : initiales + rôle.",
         lien: "projets/",
-        type: "Outil",
+        type: "Démarche",
+      },
+      {
+        titre: "Monter un projet — de l'idée à l'action",
+        desc: "Un canevas tout simple à remplir ensemble : l'idée, le but, pour qui, les actions, qui fait quoi, les moyens, les intervenants & partenaires, le calendrier, la réussite. Pas de diagnostic — on part d'une idée et on organise. Tout le monde écrit en temps réel ; vue d'ensemble imprimable, import/export. Anonyme : initiales + rôle.",
+        lien: "canevas/",
+        type: "Canevas",
+        icon: "bulb",
         badge: "Nouveau",
       },
       {
