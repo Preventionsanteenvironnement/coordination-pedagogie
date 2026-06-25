@@ -75,7 +75,7 @@
        target="_blank" rel="noopener">Guide — ajouter du contenu</a>
   </footer>
 
-  <script src="data.js?v=2026r10"></script>
+  <script src="data.js?v=2026r11"></script>
   <script>
     const grille = document.getElementById('grille');
     const grilleOutils = document.getElementById('grilleOutils');
@@ -160,8 +160,8 @@
     // --- Rendu d'un palier ---
     function rendre() {
       rendreFil();
-      // L'Espace de gestion n'apparaît qu'à l'accueil, hors recherche
-      const gestionVisible = !path.length && !q;
+      // L'Espace de gestion n'apparaît qu'à l'accueil, hors recherche, et s'il contient des outils
+      const gestionVisible = !path.length && !q && Array.isArray(OUTILS) && OUTILS.length > 0;
       zoneGestion.hidden = !gestionVisible;
       if (gestionVisible) rendreOutils();
 

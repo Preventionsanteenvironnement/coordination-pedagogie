@@ -212,37 +212,40 @@ const THEMATIQUES = [
       },
     ],
   },
+  {
+    id: "reunions",
+    nom: "Réunions & rendez-vous",
+    couleur: "#2f7d6b",
+    icon: "calendar",
+    enfants: [
+      {
+        titre: "Organiser une réunion",
+        desc: "Vous proposez des créneaux, l'équipe coche ses dispos, le meilleur moment ressort tout seul — et vous obtenez un lien à partager. C'est ici qu'on démarre une nouvelle réunion.",
+        lien: "reunions/",
+        type: "Créer",
+        icon: "clock",
+        badge: "Nouveau",
+      },
+      {
+        titre: "Réunions — suivi",
+        desc: "La vue d'ensemble de toutes les réunions déjà lancées : statut, nombre de réponses et meilleur créneau, en temps réel. C'est ici qu'on suit et qu'on valide.",
+        lien: "reunions/?suivi",
+        type: "Suivi",
+        icon: "calendar",
+      },
+      {
+        titre: "Rendez-vous PFMP — suivi",
+        desc: "Le tableau des visites de stage de l'équipe : qui a répondu, quel créneau a été choisi. Accessible depuis n'importe quel appareil.",
+        lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/?suivi",
+        type: "Suivi",
+        icon: "calendar",
+      },
+    ],
+  },
 ];
 
 /* =====================================================================
    ESPACE DE GESTION — outils interactifs (on AGIT dedans).
    Séparé des ressources ci-dessus. Réservé à l'équipe pédagogique.
    ===================================================================== */
-const OUTILS = [
-  {
-    titre: "Rendez-vous PFMP — suivi",
-    desc: "Le tableau des visites de stage de l'équipe : qui a répondu, quel créneau a été choisi. Accessible depuis n'importe quel appareil.",
-    lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/?suivi",
-    type: "Suivi",
-    couleur: "#2f7d6b",
-    icon: "calendar",
-  },
-  {
-    titre: "Organiser une réunion",
-    desc: "Vous proposez des créneaux, l'équipe coche ses dispos, le meilleur moment ressort tout seul — et vous obtenez un lien à partager. C'est ici qu'on démarre une nouvelle réunion.",
-    lien: "reunions/",
-    type: "Créer",
-    couleur: "#2f8f83",
-    icon: "clock",
-    badge: "Nouveau",
-  },
-  {
-    titre: "Réunions — suivi",
-    desc: "La vue d'ensemble de toutes les réunions déjà lancées : statut, nombre de réponses et meilleur créneau, en temps réel. C'est ici qu'on suit et qu'on valide.",
-    lien: "reunions/?suivi",
-    type: "Suivi",
-    couleur: "#2f7d6b",
-    icon: "calendar",
-    badge: "Nouveau",
-  },
-];
+const OUTILS = [];
