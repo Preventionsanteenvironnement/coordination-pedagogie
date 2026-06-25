@@ -242,6 +242,29 @@ const THEMATIQUES = [
       },
     ],
   },
+  {
+    id: "consulter",
+    nom: "Consulter l'équipe",
+    couleur: "#2f5fe0",
+    icon: "chart",
+    enfants: [
+      {
+        titre: "Lancer un sondage",
+        desc: "Une question, 2 à 6 réponses (ou Oui/Non, ou une note sur 5) : tout le monde clique, les résultats tombent en direct. Mode réunion avec QR code à projeter. C'est ici qu'on lance.",
+        lien: "sondages/",
+        type: "Créer",
+        icon: "target",
+        badge: "Nouveau",
+      },
+      {
+        titre: "Sondages — suivi",
+        desc: "Tous les sondages de l'équipe d'un coup d'œil : ouvert ou clôturé, nombre de votes, réponse en tête — en temps réel. C'est ici qu'on suit.",
+        lien: "sondages/?suivi",
+        type: "Suivi",
+        icon: "chart",
+      },
+    ],
+  },
 ];
 
 /* =====================================================================

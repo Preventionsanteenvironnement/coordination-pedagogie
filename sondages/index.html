@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Sondage express | Coordination &amp; Pédagogie</title>
+<style>
+  :root{
+    --bg:#eef1f7; --surface:#f6f8fc; --card:#fff; --ink:#1a2230; --soft:#5a6577;
+    --line:#e2e7f0; --line2:#eef2f8;
+    --accent:#2f5fe0; --accent-d:#244cc0; --accent-soft:#e7edfc;
+    --win:#1f9d6b; --win-soft:#e6f5ee;
+    --r:16px; --r-sm:11px;
+    --shadow:0 1px 2px rgba(18,24,40,.05),0 12px 30px rgba(18,24,40,.07);
+    --shadow-lg:0 10px 44px rgba(18,24,40,.16);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0c1118; --surface:#131a24; --card:#161e2a; --ink:#e7ecf3; --soft:#99a5b6;
+      --line:#273141; --line2:#1d2632;
+      --accent:#6f8cf2; --accent-d:#5b79ec; --accent-soft:#1b2238;
+      --win:#46c08a; --win-soft:#13291f;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px rgba(0,0,0,.42);
+      --shadow-lg:0 12px 50px rgba(0,0,0,.6);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  svg{width:1em;height:1em;flex:none;vertical-align:-2px}
+  a.backlink{position:fixed;top:14px;left:14px;z-index:80;display:inline-flex;align-items:center;gap:6px;
+    background:var(--card);color:var(--ink);text-decoration:none;font-size:.82rem;font-weight:600;padding:8px 13px;border-radius:999px;border:1px solid var(--line);box-shadow:var(--shadow)}
+  a.backlink:hover{border-color:var(--accent);color:var(--accent)}
+  header.hero{background:radial-gradient(120% 150% at 0% 0%,#3a68e6 0%,#2f5fe0 45%,#243c9c 100%);
+    color:#fff;padding:52px 20px 58px;text-align:center;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;inset:auto -10% -55% -10%;height:120px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0}
+  .hero-in{max-width:760px;margin:0 auto;position:relative;z-index:1}
+  .kicker{display:inline-block;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;opacity:.92;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px}
+  header.hero h1{margin:.4em 0 .12em;font-size:clamp(1.5rem,4.4vw,2.05rem);font-weight:800;letter-spacing:-.01em}
+  header.hero p{margin:0;opacity:.94;font-size:.97rem}
+  main{max-width:760px;margin:0 auto;padding:6px 16px 90px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px;margin:18px 0;animation:rise .4s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  h2{font-size:1.15rem;margin:0 0 4px}
+  .muted{color:var(--soft);font-size:.88rem}
+  label{display:block;font-weight:650;font-size:.86rem;margin:14px 0 6px}
+  label .hint{color:var(--soft);font-weight:400}
+  input,textarea{width:100%;padding:11px 13px;font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm)}
+  input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  button{font:inherit;cursor:pointer;border:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:var(--r-sm);background:var(--accent);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(47,95,224,.28);transition:.15s}
+  .btn:hover{background:var(--accent-d);transform:translateY(-1px)}
+  .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .btn.big{padding:14px 24px;font-size:1.01rem;width:100%}
+  .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--soft);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .lnk{background:none;border:none;color:var(--soft);font-size:.82rem;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:7px 8px;border-radius:8px}
+  .lnk:hover{color:var(--accent);background:var(--accent-soft)}
+  .lnk.danger{color:#c0533f}.lnk.danger:hover{background:#fbe9e5}
+  .hidden{display:none!important}
+  .center{text-align:center}
+  /* choix de type */
+  .types{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .type{flex:1 1 130px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;text-align:left;transition:.13s}
+  .type:hover{border-color:var(--accent)}
+  .type.on{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent)}
+  .type b{display:block;font-size:.9rem;font-weight:700}
+  .type span{font-size:.76rem;color:var(--soft)}
+  .opt-row{display:flex;gap:8px;margin-bottom:8px}
+  .opt-row input{flex:1}
+  .opt-rm{display:grid;place-items:center;width:40px;border-radius:var(--r-sm);background:transparent;border:1.5px solid var(--line);color:var(--soft)}
+  .opt-rm:hover{border-color:#cf5a45;color:#cf5a45}
+  .add-opt{background:transparent;border:1.5px dashed var(--line);color:var(--soft);width:100%;padding:10px;border-radius:var(--r-sm);font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .add-opt:hover{border-color:var(--accent);color:var(--accent)}
+  /* partage */
+  .share{background:linear-gradient(135deg,var(--accent-soft),var(--surface));border:1.5px solid var(--accent-soft);border-radius:var(--r);padding:16px 18px;margin:16px 0}
+  .share .lab{font-weight:750;font-size:.9rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .share-row{display:flex;gap:9px}
+  .share-row input{flex:1;font-size:.84rem}
+  /* vote */
+  .voteopts{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .voteopt{display:flex;align-items:center;gap:12px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:14px 16px;text-align:left;transition:.13s;width:100%;font-size:1rem;font-weight:600}
+  .voteopt:hover{border-color:var(--accent)}
+  .voteopt.sel{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 1px var(--accent)}
+  .voteopt .vk{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);color:#fff;flex:none}
+  .voteopt.sel .vk{background:var(--accent);border-color:var(--accent)}
+  .notebtns{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+  .noteb{flex:1 1 56px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:16px 0;font-size:1.15rem;font-weight:800;color:var(--ink)}
+  .noteb:hover{border-color:var(--accent)}
+  .noteb.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+  /* résultats */
+  .res{margin-top:6px}
+  .resrow{margin-bottom:15px}
+  .resrow-h{display:flex;justify-content:space-between;align-items:center;font-size:.95rem;margin-bottom:6px;gap:10px}
+  .resrow-h .lbl{font-weight:650;display:inline-flex;align-items:center;gap:7px}
+  .resrow-h .cnt{color:var(--soft);font-size:.86rem;flex:none}
+  .track{height:16px;background:var(--surface);border:1px solid var(--line2);border-radius:999px;overflow:hidden}
+  .fill{height:100%;border-radius:999px;background:var(--accent);transition:width .5s cubic-bezier(.2,.7,.3,1)}
+  .fill.win{background:var(--win)}
+  .lead-tag{font-size:.72rem;font-weight:700;color:var(--win);background:var(--win-soft);padding:2px 9px;border-radius:999px}
+  .res-tot{margin-top:6px;font-size:.9rem;color:var(--soft);display:flex;align-items:center;gap:7px}
+  .avg{font-size:2.4rem;font-weight:800;line-height:1;color:var(--accent)}
+  .statut{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;font-weight:750;padding:6px 13px;border-radius:999px;border:1px solid}
+  .statut.open{color:var(--win);background:var(--win-soft);border-color:var(--win)}
+  .statut.closed{color:#b6772a;background:#fbf1df;border-color:#ecd29a}
+  .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0 2px}
+  .foot{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:24px;padding-top:14px;border-top:1px solid var(--line)}
+  .banner{background:#fdeecf;color:#8a5a12;border:1.5px solid #f0cd86;border-radius:var(--r-sm);padding:13px 16px;margin:14px 0;font-weight:650;font-size:.9rem;display:flex;gap:10px;align-items:flex-start}
+  .live{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;color:var(--win);font-weight:650}
+  .live .pulse{width:9px;height:9px;border-radius:50%;background:var(--win);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,157,107,.5)}70%{box-shadow:0 0 0 8px rgba(31,157,107,0)}100%{box-shadow:0 0 0 0 rgba(31,157,107,0)}}
+  /* mode réunion (projection) */
+  .proj{position:fixed;inset:0;background:var(--bg);z-index:120;overflow:auto;padding:30px;display:none}
+  .proj.on{display:block}
+  .proj-close{position:fixed;top:18px;right:18px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 15px;font-weight:700;color:var(--soft);display:inline-flex;align-items:center;gap:7px}
+  .proj-in{max-width:1100px;margin:0 auto}
+  .proj-q{font-size:clamp(1.4rem,3.5vw,2.4rem);font-weight:800;text-align:center;margin:10px 0 26px;letter-spacing:-.01em}
+  .proj-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:30px;align-items:center}
+  @media(max-width:760px){.proj-grid{grid-template-columns:1fr}}
+  .qr-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px;text-align:center}
+  #qrbox{width:230px;height:230px;margin:0 auto 14px;background:#fff;border-radius:12px;display:grid;place-items:center;padding:10px;border:1px solid var(--line)}
+  #qrbox img,#qrbox canvas{width:100%!important;height:100%!important}
+  .qr-card .scan{font-size:1.15rem;font-weight:700}
+  .qr-card .url{font-size:.86rem;color:var(--soft);margin-top:8px;word-break:break-all}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(22px);background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;transition:.27s;pointer-events:none;z-index:130;box-shadow:var(--shadow-lg)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .rgpd{display:flex;gap:11px;align-items:flex-start;font-size:.82rem;color:var(--soft);background:var(--surface);border:1px dashed var(--line);border-radius:var(--r-sm);padding:13px 15px;margin-top:18px}
+  /* suivi */
+  .sfilters{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .scard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:15px 17px;margin-bottom:11px;display:flex;align-items:center;gap:15px;cursor:pointer;transition:.14s}
+  .scard:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+  .scard-main{flex:1;min-width:0}
+  .scard-q{font-size:1.02rem;font-weight:700;margin-bottom:3px}
+  .scard-meta{font-size:.82rem;color:var(--soft);display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  @media(max-width:560px){.scard{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<a class="backlink" href="../">‹ Portail</a>
+
+<header class="hero">
+  <div class="hero-in">
+    <span class="kicker">Coordination &amp; Pédagogie</span>
+    <h1 id="hero-titre">Sondage express</h1>
+    <p id="hero-sous">Une question, tout le monde clique, les résultats tombent en direct.</p>
+  </div>
+</header>
+
+<main>
+  <!-- CRÉATION -->
+  <section id="vue-creer" class="hidden">
+    <section class="card">
+      <h2>Lancer un sondage</h2>
+      <p class="muted">Une question, un type, c'est parti. Pour décider à plusieurs en 30 secondes.</p>
+      <label for="c-q">La question</label>
+      <input id="c-q" maxlength="160" placeholder="ex. On valide la sortie au théâtre, le jeudi 12 ?" />
+      <label>Le type de réponse</label>
+      <div class="types" id="c-types"></div>
+      <div id="c-options-wrap" class="hidden">
+        <label>Les réponses <span class="hint">— 2 à 6</span></label>
+        <div id="c-options"></div>
+        <button class="add-opt" id="c-addopt" type="button"></button>
+      </div>
+      <div style="margin-top:20px"><button class="btn big" id="c-go">Lancer le sondage</button></div>
+      <div class="rgpd"><span id="rgpd-ic"></span><span><strong>Vote anonyme.</strong> Un clic suffit, sans se présenter. Un vote par appareil (modifiable tant que c'est ouvert). Aucune donnée élève.</span></div>
+    </section>
+  </section>
+
+  <!-- SONDAGE (vote + résultats) -->
+  <section id="vue-sondage" class="hidden">
+    <div class="share" id="s-share">
+      <div class="lab"><span id="share-ic"></span> Lien à partager</div>
+      <div class="share-row"><input id="s-url" readonly /><button class="btn" id="s-copy">Copier</button></div>
+      <p class="muted" style="margin:8px 0 0">Ou projetez le « Mode réunion » : chacun scanne le QR et vote depuis son téléphone.</p>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="s-proj"></button>
+      <button class="btn ghost" id="s-share2"></button>
+    </div>
+    <div id="s-fb"></div>
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <h2 id="s-q" style="flex:1;min-width:0">…</h2>
+        <span id="s-statut"></span>
+      </div>
+      <div id="s-vote"></div>
+      <p class="muted center" id="s-votemsg" style="margin:12px 0 0"></p>
+    </section>
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center"><h2>Résultats <span class="live"><span class="pulse"></span> en direct</span></h2></div>
+      <div id="s-res" class="res"></div>
+    </section>
+    <div class="foot" id="s-foot"></div>
+  </section>
+
+  <!-- SUIVI -->
+  <section id="vue-suivi" class="hidden">
+    <div class="toolbar" style="justify-content:space-between">
+      <span class="live"><span class="pulse"></span> mis à jour en direct</span>
+      <a class="btn" href="?">＋ Nouveau sondage</a>
+    </div>
+    <div class="sfilters" id="su-filters"></div>
+    <div id="su-list"><p class="muted">Chargement…</p></div>
+  </section>
+</main>
+
+<!-- MODE RÉUNION -->
+<div class="proj" id="proj">
+  <button class="proj-close" id="proj-close"></button>
+  <div class="proj-in">
+    <div class="proj-q" id="proj-q"></div>
+    <div class="proj-grid">
+      <div class="qr-card">
+        <div id="qrbox"></div>
+        <div class="scan">Scannez pour voter</div>
+        <div class="muted" style="font-size:.85rem">avec l'appareil photo du téléphone</div>
+        <div class="url" id="proj-url"></div>
+      </div>
+      <div id="proj-res" class="res"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, setDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com",
+  projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
+  messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55"
+};
+const db = getFirestore(initializeApp(firebaseConfig));
+const COL = "coordination_sondages";
+
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const sid = params.get("id");
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random());
+const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+let toastT; function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2100); }
+
+const ICONS = {
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>', check:'<path d="M5 12.5l4.2 4.2L19 7"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  trash:'<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/>',
+  share:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>', copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  screen:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  unlock:'<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 7.8-1.4"/>',
+  users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6.1"/><path d="M16.5 14.4a5.5 5.5 0 0 1 4 4.6"/>',
+  trophy:'<path d="M8 4h8v4a4 4 0 0 1-8 0z"/><path d="M8 6H5a2 2 0 0 0 0 4h1M16 6h3a2 2 0 0 1 0 4h-1M9 14h6M10 14v3M14 14v3M8 20h8"/>',
+  back:'<path d="m14 6-6 6 6 6"/>', alert:'<path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  chev:'<path d="m9 6 6 6-6 6"/>'
+};
+const ic = n => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||""}</svg>`;
+
+const TYPES = {
+  "oui-non":      { label:"Oui / Non",            sub:"décision binaire",   opts:[["oui","Oui"],["non","Non"]] },
+  "oui-non-peut": { label:"Oui / Non / Peut-être", sub:"avec une nuance",    opts:[["oui","Oui"],["non","Non"],["peut","Peut-être"]] },
+  "choix":        { label:"Choix unique",          sub:"une seule réponse",  custom:true },
+  "multi":        { label:"Choix multiple",        sub:"plusieurs cochables", custom:true, multi:true },
+  "note":         { label:"Note 1 → 5",            sub:"accord / satisfaction", note:true }
+};
+const lsAdmin = id => "sond_admin_"+id;
+const lsVote  = id => "sond_vote_"+id;
+
+/* ===================== CRÉATION ===================== */
+function initCreer(){
+  $("vue-creer").classList.remove("hidden");
+  $("rgpd-ic").innerHTML = ic("lock");
+  let type="oui-non";
+  let opts=["",""];
+  function renderTypes(){
+    $("c-types").innerHTML = Object.entries(TYPES).map(([k,t])=>`<button type="button" class="type ${k===type?"on":""}" data-type="${k}"><b>${esc(t.label)}</b><span>${esc(t.sub)}</span></button>`).join("");
+    const custom = !!TYPES[type].custom;
+    $("c-options-wrap").classList.toggle("hidden", !custom);
+    if(custom) renderOpts();
+  }
+  function renderOpts(){
+    $("c-options").innerHTML = opts.map((v,i)=>`<div class="opt-row"><input data-opt="${i}" maxlength="80" placeholder="Réponse ${i+1}" value="${esc(v)}" />${opts.length>2?`<button class="opt-rm" type="button" data-rmopt="${i}" aria-label="Retirer">${ic("x")}</button>`:""}</div>`).join("");
+    $("c-addopt").innerHTML = ic("plus")+" Ajouter une réponse";
+    $("c-addopt").style.display = opts.length>=6 ? "none" : "";
+  }
+  $("c-types").addEventListener("click",e=>{ const b=e.target.closest("[data-type]"); if(b){ type=b.dataset.type; renderTypes(); } });
+  $("c-options").addEventListener("input",e=>{ const i=e.target.dataset.opt; if(i!=null) opts[+i]=e.target.value; });
+  $("c-options").addEventListener("click",e=>{ const r=e.target.closest("[data-rmopt]"); if(r){ opts.splice(+r.dataset.rmopt,1); renderOpts(); } });
+  $("c-addopt").addEventListener("click",()=>{ if(opts.length<6){ opts.push(""); renderOpts(); } });
+  $("c-go").addEventListener("click", async ()=>{
+    const q=$("c-q").value.trim(); if(!q){ toast("Écrivez la question."); $("c-q").focus(); return; }
+    const t=TYPES[type]; let options=[];
+    if(t.note){ options=[]; }
+    else if(t.custom){ const clean=opts.map(o=>o.trim()).filter(Boolean); if(clean.length<2){ toast("Mettez au moins 2 réponses."); return; } options=clean.map((label,i)=>({id:"o"+i,label})); }
+    else { options=t.opts.map(([id,label])=>({id,label})); }
+    const btn=$("c-go"); btn.disabled=true; btn.textContent="Création…";
+    try{
+      const ak=uid();
+      const ref=await addDoc(collection(db,COL),{ question:q, type, options, multi:!!t.multi, note:!!t.note, closed:false, adminKey:ak, createdAt:serverTimestamp() });
+      localStorage.setItem(lsAdmin(ref.id), ak);
+      location.search="?id="+ref.id;
+    }catch(e){ console.error(e); btn.disabled=false; btn.textContent="Lancer le sondage"; toast("Enregistrement impossible — règle Firestore à publier ?"); }
+  });
+  $("c-q").addEventListener("keydown",e=>{ if(e.key==="Enter") e.preventDefault(); });
+  renderTypes();
+}
+
+/* ===================== SONDAGE ===================== */
+function initSondage(){
+  $("vue-sondage").classList.remove("hidden");
+  $("hero-titre").textContent="Votre vote";
+  $("hero-sous").textContent="Un clic, et vous voyez les résultats de tout le monde en direct.";
+  $("share-ic").innerHTML = ic("share");
+  $("s-proj").innerHTML = ic("screen")+" Mode réunion (projeter)";
+  $("s-share2").innerHTML = ic("share")+" Partager";
+  $("proj-close").innerHTML = ic("x")+" Fermer";
+
+  const ref=doc(db,COL,sid);
+  let s=null, votes=[];
+  const url=location.origin+location.pathname+"?id="+sid;
+  $("s-url").value=url;
+  const isAdmin=()=> !!(localStorage.getItem(lsAdmin(sid)) || (s&&s.adminKey&&params.get("k")===s.adminKey));
+  let myVoteId=localStorage.getItem(lsVote(sid))||null;
+  let mySel=null; // tableau d'ids ou nombre (note)
+  let qr=null;
+
+  $("s-copy").addEventListener("click",()=>copy(url,"s-copy"));
+  $("s-share2").addEventListener("click",()=>copy(url));
+  function copy(u,btnId){ navigator.clipboard?.writeText(u).then(()=>{ toast("Lien copié — chacun peut voter."); if(btnId)$(btnId).textContent="Copié"; }).catch(()=>toast(u)); }
+
+  /* ---- vote ---- */
+  function curSelArr(){ return Array.isArray(mySel)?mySel:[]; }
+  async function saveVote(){
+    if(s.closed) return;
+    try{
+      if(!myVoteId){ myVoteId=uid(); localStorage.setItem(lsVote(sid), myVoteId); }
+      const data = s.note ? { note: mySel } : { sel: curSelArr() };
+      await setDoc(doc(db,COL,sid,"votes",myVoteId), data);
+      $("s-votemsg").textContent = "Votre vote est enregistré"+(s.closed?"":" — modifiable tant que c'est ouvert")+".";
+    }catch(e){ console.error(e); toast("Vote impossible."); }
+  }
+  function renderVote(){
+    if(s.closed){ $("s-vote").innerHTML=`<p class="statut closed" style="margin-top:6px">${ic("lock")} Sondage clôturé</p>`; return; }
+    if(s.note){
+      $("s-vote").innerHTML = `<div class="notebtns">${[1,2,3,4,5].map(n=>`<button class="noteb ${mySel===n?"sel":""}" data-note="${n}">${n}</button>`).join("")}</div>`;
+      return;
+    }
+    const sel=curSelArr();
+    $("s-vote").innerHTML = `<div class="voteopts">${s.options.map(o=>`<button class="voteopt ${sel.includes(o.id)?"sel":""}" data-opt="${o.id}"><span class="vk">${sel.includes(o.id)?ic("check"):""}</span>${esc(o.label)}</button>`).join("")}</div>`+
+      (s.multi?`<p class="muted" style="margin:9px 0 0">Plusieurs réponses possibles.</p>`:"");
+  }
+  $("s-vote").addEventListener("click",e=>{
+    if(s.closed) return;
+    const nb=e.target.closest("[data-note]"); if(nb){ mySel=+nb.dataset.note; renderVote(); saveVote(); return; }
+    const vo=e.target.closest("[data-opt]"); if(vo){
+      const id=vo.dataset.opt;
+      if(s.multi){ const a=curSelArr(); mySel = a.includes(id)?a.filter(x=>x!==id):[...a,id]; }
+      else { mySel=[id]; }
+      renderVote(); saveVote();
+    }
+  });
+
+  /* ---- résultats ---- */
+  function tally(){
+    if(s.note){
+      const ns=votes.map(v=>v.note).filter(n=>typeof n==="number");
+      const dist={1:0,2:0,3:0,4:0,5:0}; ns.forEach(n=>{ if(dist[n]!=null) dist[n]++; });
+      const avg = ns.length ? (ns.reduce((a,b)=>a+b,0)/ns.length) : 0;
+      return { note:true, dist, avg, total:ns.length };
+    }
+    const cnt={}; s.options.forEach(o=>cnt[o.id]=0);
+    votes.forEach(v=>(v.sel||[]).forEach(id=>{ if(cnt[id]!=null) cnt[id]++; }));
+    const max=Math.max(0,...s.options.map(o=>cnt[o.id]));
+    return { cnt, max, total:votes.length };
+  }
+  function resultHTML(t){
+    if(t.note){
+      const rows=[5,4,3,2,1].map(n=>{ const c=t.dist[n]; const pct=t.total?Math.round(c/t.total*100):0;
+        return `<div class="resrow"><div class="resrow-h"><span class="lbl">${n}</span><span class="cnt">${c} · ${pct}%</span></div><div class="track"><div class="fill" style="width:${pct}%"></div></div></div>`; }).join("");
+      return `<div style="display:flex;align-items:baseline;gap:12px;margin-bottom:14px"><span class="avg">${t.avg.toFixed(1)}</span><span class="muted">moyenne sur 5 · ${t.total} vote${t.total>1?"s":""}</span></div>${rows}`;
+    }
+    const rows=s.options.map(o=>{ const c=t.cnt[o.id]; const pct=t.total?Math.round(c/t.total*100):0; const win=c===t.max&&t.max>0;
+      return `<div class="resrow"><div class="resrow-h"><span class="lbl">${win?ic("trophy"):""} ${esc(o.label)} ${win&&t.total?'<span class="lead-tag">en tête</span>':""}</span><span class="cnt">${c} · ${pct}%</span></div><div class="track"><div class="fill ${win?"win":""}" style="width:${pct}%"></div></div></div>`; }).join("");
+    return rows+`<div class="res-tot">${ic("users")} ${t.total} ${t.total>1?"personnes ont voté":"personne a voté"}</div>`;
+  }
+  function renderResults(){
+    const t=tally();
+    $("s-res").innerHTML = resultHTML(t);
+    if($("proj").classList.contains("on")) $("proj-res").innerHTML = resultHTML(t);
+  }
+  function renderHead(){
+    $("s-q").textContent = s.question||"Sondage";
+    $("s-statut").innerHTML = s.closed?`<span class="statut closed">${ic("lock")} Clôturé</span>`:`<span class="statut open">${ic("unlock")} Ouvert</span>`;
+    $("proj-q").textContent = s.question||"";
+  }
+  function renderFoot(){
+    $("s-foot").innerHTML =
+      (isAdmin()?`<button class="lnk" id="f-close">${ic(s.closed?"unlock":"lock")} ${s.closed?"Rouvrir le vote":"Clôturer le vote"}</button>`:"")+
+      (isAdmin()?`<button class="lnk danger" id="f-del">${ic("trash")} Supprimer</button>`:"");
+    if($("f-close")) $("f-close").addEventListener("click", async ()=>{ await updateDoc(ref,{closed:!s.closed}); toast(s.closed?"Vote rouvert.":"Vote clôturé."); });
+    if($("f-del")) $("f-del").addEventListener("click", delSondage);
+  }
+  async function delSondage(){
+    if(!isAdmin()) return; if(!confirm("Supprimer ce sondage et tous les votes ?")) return;
+    try{ for(const v of votes){ await deleteDoc(doc(db,COL,sid,"votes",v.id)); } await deleteDoc(ref); localStorage.removeItem(lsAdmin(sid)); toast("Sondage supprimé."); setTimeout(()=>location.search="?",700); }
+    catch(e){ console.error(e); toast("Suppression impossible."); }
+  }
+  function showFb(){ $("s-fb").innerHTML=`<div class="banner">${ic("alert")}<span><b>Activation Firestore requise.</b> La règle de <code>coordination_sondages</code> n'est pas encore publiée — le vote est en attente.</span></div>`; }
+
+  /* ---- mode réunion ---- */
+  $("s-proj").addEventListener("click",()=>{
+    $("proj").classList.add("on"); $("proj-url").textContent=url;
+    if(!qr && window.QRCode){ try{ qr=new QRCode($("qrbox"),{ text:url, width:210, height:210, correctLevel:QRCode.CorrectLevel.M }); }catch(e){ $("qrbox").innerHTML='<span class="muted">QR indisponible</span>'; } }
+    renderResults();
+  });
+  $("proj-close").addEventListener("click",()=>$("proj").classList.remove("on"));
+
+  onSnapshot(ref, snap=>{
+    if(!snap.exists()){ $("vue-sondage").innerHTML=`<div class="card center"><h2>Sondage introuvable</h2><a class="btn" href="?">Nouveau sondage</a></div>`; return; }
+    s=snap.data(); s.options=s.options||[];
+    if(params.get("k") && s.adminKey && params.get("k")===s.adminKey && !localStorage.getItem(lsAdmin(sid))) localStorage.setItem(lsAdmin(sid), s.adminKey);
+    renderHead(); renderVote(); renderResults(); renderFoot();
+  }, err=>{ console.error(err); showFb(); });
+  onSnapshot(collection(db,COL,sid,"votes"), snap=>{
+    votes=snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(myVoteId){ const mine=votes.find(v=>v.id===myVoteId); if(mine){ mySel = s&&s.note ? mine.note : (mine.sel||[]); if(s) renderVote(); } }
+    if(s) renderResults();
+  }, err=>{ console.error(err); showFb(); });
+}
+
+/* ===================== SUIVI ===================== */
+function initSuivi(){
+  $("vue-suivi").classList.remove("hidden");
+  $("hero-titre").textContent="Sondages — suivi";
+  $("hero-sous").textContent="Tous les sondages de l'équipe, en temps réel.";
+  let list=[]; const vmap={}; const unsubs={}; let filter="all";
+  const statusOf=x=> x.closed?"closed":"open";
+  function lead(x){
+    const vs=vmap[x.id]||[];
+    if(x.note){ const ns=vs.map(v=>v.note).filter(n=>typeof n==="number"); if(!ns.length) return null; return {txt:"moyenne "+(ns.reduce((a,b)=>a+b,0)/ns.length).toFixed(1)+"/5"}; }
+    const cnt={}; (x.options||[]).forEach(o=>cnt[o.id]=0); vs.forEach(v=>(v.sel||[]).forEach(id=>{ if(cnt[id]!=null)cnt[id]++; }));
+    const max=Math.max(0,...(x.options||[]).map(o=>cnt[o.id])); if(max<=0) return null;
+    const o=(x.options||[]).find(o=>cnt[o.id]===max); return o?{txt:o.label+" ("+cnt[o.id]+")"}:null;
+  }
+  function render(){
+    const cnt=k=> k==="all"?list.length:list.filter(x=>statusOf(x)===k).length;
+    $("su-filters").innerHTML=[["all","Tous"],["open","Ouverts"],["closed","Clôturés"]].map(([k,l])=>`<button class="type ${filter===k?"on":""}" data-f="${k}" style="flex:0 0 auto"><b>${l} ${cnt(k)}</b></button>`).join("");
+    if(!list.length){ $("su-list").innerHTML=`<div class="card center"><p class="muted">Aucun sondage pour l'instant.</p><a class="btn" href="?" style="margin-top:10px">＋ Lancer le premier</a></div>`; return; }
+    const items=list.filter(x=>filter==="all"||statusOf(x)===filter).sort((a,b)=>(((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0)));
+    if(!items.length){ $("su-list").innerHTML=`<p class="muted">Aucun sondage dans cette catégorie.</p>`; return; }
+    $("su-list").innerHTML=items.map(x=>{ const nv=(vmap[x.id]||[]).length; const l=lead(x); const st=statusOf(x);
+      return `<div class="scard" data-open="${x.id}"><div class="scard-main"><div class="scard-q">${esc(x.question||"Sondage")}</div>
+        <div class="scard-meta"><span class="statut ${st}">${ic(st==="closed"?"lock":"unlock")} ${st==="closed"?"Clôturé":"Ouvert"}</span><span>${ic("users")} ${nv} vote${nv>1?"s":""}</span>${l?`<span>${ic("trophy")} ${esc(l.txt)}</span>`:`<span class="muted">en attente</span>`}</div></div>
+        <span class="lnk">Ouvrir ${ic("chev")}</span></div>`; }).join("");
+  }
+  $("su-filters").addEventListener("click",e=>{ const b=e.target.closest("[data-f]"); if(b){ filter=b.dataset.f; render(); } });
+  $("su-list").addEventListener("click",e=>{ const c=e.target.closest("[data-open]"); if(c) location.search="?id="+c.dataset.open; });
+  onSnapshot(collection(db,COL), snap=>{
+    list=snap.docs.map(d=>({id:d.id,...d.data()}));
+    const ids=new Set(list.map(x=>x.id));
+    list.forEach(x=>{ if(!unsubs[x.id]) unsubs[x.id]=onSnapshot(collection(db,COL,x.id,"votes"), vs=>{ vmap[x.id]=vs.docs.map(d=>d.data()); render(); }); });
+    Object.keys(unsubs).forEach(id=>{ if(!ids.has(id)){ unsubs[id](); delete unsubs[id]; delete vmap[id]; } });
+    render();
+  }, err=>{ console.error(err); $("su-list").innerHTML=`<div class="card center"><p class="muted">Lecture impossible — règle Firestore à publier ?</p></div>`; });
+}
+
+/* ===================== ROUTAGE ===================== */
+if(sid) initSondage(); else if(params.has("suivi")) initSuivi(); else initCreer();
+</script>
+</body>
+</html>
