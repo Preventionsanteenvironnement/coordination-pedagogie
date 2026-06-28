@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penser l'acte d'apprendre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f3efe7; --paper2:#e9e4d8; --card:#fbf8f1; --ink:#22262a; --ink-soft:#3f4a4b; --muted:#7a7d78;
+  --primary:#21565a; --primary-2:#2f7177; --accent:#c2683c; --accent-2:#d27c4f;
+  --rouge:#9a3b30; --teal:#6e7d4f; --line:rgba(34,38,42,.14); --line-soft:rgba(34,38,42,.08);
+  --shadow:0 22px 60px -30px rgba(25,55,55,.5); --shadow-sm:0 10px 30px -20px rgba(25,55,55,.45);
+  --serif:'Fraunces',Georgia,serif; --body:'Spectral',Georgia,'Times New Roman',serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --measure:42rem;
+}
+[data-theme="dark"]{
+  --paper:#0b0f0f; --paper2:#101615; --card:#141a1a; --ink:#e7ece9; --ink-soft:#bfcbc6; --muted:#82908a;
+  --primary:#6cc2bf; --primary-2:#86d2cf; --accent:#e08a5b; --accent-2:#ea9e73;
+  --rouge:#dd8070; --teal:#a7b582; --line:rgba(231,236,233,.15); --line-soft:rgba(231,236,233,.08);
+  --shadow:0 26px 70px -34px rgba(0,0,0,.85); --shadow-sm:0 12px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18.5px;line-height:1.74;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0;font-weight:600;letter-spacing:-.012em}
+::selection{background:var(--accent);color:#fff}
+em{font-style:italic}
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:200;background:linear-gradient(90deg,var(--accent),var(--primary))}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;z-index:120;display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand .mk{width:32px;height:32px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;color:#fff;
+  font-family:var(--serif);font-weight:700;background:linear-gradient(140deg,var(--primary),var(--accent));box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.01em}
+.spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-btn{display:none}
+
+.shell{display:flex;min-height:100vh;padding-top:60px}
+.sidebar{width:304px;flex:0 0 auto;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  padding:24px 14px 50px;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.toc-title{font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:8px 14px 14px;font-weight:600}
+.nav-link{display:flex;align-items:baseline;gap:12px;padding:9px 14px;border-radius:9px;color:var(--ink-soft);text-decoration:none;
+  cursor:pointer;transition:.16s;font-family:var(--sans);font-size:13.5px;font-weight:500;line-height:1.3}
+.nav-link .rn{font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--accent);flex:0 0 24px;opacity:.85}
+.nav-link:hover{background:color-mix(in srgb,var(--accent) 11%,transparent);color:var(--ink)}
+.nav-link.active{background:var(--primary);color:#fff}.nav-link.active .rn{color:#fff;opacity:.9}
+[data-theme="dark"] .nav-link.active{color:#0b0f0f}[data-theme="dark"] .nav-link.active .rn{color:#0b0f0f}
+
+.content{flex:1;min-width:0}
+.wrap{max-width:64rem;margin:0 auto;padding:50px 40px 100px}
+.page{display:none;animation:fade .5s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.phead{margin-bottom:34px;position:relative}
+.sec-num{font-family:var(--serif);font-weight:300;font-size:clamp(3rem,9vw,6rem);line-height:.8;color:var(--accent);opacity:.16;position:absolute;top:-14px;right:0;pointer-events:none}
+.kicker{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.kicker::before{content:"";width:30px;height:1.5px;background:var(--accent)}
+.ptitle{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:600;max-width:20ch;letter-spacing:-.02em}
+.psub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2vw,1.35rem);color:var(--ink-soft);margin-top:14px;max-width:50ch;font-weight:400;line-height:1.5}
+
+.prose{max-width:var(--measure)}
+.prose p{margin:0 0 22px}
+.prose h3{font-size:1.45rem;margin:46px 0 4px;font-weight:600;color:var(--ink)}
+.prose h3 .h-n{color:var(--accent);font-weight:500;margin-right:.5rem}
+.dropcap::first-letter{font-family:var(--serif);font-weight:600;float:left;font-size:4.4rem;line-height:.82;padding:6px 12px 0 0;color:var(--primary)}
+[data-theme="dark"] .dropcap::first-letter{color:var(--primary-2)}
+strong{font-weight:600;color:var(--ink)}
+.term{font-style:italic;color:var(--accent)}
+
+.sidenote{display:block;margin:14px 0;padding:14px 16px;background:var(--card);border:1px solid var(--line-soft);border-left:2px solid var(--teal);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--muted)}
+.sidenote b{color:var(--ink-soft);font-weight:600}
+.sidenote .sn-k{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:600}
+
+.def{background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 8%,transparent),transparent);border:1px solid var(--line);border-top:3px solid var(--primary);border-radius:12px;padding:22px 24px;margin:26px 0}
+.def .dt{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);font-weight:700;margin-bottom:8px}
+[data-theme="dark"] .def .dt{color:var(--primary-2)}
+.def p{margin:0;font-size:17px}.def p+p{margin-top:12px}
+.def .term-lead{font-family:var(--serif);font-style:italic;color:var(--accent);font-weight:500}
+
+.exemple{background:color-mix(in srgb,var(--accent) 7%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:12px;padding:20px 24px;margin:24px 0}
+.exemple .et{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.exemple p{margin:0;font-size:16.5px}.exemple p+p{margin-top:10px}
+
+.contro{background:color-mix(in srgb,var(--rouge) 8%,transparent);border:1px solid color-mix(in srgb,var(--rouge) 26%,transparent);border-radius:12px;padding:22px 24px;margin:26px 0}
+.contro .ct{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--rouge);font-weight:700;margin-bottom:8px}
+.contro p{margin:0;font-size:16.5px}.contro p+p{margin-top:12px}
+
+.pull{margin:40px 0;padding:6px 0 6px 28px;border-left:3px solid var(--accent)}
+.pull q{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(1.3rem,2.6vw,1.65rem);line-height:1.4;quotes:none;color:var(--ink);display:block}
+.pull q::before{content:"“";color:var(--accent)}.pull q::after{content:"”";color:var(--accent)}
+.pull cite{display:block;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+.abstract{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin:30px 0 10px;box-shadow:var(--shadow-sm)}
+.abstract .at{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.abstract p{margin:0;font-size:17px;color:var(--ink-soft)}
+
+.cover{position:relative;border-radius:20px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;margin-bottom:8px;box-shadow:var(--shadow)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(150deg,#194647,#21565a 52%,#143638)}
+.cover::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.42;background:radial-gradient(38% 46% at 82% 16%,rgba(194,104,60,.7),transparent 60%),radial-gradient(40% 42% at 12% 92%,rgba(110,125,79,.55),transparent 62%)}
+.cover .kicker{color:#e8a878}.cover .kicker::before{background:#e8a878}
+.cover h1{font-size:clamp(2.1rem,5.6vw,3.9rem);font-weight:600;max-width:17ch;letter-spacing:-.02em}
+.cover .csub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);color:rgba(255,255,255,.85);margin-top:16px;max-width:44ch}
+
+.biblio{margin-top:50px;padding-top:32px;border-top:1px solid var(--line);max-width:64rem}
+.biblio h3{font-size:1.5rem;font-weight:600;margin-bottom:6px}
+.biblio-sub{font-family:var(--body);font-style:italic;color:var(--muted);margin:0 0 18px;font-size:1rem}
+.biblio ul{list-style:none;margin:0;padding:0}
+.biblio li{font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink-soft);padding:11px 0 11px 24px;position:relative;border-bottom:1px solid var(--line-soft)}
+.biblio li:last-child{border-bottom:0}.biblio li::before{content:"—";position:absolute;left:0;color:var(--accent)}
+.biblio li b{font-weight:600;color:var(--ink)}.biblio li em{font-style:italic}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line);max-width:64rem}
+.pagenav a{flex:1;padding:18px 22px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--card);transition:.2s;cursor:pointer;font-family:var(--sans)}
+.pagenav a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.pagenav b{display:block;font-family:var(--serif);font-size:1.04rem;font-weight:600;margin-top:4px}
+.pagenav .next{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(6,9,9,.5);z-index:110;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(min-width:1340px){
+  .wrap{max-width:66rem}.prose{position:relative}
+  .sidenote{float:right;clear:right;width:14rem;margin:.35rem calc(-14rem - 1.8rem) 1rem 1.8rem;background:transparent;border-left:2px solid var(--teal);border-radius:0;padding:2px 0 2px 14px}
+}
+@media(max-width:900px){
+  .menu-btn{display:grid}
+  .sidebar{position:fixed;left:0;top:60px;transform:translateX(-100%);transition:.35s;z-index:115;width:300px;box-shadow:var(--shadow);padding-top:20px}
+  .sidebar.open{transform:none}
+  .wrap{padding:36px 22px 80px}.pagenav{flex-direction:column}
+}
+@media(max-width:560px){body{font-size:17.5px}.cover{padding:30px 22px;border-radius:16px}.dropcap::first-letter{font-size:3.6rem}}
+</style>
+</head>
+<body>
+<a href="../" data-portal-back aria-label="Retour au portail" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:6px;background:#ffffff;color:#1c2530;text-decoration:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);box-shadow:0 3px 12px rgba(0,0,0,.16)">&lsaquo; Portail</a>
+<div id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Sommaire"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <div class="brand" data-go="ouverture"><div class="mk">P</div><div><b>Penser l'acte d'apprendre</b></div></div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Thème"><svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="toc-title">Sommaire</div>
+    <a class="nav-link" data-go="ouverture"><span class="rn">0</span> La question d'apprendre</a>
+    <a class="nav-link" data-go="enigme"><span class="rn">I</span> L'énigme fondatrice</a>
+    <a class="nav-link" data-go="mecanisme"><span class="rn">II</span> Comment l'apprentissage advient</a>
+    <a class="nav-link" data-go="triangle"><span class="rn">III</span> Le triangle pédagogique</a>
+    <a class="nav-link" data-go="concept"><span class="rn">IV</span> Du lieu commun au concept</a>
+    <a class="nav-link" data-go="educabilite"><span class="rn">V</span> Le pari de l'éducabilité</a>
+    <a class="nav-link" data-go="liberte"><span class="rn">VI</span> La liberté &amp; l'autorité</a>
+    <a class="nav-link" data-go="differencier"><span class="rn">VII</span> Différencier sans isoler</a>
+    <a class="nav-link" data-go="resister"><span class="rn">VIII</span> Le devoir de résister</a>
+    <a class="nav-link" data-go="synthese"><span class="rn">IX</span> Synthèse &amp; repères</a>
+  </aside>
+
+  <main class="content">
+  <div class="wrap">
+
+  <!-- 0 OUVERTURE -->
+  <section class="page active" id="ouverture">
+    <div class="cover reveal">
+      <div class="kicker">Étude · pédagogie</div>
+      <h1>Penser l'acte d'apprendre</h1>
+      <p class="csub">Non pas une boîte à recettes, mais une pensée : ce que veut dire « apprendre », et ce que cela exige de qui enseigne.</p>
+    </div>
+
+    <div class="abstract reveal">
+      <div class="at">Résumé</div>
+      <p>On se propose de penser, à l'usage de celles et ceux qui enseignent, l'<strong>acte d'apprendre</strong> lui-même. La pédagogie n'y est ni une science appliquée ni un répertoire de procédés, mais une <em>théorie pratique</em> qui affronte une énigme : on ne peut pas apprendre à la place de l'autre. De cette énigme découle tout — le rôle du sens et de l'obstacle, le triangle qui noue le savoir, l'élève et le maître, le pari que <em>tous</em> peuvent apprendre, la tension entre l'éducabilité et la liberté, l'art de différencier sans isoler. Et, au bout, une conviction : penser l'acte d'apprendre, c'est aussi <strong>résister</strong> à ce qui le menace.</p>
+    </div>
+
+    <div class="phead reveal" style="margin-top:46px">
+      <span class="sec-num">0</span>
+      <div class="kicker">Ouverture</div>
+      <h2 class="ptitle">La question d'apprendre</h2>
+      <p class="psub">Une double antériorité, et toute la difficulté du métier.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Enseigner paraît simple : il y aurait un savoir d'un côté, un élève de l'autre, et l'art consisterait à faire passer le premier dans la tête du second. Cette image — la transmission comme transvasement — est précisément ce que toute pédagogie sérieuse commence par défaire. Car « transformer par des paroles l'eau de l'ignorance en vin de la connaissance » n'arrive jamais : aucun discours, si clair soit-il, n'apprend à la place de celui qui écoute. Entre le savoir et l'élève, il y a un acte — <em>apprendre</em> — que nul ne peut accomplir pour un autre.</p>
+
+      <p class="reveal">Tout le métier tient dans une contradiction qu'il faut nommer d'emblée, car elle ne se résout pas, elle se travaille.</p>
+
+      <div class="def reveal">
+        <div class="dt">La double antériorité</div>
+        <p><span class="term-lead">Ontologiquement, le savoir précède l'apprendre</span> : ce qu'il faut apprendre existe avant l'élève, et avec ses exigences propres. <span class="term-lead">Pédagogiquement, le sujet précède le savoir</span> : c'est toujours un élève singulier, avec son histoire et ce qu'il sait déjà, qui apprend — ou n'apprend pas.</p>
+        <p>« Et c'est cette double antériorité qui fait toute la difficulté de l'entreprise. »</p>
+      </div>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Cette formulation, et l'essentiel de l'armature de cette étude, sont empruntés à l'œuvre pédagogique de <b>Philippe Meirieu</b>.</div>
+
+      <p class="reveal">De là vient que la pédagogie n'est pas une technique neutre. Elle est, selon les mots qu'elle reprend volontiers, une « théorie pratique » ou un « art de faire » : une pensée qui n'existe que dans l'action, et qui doit en permanence tenir ensemble le savoir à transmettre et le sujet qui l'apprend, sans jamais sacrifier l'un à l'autre. Sa devise n'est pas « décrire pour prescrire » — le rêve d'une science qui dicterait les bonnes méthodes —, mais <strong>« comprendre pour inventer »</strong>.</p>
+
+      <div class="pull reveal"><q>C'est l'élève qui apprend, et lui seul. Il apprend à sa manière, comme n'a jamais appris ni apprendra personne.</q></div>
+
+      <p class="reveal">Le parcours suivra l'ordre des choses. On partira de l'<em>énigme</em> qui fonde le métier (I), puis on examinera comment l'apprentissage <em>advient</em> réellement — sens, désir, obstacle, déjà-là (II). On se donnera ensuite les instruments du regard : le <em>triangle pédagogique</em> (III) et le passage <em>du lieu commun au concept</em> (IV). On posera alors le double fondement éthique — le <em>pari de l'éducabilité</em> (V) et la <em>liberté</em> de l'apprenant, avec l'autorité qui l'autorise (VI). On en tirera l'art de <em>différencier sans isoler</em> (VII), avant la dimension politique — le <em>devoir de résister</em> (VIII) — et la synthèse (IX).</p>
+    </div>
+    <div class="pagenav"><span></span><a class="next" data-go="enigme"><small>Section I →</small><b>L'énigme fondatrice</b></a></div>
+  </section>
+
+  <!-- I ENIGME -->
+  <section class="page" id="enigme">
+    <div class="phead"><span class="sec-num">I</span><div class="kicker">Section I</div><h2 class="ptitle">L'énigme fondatrice</h2><p class="psub">Faire apprendre sans pouvoir contraindre à apprendre.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Au cœur du métier d'enseigner se tient une énigme que rien ne lève : l'enseignant doit <em>faire apprendre</em>, mais il ne peut pas <em>apprendre à la place</em> de l'élève, ni le <em>contraindre</em> à le faire. La seule activité qui permette d'apprendre est celle « qui se passe dans la tête de l'élève » — et celle-là, aucun pouvoir ne l'atteint directement. On peut conduire un élève en cours, exiger sa présence, organiser son travail ; on ne peut pas décider qu'il comprenne.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'« énigme à la place de l'autre » et la notion d'<b>impouvoir</b> de l'éducateur structurent <em>L'école, mode d'emploi</em> et <em>Le devoir de résister</em>.</div>
+
+      <p class="reveal">Cet <strong>impouvoir</strong> n'est pas un défaut du métier : c'en est la vérité. Apprendre est « un parcours singulier que personne ne peut faire à votre place » ; on apprend « avec son histoire, en partant de ce que l'on sait et de ce que l'on est ». La liberté de l'apprenant n'est donc pas un obstacle à neutraliser — comme si l'élève idéal était celui qui se laisserait remplir sans résister —, mais la <em>condition même</em> de tout apprentissage authentique. Sans son engagement, rien ne se passe.</p>
+
+      <div class="pull reveal"><q>Apprendre, c'est toujours, d'abord, être impliqué et se dégager progressivement de cette implication pour accéder à l'abstraction.</q></div>
+
+      <p class="reveal">Faut-il en conclure que l'enseignant est impuissant ? Au contraire. Reconnaître l'impouvoir, c'est déplacer le travail là où il est efficace : non sur l'acte d'apprendre — inatteignable —, mais sur ses <strong>conditions</strong>. L'enseignant agit sur la situation, les supports, les consignes, le sens proposé, l'obstacle calibré ; il « multiplie les possibilités offertes à ses élèves de se saisir d'un sens ». Il ne fabrique pas l'apprentissage ; il le rend possible, probable, désirable.</p>
+
+      <div class="contro reveal">
+        <div class="ct">Renverser le « il n'est pas motivé »</div>
+        <p>L'énigme commande de retourner un jugement courant. Dire d'un élève « il n'est pas motivé » fige un état comme s'il était une nature. Et s'il était <em>dé</em>motivé — parce qu'on n'est jamais parvenu à le faire réussir ? La mission de l'école « n'est pas de distribuer des savoirs à des élèves qui n'en veulent pas, mais de transformer les élèves en <em>demandeurs</em> de savoir ». Le désir d'apprendre n'est pas un préalable qu'on exige ; c'est un effet qu'on travaille.</p>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="ouverture"><small>← Ouverture</small><b>La question d'apprendre</b></a><a class="next" data-go="mecanisme"><small>Section II →</small><b>Comment l'apprentissage advient</b></a></div>
+  </section>
+
+  <!-- II MECANISME -->
+  <section class="page" id="mecanisme">
+    <div class="phead"><span class="sec-num">II</span><div class="kicker">Section II</div><h2 class="ptitle">Comment l'apprentissage advient</h2><p class="psub">Le sens, l'obstacle, et le « déjà-là » transformé.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Si l'on ne peut pas apprendre à la place de l'élève, comment l'apprentissage advient-il ? Trois ressorts, noués ensemble, en composent le mécanisme : le <strong>sens</strong>, l'<strong>obstacle</strong> et le <strong>déjà-là</strong>. Les séparer, c'est manquer leur fonctionnement ; c'est ensemble qu'ils opèrent.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le triptyque sens / obstacle / situation-problème est au cœur d'<em>Apprendre… oui mais comment</em> et de <em>C'est quoi apprendre ?</em></div>
+
+      <h3 class="reveal"><span class="h-n">§1</span>Le sens : sortir des savoirs morts</h3>
+      <p class="reveal">On n'apprend pas durablement un savoir qui « flotte dans une sphère purement didactique », imposé comme pure obligation. Il faut qu'il <em>fasse sens</em> — qu'il concerne l'élève, l'éclaire, lui donne du pouvoir sur le monde. « Ce n'est pas la difficulté qui rebute ou décourage, c'est le fait de n'avoir à apprendre que des savoirs morts. » L'inverse de cette pédagogie « bancaire » — recevoir des savoirs comme des billets de banque à rendre le jour de l'examen — consiste à redonner vie aux connaissances.</p>
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p><strong>Le théorème par sa genèse.</strong> Plutôt que de faire appliquer Pythagore à des triangles abstraits, faire découvrir <em>pourquoi</em> il fut élaboré — retrouver les bornes des champs après les crues du Nil, mesurer l'inaccessible — et où il vit encore (le bâtiment, l'arpentage). Le savoir cesse d'être une contrainte subie pour devenir un instrument qui donne prise sur le réel.</p>
+      </div>
+
+      <h3 class="reveal"><span class="h-n">§2</span>L'obstacle et la situation-problème</h3>
+      <p class="reveal">On apprend en franchissant un <strong>obstacle</strong>. Encore faut-il que cet obstacle soit pris en charge par l'élève comme <em>son</em> problème. C'est le rôle de la <strong>situation-problème</strong> : une tâche délibérément construite où un obstacle émerge, auquel le maître a su « articuler un objectif d'apprentissage ». L'effort consenti n'est alors pas l'ennemi du plaisir — « on peut trouver du plaisir dans l'effort quand on est mû par le désir d'apprendre ».</p>
+      <div class="def reveal">
+        <div class="dt">Définition · la situation-problème</div>
+        <p>Un dispositif où l'élève, pour réussir une tâche qui a du sens pour lui, doit <span class="term-lead">construire un savoir nouveau</span> : le savoir devient l'outil dont il a besoin pour franchir l'obstacle, et non un préalable abstrait imposé d'avance.</p>
+      </div>
+
+      <h3 class="reveal"><span class="h-n">§3</span>Le déjà-là : faire avec et contre</h3>
+      <p class="reveal">Nul élève n'est une page blanche. Il aborde tout savoir muni de <strong>représentations</strong> — un « déjà-là » fait de ce qu'il sait, croit, et se figure. Ce déjà-là est à la fois <em>appui</em> (sans lui, rien ne s'accroche) et <em>obstacle</em> (il peut fausser la compréhension). Apprendre, c'est passer des représentations premières à des représentations épurées : l'enseignant « s'aide du déjà-là, mais crée de nouveaux possibles ». Il faut donc faire <em>avec</em> les représentations pour démarrer, et <em>contre</em> elles pour avancer.</p>
+
+      <div class="pull reveal"><q>La pédagogie n'est rien d'autre que l'art de la médiation : elle s'ingénie à construire une arche entre l'enfant et le savoir.</q></div>
+
+      <p class="reveal">Reste que rien de tout cela ne se programme mécaniquement : « il n'y a pas de mécanique universelle en matière d'apprentissage ». L'enseignant travaille avec des « pierres vives » ; le moment où le déclic survient — « un regard confiant, une explication bien construite, un récit » — garde sa part d'imprévu. La <strong>médiation</strong> consiste précisément à multiplier les chances que ce moment advienne.</p>
+    </div>
+    <div class="pagenav"><a data-go="enigme"><small>← Section I</small><b>L'énigme fondatrice</b></a><a class="next" data-go="triangle"><small>Section III →</small><b>Le triangle pédagogique</b></a></div>
+  </section>
+
+  <!-- III TRIANGLE -->
+  <section class="page" id="triangle">
+    <div class="phead"><span class="sec-num">III</span><div class="kicker">Section III</div><h2 class="ptitle">Le triangle pédagogique</h2><p class="psub">Trois pôles, trois processus — et les déséquilibres à éviter.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Tout acte d'enseignement noue trois termes : un <strong>savoir</strong>, un <strong>élève</strong>, un <strong>maître</strong>. C'est le <strong>triangle pédagogique</strong>. Sa vertu n'est pas décorative : il permet de comprendre que privilégier un pôle au détriment des autres engendre une pédagogie déséquilibrée — et que l'art consiste à tenir les trois côtés ensemble.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le triangle est un acquis classique de la pédagogie (Jean Houssaye) ; ses déséquilibres sont analysés dans <em>Des lieux communs aux concepts clés</em>.</div>
+
+      <div class="def reveal">
+        <div class="dt">Trois pôles, trois processus</div>
+        <p><span class="term-lead">Enseigner</span> (savoir ↔ maître) — organiser la rencontre avec le savoir ; <span class="term-lead">apprendre</span> (élève ↔ savoir) — l'acte personnel de l'élève, que nul ne fait à sa place ; <span class="term-lead">former</span> (maître ↔ élève) — la relation qui accompagne l'émergence d'un sujet. Aucune pédagogie ne vit sur un seul axe.</p>
+      </div>
+
+      <p class="reveal">Les déséquilibres ont chacun leur nom. <strong>Privilégier le seul savoir</strong>, c'est la pédagogie « bancaire » du cours magistral, où l'on suppose que dire suffit à faire apprendre. <strong>Privilégier le seul élève</strong>, c'est le spontanéisme, l'« enfant créateur » livré à lui-même — qui, loin de libérer, « désarme les plus désarmés » et laisse caracoler les héritiers culturels. <strong>Privilégier la seule méthode du maître</strong>, c'est le dressage, le technicisme des « bonnes pratiques » standardisées. La position juste n'est jamais un équilibre figé : c'est un <em>réglage permanent</em>.</p>
+
+      <p class="reveal">Un second triangle, plus profond, double le premier : toute doctrine pédagogique articule des <strong>finalités</strong> (quel humain, quelle société ?), des <strong>connaissances</strong> (sur l'enfant, ses apprentissages, son milieu) et des <strong>pratiques</strong> (méthodes, outils, institutions). Là encore, absolutiser un pôle dérive : la <em>dérive scientiste</em> déduit les pratiques des seules données « prouvées » en escamotant la question des finalités ; la <em>dérive prescriptive</em> somme d'appliquer des méthodes sans penser les conditions ; la <em>dérive théoricienne</em> se drape dans les grands principes sans jamais se compromettre avec l'action.</p>
+
+      <div class="pull reveal"><q>Il n'est d'action possible que si l'on parvient à tenir ensemble, tant bien que mal et le plus lucidement possible, ces trois dimensions.</q></div>
+
+      <p class="reveal">Ce que ces deux triangulations enseignent au praticien, c'est la <strong>médiation</strong> comme cœur du métier. Le maître n'est ni un robinet de savoir ni un simple animateur : il est l'« intermédiaire » qui réduit la complexité, focalise l'attention, dédramatise, met à portée — sans jamais se substituer à l'élève. Il agit dans la zone où l'élève ne peut pas encore seul, mais pourra bientôt. C'est un travail modeste et décisif, qui suppose, on le verra, de penser ses outils comme des <em>concepts</em> et non comme des évidences.</p>
+    </div>
+    <div class="pagenav"><a data-go="mecanisme"><small>← Section II</small><b>Comment l'apprentissage advient</b></a><a class="next" data-go="concept"><small>Section IV →</small><b>Du lieu commun au concept</b></a></div>
+  </section>
+
+  <!-- IV CONCEPT -->
+  <section class="page" id="concept">
+    <div class="phead"><span class="sec-num">IV</span><div class="kicker">Section IV</div><h2 class="ptitle">Du lieu commun au concept</h2><p class="psub">Pourquoi la pédagogie n'est ni une science, ni une collection de recettes.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">La pédagogie vit de formules mobilisatrices : « il faut rendre l'élève actif », « le mettre au centre », « respecter l'enfant », « partir de ses besoins ». Ces <strong>lieux communs</strong> ne sont pas faux — ils sont l'« insurrection fondatrice » qui dresse l'éducateur contre la fatalité. Mais ils ne disent rien de précis : tout et son contraire peuvent s'y loger. « Actif » veut-il dire s'agiter, ou opérer mentalement ? « Au centre » veut-il dire roi, ou pris en compte ? Le travail du pédagogue est de passer de ces évidences aux <strong>concepts</strong> qui orientent vraiment l'action.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La démarche « du lieu commun au concept » donne son titre et sa structure à l'un des ouvrages de synthèse de <b>Meirieu</b> (2013).</div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Mettre au travail</div>
+        <p><strong>« Être actif » → opérer.</strong> Un élève peut être passif en bricolant, et intensément actif en écoutant. Le concept opératoire n'est pas l'agitation mais l'<em>opération mentale</em> : « la seule activité qui permette d'apprendre est celle qui se passe dans la tête de l'élève ». <strong>« Il n'est pas motivé » → le désir se construit.</strong> On ne crée pas le désir par décret — « on ne fait pas boire un cheval qui n'a pas soif » —, mais on l'éveille par le sens et l'énigme.</p>
+      </div>
+
+      <p class="reveal">Cette exigence conceptuelle protège de deux illusions symétriques. Contre le <em>scientisme</em>, qui voudrait déduire la pédagogie de données « prouvées » : il n'y a pas de déductibilité en éducation — « la remédiation n'est pas dans le diagnostic comme une noix dans sa coquille ». Connaître la difficulté d'un élève ne livre jamais mécaniquement la solution ; celle-ci relève de l'invention. Contre le <em>recettisme</em>, qui voudrait appliquer des « méthodes qui marchent » : aucune méthode ne vaut indépendamment du sens qu'elle prend pour cet élève, ici, maintenant.</p>
+
+      <div class="def reveal">
+        <div class="dt">Le concept du curseur</div>
+        <p>Les contradictions de la pédagogie — projet et objectifs, contrainte et liberté, empathie et fermeté — ne se résolvent pas par une synthèse définitive. Ce sont des <span class="term-lead">tensions fécondes</span> : des lignes dont les deux extrémités sont des impasses, et entre lesquelles le praticien « déplace le curseur » par un réglage fin et permanent. C'est ce qui fait de l'enseignant un expert, et non un simple exécutant.</p>
+      </div>
+
+      <div class="pull reveal"><q>Le béhaviorisme s'arc-boute sur la formule « décrire pour prescrire » ; la vraie pédagogie fait, elle, le pari de « comprendre pour inventer ».</q></div>
+
+      <p class="reveal">Penser conceptuellement n'est donc pas un luxe d'universitaire : c'est ce qui rend l'enseignant capable d'<em>inventer</em> face à l'imprévu de sa classe, au lieu d'appliquer des protocoles qui ne tomberont jamais juste. Et c'est la condition pour aborder la question qui fonde tout l'édifice : peut-on vraiment parier que <em>tous</em> les élèves apprendront ?</p>
+    </div>
+    <div class="pagenav"><a data-go="triangle"><small>← Section III</small><b>Le triangle pédagogique</b></a><a class="next" data-go="educabilite"><small>Section V →</small><b>Le pari de l'éducabilité</b></a></div>
+  </section>
+
+  <!-- V EDUCABILITE -->
+  <section class="page" id="educabilite">
+    <div class="phead"><span class="sec-num">V · le fondement</span><div class="kicker">Section V</div><h2 class="ptitle">Le pari de l'éducabilité</h2><p class="psub">Faire le pari que tout élève peut apprendre — un postulat indémontrable, et nécessaire.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Au fondement de toute pédagogie digne de ce nom, il y a un pari : <strong>tout élève peut apprendre et grandir, et nul ne peut jamais décréter, pour une personne donnée, qu'un apprentissage lui est définitivement impossible.</strong> C'est le <strong>principe d'éducabilité</strong>. Il ne se démontre pas — on ne peut pas <em>prouver</em> qu'un élève réussira ; c'est une décision éthique, anticipatrice, sans laquelle, simplement, on renonce.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le principe d'éducabilité, hérité du paradigme médical des Lumières, est central chez <b>Meirieu</b> ; ses textes fondateurs sont la <em>Lettre de Stans</em> (Pestalozzi) et le mémoire d'Itard sur Victor.</div>
+
+      <p class="reveal">Ce postulat est né, historiquement, du côté des <em>médecins-éducateurs</em>. La médecine dispose d'un serment qui oblige à soigner sans conditions ; la pédagogie n'en a pas d'équivalent, mais elle a emprunté aux philosophes des Lumières l'idée de <strong>perfectibilité</strong> — l'humain n'est pas donné, il se construit — et le principe que l'éducateur « n'a pas le droit de désespérer de quiconque ». Il en résulte une <em>obligation de moyens</em>, et non de résultats : « tout mettre en œuvre pour que l'enfant apprenne et accède à l'autonomie », puisque l'homme « n'est pas un objet qu'on fabrique ».</p>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Deux gestes fondateurs</div>
+        <p><strong>Stans (1799).</strong> Devant des enfants misérables, « à peine un sur dix connaît son alphabet », et qu'on disait perdus, l'éducateur tient le pari par l'exigence bienveillante. Il voit alors croître une « force intérieure » insoupçonnée : « tout ce qui lui fait dire <em>j'en suis capable</em>, l'enfant le veut. »</p>
+        <p><strong>Victor de l'Aveyron.</strong> L'« enfant sauvage », déclaré « débile congénital » par les fatalistes, est instruit par un médecin qui « brave leurs foudres ». Il n'y parvient pas tout à fait — « peu importe » : il a posé le geste inaugural, travailler pour que <em>chacun</em>, quels que soient ses handicaps, puisse accéder aux œuvres.</p>
+      </div>
+
+      <p class="reveal">Ce pari n'a rien d'angélique. Il est ce qui interdit d'<strong>assigner l'élève à son passé</strong>, de lire dans son origine sociale ou ses difficultés un destin — exactement ce que la sociologie de la reproduction enseigne à redouter. Supposer l'enfant incapable est un « fatalisme fondamentalement anti-éducatif ». La pédagogie est, en ce sens précis, « le remplacement du donné par le construit, la fin de l'assignation à résidence ».</p>
+
+      <div class="contro reveal">
+        <div class="ct">Le revers de l'éducabilité : la toute-puissance</div>
+        <p>Mais l'éducabilité livrée à elle-même devient dangereuse. Réduite au seul « tous peuvent apprendre, donc tous les moyens sont bons », elle nourrit le fantasme de <em>fabriquer</em> l'élève : le « repérer pour réparer », l'« enfant-machine » que l'on programmerait par une somme d'interventions ciblées — au prix de la disparition du sujet. C'est le rêve, jamais loin, du pédagogue-Frankenstein. D'où la nécessité d'un contrepoids, qui est l'objet de la section suivante : la <strong>liberté</strong>.</p>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="concept"><small>← Section IV</small><b>Du lieu commun au concept</b></a><a class="next" data-go="liberte"><small>Section VI →</small><b>La liberté &amp; l'autorité</b></a></div>
+  </section>
+
+  <!-- VI LIBERTE -->
+  <section class="page" id="liberte">
+    <div class="phead"><span class="sec-num">VI</span><div class="kicker">Section VI</div><h2 class="ptitle">La liberté &amp; l'autorité</h2><p class="psub">Tenir ensemble deux principes que tout invite à séparer.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Au principe d'éducabilité répond, indissociable, le <strong>principe de liberté</strong> : l'apprentissage ne se décrète pas, nul ne peut l'imposer à quiconque, il requiert l'engagement personnel du sujet. Toute la pédagogie tient dans la <em>tension</em> entre ces deux principes — et c'est précisément cette tension, tenue sans la rompre, qui distingue la pédagogie d'un simple discours sur l'éducation.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La tension éducabilité / liberté est le « cœur » explicite de <em>Le devoir de résister</em> et de toute la pensée de <b>Meirieu</b>.</div>
+
+      <p class="reveal">Car céder à l'un des deux principes seul mène à une impasse symétrique. <strong>S'en tenir à l'éducabilité seule</strong>, c'est basculer dans le volontarisme mécaniste et le dressage : « tous peuvent apprendre, donc employons tous les moyens ». <strong>S'en tenir à la liberté seule</strong>, c'est basculer dans le fatalisme et la démission : « tant pis pour ceux qui n'y arrivent pas ». La pédagogie refuse les deux : elle est « déterminée sur l'éducabilité de tous, mais refuse d'employer n'importe quel moyen pour y parvenir ».</p>
+
+      <div class="pull reveal"><q>Proposer des médiations, au nom de l'éducabilité de tous — et chercher à susciter l'engagement personnel, au nom du respect de la liberté de chacun.</q></div>
+
+      <p class="reveal">Comment tenir les deux à la fois ? Non par un discours, mais par l'invention de <strong>dispositifs</strong>. Un bon dispositif part d'objectifs assumés par l'adulte (éducabilité), tout en étant organisé pour solliciter l'engagement libre de l'élève (liberté) ; il comporte contraintes <em>et</em> ressources ; et il est pensé pour que l'élève en comprenne les enjeux et finisse par <em>s'en détacher</em>. C'est l'art des « belles contraintes » : « tout faire en ne faisant rien », travailler dans le temps le passage de l'hétéronomie à l'autonomie.</p>
+
+      <h3 class="reveal"><span class="h-n">§</span>Une autorité qui autorise</h3>
+      <p class="reveal">Cette tension redéfinit l'<strong>autorité</strong>. Ni l'autoritarisme (le pouvoir sur l'élève), ni le laisser-faire (l'effacement du maître) ne conviennent — et l'on remarquera que la non-directivité affichée « récupère souvent en séduction ce qu'elle abandonne en contrainte ». L'autorité juste est celle qui <em>autorise</em> : qui rend l'élève auteur, « légitime parce que questionnable, questionnable parce que légitime ». Elle permet de « s'incorporer un héritage et de le dépasser ». Le vrai péril de l'époque n'est d'ailleurs pas un excès d'autorité, mais la montée des phénomènes d'<em>emprise</em>.</p>
+
+      <p class="reveal">La visée qui donne sens à tout cela porte un nom : l'<strong>émancipation</strong>. Éduquer, c'est instruire <em>et</em> rendre capable de « penser par soi-même », pour « échapper à toute forme d'emprise ». Le mouvement est précis : « le sujet progresse en assumant la dépendance à l'égard de ses maîtres, et en s'en dégageant dès lors qu'il l'a intégrée dans sa propre démarche ». Apprendre est ainsi, jusqu'au bout, un acte de liberté.</p>
+    </div>
+    <div class="pagenav"><a data-go="educabilite"><small>← Section V</small><b>Le pari de l'éducabilité</b></a><a class="next" data-go="differencier"><small>Section VII →</small><b>Différencier sans isoler</b></a></div>
+  </section>
+
+  <!-- VII DIFFERENCIER -->
+  <section class="page" id="differencier">
+    <div class="phead"><span class="sec-num">VII</span><div class="kicker">Section VII</div><h2 class="ptitle">Différencier sans isoler</h2><p class="psub">L'hétérogénéité n'est pas un problème : c'est le point de départ.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Puisque chacun apprend par un chemin singulier, l'<strong>hétérogénéité</strong> d'une classe n'est pas une anomalie à corriger : c'est le fait normal de tout enseignement dès qu'on s'adresse à <em>tous</em>. D'où une formule qui paraît un paradoxe et n'en est pas un : « l'expression <em>pédagogie différenciée</em> est un pléonasme — il n'y a de pédagogie que différenciée, puisqu'il n'y a de savoir que dans et par le parcours qui y mène ».</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La différenciation est développée dans <em>L'école, mode d'emploi</em> (Meirieu) ; la distinction personnaliser / individualiser, dans <em>La personnalisation des apprentissages</em> (<b>Sylvain Connac</b>).</div>
+
+      <p class="reveal">Différencier ne veut pas dire abaisser les objectifs pour les « moins doués » — ce serait transformer une <em>hétérogénéité de fait</em> en <em>hétérogénéité de droit</em>, et renoncer. Cela veut dire <strong>varier les itinéraires au service d'objectifs communs et exigeants</strong>. « Différencier, c'est lutter à la fois pour que les inégalités s'atténuent et pour que le niveau monte. » Le chemin unique, lui, « sélectionne toujours ceux qu'il fait réussir ».</p>
+
+      <div class="def reveal">
+        <div class="dt">Deux manières de différencier</div>
+        <p><span class="term-lead">Successive</span> — au fil du cours, alterner les outils et les approches : un texte éclairé d'un schéma puis d'un commentaire oral, un exposé interrompu d'une manipulation. Peu coûteuse, c'est le premier pas que chacun peut faire seul.</p>
+        <p><span class="term-lead">Simultanée</span> — au même moment, des élèves mènent des activités différentes selon leurs besoins (ateliers, plans de travail). Plus exigeante, elle suppose de « casser la structure-classe » par moments.</p>
+      </div>
+
+      <p class="reveal">Mais une distinction décide de tout : <strong>personnaliser n'est pas individualiser</strong>. L'<em>individu</em> est l'unité repliée sur soi ; la <em>personne</em> est l'individu en relation, qui « se réalise aussi bien dans le je que dans le nous ». Individualiser à l'excès — chaque élève seul face à sa fiche — atomise, prive des interactions sans lesquelles on n'apprend pas, et finit par stigmatiser ceux qu'on isole. Personnaliser, à l'inverse, c'est mobiliser la personne <em>au sein</em> d'un collectif coopératif.</p>
+
+      <div class="contro reveal">
+        <div class="ct">Les dérives de l'individualisation</div>
+        <p>« Le travail individualisé n'a de sens que s'il est intégré à la vie sociale coopérative. » Isoler chaque élève dans des tâches solitaires le prive des « bienfaits des interactions », car « on n'apprend jamais seul ». Pire, individualiser l'aide « pour quelques-uns » revient souvent à les stigmatiser et à faire porter aux familles la responsabilité de l'échec. Le remède n'est pas moins de collectif, mais un collectif <em>coopératif</em> : aide, entraide, tutorat — « personne ne sait tout, mais tout le monde sait quelque chose ».</p>
+      </div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p><strong>Une séquence en quatre temps.</strong> <em>Découverte</em> (faire émerger la notion à partir de supports variés, différenciation successive) → <em>intégration</em> (itinéraires au choix, fiches, ateliers, élèves-moniteurs, différenciation simultanée) → <em>évaluation</em> (commune dans son objectif, variée dans ses supports) → <em>remédiation</em> ciblée. Le tout adossé à des <strong>objectifs-noyaux</strong> communs, explicités aux élèves, et clos par un temps de <strong>métacognition</strong> — « qu'ai-je réussi à faire ? qu'ai-je appris ? » — pour que l'élève devienne le pilote de sa propre différenciation.</p>
+      </div>
+
+      <p class="reveal">Différencier, bien compris, n'est donc pas une logistique de l'hétérogénéité : c'est rendre l'élève sujet, et non objet, de son apprentissage — en tenant ensemble le singulier et le commun.</p>
+    </div>
+    <div class="pagenav"><a data-go="liberte"><small>← Section VI</small><b>La liberté &amp; l'autorité</b></a><a class="next" data-go="resister"><small>Section VIII →</small><b>Le devoir de résister</b></a></div>
+  </section>
+
+  <!-- VIII RESISTER -->
+  <section class="page" id="resister">
+    <div class="phead"><span class="sec-num">VIII</span><div class="kicker">Section VIII · l'enjeu politique</div><h2 class="ptitle">Le devoir de résister</h2><p class="psub">Penser l'acte d'apprendre, c'est aussi défendre ce qui le rend possible.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Tout ce qui précède a une conséquence que l'on aurait tort de croire militante par surcroît : penser l'acte d'apprendre engage à le <strong>défendre</strong>. La pédagogie n'est pas une technique neutre ; elle incarne des valeurs, et ces valeurs sont aujourd'hui pressées de toutes parts. D'où un devoir : « résister, à notre échelle et partout où c'est possible, à tout ce qui humilie, assujettit et sépare ».</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La thèse du « devoir de résister » et la fonction « thermostatique » de l'École (prendre le contre-pied de la température ambiante) sont développées par <b>Meirieu</b>.</div>
+
+      <p class="reveal">Plusieurs dérives, qui ont l'air d'évidences modernes, menacent l'espace fragile où un sujet apprend. Les nommer, c'est déjà commencer à y résister.</p>
+
+      <div class="def reveal">
+        <div class="dt">Ce à quoi résister</div>
+        <p><span class="term-lead">L'élève-client</span> — réduire l'École à un service jugé sur la satisfaction des usagers ; or « une institution n'est pas un service, elle incarne des valeurs ». <span class="term-lead">Le tout-évaluation</span> — « seul le dressage peut être piloté par les résultats » ; en éducation, on pilote avec des valeurs, on régule avec les résultats. <span class="term-lead">L'individualisme</span> — la mise en concurrence qui ruine le creuset commun. <span class="term-lead">Le réductionnisme</span> — la « neuropédagogie » miracle et le retour du « don » inné : « le Moi n'est pas une clé USB ». <span class="term-lead">L'immédiateté</span> — la dictature du caprice, contre laquelle l'éducateur « travaille sur la temporalité » et fait émerger le désir là où l'on exalte la pulsion.</p>
+      </div>
+
+      <p class="reveal">À ces dérives, la pédagogie oppose ce qu'elle défend positivement : l'<strong>exigence pour tous</strong> (élever, non trier) ; l'<strong>émancipation</strong> et la pensée critique ; le <strong>collectif</strong> solidaire « où nul ne se trouve jamais dans une impasse » ; la <strong>culture</strong> qui, tout à la fois, « nous libère et nous unit » ; la <strong>patience</strong> d'un temps long. Résister n'est pas se complaire dans la marginalité ni jouir de l'échec ; c'est conjuguer « un sursaut de lucidité et un sursaut d'engagement ».</p>
+
+      <div class="pull reveal"><q>Pas de démocratie sans École capable, en même temps, d'instruire et d'émanciper. Pas de démocratie sans pédagogie.</q></div>
+
+      <p class="reveal">On comprend alors pourquoi le « devoir de résister » n'est pas un supplément ajouté à la pédagogie : il <em>est</em> la pédagogie, dès lors qu'on refuse à la fois le dressage — qui nie la liberté — et l'abandon — qui nie l'éducabilité. Protéger l'espace où un sujet libre se construit dans un collectif, c'est défendre la condition de possibilité même de la démocratie.</p>
+    </div>
+    <div class="pagenav"><a data-go="differencier"><small>← Section VII</small><b>Différencier sans isoler</b></a><a class="next" data-go="synthese"><small>Section IX →</small><b>Synthèse &amp; repères</b></a></div>
+  </section>
+
+  <!-- IX SYNTHESE -->
+  <section class="page" id="synthese">
+    <div class="phead"><span class="sec-num">IX</span><div class="kicker">Section IX</div><h2 class="ptitle">Synthèse &amp; repères</h2><p class="psub">L'unité d'une pensée de l'acte d'apprendre.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Au terme, toute cette pensée tient dans un seul geste, sans cesse répété : <strong>tenir ensemble deux principes que tout invite à séparer</strong> — l'éducabilité (tous peuvent apprendre) et la liberté (nul n'apprend de force). De cette tension fondatrice découle le reste. Parce que nul n'apprend à la place d'un autre, l'enseignant travaille les <em>conditions</em> de l'apprentissage — le sens, l'obstacle, le déjà-là. Parce que le savoir et le sujet ont chacun leurs exigences, il tient les trois pôles du triangle sans en sacrifier aucun. Parce que la pédagogie n'est ni science ni recette, il pense en concepts pour pouvoir <em>inventer</em>.</p>
+
+      <p class="reveal">L'acte d'apprendre est ainsi, toujours, à la fois technique et éthique : on ne peut pas séparer le geste qui fait apprendre du pari sur la personne qui apprend. Trois maximes en condensent l'esprit, qu'un enseignant peut emporter avec lui :</p>
+
+      <h3 class="reveal">Travailler les conditions, non l'acte</h3>
+      <p class="reveal" style="margin-top:0">On ne contraint pas à apprendre ; on rend l'apprentissage possible et désirable — par le sens, l'obstacle juste, la médiation.</p>
+      <h3 class="reveal">Tenir l'éducabilité et la liberté</h3>
+      <p class="reveal" style="margin-top:0">Ne désespérer de personne, et ne forcer personne : inventer sans cesse des dispositifs qui permettent au sujet d'engager sa liberté.</p>
+      <h3 class="reveal">Différencier dans le commun, et résister</h3>
+      <p class="reveal" style="margin-top:0">Varier les chemins sans isoler ni renoncer à l'exigence ; défendre l'École contre ce qui la réduit à un marché.</p>
+
+      <div class="pull reveal"><q>Il faut beaucoup de chemins pour que tout le monde arrive en haut de la montagne.</q><cite>proverbe inventé par des élèves de sixième</cite></div>
+
+      <p class="reveal">C'est peut-être là l'essentiel de ce que cette pensée offre à qui enseigne : non des certitudes, mais une <em>boussole</em>. Elle ne dit pas « voici la méthode » ; elle dit « voici les tensions à tenir, et l'horizon à viser ». Penser l'acte d'apprendre, c'est accepter de travailler dans cet entre-deux exigeant — entre le savoir et le sujet, entre la contrainte et la liberté, entre le singulier et le commun — avec, pour seule garantie, le pari obstiné que tout élève, devant nous, peut grandir.</p>
+
+      <div class="biblio reveal">
+        <h3>Repères bibliographiques</h3>
+        <p class="biblio-sub">Les sources sur lesquelles s'appuie cette étude.</p>
+        <ul>
+          <li><b>Philippe Meirieu</b>, <em>Apprendre… oui, mais comment</em> (1987) · <em>L'école, mode d'emploi. Des méthodes actives à la pédagogie différenciée</em>.</li>
+          <li><b>Philippe Meirieu</b>, <em>Pédagogie : des lieux communs aux concepts clés</em> · <em>C'est quoi apprendre ?</em></li>
+          <li><b>Philippe Meirieu</b>, <em>Pédagogie : le devoir de résister</em> · <em>Dictionnaire inattendu de pédagogie</em>.</li>
+          <li><b>Sylvain Connac</b>, <em>La personnalisation des apprentissages. Agir face à l'hétérogénéité</em>.</li>
+          <li><em>Anthologie des textes clés en pédagogie</em> — et, en arrière-plan, Rousseau, Pestalozzi, Itard, Freinet, Vygotski, Bruner.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="resister"><small>← Section VIII</small><b>Le devoir de résister</b></a><a class="next" data-go="ouverture"><small>Retour →</small><b>Au début de l'étude</b></a></div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];const links=[...document.querySelectorAll('.nav-link')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>revealScan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeMenu(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('menuBtn').onclick=()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tBtn=document.getElementById('themeBtn'),tIcon=document.getElementById('themeIcon');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tBtn.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');tIcon.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.1});
+function revealScan(scope){(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}revealScan();
+const bar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

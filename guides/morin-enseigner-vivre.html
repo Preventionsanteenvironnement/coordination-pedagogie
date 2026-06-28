@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enseigner à vivre — l'éducation selon Edgar Morin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2f1e7; --paper2:#e7e8d8; --card:#f9f9f0; --ink:#1f2620; --ink-soft:#3c4a3e; --muted:#76807a;
+  --primary:#2b4a30; --primary-2:#3f6645; --accent:#c2933c; --accent-2:#d3a652;
+  --rouge:#b0503a; --teal:#5e7a64; --line:rgba(31,38,32,.14); --line-soft:rgba(31,38,32,.08);
+  --shadow:0 22px 60px -30px rgba(25,55,35,.5); --shadow-sm:0 10px 30px -20px rgba(25,55,35,.45);
+  --serif:'Fraunces',Georgia,serif; --body:'Spectral',Georgia,'Times New Roman',serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --measure:42rem;
+}
+[data-theme="dark"]{
+  --paper:#0a0e0a; --paper2:#0f140f; --card:#131813; --ink:#e7ece5; --ink-soft:#bfcbbf; --muted:#828c82;
+  --primary:#8fc499; --primary-2:#a6d3ae; --accent:#d8ac5b; --accent-2:#e4bd72;
+  --rouge:#e0876e; --teal:#90b59a; --line:rgba(231,236,229,.15); --line-soft:rgba(231,236,229,.08);
+  --shadow:0 26px 70px -34px rgba(0,0,0,.85); --shadow-sm:0 12px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18.5px;line-height:1.74;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0;font-weight:600;letter-spacing:-.012em}
+::selection{background:var(--accent);color:#fff}
+em{font-style:italic}
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:200;background:linear-gradient(90deg,var(--accent),var(--primary))}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;z-index:120;display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand .mk{width:32px;height:32px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;color:#fff;
+  font-family:var(--serif);font-weight:700;background:linear-gradient(140deg,var(--primary),var(--accent));box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.01em}
+.spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-btn{display:none}
+
+.shell{display:flex;min-height:100vh;padding-top:60px}
+.sidebar{width:310px;flex:0 0 auto;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  padding:24px 14px 50px;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.toc-title{font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:8px 14px 14px;font-weight:600}
+.nav-link{display:flex;align-items:baseline;gap:12px;padding:9px 14px;border-radius:9px;color:var(--ink-soft);text-decoration:none;
+  cursor:pointer;transition:.16s;font-family:var(--sans);font-size:13.5px;font-weight:500;line-height:1.3}
+.nav-link .rn{font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--accent);flex:0 0 24px;opacity:.85}
+.nav-link:hover{background:color-mix(in srgb,var(--accent) 11%,transparent);color:var(--ink)}
+.nav-link.active{background:var(--primary);color:#fff}.nav-link.active .rn{color:#fff;opacity:.9}
+[data-theme="dark"] .nav-link.active{color:#0a0e0a}[data-theme="dark"] .nav-link.active .rn{color:#0a0e0a}
+
+.content{flex:1;min-width:0}
+.wrap{max-width:64rem;margin:0 auto;padding:50px 40px 100px}
+.page{display:none;animation:fade .5s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.phead{margin-bottom:34px;position:relative}
+.sec-num{font-family:var(--serif);font-weight:300;font-size:clamp(3rem,9vw,6rem);line-height:.8;color:var(--accent);opacity:.16;position:absolute;top:-14px;right:0;pointer-events:none}
+.kicker{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.kicker::before{content:"";width:30px;height:1.5px;background:var(--accent)}
+.ptitle{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:600;max-width:20ch;letter-spacing:-.02em}
+.psub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2vw,1.35rem);color:var(--ink-soft);margin-top:14px;max-width:50ch;font-weight:400;line-height:1.5}
+
+.prose{max-width:var(--measure)}
+.prose p{margin:0 0 22px}
+.prose h3{font-size:1.45rem;margin:46px 0 4px;font-weight:600;color:var(--ink)}
+.prose h3 .h-n{color:var(--accent);font-weight:500;margin-right:.5rem}
+.dropcap::first-letter{font-family:var(--serif);font-weight:600;float:left;font-size:4.4rem;line-height:.82;padding:6px 12px 0 0;color:var(--primary)}
+[data-theme="dark"] .dropcap::first-letter{color:var(--primary-2)}
+strong{font-weight:600;color:var(--ink)}
+.term{font-style:italic;color:var(--accent)}
+
+.sidenote{display:block;margin:14px 0;padding:14px 16px;background:var(--card);border:1px solid var(--line-soft);border-left:2px solid var(--teal);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--muted)}
+.sidenote b{color:var(--ink-soft);font-weight:600}
+.sidenote .sn-k{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:600}
+
+.def{background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 8%,transparent),transparent);border:1px solid var(--line);border-top:3px solid var(--primary);border-radius:12px;padding:22px 24px;margin:26px 0}
+.def .dt{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);font-weight:700;margin-bottom:8px}
+[data-theme="dark"] .def .dt{color:var(--primary-2)}
+.def p{margin:0;font-size:17px}.def p+p{margin-top:12px}
+.def .term-lead{font-family:var(--serif);font-style:italic;color:var(--accent);font-weight:500}
+
+.exemple{background:color-mix(in srgb,var(--accent) 7%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:12px;padding:20px 24px;margin:24px 0}
+.exemple .et{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.exemple p{margin:0;font-size:16.5px}.exemple p+p{margin-top:10px}
+
+.contro{background:color-mix(in srgb,var(--rouge) 8%,transparent);border:1px solid color-mix(in srgb,var(--rouge) 26%,transparent);border-radius:12px;padding:22px 24px;margin:26px 0}
+.contro .ct{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--rouge);font-weight:700;margin-bottom:8px}
+.contro p{margin:0;font-size:16.5px}.contro p+p{margin-top:12px}
+
+.pull{margin:40px 0;padding:6px 0 6px 28px;border-left:3px solid var(--accent)}
+.pull q{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(1.3rem,2.6vw,1.65rem);line-height:1.4;quotes:none;color:var(--ink);display:block}
+.pull q::before{content:"“";color:var(--accent)}.pull q::after{content:"”";color:var(--accent)}
+.pull cite{display:block;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+.abstract{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin:30px 0 10px;box-shadow:var(--shadow-sm)}
+.abstract .at{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.abstract p{margin:0;font-size:17px;color:var(--ink-soft)}
+
+/* les 7 savoirs */
+.savoirs{margin:34px 0 6px;max-width:62rem}
+.savoirs .th{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:14px}
+.savoir{display:flex;gap:16px;align-items:flex-start;padding:13px 0;border-bottom:1px solid var(--line-soft)}
+.savoir:last-child{border-bottom:0}
+.savoir .sn{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:15px;color:#fff;background:linear-gradient(150deg,var(--primary),var(--primary-2));box-shadow:var(--shadow-sm)}
+.savoir .sx b{font-family:var(--serif);font-size:1.06rem;font-weight:600;color:var(--ink);display:block}
+.savoir .sx p{margin:3px 0 0;font-size:15px;color:var(--ink-soft);line-height:1.5}
+
+.cover{position:relative;border-radius:20px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;margin-bottom:8px;box-shadow:var(--shadow)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(150deg,#22401f,#2b4a30 52%,#1a3220)}
+.cover::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.42;background:radial-gradient(38% 46% at 82% 16%,rgba(194,147,60,.75),transparent 60%),radial-gradient(40% 42% at 12% 92%,rgba(94,122,100,.6),transparent 62%)}
+.cover .kicker{color:#e6c489}.cover .kicker::before{background:#e6c489}
+.cover h1{font-size:clamp(2.1rem,5.6vw,3.9rem);font-weight:600;max-width:17ch;letter-spacing:-.02em}
+.cover .csub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);color:rgba(255,255,255,.85);margin-top:16px;max-width:46ch}
+
+.biblio{margin-top:50px;padding-top:32px;border-top:1px solid var(--line);max-width:64rem}
+.biblio h3{font-size:1.5rem;font-weight:600;margin-bottom:6px}
+.biblio-sub{font-family:var(--body);font-style:italic;color:var(--muted);margin:0 0 18px;font-size:1rem}
+.biblio ul{list-style:none;margin:0;padding:0}
+.biblio li{font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink-soft);padding:11px 0 11px 24px;position:relative;border-bottom:1px solid var(--line-soft)}
+.biblio li:last-child{border-bottom:0}.biblio li::before{content:"—";position:absolute;left:0;color:var(--accent)}
+.biblio li b{font-weight:600;color:var(--ink)}.biblio li em{font-style:italic}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line);max-width:64rem}
+.pagenav a{flex:1;padding:18px 22px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--card);transition:.2s;cursor:pointer;font-family:var(--sans)}
+.pagenav a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.pagenav b{display:block;font-family:var(--serif);font-size:1.04rem;font-weight:600;margin-top:4px}
+.pagenav .next{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(5,8,5,.5);z-index:110;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(min-width:1340px){
+  .wrap{max-width:66rem}.prose{position:relative}
+  .sidenote{float:right;clear:right;width:14rem;margin:.35rem calc(-14rem - 1.8rem) 1rem 1.8rem;background:transparent;border-left:2px solid var(--teal);border-radius:0;padding:2px 0 2px 14px}
+}
+@media(max-width:900px){
+  .menu-btn{display:grid}
+  .sidebar{position:fixed;left:0;top:60px;transform:translateX(-100%);transition:.35s;z-index:115;width:300px;box-shadow:var(--shadow);padding-top:20px}
+  .sidebar.open{transform:none}
+  .wrap{padding:36px 22px 80px}.pagenav{flex-direction:column}
+}
+@media(max-width:560px){body{font-size:17.5px}.cover{padding:30px 22px;border-radius:16px}.dropcap::first-letter{font-size:3.6rem}}
+</style>
+</head>
+<body>
+<a href="../" data-portal-back aria-label="Retour au portail" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:6px;background:#ffffff;color:#1c2530;text-decoration:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);box-shadow:0 3px 12px rgba(0,0,0,.16)">&lsaquo; Portail</a>
+<div id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Sommaire"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <div class="brand" data-go="ouverture"><div class="mk">E</div><div><b>Enseigner à vivre</b></div></div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Thème"><svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="toc-title">Sommaire</div>
+    <a class="nav-link" data-go="ouverture"><span class="rn">0</span> Enseigner à vivre</a>
+    <a class="nav-link" data-go="mal"><span class="rn">I</span> Le mal de l'enseignement</a>
+    <a class="nav-link" data-go="tete"><span class="rn">II</span> La tête bien faite</a>
+    <a class="nav-link" data-go="savoirs"><span class="rn">III</span> Les sept savoirs</a>
+    <a class="nav-link" data-go="connaitre"><span class="rn">IV</span> Connaître &amp; relier</a>
+    <a class="nav-link" data-go="humain"><span class="rn">V</span> Enseigner l'humain</a>
+    <a class="nav-link" data-go="affronter"><span class="rn">VI</span> Affronter &amp; comprendre</a>
+    <a class="nav-link" data-go="citoyen"><span class="rn">VII</span> Former le citoyen</a>
+    <a class="nav-link" data-go="synthese"><span class="rn">VIII</span> La métamorphose</a>
+  </aside>
+
+  <main class="content">
+  <div class="wrap">
+
+  <!-- 0 OUVERTURE -->
+  <section class="page active" id="ouverture">
+    <div class="cover reveal">
+      <div class="kicker">Guide · l'éducation selon Edgar Morin</div>
+      <h1>Enseigner à vivre</h1>
+      <p class="csub">L'école transmet des savoirs ; elle a oublié d'aider à vivre. Le projet d'Edgar Morin pour réformer l'éducation — et former des esprits, des humains, des citoyens.</p>
+    </div>
+
+    <div class="abstract reveal">
+      <div class="at">Résumé</div>
+      <p>Ce guide rassemble la pensée de l'éducation d'Edgar Morin. Sa thèse : enseigner, ce n'est pas remplir des têtes de connaissances séparées, c'est <strong>aider à vivre</strong> — affronter l'erreur et l'incertitude, se comprendre et comprendre autrui, habiter la Terre en citoyen. Cela suppose une <strong>réforme de la pensée</strong> : passer d'un savoir compartimenté à une pensée qui <em>relie</em>. On en suivra le diagnostic, le principe (« la tête bien faite »), la charpente des <strong>sept savoirs nécessaires</strong>, et l'horizon civique — former le citoyen de la « Terre-Patrie ».</p>
+    </div>
+
+    <div class="phead reveal" style="margin-top:46px">
+      <span class="sec-num">0</span>
+      <div class="kicker">Ouverture</div>
+      <h2 class="ptitle">Enseigner à vivre</h2>
+      <p class="psub">La plus vieille, et la plus oubliée, des finalités de l'école.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Une formule de Rousseau ouvre tout : dans l'<em>Émile</em>, le précepteur déclare que « vivre est le métier que je veux lui apprendre ». Morin la reprend — en la corrigeant aussitôt, car « on peut seulement <em>aider</em> à apprendre à vivre ». Mais l'essentiel est dit : la mission première de l'école n'est pas seulement de transmettre des connaissances, c'est d'aider chacun à <strong>affronter sa vie</strong> — comme individu, comme citoyen, comme être humain.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'ensemble de ce guide suit les ouvrages d'éducation d'<b>Edgar Morin</b> : <em>Enseigner à vivre</em>, <em>La Tête bien faite</em>, <em>Les Sept Savoirs nécessaires à l'éducation du futur</em>, et le versant civique de <em>La Voie</em>.</div>
+
+      <p class="reveal">Or c'est précisément ce que l'école a cessé de faire. Elle livre des outils — lire, écrire, compter — et des savoirs spécialisés, mais elle « s'écarte de la vie » : elle découpe le réel en tranches séparées et ignore les problèmes permanents du <em>vivre</em>. Apprendre à se connaître, à comprendre autrui, à douter, à affronter l'incertain : rien de tout cela n'est enseigné.</p>
+
+      <div class="pull reveal"><q>Vivre est le métier que je veux lui apprendre.</q><cite>Rousseau, Émile — repris par Morin</cite></div>
+
+      <p class="reveal">« Vivre » n'est pas « survivre ». Survivre, c'est se réduire aux nécessités matérielles ; vivre, c'est « épanouir ses potentialités », accéder à une qualité de vie, à un art de vivre. D'où l'avertissement de Morin contre une école sous pression « techno-économique », qui réduit l'éducation à « l'acquisition de compétences socio-professionnelles au détriment des compétences <em>existentielles</em> ». La vraie autonomie, ajoute-t-il, n'est pas l'isolement : « il n'y a pas d'autonomie mentale sans dépendance à ce qui la nourrit, c'est-à-dire la culture ».</p>
+
+      <p class="reveal">Tout cela exige plus qu'un aménagement de programmes : une <strong>réforme de la pensée</strong> elle-même, pour apprendre à relier ce que l'école a pris l'habitude de séparer. On suivra le chemin : le mal de l'enseignement (I), le principe d'une « tête bien faite » (II), la charpente des sept savoirs (III), puis leur développement — connaître et relier (IV), enseigner l'humain (V), affronter et comprendre (VI), former le citoyen (VII) —, avant l'horizon d'ensemble : la métamorphose (VIII).</p>
+    </div>
+    <div class="pagenav"><span></span><a class="next" data-go="mal"><small>Section I →</small><b>Le mal de l'enseignement</b></a></div>
+  </section>
+
+  <!-- I MAL -->
+  <section class="page" id="mal">
+    <div class="phead"><span class="sec-num">I</span><div class="kicker">Section I</div><h2 class="ptitle">Le mal de l'enseignement</h2><p class="psub">Des savoirs en miettes, coupés de la vie.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Avant de proposer, Morin diagnostique. Et le mal a un nom : la <strong>séparation</strong>. L'école « apprend dès l'école élémentaire à isoler les objets, à séparer les disciplines, à disjoindre les problèmes — plutôt qu'à relier et intégrer ». Elle accumule des savoirs en tranches, sans jamais montrer comment ils communiquent. Le résultat est une « intelligence aveugle », efficace sur le fragment, incapable de saisir le global et l'essentiel.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le diagnostic est développé dans <em>Enseigner à vivre</em> et <em>La Tête bien faite</em> : « l'hyperspécialisation empêche de voir le global et dissout l'essentiel ».</div>
+
+      <p class="reveal">Une lacune résume toutes les autres, et elle est vertigineuse : l'école transmet des connaissances, mais n'apprend jamais ce qu'est <em>connaître</em>. Or toute connaissance est traduction et reconstruction — donc exposée à l'erreur. Une école qui n'enseigne pas cela laisse ses élèves sans défense contre l'illusion.</p>
+
+      <div class="pull reveal"><q>Partout on enseigne des connaissances, nulle part on n'enseigne ce qu'est la connaissance.</q><cite>Enseigner à vivre</cite></div>
+
+      <p class="reveal">À cette compartimentation s'ajoute une <strong>déconnexion d'avec la vie</strong>. L'école « n'apporte pas le viatique bienfaisant pour l'aventure de vivre » : elle ne prépare ni aux incertitudes de l'existence, ni à la connaissance de soi, ni à la compréhension d'autrui. Morin le souligne d'une formule qui devrait alerter tout éducateur : « la compréhension humaine n'est nulle part enseignée » — alors qu'elle est la racine de presque tous les conflits.</p>
+
+      <div class="contro reveal">
+        <div class="ct">La fracture des deux cultures</div>
+        <p>Le mal a une forme culturelle : la rupture entre la <em>culture scientifique</em> (qui découvre, mais « privée de réflexivité ») et la <em>culture des humanités</em> (qui réfléchit le destin humain, mais « moulin privé du grain » des sciences). L'une ignore l'autre. Or « l'impérialisme des connaissances calculatrices et quantitatives progresse au détriment des connaissances réflexives et qualitatives ». Réparer cette fracture sera l'un des chantiers de la réforme.</p>
+      </div>
+
+      <p class="reveal">Morin ne s'arrête pas au constat institutionnel : il décrit aussi la <em>crise relationnelle</em> de la classe, une tension entre la « bio-classe adolescente » et la « classe enseignante adulte », où le pire est l'humiliation et le remède, la compréhension. Le mal est donc à la fois cognitif, culturel et humain. À quoi opposer un principe simple, et ancien.</p>
+    </div>
+    <div class="pagenav"><a data-go="ouverture"><small>← Ouverture</small><b>Enseigner à vivre</b></a><a class="next" data-go="tete"><small>Section II →</small><b>La tête bien faite</b></a></div>
+  </section>
+
+  <!-- II TETE -->
+  <section class="page" id="tete">
+    <div class="phead"><span class="sec-num">II</span><div class="kicker">Section II · le principe</div><h2 class="ptitle">La tête bien faite</h2><p class="psub">Mieux vaut savoir relier qu'accumuler.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">À la tête « bien pleine », Morin oppose, avec Montaigne, la tête « bien faite ». C'est la première finalité de l'enseignement, et le principe qui commande tout le reste. Une tête bien pleine accumule un savoir empilé, « sans principe de sélection et d'organisation qui lui donne sens ». Une tête bien faite, elle, sait <em>poser les problèmes</em> et <em>relier</em> les connaissances.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>« La tête bien faite » donne son titre au livre-programme de <b>Morin</b> sur la réforme de l'éducation (1999).</div>
+
+      <div class="def reveal">
+        <div class="dt">Bien faite, bien pleine</div>
+        <p><span class="term-lead">Bien pleine</span> — le savoir accumulé, empilé, qui ne dispose d'aucun principe pour s'organiser et faire sens : l'accumulation stérile. <span class="term-lead">Bien faite</span> — une aptitude générale à poser et traiter les problèmes, et des principes organisateurs qui permettent de <strong>relier</strong> les savoirs et de leur donner sens. « Une tête apte à organiser les connaissances, et par là à éviter leur accumulation stérile. »</p>
+      </div>
+
+      <div class="pull reveal"><q>Mieux vaut une tête bien faite que bien pleine.</q><cite>Montaigne, repris par Morin</cite></div>
+
+      <p class="reveal">Le cœur opératoire de ce principe est l'aptitude à <strong>contextualiser et globaliser</strong>. « La connaissance pertinente est celle qui situe toute information dans son contexte » : la connaissance progresse moins par accumulation et formalisation que par la capacité à relier les parties au tout et le tout aux parties. Le mot d'ordre n'est pas de détruire les disciplines, mais de les faire communiquer.</p>
+
+      <div class="pull reveal"><q>Il ne s'agit pas de détruire, il s'agit de relier.</q><cite>Enseigner à vivre</cite></div>
+
+      <p class="reveal">D'où la thèse politique de toute l'entreprise : on ne réformera pas l'éducation sans réformer la pensée, ni l'inverse — les deux sont liées en boucle. Et cette réforme n'est pas <em>programmatique</em> (ajouter ou retrancher des contenus), mais <strong>paradigmatique</strong> : elle « concerne notre aptitude à organiser la connaissance ». Changer non ce qu'on enseigne d'abord, mais la <em>manière</em> dont on relie ce qu'on enseigne.</p>
+
+      <div class="contro reveal">
+        <div class="ct">La boucle, et comment en sortir</div>
+        <p>Morin reconnaît le cercle : « on ne peut réformer l'institution sans avoir réformé les esprits, mais on ne peut réformer les esprits sans avoir réformé les institutions ». L'issue n'est pas de tout attendre d'un grand soir, mais de <em>commencer</em> — par une minorité d'éducateurs convaincus, en marge : « le commencement ne peut être que déviant et marginal ». Toute action sur un terme de la boucle modifie l'autre.</p>
+      </div>
+
+      <p class="reveal">Reste à savoir <em>quoi</em> enseigner, concrètement, pour former une telle tête — et préparer à vivre. C'est l'objet de la charpente la plus célèbre de Morin : les sept savoirs.</p>
+    </div>
+    <div class="pagenav"><a data-go="mal"><small>← Section I</small><b>Le mal de l'enseignement</b></a><a class="next" data-go="savoirs"><small>Section III →</small><b>Les sept savoirs</b></a></div>
+  </section>
+
+  <!-- III SAVOIRS -->
+  <section class="page" id="savoirs">
+    <div class="phead"><span class="sec-num">III</span><div class="kicker">Section III · la charpente</div><h2 class="ptitle">Les sept savoirs</h2><p class="psub">Sept savoirs « nécessaires » — et pourtant absents de nos programmes.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">À la demande de l'UNESCO, Morin a dégagé sept savoirs qu'aucune culture, aucune école ne devrait ignorer — et que pourtant l'enseignement actuel néglige. Ce ne sont pas sept matières à ajouter : ce sont sept <strong>manques</strong>, sept zones aveugles. Leur point commun : ils relèvent tous d'une réalité <em>complexe</em> — l'humain, la planète, la connaissance — que l'école fragmente au lieu de relier.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Formulés pour l'UNESCO en 1999 (<em>Les Sept Savoirs nécessaires à l'éducation du futur</em>), ils sont repris et synthétisés dans <em>Enseigner à vivre</em>.</div>
+
+      <div class="savoirs reveal">
+        <div class="th">Les sept savoirs nécessaires à l'éducation du futur</div>
+        <div class="savoir"><div class="sn">1</div><div class="sx"><b>Les cécités de la connaissance</b><p>Enseigner ce qu'est connaître, et ses pièges : l'erreur et l'illusion, dont nous sommes menacés sans le savoir.</p></div></div>
+        <div class="savoir"><div class="sn">2</div><div class="sx"><b>Une connaissance pertinente</b><p>Contextualiser, globaliser, relier — contre le savoir en miettes.</p></div></div>
+        <div class="savoir"><div class="sn">3</div><div class="sx"><b>La condition humaine</b><p>Enseigner l'humain dans son unité et sa diversité : à la fois biologique, psychique, culturel, social.</p></div></div>
+        <div class="savoir"><div class="sn">4</div><div class="sx"><b>L'identité terrienne</b><p>La Terre-Patrie, l'ère planétaire, notre communauté de destin.</p></div></div>
+        <div class="savoir"><div class="sn">5</div><div class="sx"><b>Affronter les incertitudes</b><p>Naviguer dans l'incertain ; toute action est un pari, toute décision une stratégie.</p></div></div>
+        <div class="savoir"><div class="sn">6</div><div class="sx"><b>La compréhension</b><p>Comprendre autrui — contre l'incompréhension, source de presque tous les maux humains.</p></div></div>
+        <div class="savoir"><div class="sn">7</div><div class="sx"><b>L'éthique du genre humain</b><p>Solidarité, responsabilité, démocratie, citoyenneté terrestre.</p></div></div>
+      </div>
+
+      <p class="reveal" style="margin-top:30px">On le voit : ces sept savoirs forment une progression. Les deux premiers concernent la <em>connaissance</em> elle-même ; les deux suivants, ce que nous <em>sommes</em> (humains, terriens) ; les deux d'après, comment <em>affronter la vie</em> et <em>autrui</em> ; le dernier, comment <em>agir</em> et vivre ensemble. On les développe maintenant en quatre temps — exactement le programme d'une éducation qui « enseigne à vivre ».</p>
+    </div>
+    <div class="pagenav"><a data-go="tete"><small>← Section II</small><b>La tête bien faite</b></a><a class="next" data-go="connaitre"><small>Section IV →</small><b>Connaître &amp; relier</b></a></div>
+  </section>
+
+  <!-- IV CONNAITRE -->
+  <section class="page" id="connaitre">
+    <div class="phead"><span class="sec-num">IV</span><div class="kicker">Savoirs 1 &amp; 2</div><h2 class="ptitle">Connaître &amp; relier</h2><p class="psub">Apprendre ce qu'est connaître — et apprendre à relier.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le premier savoir paraît une évidence dès qu'on l'énonce, et il est pourtant absent partout : enseigner les <strong>cécités de la connaissance</strong>. Toute connaissance est « à la fois une traduction et une reconstruction du réel » ; or dans toute traduction se glisse le risque d'erreur. Nous sommes donc « sans cesse menacés de nous tromper sans le savoir » — par les illusions de la mémoire, le mensonge à soi-même, l'égocentrisme qui se donne raison.</p>
+      <div class="sidenote reveal"><span class="sn-k">Savoir 1</span>« Les cécités de la connaissance : l'erreur et l'illusion. » L'école traite l'erreur de l'élève comme une faute — alors qu'elle est une <b>information</b>.</div>
+
+      <div class="pull reveal"><q>Toute connaissance est une traduction et une reconstruction du réel. Nous sommes sans cesse menacés de nous tromper sans le savoir.</q><cite>Enseigner à vivre</cite></div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p>Tenir un <strong>journal d'auto-observation</strong> où l'élève revient, après coup, sur un jugement précipité et voit comment il s'est trompé. Ou analyser un cas d'<em>aveuglement collectif</em> — comment une société entière a pu « marcher en somnambule vers le désastre » —, pour montrer que des certitudes partagées peuvent égarer. L'erreur cesse d'être une honte : elle devient un objet d'étude, « moteur de découvertes ».</p>
+      </div>
+
+      <p class="reveal">Le deuxième savoir en découle : la <strong>connaissance pertinente</strong>. Contre le savoir en miettes, il s'agit d'apprendre à <em>contextualiser, globaliser, relier</em>. « La connaissance progresse principalement, non par sophistication et abstraction, mais par capacité à contextualiser et à globaliser. » C'est la « tête bien faite » à l'œuvre : situer chaque information dans l'ensemble où elle prend sens.</p>
+      <div class="sidenote reveal"><span class="sn-k">Savoir 2</span>« Les principes d'une connaissance pertinente. » L'enseignement « disjoint les problèmes au lieu de relier » : il faut une pensée qui distingue <em>sans</em> séparer.</div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p><strong>Partir du Soleil, au primaire.</strong> On étudie son organisation physique (ordre et désordre de ses explosions, les photons), puis son rôle pour la vie (la photosynthèse, l'atmosphère), puis son rôle dans les sociétés humaines (les calendriers, les grands mythes solaires). Un seul objet fait communiquer physique, biologie, géographie, histoire et culture. C'est cela, relier.</p>
+      </div>
+
+      <p class="reveal">Ces deux savoirs sont le socle : sans une conscience de l'erreur et une capacité à relier, aucun des suivants n'est possible. Ils arment l'élève contre l'illusion, et lui donnent la pensée capable d'aborder ce qu'il faut maintenant lui enseigner : ce qu'il <em>est</em>.</p>
+    </div>
+    <div class="pagenav"><a data-go="savoirs"><small>← Section III</small><b>Les sept savoirs</b></a><a class="next" data-go="humain"><small>Section V →</small><b>Enseigner l'humain</b></a></div>
+  </section>
+
+  <!-- V HUMAIN -->
+  <section class="page" id="humain">
+    <div class="phead"><span class="sec-num">V</span><div class="kicker">Savoirs 3 &amp; 4</div><h2 class="ptitle">Enseigner l'humain</h2><p class="psub">Qui sommes-nous ? Des êtres complexes, et des terriens.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le troisième savoir comble l'absence la plus étonnante : nulle part l'école n'enseigne ce qu'est la <strong>condition humaine</strong>. L'humain y est « dispersé, compartimenté » entre les disciplines — le cerveau à la biologie, l'esprit à la psychologie, la société à la sociologie — au point qu'« il est devenu impossible d'apprendre ce que signifie être humain ». Il faut au contraire le restituer dans son unité complexe.</p>
+      <div class="sidenote reveal"><span class="sn-k">Savoir 3</span>« Enseigner la condition humaine. » L'humain est « à la fois physique, biologique, psychique, culturel, social, historique » — et trinitaire : individu / espèce / société.</div>
+
+      <p class="reveal">L'humain est « à la fois 100 % biologique et 100 % culturel » ; il est aussi une <em>trinité</em> indissociable — individu, espèce, société — dont chaque terme produit et est produit par les autres. Et il faut tenir ensemble son <strong>unité</strong> (tous les humains partagent une même condition) et sa <strong>diversité</strong> (chaque culture, chaque individu est singulier).</p>
+
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p>Construire un cycle autour de la grande question : <strong>« Qui sommes-nous, d'où venons-nous, où allons-nous ? »</strong> À partir d'elle, l'enfant découvre en quoi il est être biologique, physique, psychique, social et historique — et l'on « ramifie vers les disciplines tout en montrant leurs liens ». Au collège et au lycée, recourir au <em>roman</em> et au <em>cinéma</em>, qui montrent les êtres « dans leur subjectivité et leur complexité » là où les sciences les dissolvent.</p>
+      </div>
+
+      <p class="reveal">Le quatrième savoir élargit le regard à la planète : l'<strong>identité terrienne</strong>. « Le destin désormais planétaire du genre humain est une réalité clé ignorée par l'enseignement. » Depuis que tous les continents communiquent, et plus encore depuis que les mêmes périls nous menacent tous, l'humanité forme une <em>communauté de destin</em>. Il faut enseigner cette appartenance commune : nous sommes « enfants de la Terre, enfants de la Vie, enfants du Cosmos ».</p>
+      <div class="sidenote reveal"><span class="sn-k">Savoir 4</span>« Enseigner l'identité terrienne. » La <b>Terre-Patrie</b> : non l'addition d'une planète et d'une humanité, mais une totalité complexe, notre maison commune.</div>
+
+      <div class="pull reveal"><q>Le trésor de l'unité humaine est la diversité humaine ; le trésor de la diversité humaine est l'unité humaine.</q><cite>La Voie</cite></div>
+
+      <p class="reveal">Enseigner l'humain et la Terre, ce n'est pas un supplément d'âme : c'est, on le verra, déjà former des citoyens. Mais il reste à préparer l'élève à ce que la vie a de plus rude — l'incertain — et à ce qu'elle a de plus précieux — autrui.</p>
+    </div>
+    <div class="pagenav"><a data-go="connaitre"><small>← Section IV</small><b>Connaître &amp; relier</b></a><a class="next" data-go="affronter"><small>Section VI →</small><b>Affronter &amp; comprendre</b></a></div>
+  </section>
+
+  <!-- VI AFFRONTER -->
+  <section class="page" id="affronter">
+    <div class="phead"><span class="sec-num">VI</span><div class="kicker">Savoirs 5 &amp; 6</div><h2 class="ptitle">Affronter &amp; comprendre</h2><p class="psub">Naviguer dans l'incertain ; reconnaître autrui.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le cinquième savoir prépare à ce que l'école fuit : l'<strong>incertitude</strong>. Elle est au cœur des sciences elles-mêmes, et elle a gagné le devenir historique — « le futur est imprédictible ». Apprendre à vivre, c'est apprendre à avancer sans garantie. Morin en donne la formule la plus belle.</p>
+      <div class="sidenote reveal"><span class="sn-k">Savoir 5</span>« Affronter les incertitudes. » L'école valorise la bonne réponse certaine ; elle néglige le doute, qui est pourtant une vertu de la connaissance.</div>
+
+      <div class="pull reveal"><q>Il faut apprendre à naviguer dans un océan d'incertitudes à travers des archipels de certitude.</q><cite>Enseigner à vivre</cite></div>
+
+      <p class="reveal">Au cœur de ce savoir, un principe : l'<strong>écologie de l'action</strong>. Toute action, une fois lancée, échappe à son auteur et peut produire l'inverse de ce qu'elle visait. D'où deux leçons : « toute décision est un pari », et il faut préférer la <em>stratégie</em> (qui se corrige en cours de route) au <em>programme</em> rigide. On n'élimine pas l'incertitude — on négocie avec elle.</p>
+
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p>Analyser un cas où l'action s'est retournée contre ses intentions — une réforme qui produit l'effet contraire, des antibiotiques qui <em>accroissent</em> la résistance des bactéries. Puis faire élaborer aux élèves une <strong>stratégie à plusieurs scénarios</strong> plutôt qu'un plan unique, en y intégrant l'imprévu. C'est apprendre à décider en situation incertaine — ce que la vie exigera d'eux.</p>
+      </div>
+
+      <p class="reveal">Le sixième savoir touche peut-être au plus humain de tous : la <strong>compréhension</strong>. Morin distingue <em>expliquer</em> (saisir objectivement, comme un objet) et <em>comprendre</em> autrui (saisir un sujet, par empathie et identification). Notre époque de communications n'est pas pour autant une époque de compréhension — et « l'incompréhension porte en elle des germes de mort ».</p>
+      <div class="sidenote reveal"><span class="sn-k">Savoir 6</span>« Enseigner la compréhension. » Étudier les racines de l'incompréhension : égocentrisme, mépris, le « bouc émissaire », le cercle de la vengeance.</div>
+
+      <div class="pull reveal"><q>La compréhension humaine n'est nulle part enseignée.</q><cite>Enseigner à vivre</cite></div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p>« Si je vois un enfant en pleurs, je le comprends non en mesurant la salinité de ses larmes, mais en retrouvant mes propres détresses enfantines. » Faire de la <strong>compréhension un objet explicite</strong> : analyser un conflit (scolaire, familial, interculturel) dans ses <em>causes</em> — et mobiliser la littérature et le cinéma comme écoles d'empathie. Même la politesse s'enseigne « non comme contrainte sociale, mais comme reconnaissance d'autrui ».</p>
+      </div>
+
+      <p class="reveal">Ces deux savoirs préparent à l'épreuve et à la rencontre. Ils débouchent sur le septième, qui les couronne et les engage dans le monde commun : l'éthique, et le citoyen.</p>
+    </div>
+    <div class="pagenav"><a data-go="humain"><small>← Section V</small><b>Enseigner l'humain</b></a><a class="next" data-go="citoyen"><small>Section VII →</small><b>Former le citoyen</b></a></div>
+  </section>
+
+  <!-- VII CITOYEN -->
+  <section class="page" id="citoyen">
+    <div class="phead"><span class="sec-num">VII</span><div class="kicker">Savoir 7 · le versant civique</div><h2 class="ptitle">Former le citoyen</h2><p class="psub">De l'éthique du genre humain à la citoyenneté de la Terre.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le septième savoir engage l'éducation dans la cité : l'<strong>éthique du genre humain</strong>. Elle découle directement de la trinité humaine. L'éthique <em>individu / société</em> appelle un contrôle mutuel — c'est-à-dire la <strong>démocratie</strong> ; l'éthique <em>individu / espèce</em> appelle la <strong>citoyenneté terrestre</strong>. Cette éthique « ne saurait être enseignée par des leçons de morale » : elle se forme dans la conscience de notre triple appartenance.</p>
+      <div class="sidenote reveal"><span class="sn-k">Savoir 7</span>« L'éthique du genre humain. » Ses sources, dit Morin, sont universelles : la <b>solidarité</b> et la <b>responsabilité</b>.</div>
+
+      <p class="reveal">Ce versant civique est développé dans les grands livres politiques de Morin. Nous vivons l'<strong>ère planétaire</strong> : par la mondialisation, les fragments dispersés de l'humanité sont devenus une « communauté de destin — une communauté de vie ou de mort ». Mais cette unité de fait n'est pas encore une conscience. La former, c'est l'objet d'une éducation à la <strong>Terre-Patrie</strong>.</p>
+
+      <div class="def reveal">
+        <div class="dt">La Terre-Patrie</div>
+        <p>Non pas un super-État qui abolirait les nations, mais une patrie commune qui <span class="term-lead">englobe et protège</span> les patries singulières : « unir les patries dans la Terre-Patrie ». Le citoyen morinien est ainsi <em>enraciné</em> (dans sa culture, son local) <em>et</em> planétaire — selon le principe que « l'unité et la diversité humaines sont chacune le trésor de l'autre ».</p>
+      </div>
+
+      <p class="reveal">Mais la démocratie qui s'y rattache est menacée par un mal précis, qui rejoint le projet éducatif. À mesure que le savoir devient l'affaire des seuls experts, « le citoyen perd le droit à la connaissance » : il ne peut plus penser les problèmes qui le concernent. D'où la notion centrale de <strong>démocratie cognitive</strong>.</p>
+
+      <div class="pull reveal"><q>Tandis que l'expert perd l'aptitude à concevoir le global, le citoyen perd le droit à la connaissance.</q><cite>La Voie</cite></div>
+
+      <p class="reveal">La conséquence est limpide, et elle boucle tout le guide : on ne peut « démocratiser un savoir cloisonné par nature ». La démocratie cognitive <em>exige</em> la réforme de la pensée — donc l'éducation. Enseigner à relier les savoirs, c'est déjà former des citoyens capables de penser le bien commun.</p>
+
+      <div class="exemple reveal">
+        <div class="et">◆ En classe</div>
+        <p><strong>Faire de la classe une expérience de démocratie.</strong> Le débat et le conflit d'idées, encadrés, sont « un apprentissage de la démocratie, qui a besoin de conflits d'idées pour ne pas dépérir ». Cultiver de façon <em>concentrique</em> le sentiment d'appartenance — à sa commune, à son pays, à l'Europe, à la Terre. Étudier un problème global concret (climat, pandémie, migrations) pour faire sentir l'intersolidarité planétaire. L'humanité « se contemplant elle-même, vue de la Lune » : une seule maison.</p>
+      </div>
+
+      <p class="reveal">Le profil du citoyen que l'éducation doit former se dessine ainsi : <strong>lucide</strong> sur la complexité du monde, <strong>responsable et solidaire</strong>, à la fois <strong>enraciné et terrien</strong>. Former ce citoyen n'est pas une option morale ajoutée : c'est l'aboutissement même d'une éducation qui apprend à vivre.</p>
+    </div>
+    <div class="pagenav"><a data-go="affronter"><small>← Section VI</small><b>Affronter &amp; comprendre</b></a><a class="next" data-go="synthese"><small>Section VIII →</small><b>La métamorphose</b></a></div>
+  </section>
+
+  <!-- VIII SYNTHESE -->
+  <section class="page" id="synthese">
+    <div class="phead"><span class="sec-num">VIII</span><div class="kicker">Section VIII</div><h2 class="ptitle">La métamorphose</h2><p class="psub">Réformer la pensée, l'éducation et la vie — ensemble.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Au terme, la pensée éducative de Morin tient en un mouvement unique : <strong>relier</strong>. Relier les savoirs entre eux (la tête bien faite), relier le savoir à la vie (enseigner à vivre), relier l'élève à l'humanité et à la Terre (les sept savoirs), relier enfin l'éducation à la démocratie (le citoyen). Tout ce qui, dans l'école d'aujourd'hui, sépare, est ce qu'il faut apprendre à tisser.</p>
+
+      <p class="reveal">C'est pourquoi la réforme visée n'est pas une retouche de programmes. Elle est solidaire d'une réforme de la pensée, elle-même solidaire d'une réforme de civilisation. Morin le dit en un mot, qu'il préfère à « révolution » :</p>
+
+      <div class="pull reveal"><q>Ce serait plus qu'une réforme, plus riche qu'une révolution : une métamorphose.</q><cite>Enseigner à vivre</cite></div>
+
+      <p class="reveal">Trois gestes, qu'un enseignant peut faire siens dès demain, en condensent l'esprit :</p>
+
+      <h3 class="reveal">Relier au lieu d'empiler</h3>
+      <p class="reveal" style="margin-top:0">Contextualiser, globaliser, faire communiquer les disciplines — viser la tête bien faite, non la tête bien pleine.</p>
+      <h3 class="reveal">Enseigner à vivre</h3>
+      <p class="reveal" style="margin-top:0">Faire place à ce que l'école oublie : connaître ses erreurs, affronter l'incertain, comprendre autrui, se connaître soi-même.</p>
+      <h3 class="reveal">Former des citoyens terriens</h3>
+      <p class="reveal" style="margin-top:0">Enseigner la condition humaine et l'identité terrienne ; faire de la classe une expérience de démocratie et de reliance.</p>
+
+      <div class="contro reveal">
+        <div class="ct">Une honnêteté critique</div>
+        <p>Pour bien recevoir Morin, il faut en mesurer la limite : sa vision est ample, parfois plus <em>inspirante qu'opératoire</em>. « Relier les savoirs », « enseigner à vivre » : ces mots d'ordre sont superbes, mais leur mise en œuvre concrète — dans une classe, avec un programme et un horaire — reste largement à inventer par les enseignants eux-mêmes. À recevoir donc non comme un manuel, mais comme une <em>boussole</em> et un horizon, qui redonnent sens au métier.</p>
+      </div>
+
+      <p class="reveal">Reste l'essentiel, et il touche chaque éducateur : Morin déplace l'enseignant du rôle de distributeur de savoirs vers celui d'un passeur qui prépare à la vie. Il répond même à la vieille objection — « qui éduquera les éducateurs ? » — par une formule modeste et juste : « ils s'auto-éduquent, avec l'aide des éduqués ». Enseigner à vivre, c'est aussi réapprendre, soi-même, à le faire.</p>
+
+      <div class="biblio reveal">
+        <h3>Repères bibliographiques</h3>
+        <p class="biblio-sub">Les ouvrages d'Edgar Morin sur l'éducation et la citoyenneté.</p>
+        <ul>
+          <li><b>Edgar Morin</b>, <em>Enseigner à vivre. Manifeste pour changer l'éducation</em> (2014).</li>
+          <li><b>Edgar Morin</b>, <em>La Tête bien faite. Repenser la réforme, réformer la pensée</em> (1999).</li>
+          <li><b>Edgar Morin</b>, <em>Les Sept Savoirs nécessaires à l'éducation du futur</em> (UNESCO, 1999).</li>
+          <li><b>Edgar Morin</b>, <em>La Voie. Pour l'avenir de l'humanité</em> (2011) · <em>Où va le monde&nbsp;?</em> (2007).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="citoyen"><small>← Section VII</small><b>Former le citoyen</b></a><a class="next" data-go="ouverture"><small>Retour →</small><b>Au début du guide</b></a></div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];const links=[...document.querySelectorAll('.nav-link')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>revealScan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeMenu(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('menuBtn').onclick=()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tBtn=document.getElementById('themeBtn'),tIcon=document.getElementById('themeIcon');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tBtn.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');tIcon.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.1});
+function revealScan(scope){(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}revealScan();
+const bar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

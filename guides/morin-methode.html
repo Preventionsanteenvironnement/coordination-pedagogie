@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Méthode — guide de lecture (Edgar Morin)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f4efe4; --paper2:#ebe4d4; --card:#fbf8ef; --ink:#26211a; --ink-soft:#4a4234; --muted:#867c6a;
+  --primary:#473725; --primary-2:#6e5836; --accent:#bf9540; --accent-2:#d0a855;
+  --rouge:#9c4a33; --teal:#4f6f5e; --line:rgba(38,33,26,.14); --line-soft:rgba(38,33,26,.08);
+  --shadow:0 22px 60px -30px rgba(60,45,25,.5); --shadow-sm:0 10px 30px -20px rgba(60,45,25,.45);
+  --serif:'Fraunces',Georgia,serif; --body:'Spectral',Georgia,'Times New Roman',serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --measure:42rem;
+}
+[data-theme="dark"]{
+  --paper:#0f0c08; --paper2:#16110b; --card:#1a150e; --ink:#ece5d8; --ink-soft:#cabfa9; --muted:#8f8470;
+  --primary:#d8b271; --primary-2:#e6c488; --accent:#dcab50; --accent-2:#e8bd6c;
+  --rouge:#dd8064; --teal:#83ad94; --line:rgba(236,229,216,.15); --line-soft:rgba(236,229,216,.08);
+  --shadow:0 26px 70px -34px rgba(0,0,0,.85); --shadow-sm:0 12px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18.5px;line-height:1.74;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0;font-weight:600;letter-spacing:-.012em}
+::selection{background:var(--accent);color:#fff}
+em{font-style:italic}
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:200;background:linear-gradient(90deg,var(--accent),var(--primary))}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;z-index:120;display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand .mk{width:32px;height:32px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;color:#fff;
+  font-family:var(--serif);font-weight:700;background:linear-gradient(140deg,var(--primary),var(--accent));box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.01em}
+.spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-btn{display:none}
+
+.shell{display:flex;min-height:100vh;padding-top:60px}
+.sidebar{width:308px;flex:0 0 auto;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  padding:24px 14px 50px;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.toc-title{font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:8px 14px 14px;font-weight:600}
+.nav-link{display:flex;align-items:baseline;gap:12px;padding:9px 14px;border-radius:9px;color:var(--ink-soft);text-decoration:none;
+  cursor:pointer;transition:.16s;font-family:var(--sans);font-size:13.5px;font-weight:500;line-height:1.3}
+.nav-link .rn{font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--accent);flex:0 0 24px;opacity:.85}
+.nav-link:hover{background:color-mix(in srgb,var(--accent) 11%,transparent);color:var(--ink)}
+.nav-link.active{background:var(--primary);color:#fff}.nav-link.active .rn{color:#fff;opacity:.9}
+[data-theme="dark"] .nav-link.active{color:#0f0c08}[data-theme="dark"] .nav-link.active .rn{color:#0f0c08}
+
+.content{flex:1;min-width:0}
+.wrap{max-width:64rem;margin:0 auto;padding:50px 40px 100px}
+.page{display:none;animation:fade .5s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.phead{margin-bottom:34px;position:relative}
+.sec-num{font-family:var(--serif);font-weight:300;font-size:clamp(3rem,9vw,6rem);line-height:.8;color:var(--accent);opacity:.16;position:absolute;top:-14px;right:0;pointer-events:none}
+.kicker{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.kicker::before{content:"";width:30px;height:1.5px;background:var(--accent)}
+.ptitle{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:600;max-width:20ch;letter-spacing:-.02em}
+.psub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2vw,1.35rem);color:var(--ink-soft);margin-top:14px;max-width:50ch;font-weight:400;line-height:1.5}
+
+.prose{max-width:var(--measure)}
+.prose p{margin:0 0 22px}
+.prose h3{font-size:1.45rem;margin:46px 0 4px;font-weight:600;color:var(--ink)}
+.prose h3 .h-n{color:var(--accent);font-weight:500;margin-right:.5rem}
+.dropcap::first-letter{font-family:var(--serif);font-weight:600;float:left;font-size:4.4rem;line-height:.82;padding:6px 12px 0 0;color:var(--primary)}
+[data-theme="dark"] .dropcap::first-letter{color:var(--primary-2)}
+strong{font-weight:600;color:var(--ink)}
+.term{font-style:italic;color:var(--accent)}
+
+.sidenote{display:block;margin:14px 0;padding:14px 16px;background:var(--card);border:1px solid var(--line-soft);border-left:2px solid var(--teal);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--muted)}
+.sidenote b{color:var(--ink-soft);font-weight:600}
+.sidenote .sn-k{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:600}
+
+.def{background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 8%,transparent),transparent);border:1px solid var(--line);border-top:3px solid var(--primary);border-radius:12px;padding:22px 24px;margin:26px 0}
+.def .dt{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);font-weight:700;margin-bottom:8px}
+[data-theme="dark"] .def .dt{color:var(--primary-2)}
+.def p{margin:0;font-size:17px}.def p+p{margin-top:12px}
+.def .term-lead{font-family:var(--serif);font-style:italic;color:var(--accent);font-weight:500}
+
+.exemple{background:color-mix(in srgb,var(--accent) 7%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:12px;padding:20px 24px;margin:24px 0}
+.exemple .et{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.exemple p{margin:0;font-size:16.5px}.exemple p+p{margin-top:10px}
+
+.contro{background:color-mix(in srgb,var(--rouge) 8%,transparent);border:1px solid color-mix(in srgb,var(--rouge) 26%,transparent);border-radius:12px;padding:22px 24px;margin:26px 0}
+.contro .ct{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--rouge);font-weight:700;margin-bottom:8px}
+.contro p{margin:0;font-size:16.5px}.contro p+p{margin-top:12px}
+
+.pull{margin:40px 0;padding:6px 0 6px 28px;border-left:3px solid var(--accent)}
+.pull q{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(1.3rem,2.6vw,1.65rem);line-height:1.4;quotes:none;color:var(--ink);display:block}
+.pull q::before{content:"“";color:var(--accent)}.pull q::after{content:"”";color:var(--accent)}
+.pull cite{display:block;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+.abstract{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin:30px 0 10px;box-shadow:var(--shadow-sm)}
+.abstract .at{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.abstract p{margin:0;font-size:17px;color:var(--ink-soft)}
+
+/* aperçu des 6 tomes */
+.tomes{margin:34px 0 6px;max-width:62rem}
+.tomes .th{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:14px}
+.tome{display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.tome:last-child{border-bottom:0}
+.tome .tn{flex:0 0 auto;width:44px;height:44px;border-radius:8px;display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:15px;color:#fff;background:linear-gradient(150deg,var(--primary),var(--primary-2));box-shadow:var(--shadow-sm)}
+.tome .tx b{font-family:var(--serif);font-size:1.1rem;font-weight:600;color:var(--ink);display:block}
+.tome .tx b span{color:var(--muted);font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.06em;margin-left:8px}
+.tome .tx p{margin:4px 0 0;font-size:15.5px;color:var(--ink-soft);line-height:1.5}
+
+.cover{position:relative;border-radius:20px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;margin-bottom:8px;box-shadow:var(--shadow)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(150deg,#3a2d1d,#473725 52%,#2a2014)}
+.cover::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.42;background:radial-gradient(38% 46% at 82% 16%,rgba(191,149,64,.75),transparent 60%),radial-gradient(40% 42% at 12% 92%,rgba(79,111,94,.5),transparent 62%)}
+.cover .kicker{color:#e6c489}.cover .kicker::before{background:#e6c489}
+.cover h1{font-size:clamp(2.1rem,5.8vw,4rem);font-weight:600;max-width:16ch;letter-spacing:-.02em}
+.cover .csub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);color:rgba(255,255,255,.85);margin-top:16px;max-width:46ch}
+
+.biblio{margin-top:50px;padding-top:32px;border-top:1px solid var(--line);max-width:64rem}
+.biblio h3{font-size:1.5rem;font-weight:600;margin-bottom:6px}
+.biblio-sub{font-family:var(--body);font-style:italic;color:var(--muted);margin:0 0 18px;font-size:1rem}
+.biblio ul{list-style:none;margin:0;padding:0}
+.biblio li{font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink-soft);padding:11px 0 11px 24px;position:relative;border-bottom:1px solid var(--line-soft)}
+.biblio li:last-child{border-bottom:0}.biblio li::before{content:"—";position:absolute;left:0;color:var(--accent)}
+.biblio li b{font-weight:600;color:var(--ink)}.biblio li em{font-style:italic}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line);max-width:64rem}
+.pagenav a{flex:1;padding:18px 22px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--card);transition:.2s;cursor:pointer;font-family:var(--sans)}
+.pagenav a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.pagenav b{display:block;font-family:var(--serif);font-size:1.04rem;font-weight:600;margin-top:4px}
+.pagenav .next{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(8,6,3,.5);z-index:110;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(min-width:1340px){
+  .wrap{max-width:66rem}.prose{position:relative}
+  .sidenote{float:right;clear:right;width:14rem;margin:.35rem calc(-14rem - 1.8rem) 1rem 1.8rem;background:transparent;border-left:2px solid var(--teal);border-radius:0;padding:2px 0 2px 14px}
+}
+@media(max-width:900px){
+  .menu-btn{display:grid}
+  .sidebar{position:fixed;left:0;top:60px;transform:translateX(-100%);transition:.35s;z-index:115;width:300px;box-shadow:var(--shadow);padding-top:20px}
+  .sidebar.open{transform:none}
+  .wrap{padding:36px 22px 80px}.pagenav{flex-direction:column}
+}
+@media(max-width:560px){body{font-size:17.5px}.cover{padding:30px 22px;border-radius:16px}.dropcap::first-letter{font-size:3.6rem}}
+</style>
+</head>
+<body>
+<a href="../" data-portal-back aria-label="Retour au portail" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:6px;background:#ffffff;color:#1c2530;text-decoration:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);box-shadow:0 3px 12px rgba(0,0,0,.16)">&lsaquo; Portail</a>
+<div id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Sommaire"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <div class="brand" data-go="ouverture"><div class="mk">M</div><div><b>La Méthode — guide</b></div></div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Thème"><svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="toc-title">Sommaire</div>
+    <a class="nav-link" data-go="ouverture"><span class="rn">0</span> Qu'est-ce que La Méthode&nbsp;?</a>
+    <a class="nav-link" data-go="t1"><span class="rn">I</span> T1 · La Nature de la nature</a>
+    <a class="nav-link" data-go="t2"><span class="rn">II</span> T2 · La Vie de la vie</a>
+    <a class="nav-link" data-go="t3"><span class="rn">III</span> T3 · La Connaissance</a>
+    <a class="nav-link" data-go="t4"><span class="rn">IV</span> T4 · Les Idées</a>
+    <a class="nav-link" data-go="t5"><span class="rn">V</span> T5 · L'Humanité de l'humanité</a>
+    <a class="nav-link" data-go="t6"><span class="rn">VI</span> T6 · Éthique</a>
+    <a class="nav-link" data-go="spirale"><span class="rn">VII</span> L'unité : la spirale</a>
+    <a class="nav-link" data-go="lire"><span class="rn">VIII</span> Lire La Méthode</a>
+  </aside>
+
+  <main class="content">
+  <div class="wrap">
+
+  <!-- 0 OUVERTURE -->
+  <section class="page active" id="ouverture">
+    <div class="cover reveal">
+      <div class="kicker">Guide de lecture · l'œuvre d'une vie</div>
+      <h1>La Méthode</h1>
+      <p class="csub">Six tomes, près de trente ans : non pas une recette à appliquer, mais une voie pour penser la complexité du monde. Parcours guidé du grand œuvre d'Edgar Morin.</p>
+    </div>
+
+    <div class="abstract reveal">
+      <div class="at">À quoi sert ce guide</div>
+      <p><em>La Méthode</em> est un monument — six volumes, de 1977 à 2004 — souvent réputé difficile. Ce guide en donne une <strong>carte claire</strong> : ce que fait chaque tome, son idée maîtresse, ses concepts, et comment les six s'enchaînent en une seule grande <em>spirale</em>. L'objectif n'est pas de résumer l'irrésumable, mais de donner les clés pour <strong>s'y retrouver et comprendre</strong> — puis, si l'on veut, d'y entrer par la bonne porte.</p>
+    </div>
+
+    <div class="phead reveal" style="margin-top:46px">
+      <span class="sec-num">0</span>
+      <div class="kicker">Ouverture</div>
+      <h2 class="ptitle">Qu'est-ce que <em>La Méthode</em>&nbsp;?</h2>
+      <p class="psub">Le titre est au singulier, et sans « -ologie ». Ce n'est pas un hasard.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Le premier malentendu à lever concerne le titre. « La Méthode » ne désigne ni une méthodologie, ni un protocole, ni une recette à appliquer pas à pas. À l'origine, rappelle Morin, le mot <em>méthode</em> signifiait <strong>cheminement</strong> — du grec <em>meta-hodos</em>, « en chemin ». La Méthode est donc une <strong>voie qui se fait en marchant</strong>, et l'œuvre s'ouvre sur les vers d'Antonio Machado qui en sont le manifeste.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'épigraphe de Machado et la définition de la méthode comme « cheminement » reviennent en tête de presque chaque tome — c'est le seuil de l'œuvre entière.</div>
+
+      <div class="pull reveal"><q>Marcheur, il n'est pas de chemin ; en marchant se construit le chemin.</q><cite>Antonio Machado, en exergue de La Méthode</cite></div>
+
+      <p class="reveal">D'où la formule programmatique qui ouvre l'œuvre : « Je n'apporte pas la méthode, je pars à la recherche de la méthode. Je ne pars pas avec méthode, je pars avec le refus, en pleine conscience, de la simplification. » La Méthode ne livre pas un système clos ; elle apprend à se déprendre de la pensée qui sépare et réduit, pour acquérir une pensée qui <strong>relie</strong> — ce que Morin nomme la pensée complexe. « Ce qui apprend à apprendre, c'est cela la méthode. »</p>
+
+      <p class="reveal">Le mot qui résume l'ambition de l'œuvre est tout aussi mal compris : <strong>encyclopédie</strong>. Morin refuse le sens moderne — l'accumulation alphabétique du savoir — et restaure le sens grec : <em>en-cyclo-pédie</em>, « mettre le savoir en cycle ». Il ne s'agit pas de tout savoir, mais d'<strong>articuler les savoirs disjoints</strong>, de relier les sciences de la nature et les sciences de l'homme que notre culture a séparées.</p>
+
+      <p class="reveal">Voici, pour commencer, la carte de l'ensemble. Les six tomes montent du plus englobant — la matière — au plus proprement humain — l'éthique —, en niveaux de complexité croissante.</p>
+
+      <div class="tomes reveal">
+        <div class="th">Les six tomes en un coup d'œil</div>
+        <div class="tome"><div class="tn">I</div><div class="tx"><b>La Nature de la nature<span>1977</span></b><p>L'univers physique comme lieu d'<em>organisation</em> : ordre, désordre et organisation y sont inséparables.</p></div></div>
+        <div class="tome"><div class="tn">II</div><div class="tx"><b>La Vie de la vie<span>1980</span></b><p>Le vivant comme <em>auto-éco-ré-organisation</em> : autonome parce que dépendant ; le sujet dès la cellule.</p></div></div>
+        <div class="tome"><div class="tn">III</div><div class="tx"><b>La Connaissance de la connaissance<span>1986</span></b><p>La connaissance prise pour objet : connaître, c'est traduire et reconstruire — d'où le risque d'erreur.</p></div></div>
+        <div class="tome"><div class="tn">IV</div><div class="tx"><b>Les Idées<span>1991</span></b><p>La vie des idées : la <em>noosphère</em>, ce monde des mythes et des théories qui nous possède autant qu'on le possède.</p></div></div>
+        <div class="tome"><div class="tn">V</div><div class="tx"><b>L'Humanité de l'humanité<span>2001</span></b><p>L'humain comme <em>trinité</em> individu / espèce / société, à la fois un et divers.</p></div></div>
+        <div class="tome"><div class="tn">VI</div><div class="tx"><b>Éthique<span>2004</span></b><p>Comment agir bien : une éthique complexe de la <em>reliance</em>, qui assume l'incertitude.</p></div></div>
+      </div>
+
+      <p class="reveal" style="margin-top:34px">On parcourra maintenant chaque tome (I à VI), puis on verra comment ils forment une seule <em>spirale</em> (VII), avant quelques conseils pour entrer dans l'œuvre (VIII).</p>
+    </div>
+    <div class="pagenav"><span></span><a class="next" data-go="t1"><small>Tome 1 →</small><b>La Nature de la nature</b></a></div>
+  </section>
+
+  <!-- I T1 -->
+  <section class="page" id="t1">
+    <div class="phead"><span class="sec-num">I</span><div class="kicker">Tome 1 · 1977</div><h2 class="ptitle">La Nature de la nature</h2><p class="psub">Avant la vie et l'homme : l'organisation, née du jeu de l'ordre et du désordre.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Pourquoi commencer par la physique ? Parce que c'est là, dans la matière même, que naît ce qui fera la trame de toute l'œuvre : l'<strong>organisation</strong>. Avant d'être un fait de la vie ou des sociétés, l'organisation est un fait cosmique. Le tome 1 pose donc le socle : non pas un fondement inerte, mais l'« infrastructure organisationnelle » commune à l'univers, à la vie et à l'homme.</p>
+      <div class="sidenote reveal"><span class="sn-k">Idée maîtresse</span>L'organisation ne s'oppose pas au désordre : elle en <b>naît</b>. Ordre, désordre et organisation sont inséparables.</div>
+
+      <p class="reveal">Le geste fondateur est de renoncer à l'« Ordre-Roi » — l'idée d'un univers réglé par de pures lois, où le désordre ne serait qu'apparence. Morin montre que l'ordre et le désordre, loin de s'exclure, <strong>coopèrent</strong> : c'est de leur rencontre, à travers les interactions, que surgit l'organisation. Il en fait un quatuor inséparable.</p>
+
+      <div class="def reveal">
+        <div class="dt">Le tétragramme &amp; le système</div>
+        <p><span class="term-lead">Ordre — désordre — interactions — organisation</span> : un « mémento » qui interdit de chercher un principe ultime unique. Et la double loi du <span class="term-lead">système</span> : le tout est <em>plus</em> que la somme des parties (des qualités <strong>émergent</strong> de l'organisation — l'eau a des propriétés qu'ignorent l'hydrogène et l'oxygène), mais aussi <em>moins</em> (l'organisation <strong>inhibe</strong> certaines qualités des parties).</p>
+      </div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Image</div>
+        <p><strong>Les tourbillons de Bénard.</strong> Un liquide chauffé, en plein désordre, se structure soudain — au-delà d'un seuil — en cellules régulières qui « s'auto-entretiennent ». C'est l'<strong>auto-organisation</strong> : « l'ordre par le bruit », l'organisation qui se fait <em>avec et contre</em> le désordre.</p>
+      </div>
+
+      <p class="reveal">Ce tome installe ainsi tous les outils que les suivants vont faire monter en complexité : système, émergence, information, boucle, auto-organisation. Il dit, au fond, une chose simple et vertigineuse : l'univers n'est pas une mécanique, c'est une <em>genèse</em> permanente — et la suite de l'œuvre racontera comment, de cette genèse, sont sortis le vivant, puis l'esprit.</p>
+    </div>
+    <div class="pagenav"><a data-go="ouverture"><small>← Ouverture</small><b>Qu'est-ce que La Méthode&nbsp;?</b></a><a class="next" data-go="t2"><small>Tome 2 →</small><b>La Vie de la vie</b></a></div>
+  </section>
+
+  <!-- II T2 -->
+  <section class="page" id="t2">
+    <div class="phead"><span class="sec-num">II</span><div class="kicker">Tome 2 · 1980</div><h2 class="ptitle">La Vie de la vie</h2><p class="psub">Le vivant : une organisation qui se produit elle-même — autonome parce que dépendante.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le tome 2 monte d'un cran : de la matière au <strong>vivant</strong>. Et il commence par un renversement. La vie n'émane pas d'un mystérieux « principe vital » ; au contraire, « c'est la vie qui émerge de l'organisation vivante ». Le vivant est un type d'organisation très particulier : une organisation qui <strong>s'organise, se produit et se reproduit elle-même</strong>.</p>
+      <div class="sidenote reveal"><span class="sn-k">Idée maîtresse</span>Le vivant ne se conserve qu'en se <b>ré-organisant</b> sans cesse — y compris à partir de la mort de ses propres composants.</div>
+
+      <p class="reveal">Mais il ne peut le faire seul : pour s'auto-organiser, il doit puiser en permanence énergie, matière et information dans son milieu. D'où le concept-clé, volontairement imprononçable pour rappeler qu'on ne peut rien en retrancher : l'<strong>auto-éco-ré-organisation</strong>. Et son cœur, le paradoxe le plus fécond du tome.</p>
+
+      <div class="pull reveal"><q>Toute autonomie s'accroît en accroissant son éco-dépendance.</q><cite>La Vie de la vie</cite></div>
+
+      <p class="reveal">Autrement dit : <strong>le vivant est autonome <em>parce que</em> dépendant</strong>. Son indépendance se paie d'un lien vital à l'écosystème. Cela vaut, on le verra, jusqu'à la liberté humaine — « toute liberté est serve », tissée des dépendances dont elle émerge.</p>
+
+      <div class="def reveal">
+        <div class="dt">L'être-machine vivant &amp; le computo</div>
+        <p>La <span class="term-lead">machine vivante</span> se distingue de la machine artificielle : celle-ci s'arrête à la première panne ; celle-là <em>tolère et corrige l'erreur</em>, et se régénère à partir de la mort de ses constituants. Plus audacieux encore, le <span class="term-lead">computo</span> : tout vivant, jusqu'à la bactérie, distingue son « soi » du monde, agit pour se maintenir — il est donc, en un sens premier, un <strong>sujet</strong>. Non par conscience, mais par auto-référence. « Computo ergo sum. »</p>
+      </div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Image</div>
+        <p><strong>La bactérie.</strong> Elle « se connaît » dans l'acte même où elle se nourrit, se défend, se reproduit — « mais elle ne sait nullement ce qu'elle sait ». Le sujet n'est pas un supplément d'âme réservé à l'homme : il est <em>vital</em>, présent dès la première cellule. « La clé de la bactérie est dans l'homme, dont la clé est dans la bactérie. »</p>
+      </div>
+
+      <p class="reveal">Ce tome fait ainsi entrer le <em>sujet</em> dans la biologie elle-même, rompant la grande séparation entre l'objet et le sujet. Et il s'achève là où le tome suivant prendra le relais : si tout vivant connaît à sa manière, qu'est-ce donc que <em>connaître</em> ?</p>
+    </div>
+    <div class="pagenav"><a data-go="t1"><small>← Tome 1</small><b>La Nature de la nature</b></a><a class="next" data-go="t3"><small>Tome 3 →</small><b>La Connaissance de la connaissance</b></a></div>
+  </section>
+
+  <!-- III T3 -->
+  <section class="page" id="t3">
+    <div class="phead"><span class="sec-num">III</span><div class="kicker">Tome 3 · 1986</div><h2 class="ptitle">La Connaissance de la connaissance</h2><p class="psub">L'œuvre se retourne sur son propre instrument : connaître, c'est traduire.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Arrivée à mi-parcours, <em>La Méthode</em> accomplit un geste réflexif : elle se retourne sur l'<strong>instrument même qui l'a produite</strong> — la connaissance humaine. Car comment se fier à un savoir qui ne sait rien de ses propres conditions ? D'où l'objet du tome : étudier le cerveau-esprit qui connaît, pour repérer les sources de nos erreurs.</p>
+      <div class="sidenote reveal"><span class="sn-k">Idée maîtresse</span>Connaître n'est pas <b>refléter</b> le réel comme un miroir, mais le <b>traduire et le reconstruire</b> — d'où un risque d'erreur inscrit au principe même.</div>
+
+      <p class="reveal">La première illusion à dissiper est celle de la connaissance-reflet. Le cerveau ne reçoit pas le monde « tel quel » : il le reconstruit, par une cascade de traductions, à partir de signaux sans langage. « Notre seule réalité immédiate est notre représentation de la réalité. » Et parce qu'elle est traduction-reconstruction, toute connaissance porte « chance de vérité comme risque d'erreur ».</p>
+
+      <div class="pull reveal"><q>Le propre de l'erreur et de l'illusion est de ne pas se manifester comme erreur ou illusion.</q><cite>La Connaissance de la connaissance</cite></div>
+
+      <p class="reveal">Là est tout l'enjeu : si l'erreur s'annonçait, elle serait évitable ; mais elle se donne pour vérité. De là l'impératif paradoxal qui donne son titre au tome : pour moins se tromper, <strong>la connaissance doit se connaître elle-même</strong>. Étudier ses cécités — celles du cerveau, de l'esprit, de la culture, et la plus profonde de toutes : le <em>paradigme</em>, ce principe invisible qui commande ce que nous pouvons penser, à notre insu.</p>
+
+      <div class="def reveal">
+        <div class="dt">Le paradigme</div>
+        <p>Sous nos idées, une instance cachée sélectionne les concepts admissibles et « contrôle l'organisation des raisonnements ». On ne change pas de pensée en accumulant des faits, mais en changeant de paradigme — comme il fallut, pour passer de Ptolémée à Copernic, changer le principe même qui organisait l'expérience. Le paradigme à renverser ici : la <em>simplification</em> qui disjoint et réduit.</p>
+      </div>
+
+      <p class="reveal">Ce tome est, de l'aveu de Morin, l'une des meilleures portes d'entrée dans l'œuvre : il en contient le foyer épistémologique. Et il appelle son prolongement naturel — car si l'on connaît avec des idées, encore faut-il interroger <em>les idées elles-mêmes</em>.</p>
+    </div>
+    <div class="pagenav"><a data-go="t2"><small>← Tome 2</small><b>La Vie de la vie</b></a><a class="next" data-go="t4"><small>Tome 4 →</small><b>Les Idées</b></a></div>
+  </section>
+
+  <!-- IV T4 -->
+  <section class="page" id="t4">
+    <div class="phead"><span class="sec-num">IV</span><div class="kicker">Tome 4 · 1991</div><h2 class="ptitle">Les Idées</h2><p class="psub">Les idées ont une vie — et il nous arrive d'être possédés par elles.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le tome 4 passe du monde que nos idées tentent de connaître au monde <em>des</em> idées lui-même. Sa thèse, surprenante et féconde : les idées ne sont pas de simples outils dociles — <strong>elles ont une vie</strong>. Il existe un « troisième règne », après la matière et le vivant : celui des choses de l'esprit — langages, mythes, dieux, théories. Morin le nomme la <strong>noosphère</strong>.</p>
+      <div class="sidenote reveal"><span class="sn-k">Idée maîtresse</span>Produites par nous, les idées acquièrent une réalité et une <b>autonomie</b> propres ; elles naissent, luttent, se reproduisent et meurent dans une véritable écologie.</div>
+
+      <p class="reveal">Ce monde a un support matériel — nos cerveaux, nos paroles, nos écrits — qui lui « insuffle une vie propre ». Et il est ambivalent : « la noosphère est en nous, et nous sommes dans la noosphère ». Nous l'habitons comme une atmosphère de signes, qui nous fait communiquer mais peut aussi faire écran entre nous et le réel.</p>
+
+      <p class="reveal">De là le rapport le plus troublant qu'analyse le tome — celui de la <strong>possession</strong>. Nous croyons posséder nos idées ; mais bien souvent, ce sont elles qui nous possèdent.</p>
+
+      <div class="pull reveal"><q>Nous sommes possédés par les idées que nous possédons. Les idées les plus virulentes ont des aptitudes exterminatrices qui dépassent celles des dieux les plus cruels.</q><cite>Les Idées</cite></div>
+
+      <div class="def reveal">
+        <div class="dt">Théorie ou doctrine&nbsp;?</div>
+        <p>Tout système d'idées a un noyau protégé par un « dispositif immunologique ». La <span class="term-lead">théorie</span> reste ouverte : elle accepte la critique, la réfutation, « l'idée de sa propre mort ». La <span class="term-lead">doctrine</span> se ferme : blindée, irréfutable, elle ne retient que ce qui la confirme. Un même système peut être l'un ou l'autre selon son milieu. « Une théorie se rend, mais ne se suicide pas. »</p>
+      </div>
+
+      <p class="reveal">L'enjeu est la <strong>lucidité contre l'aveuglement idéologique</strong>. Le principal obstacle à la connaissance n'est pas dehors, il est dans notre propre outil mental, qui tend spontanément à se fermer et à prendre ses idées pour le réel. Le paradoxe que le tome assume jusqu'au bout : « nous devons mener une lutte cruciale contre les idées — mais nous ne pouvons le faire qu'avec le secours des idées ».</p>
+    </div>
+    <div class="pagenav"><a data-go="t3"><small>← Tome 3</small><b>La Connaissance de la connaissance</b></a><a class="next" data-go="t5"><small>Tome 5 →</small><b>L'Humanité de l'humanité</b></a></div>
+  </section>
+
+  <!-- V T5 -->
+  <section class="page" id="t5">
+    <div class="phead"><span class="sec-num">V</span><div class="kicker">Tome 5 · 2001</div><h2 class="ptitle">L'Humanité de l'humanité</h2><p class="psub">Qui sommes-nous ? Une trinité, et une unité multiple.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Après la nature, la vie, la connaissance et les idées, l'œuvre revient à son point de départ secret : l'<strong>humain</strong>. Le tome 5 en propose une définition complexe, qui refuse de le découper entre les disciplines. Car l'erreur fut de disjoindre : l'espèce à la biologie, l'individu à la psychologie, la société à la sociologie — perdant ainsi la <em>relation</em> même qui les noue.</p>
+      <div class="sidenote reveal"><span class="sn-k">Idée maîtresse</span>L'humain est une <b>trinité</b> indissociable — individu, espèce, société — dont chaque terme produit et est produit par les deux autres.</div>
+
+      <p class="reveal">Première reliance : l'humain est <strong>bio-culturel</strong>, « à la fois à 100 % biologique et à 100 % culturel ». Ce qu'il y a de plus biologique en nous — le sexe, la mort, le manger — est aussi ce qu'il y a de plus chargé de symboles et de rites. Deuxième reliance, plus dérangeante : derrière l'<em>homo sapiens</em> rationnel se tient un <em>homo demens</em>, affectif, imaginaire, mythologique — et les deux ont la même source.</p>
+
+      <div class="pull reveal"><q>Nous sommes contraints de voir qu'homo sapiens est homo demens. L'homme est fou-sage.</q><cite>autour de L'Humanité de l'humanité</cite></div>
+
+      <div class="def reveal">
+        <div class="dt">Unitas multiplex</div>
+        <p>L'unité humaine est une <span class="term-lead">unité multiple</span> : c'est la même nature qui produit l'immense diversité des individus et des cultures. « Il y a unité dans la diversité humaine, et diversité dans l'unité humaine. » Nous sommes « jumeaux par le langage et séparés par les langues ». L'enjeu : que l'unité n'efface pas la diversité, ni la diversité l'unité.</p>
+      </div>
+
+      <p class="reveal">Ce tome est l'<strong>application exemplaire</strong> de toute la méthode : il tient la dialogique (sapiens/demens), la récursion (la trinité qui s'entre-génère), l'hologramme (« chaque homme porte la forme entière de l'humaine condition »). Et il prépare la question ultime : si l'humain est cet être complexe, capable du meilleur comme du pire, comment doit-il agir ?</p>
+    </div>
+    <div class="pagenav"><a data-go="t4"><small>← Tome 4</small><b>Les Idées</b></a><a class="next" data-go="t6"><small>Tome 6 →</small><b>Éthique</b></a></div>
+  </section>
+
+  <!-- VI T6 -->
+  <section class="page" id="t6">
+    <div class="phead"><span class="sec-num">VI · le couronnement</span><div class="kicker">Tome 6 · 2004</div><h2 class="ptitle">Éthique</h2><p class="psub">Comment agir bien dans un monde complexe et incertain.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le dernier tome affronte la question que toute l'œuvre rendait inévitable : après avoir pensé la nature, la vie, la connaissance, les idées et l'humanité — <strong>comment agir bien ?</strong> Non pour édicter un code de règles, mais pour penser une <em>éthique complexe</em>, qui « abrite en elle des incertitudes et des contradictions sans cesse à affronter ».</p>
+      <div class="sidenote reveal"><span class="sn-k">Idée maîtresse</span>L'éthique ne descend pas d'un commandement : elle naît du <b>lien</b>. Se relier à autrui, à la communauté, à l'humanité, à la Terre.</div>
+
+      <p class="reveal">Dans un monde où les anciens fondements (Dieu, la Loi, la tradition) sont en crise, Morin ne cherche pas un nouveau fondement absolu : il <em>ressource</em> l'éthique dans un acte premier — la <strong>reliance</strong>. L'acte moral est « un acte individuel de reliance : avec un autrui, avec une communauté, avec une société et, à la limite, avec l'espèce humaine ».</p>
+
+      <div class="pull reveal"><q>La pensée complexe est la pensée qui relie. L'éthique complexe est l'éthique de reliance. La mission éthique peut se concentrer en un terme : « relier ».</q><cite>Éthique</cite></div>
+
+      <div class="def reveal">
+        <div class="dt">Les trois pôles de l'éthique</div>
+        <p><span class="term-lead">Auto-éthique</span> — l'éthique pour soi : auto-examen, intégrité, lutte contre sa propre barbarie intérieure. <span class="term-lead">Socio-éthique</span> — envers la communauté : solidarité, responsabilité, civisme, démocratie. <span class="term-lead">Anthropo-éthique</span> — envers l'humanité et la planète : la « Terre-Patrie », assumer le destin de l'espèce. Trois branches d'un même tronc, parfois concurrentes — d'où la nécessité de choisir et de parier.</p>
+      </div>
+
+      <p class="reveal">Le tome assume une vérité rude : l'<strong>incertitude éthique</strong>. Comme toute action échappe à son auteur (l'« écologie de l'action »), une bonne intention peut produire du mal. « La morale non complexe obéit au code binaire bien/mal ; l'éthique complexe conçoit que le bien puisse contenir un mal. » Il n'y a pas de bien pur.</p>
+
+      <div class="pull reveal"><q>L'éthique n'a pas les mains sales, mais elle n'a pas les mains pures.</q><cite>Éthique</cite></div>
+
+      <p class="reveal">Deux gestes la portent jusqu'au bout. <strong>Comprendre</strong> autrui — sans confondre comprendre et justifier : « la compréhension favorise le jugement intellectuel, mais elle n'empêche pas la condamnation morale ». Et <strong>résister</strong> — « le sens que je donne à l'éthique, c'est la résistance à la cruauté du monde et à la barbarie humaine », en misant sur les « forces faibles » de la reliance : compréhension, amitié, amour. Le mot qui clôt l'œuvre vaut pour la vie, la connaissance et la morale ensemble : « <em>tout ce qui ne se régénère pas dégénère.</em> »</p>
+    </div>
+    <div class="pagenav"><a data-go="t5"><small>← Tome 5</small><b>L'Humanité de l'humanité</b></a><a class="next" data-go="spirale"><small>Section VII →</small><b>L'unité : la spirale</b></a></div>
+  </section>
+
+  <!-- VII SPIRALE -->
+  <section class="page" id="spirale">
+    <div class="phead"><span class="sec-num">VII</span><div class="kicker">Section VII</div><h2 class="ptitle">L'unité : la spirale</h2><p class="psub">Comment les six tomes ne font qu'une seule œuvre.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">On pourrait croire à six livres juxtaposés. Ce serait manquer l'essentiel : les six tomes forment <strong>un seul mouvement</strong>, et leur ordre n'a rien d'arbitraire. Ils montent du plus englobant au plus humain — la matière, la vie, la connaissance, les idées, l'humanité, l'éthique — en niveaux de complexité croissante, chaque étage présupposant le précédent et le dépassant.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Chaque tome est « hologrammatique » : autonome, et pourtant porteur de l'œuvre entière. On peut commencer par l'un, mais chacun renvoie aux autres.</div>
+
+      <p class="reveal">Mais ce mouvement n'est pas une ligne droite : c'est une <strong>boucle</strong>. À mi-chemin, l'œuvre se retourne sur elle-même — la connaissance (tomes 3 et 4) revient interroger la nature et la vie (tomes 1 et 2) qui l'ont produite. Et elle se referme là où elle avait secrètement commencé : sur l'humain. Pourtant ce retour ne tourne pas en rond.</p>
+
+      <div class="pull reveal"><q>Le cercle aura pu se transformer en une spirale où le retour au commencement est précisément ce qui éloigne du commencement.</q><cite>La Méthode</cite></div>
+
+      <p class="reveal">C'est l'image juste : une <strong>spirale</strong>. On revient au point de départ, mais d'un cran plus haut, transformé par le voyage — comme on revient changé d'un long apprentissage. La fin (l'éthique) n'est pas une conclusion qui clôt, mais une ouverture qui renvoie à tout le reste.</p>
+
+      <div class="def reveal">
+        <div class="dt">Le fil qui traverse tout</div>
+        <p>Un même concept circule du premier au dernier tome, en se complexifiant : l'<span class="term-lead">organisation</span> — physique (T1), puis auto-éco-organisation vivante (T2), puis organisation de la connaissance et des idées (T3-T4), puis organisation anthropo-sociale (T5). Et son versant actif, qui devient à la fin une éthique : la <span class="term-lead">reliance</span>. Relier les savoirs, relier le sujet et l'objet, relier les humains — « la religion de ce qui relie, le rejet de ce qui rejette ».</p>
+      </div>
+
+      <p class="reveal">On comprend alors pourquoi « la Méthode » est au singulier. Elle n'est pas la somme de six enquêtes, mais une seule manière de penser — relier en distinguant, assumer l'incertitude, cheminer sans système clos — appliquée tour à tour à tous les ordres du réel. L'unité n'est pas dans un résultat, mais dans le <em>geste</em> : celui de mettre le savoir en cycle.</p>
+    </div>
+    <div class="pagenav"><a data-go="t6"><small>← Tome 6</small><b>Éthique</b></a><a class="next" data-go="lire"><small>Section VIII →</small><b>Lire La Méthode</b></a></div>
+  </section>
+
+  <!-- VIII LIRE -->
+  <section class="page" id="lire">
+    <div class="phead"><span class="sec-num">VIII</span><div class="kicker">Section VIII</div><h2 class="ptitle">Lire <em>La Méthode</em></h2><p class="psub">Par quelle porte entrer, et comment s'y retrouver.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Reste la question pratique : comment lire un tel monument sans s'y perdre ? La bonne nouvelle, c'est que le caractère <em>hologrammatique</em> de l'œuvre l'autorise — chaque tome se tient seul. On n'est pas obligé de tout lire, ni dans l'ordre. Voici quelques repères pour entrer et comprendre.</p>
+
+      <h3 class="reveal">Par quelle porte commencer</h3>
+      <p class="reveal" style="margin-top:0">Pour saisir le projet, le tome 3, <em>La Connaissance de la connaissance</em>, est souvent le plus accessible ; pour l'anthropologie, le tome 5, <em>L'Humanité de l'humanité</em>. Mais le plus sage est sans doute d'entrer d'abord par les <strong>petits livres-passerelles</strong> — <em>Introduction à la pensée complexe</em>, <em>La Tête bien faite</em>, <em>Les Sept Savoirs nécessaires à l'éducation du futur</em> — qui condensent la démarche et en facilitent l'accès.</p>
+
+      <h3 class="reveal">Ce qu'il faut chercher</h3>
+      <p class="reveal" style="margin-top:0">Ne pas tenter de tout retenir. Suivre plutôt les <strong>concepts récurrents</strong> qui « mettent en cycle » l'ensemble : organisation, auto-éco-organisation, ordre/désordre/organisation, boucle récursive, dialogique, hologramme, paradigme, reliance. Ce sont eux le vrai fil d'Ariane.</p>
+
+      <h3 class="reveal">Dans quel esprit</h3>
+      <p class="reveal" style="margin-top:0">Ne pas chercher une recette ni un système clos : on lit pour <em>cheminer</em>, pour se déprendre de la pensée qui sépare. Accepter l'inachèvement et la spirale — on revient sur ses pas en montant d'un cran. Lire les seuils (l'épigraphe de Machado, la préface autobiographique « Mission impossible ») qui éclairent la genèse et l'architecture.</p>
+
+      <div class="contro reveal">
+        <div class="ct">Une honnêteté critique</div>
+        <p>Pour bien lire, il faut aussi mesurer les limites. On a reproché à <em>La Méthode</em> son ampleur encyclopédique et un style parfois plus <em>incantatoire</em> qu'opératoire : élégante à énoncer (« il faut tout relier »), elle est ardue à mettre en pratique, et son refus des frontières disciplinaires inquiète une science qui doit aussi sa rigueur à la spécialisation. À recevoir donc non comme un système à appliquer, mais pour ce qu'elle se veut : une <em>incitation</em> à penser autrement.</p>
+      </div>
+
+      <p class="reveal">Reste l'essentiel, et il est rare : une œuvre qui, à une époque de savoirs fragmentés et de crises enchevêtrées, réapprend patiemment à <strong>relier</strong> ce que nous avions pris l'habitude de séparer — la nature et la culture, le savoir et la conscience, la partie et le tout, l'individu et l'espèce. C'est pourquoi <em>La Méthode</em> n'est pas seulement un grand livre de philosophie : c'est une école de lucidité, et un appel à penser par soi-même.</p>
+
+      <div class="pull reveal"><q>Quiconque pense selon la méthode de la complexité pense par lui-même et incite autrui à penser par soi-même.</q><cite>Edgar Morin</cite></div>
+
+      <div class="biblio reveal">
+        <h3>Les six tomes</h3>
+        <p class="biblio-sub">Edgar Morin, <em>La Méthode</em> (Éditions du Seuil, 1977–2004).</p>
+        <ul>
+          <li><b>Tome 1</b> · <em>La Nature de la nature</em> (1977).</li>
+          <li><b>Tome 2</b> · <em>La Vie de la vie</em> (1980).</li>
+          <li><b>Tome 3</b> · <em>La Connaissance de la connaissance</em> (1986).</li>
+          <li><b>Tome 4</b> · <em>Les Idées. Leur habitat, leur vie, leurs mœurs, leur organisation</em> (1991).</li>
+          <li><b>Tome 5</b> · <em>L'Humanité de l'humanité. L'identité humaine</em> (2001).</li>
+          <li><b>Tome 6</b> · <em>Éthique</em> (2004).</li>
+          <li><em>Pour entrer</em> : <em>Introduction à la pensée complexe</em> · <em>La Tête bien faite</em> · <em>Les Sept Savoirs nécessaires à l'éducation du futur</em>.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="spirale"><small>← Section VII</small><b>L'unité : la spirale</b></a><a class="next" data-go="ouverture"><small>Retour →</small><b>Au début du guide</b></a></div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];const links=[...document.querySelectorAll('.nav-link')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>revealScan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeMenu(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('menuBtn').onclick=()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tBtn=document.getElementById('themeBtn'),tIcon=document.getElementById('themeIcon');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tBtn.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');tIcon.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.1});
+function revealScan(scope){(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}revealScan();
+const bar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

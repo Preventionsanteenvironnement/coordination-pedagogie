@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le diagnostic de notre époque — Byung-Chul Han</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f2efe9; --paper2:#e9e4da; --card:#faf7f1; --ink:#252029; --ink-soft:#473f4c; --muted:#827a85;
+  --primary:#3b2e44; --primary-2:#574263; --accent:#c0923f; --accent-2:#d2a455;
+  --rouge:#9c4439; --teal:#5a7264; --line:rgba(37,32,41,.14); --line-soft:rgba(37,32,41,.08);
+  --shadow:0 22px 60px -30px rgba(50,35,60,.5); --shadow-sm:0 10px 30px -20px rgba(50,35,60,.45);
+  --serif:'Fraunces',Georgia,serif; --body:'Spectral',Georgia,'Times New Roman',serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --measure:42rem;
+}
+[data-theme="dark"]{
+  --paper:#0e0b11; --paper2:#15101a; --card:#191320; --ink:#ece6ef; --ink-soft:#cabdd0; --muted:#8c8092;
+  --primary:#cbb0dc; --primary-2:#d9c2e6; --accent:#d9ac5b; --accent-2:#e5bd72;
+  --rouge:#dd8473; --teal:#86b39c; --line:rgba(236,230,239,.15); --line-soft:rgba(236,230,239,.08);
+  --shadow:0 26px 70px -34px rgba(0,0,0,.85); --shadow-sm:0 12px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18.5px;line-height:1.74;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0;font-weight:600;letter-spacing:-.012em}
+::selection{background:var(--accent);color:#fff}
+em{font-style:italic}
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:200;background:linear-gradient(90deg,var(--accent),var(--primary))}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;z-index:120;display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand .mk{width:32px;height:32px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;color:#fff;
+  font-family:var(--serif);font-weight:700;background:linear-gradient(140deg,var(--primary),var(--accent));box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.01em}
+.spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-btn{display:none}
+
+.shell{display:flex;min-height:100vh;padding-top:60px}
+.sidebar{width:300px;flex:0 0 auto;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  padding:24px 14px 50px;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.toc-title{font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:8px 14px 14px;font-weight:600}
+.nav-link{display:flex;align-items:baseline;gap:12px;padding:9px 14px;border-radius:9px;color:var(--ink-soft);text-decoration:none;
+  cursor:pointer;transition:.16s;font-family:var(--sans);font-size:13.5px;font-weight:500;line-height:1.3}
+.nav-link .rn{font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--accent);flex:0 0 24px;opacity:.85}
+.nav-link:hover{background:color-mix(in srgb,var(--accent) 11%,transparent);color:var(--ink)}
+.nav-link.active{background:var(--primary);color:#fff}.nav-link.active .rn{color:#fff;opacity:.9}
+[data-theme="dark"] .nav-link.active{color:#0e0b11}[data-theme="dark"] .nav-link.active .rn{color:#0e0b11}
+
+.content{flex:1;min-width:0}
+.wrap{max-width:64rem;margin:0 auto;padding:50px 40px 100px}
+.page{display:none;animation:fade .5s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.phead{margin-bottom:34px;position:relative}
+.sec-num{font-family:var(--serif);font-weight:300;font-size:clamp(3rem,9vw,6rem);line-height:.8;color:var(--accent);opacity:.16;position:absolute;top:-14px;right:0;pointer-events:none}
+.kicker{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.kicker::before{content:"";width:30px;height:1.5px;background:var(--accent)}
+.ptitle{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:600;max-width:20ch;letter-spacing:-.02em}
+.psub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2vw,1.35rem);color:var(--ink-soft);margin-top:14px;max-width:50ch;font-weight:400;line-height:1.5}
+
+.prose{max-width:var(--measure)}
+.prose p{margin:0 0 22px}
+.prose h3{font-size:1.45rem;margin:46px 0 4px;font-weight:600;color:var(--ink)}
+.prose h3 .h-n{color:var(--accent);font-weight:500;margin-right:.5rem}
+.dropcap::first-letter{font-family:var(--serif);font-weight:600;float:left;font-size:4.4rem;line-height:.82;padding:6px 12px 0 0;color:var(--primary)}
+[data-theme="dark"] .dropcap::first-letter{color:var(--primary-2)}
+strong{font-weight:600;color:var(--ink)}
+.term{font-style:italic;color:var(--accent)}
+
+.sidenote{display:block;margin:14px 0;padding:14px 16px;background:var(--card);border:1px solid var(--line-soft);border-left:2px solid var(--teal);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--muted)}
+.sidenote b{color:var(--ink-soft);font-weight:600}
+.sidenote .sn-k{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:600}
+
+.def{background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 8%,transparent),transparent);border:1px solid var(--line);border-top:3px solid var(--primary);border-radius:12px;padding:22px 24px;margin:26px 0}
+.def .dt{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);font-weight:700;margin-bottom:8px}
+[data-theme="dark"] .def .dt{color:var(--primary-2)}
+.def p{margin:0;font-size:17px}.def p+p{margin-top:12px}
+.def .term-lead{font-family:var(--serif);font-style:italic;color:var(--accent);font-weight:500}
+
+.exemple{background:color-mix(in srgb,var(--accent) 7%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);border-radius:12px;padding:20px 24px;margin:24px 0}
+.exemple .et{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.exemple p{margin:0;font-size:16.5px}.exemple p+p{margin-top:10px}
+
+.contro{background:color-mix(in srgb,var(--rouge) 8%,transparent);border:1px solid color-mix(in srgb,var(--rouge) 26%,transparent);border-radius:12px;padding:22px 24px;margin:26px 0}
+.contro .ct{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--rouge);font-weight:700;margin-bottom:8px}
+.contro p{margin:0;font-size:16.5px}.contro p+p{margin-top:12px}
+
+.pull{margin:40px 0;padding:6px 0 6px 28px;border-left:3px solid var(--accent)}
+.pull q{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(1.3rem,2.6vw,1.65rem);line-height:1.4;quotes:none;color:var(--ink);display:block}
+.pull q::before{content:"“";color:var(--accent)}.pull q::after{content:"”";color:var(--accent)}
+.pull cite{display:block;font-family:var(--sans);font-style:normal;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+.abstract{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin:30px 0 10px;box-shadow:var(--shadow-sm)}
+.abstract .at{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.abstract p{margin:0;font-size:17px;color:var(--ink-soft)}
+
+.cover{position:relative;border-radius:20px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;margin-bottom:8px;box-shadow:var(--shadow)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(150deg,#2b2033,#3b2e44 52%,#211926)}
+.cover::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.4;background:radial-gradient(38% 46% at 82% 16%,rgba(192,146,63,.7),transparent 60%),radial-gradient(40% 42% at 12% 92%,rgba(90,114,100,.55),transparent 62%)}
+.cover .kicker{color:#e3bd7e}.cover .kicker::before{background:#e3bd7e}
+.cover h1{font-size:clamp(2.1rem,5.6vw,3.8rem);font-weight:600;max-width:18ch;letter-spacing:-.02em}
+.cover .csub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);color:rgba(255,255,255,.85);margin-top:16px;max-width:44ch}
+
+.biblio{margin-top:50px;padding-top:32px;border-top:1px solid var(--line);max-width:64rem}
+.biblio h3{font-size:1.5rem;font-weight:600;margin-bottom:6px}
+.biblio-sub{font-family:var(--body);font-style:italic;color:var(--muted);margin:0 0 18px;font-size:1rem}
+.biblio ul{list-style:none;margin:0;padding:0}
+.biblio li{font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink-soft);padding:11px 0 11px 24px;position:relative;border-bottom:1px solid var(--line-soft)}
+.biblio li:last-child{border-bottom:0}.biblio li::before{content:"—";position:absolute;left:0;color:var(--accent)}
+.biblio li b{font-weight:600;color:var(--ink)}.biblio li em{font-style:italic}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line);max-width:64rem}
+.pagenav a{flex:1;padding:18px 22px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--card);transition:.2s;cursor:pointer;font-family:var(--sans)}
+.pagenav a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.pagenav b{display:block;font-family:var(--serif);font-size:1.04rem;font-weight:600;margin-top:4px}
+.pagenav .next{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(8,6,10,.5);z-index:110;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(min-width:1340px){
+  .wrap{max-width:66rem}.prose{position:relative}
+  .sidenote{float:right;clear:right;width:14rem;margin:.35rem calc(-14rem - 1.8rem) 1rem 1.8rem;background:transparent;border-left:2px solid var(--teal);border-radius:0;padding:2px 0 2px 14px}
+}
+@media(max-width:900px){
+  .menu-btn{display:grid}
+  .sidebar{position:fixed;left:0;top:60px;transform:translateX(-100%);transition:.35s;z-index:115;width:300px;box-shadow:var(--shadow);padding-top:20px}
+  .sidebar.open{transform:none}
+  .wrap{padding:36px 22px 80px}.pagenav{flex-direction:column}
+}
+@media(max-width:560px){body{font-size:17.5px}.cover{padding:30px 22px;border-radius:16px}.dropcap::first-letter{font-size:3.6rem}}
+</style>
+</head>
+<body>
+<a href="../" data-portal-back aria-label="Retour au portail" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:6px;background:#ffffff;color:#1c2530;text-decoration:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);box-shadow:0 3px 12px rgba(0,0,0,.16)">&lsaquo; Portail</a>
+<div id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Sommaire"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <div class="brand" data-go="ouverture"><div class="mk">H</div><div><b>Le diagnostic de l'époque</b></div></div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Thème"><svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="toc-title">Sommaire</div>
+    <a class="nav-link" data-go="ouverture"><span class="rn">0</span> Le mal du positif</a>
+    <a class="nav-link" data-go="performance"><span class="rn">I</span> La société de la performance</a>
+    <a class="nav-link" data-go="epuisement"><span class="rn">II</span> L'épuisement</a>
+    <a class="nav-link" data-go="autre"><span class="rn">III</span> La disparition de l'Autre</a>
+    <a class="nav-link" data-go="numerique"><span class="rn">IV</span> Le règne du numérique</a>
+    <a class="nav-link" data-go="choses"><span class="rn">V</span> La fin des choses</a>
+    <a class="nav-link" data-go="divertissement"><span class="rn">VI</span> Le divertissement &amp; la mort niée</a>
+    <a class="nav-link" data-go="rituel"><span class="rn">VII</span> Ce que nous avons perdu&nbsp;: le rituel</a>
+    <a class="nav-link" data-go="contemplation"><span class="rn">VIII</span> Le remède&nbsp;: la vie contemplative</a>
+    <a class="nav-link" data-go="synthese"><span class="rn">IX</span> Synthèse &amp; repères</a>
+  </aside>
+
+  <main class="content">
+  <div class="wrap">
+
+  <!-- 0 OUVERTURE -->
+  <section class="page active" id="ouverture">
+    <div class="cover reveal">
+      <div class="kicker">Étude · philosophie contemporaine</div>
+      <h1>Le diagnostic de notre époque</h1>
+      <p class="csub">Une société qui n'opprime plus, mais qui épuise&nbsp;; qui ne manque de rien, mais se noie dans le trop-plein du même. Anatomie d'un malaise.</p>
+    </div>
+
+    <div class="abstract reveal">
+      <div class="at">Résumé</div>
+      <p>On se propose de reconstituer, comme un seul argument continu, la pensée de Byung-Chul Han — l'un des diagnostics les plus lus de notre temps. Sa thèse&nbsp;: nous sommes passés d'une société de la <strong>négativité</strong> (la discipline, l'interdit, l'Autre) à une société de la <strong>positivité totale</strong> (la performance, la transparence, le lisse, le Même). Cette mutation ne libère pas&nbsp;: elle <em>épuise</em>. En liquidant la négativité — le manque, la distance, le secret, la souffrance, la mort, l'altérité —, elle détruit précisément ce qui rendait possibles l'expérience, le désir, la pensée et la communauté. On en suivra les visages, puis on en cherchera, avec lui, le remède.</p>
+    </div>
+
+    <div class="phead reveal" style="margin-top:46px">
+      <span class="sec-num">0</span>
+      <div class="kicker">Ouverture</div>
+      <h2 class="ptitle">Le mal du positif</h2>
+      <p class="psub">Et si notre souffrance ne venait plus de l'interdit, mais de l'excès&nbsp;?</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Le siècle précédent avait appris à penser le mal sur le mode du <em>négatif</em> : l'oppression, l'interdit, la censure, le manque, l'aliénation. On souffrait de ce qui était défendu, retenu, refoulé ; on se libérait en levant des barrières. Or le malaise contemporain, soutient cette pensée, n'a plus cette forme. Nous ne souffrons pas d'un excès de contrainte mais d'un excès de <strong>positivité</strong> : trop de performance, trop de communication, trop de stimulation, trop de possibles. Le mal n'est plus la prison ; c'est la <em>saturation</em>.</p>
+
+      <p class="reveal">Tout l'édifice repose sur un couple d'opérateurs qu'il faut d'emblée poser, car il commande chaque analyse qui suivra.</p>
+
+      <div class="def reveal">
+        <div class="dt">L'opérateur central</div>
+        <p><span class="term-lead">La négativité</span> — tout ce qui résiste, nie, interrompt : l'Autre, l'étranger, le « non », le secret, la distance, la blessure, la souffrance, la mort. Elle fait obstacle, et c'est pourquoi elle fait sens.</p>
+        <p><span class="term-lead">La positivité</span> — l'excès du Même : le lisse, le disponible, le consommable, le transparent, le « j'aime ». Elle ne rencontre aucune résistance — et c'est pourquoi elle sature sans nourrir.</p>
+      </div>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Ce couple traverse toute l'œuvre. Il est posé dans <em>La société de la fatigue</em> et déployé jusqu'à <em>Vita contemplativa</em>.</div>
+
+      <p class="reveal">L'image médicale qu'en donne cette philosophie est éclairante. Aux maladies <em>immunologiques</em> du XX<sup>e</sup> siècle — l'infection venue de l'étranger hostile, qu'on repousse comme un ennemi — succèdent des maladies <em>neuronales</em> : dépression, burn-out, déficit d'attention. Or « il n'y a pas de réaction immunitaire à la graisse » : ces maux ne viennent pas d'un dehors qui agresse, mais d'un dedans qui déborde. Une violence de l'<em>immanence</em>, par saturation, et non par exclusion.</p>
+
+      <div class="pull reveal"><q>La négativité de l'Autre cède la place à la positivité du Même — et c'est dans cet enfer du Même que tout se défait.</q></div>
+
+      <p class="reveal">Le parcours suivra l'ordre d'une démonstration. On exposera d'abord le moteur — la <em>société de la performance</em> et son auto-exploitation (I) — et son premier effet, l'<em>épuisement</em> (II). On verra ensuite ce que la positivité efface : l'<em>Autre</em>, dans la beauté et l'amour (III) ; puis ses milieux — le <em>numérique</em> (IV) et la <em>fin des choses</em> (V) — et son injonction ultime, le <em>divertissement</em>, doublé d'un déni de la mort (VI). Enfin, on passera au versant constructif : ce que nous avons perdu — le <em>rituel</em> (VII) — et le remède proposé — la <em>vie contemplative</em> et la Terre (VIII), avant la synthèse (IX).</p>
+    </div>
+    <div class="pagenav"><span></span><a class="next" data-go="performance"><small>Section I →</small><b>La société de la performance</b></a></div>
+  </section>
+
+  <!-- I PERFORMANCE -->
+  <section class="page" id="performance">
+    <div class="phead"><span class="sec-num">I</span><div class="kicker">Section I</div><h2 class="ptitle">La société de la performance</h2><p class="psub">Du « tu ne dois pas » au « tu peux » — comment la liberté est devenue une contrainte.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">La société que décrivait Foucault était <em>disciplinaire</em> : faite d'hôpitaux, de casernes, de prisons et d'usines, elle gouvernait par l'interdit. Son verbe était négatif — « tu ne dois pas » — et elle produisait des fous et des criminels. Cette société, soutient Han, a cédé la place à une <strong>société de la performance</strong> (ou du rendement), qui ne fonctionne plus par l'interdiction mais par une injonction <em>positive</em> : « tu peux », « <em>yes, we can</em> ». Elle ne produit plus des déviants, mais des <strong>dépressifs et des ratés</strong>.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le passage de la société disciplinaire à la société de la performance est l'argument inaugural de <em>La société de la fatigue</em> (2010).</div>
+
+      <p class="reveal">Le changement paraît être une libération : plus de maître, plus d'instance extérieure qui commande. En réalité, il intensifie l'exploitation en la déplaçant à l'intérieur du sujet. Délivré de toute domination, l'individu devient « <strong>entrepreneur de lui-même</strong> » : il est désormais, dans la même personne, le maître et l'esclave, l'exploiteur et l'exploité. La figure mythique en est Prométhée, enchaîné non plus à un rocher mais à lui-même, et dont le foie sans cesse dévoré et repoussant est l'image de la fatigue.</p>
+
+      <div class="def reveal">
+        <div class="dt">Définition · l'auto-exploitation</div>
+        <p>Une exploitation <span class="term-lead">sans domination</span>, donc sans limites. Elle est plus efficace que l'exploitation par un tiers, « car elle va de pair avec le sentiment de liberté ». On se courbe volontairement jusqu'à se briser. Chacun « porte son camp de travail en lui » — et y est à la fois le prisonnier et le gardien.</p>
+      </div>
+
+      <p class="reveal">Le paradoxe est exact : « la disparition de l'instance de domination ne conduit pas à la liberté ; elle fait au contraire coïncider liberté et contrainte ». Puisque nul ne m'oblige, je m'oblige moi-même — sans répit, puisque la contrainte vient de ma propre volonté de me réaliser. Et puisque nul ne m'exploite, l'échec ne peut être imputé à personne d'autre qu'à moi : « si j'échoue, j'en suis le seul coupable ». L'oppression a disparu ; la culpabilité, elle, s'est intériorisée.</p>
+
+      <div class="pull reveal"><q>L'excès de travail s'exacerbe en exploitation de soi. L'exploiteur est, dans le même temps, l'exploité.</q><cite>La société de la fatigue</cite></div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Symptôme</div>
+        <p><strong>« Oui, tu le peux. »</strong> Han raconte qu'en Corée du Sud, les vieux mots d'ordre scolaires — « patience », « application », vocabulaire de la discipline — ont été remplacés par l'affiche « <em>Oui, tu le peux</em> ». Mutation en apparence bienveillante, en réalité « la plus dure de toutes » : elle transfère sur l'élève la charge totale de sa réussite, et fait de son éventuel échec une faute personnelle. Le motivationnel est la forme douce de la contrainte.</p>
+      </div>
+
+      <p class="reveal">Tel est le moteur. Reste à voir ce qu'il produit lorsqu'il tourne sans frein : non la prospérité d'un sujet libre, mais son effondrement.</p>
+    </div>
+    <div class="pagenav"><a data-go="ouverture"><small>← Ouverture</small><b>Le mal du positif</b></a><a class="next" data-go="epuisement"><small>Section II →</small><b>L'épuisement</b></a></div>
+  </section>
+
+  <!-- II EPUISEMENT -->
+  <section class="page" id="epuisement">
+    <div class="phead"><span class="sec-num">II</span><div class="kicker">Section II</div><h2 class="ptitle">L'épuisement</h2><p class="psub">La dépression et le burn-out ne sont pas des maladies du travail, mais de la performance.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Quand la positivité ne connaît plus de limite, le sujet se brise. Les maladies emblématiques de l'époque — dépression, burn-out, déficit d'attention, trouble de la personnalité limite — ne sont pas, pour Han, des effets d'un excès de négativité (un conflit, un interdit, une oppression), mais d'un excès de <strong>positivité</strong> : une saturation, un « infarctus de l'âme ». Elles ne disent pas un manque, mais un trop-plein.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'analyse de la dépression et du burn-out comme « violence neuronale » figure dans <em>La société de la fatigue</em> ; le versant économique, dans <em>Thanatocapitalisme</em>.</div>
+
+      <p class="reveal">Le moment précis du basculement est nommé avec netteté : la dépression « se déclenche au moment où le sujet de la performance <strong>ne peut plus pouvoir</strong> ». Sommé sans cesse de pouvoir davantage, l'individu finit par s'effondrer sous le poids de sa propre injonction. Le burn-out, dès lors, « n'est pas une maladie du travail, mais une maladie de la performance » : ce n'est pas la tâche qui épuise, c'est le principe — se maximiser sans fin.</p>
+
+      <div class="pull reveal"><q>La plainte du dépressif « rien n'est possible » n'est possible que dans une société qui croit que « rien n'est impossible ».</q><cite>La société de la fatigue</cite></div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Symptômes</div>
+        <p><strong>Le multitâche.</strong> Loin d'être un progrès, l'attention dispersée sur plusieurs fronts est une <em>régression</em> vers la vigilance de l'animal sauvage, qui mange tout en surveillant ses prédateurs. À mesure que se perd la capacité d'attention profonde, « le souci de la vie bonne laisse la place au souci de la <em>survie</em> ».</p>
+        <p><strong>L'euphorie initiale.</strong> « Le premier palier du syndrome de burn-out, c'est justement l'euphorie » : on se précipite dans le travail avec entrain — jusqu'à l'effondrement. La performance et le dopage finissent par se confondre : « une performance sans performance ».</p>
+      </div>
+
+      <p class="reveal">Cet épuisement a une conséquence politique décisive, et glaçante. Le sujet auto-exploité est <em>atomisé</em> : « jamais on ne voit se former un collectif, un "nous" qui pourrait se dresser contre le système ». La fatigue sépare, isole, rend muet. D'où la formule de <em>Thanatocapitalisme</em> : « on ne fait pas une masse révolutionnaire avec des individus épuisés, dépressifs, isolés ». La lutte des classes s'est retournée en lutte de soi contre soi — et le dépressif en est « l'invalide de cette guerre intérieure ».</p>
+
+      <div class="contro reveal">
+        <div class="ct">Une fatigue contre la fatigue</div>
+        <p>Han ne s'arrête pas au constat. Il distingue de la fatigue qui isole une autre fatigue, <em>bonne</em> : non l'épuisement du « je peux » saturé, mais une « fatigue fondamentale », réconciliante, qui désarme le moi, ralentit, rouvre au monde et à l'Autre. Une fatigue « du nous » et non « du je seul ». C'est la première trouée vers le remède que développeront les dernières sections.</p>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="performance"><small>← Section I</small><b>La société de la performance</b></a><a class="next" data-go="autre"><small>Section III →</small><b>La disparition de l'Autre</b></a></div>
+  </section>
+
+  <!-- III AUTRE -->
+  <section class="page" id="autre">
+    <div class="phead"><span class="sec-num">III</span><div class="kicker">Section III</div><h2 class="ptitle">La disparition de l'Autre</h2><p class="psub">Le lisse, le Même, et l'agonie du désir : une société qui ne rencontre plus que soi.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">La positivité a une <em>esthétique</em>, et Han lui donne un nom : le <strong>lisse</strong>. C'est, dit-il, « le fil rouge de notre époque » — ce qui relie l'écran de l'iPhone, les sculptures-miroirs de Jeff Koons et l'épilation intégrale. Le lisse ne heurte pas, ne résiste pas, ne blesse pas. « Il aspire au <em>Like</em>. L'objet lisse élimine l'objection. Toute forme de négativité est dissipée. »</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'esthétique du lisse est analysée dans <em>Sauvons le Beau</em> (2015) ; l'agonie du désir, dans <em>Le Désir. L'enfer de l'identique</em> (2012).</div>
+
+      <p class="reveal">Or le beau, le vrai, suppose la négativité. Il bouleverse, il suspend, il blesse comme une flèche ; il commande « tu dois changer ta vie ». Réduit au lisse, au consommable, à l'agrément, il s'épuise dans le « j'aime » — « l'expression timide digne d'une préférence culinaire ». Une beauté qui ne peut plus inquiéter n'est plus une beauté : c'est un produit. Et « sans blessure, nulle vérité ».</p>
+
+      <p class="reveal">Le même mécanisme frappe l'amour. Dans une société narcissique du <strong>Même</strong>, l'<strong>Autre</strong> — l'altérité radicale, ce qui se dérobe à la prise, au savoir, à la consommation — disparaît. On ne peut plus vraiment désirer l'autre <em>comme</em> autre, car le désir vit précisément de ce qu'on ne peut posséder. C'est l'<em>agonie de l'éros</em> : l'amour positivé en performance et en confort, débarrassé de sa part de blessure, d'excès et de transcendance.</p>
+
+      <div class="def reveal">
+        <div class="dt">L'enfer du Même</div>
+        <p>Privé de tout dehors, le sujet contemporain « ne rencontre plus que lui-même ». La consommation exige de lisser, de niveler, de démystifier — donc <span class="term-lead">détruit l'Autre</span>. Éros et dépression sont alors deux opposés : « l'éros arrache le sujet à lui-même pour l'envoyer vers l'autre ; la dépression le précipite en lui-même ».</p>
+      </div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Symptômes</div>
+        <p><strong>Le selfie</strong> — non l'amour de soi, mais un « narcissisme négatif » : un visage vide reproduisant son propre vide. <strong>Le « like »</strong> — un espace de pure positivité qui « prolonge le Même » et élimine la négativité de l'amour comme de la haine. <strong>La rencontre par application</strong> — l'amour positivé en « offre avec horaires fixes », confort du Même contre risque de l'Autre, « à l'ère du sexe d'occasion ».</p>
+      </div>
+
+      <div class="pull reveal"><q>Sans blessure, nulle vérité, nul discernement. Il n'existe aucune vérité dans l'enfer du même.</q><cite>Sauvons le Beau</cite></div>
+
+      <p class="reveal">Sauver la beauté et sauver l'amour reviennent ainsi à une seule et même tâche : <strong>sauver l'Autre</strong>, contre la clôture narcissique du sujet. C'est le cœur éthique du diagnostic — et son enjeu le plus directement humain : retrouver ce qui, en nous résistant, nous fait sortir de nous-mêmes.</p>
+    </div>
+    <div class="pagenav"><a data-go="epuisement"><small>← Section II</small><b>L'épuisement</b></a><a class="next" data-go="numerique"><small>Section IV →</small><b>Le règne du numérique</b></a></div>
+  </section>
+
+  <!-- IV NUMERIQUE -->
+  <section class="page" id="numerique">
+    <div class="phead"><span class="sec-num">IV</span><div class="kicker">Section IV</div><h2 class="ptitle">Le règne du numérique</h2><p class="psub">La nuée, le shitstorm, la transparence : un medium qui nous reprogramme.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le numérique n'est pas un simple outil que l'on prendrait ou laisserait : c'est un <strong>medium</strong> qui « nous reprogramme », modifiant en deçà de toute décision notre perception, notre pensée et notre vie commune. Il est le milieu où la positivité prend corps — et où la distance, le respect et l'Autre achèvent de se dissoudre.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Les concepts de <b>nuée</b>, de <b>shitstorm</b> et de <b>psychopolitique</b> sont développés dans <em>Dans la nuée. Réflexions sur le numérique</em> (2013).</div>
+
+      <p class="reveal">La formation propre à cet âge n'est pas la foule mais la <strong>nuée</strong> (l'essaim). La foule classique avait une âme, une voix, pouvait agir ensemble ; la nuée numérique est faite d'<em>individus isolés</em> — des reclus « retranchés derrière leur écran ». « Alors que les médias électroniques comme la radio rassemblaient les hommes, les médias numériques les <em>isolent</em>. » C'est un « assemblement sans rassemblement », incapable de produire un « nous » politique.</p>
+
+      <p class="reveal">Sa décharge affective type est le <strong>shitstorm</strong> : une vague d'indignation anonyme et instantanée. Han la distingue de la <em>colère</em> — qui, dans l'épopée, était narrative, tournée vers un avenir, capable d'agir. La vague d'indignation, elle, est pure <em>furie</em> : « un état affectif stérile sur le plan de l'agir », qui s'attaque à des personnes sans jamais ébranler les rapports de domination.</p>
+
+      <div class="def reveal">
+        <div class="dt">Définition · respect et distance</div>
+        <p>« Respect » signifie littéralement <span class="term-lead">regarder en arrière</span> — un pathos de l'écart. Le numérique supprime la distance (spatiale et mentale), bascule l'intime dans le public, sépare le message du messager par l'anonymat — et « détruit le nom », donc le respect, la confiance, la responsabilité. « Une société sans pathos de l'écart débouche sur une société du scandale. »</p>
+      </div>
+
+      <p class="reveal">Reste l'illusion la plus tenace : celle de la <strong>transparence</strong> comme liberté. Han la renverse. La transparence totale n'émancipe pas, elle <em>contrôle</em> : elle est de connivence avec la surveillance. « Ce n'est plus Big Brother, mais Big Data. » Le pouvoir n'a plus besoin de réprimer ; il séduit, plaît, devine et oriente les comportements « de l'intérieur » grâce aux données. C'est le passage du biopouvoir à la <strong>psychopolitique</strong> — la surveillance la plus efficace parce qu'elle est volontaire et qu'elle se prend pour de la liberté.</p>
+
+      <div class="pull reveal"><q>À partir d'un certain seuil, l'information n'informe plus, elle déforme ; et la communication ne communique plus, elle accumule.</q><cite>Dans la nuée</cite></div>
+    </div>
+    <div class="pagenav"><a data-go="autre"><small>← Section III</small><b>La disparition de l'Autre</b></a><a class="next" data-go="choses"><small>Section V →</small><b>La fin des choses</b></a></div>
+  </section>
+
+  <!-- V CHOSES -->
+  <section class="page" id="choses">
+    <div class="phead"><span class="sec-num">V</span><div class="kicker">Section V</div><h2 class="ptitle">La fin des choses</h2><p class="psub">Quand les informations remplacent les choses, le monde se déréalise.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">À l'ordre numérique correspond une révolution plus discrète, mais plus profonde encore : la disparition des <strong>choses</strong>. L'ordre terrestre était fait de choses stables, durables, qui prenaient forme et duraient — « les pôles de repos du monde », ce qui stabilise la vie humaine. L'ordre nouveau les remplace par des <strong>non-choses</strong> : des informations, des données, des flux sans poids ni durée.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le couple <b>chose / non-chose</b> et la critique de l'« infosphère » sont l'objet de <em>La Fin des choses</em> (2021).</div>
+
+      <p class="reveal">La différence est ontologique. Les choses se <em>racontent</em> et portent un monde ; les informations se <em>comptent</em>, « additives et non narratives », fugaces, sans solidité d'être. À mesure qu'elles refoulent les choses, le réel lui-même se dilue : « nous n'habitons plus la terre et le ciel, nous habitons Google Earth et le Cloud. Le monde devient de plus en plus insaisissable, nuageux et spectral. »</p>
+
+      <div class="exemple reveal">
+        <div class="et">◆ L'objet central</div>
+        <p><strong>Le smartphone.</strong> Il est l'« infomate » de l'époque, un miroir narcissique, un « pornophone », et même « un camp de travail mobile dans lequel nous nous enfermons volontairement ». En tapotant, « je soumets le monde à mes besoins » : disponibilité totale, référence à soi amplifiée, Autre évacué. « Le <em>like</em> est l'amen numérique. »</p>
+      </div>
+
+      <p class="reveal">Han fait travailler ici une intuition de Heidegger : « seule la main reçoit le don de la pensée ». La main saisit, façonne, s'attarde sur la chose ; le <em>doigt</em>, lui, ne fait que choisir et compter sur l'écran. « L'homme sans mains du futur choisit, au lieu d'<em>agir</em>. » Avec les choses se perdent la durée, le silence, le <em>séjour</em> contemplatif — ce « regard long et lent » sans lequel il n'y a ni attention profonde ni expérience.</p>
+
+      <div class="pull reveal"><q>L'absence de résistance du numérique mène à une pauvreté du monde et de l'expérience.</q><cite>La Fin des choses</cite></div>
+
+      <p class="reveal">On mesure ici la cohérence du diagnostic : la même <em>absence de résistance</em> — de négativité — qui lissait la beauté et abolissait la distance déréalise désormais le monde matériel. Partout, c'est le contact à ce qui résiste qui s'efface. Il manquait encore, à ce tableau, son injonction la plus joyeuse en apparence — et la plus révélatrice.</p>
+    </div>
+    <div class="pagenav"><a data-go="numerique"><small>← Section IV</small><b>Le règne du numérique</b></a><a class="next" data-go="divertissement"><small>Section VI →</small><b>Le divertissement &amp; la mort niée</b></a></div>
+  </section>
+
+  <!-- VI DIVERTISSEMENT -->
+  <section class="page" id="divertissement">
+    <div class="phead"><span class="sec-num">VI</span><div class="kicker">Section VI</div><h2 class="ptitle">Le divertissement &amp; la mort niée</h2><p class="psub">« Amuse-toi&nbsp;! » — l'évacuation de la souffrance, et le capital comme déni de la mort.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">La positivité a son impératif, et il est riant : « <strong>amuse-toi bien&nbsp;!</strong> ». L'histoire de l'Occident, soutient Han, fut d'abord une histoire de la <em>Passion</em> — au sens de <em>passio</em>, le pâtir, la souffrance, mais aussi la quête de sens et de transcendance, dont la croix est l'archétype. À cette culture de la négativité succède une culture du <strong>divertissement</strong> qui s'est totalisée au point de devenir une « formule de l'Être » : n'est désormais réel que ce qui divertit.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La généalogie du divertissement est l'objet d'<em>Amusez-vous bien&nbsp;!</em> (2017) ; le déni de la mort, de <em>Thanatocapitalisme</em>.</div>
+
+      <p class="reveal">Le divertissement n'est plus l'épisode du temps libre : il est le paradigme. La frontière du travail et du loisir s'efface — le travail lui-même doit devenir <em>fun</em>, le jeu se « gamifie » —, et avec elle disparaît la négativité de la souffrance. À l'ancien « prie et travaille » succède le « profite ». Or une vie d'où l'on a expulsé toute douleur, tout manque, toute gravité n'est pas une vie pleine : c'est une vie <em>lissée</em>, plate, sans profondeur ni transcendance.</p>
+
+      <p class="reveal">Ce déni atteint son objet ultime avec la mort. Le capitalisme, dans sa lecture la plus radicale, est une <strong>machine à nier la mort</strong>. On accumule sans fin pour conjurer la perte absolue : « plus de capital signifie moins de mort ». La croissance illimitée n'est dès lors qu'une « prolifération cancéreuse dépourvue de but », et la santé érigée en déesse — l'« hystérie » du <em>fitness</em>, de l'optimisation, de la survie à tout prix.</p>
+
+      <div class="def reveal">
+        <div class="dt">Le revers · la survie contre la vie</div>
+        <p>En refoulant la mort, le capitalisme fige la vie en <span class="term-lead">survie</span>. Il engendre une « vie fantôme », une mort-dans-la-vie : « les zombies de la performance, du fitness ou du botox sont des phénomènes de la vie sans mort ». Vouloir vivre sans la négativité de la mort, c'est cesser de vraiment vivre.</p>
+      </div>
+
+      <div class="pull reveal"><q>Le capitalisme repose sur la négation de la mort. On accumule le capital pour faire face à la mort comme perte absolue.</q><cite>Thanatocapitalisme</cite></div>
+
+      <p class="reveal">Le diagnostic est ici à son comble : la même logique qui lisse la beauté, isole les sujets et déréalise le monde finit par nier la finitude elle-même. Il est temps de retourner le regard, et de demander : que faudrait-il <em>retrouver</em> ?</p>
+    </div>
+    <div class="pagenav"><a data-go="choses"><small>← Section V</small><b>La fin des choses</b></a><a class="next" data-go="rituel"><small>Section VII →</small><b>Ce que nous avons perdu&nbsp;: le rituel</b></a></div>
+  </section>
+
+  <!-- VII RITUEL -->
+  <section class="page" id="rituel">
+    <div class="phead"><span class="sec-num">VII · le tournant</span><div class="kicker">Section VII</div><h2 class="ptitle">Ce que nous avons perdu&nbsp;: le rituel</h2><p class="psub">Sans rituels, plus de communauté, plus de durée, plus de monde habitable.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Ici le diagnostic se renverse en remède. Car ce que la société de la performance a détruit porte un nom précis : le <strong>rituel</strong>. Loin d'être une survivance archaïque, le rituel est une « technique symbolique de mise en demeure » — au sens où il fait du monde une <em>demeure</em>. « Les rituels sont, dans le temps, ce qu'un logement est dans l'espace » : ils rendent le temps habitable.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'analyse du rituel comme architecture du temps est développée dans <em>La disparition des rituels</em> (2019).</div>
+
+      <p class="reveal">Le rituel produit quelque chose que notre époque a perdu : une <strong>communauté</strong>. Et une communauté d'un type particulier — silencieuse. Han oppose deux formules. Le rituel crée une « communauté <em>sans</em> communication » : une résonance, un rythme partagé, un sentiment commun qui n'a pas besoin de mots. Le numérique, lui, impose l'inverse — une « communication <em>sans</em> communauté » : un flux de messages qui isole. Plus on communique, moins on est ensemble.</p>
+
+      <div class="pull reveal"><q>Les rituels produisent une communauté sans communication, en un temps où règne une communication sans communauté.</q><cite>La disparition des rituels</cite></div>
+
+      <p class="reveal">Le rituel repose sur la <strong>répétition</strong> — qu'il ne faut pas confondre avec la routine. La répétition crée de l'intensité et de la durée ; elle « décèle une intensité dans l'insignifiant », elle est le « pain quotidien » qui stabilise. Le néolibéralisme la détruit au profit d'une chasse compulsive au nouveau, qui épuise sans nourrir. Il désapprend aussi la <em>clôture</em> — l'art de conclure : les seuils, le deuil, les formes qui donnent un terme et un sens, dissous dans le culte de l'ouverture illimitée.</p>
+
+      <div class="exemple reveal">
+        <div class="et">◆ La fête contre l'événement</div>
+        <p>La <strong>fête</strong> (le « temps haut ») est cyclique : elle rassemble, crée des liens et des obligations, fait un temps « où l'on peut s'attarder ». L'<strong>événement</strong> (l'<em>event</em>) géré par le « management » est fortuit, consommable, sans lendemain : « les festivals sont des manifestations de masse, et les masses ne forment pas de communauté ». Le modèle perdu est celui du repos sacré — la suspension de la production, le silence partagé, l'écoute commune.</p>
+      </div>
+
+      <p class="reveal">Restaurer le rituel, ce n'est pas revenir en arrière : c'est rouvrir un temps habitable, et délivrer le sujet du fardeau narcissique de devoir, sans cesse, se produire lui-même. Mais le remède le plus radical est ailleurs — dans une réhabilitation de l'inactivité même.</p>
+    </div>
+    <div class="pagenav"><a data-go="divertissement"><small>← Section VI</small><b>Le divertissement &amp; la mort niée</b></a><a class="next" data-go="contemplation"><small>Section VIII →</small><b>Le remède&nbsp;: la vie contemplative</b></a></div>
+  </section>
+
+  <!-- VIII CONTEMPLATION -->
+  <section class="page" id="contemplation">
+    <div class="phead"><span class="sec-num">VIII</span><div class="kicker">Section VIII · le remède</div><h2 class="ptitle">Le remède&nbsp;: la vie contemplative</h2><p class="psub">L'éloge de l'inactivité, la lenteur du jardin, et le soin dû à la Terre.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">À l'hyperactivité épuisante, Han oppose une réhabilitation de ce que toute notre culture méprise : l'<strong>inactivité</strong>. Non pas la paresse ni le simple repos qui récupère pour mieux produire, mais une « forme éclatante de l'existence humaine », dotée de sa logique, de sa temporalité, de sa magie propres. C'est même, dit-il, l'<em>humanum</em> : « c'est la part d'inactivité dans le faire qui rend celui-ci humain ».</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'éloge de l'inactivité est l'argument de <em>Vita contemplativa</em> (2022) ; son incarnation, d'<em>Un voyage dans les jardins. Éloge de la Terre</em> (2018).</div>
+
+      <p class="reveal">Han retourne ici une thèse célèbre. Contre l'absolutisation de l'agir et de l'action, il affirme : « la <em>vita activa</em> dégénère en hyperactivité et s'achève sur le burn-out — non seulement du psychisme, mais de toute la planète — si elle n'intègre pas en elle la <em>vita contemplativa</em> ». L'accomplissement n'est ni dans l'action pure ni dans la contemplation pure, mais dans leur tissage — la <em>vita composita</em>, où « la vie active doit nous conduire à la contemplation, et la contemplation nous ramener à l'activité ».</p>
+
+      <div class="def reveal">
+        <div class="dt">La contemplation</div>
+        <p>Une <span class="term-lead">observation étonnée</span> : réceptivité, attente, écoute, attention profonde. « Penser, c'est prêter l'oreille » ; et, dans le mot allemand, « penser, c'est remercier » (<em>Denken ist Danken</em>). Là où le sujet de la performance « se produit », l'âme contemplative <em>reçoit</em> — et c'est cette réceptivité qui rend possibles l'expérience et la pensée véritables.</p>
+      </div>
+
+      <p class="reveal">Le lieu où cette philosophie s'incarne est le <strong>jardin</strong>. Han y a passé trois années, et il en tire une expérience du temps inverse de celle de l'écran. « Le temps du jardin est le <em>temps de l'Autre</em> » : chaque plante a son rythme propre, dont nul ne peut disposer ; il faut l'attente, la patience, la croissance lente, le retour des saisons. La nature résiste, garde son mystère — elle est l'Autre vivant que la positivité avait effacé.</p>
+
+      <div class="pull reveal"><q>La beauté nous oblige, mieux, nous commande de la ménager.</q><cite>Un voyage dans les jardins</cite></div>
+
+      <div class="exemple reveal">
+        <div class="et">◆ Le contre-modèle</div>
+        <p><strong>Ménager la Terre.</strong> « Humain » vient de <em>humus</em>, la terre ; « la terre est notre espace de résonance ». La regarder comme une simple ressource à exploiter, « c'est déjà la détruire ». Le remède est un <em>soin</em> — ce que l'allemand dit d'un seul geste, car <em>ménager</em> (schonen) et <em>beau</em> (schön) ont même racine : le beau oblige au soin. Le silence, la lenteur, l'attention, l'espoir « qui est le mode temporel du jardinier » dessinent une autre façon d'habiter.</p>
+      </div>
+
+      <p class="reveal">De là une « politique de l'inactivité » : interrompre la compulsion d'activité — « moyen de domination des plus efficaces » —, ménager des espaces de silence et de solitude où peut naître ce qui mérite d'être dit ou fait. Le livre se referme sur le vers de Hölderlin qui condense tout le versant-remède : « <em>Mais aux lieux du péril croît aussi ce qui sauve.</em> »</p>
+    </div>
+    <div class="pagenav"><a data-go="rituel"><small>← Section VII</small><b>Ce que nous avons perdu</b></a><a class="next" data-go="synthese"><small>Section IX →</small><b>Synthèse &amp; repères</b></a></div>
+  </section>
+
+  <!-- IX SYNTHESE -->
+  <section class="page" id="synthese">
+    <div class="phead"><span class="sec-num">IX</span><div class="kicker">Section IX</div><h2 class="ptitle">Synthèse &amp; repères</h2><p class="psub">Un seul argument, dix visages — et ce qu'il faut en retenir.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Tout ce parcours obéit à une seule thèse, qu'on peut maintenant énoncer d'un trait. Nous sommes passés d'une société de la <strong>négativité</strong> — la discipline, l'interdit, l'Autre — à une société de la <strong>positivité totale</strong> — la performance, la transparence, le lisse, le Même. Et cette mutation, qui se présente comme une libération, est en vérité un appauvrissement : en liquidant la négativité, elle détruit ce qui rendait possibles l'expérience, le désir, la pensée et la communauté.</p>
+
+      <p class="reveal">Les dix chapitres en sont les visages : la <em>performance</em> qui s'auto-exploite, l'<em>épuisement</em> qui en résulte, la disparition de l'<em>Autre</em> dans la beauté et l'amour, le <em>numérique</em> qui abolit la distance, la <em>fin des choses</em> qui déréalise le monde, le <em>divertissement</em> qui nie la souffrance et la <em>mort</em>. Puis le tournant : le <em>rituel</em> perdu, et le remède d'une <em>vie contemplative</em> réconciliée avec la lenteur, le silence et la Terre. Trois gestes en résument l'esprit :</p>
+
+      <h3 class="reveal">Réhabiliter la bonne négativité</h3>
+      <p class="reveal" style="margin-top:0">Faire droit à ce qui résiste — l'Autre, le secret, la distance, la blessure, la finitude — car c'est cela qui fait sens, contre le lissage de toute chose.</p>
+      <h3 class="reveal">Ralentir, demeurer, contempler</h3>
+      <p class="reveal" style="margin-top:0">Opposer à l'hyperactivité l'inactivité comme intensité ; au flux, le séjour ; à la production de soi, l'attention reçue.</p>
+      <h3 class="reveal">Restaurer le commun</h3>
+      <p class="reveal" style="margin-top:0">Retrouver le rituel et la fête — la « communauté sans communication » — contre l'isolement de la « communication sans communauté ».</p>
+
+      <div class="pull reveal"><q>Aux lieux du péril croît aussi ce qui sauve.</q></div>
+
+      <div class="contro reveal">
+        <div class="ct">Une honnêteté critique</div>
+        <p>Il faut le dire pour bien lire Han : son arme — la valorisation systématique du <em>négatif</em> contre le <em>positif</em> — est aussi son point de faiblesse. On a pu lui reprocher un diagnostic trop tranché, nostalgique, qui idéalise l'« avant » (le rituel, la chose, l'aura) et noircit le présent sans assez créditer ce que le numérique ou l'émancipation des formes peuvent ouvrir. La préface au <em>Désir</em> elle-même suggère que l'amour n'est pas que blessure et anéantissement de soi, mais aussi construction patiente d'un monde partagé. À recevoir donc non comme un verdict clos, mais comme un <em>diagnostic</em> — puissant, fécond, et discutable.</p>
+      </div>
+
+      <p class="reveal">Reste l'essentiel, et il est rare : une pensée qui met des mots sur ce que beaucoup éprouvent sans savoir le nommer — la fatigue d'être soi, le vertige des écrans, la difficulté de rencontrer l'autre, le besoin de lenteur. À ce titre, elle parle à chacun ; et peut-être avec une acuité particulière à ceux dont le métier est d'accompagner, de transmettre, et de préserver des espaces d'attention.</p>
+
+      <div class="biblio reveal">
+        <h3>Repères bibliographiques</h3>
+        <p class="biblio-sub">Les dix ouvrages sur lesquels s'appuie cette étude.</p>
+        <ul>
+          <li><b>Byung-Chul Han</b>, <em>La société de la fatigue</em> (2010).</li>
+          <li><b>Byung-Chul Han</b>, <em>Le Désir, ou l'enfer de l'identique</em> (2012) · <em>Dans la nuée. Réflexions sur le numérique</em> (2013).</li>
+          <li><b>Byung-Chul Han</b>, <em>Sauvons le Beau. L'esthétique à l'ère numérique</em> (2015).</li>
+          <li><b>Byung-Chul Han</b>, <em>Amusez-vous bien&nbsp;! Essai sur le divertissement</em> (2017) · <em>Un voyage dans les jardins. Éloge de la Terre</em> (2018).</li>
+          <li><b>Byung-Chul Han</b>, <em>La disparition des rituels</em> (2019) · <em>La Fin des choses</em> (2021).</li>
+          <li><b>Byung-Chul Han</b>, <em>Vita contemplativa, ou de l'inactivité</em> (2022) · <em>Thanatocapitalisme</em> (recueil).</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="contemplation"><small>← Section VIII</small><b>Le remède&nbsp;: la vie contemplative</b></a><a class="next" data-go="ouverture"><small>Retour →</small><b>Au début de l'étude</b></a></div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];const links=[...document.querySelectorAll('.nav-link')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>revealScan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeMenu(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('menuBtn').onclick=()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tBtn=document.getElementById('themeBtn'),tIcon=document.getElementById('themeIcon');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tBtn.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');tIcon.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.1});
+function revealScan(scope){(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}revealScan();
+const bar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>

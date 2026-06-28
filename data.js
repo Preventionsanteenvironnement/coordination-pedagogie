@@ -125,7 +125,8 @@ const THEMATIQUES = [
     enfants: [
       {
         titre: "Communication",
-        desc: "L'art de la parole et la pratique réflexive : soigner sa parole, sa posture et son rapport à l'expérience.",
+        desc: "Soigner sa parole et sa présence.",
+        icon: "users",
         enfants: [
           {
             titre: "L'art de la parole",
@@ -134,12 +135,89 @@ const THEMATIQUES = [
             type: "Ouvrage",
             icon: "book",
           },
+        ],
+      },
+      {
+        titre: "Apprendre & pratique réflexive",
+        desc: "Comprendre l'acte d'apprendre, et prendre du recul sur sa pratique.",
+        icon: "brain",
+        enfants: [
+          {
+            titre: "Penser l'acte d'apprendre",
+            desc: "Ce que veut dire « apprendre » : les ressorts de l'apprentissage, du côté de l'élève.",
+            lien: "guides/penser-apprendre.html",
+            type: "Étude",
+            icon: "brain",
+          },
           {
             titre: "La réflexivité",
             desc: "Prendre du recul sur sa pratique : analyser ses gestes professionnels et apprendre de l'expérience.",
             lien: "guides/reflexivite-etude.html",
             type: "Ouvrage",
             icon: "bulb",
+          },
+        ],
+      },
+      {
+        titre: "Pensée complexe — Edgar Morin",
+        desc: "Relier les savoirs et penser la complexité — l'œuvre d'Edgar Morin pour l'éducation.",
+        icon: "compass",
+        enfants: [
+          {
+            titre: "Enseigner à vivre (Edgar Morin)",
+            desc: "L'éducation selon Edgar Morin : préparer les élèves à affronter la complexité de la vie.",
+            lien: "guides/morin-enseigner-vivre.html",
+            type: "Étude",
+            icon: "book",
+          },
+          {
+            titre: "La pensée complexe (Edgar Morin)",
+            desc: "Relier au lieu de séparer : les principes de la pensée complexe.",
+            lien: "guides/morin-pensee-complexe.html",
+            type: "Étude",
+            icon: "brain",
+          },
+          {
+            titre: "La Méthode — guide de lecture (Edgar Morin)",
+            desc: "Un fil pour entrer dans « La Méthode », l'œuvre maîtresse de Morin sur la connaissance.",
+            lien: "guides/morin-methode.html",
+            type: "Étude",
+            icon: "book",
+          },
+        ],
+      },
+      {
+        titre: "École & société",
+        desc: "Regards critiques sur l'école et notre époque.",
+        icon: "scale",
+        enfants: [
+          {
+            titre: "L'école et la reproduction (Bourdieu)",
+            desc: "Comment l'école reproduit les inégalités sociales : l'analyse de Pierre Bourdieu.",
+            lien: "guides/bourdieu-ecole.html",
+            type: "Étude",
+            icon: "scale",
+          },
+          {
+            titre: "Le diagnostic de notre époque (Byung-Chul Han)",
+            desc: "Une lecture critique de notre temps — performance, épuisement, attention — avec Byung-Chul Han.",
+            lien: "guides/byung-chul-han.html",
+            type: "Étude",
+            icon: "brain",
+          },
+        ],
+      },
+      {
+        titre: "Coéducation",
+        desc: "Construire l'alliance avec les familles.",
+        icon: "heart",
+        enfants: [
+          {
+            titre: "La coéducation",
+            desc: "Construire l'alliance école-familles : principes, postures et leviers concrets.",
+            lien: "guides/coeducation.html",
+            type: "Étude",
+            icon: "heart",
           },
         ],
       },

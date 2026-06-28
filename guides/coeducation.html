@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La coéducation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f4efe6; --paper2:#ece4d6; --card:#fbf8f1; --ink:#2a2127; --ink-soft:#4a3f48; --muted:#867a82;
+  --primary:#7c3b46; --primary-2:#9c4f5b; --accent:#c0913a; --accent-2:#cfa14a;
+  --rouge:#9a3b34; --teal:#3a6b66; --line:rgba(42,33,39,.14); --line-soft:rgba(42,33,39,.08);
+  --shadow:0 22px 60px -30px rgba(80,40,55,.5); --shadow-sm:0 10px 30px -20px rgba(80,40,55,.45);
+  --serif:'Fraunces',Georgia,serif; --body:'Spectral',Georgia,'Times New Roman',serif; --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --measure:42rem;
+}
+[data-theme="dark"]{
+  --paper:#100c0f; --paper2:#161015; --card:#1a141a; --ink:#ece4ea; --ink-soft:#c8bcc4; --muted:#8d8088;
+  --primary:#e09aa6; --primary-2:#eeb1bc; --accent:#dcae5c; --accent-2:#e7bd6e;
+  --rouge:#d9837b; --teal:#6fbcb4; --line:rgba(236,228,234,.15); --line-soft:rgba(236,228,234,.08);
+  --shadow:0 26px 70px -34px rgba(0,0,0,.85); --shadow-sm:0 12px 34px -22px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18.5px;line-height:1.74;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .4s,color .4s}
+h1,h2,h3,h4{font-family:var(--serif);line-height:1.15;margin:0;font-weight:600;letter-spacing:-.012em}
+::selection{background:var(--accent);color:#fff}
+em{font-style:italic}
+#progress{position:fixed;top:0;left:0;height:2.5px;width:0;z-index:200;background:linear-gradient(90deg,var(--accent),var(--rouge))}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:60px;z-index:120;display:flex;align-items:center;gap:14px;
+  padding:0 20px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;cursor:pointer}
+.brand .mk{width:32px;height:32px;border-radius:7px;flex:0 0 auto;display:grid;place-items:center;color:#fff;
+  font-family:var(--serif);font-weight:700;background:linear-gradient(140deg,var(--primary),var(--accent));box-shadow:var(--shadow-sm)}
+.brand b{font-family:var(--serif);font-weight:600;font-size:17px;letter-spacing:.01em}
+.spacer{flex:1}
+.icon-btn{width:38px;height:38px;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.menu-btn{display:none}
+
+.shell{display:flex;min-height:100vh;padding-top:60px}
+.sidebar{width:288px;flex:0 0 auto;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;
+  padding:24px 14px 50px;border-right:1px solid var(--line);background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.toc-title{font-family:var(--sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:8px 14px 14px;font-weight:600}
+.nav-link{display:flex;align-items:baseline;gap:12px;padding:9px 14px;border-radius:9px;color:var(--ink-soft);text-decoration:none;
+  cursor:pointer;transition:.16s;font-family:var(--sans);font-size:14px;font-weight:500;line-height:1.3}
+.nav-link .rn{font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--accent);flex:0 0 26px;opacity:.85}
+.nav-link:hover{background:color-mix(in srgb,var(--accent) 11%,transparent);color:var(--ink)}
+.nav-link.active{background:var(--primary);color:#fff}.nav-link.active .rn{color:#fff;opacity:.9}
+[data-theme="dark"] .nav-link.active{color:#100c0f}[data-theme="dark"] .nav-link.active .rn{color:#100c0f}
+
+.content{flex:1;min-width:0}
+.wrap{max-width:60rem;margin:0 auto;padding:50px 40px 100px}
+.page{display:none;animation:fade .5s ease both}.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.reveal{opacity:0;transform:translateY(18px);transition:.7s cubic-bezier(.2,.7,.2,1)}.reveal.in{opacity:1;transform:none}
+
+.phead{margin-bottom:34px;position:relative}
+.sec-num{font-family:var(--serif);font-weight:300;font-size:clamp(3rem,9vw,6rem);line-height:.8;color:var(--accent);opacity:.16;position:absolute;top:-14px;right:0;pointer-events:none}
+.kicker{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.kicker::before{content:"";width:30px;height:1.5px;background:var(--accent)}
+.ptitle{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:600;max-width:20ch;letter-spacing:-.02em}
+.psub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2vw,1.35rem);color:var(--ink-soft);margin-top:14px;max-width:48ch;font-weight:400;line-height:1.5}
+
+.prose{max-width:var(--measure)}
+.prose p{margin:0 0 22px}
+.prose h3{font-size:1.45rem;margin:46px 0 4px;font-weight:600;color:var(--ink)}
+.prose h3 .h-n{color:var(--accent);font-weight:500;margin-right:.5rem}
+.dropcap::first-letter{font-family:var(--serif);font-weight:600;float:left;font-size:4.4rem;line-height:.82;padding:6px 12px 0 0;color:var(--primary)}
+[data-theme="dark"] .dropcap::first-letter{color:var(--primary-2)}
+strong{font-weight:600;color:var(--ink)}
+.term{font-style:italic;color:var(--primary)}[data-theme="dark"] .term{color:var(--primary-2)}
+
+.sidenote{display:block;margin:14px 0;padding:14px 16px;background:var(--card);border:1px solid var(--line-soft);border-left:2px solid var(--teal);border-radius:0 8px 8px 0;font-family:var(--sans);font-size:13px;line-height:1.55;color:var(--muted)}
+.sidenote b{color:var(--ink-soft);font-weight:600}
+.sidenote .sn-k{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:4px;font-weight:600}
+
+.def{background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 6%,transparent),transparent);border:1px solid var(--line);border-top:3px solid var(--primary);border-radius:12px;padding:22px 24px;margin:26px 0}
+.def .dt{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--primary);font-weight:700;margin-bottom:8px}
+[data-theme="dark"] .def .dt{color:var(--primary-2)}
+.def p{margin:0;font-size:17px}.def p+p{margin-top:12px}
+
+.contro{background:color-mix(in srgb,var(--rouge) 7%,transparent);border:1px solid color-mix(in srgb,var(--rouge) 26%,transparent);border-radius:12px;padding:22px 24px;margin:26px 0}
+.contro .ct{font-family:var(--sans);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--rouge);font-weight:700;margin-bottom:8px}
+.contro p{margin:0;font-size:16.5px}.contro p+p{margin-top:12px}
+
+.pull{margin:40px 0;padding:6px 0 6px 28px;border-left:3px solid var(--accent)}
+.pull q{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(1.35rem,2.6vw,1.7rem);line-height:1.4;quotes:none;color:var(--ink)}
+.pull q::before{content:"“";color:var(--accent)}.pull q::after{content:"”";color:var(--accent)}
+
+.abstract{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 30px;margin:30px 0 10px;box-shadow:var(--shadow-sm)}
+.abstract .at{font-family:var(--sans);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:10px}
+.abstract p{margin:0;font-size:17px;color:var(--ink-soft)}
+
+.cover{position:relative;border-radius:20px;overflow:hidden;padding:clamp(34px,5vw,64px);color:#fff;margin-bottom:8px;box-shadow:var(--shadow)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(150deg,#5a2a33,#7c3b46 55%,#46303f)}
+.cover::after{content:"";position:absolute;inset:-30%;z-index:-1;opacity:.4;background:radial-gradient(38% 46% at 80% 18%,rgba(192,145,58,.6),transparent 60%),radial-gradient(40% 42% at 14% 90%,rgba(58,107,102,.5),transparent 62%)}
+.cover .kicker{color:#e7c897}.cover .kicker::before{background:#e7c897}
+.cover h1{font-size:clamp(2.2rem,6vw,4rem);font-weight:600;max-width:18ch;letter-spacing:-.02em}
+.cover .csub{font-family:var(--body);font-style:italic;font-size:clamp(1.1rem,2.4vw,1.5rem);color:rgba(255,255,255,.85);margin-top:16px;max-width:42ch}
+
+.biblio{margin-top:50px;padding-top:32px;border-top:1px solid var(--line);max-width:62rem}
+.biblio h3{font-size:1.5rem;font-weight:600;margin-bottom:6px}
+.biblio-sub{font-family:var(--body);font-style:italic;color:var(--muted);margin:0 0 18px;font-size:1rem}
+.biblio ul{list-style:none;margin:0;padding:0}
+.biblio li{font-family:var(--sans);font-size:14.5px;line-height:1.55;color:var(--ink-soft);padding:11px 0 11px 24px;position:relative;border-bottom:1px solid var(--line-soft)}
+.biblio li:last-child{border-bottom:0}.biblio li::before{content:"—";position:absolute;left:0;color:var(--accent)}
+.biblio li b{font-weight:600;color:var(--ink)}.biblio li em{font-style:italic}
+
+.pagenav{display:flex;justify-content:space-between;gap:14px;margin-top:64px;padding-top:28px;border-top:1px solid var(--line);max-width:62rem}
+.pagenav a{flex:1;padding:18px 22px;border:1px solid var(--line);border-radius:12px;text-decoration:none;background:var(--card);transition:.2s;cursor:pointer;font-family:var(--sans)}
+.pagenav a:hover{border-color:var(--accent);transform:translateY(-2px)}
+.pagenav small{color:var(--muted);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase}
+.pagenav b{display:block;font-family:var(--serif);font-size:1.04rem;font-weight:600;margin-top:4px}
+.pagenav .next{text-align:right}
+
+.scrim{position:fixed;inset:0;background:rgba(8,6,8,.5);z-index:110;opacity:0;pointer-events:none;transition:.3s}.scrim.show{opacity:1;pointer-events:auto}
+
+@media(min-width:1320px){
+  .wrap{max-width:64rem}.prose{position:relative}
+  .sidenote{float:right;clear:right;width:14rem;margin:.35rem calc(-14rem - 1.8rem) 1rem 1.8rem;background:transparent;border-left:2px solid var(--teal);border-radius:0;padding:2px 0 2px 14px}
+}
+@media(max-width:900px){
+  .menu-btn{display:grid}
+  .sidebar{position:fixed;left:0;top:60px;transform:translateX(-100%);transition:.35s;z-index:115;width:300px;box-shadow:var(--shadow);padding-top:20px}
+  .sidebar.open{transform:none}
+  .wrap{padding:36px 22px 80px}.pagenav{flex-direction:column}
+}
+@media(max-width:560px){body{font-size:17.5px}.brand small{display:none}.cover{padding:30px 22px;border-radius:16px}.dropcap::first-letter{font-size:3.6rem}}
+</style>
+</head>
+<body>
+<a href="../" data-portal-back aria-label="Retour au portail" style="position:fixed;top:14px;left:14px;z-index:99999;display:inline-flex;align-items:center;gap:6px;background:#ffffff;color:#1c2530;text-decoration:none;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;border:1px solid rgba(0,0,0,.12);box-shadow:0 3px 12px rgba(0,0,0,.16)">&lsaquo; Portail</a>
+<div id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" aria-label="Sommaire"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+  <div class="brand" data-go="ouverture"><div class="mk">C</div><div><b>La coéducation</b></div></div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" aria-label="Thème"><svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+</header>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="toc-title">Sommaire</div>
+    <a class="nav-link" data-go="ouverture"><span class="rn">0</span> Le problème de la coéducation</a>
+    <a class="nav-link" data-go="frontiere"><span class="rn">I</span> Une frontière instituée</a>
+    <a class="nav-link" data-go="partenariat"><span class="rn">II</span> Le partenariat comme modèle</a>
+    <a class="nav-link" data-go="postures"><span class="rn">III</span> Les postures de l'école</a>
+    <a class="nav-link" data-go="inegalites"><span class="rn">IV</span> L'épreuve des inégalités</a>
+    <a class="nav-link" data-go="demission"><span class="rn">V</span> Le mythe de la démission</a>
+    <a class="nav-link" data-go="pouvoir"><span class="rn">VI</span> Partenaires ou protagonistes&nbsp;?</a>
+    <a class="nav-link" data-go="construire"><span class="rn">VII</span> Construire une coéducation juste</a>
+    <a class="nav-link" data-go="synthese"><span class="rn">VIII</span> Synthèse &amp; repères</a>
+  </aside>
+
+  <main class="content">
+  <div class="wrap">
+
+  <!-- 0 OUVERTURE -->
+  <section class="page active" id="ouverture">
+    <div class="cover reveal">
+      <div class="kicker">Étude</div>
+      <h1>La coéducation, ou la responsabilité partagée à l'épreuve de la justice</h1>
+      <p class="csub">Le partenariat entre l'école et les familles : une évidence bienveillante, une réalité conflictuelle, une question d'égalité.</p>
+    </div>
+
+    <div class="abstract reveal">
+      <div class="at">Résumé</div>
+      <p>On se propose d'examiner la <em>coéducation</em> non comme un mot d'ordre consensuel, mais comme un <strong>problème</strong>. Derrière l'évidence du « partenariat » école-familles se cachent une histoire de défiance, des rapports de pouvoir, et surtout une question d'inégalités. L'hypothèse directrice est la suivante : la coéducation n'est pas un donné naturel, c'est une <strong>construction institutionnelle</strong> ; et, mal pensée, elle <strong>reproduit les inégalités qu'elle prétend combattre</strong>. On en suivra la promesse, on en exposera les mécanismes, puis on en interrogera les limites — pour dégager les conditions d'une coéducation <em>juste</em>.</p>
+    </div>
+
+    <div class="phead reveal" style="margin-top:46px">
+      <span class="sec-num">0</span>
+      <div class="kicker">Ouverture</div>
+      <h2 class="ptitle">Le problème de la coéducation</h2>
+      <p class="psub">Pourquoi un mot aussi doux mérite d'être traité comme un objet d'analyse.</p>
+    </div>
+
+    <div class="prose">
+      <p class="dropcap reveal">Le mot a quelque chose d'irrésistible. <em>Coéduquer</em> : éduquer ensemble, l'école et la famille unies autour de l'enfant. Qui s'y opposerait ? L'évidence du terme est précisément ce qui doit éveiller la vigilance. Car cette douceur recouvre une longue histoire de méfiance réciproque, des malentendus tenaces, des rapports de pouvoir, et un risque que peu de discours nomment : celui d'aggraver, sous couleur de partenariat, les inégalités scolaires.</p>
+
+      <p class="reveal">Il faut d'abord lever l'ambiguïté du terme. La coéducation n'est pas une simple bonne entente ; c'est un <em>principe</em> d'action articulant plusieurs porteurs de savoir autour d'un même sujet apprenant.</p>
+
+      <div class="def reveal">
+        <div class="dt">Définition de travail</div>
+        <p><strong>La coéducation</strong> désigne le partage de la responsabilité éducative entre l'école, les familles et, plus largement, la communauté. Comme principe d'action, elle suppose une <em>co-intervention</em> : une <strong>coplanification</strong>, une <strong>coaction</strong> et une <strong>corétroaction</strong>, où chacun est tour à tour apprenant et formateur.</p>
+        <p>Elle n'est donc ni la délégation de l'éducation à la seule école, ni la sous-traitance du soutien scolaire aux seules familles : c'est une <em>responsabilité conjointe</em> autour de l'enfant.</p>
+      </div>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La triade <b>coplanification / coaction / corétroaction</b> est dégagée par l'ouvrage collectif <em>De nouvelles configurations éducatives</em> (dir. P. Maubant &amp; L. Roger, 2010).</div>
+
+      <p class="reveal">Posé ainsi, le problème directeur peut se formuler. Le discours dominant présente la coéducation comme une <em>évidence bienveillante</em> : il suffirait de « rapprocher » l'école et les familles pour que tous les enfants en profitent. Or l'examen attentif révèle une tout autre réalité. La relation école-familles est traversée par une <strong>asymétrie de pouvoir</strong>, par des <strong>codes inégalement maîtrisés</strong>, et par une norme implicite — celle de l'« implication parentale » attendue — qui n'est pas neutre socialement. Loin d'être un terrain plat, la coéducation est un <em>dispositif</em> qui peut servir la justice scolaire comme la trahir.</p>
+
+      <div class="pull reveal"><q>La manière dont l'école prend soin des enfants se lit dans la manière dont elle prend soin de leurs familles.</q></div>
+
+      <p class="reveal">Telle est la tension que cette étude voudra tenir d'un bout à l'autre. On commencera par rappeler que la frontière entre l'école et la famille est elle-même <em>instituée</em>, et que l'éducation excède aujourd'hui le seul cadre scolaire (I). On exposera ensuite le modèle qui a donné au champ son vocabulaire — le <em>partenariat</em> et les sphères qui se recouvrent (II) —, puis la typologie des postures que l'école peut adopter (III). On confrontera alors cette promesse à son épreuve : les <em>inégalités</em> que la coéducation peut reconduire (IV), le <em>mythe de la démission parentale</em> qu'elle charrie souvent (V), et les <em>rapports de pouvoir</em> qui la travaillent, jusque dans leur reconfiguration numérique (VI). On dégagera enfin les conditions d'une coéducation <em>juste</em> (VII), avant une synthèse (VIII).</p>
+    </div>
+
+    <div class="pagenav"><span></span><a class="next" data-go="frontiere"><small>Section I →</small><b>Une frontière instituée</b></a></div>
+  </section>
+
+  <!-- I FRONTIERE -->
+  <section class="page" id="frontiere">
+    <div class="phead"><span class="sec-num">I</span><div class="kicker">Section I</div><h2 class="ptitle">Une frontière instituée</h2><p class="psub">L'école s'est d'abord construite contre la famille — et l'éducation déborde aujourd'hui ses murs.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">La proximité de l'école et de la famille n'a rien d'originaire. L'école républicaine s'est, pour une part, <em>érigée contre</em> les familles : pour instruire l'enfant et l'élever au-dessus des particularismes de son milieu, elle a dû l'en <em>prélever</em> symboliquement, instaurer une distance entre le foyer et la salle de classe. Ce que l'on peut nommer le <strong>référentiel de la distance</strong> n'est pas un défaut de l'institution : c'en est une condition fondatrice. Le comprendre interdit de croire que la coéducation serait le retour naturel à une alliance perdue ; elle est, au contraire, un renversement récent et fragile.</p>
+
+      <p class="reveal">Ce renversement a un âge. C'est dans les années 1980 que s'impose un second référentiel, celui du <strong>partenariat</strong> : on reconnaît aux parents des droits formels, on les invite à entrer dans l'école, on en fait — en principe — des associés. Mais ce référentiel est lui-même entré en crise, car il « ne peut plus cacher son rôle dans l'aggravation des inégalités ». De là l'émergence d'un troisième référentiel, proprement <em>oxymorique</em> : il faudrait être, vis-à-vis des familles, <strong>à la fois distant et proche</strong>.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La succession <b>distance → partenariat → proximité/distance</b> est lue, à la suite d'Antoine Prost, par <em>L'école du like</em> (A. Kilic, J.-P. ...), qui en montre la reconfiguration numérique.</div>
+
+      <h3 class="reveal"><span class="h-n">§1</span>L'éducation excède l'école</h3>
+      <p class="reveal">Une seconde évidence doit être défaite : l'idée que l'éducation se jouerait dans la seule classe. L'enfant apprend dans une <strong>pluralité de configurations</strong> — la famille, les pairs, les médias, les associations, les écrans, le territoire. La « forme scolaire » n'est qu'une <em>forme</em> d'éducation parmi d'autres : un système historique et particulier de relations sociales, non la norme naturelle de tout apprentissage. La tenir pour l'étalon universel revient déjà à déprécier les autres lieux où l'enfant se construit.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La pluralité des « formes de l'éducation » (formel / non-formel / informel) et la critique de la « forme scolaire » comme étalon : <em>Les formes de l'éducation</em> (dir. O. Maulini &amp; C. Montandon).</div>
+
+      <p class="reveal">Cette diversification a une conséquence directe pour notre objet. Si l'éducation se distribue entre plusieurs instances, la question n'est plus seulement « comment l'école peut-elle faire venir les familles ? », mais « comment coordonner, sans les hiérarchiser indûment, les multiples milieux où l'enfant apprend ? ». La coéducation cesse alors d'être un face-à-face entre deux institutions pour devenir l'<em>articulation</em> de configurations éducatives plurielles — articulation dont l'école n'est qu'un terme, fût-il central.</p>
+
+      <p class="reveal">Mais cette ouverture porte un danger que la suite de l'étude rencontrera : déléguer à d'autres instances ce que l'école peine à faire — autrement dit, externaliser la difficulté. Avant d'en venir à cette critique, il faut exposer le modèle qui a donné au partenariat sa grammaire.</p>
+    </div>
+    <div class="pagenav"><a data-go="ouverture"><small>← Ouverture</small><b>Le problème de la coéducation</b></a><a class="next" data-go="partenariat"><small>Section II →</small><b>Le partenariat comme modèle</b></a></div>
+  </section>
+
+  <!-- II PARTENARIAT -->
+  <section class="page" id="partenariat">
+    <div class="phead"><span class="sec-num">II</span><div class="kicker">Section II</div><h2 class="ptitle">Le partenariat comme modèle</h2><p class="psub">Des sphères qui se recouvrent, et six manières de s'impliquer.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le champ de la coéducation a reçu sa grammaire d'un modèle devenu international : celui des <strong>sphères d'influence qui se recouvrent</strong>. L'enfant se développe simultanément dans trois milieux — la famille, l'école, la communauté — que les pratiques peuvent <em>rapprocher</em> ou <em>écarter</em>. Plus ces sphères se recouvrent, plus l'enfant reçoit, à l'école comme à la maison, des messages <em>convergents</em> sur l'importance d'apprendre et de persévérer ; et c'est de cette convergence, accumulée dans le temps, que naît une probabilité accrue de réussite.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le modèle des <b>overlapping spheres of influence</b> et la typologie des six types d'implication sont l'œuvre de Joyce L. Epstein, <em>School, Family, and Community Partnerships</em>.</div>
+
+      <p class="reveal">Un point de ce modèle est décisif et souvent oublié : <strong>l'enfant en est le centre et l'acteur principal</strong>. Le partenariat ne « produit » pas mécaniquement la réussite ; il <em>engage, guide et motive</em> l'élève pour qu'il produise la sienne. La formule programmatique du modèle est célèbre : « la manière dont l'école prend soin des enfants se lit dans la manière dont elle prend soin de leurs familles ». Une école qui ne voit que des <em>élèves</em> tient la famille à distance ; une école qui voit des <em>enfants</em> traite famille et communauté en partenaires.</p>
+
+      <h3 class="reveal"><span class="h-n">§1</span>Six types d'implication</h3>
+      <p class="reveal">Le modèle décline le partenariat en une <strong>typologie — et non une hiérarchie</strong> : aucun type n'est supérieur, et aucune pratique réelle n'est « pure ». Chaque type appelle ses pratiques, ses obstacles propres, et produit des effets distincts.</p>
+
+      <div class="def reveal">
+        <div class="dt">Les six types d'implication</div>
+        <p><strong>1. Parentalité</strong> — aider toutes les familles à offrir un environnement favorable, et aider l'école à connaître ses familles. <strong>2. Communiquer</strong> — des échanges <em>à double sens</em> (école ↔ maison) sur les apprentissages et les progrès. <strong>3. Bénévolat</strong> — accueillir et organiser l'aide et la présence des parents, en tout lieu et à tout moment. <strong>4. Apprendre à la maison</strong> — outiller les familles pour soutenir le travail scolaire, comme <em>interaction</em> (et non comme enseignement). <strong>5. Participer aux décisions</strong> — faire des familles des représentantes réelles, porteuses de la voix de toutes. <strong>6. Collaborer avec la communauté</strong> — relier l'école aux ressources du territoire, dans les deux sens.</p>
+      </div>
+
+      <p class="reveal">L'intérêt de cette grille n'est pas seulement descriptif. Elle permet de <em>diagnostiquer</em> (qu'est-ce qui est déjà fait ?), de <em>concevoir</em> (quel type pour quel objectif ?) et d'<em>évaluer</em> les programmes. Elle déplace ainsi la question du « pourquoi » — sur lequel tout le monde s'accorde — vers le « comment », c'est-à-dire vers une ingénierie reproductible : une équipe dédiée, un plan d'action écrit reliant chaque activité à un objectif de réussite, une évaluation annuelle.</p>
+
+      <h3 class="reveal"><span class="h-n">§2</span>Ce que la recherche établit — et ce qu'il ne faut pas en attendre</h3>
+      <p class="reveal">L'engagement des familles est associé à des effets mesurables : en lecture, sur les attitudes face aux apprentissages, sur l'<em>assiduité</em> et le <em>comportement</em>, sur les transitions (entrée à l'école, passage au collège). Ces effets profitent aussi, et c'est notable, aux familles à faibles revenus. Mais le modèle pose lui-même une limite que la suite rendra cruciale.</p>
+      <div class="contro reveal">
+        <div class="ct">Une limite assumée</div>
+        <p>« Nous ne devrions pas trop attendre de l'implication des familles et de la communauté. » Le partenariat <em>ajoute</em> une valeur à un enseignement de qualité ; il ne le <em>remplace</em> pas. Il n'est ni une panacée, ni un substitut à des politiques saines, à un financement suffisant et à un enseignement excellent — « le petit plus qui fait la grande différence », non le remède aux maux de l'école.</p>
+        <p>Surtout : <em>toute</em> implication ne relève pas les résultats. Chaque type produit des effets spécifiques, et une pratique mal conçue peut <strong>exclure</strong> des familles et creuser, plutôt que combler, les écarts.</p>
+      </div>
+      <p class="reveal">Ce dernier avertissement est le seuil de tout l'examen critique qui suit : car ce que le modèle promet pour <em>toutes</em> les familles ne se réalise, en fait, qu'inégalement.</p>
+    </div>
+    <div class="pagenav"><a data-go="frontiere"><small>← Section I</small><b>Une frontière instituée</b></a><a class="next" data-go="postures"><small>Section III →</small><b>Les postures de l'école</b></a></div>
+  </section>
+
+  <!-- III POSTURES -->
+  <section class="page" id="postures">
+    <div class="phead"><span class="sec-num">III</span><div class="kicker">Section III</div><h2 class="ptitle">Les postures de l'école</h2><p class="psub">De la forteresse au foyer : quatre manières d'accueillir — ou de tenir à distance.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Toutes les écoles ne se rapportent pas de la même façon aux familles, et l'écart entre elles n'est pas affaire de bonne volonté individuelle mais de <em>culture</em> et de <em>croyances</em> institutionnelles. On peut décrire cette culture selon une échelle, du moins au plus accueillant, qui va de la forteresse au véritable foyer.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La typologie des quatre écoles et les « croyances fondatrices » d'une école-partenaire sont proposées par <em>Beyond the Bake Sale</em> (A. Henderson, K. Mapp, V. Johnson, D. Davies, 2007).</div>
+
+      <div class="def reveal">
+        <div class="dt">Quatre postures</div>
+        <p><strong>L'école-forteresse</strong> — « les parents sont à leur place à la maison ; si l'élève échoue, c'est que sa famille ne le soutient pas ». On tient les familles <em>à distance</em>. <strong>L'école « venez quand on appelle »</strong> — les parents sont admis, mais aux conditions de l'école, et n'auraient « pas grand-chose à offrir ». <strong>L'école « porte ouverte »</strong> — on accueille et l'on multiplie les occasions, mais l'initiative et l'inclusion restent partielles. <strong>L'école-partenaire</strong> — « toutes les familles ont quelque chose de précieux à offrir » ; on fait <em>ce qu'il faut</em> pour travailler étroitement avec chacune.</p>
+      </div>
+
+      <p class="reveal">Cette échelle a une vertu rare : elle est <em>diagnostique</em>. Deux écoles d'un même quartier peuvent occuper des positions opposées ; et combler l'écart de réussite entre élèves suppose de combler l'écart entre la forteresse et le foyer. Mais ce qui sépare ces postures n'est pas d'abord une technique : c'est un <strong>jeu de croyances</strong>.</p>
+
+      <h3 class="reveal"><span class="h-n">§1</span>L'obstacle premier : la pensée du déficit</h3>
+      <p class="reveal">Le frein majeur au partenariat n'est pas l'absence des familles : c'est une <strong>pensée du déficit</strong> qui, sans toujours se dire, imprègne l'institution. Le verdict « ces parents ne se soucient pas de l'éducation » frappe injustement les familles pauvres, immigrées, de couleur — alors même que les enquêtes montrent souvent chez elles une <em>plus forte</em> priorité accordée à la réussite. Or les attentes basses ne sont pas sans effet : lorsqu'un enseignant attend peu d'un élève, il se sent <em>moins responsable</em> de ses apprentissages et lui propose un travail moins exigeant. La croyance déficitaire est donc <em>performative</em> : elle produit ce qu'elle prétend constater.</p>
+
+      <h3 class="reveal"><span class="h-n">§2</span>Les croyances d'une école-partenaire, et le premier pas</h3>
+      <p class="reveal">À l'inverse, quatre convictions fondent une école-partenaire : <strong>toutes les familles ont des rêves pour leurs enfants</strong> ; <strong>toutes ont la capacité de soutenir l'apprentissage</strong>, quel que soit leur niveau d'études ou leur langue ; <strong>parents et personnels doivent être des partenaires égaux</strong> ; et <strong>la responsabilité du premier pas incombe à l'école</strong>. Cette dernière conviction est décisive : « tendre la main » est plus facile pour des éducateurs que « tendre vers » l'école ne l'est pour des parents intimidés ; c'est donc à l'institution de faire le premier geste.</p>
+
+      <div class="pull reveal"><q>« Je ne pensais pas que c'était à moi qu'ils s'adressaient. Je ne pensais pas qu'ils voulaient que je vienne. »</q></div>
+
+      <p class="reveal">Le mouvement par lequel une famille se sent enfin <em>membre</em> de l'école suit trois temps simples : <strong>accueillir, honorer la participation, relier</strong> autour de l'enfant et de ses apprentissages. Au bout, un sentiment d'appartenance — l'école perçue comme un lieu qui « nous » appartient aussi. Cette posture est l'idéal. Reste à savoir si elle suffit à neutraliser ce que la section suivante met au jour : l'inégalité logée au cœur même de l'implication.</p>
+    </div>
+    <div class="pagenav"><a data-go="partenariat"><small>← Section II</small><b>Le partenariat comme modèle</b></a><a class="next" data-go="inegalites"><small>Section IV →</small><b>L'épreuve des inégalités</b></a></div>
+  </section>
+
+  <!-- IV INEGALITES -->
+  <section class="page" id="inegalites">
+    <div class="phead"><span class="sec-num">IV</span><div class="kicker">Section IV · le cœur critique</div><h2 class="ptitle">L'épreuve des inégalités</h2><p class="psub">Et si la norme de l'« implication » était, en réalité, une norme de classe&nbsp;?</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Voici le point où la promesse vacille. L'école attend des parents un type très précis d'implication : informée, assertive, en première ligne. Or cette norme, présentée comme universelle et bienveillante, est en réalité la norme d'une <em>classe</em> particulière. La sociologie de la famille l'a montré avec une précision saisissante : les pratiques éducatives ne se dispersent pas au hasard, elles se regroupent en deux <strong>logiques culturelles</strong> opposées, inégalement ajustées aux attentes de l'institution.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La distinction <b>concerted cultivation / accomplishment of natural growth</b> et les notions de « sens du droit » et « sens de la contrainte » : Annette Lareau, <em>Unequal Childhoods</em> (2003).</div>
+
+      <div class="def reveal">
+        <div class="dt">Deux logiques éducatives</div>
+        <p><strong>La « culture concertée »</strong> (classes moyennes) — l'enfant est un projet à développer activement : agenda dense d'activités encadrées, primat du raisonnement et de la négociation, frontière brouillée entre adultes et enfants, intervention active dans les institutions.</p>
+        <p><strong>L'« accomplissement de la croissance naturelle »</strong> (classes populaires) — l'enfant se développera pourvu qu'on lui assure amour et sécurité : longues plages de jeu autonome, directives plutôt que négociation, frontière nette entre adultes et enfants, délégation de l'autorité aux professionnels.</p>
+      </div>
+
+      <p class="reveal">L'avantage scolaire ne tient pas à un amour parental inégal — toutes les familles veulent le meilleur pour leur enfant — mais à la <strong>concordance entre la logique du foyer et les standards de l'institution</strong>. L'école valorise précisément ce que fait la classe moyenne : développer le vocabulaire par le raisonnement, cultiver les talents par des activités organisées, et une présence parentale assertive. Pour ces familles, le foyer est <em>en phase</em> avec l'école ; pour les familles populaires, il est « désaccordé ».</p>
+
+      <p class="reveal">De là naissent deux dispositions opposées. D'un côté, un <strong>« sens du droit »</strong> : habitués à être écoutés et à argumenter à la maison, les enfants de classe moyenne agissent comme s'ils avaient le droit de personnaliser les interactions institutionnelles, de questionner, d'obtenir une exception. De l'autre, un <strong>« sens de la contrainte »</strong> : distance, méfiance, sentiment d'impuissance face aux institutions. Du côté des parents, l'écart est plus net encore : pour les familles populaires, l'éducateur est un <em>supérieur social</em> ; pour les familles de classe moyenne, un égal — voire un subordonné.</p>
+
+      <div class="pull reveal"><q>Les enfants de classe moyenne sont « nés sur la troisième base, mais croient avoir frappé un coup de trois bases ».</q></div>
+
+      <h3 class="reveal"><span class="h-n">§1</span>Le partenariat comme conversion du capital</h3>
+      <p class="reveal">On comprend dès lors le mécanisme par lequel la coéducation, loin d'égaliser, peut <em>amplifier</em>. Les parents les plus « impliqués » — au sens où l'école l'entend — sont aussi les mieux dotés en capital économique, culturel et social. La mère de classe moyenne intervient en classe, chez le médecin, au camp ; elle <em>active</em> son capital et le convertit en avantages institutionnels concrets pour son enfant. Le partenariat fonctionne alors comme un <strong>opérateur de conversion</strong> : il transforme un avantage de départ en avantage scolaire effectif. Là où des associations de parents aisés financent des programmes entiers, d'autres écoles n'en verront jamais la couleur : l'implication parentale <em>creuse</em> l'écart matériel entre établissements au lieu de le corriger.</p>
+      <div class="sidenote reveal"><span class="sn-k">Filiation</span>Ce mécanisme prolonge l'analyse bourdieusienne du <b>capital culturel</b> : les familles dotées « balayent l'horizon » à la recherche d'occasions d'activer leur capital au profit de leurs enfants.</div>
+
+      <div class="contro reveal">
+        <div class="ct">Quand la différence devient déficit</div>
+        <p>L'effet le plus insidieux est conceptuel. Les compétences réelles des enfants populaires — autonomie, débrouillardise, liens familiaux denses — sont rendues « quasi invisibles » dans le monde des institutions, et « les différences en viennent à être définies comme des <strong>déficits</strong> ». En universalisant un standard de classe, l'institution <em>produit</em> de l'inégalité à partir de la simple diversité des pratiques.</p>
+        <p>Et la même demande institutionnelle — des parents à la fois déférents <em>et</em> assertifs — produit des effets opposés selon la classe. Pour certaines familles, le « partenariat » n'est même pas vécu comme une collaboration mais comme une <strong>surveillance</strong> : l'obligation faite aux éducateurs de signaler certaines pratiques expose spécifiquement les familles populaires à l'intervention de l'État.</p>
+      </div>
+
+      <p class="reveal">Faut-il en conclure que la culture concertée serait « meilleure » ? Nullement — et ce serait retomber dans la pensée du déficit que cette section dénonce. Chaque logique a ses coûts et ses vertus : la première engendre des enfants épuisés, un individualisme parfois au détriment du lien familial ; la seconde offre une autonomie, une inventivité et des solidarités de parenté que la première, souvent, ignore. Le problème n'est pas moral, il est <em>relationnel et institutionnel</em> : l'école ne reconnaît qu'une seule logique comme légitime, et refuse à l'autre toute « valeur d'échange ».</p>
+    </div>
+    <div class="pagenav"><a data-go="postures"><small>← Section III</small><b>Les postures de l'école</b></a><a class="next" data-go="demission"><small>Section V →</small><b>Le mythe de la démission</b></a></div>
+  </section>
+
+  <!-- V DEMISSION -->
+  <section class="page" id="demission">
+    <div class="phead"><span class="sec-num">V</span><div class="kicker">Section V</div><h2 class="ptitle">Le mythe de la démission</h2><p class="psub">Les familles populaires ne sont pas indifférentes : elles sont désaccordées.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le corollaire de la pensée du déficit porte un nom familier dans les salles des professeurs : la « démission parentale ». L'élève peine, les parents ne viennent pas aux réunions : on en déduit qu'ils « laissent faire ». Une enquête fine des milieux populaires a pourtant établi que cette démission est un <strong>mythe</strong> — un produit interprétatif des enseignants qui, ignorant les logiques internes des familles, infèrent l'indifférence du seul comportement scolaire de l'enfant.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>La déconstruction du « mythe de la démission parentale » et l'analyse des <b>configurations familiales</b> : Bernard Lahire, <em>Tableaux de familles</em> (1995).</div>
+
+      <p class="reveal">Le fait s'impose à l'enquête : presque tous les parents tiennent l'école pour importante et espèrent que leurs enfants « s'en sortent » mieux qu'eux. L'absence aux réunions n'est pas de l'indifférence ; elle suit les logiques de la <em>sociabilité ordinaire</em> — les familles socialement proches des enseignants fréquentent davantage l'école, sans pour autant « mieux suivre ». Le suivi réel existe ailleurs, invisible à l'institution : contrôle des devoirs, leçons récitées, heure du coucher, rendez-vous chez l'orthophoniste.</p>
+
+      <h3 class="reveal"><span class="h-n">§1</span>Transmettre n'est pas transvaser</h3>
+      <p class="reveal">Pourquoi, alors, des trajectoires si opposées à capital culturel équivalent ? Parce que l'essentiel ne se <em>transmet</em> pas comme on transvaserait un contenu : il se <strong>construit</strong>, relationnellement, dans la trame concrète des interdépendances familiales — ce qu'on peut nommer une <em>configuration</em>. Ce qui « passe » d'une génération à l'autre, c'est bien plus qu'un capital : un rapport à l'école et à l'écrit, fait aussi « d'angoisses et de hontes, de réticences et de rejets », un rapport au temps, à l'ordre, aux contraintes.</p>
+
+      <p class="reveal">Plusieurs dimensions structurent ces configurations : les <em>écritures domestiques</em> (listes, agenda, comptes, classement des papiers) qui installent un rapport réflexif et rationalisé au quotidien, homologue à celui qu'exige l'école ; et les <strong>formes d'autorité</strong> — l'autorité par contrainte extérieure et immédiate <em>versus</em> l'autorité fondée sur l'autocontrainte et l'intériorisation des normes, que l'école élémentaire requiert sous le nom d'« autonomie ». Quand les régimes disciplinaires du foyer et de la classe divergent, l'enfant se trouve pris dans une <em>double contrainte</em>. Décisif : ces dispositions ne suivent pas mécaniquement les frontières de classe — la diversité des rapports à l'écrit existe aussi dans les milieux populaires.</p>
+
+      <div class="pull reveal"><q>L'héritage culturel ne parvient pas toujours à trouver les conditions adéquates pour que l'héritier hérite.</q></div>
+
+      <p class="reveal">Il suit de là que les malentendus entre l'école et les familles sont <strong>cognitifs et culturels, non moraux</strong>. L'école elle-même en produit : tel parent croit que l'« étude » est un travail surveillé et corrigé, et cesse en conséquence de vérifier les devoirs. Imputer ces écarts à un défaut de bonne volonté, c'est manquer leur nature — et fonder la coéducation sur un contresens.</p>
+
+      <div class="contro reveal">
+        <div class="ct">L'envers de la « participation »</div>
+        <p>De là une critique qui vise certaines formes de coéducation. Vouloir « à tout prix » intégrer les familles populaires dans les lieux et les cadres légitimes peut <em>redoubler</em> une imposition : un travail de « conversion-acculturation de l'ethos » qui relève davantage de la gestion sociale des populations que de la lutte contre l'échec. D'autant que le « droit d'ingérence » est <strong>dissymétrique</strong> : on conseille volontiers les parents sur la conduite de leur enfant, mais les enseignants n'admettent pas qu'on touche à leur pédagogie.</p>
+        <p>L'hypothèse selon laquelle la simple présence des parents ferait progresser les résultats est jugée, à ce titre, « naïve et superficielle ». La conséquence n'est pas de renoncer à la coéducation, mais d'en déplacer la cible : reconnaître les compétences familiales déjà à l'œuvre, viser les apprentissages sans exiger une conversion des modes de vie, et <em>symétriser</em> la relation.</p>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="inegalites"><small>← Section IV</small><b>L'épreuve des inégalités</b></a><a class="next" data-go="pouvoir"><small>Section VI →</small><b>Partenaires ou protagonistes&nbsp;?</b></a></div>
+  </section>
+
+  <!-- VI POUVOIR -->
+  <section class="page" id="pouvoir">
+    <div class="phead"><span class="sec-num">VI</span><div class="kicker">Section VI</div><h2 class="ptitle">Partenaires ou protagonistes&nbsp;?</h2><p class="psub">Le partenariat, euphémisme d'un rapport de pouvoir — et sa reconfiguration par l'écran.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Le mot « partenariat » a la douceur des consensus. Mais l'enquête sociologique y décèle un <em>euphémisme</em> : la relation école-familles n'est pas un donné harmonieux, elle est « caractérisée par une lutte pour le contrôle et la définition ». Derrière le terme consensuel se joue un <strong>conflit pour la domination</strong> — d'où la question, plus juste que le slogan : les parents sont-ils des partenaires ou des <em>protagonistes</em>, c'est-à-dire des rivaux ?</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'analyse du partenariat comme « contest for domination » : Gill Crozier, <em>Parents and Schools: Partners or Protagonists?</em></div>
+
+      <p class="reveal">Cette lutte est, de nouveau, structurée par la classe — mais avec un renversement instructif. Les parents de classe moyenne, dotés du capital scolaire qui leur permet de questionner et de contester, et armés du <em>pouvoir de partir</em> (l'« exit » que renforce le quasi-marché scolaire), sont perçus par l'école comme une <strong>menace</strong> : trop « exigeants », trop « assertifs ». Les parents populaires, eux, font confiance aux enseignants — souvent par défaut, faute d'information — et maintiennent délibérément une <strong>frontière entre le foyer et l'école</strong>. Cette mise à distance n'est pas de l'apathie : c'est une <em>résistance lucide</em> à une normalisation perçue comme humiliante, le refus de « collaborer à sa propre subordination ».</p>
+
+      <p class="reveal">On peut lire ce dispositif à la lumière d'une analytique du pouvoir : l'implication parentale tient alors moins de l'<em>empowerment</em> que de la <strong>responsabilisation</strong> et de la surveillance mutuelle. La réunion parents-professeurs s'analyse elle-même comme une scène : l'enseignant y déploie son expertise « de manière contrôlée » pour réembarquer la confiance, tout en gardant ses incertitudes en coulisses. La défiance, des deux côtés, est la vérité d'un partenariat qui n'a pas su devenir réciproque.</p>
+
+      <h3 class="reveal"><span class="h-n">§1</span>L'écran ne résout rien — il reconfigure</h3>
+      <p class="reveal">À l'ère des applications de communication, on a cru tenir l'outil d'un partenariat enfin symétrique. L'enquête déçoit cette promesse. Le numérique introduit dans l'école la logique des réseaux sociaux — le <em>like</em>, la photographie « instagrammable » de la classe, l'attente de reconnaissance — et fait naître un « enseignant communiquant ». Mais la révolution n'a pas lieu : la communication devient plus rapide et plus familière, sans devenir égale.</p>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>L'enquête sur les applications de liaison école-familles au primaire : <em>L'école du like</em>.</div>
+
+      <div class="pull reveal"><q>On a promis aux parents d'être acteurs ; ils sont, de fait, spectateurs.</q></div>
+
+      <p class="reveal">Trois constats en découlent. D'abord, le nouveau référentiel est <strong>oxymorique</strong> : la technologie permet d'être plus proche tout en tenant le conflit à distance (le « <em>dislike</em> » n'est pas offert aux parents ; l'enseignant maîtrise les notifications). Ensuite, sous le lexique de la coéducation se loge souvent un objectif implicite de <strong>contrôle des « mauvais parents »</strong> — et une transparence accrue qui se retourne en surveillance, non seulement des parents mais de l'<em>enfant</em>, dont le droit à des « espaces pour soi » devient l'impensé du dispositif. Enfin, la <strong>fracture numérique</strong> est mal posée : réduite à l'accès aux outils, elle se loge en réalité dans les <em>usages</em> — la capacité à « bien » liker, commenter, se montrer « bon parent » —, et se trouve construite par les représentations mêmes des enseignants.</p>
+
+      <p class="reveal">Il faut être juste : pour des enseignants déjà sensibles aux malentendus, l'outil offre un moyen d'agir — désacraliser l'image inaccessible du maître, toucher les « parents au travail » qui ne venaient pas au portail, rendre l'école plus familière. Mais cette proximité vaut pour l'ordinaire ; elle « ne résout pas le traitement des cas singuliers ». Dès qu'un vrai problème surgit, le face-à-face redevient nécessaire. L'écran reconfigure la relation ; il ne la rend pas, par lui-même, plus juste.</p>
+    </div>
+    <div class="pagenav"><a data-go="demission"><small>← Section V</small><b>Le mythe de la démission</b></a><a class="next" data-go="construire"><small>Section VII →</small><b>Construire une coéducation juste</b></a></div>
+  </section>
+
+  <!-- VII CONSTRUIRE -->
+  <section class="page" id="construire">
+    <div class="phead"><span class="sec-num">VII</span><div class="kicker">Section VII</div><h2 class="ptitle">Construire une coéducation juste</h2><p class="psub">Changer l'institution, plutôt que réparer les familles.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Si la coéducation peut reproduire l'inégalité, faut-il y renoncer ? Ce serait abandonner aux familles déjà dotées un terrain qu'elles occupent seules. La conclusion juste est inverse : il faut faire de la coéducation un instrument <em>délibérément</em> orienté vers l'équité. Cela suppose un déplacement de principe — cesser de vouloir « réparer » des familles supposées défaillantes, pour <strong>transformer l'institution</strong> qui ne crée pas les conditions d'une place légitime.</p>
+
+      <p class="reveal">Le premier geste est connu : <strong>le premier pas appartient à l'école</strong>. Non parce que les familles seraient passives, mais parce que l'asymétrie de légitimité rend l'approche bien plus coûteuse pour le parent intimidé que pour le professionnel. Accueillir précède tout : abattre les comptoirs qui font barrière, sortir du bâtiment pour saluer, prononcer correctement les noms, traduire, varier les horaires, lever les obstacles matériels — garde d'enfants, transport. Accueillir, honorer, relier.</p>
+
+      <div class="def reveal">
+        <div class="dt">Les leviers d'une coéducation équitable</div>
+        <p><strong>Aller vers</strong> (et non attendre) : porter la rencontre sur les lieux de vie, en lien avec les acteurs du quartier. <strong>Communiquer à double sens</strong> : écouter autant qu'informer, et <em>agir</em> sur ce qu'on entend. <strong>Reconnaître les savoirs des familles</strong> : partir du principe que toute famille veut la réussite de son enfant et possède des ressources. <strong>Partager réellement le pouvoir</strong> : associer les familles aux décisions qui comptent, et les outiller pour cela. <strong>Élargir la participation</strong> : viser d'abord les plus éloignés, non les plus présents.</p>
+      </div>
+      <div class="sidenote reveal"><span class="sn-k">Repère</span>Le principe « changer les institutions plutôt que cibler les individus », et les leviers de l'<em>outreach</em> et de la confiance : <em>Improving Learning by Widening Participation</em> ; et les dispositifs d'accueil de <em>Beyond the Bake Sale</em>.</div>
+
+      <h3 class="reveal"><span class="h-n">§1</span>Élargir, et non récompenser</h3>
+      <p class="reveal">Tout le sens de l'<em>élargissement de la participation</em> tient dans un renversement de la cible. Une coéducation qui s'adresse, de fait, à ceux qui participent déjà ne fait que <em>récompenser</em> l'avantage. Une coéducation juste prend pour priorité ceux que l'institution éloigne : elle reconnaît les savoirs informels, construit la confiance pas à pas, supprime les obstacles concrets, et — point essentiel — agit sur les <strong>réseaux et les institutions</strong>, non sur les seuls individus. Car « le changement, pour les groupes défavorisés et sans pouvoir, a peu de chances de survenir » tant que tous les acteurs n'y participent pas et que l'école ne remet pas en cause ses propres stéréotypes.</p>
+
+      <h3 class="reveal"><span class="h-n">§2</span>Reconnaître, plutôt que convertir</h3>
+      <p class="reveal">Le principe éthique qui unifie ces leviers est celui d'une <strong>reconnaissance</strong>. Il ne s'agit pas de convertir les familles à une norme unique — celle, on l'a vu, d'une classe particulière —, mais de symétriser la relation et de tenir pour légitimes des logiques éducatives plurielles. Cela passe par un travail sur soi de l'institution : exposer les croyances déficitaires à des faits qui les contredisent, traduire et préparer les familles à gouverner, leur confier de <em>vrais</em> enjeux. L'école y gagne sa vocation la plus haute — devenir, selon une belle image, un « laboratoire de la démocratie ».</p>
+
+      <div class="pull reveal"><q>Toute hausse d'exigence envers une partie devrait s'accompagner d'un investissement égal dans ses moyens d'y répondre.</q></div>
+
+      <p class="reveal">Ce principe de <em>réciprocité</em> est le critère d'une coéducation juste : on ne peut tenir quiconque pour « défaillant » sans lui avoir donné les moyens de réussir. Appliqué aux familles, il interdit de leur imputer une distance que l'institution a, pour une part, produite — et il oblige l'école à investir dans la relation avant d'en attendre les fruits.</p>
+    </div>
+    <div class="pagenav"><a data-go="pouvoir"><small>← Section VI</small><b>Partenaires ou protagonistes&nbsp;?</b></a><a class="next" data-go="synthese"><small>Section VIII →</small><b>Synthèse &amp; repères</b></a></div>
+  </section>
+
+  <!-- VIII SYNTHESE -->
+  <section class="page" id="synthese">
+    <div class="phead"><span class="sec-num">VIII</span><div class="kicker">Section VIII</div><h2 class="ptitle">Synthèse&nbsp;: une responsabilité partagée et juste</h2><p class="psub">Ce que le parcours établit.</p></div>
+    <div class="prose">
+      <p class="dropcap reveal">Au terme de ce parcours, la coéducation n'apparaît plus comme un mot d'ordre, mais comme une notion tendue entre une nécessité, un idéal et une ambiguïté. <strong>Une nécessité</strong> : l'enfant apprend dans plusieurs sphères à la fois, et leur convergence soutient sa réussite. <strong>Un idéal</strong> : le partenariat, où l'école fait le premier pas, accueille toutes les familles et partage le pouvoir. <strong>Une ambiguïté</strong> : ce même partenariat, abandonné à sa pente, récompense les familles déjà dotées, lit la différence comme un déficit, et peut se retourner en surveillance.</p>
+
+      <p class="reveal">La thèse que cette étude voulait soutenir est que la coéducation n'est pas un terrain neutre, mais un <strong>dispositif</strong> dont la valeur dépend entièrement de sa conception. Trois conditions distinguent une coéducation juste d'une coéducation qui reconduit l'inégalité :</p>
+
+      <h3 class="reveal">Le premier pas à l'institution</h3>
+      <p class="reveal" style="margin-top:0">Parce que l'asymétrie de légitimité est réelle, c'est à l'école d'aller vers les familles — et d'abord vers les plus éloignées, non vers les plus présentes.</p>
+      <h3 class="reveal">La reconnaissance plutôt que la conversion</h3>
+      <p class="reveal" style="margin-top:0">Tenir pour légitimes des logiques éducatives plurielles, refuser de lire la différence comme un manque, et symétriser une relation aujourd'hui asymétrique.</p>
+      <h3 class="reveal">Le partage réel du pouvoir</h3>
+      <p class="reveal" style="margin-top:0">Associer les familles aux décisions qui comptent, et leur en donner les moyens — selon le principe de réciprocité qui interdit d'exiger sans investir.</p>
+
+      <div class="pull reveal"><q>La coéducation n'est pas l'art de faire venir les familles à l'école : c'est l'art de rendre l'école digne d'être un lieu commun.</q></div>
+
+      <p class="reveal">Reste un avertissement, qui est aussi la probité de la notion : la coéducation n'est ni une panacée ni un substitut. Elle n'efface ni la qualité de l'enseignement, ni le financement, ni les politiques justes ; elle en est le complément, « le petit plus qui fait la grande différence ». Bien comprise, elle ne demande pas aux familles de devenir autres : elle demande à l'école de devenir, pour toutes, un lieu où l'on se reconnaît.</p>
+
+      <div class="biblio reveal">
+        <h3>Repères bibliographiques</h3>
+        <p class="biblio-sub">Les principales sources sur lesquelles s'appuie cette étude.</p>
+        <ul>
+          <li><b>Joyce L. Epstein</b>, <em>School, Family, and Community Partnerships</em>.</li>
+          <li><b>A. Henderson, K. Mapp, V. Johnson, D. Davies</b>, <em>Beyond the Bake Sale. The Essential Guide to Family-School Partnerships</em> (2007).</li>
+          <li><b>Annette Lareau</b>, <em>Unequal Childhoods. Class, Race, and Family Life</em> (2003 ; 2ᵉ éd. 2011).</li>
+          <li><b>Bernard Lahire</b>, <em>Tableaux de familles. Heurs et malheurs scolaires en milieux populaires</em> (1995).</li>
+          <li><b>Gill Crozier</b>, <em>Parents and Schools: Partners or Protagonists?</em></li>
+          <li><em>L'école du like</em> (A. Kilic, J.-P. ...).</li>
+          <li><em>De nouvelles configurations éducatives</em> (dir. P. Maubant &amp; L. Roger) · <em>Improving Learning by Widening Participation</em>.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pagenav"><a data-go="construire"><small>← Section VII</small><b>Construire une coéducation juste</b></a><a class="next" data-go="ouverture"><small>Retour →</small><b>Au début de l'étude</b></a></div>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<script>
+const pages=[...document.querySelectorAll('.page')];const links=[...document.querySelectorAll('.nav-link')];
+function go(id){const pg=document.getElementById(id);if(!pg)return;
+  pages.forEach(p=>p.classList.remove('active'));pg.classList.add('active');
+  links.forEach(l=>l.classList.toggle('active',l.dataset.go===id));
+  history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'instant'});closeMenu();requestAnimationFrame(()=>revealScan(pg));}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-go]');if(t){e.preventDefault();go(t.dataset.go);}});
+const sidebar=document.getElementById('sidebar'),scrim=document.getElementById('scrim');
+function closeMenu(){sidebar.classList.remove('open');scrim.classList.remove('show');}
+document.getElementById('menuBtn').onclick=()=>{sidebar.classList.toggle('open');scrim.classList.toggle('show');};scrim.onclick=closeMenu;
+const tBtn=document.getElementById('themeBtn'),tIcon=document.getElementById('themeIcon');
+const sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>';
+const moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+let dark=false;tBtn.onclick=()=>{dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');tIcon.innerHTML=dark?sun:moon;};
+const io=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}})},{threshold:.1});
+function revealScan(scope){(scope||document).querySelectorAll('.reveal:not(.in)').forEach(el=>io.observe(el));}revealScan();
+const bar=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
+const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
+</script>
+</body>
+</html>
