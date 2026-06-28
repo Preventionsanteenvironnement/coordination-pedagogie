@@ -2657,8 +2657,9 @@ function resolve() {
 // Le coordinateur déverrouille l'éditeur avec une clé, mémorisée sur SON appareil.
 // Garde-fou d'interface (à la manière du portail) — la vraie sécurité viendra des
 // règles Firestore. ⚠️ Personnalise ADMIN_KEY avant de publier.
-const ADMIN_KEY = 'coordPSR';
+const ADMIN_KEY = 'pse';
 const ADMIN_FLAG = 'psr-admin:v1';
+const normKey = (k) => String(k == null ? '' : k).trim().toLowerCase();
 
 function isUnlocked() {
   try { return localStorage.getItem(ADMIN_FLAG) === '1'; } catch (e) { return false; }
@@ -2669,7 +2670,7 @@ function setUnlocked(v) {
 // Déverrouillage possible aussi par URL : index.html?admin=LACLE
 function unlockFromUrl() {
   const m = location.search.match(/[?&]admin=([^&]+)/);
-  if (m && decodeURIComponent(m[1]) === ADMIN_KEY) {
+  if (m && normKey(decodeURIComponent(m[1])) === ADMIN_KEY) {
     setUnlocked(true);
     window.history.replaceState(null, '', location.pathname + location.hash);
     return true;
@@ -2802,7 +2803,7 @@ function App() {
   const unlock = () => {
     const k = window.prompt('Clé d\'accès coordination :');
     if (k == null) return;
-    if (k === ADMIN_KEY) { setUnlocked(true); setIsAdmin(true); setMode('coordination'); navigate('/dashboard'); toast('Éditeur déverrouillé'); }
+    if (normKey(k) === ADMIN_KEY) { setUnlocked(true); setIsAdmin(true); setMode('coordination'); navigate('/dashboard'); toast('Éditeur déverrouillé'); }
     else toast('Clé incorrecte', 'warn');
   };
   const lock = () => { setUnlocked(false); setIsAdmin(false); setMode('intervenant'); navigate('/consultation'); toast('Éditeur verrouillé'); };
