@@ -271,4 +271,13 @@ const THEMATIQUES = [
    ESPACE DE GESTION — outils interactifs (on AGIT dedans).
    Séparé des ressources ci-dessus. Réservé à l'équipe pédagogique.
    ===================================================================== */
-const OUTILS = [];
+const OUTILS = [
+  {
+    titre: "Planning AESH — PSR & MELEC",
+    desc: "Emplois du temps des sections PSR & MELEC, affectation des AESH (semaine A/B), périodes PFMP et événements. Les intervenants y consultent leur planning ; l'éditeur est réservé au coordinateur.",
+    lien: "planning-psr/",
+    couleur: "#2bb6a3",
+    icon: "calendar",
+    badge: "Nouveau",
+  },
+];

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coordination PSR — Planning</title>
+  <meta name="description" content="Outil de coordination des emplois du temps CAP PSR : classes, AESH, enseignants, Semaine A/B." />
+  <link rel="stylesheet" href="./styles/tokens.css" />
+  <link rel="stylesheet" href="./styles/base.css" />
+  <link rel="stylesheet" href="./styles/layout.css" />
+  <link rel="stylesheet" href="./styles/components.css" />
+</head>
+<body>
+  <div id="app" class="app-loading">
+    <div class="boot">
+      <div class="boot-logo">PSR</div>
+      <div class="boot-text">Chargement de l'espace de coordination…</div>
+    </div>
+  </div>
+  <!-- Firebase (SDK compat, optionnel) — pour la messagerie une fois en ligne.
+       Hors-ligne / en double-clic : ces scripts échouent sans bloquer l'app (messagerie « à configurer »). -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" crossorigin="anonymous" onerror="window.__noFirebase=1"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" crossorigin="anonymous" onerror="window.__noFirebase=1"></script>
+
+  <!-- Scripts « classiques » (et non modules) pour fonctionner aussi en double-clic (file://). -->
+  <script src="./vendor/preact.umd.js"></script>
+  <script src="./vendor/hooks.umd.js"></script>
+  <script src="./vendor/htm.umd.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

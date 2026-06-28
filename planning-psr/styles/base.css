@@ -1,0 +1,73 @@
+/* ============================================================
+   Base — reset léger, typographie, éléments globaux.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 800px at 85% -10%, rgba(75,86,214,0.06), transparent 60%),
+    radial-gradient(900px 700px at -10% 110%, rgba(123,77,219,0.05), transparent 55%),
+    linear-gradient(160deg, var(--bg-grad-1), var(--bg-grad-2));
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; color: var(--text); }
+h1 { font-size: 24px; }
+h2 { font-size: 18px; }
+h3 { font-size: 15px; }
+
+a { color: var(--accent); text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; font-size: 14px; }
+
+::selection { background: var(--accent-soft); }
+
+/* Scrollbars discrètes */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: var(--r-pill); border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--surface-hover); background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* — Écran de démarrage — */
+.app-loading { height: 100vh; display: grid; place-items: center; }
+.boot { text-align: center; animation: fade-in .4s ease; }
+.boot-logo {
+  width: 64px; height: 64px; margin: 0 auto var(--sp-4);
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 20px; letter-spacing: 0.05em;
+  border-radius: var(--r-lg);
+  background: linear-gradient(140deg, var(--accent), var(--accent-2));
+  color: white; box-shadow: var(--shadow-glow);
+}
+.boot-text { color: var(--text-3); font-size: 14px; }
+
+@keyframes fade-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+
+.fade-in { animation: fade-in .35s ease both; }
+.slide-up { animation: slide-up .35s ease both; }
+
+/* Utilitaires */
+.muted { color: var(--text-3); }
+.dim { color: var(--text-2); }
+.mono { font-family: var(--font-mono); }
+.row { display: flex; align-items: center; gap: var(--sp-3); }
+.col { display: flex; flex-direction: column; }
+.spread { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.wrap { flex-wrap: wrap; }
+.gap-2 { gap: var(--sp-2); }
+.gap-4 { gap: var(--sp-4); }
+.grow { flex: 1; }
+.center { text-align: center; }
+.nowrap { white-space: nowrap; }
+.hidden { display: none !important; }

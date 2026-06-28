@@ -1,0 +1,76 @@
+/* ============================================================
+   Design tokens — THÈME CLAIR, fort contraste, texte généreux.
+   Un seul endroit pour faire évoluer l'identité visuelle.
+   ============================================================ */
+:root {
+  /* — Surfaces & fond (clairs) — */
+  --bg: #eef1f7;
+  --bg-grad-1: #f3f5fb;
+  --bg-grad-2: #e8ecf5;
+  --surface: #ffffff;
+  --surface-2: #f6f8fc;
+  --surface-3: #eef1f7;
+  --surface-hover: #e6ebf4;
+  --border: #d3dbea;
+  --border-strong: #b6c1d6;
+  --border-soft: #e4e9f2;
+
+  /* — Texte (sombre sur clair, contraste élevé) — */
+  --text: #16203a;
+  --text-2: #3c4a66;
+  --text-3: #5e6b85;
+  --text-inverse: #ffffff;
+
+  /* — Accent (indigo soutenu, lisible sur blanc) — */
+  --accent: #4b56d6;
+  --accent-2: #7b4ddb;
+  --accent-soft: rgba(75, 86, 214, 0.10);
+  --accent-border: rgba(75, 86, 214, 0.40);
+
+  /* — Sémantique (versions soutenues pour fond clair) — */
+  --ok: #138a52;
+  --ok-soft: rgba(19, 138, 82, 0.12);
+  --warn: #b5670a;
+  --warn-soft: rgba(181, 103, 10, 0.14);
+  --danger: #cf2f26;
+  --danger-soft: rgba(207, 47, 38, 0.12);
+  --info: #0b72b8;
+  --info-soft: rgba(11, 114, 184, 0.12);
+
+  /* — Rayons — */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
+  --r-xl: 26px;
+  --r-pill: 999px;
+
+  /* — Ombres (douces, pour fond clair) — */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.05);
+  --shadow-md: 0 6px 20px rgba(16, 24, 40, 0.08);
+  --shadow-lg: 0 20px 50px rgba(16, 24, 40, 0.16);
+  --shadow-glow: 0 0 0 1px var(--accent-border), 0 8px 28px rgba(75, 86, 214, 0.22);
+
+  /* — Typographie — */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* — Espacements — */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* — Layout — */
+  --sidebar-w: 256px;
+  --topbar-h: 66px;
+
+  /* — Semaines — */
+  --sem-a: #0b72b8;
+  --sem-a-soft: rgba(11, 114, 184, 0.14);
+  --sem-b: #8a36cf;
+  --sem-b-soft: rgba(138, 54, 207, 0.14);
+}
