@@ -118,6 +118,22 @@ const THEMATIQUES = [
     ],
   },
   {
+    id: "aesh",
+    nom: "Espace AESH",
+    couleur: "#0f766e",
+    icon: "heart",
+    enfants: [
+      {
+        titre: "Les missions de l'AESH",
+        desc: "Au fond, accompagner quoi ? Les 3 domaines (circulaire 2017-084), la juste posture, l'équipe autour de l'élève, et tous les textes officiels. Guide multipage, pensé pour le mobile.",
+        lien: "guides/aesh-missions.html",
+        type: "Guide",
+        icon: "users",
+        badge: "Nouveau",
+      },
+    ],
+  },
+  {
     id: "pratiques-pro",
     nom: "Ouvrages & réflexions",
     couleur: "#0e7c66",

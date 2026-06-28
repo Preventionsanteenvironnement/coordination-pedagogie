@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<title>Les missions de l'AESH — Espace AESH</title>
+<style>
+  :root{
+    --bg:#f5f3ee; --card:#ffffff; --ink:#1d2a28; --soft:#5e6f6a; --line:#e7e3da; --line2:#f0ede5;
+    --c1:#0f766e; --c1d:#0b5a54; --c1soft:#dff1ee;
+    --coral:#ef6c4d; --coralsoft:#fbe7e0;
+    --d1:#c2700a; --d1soft:#fbeed5;     /* vie quotidienne */
+    --d2:#0f766e; --d2soft:#daf0ec;     /* apprentissages  */
+    --d3:#6f54c8; --d3soft:#e9e3fb;     /* vie sociale     */
+    --r:20px; --r-sm:13px;
+    --shadow:0 1px 2px rgba(20,40,38,.05),0 14px 34px rgba(20,40,38,.08);
+    --shadow-lg:0 14px 50px rgba(20,40,38,.18);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0c1413; --card:#13201e; --ink:#e8efed; --soft:#9fb0ab; --line:#26352f; --line2:#1a2723;
+      --c1:#3fb5a6; --c1d:#2f9b8e; --c1soft:#11302b;
+      --coral:#f0825f; --coralsoft:#33201a;
+      --d1:#e0a24e; --d1soft:#33260f; --d2:#3fb5a6; --d2soft:#0f2e2a; --d3:#a892ee; --d3soft:#221a3a;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 38px rgba(0,0,0,.45);
+      --shadow-lg:0 16px 54px rgba(0,0,0,.6);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.6;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+  svg{flex:none}
+  a{color:inherit}
+  .wrap{max-width:780px;margin:0 auto;padding:0 16px 120px}
+  /* topbar */
+  .topbar{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px}
+  .home{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:.82rem;font-weight:650;color:var(--soft);background:var(--card);border:1px solid var(--line);padding:7px 12px;border-radius:999px}
+  .home:hover{color:var(--c1);border-color:var(--c1)}
+  .tb-t{font-size:.86rem;font-weight:750;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tb-n{font-size:.74rem;font-weight:700;color:var(--c1);background:var(--c1soft);padding:4px 10px;border-radius:999px;flex:none}
+  /* nav pills */
+  .nav{position:sticky;top:53px;z-index:20;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav-in{max-width:780px;margin:0 auto;display:flex;gap:7px;overflow-x:auto;padding:11px 16px;scrollbar-width:none}
+  .nav-in::-webkit-scrollbar{display:none}
+  .pill{flex:none;display:inline-flex;align-items:center;gap:7px;font-size:.82rem;font-weight:650;color:var(--soft);background:var(--card);border:1px solid var(--line);padding:8px 13px;border-radius:999px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .pill:hover{border-color:var(--c1)}
+  .pill.on{background:var(--c1);color:#fff;border-color:var(--c1);box-shadow:0 3px 10px color-mix(in srgb,var(--c1) 40%,transparent)}
+  .pill .pn{display:grid;place-items:center;width:19px;height:19px;border-radius:50%;background:var(--c1soft);color:var(--c1);font-size:.7rem;font-weight:800}
+  .pill.on .pn{background:rgba(255,255,255,.25);color:#fff}
+  /* pages */
+  .page{display:none;animation:fade .35s ease both}
+  .page.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--c1);margin:26px 0 8px}
+  h1{font-size:clamp(1.7rem,6vw,2.5rem);font-weight:850;letter-spacing:-.02em;line-height:1.12;margin:0 0 12px}
+  h2{font-size:1.42rem;font-weight:800;letter-spacing:-.01em;margin:30px 0 10px}
+  h3{font-size:1.08rem;font-weight:750;margin:0 0 6px}
+  p{margin:0 0 14px}
+  .lead{font-size:1.12rem;color:var(--soft)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;margin:14px 0}
+  /* hero */
+  .hero{position:relative;border-radius:26px;overflow:hidden;padding:38px 26px 32px;margin:18px 0 8px;color:#fff;
+    background:linear-gradient(135deg,#0f766e 0%,#0b5a54 60%,#134e4a 100%)}
+  .hero h1{color:#fff;margin:0 0 10px}
+  .hero p{color:rgba(255,255,255,.92);font-size:1.06rem;margin:0;max-width:30em}
+  .hero .badge{display:inline-flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.16);padding:6px 13px;border-radius:999px;margin-bottom:16px}
+  .blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.5}
+  .b1{width:200px;height:200px;background:#34d399;right:-50px;top:-60px;opacity:.32}
+  .b2{width:130px;height:130px;background:#f59e0b;right:40px;bottom:-50px;opacity:.3}
+  .b3{width:90px;height:90px;background:#22d3ee;left:-30px;bottom:-30px;opacity:.25}
+  /* principe / callouts */
+  .key{display:flex;gap:14px;background:var(--coralsoft);border:1px solid color-mix(in srgb,var(--coral) 40%,transparent);border-radius:var(--r);padding:18px 20px;margin:18px 0}
+  .key .ki{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--coral);color:#fff}
+  .key b{color:var(--ink)}
+  .ex{background:var(--c1soft);border-left:4px solid var(--c1);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:13px 16px;margin:12px 0;font-size:.95rem}
+  .ex .exl{font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c1);display:block;margin-bottom:3px}
+  /* 3 domaines */
+  .dom{border-radius:var(--r);padding:20px;margin:14px 0;border:1px solid var(--line);background:var(--card);box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .dom::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px}
+  .dom.x1::before{background:var(--d1)} .dom.x2::before{background:var(--d2)} .dom.x3::before{background:var(--d3)}
+  .dom-h{display:flex;align-items:center;gap:13px;margin-bottom:6px}
+  .dom-ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none}
+  .dom.x1 .dom-ic{background:var(--d1soft);color:var(--d1)} .dom.x2 .dom-ic{background:var(--d2soft);color:var(--d2)} .dom.x3 .dom-ic{background:var(--d3soft);color:var(--d3)}
+  .dom-n{font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+  .dom.x1 .dom-n{color:var(--d1)} .dom.x2 .dom-n{color:var(--d2)} .dom.x3 .dom-n{color:var(--d3)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .chip{font-size:.82rem;font-weight:600;background:var(--line2);color:var(--ink);padding:6px 11px;border-radius:999px}
+  /* triptyque aperçu */
+  .trip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+  @media(max-width:560px){.trip{grid-template-columns:1fr}}
+  .tcard{border-radius:var(--r-sm);padding:14px;color:#fff;min-height:104px;display:flex;flex-direction:column;justify-content:space-between}
+  .tcard.x1{background:linear-gradient(150deg,#d98315,#b4660a)} .tcard.x2{background:linear-gradient(150deg,#13897e,#0b5a54)} .tcard.x3{background:linear-gradient(150deg,#7d63d6,#5b41ad)}
+  .tcard b{font-size:1.02rem;font-weight:750} .tcard small{opacity:.9;font-size:.78rem}
+  .tcard .tn{font-size:.7rem;font-weight:800;opacity:.8}
+  /* fait / pas fait */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  @media(max-width:560px){.two{grid-template-columns:1fr}}
+  .yn{border-radius:var(--r);padding:16px 18px;border:1px solid var(--line)}
+  .yn.y{background:var(--d2soft)} .yn.n{background:var(--coralsoft)}
+  .yn h3{display:flex;align-items:center;gap:8px}
+  .yn.y h3{color:var(--c1d)} .yn.n h3{color:#b34a2f}
+  .yn ul{margin:8px 0 0;padding-left:0;list-style:none}
+  .yn li{display:flex;gap:9px;font-size:.92rem;margin-bottom:8px;align-items:flex-start}
+  .yn li svg{margin-top:3px;flex:none}
+  .yn.y li svg{color:var(--c1)} .yn.n li svg{color:var(--coral)}
+  /* hub relations */
+  .hub{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:16px 0}
+  .hub .center{flex-basis:100%;text-align:center;margin-bottom:4px}
+  .hub .center span{display:inline-block;background:var(--c1);color:#fff;font-weight:750;padding:10px 20px;border-radius:999px;box-shadow:var(--shadow)}
+  .rel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 14px;font-size:.9rem;flex:1 1 160px;min-width:150px}
+  .rel b{display:block;font-size:.92rem} .rel small{color:var(--soft)}
+  /* source chips */
+  .src{display:inline-flex;align-items:center;gap:6px;font-size:.76rem;font-weight:700;color:var(--c1);background:var(--c1soft);border:1px solid color-mix(in srgb,var(--c1) 28%,transparent);padding:4px 10px;border-radius:999px;cursor:pointer;vertical-align:middle}
+  .src:hover{background:var(--c1);color:#fff}
+  .quote{border-left:4px solid var(--c1);background:var(--card);border:1px solid var(--line);border-left-width:4px;border-radius:0 var(--r-sm) var(--r-sm) 0;padding:14px 17px;margin:14px 0;font-style:italic;color:var(--ink)}
+  .quote cite{display:block;font-style:normal;font-size:.8rem;color:var(--soft);margin-top:7px;font-weight:600}
+  /* liste textes */
+  .txt{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .txt:last-child{border-bottom:none}
+  .txt .ti{flex:none;width:38px;height:38px;border-radius:11px;background:var(--c1soft);color:var(--c1);display:grid;place-items:center}
+  .txt b{font-size:.96rem} .txt p{margin:2px 0 5px;font-size:.88rem;color:var(--soft)}
+  .txt a{font-size:.8rem;font-weight:700;color:var(--c1);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  /* prev/next */
+  .pn-bar{display:flex;justify-content:space-between;gap:10px;margin-top:30px}
+  .pn-btn{flex:1;display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;cursor:pointer;text-align:left;transition:.15s}
+  .pn-btn:hover{border-color:var(--c1);transform:translateY(-1px)}
+  .pn-btn[disabled]{opacity:.4;cursor:default;transform:none}
+  .pn-btn.next{justify-content:flex-end;text-align:right;background:var(--c1);color:#fff;border-color:var(--c1)}
+  .pn-btn small{display:block;font-size:.7rem;opacity:.75;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .pn-btn span{font-weight:750;font-size:.92rem}
+  /* sheet source */
+  .sheet-bg{position:fixed;inset:0;background:rgba(15,25,23,.55);z-index:60;opacity:0;pointer-events:none;transition:.22s}
+  .sheet-bg.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-radius:24px 24px 0 0;padding:22px 22px calc(26px + env(safe-area-inset-bottom));box-shadow:var(--shadow-lg);transform:translateY(102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-width:780px;margin:0 auto}
+  .sheet.on{transform:none}
+  .sheet-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .sheet-h b{font-size:.96rem;color:var(--c1)}
+  .sheet-x{background:var(--line2);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;color:var(--soft);display:grid;place-items:center}
+  .sheet p{font-size:.96rem;font-style:italic;margin:0 0 12px}
+  .sheet a{font-size:.82rem;font-weight:700;color:var(--c1);text-decoration:none}
+  .ico{width:1em;height:1em;display:inline-block}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-in">
+  <a class="home" href="../"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg> Portail</a>
+  <div class="tb-t">Les missions de l'AESH</div>
+  <div class="tb-n" id="tb-n">1 / 7</div>
+</div></div>
+
+<nav class="nav"><div class="nav-in" id="nav"></div></nav>
+
+<div class="wrap">
+
+  <!-- 1 — ACCUEIL -->
+  <section class="page on" data-page data-title="L'essentiel">
+    <div class="hero">
+      <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+      <span class="badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 19v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg> Espace AESH</span>
+      <h1>Les missions de l'AESH</h1>
+      <p>Accompagner un élève en situation de handicap vers l'autonomie, les apprentissages et la vie du groupe — dans un cadre précis, fixé par la loi.</p>
+    </div>
+
+    <div class="key">
+      <span class="ki"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+      <div><b>Un principe avant tout :</b> les missions de l'AESH sont <b>strictement énumérées</b> par la circulaire n° 2017-084 du 3 mai 2017. Une tâche qui n'y figure pas ne peut pas être confiée à un·e AESH. <span class="src" data-src="circ">réf. circulaire 2017-084</span></div>
+    </div>
+
+    <p class="lead">Tout tient en <b>trois grands domaines d'accompagnement</b> :</p>
+    <div class="trip">
+      <div class="tcard x1"><span class="tn">Domaine 1</span><b>La vie quotidienne</b><small>autonomie, repas, hygiène, déplacements</small></div>
+      <div class="tcard x2"><span class="tn">Domaine 2</span><b>Les apprentissages</b><small>accès au travail de la classe</small></div>
+      <div class="tcard x3"><span class="tn">Domaine 3</span><b>La vie sociale</b><small>relations, échanges, groupe</small></div>
+    </div>
+    <p class="lead" style="font-size:.98rem;margin-top:18px">Ce guide explique, point par point, ce que recouvre chaque domaine, la juste posture, avec qui l'on travaille, et tous les textes officiels — avec des exemples concrets.</p>
+  </section>
+
+  <!-- 2 — QUI -->
+  <section class="page" data-page data-title="Qui est l'AESH ?">
+    <div class="eyebrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Repère 2</div>
+    <h1>Qui est l'AESH&nbsp;?</h1>
+    <p class="lead">L'<b>Accompagnant des élèves en situation de handicap</b> est un <b>agent public</b> du ministère de l'Éducation nationale. Son métier existe dans la loi.</p>
+
+    <div class="card">
+      <h3>Un métier inscrit dans le Code de l'éducation</h3>
+      <p>Le statut des AESH est créé par l'<b>article L. 917-1 du Code de l'éducation</b> : des personnels recrutés pour exercer des fonctions d'aide à l'inclusion scolaire des élèves en situation de handicap. <span class="src" data-src="L917">réf. L. 917-1</span></p>
+      <p>L'aide humaine — individuelle ou mutualisée — est <b>attribuée par la CDAPH</b> (commission des droits et de l'autonomie des personnes handicapées) lorsqu'elle est nécessaire à la scolarisation. <span class="src" data-src="L351">réf. L. 351-3</span></p>
+    </div>
+
+    <h2>De quoi parle-t-on quand on dit «&nbsp;handicap&nbsp;»&nbsp;?</h2>
+    <div class="quote">« Constitue un handicap […] toute limitation d'activité ou restriction de participation à la vie en société subie par une personne en raison d'une altération substantielle, durable ou définitive d'une ou plusieurs fonctions physiques, sensorielles, mentales, cognitives ou psychiques, d'un polyhandicap ou d'un trouble de santé invalidant. »
+      <cite>Loi n° 2005-102 du 11 février 2005, article 2 <span class="src" data-src="loi2005">voir le texte</span></cite></div>
+
+    <div class="key" style="background:var(--c1soft);border-color:color-mix(in srgb,var(--c1) 35%,transparent)">
+      <span class="ki" style="background:var(--c1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/></svg></span>
+      <div><b>À ne jamais oublier :</b> l'élève en situation de handicap, comme tous les élèves, reste sous la <b>responsabilité pédagogique et juridique de l'enseignant</b>. L'AESH accompagne — il n'enseigne pas et n'évalue pas. <span class="src" data-src="resp">réf. Guide national, p. 7</span></div>
+    </div>
+  </section>
+
+  <!-- 3 — LES 3 DOMAINES -->
+  <section class="page" data-page data-title="Les 3 domaines">
+    <div class="eyebrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg> Le cœur du métier</div>
+    <h1>Les 3 domaines d'aide</h1>
+    <p class="lead">La circulaire n° 2017-084 organise l'accompagnement autour de trois domaines. C'est la colonne vertébrale du métier. <span class="src" data-src="circ3">réf. circulaire 2017-084</span></p>
+
+    <div class="dom x1">
+      <div class="dom-h"><span class="dom-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 1 4 4c0 2-1.5 3-1.5 5h-5C9.5 10 8 9 8 7a4 4 0 0 1 4-4z"/><path d="M9 17h6M10 21h4"/></svg></span>
+        <div><div class="dom-n">Domaine 1</div><h3>L'accompagnement dans les actes de la vie quotidienne</h3></div></div>
+      <p>Aider l'élève aux <b>actes essentiels de la vie</b> pour qu'il puisse être présent et disponible en classe : habillage, lever et coucher (sieste du jeune enfant), aide à la prise des repas, aide à la toilette et aux soins d'hygiène de façon générale, déplacements. <span class="src" data-src="circ3">réf. circulaire 2017-084</span></p>
+      <div class="chips"><span class="chip">Habillage</span><span class="chip">Repas / cantine</span><span class="chip">Hygiène</span><span class="chip">Déplacements</span><span class="chip">Installation</span></div>
+      <div class="ex"><span class="exl">Exemple concret</span>À la cantine, l'AESH aide Léa à couper sa viande et à tenir ses couverts, puis l'encourage à manger seule. Le but n'est pas de faire à sa place, mais de rendre le repas possible.</div>
+    </div>
+
+    <div class="dom x2">
+      <div class="dom-h"><span class="dom-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5A1.5 1.5 0 0 1 4.5 4H11v15H4.5A1.5 1.5 0 0 0 3 20.5z"/><path d="M21 5.5A1.5 1.5 0 0 0 19.5 4H13v15h6.5A1.5 1.5 0 0 1 21 20.5z"/></svg></span>
+        <div><div class="dom-n">Domaine 2</div><h3>L'accompagnement dans l'accès aux apprentissages</h3></div></div>
+      <p>Soutenir l'élève pour qu'il <b>accède au travail de la classe</b>, dans le cadre fixé par l'enseignant — qui reste maître de la pédagogie et de l'évaluation.</p>
+      <div class="chips"><span class="chip">Reformuler une consigne</span><span class="chip">Soutenir l'attention</span><span class="chip">Matériel adapté</span><span class="chip">S'organiser</span><span class="chip">Écrire sous la dictée*</span></div>
+      <div class="ex"><span class="exl">Exemple concret</span>L'enseignant donne une consigne au tableau. L'AESH la <b>reformule</b> à voix basse pour Sami, l'aide à sortir le bon matériel, puis le laisse chercher seul. Si un aménagement le prévoit, l'AESH peut écrire sous sa dictée.</div>
+    </div>
+
+    <div class="dom x3">
+      <div class="dom-h"><span class="dom-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M15 19a4 4 0 0 1 6 0"/></svg></span>
+        <div><div class="dom-n">Domaine 3</div><h3>L'accompagnement dans la vie sociale et relationnelle</h3></div></div>
+      <p>Aider l'élève à <b>prendre sa place dans le groupe</b> : communiquer avec ses camarades, participer aux activités collectives, vivre les temps de classe et de récréation.</p>
+      <div class="chips"><span class="chip">Échanges avec les pairs</span><span class="chip">Activités de groupe</span><span class="chip">Médiation</span><span class="chip">Participation</span></div>
+      <div class="ex"><span class="exl">Exemple concret</span>À la récréation, l'AESH encourage Zoé à rejoindre un jeu collectif et facilite les premiers échanges, puis s'efface dès que la relation se noue.</div>
+    </div>
+
+    <p style="font-size:.85rem;color:var(--soft);margin-top:6px">* Selon les aménagements notifiés. Le rôle de «&nbsp;secrétaire / scripteur&nbsp;» fait l'objet d'un guide dédié.</p>
+  </section>
+
+  <!-- 4 — POSTURE -->
+  <section class="page" data-page data-title="La juste posture">
+    <div class="eyebrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M5.6 5.6l2.1 2.1M3 12h3M18 12h3M16.3 7.7l2.1-2.1"/><circle cx="12" cy="15" r="5"/></svg> La posture</div>
+    <h1>Faire <em>avec</em>, jamais <em>à la place</em></h1>
+    <p class="lead">Le fil conducteur de tout le métier : <b>développer l'autonomie de l'élève</b>. L'AESH est un appui qui doit, idéalement, se rendre de moins en moins nécessaire.</p>
+
+    <div class="two">
+      <div class="yn y"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg> Ce qui relève de l'AESH</h3>
+        <ul>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg> Accompagner dans les 3 domaines (vie quotidienne, apprentissages, vie sociale)</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg> Encourager l'autonomie et l'effort de l'élève</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg> Appliquer les consignes de l'enseignant</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg> Participer aux ESS et au suivi de l'élève</li>
+        </ul></div>
+      <div class="yn n"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg> Ce qui n'en relève pas</h3>
+        <ul>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg> Enseigner ou évaluer (rôle de l'enseignant)</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg> Assurer la <b>surveillance de la cour</b> <span class="src" data-src="cour">réf. p. 9</span></li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg> Les soins médicaux (relèvent du PAI / de l'infirmière)</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg> Toute tâche absente de la circulaire 2017-084</li>
+        </ul></div>
+    </div>
+    <div class="ex"><span class="exl">Le bon réflexe</span>Avant d'aider, se demander : «&nbsp;Est-ce que l'élève peut le faire seul, même lentement&nbsp;?&nbsp;» Si oui, on le laisse essayer et on encourage. L'aide vient quand elle est vraiment nécessaire.</div>
+  </section>
+
+  <!-- 5 — AVEC QUI -->
+  <section class="page" data-page data-title="Avec qui ?">
+    <div class="eyebrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6.1"/></svg> L'équipe</div>
+    <h1>L'AESH ne travaille jamais seul·e</h1>
+    <p class="lead">L'accompagnement est un <b>travail d'équipe</b>, autour de l'élève et de sa famille.</p>
+
+    <div class="hub">
+      <div class="center"><span>L'AESH, au service de l'élève</span></div>
+      <div class="rel"><b>L'enseignant</b><small>Responsable pédagogique. Donne le cadre et les consignes.</small></div>
+      <div class="rel"><b>La famille</b><small>Dans un cadre professionnel, en temps formalisés. Discrétion : pas de coordonnées personnelles. <span class="src" data-src="fam">réf. p. 4</span></small></div>
+      <div class="rel"><b>L'enseignant référent (ERSEH)</b><small>Coordonne le parcours et l'équipe de suivi.</small></div>
+      <div class="rel"><b>L'équipe de suivi (ESS)</b><small>Réunions de suivi de la scolarisation : l'AESH y participe.</small></div>
+      <div class="rel"><b>Le coordonnateur du PIAL</b><small>Organise l'emploi du temps et les affectations.</small></div>
+      <div class="rel"><b>RASED, ULIS, autres AESH</b><small>Ressources et échanges entre professionnels.</small></div>
+    </div>
+    <div class="ex"><span class="exl">Avant de commencer</span>Une rencontre est prévue avec l'élève et sa famille, en présence d'un professeur ou du directeur. Les outils utiles (PPS, GEVA-Sco) sont communiqués à l'AESH. <span class="src" data-src="avant">réf. p. 7</span></div>
+  </section>
+
+  <!-- 6 — MODALITÉS -->
+  <section class="page" data-page data-title="Les modalités">
+    <div class="eyebrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg> L'organisation</div>
+    <h1>Individuelle, mutualisée ou collective</h1>
+    <p class="lead">C'est la <b>CDAPH</b> qui définit, pour chaque élève, la forme de l'aide humaine. <span class="src" data-src="modal">réf. p. 6</span></p>
+
+    <div class="card"><h3>Trois formes d'accompagnement</h3>
+      <div class="chips" style="margin-top:4px">
+        <span class="chip" style="background:var(--d1soft);color:var(--d1)">Individuelle — un élève désigné</span>
+        <span class="chip" style="background:var(--d2soft);color:var(--d2)">Mutualisée — plusieurs élèves, selon les besoins</span>
+        <span class="chip" style="background:var(--d3soft);color:var(--d3)">Collective — un dispositif (ex. ULIS)</span>
+      </div>
+    </div>
+
+    <h2>Les outils du parcours</h2>
+    <div class="txt"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7.5z"/><path d="M13.5 3v4.5H18"/></svg></span>
+      <div><b>Le PPS</b> — projet personnalisé de scolarisation<p>Le document qui définit les besoins et les réponses pour l'élève. L'AESH en a connaissance.</p></div></div>
+    <div class="txt"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>
+      <div><b>Le GEVA-Sco</b><p>L'observation de l'élève en situation, qui nourrit l'équipe de suivi.</p></div></div>
+    <div class="txt"><span class="ti"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5-9 4.5z"/><path d="M3 7.5V16l9 4.5 9-4.5V7.5"/></svg></span>
+      <div><b>Le PIAL</b> — pôle inclusif d'accompagnement localisé<p>L'organisation de proximité qui répartit les AESH. Le coordonnateur gère les emplois du temps.</p></div></div>
+  </section>
+
+  <!-- 7 — TEXTES -->
+  <section class="page" data-page data-title="Les textes">
+    <div class="eyebrow"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M7 20h10"/><path d="M12 6 5 9l-2.5 5a3 3 0 0 0 5 0L5 9m14 0-2.5 5a3 3 0 0 0 5 0L19 9 12 6"/></svg> Les sources officielles</div>
+    <h1>Sur quoi repose ce guide</h1>
+    <p class="lead">Tout ici s'appuie sur des textes officiels. Voici les références, à jour.</p>
+
+    <div class="card">
+      <div class="txt"><span class="ti">L</span><div><b>Loi n° 2005-102 du 11 février 2005</b><p>Égalité des droits et des chances, participation et citoyenneté des personnes handicapées — définit le handicap et le droit à la scolarisation.</p><a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000809647" target="_blank" rel="noopener">Légifrance ↗</a></div></div>
+      <div class="txt"><span class="ti">C</span><div><b>Code de l'éducation, art. L. 917-1</b><p>Crée le statut des accompagnants des élèves en situation de handicap (AESH).</p><a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006071191" target="_blank" rel="noopener">Code de l'éducation ↗</a></div></div>
+      <div class="txt"><span class="ti">C</span><div><b>Code de l'éducation, art. L. 351-3</b><p>L'aide humaine et son attribution par la CDAPH.</p><a href="https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006071191" target="_blank" rel="noopener">Code de l'éducation ↗</a></div></div>
+      <div class="txt"><span class="ti">§</span><div><b>Circulaire n° 2017-084 du 3 mai 2017</b><p>Missions et activités des personnels AESH — le texte qui énumère strictement les missions (les 3 domaines).</p><a href="https://www.education.gouv.fr/" target="_blank" rel="noopener">education.gouv.fr ↗</a></div></div>
+      <div class="txt"><span class="ti">D</span><div><b>Décret n° 2014-724 du 27 juin 2014</b><p>Conditions de recrutement et d'emploi des AESH.</p><a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000029153266" target="_blank" rel="noopener">Légifrance ↗</a></div></div>
+      <div class="txt"><span class="ti">G</span><div><b>Guide national des AESH</b> — Ministère de l'Éducation nationale<p>Le guide de référence pour les AESH (emploi, missions, droits).</p><a href="https://www.education.gouv.fr/devenir-accompagnant-d-eleves-en-situation-de-handicap-aesh-12188" target="_blank" rel="noopener">education.gouv.fr ↗</a></div></div>
+      <div class="txt"><span class="ti">R</span><div><b>Rapport IGAS-IGÉSR (mai 2026)</b> — Rôle et missions des AESH dans l'école inclusive<p>État des lieux 2026 et 22 recommandations (reconnaissance du métier, virage vers l'accessibilité).</p><a href="https://www.igas.gouv.fr/" target="_blank" rel="noopener">igas.gouv.fr ↗</a></div></div>
+    </div>
+    <p style="font-size:.82rem;color:var(--soft)">Mis à jour le 28 juin 2026. Ce guide sera enrichi au fil du temps.</p>
+  </section>
+
+  <div class="pn-bar">
+    <button class="pn-btn prev" id="prev"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg><span><small>Précédent</small><span id="prev-t"></span></span></button>
+    <button class="pn-btn next" id="next"><span><small>Suivant</small><span id="next-t"></span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 6 6 6-6 6"/></svg></button>
+  </div>
+</div>
+
+<div class="sheet-bg" id="sheet-bg"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-h"><b id="sheet-ref">Source</b><button class="sheet-x" id="sheet-x"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <p id="sheet-txt"></p>
+  <a id="sheet-link" href="#" target="_blank" rel="noopener" hidden>Voir le texte officiel ↗</a>
+</div>
+
+<script>
+  const pages=[...document.querySelectorAll('[data-page]')];
+  const nav=document.getElementById('nav');
+  nav.innerHTML=pages.map((p,i)=>`<button class="pill ${i===0?'on':''}" data-i="${i}"><span class="pn">${i+1}</span>${p.dataset.title}</button>`).join('');
+  const pills=[...nav.children];
+  let cur=0;
+  function show(i){
+    if(i<0||i>=pages.length) return;
+    pages[cur].classList.remove('on'); pills[cur].classList.remove('on');
+    cur=i;
+    pages[cur].classList.add('on'); pills[cur].classList.add('on');
+    document.getElementById('tb-n').textContent=(i+1)+' / '+pages.length;
+    pills[cur].scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+    window.scrollTo({top:0,behavior:'smooth'});
+    const prev=document.getElementById('prev'), next=document.getElementById('next');
+    prev.disabled=i===0; next.disabled=i===pages.length-1;
+    document.getElementById('prev-t').textContent=i>0?pages[i-1].dataset.title:'';
+    document.getElementById('next-t').textContent=i<pages.length-1?pages[i+1].dataset.title:'Terminé';
+  }
+  nav.addEventListener('click',e=>{const b=e.target.closest('[data-i]'); if(b) show(+b.dataset.i);});
+  document.getElementById('prev').addEventListener('click',()=>show(cur-1));
+  document.getElementById('next').addEventListener('click',()=>show(cur+1));
+
+  const SOURCES={
+    circ:{ref:"Circulaire n° 2017-084 du 3 mai 2017",txt:"« Les missions que vous exercez dans le cadre de votre contrat de travail d'AESH sont strictement énumérées par la circulaire n° 2017-084 du 3 mai 2017. Les services académiques, les écoles ou les établissements ne peuvent pas vous confier des tâches n'y figurant pas. »",url:"https://www.education.gouv.fr/"},
+    circ3:{ref:"Circulaire n° 2017-084 du 3 mai 2017",txt:"Les activités s'articulent autour de trois missions : l'accompagnement de l'élève dans les actes de la vie quotidienne ; l'accompagnement dans l'accès aux apprentissages ; l'accompagnement dans les activités de la vie sociale et relationnelle.",url:"https://www.education.gouv.fr/"},
+    L917:{ref:"Code de l'éducation, art. L. 917-1",txt:"Crée le statut des accompagnants des élèves en situation de handicap (AESH), recrutés pour exercer des fonctions d'aide à l'inclusion scolaire des élèves en situation de handicap.",url:"https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006071191"},
+    L351:{ref:"Code de l'éducation, art. L. 351-3",txt:"L'aide humaine individuelle ou mutualisée est attribuée par la commission des droits et de l'autonomie des personnes handicapées (CDAPH) lorsqu'elle est nécessaire à la scolarisation de l'élève en situation de handicap.",url:"https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006071191"},
+    loi2005:{ref:"Loi n° 2005-102 du 11 février 2005, art. 2",txt:"« Constitue un handicap […] toute limitation d'activité ou restriction de participation à la vie en société subie par une personne en raison d'une altération substantielle, durable ou définitive d'une ou plusieurs fonctions physiques, sensorielles, mentales, cognitives ou psychiques, d'un polyhandicap ou d'un trouble de santé invalidant. »",url:"https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000809647"},
+    resp:{ref:"Guide national des AESH (MEN), p. 7",txt:"« L'élève en situation de handicap, comme tous les élèves, est sous la responsabilité pédagogique et juridique de l'enseignant. »",url:"https://www.education.gouv.fr/devenir-accompagnant-d-eleves-en-situation-de-handicap-aesh-12188"},
+    cour:{ref:"Guide national des AESH (MEN), p. 9",txt:"« Il ne peut pas vous être confié une mission de surveillance de la cour. » L'AESH n'est pas compté dans le taux d'encadrement et de surveillance, sa mission étant centrée sur l'accompagnement de l'élève concerné.",url:""},
+    fam:{ref:"Guide national des AESH (MEN), p. 4",txt:"« Les relations avec les familles doivent s'inscrire dans un cadre professionnel […]. Il vous est recommandé de ne pas transmettre vos numéros de téléphone ou adresse mail personnel aux familles » — dans le respect de l'obligation de discrétion professionnelle.",url:""},
+    avant:{ref:"Guide national des AESH (MEN), p. 7",txt:"« Avant le début de l'accompagnement, vous participez à une rencontre avec le ou les élèves que vous allez accompagner et leur(s) famille(s), en présence d'un professeur, du directeur d'école ou du chef d'établissement. » Les outils utiles (PPS, GEVA-Sco) vous sont communiqués.",url:""},
+    modal:{ref:"Guide national des AESH (MEN), p. 6",txt:"« Vous accompagnez des élèves en situation de handicap selon les modalités définies par la CDAPH pour chacun d'entre eux (aide individuelle, collective ou mutualisée). »",url:""}
+  };
+  const bg=document.getElementById('sheet-bg'), sheet=document.getElementById('sheet');
+  function openSheet(id){const s=SOURCES[id]; if(!s)return;
+    document.getElementById('sheet-ref').textContent=s.ref;
+    document.getElementById('sheet-txt').textContent=s.txt;
+    const a=document.getElementById('sheet-link'); if(s.url){a.href=s.url;a.hidden=false;}else{a.hidden=true;}
+    bg.classList.add('on'); sheet.classList.add('on');}
+  function closeSheet(){bg.classList.remove('on'); sheet.classList.remove('on');}
+  document.addEventListener('click',e=>{const c=e.target.closest('[data-src]'); if(c) openSheet(c.dataset.src);});
+  bg.addEventListener('click',closeSheet); document.getElementById('sheet-x').addEventListener('click',closeSheet);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); if(e.key==='ArrowRight') show(cur+1); if(e.key==='ArrowLeft') show(cur-1); });
+  show(0);
+</script>
+</body>
+</html>
