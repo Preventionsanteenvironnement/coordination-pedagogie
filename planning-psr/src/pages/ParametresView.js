@@ -2,7 +2,7 @@
 // AESH & volumes, classes, enseignants, et la sauvegarde (export/import/reset).
 import { html, useState } from '@ui';
 import { Icon } from '../components/icons.js';
-import { Avatar, fmt, toast } from '../components/shared.js';
+import { Avatar, AVATARS, fmt, toast } from '../components/shared.js';
 import { upsertAesh, upsertClasse, resetToSeed, updateSemaine } from '../store.js';
 import { bilanAesh } from '../lib/selectors.js';
 import { exportJSON, triggerImport } from '../lib/io.js';
@@ -18,14 +18,18 @@ function AeshEditor({ state }) {
         Le <b style="color:var(--text-2)">sigle</b> est ce qui s'affiche dans la grille (RGPD) — mettez la lettre ou l'abréviation de votre choix.
       </div>
       <table class="tbl">
-        <thead><tr><th>Intervenant</th><th>Sigle</th><th>Volume cible</th><th>Positionné</th><th>Couleur</th></tr></thead>
+        <thead><tr><th>Intervenant</th><th>Sigle</th><th>Avatar</th><th>Volume cible</th><th>Positionné</th><th>Couleur</th></tr></thead>
         <tbody>
           ${state.aesh.map((a) => {
             const b = bilanAesh(state, a.id);
             return html`<tr>
-              <td><div class="row"><span class="aesh-pill" style=${`background:${a.color}`}>${a.code || a.initiales}</span> ${a.nom}</div></td>
+              <td><div class="row"><${Avatar} avatar=${a.avatar} initiales=${a.code || a.initiales} color=${a.color} size=${26} /> ${a.nom}</div></td>
               <td><input class="input" style="width:70px" value=${a.code || ''} maxlength="4"
                   onInput=${(e) => upsertAesh({ ...a, code: e.target.value })} /></td>
+              <td><select class="select" style="font-size:18px;padding:4px 8px" value=${a.avatar || ''}
+                  onChange=${(e) => upsertAesh({ ...a, avatar: e.target.value })}>
+                  ${AVATARS.map((av) => html`<option value=${av} selected=${(a.avatar || '') === av}>${av || '— lettre —'}</option>`)}
+                </select></td>
               <td>
                 <input class="input" style="width:84px" type="number" step="0.5" value=${a.volumeCible}
                   onChange=${(e) => { upsertAesh({ ...a, volumeCible: parseFloat(e.target.value) || 0 }); toast('Volume mis à jour'); }} />

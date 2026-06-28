@@ -1,8 +1,9 @@
 // Page Intervenant — planning personnel d'un AESH + détail de son volume horaire.
-import { html } from '@ui';
+import { html, useState } from '@ui';
 import { Icon } from '../components/icons.js';
 import { ScheduleGrid } from '../components/ScheduleGrid.js';
 import { WeekControl } from '../components/WeekControl.js';
+import { AeshScheduleEditor } from '../components/AeshScheduleEditor.js';
 import { Avatar, HourMeter, fmt } from '../components/shared.js';
 import { bilanAesh, byId } from '../lib/selectors.js';
 import { navigate } from '../router.js';
@@ -10,6 +11,7 @@ import { navigate } from '../router.js';
 export function IntervenantView({ state, params }) {
   const aeshId = params.id || (state.aesh[0] && state.aesh[0].id);
   const aesh = byId(state.aesh, aeshId);
+  const [editing, setEditing] = useState(false);
   if (!aesh) return html`<div class="empty">Intervenant introuvable.</div>`;
 
   const b = bilanAesh(state, aeshId);
@@ -18,22 +20,25 @@ export function IntervenantView({ state, params }) {
 
   return html`
     <div class="page-header">
-      <div class="spread">
-        <div class="row gap-4">
+      <div class="spread wrap gap-4">
+        <div class="row gap-4 wrap">
           <div class="seg">
             ${state.aesh.map((a) => html`
-              <button class=${a.id === aeshId ? 'active both' : ''} onClick=${() => navigate(`/aesh/${a.id}`)}>${a.prenom}</button>`)}
+              <button class=${a.id === aeshId ? 'active both' : ''} onClick=${() => navigate(`/aesh/${a.id}`)}>${a.code || a.initiales}</button>`)}
           </div>
           <div class="row">
-            <${Avatar} initiales=${aesh.initiales} color=${aesh.color} size=${34} />
+            <${Avatar} avatar=${aesh.avatar} initiales=${aesh.initiales} color=${aesh.color} size=${34} />
             <div>
               <h1 class="page-title">${aesh.nom}</h1>
               <div class="page-desc">Volume contractuel ${fmt(aesh.volumeCible)} h / semaine</div>
             </div>
           </div>
         </div>
+        <button class="btn primary" onClick=${() => setEditing(true)}>${Icon.edit({ size: 15 })} Composer le planning</button>
       </div>
     </div>
+
+    ${editing ? html`<${AeshScheduleEditor} state=${state} aeshId=${aeshId} onClose=${() => setEditing(false)} />` : null}
 
     <div style="margin-bottom:16px"><${WeekControl} state=${state} /></div>
 

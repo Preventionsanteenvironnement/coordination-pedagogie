@@ -11,17 +11,15 @@ import { Icon } from './icons.js';
 
 function AeshPill({ aesh, seanceId, editable }) {
   const code = aesh.code || aesh.initiales || '?';
+  const retirer = (e) => {
+    e.stopPropagation();
+    removeAffectation(aesh.id, seanceId);
+    toast(`AESH ${code} retiré`, 'warn', { label: 'Annuler', fn: () => addAffectation(aesh.id, seanceId) });
+  };
   return html`
-    <span class="aesh-pill" style=${`background:${aesh.color}`}
-      title=${editable ? 'Cliquer pour retirer' : `AESH ${code}`}
-      onClick=${(e) => {
-        if (!editable) return;
-        e.stopPropagation();
-        removeAffectation(aesh.id, seanceId);
-        toast(`AESH ${code} retiré de ce créneau`, 'warn');
-      }}>
+    <span class="aesh-pill" style=${`background:${aesh.color}`} title=${`AESH ${code}`}>
       ${code}
-      ${editable ? html`<span class="x">×</span>` : null}
+      ${editable ? html`<button class="x" title="Retirer ce créneau" onClick=${retirer}>×</button>` : null}
     </span>`;
 }
 

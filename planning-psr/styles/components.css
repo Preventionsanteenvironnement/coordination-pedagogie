@@ -182,8 +182,21 @@
   font-size: 11.5px; font-weight: 800; color: white; letter-spacing: .02em;
   cursor: default;
 }
-.aesh-pill .x { opacity: 0; margin-left: 2px; font-weight: 800; }
-.aesh-pill:hover .x { opacity: .85; }
+.aesh-pill .x {
+  display: inline-grid; place-items: center; margin-left: 2px;
+  width: 15px; height: 15px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(0,0,0,0.22); color: #fff; font-weight: 800; font-size: 12px; line-height: 1;
+  opacity: .65; transition: opacity .12s, background .12s;
+}
+.aesh-pill .x:hover { opacity: 1; background: var(--danger); }
+.aesh-pill:hover .x { opacity: .9; }
+
+.toast-action {
+  margin-left: 8px; padding: 3px 9px; border-radius: var(--r-sm);
+  background: var(--accent); color: #fff; border: none; cursor: pointer;
+  font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; gap: 4px;
+}
+.toast-action:hover { filter: brightness(1.08); }
 .aesh-mini-avatar { width: 15px; height: 15px; border-radius: 50%; display: grid; place-items: center; font-size: 8px; background: rgba(0,0,0,0.25); }
 
 .cell-empty-hint {
@@ -247,6 +260,33 @@
 .modal-head { padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border-soft); display: flex; align-items: center; justify-content: space-between; }
 .modal-body { padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4); }
 .modal-foot { padding: var(--sp-4) var(--sp-5); border-top: 1px solid var(--border-soft); display: flex; justify-content: flex-end; gap: var(--sp-2); }
+
+/* — Modale large + éditeur de planning par AESH — */
+.modal.modal-wide { width: min(1120px, 96vw); }
+.sch-grid {
+  display: grid; grid-template-columns: 60px repeat(6, 1fr); gap: 4px;
+}
+.sch-corner { }
+.sch-day { text-align: center; font-weight: 750; font-size: 12.5px; padding: 4px 0; color: var(--text-2); }
+.sch-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); text-align: right; padding-top: 4px; }
+.sch-slot { display: flex; flex-direction: column; gap: 3px; min-height: 26px; }
+.sch-cell {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  padding: 4px 6px; border-radius: var(--r-sm); cursor: pointer; text-align: left;
+  border: 1px solid var(--border); background: var(--surface-2);
+  border-left: 3px solid var(--disc); position: relative; transition: all .12s;
+}
+.sch-cell-top { display: flex; align-items: center; gap: 4px; font-size: 10.5px; }
+.sch-cell-sub { font-size: 9px; color: var(--text-3); }
+.sch-sem { font-weight: 800; font-size: 9px; }
+.sch-mark { position: absolute; top: 3px; right: 4px; opacity: .5; }
+.sch-cell.off:hover { border-color: var(--accent-border); background: var(--accent-soft); }
+.sch-cell.on { background: var(--disc); border-color: transparent; color: #fff; }
+.sch-cell.on .sch-cell-sub { color: rgba(255,255,255,.85); }
+.sch-cell.on .sch-mark { opacity: 1; }
+.sch-cell.conflit { border-style: dashed; border-left-color: var(--danger); opacity: .65; background: var(--danger-soft); }
+.sch-cell.conflit .sch-mark { color: var(--danger); opacity: 1; }
+.sch-empty { display: block; min-height: 22px; }
 
 /* — Toast — */
 .toast-wrap { position: fixed; bottom: var(--sp-5); right: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-2); z-index: 60; }

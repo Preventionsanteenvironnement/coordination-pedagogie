@@ -105,7 +105,7 @@ export function EvenementsView({ state }) {
               ${points.map((e) => {
                 const t = EVENT_TYPES[e.type]; const c = byId(state.classes, e.classe);
                 return html`<tr style="cursor:pointer" onClick=${() => setDraft(e)}>
-                  <td class="mono dim">${fmtDate(e.debut)}</td>
+                  <td class="mono dim">${fmtDate(e.debut)}${e.heureDebut ? html` <span class="badge" style="font-size:10.5px">${e.heureDebut}${e.heureFin ? '–' + e.heureFin : ''}</span>` : null}</td>
                   <td><span class="badge" style=${`color:${t.color};background:${t.color}1f`}>${t.court}</span></td>
                   <td>${c ? c.nom : e.classe}</td>
                   <td>${e.titre || '—'} ${e.previsionnel ? html`<span class="badge" style="margin-left:6px">prévis.</span>` : null}</td>

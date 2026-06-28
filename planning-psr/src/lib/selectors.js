@@ -108,6 +108,20 @@ export function listeAesh(state, aeshId) {
     .sort((a, b) => (ordreJour[a.jour] - ordreJour[b.jour]) || a.creneau.localeCompare(b.creneau));
 }
 
+// L'AESH est-il déjà occupé sur ce créneau (jour+créneau, semaine compatible) ?
+// Renvoie la/les séance(s) en conflit (hors la séance testée).
+export function aeshOccupeAt(state, aeshId, jour, creneau, semaine, exceptSeanceId) {
+  const seanceIds = new Set(state.affectations.filter((a) => a.aesh === aeshId).map((a) => a.seance));
+  return state.seances.filter((s) =>
+    seanceIds.has(s.id) && s.id !== exceptSeanceId &&
+    s.jour === jour && s.creneau === creneau &&
+    (s.semaine === 'AB' || semaine === 'AB' || s.semaine === semaine));
+}
+
+export function estAffecte(state, aeshId, seanceId) {
+  return state.affectations.some((a) => a.aesh === aeshId && a.seance === seanceId);
+}
+
 export function totauxGeneraux(state) {
   const totalAffecteH = state.aesh.reduce((s, a) => s + heuresAeshClasse(state, a.id), 0);
   const totalHorsH = state.aesh.reduce((s, a) => s + heuresAeshHorsClasse(state, a.id), 0);

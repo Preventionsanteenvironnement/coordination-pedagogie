@@ -1,9 +1,13 @@
 // Petits composants réutilisables : jauge d'heures, avatar, puce AESH, toasts.
 import { html } from '@ui';
 
-export function Avatar({ initiales, color, size = 22 }) {
-  return html`<span class="chip-avatar" style=${`background:${color};width:${size}px;height:${size}px;font-size:${size*0.42}px`}>${initiales}</span>`;
+export function Avatar({ avatar, initiales, color, size = 22 }) {
+  const isEmoji = avatar && /\p{Extended_Pictographic}/u.test(avatar);
+  return html`<span class="chip-avatar" style=${`background:${isEmoji ? 'transparent' : color};width:${size}px;height:${size}px;font-size:${size * (isEmoji ? 0.7 : 0.42)}px`}>${avatar || initiales}</span>`;
 }
+
+// Jeu d'avatars proposés (emoji neutres) + « aucun ».
+export const AVATARS = ['', '🦊', '🐼', '🦉', '🐺', '🦁', '🐯', '🐧', '🦅', '🌟', '🎯', '🧩', '📘', '🎓'];
 
 // Jauge : réalisé / cible, couleur selon l'écart.
 export function HourMeter({ value, target, label, sub }) {
@@ -30,6 +34,7 @@ export function fmt(n) {
 }
 
 // — Système de toasts global —
+// action (optionnel) = { label, fn } : affiche un bouton (ex. « Annuler »).
 let toastHandler = null;
 export function registerToast(fn) { toastHandler = fn; }
-export function toast(msg, kind = 'ok') { if (toastHandler) toastHandler(msg, kind); }
+export function toast(msg, kind = 'ok', action = null) { if (toastHandler) toastHandler(msg, kind, action); }

@@ -15,6 +15,8 @@ export function EvenementModal({ state, draft, onClose }) {
   const [titre, setTitre] = useState(draft.titre || '');
   const [debut, setDebut] = useState(draft.debut || '');
   const [fin, setFin] = useState(draft.fin || draft.debut || '');
+  const [hDebut, setHDebut] = useState(draft.heureDebut || '');
+  const [hFin, setHFin] = useState(draft.heureFin || '');
   const isRange = EVENT_TYPES[type]?.range;
 
   const save = () => {
@@ -22,6 +24,7 @@ export function EvenementModal({ state, draft, onClose }) {
     upsertEvenement({
       id: draft.id || makeEvId(), type, classe,
       titre: titre.trim(), debut, fin: isRange ? (fin || debut) : debut,
+      heureDebut: hDebut || '', heureFin: hFin || '',
       previsionnel: draft.previsionnel || false,
     });
     toast(isNew ? 'Événement ajouté' : 'Événement modifié');
@@ -68,6 +71,16 @@ export function EvenementModal({ state, draft, onClose }) {
               <label>Fin</label>
               <input class="input" type="date" value=${fin} onInput=${(e) => setFin(e.target.value)} />
             </div>` : null}
+          </div>
+          <div class="field">
+            <label>Créneau horaire (optionnel · par demi-heure)</label>
+            <div class="row gap-2">
+              <input class="input" type="time" step="1800" value=${hDebut} onInput=${(e) => setHDebut(e.target.value)} style="width:120px" />
+              <span class="muted">→</span>
+              <input class="input" type="time" step="1800" value=${hFin} onInput=${(e) => setHFin(e.target.value)} style="width:120px" />
+              ${(hDebut || hFin) ? html`<button class="btn sm ghost" onClick=${() => { setHDebut(''); setHFin(''); }}>Effacer</button>` : null}
+            </div>
+            <div class="muted" style="font-size:11.5px">Ex. 08:00→09:00, 08:30→09:00, 08:30→09:30… s'affiche sur l'événement.</div>
           </div>
         </div>
         <div class="modal-foot">

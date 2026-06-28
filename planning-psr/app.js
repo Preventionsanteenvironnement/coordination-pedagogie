@@ -684,6 +684,20 @@ function listeAesh(state, aeshId) {
     .sort((a, b) => (ordreJour[a.jour] - ordreJour[b.jour]) || a.creneau.localeCompare(b.creneau));
 }
 
+// L'AESH est-il déjà occupé sur ce créneau (jour+créneau, semaine compatible) ?
+// Renvoie la/les séance(s) en conflit (hors la séance testée).
+function aeshOccupeAt(state, aeshId, jour, creneau, semaine, exceptSeanceId) {
+  const seanceIds = new Set(state.affectations.filter((a) => a.aesh === aeshId).map((a) => a.seance));
+  return state.seances.filter((s) =>
+    seanceIds.has(s.id) && s.id !== exceptSeanceId &&
+    s.jour === jour && s.creneau === creneau &&
+    (s.semaine === 'AB' || semaine === 'AB' || s.semaine === semaine));
+}
+
+function estAffecte(state, aeshId, seanceId) {
+  return state.affectations.some((a) => a.aesh === aeshId && a.seance === seanceId);
+}
+
 function totauxGeneraux(state) {
   const totalAffecteH = state.aesh.reduce((s, a) => s + heuresAeshClasse(state, a.id), 0);
   const totalHorsH = state.aesh.reduce((s, a) => s + heuresAeshHorsClasse(state, a.id), 0);
@@ -1102,9 +1116,13 @@ function triggerImport() {
 // Petits composants réutilisables : jauge d'heures, avatar, puce AESH, toasts.
 
 
-function Avatar({ initiales, color, size = 22 }) {
-  return html`<span class="chip-avatar" style=${`background:${color};width:${size}px;height:${size}px;font-size:${size*0.42}px`}>${initiales}</span>`;
+function Avatar({ avatar, initiales, color, size = 22 }) {
+  const isEmoji = avatar && /\p{Extended_Pictographic}/u.test(avatar);
+  return html`<span class="chip-avatar" style=${`background:${isEmoji ? 'transparent' : color};width:${size}px;height:${size}px;font-size:${size * (isEmoji ? 0.7 : 0.42)}px`}>${avatar || initiales}</span>`;
 }
+
+// Jeu d'avatars proposés (emoji neutres) + « aucun ».
+const AVATARS = ['', '🦊', '🐼', '🦉', '🐺', '🦁', '🐯', '🐧', '🦅', '🌟', '🎯', '🧩', '📘', '🎓'];
 
 // Jauge : réalisé / cible, couleur selon l'écart.
 function HourMeter({ value, target, label, sub }) {
@@ -1131,9 +1149,10 @@ function fmt(n) {
 }
 
 // — Système de toasts global —
+// action (optionnel) = { label, fn } : affiche un bouton (ex. « Annuler »).
 let toastHandler = null;
 function registerToast(fn) { toastHandler = fn; }
-function toast(msg, kind = 'ok') { if (toastHandler) toastHandler(msg, kind); }
+function toast(msg, kind = 'ok', action = null) { if (toastHandler) toastHandler(msg, kind, action); }
 
 
 // ───── components/icons.js ─────
@@ -1266,17 +1285,15 @@ function WeekControl({ state, compact = false }) {
 
 function AeshPill({ aesh, seanceId, editable }) {
   const code = aesh.code || aesh.initiales || '?';
+  const retirer = (e) => {
+    e.stopPropagation();
+    removeAffectation(aesh.id, seanceId);
+    toast(`AESH ${code} retiré`, 'warn', { label: 'Annuler', fn: () => addAffectation(aesh.id, seanceId) });
+  };
   return html`
-    <span class="aesh-pill" style=${`background:${aesh.color}`}
-      title=${editable ? 'Cliquer pour retirer' : `AESH ${code}`}
-      onClick=${(e) => {
-        if (!editable) return;
-        e.stopPropagation();
-        removeAffectation(aesh.id, seanceId);
-        toast(`AESH ${code} retiré de ce créneau`, 'warn');
-      }}>
+    <span class="aesh-pill" style=${`background:${aesh.color}`} title=${`AESH ${code}`}>
       ${code}
-      ${editable ? html`<span class="x">×</span>` : null}
+      ${editable ? html`<button class="x" title="Retirer ce créneau" onClick=${retirer}>×</button>` : null}
     </span>`;
 }
 
@@ -1542,6 +1559,8 @@ function EvenementModal({ state, draft, onClose }) {
   const [titre, setTitre] = useState(draft.titre || '');
   const [debut, setDebut] = useState(draft.debut || '');
   const [fin, setFin] = useState(draft.fin || draft.debut || '');
+  const [hDebut, setHDebut] = useState(draft.heureDebut || '');
+  const [hFin, setHFin] = useState(draft.heureFin || '');
   const isRange = EVENT_TYPES[type]?.range;
 
   const save = () => {
@@ -1549,6 +1568,7 @@ function EvenementModal({ state, draft, onClose }) {
     upsertEvenement({
       id: draft.id || makeEvId(), type, classe,
       titre: titre.trim(), debut, fin: isRange ? (fin || debut) : debut,
+      heureDebut: hDebut || '', heureFin: hFin || '',
       previsionnel: draft.previsionnel || false,
     });
     toast(isNew ? 'Événement ajouté' : 'Événement modifié');
@@ -1596,11 +1616,115 @@ function EvenementModal({ state, draft, onClose }) {
               <input class="input" type="date" value=${fin} onInput=${(e) => setFin(e.target.value)} />
             </div>` : null}
           </div>
+          <div class="field">
+            <label>Créneau horaire (optionnel · par demi-heure)</label>
+            <div class="row gap-2">
+              <input class="input" type="time" step="1800" value=${hDebut} onInput=${(e) => setHDebut(e.target.value)} style="width:120px" />
+              <span class="muted">→</span>
+              <input class="input" type="time" step="1800" value=${hFin} onInput=${(e) => setHFin(e.target.value)} style="width:120px" />
+              ${(hDebut || hFin) ? html`<button class="btn sm ghost" onClick=${() => { setHDebut(''); setHFin(''); }}>Effacer</button>` : null}
+            </div>
+            <div class="muted" style="font-size:11.5px">Ex. 08:00→09:00, 08:30→09:00, 08:30→09:30… s'affiche sur l'événement.</div>
+          </div>
         </div>
         <div class="modal-foot">
           ${!isNew ? html`<button class="btn danger" style="margin-right:auto" onClick=${del}>${Icon.trash({ size: 15 })} Supprimer</button>` : null}
           <button class="btn ghost" onClick=${onClose}>Annuler</button>
           <button class="btn primary" onClick=${save}>${Icon.check({ size: 15 })} ${isNew ? 'Ajouter' : 'Enregistrer'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+
+// ───── components/AeshScheduleEditor.js ─────
+// Éditeur du planning d'UN intervenant — on coche/décoche les cours qu'il accompagne,
+// sur tous les jours et toutes les classes, avec détection de conflit en direct.
+
+
+
+
+
+
+
+
+function SeanceToggle({ state, aesh, seance }) {
+  const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
+  const classe = byId(state.classes, seance.classe);
+  const assigned = estAffecte(state, aesh.id, seance.id);
+  const conflits = assigned ? [] : aeshOccupeAt(state, aesh.id, seance.jour, seance.creneau, seance.semaine, seance.id);
+  const conflit = conflits.length > 0;
+  const sem = state.config.semaine;
+
+  const click = () => {
+    if (assigned) {
+      removeAffectation(aesh.id, seance.id);
+      toast(`Retiré de ${disc.court}`, 'warn', { label: 'Annuler', fn: () => addAffectation(aesh.id, seance.id) });
+    } else if (conflit) {
+      const c = conflits[0]; const cd = DISCIPLINES[c.disc];
+      toast(`Conflit : déjà sur ${cd ? cd.court : 'un cours'} à ce créneau`, 'warn');
+    } else {
+      addAffectation(aesh.id, seance.id);
+    }
+  };
+
+  return html`
+    <button class=${'sch-cell ' + (assigned ? 'on' : conflit ? 'conflit' : 'off')}
+      style=${assigned ? `--disc:${aesh.color}` : `--disc:${disc.color}`}
+      title=${conflit ? 'Conflit d\'horaire' : (assigned ? 'Cliquer pour retirer' : 'Cliquer pour affecter')}
+      onClick=${click}>
+      <span class="sch-cell-top">
+        <b>${disc.court}</b>
+        ${seance.semaine !== 'AB' ? html`<span class="sch-sem" style=${`color:${semaineColor(sem, seance.semaine)}`}>${semaineLabel(sem, seance.semaine)}</span>` : null}
+      </span>
+      <span class="sch-cell-sub">${classe ? classe.nom : ''}${seance.salle ? ' · ' + seance.salle : ''}</span>
+      <span class="sch-mark">${assigned ? Icon.check({ size: 13 }) : conflit ? Icon.alert({ size: 12 }) : Icon.plus({ size: 13 })}</span>
+    </button>`;
+}
+
+function AeshScheduleEditor({ state, aeshId, onClose }) {
+  const aesh = byId(state.aesh, aeshId);
+  if (!aesh) return null;
+  const b = bilanAesh(state, aeshId);
+  const reste = b.cible - b.total;
+
+  return html`
+    <div class="overlay" onClick=${onClose}>
+      <div class="modal modal-wide" onClick=${(e) => e.stopPropagation()}>
+        <div class="modal-head">
+          <div class="row gap-2">
+            <span class="aesh-pill" style=${`background:${aesh.color};font-size:13px`}>${aesh.code || aesh.initiales}</span>
+            <div>
+              <h2>Composer le planning</h2>
+              <div class="muted" style="font-size:12px">Cochez les cours accompagnés — les conflits sont signalés</div>
+            </div>
+          </div>
+          <div class="row gap-2">
+            <span class=${'badge ' + (Math.abs(reste) < 0.01 ? 'ok' : reste > 0 ? 'warn' : 'danger')}>
+              ${fmt(b.total)} / ${fmt(b.cible)} h ${reste > 0.01 ? `· ${fmt(reste)} à placer` : reste < -0.01 ? `· +${fmt(-reste)}` : ''}
+            </span>
+            <button class="btn icon ghost" onClick=${onClose}>${Icon.x({ size: 18 })}</button>
+          </div>
+        </div>
+        <div class="modal-body" style="padding:14px">
+          <div class="sch-grid">
+            <div class="sch-corner"></div>
+            ${JOURS.map((j) => html`<div class="sch-day">${j.court}</div>`)}
+            ${CRENEAUX.filter((c) => !c.pause).map((c) => html`
+              <div class="sch-time">${c.debut}<br/>${c.fin}</div>
+              ${JOURS.map((j) => {
+                const seances = state.seances.filter((s) => s.jour === j.id && s.creneau === c.id);
+                return html`<div class="sch-slot">
+                  ${seances.length
+                    ? seances.map((s) => html`<${SeanceToggle} state=${state} aesh=${aesh} seance=${s} />`)
+                    : html`<span class="sch-empty"></span>`}
+                </div>`;
+              })}`)}
+          </div>
+        </div>
+        <div class="modal-foot">
+          <span class="muted" style="margin-right:auto;font-size:12px">${Icon.sparkle({ size: 13 })} Vert = accompagné · gris = libre · rouge = conflit d'horaire</span>
+          <button class="btn primary" onClick=${onClose}>${Icon.check({ size: 15 })} Terminé</button>
         </div>
       </div>
     </div>`;
@@ -1853,9 +1977,11 @@ function ClasseView({ state, params, readOnly = false }) {
 
 
 
+
 function IntervenantView({ state, params }) {
   const aeshId = params.id || (state.aesh[0] && state.aesh[0].id);
   const aesh = byId(state.aesh, aeshId);
+  const [editing, setEditing] = useState(false);
   if (!aesh) return html`<div class="empty">Intervenant introuvable.</div>`;
 
   const b = bilanAesh(state, aeshId);
@@ -1864,22 +1990,25 @@ function IntervenantView({ state, params }) {
 
   return html`
     <div class="page-header">
-      <div class="spread">
-        <div class="row gap-4">
+      <div class="spread wrap gap-4">
+        <div class="row gap-4 wrap">
           <div class="seg">
             ${state.aesh.map((a) => html`
-              <button class=${a.id === aeshId ? 'active both' : ''} onClick=${() => navigate(`/aesh/${a.id}`)}>${a.prenom}</button>`)}
+              <button class=${a.id === aeshId ? 'active both' : ''} onClick=${() => navigate(`/aesh/${a.id}`)}>${a.code || a.initiales}</button>`)}
           </div>
           <div class="row">
-            <${Avatar} initiales=${aesh.initiales} color=${aesh.color} size=${34} />
+            <${Avatar} avatar=${aesh.avatar} initiales=${aesh.initiales} color=${aesh.color} size=${34} />
             <div>
               <h1 class="page-title">${aesh.nom}</h1>
               <div class="page-desc">Volume contractuel ${fmt(aesh.volumeCible)} h / semaine</div>
             </div>
           </div>
         </div>
+        <button class="btn primary" onClick=${() => setEditing(true)}>${Icon.edit({ size: 15 })} Composer le planning</button>
       </div>
     </div>
+
+    ${editing ? html`<${AeshScheduleEditor} state=${state} aeshId=${aeshId} onClose=${() => setEditing(false)} />` : null}
 
     <div style="margin-bottom:16px"><${WeekControl} state=${state} /></div>
 
@@ -2253,7 +2382,7 @@ function EvenementsView({ state }) {
               ${points.map((e) => {
                 const t = EVENT_TYPES[e.type]; const c = byId(state.classes, e.classe);
                 return html`<tr style="cursor:pointer" onClick=${() => setDraft(e)}>
-                  <td class="mono dim">${fmtDate(e.debut)}</td>
+                  <td class="mono dim">${fmtDate(e.debut)}${e.heureDebut ? html` <span class="badge" style="font-size:10.5px">${e.heureDebut}${e.heureFin ? '–' + e.heureFin : ''}</span>` : null}</td>
                   <td><span class="badge" style=${`color:${t.color};background:${t.color}1f`}>${t.court}</span></td>
                   <td>${c ? c.nom : e.classe}</td>
                   <td>${e.titre || '—'} ${e.previsionnel ? html`<span class="badge" style="margin-left:6px">prévis.</span>` : null}</td>
@@ -2412,14 +2541,18 @@ function AeshEditor({ state }) {
         Le <b style="color:var(--text-2)">sigle</b> est ce qui s'affiche dans la grille (RGPD) — mettez la lettre ou l'abréviation de votre choix.
       </div>
       <table class="tbl">
-        <thead><tr><th>Intervenant</th><th>Sigle</th><th>Volume cible</th><th>Positionné</th><th>Couleur</th></tr></thead>
+        <thead><tr><th>Intervenant</th><th>Sigle</th><th>Avatar</th><th>Volume cible</th><th>Positionné</th><th>Couleur</th></tr></thead>
         <tbody>
           ${state.aesh.map((a) => {
             const b = bilanAesh(state, a.id);
             return html`<tr>
-              <td><div class="row"><span class="aesh-pill" style=${`background:${a.color}`}>${a.code || a.initiales}</span> ${a.nom}</div></td>
+              <td><div class="row"><${Avatar} avatar=${a.avatar} initiales=${a.code || a.initiales} color=${a.color} size=${26} /> ${a.nom}</div></td>
               <td><input class="input" style="width:70px" value=${a.code || ''} maxlength="4"
                   onInput=${(e) => upsertAesh({ ...a, code: e.target.value })} /></td>
+              <td><select class="select" style="font-size:18px;padding:4px 8px" value=${a.avatar || ''}
+                  onChange=${(e) => upsertAesh({ ...a, avatar: e.target.value })}>
+                  ${AVATARS.map((av) => html`<option value=${av} selected=${(a.avatar || '') === av}>${av || '— lettre —'}</option>`)}
+                </select></td>
               <td>
                 <input class="input" style="width:84px" type="number" step="0.5" value=${a.volumeCible}
                   onChange=${(e) => { upsertAesh({ ...a, volumeCible: parseFloat(e.target.value) || 0 }); toast('Volume mis à jour'); }} />
@@ -2748,14 +2881,18 @@ function Sidebar({ route, state, mode, isAdmin, onToggleMode, onUnlock, onLock }
 function Toasts() {
   const [items, setItems] = useState([]);
   useEffect(() => {
-    registerToast((msg, kind) => {
+    registerToast((msg, kind, action) => {
       const id = Math.round(performance.now()) + Math.random();
-      setItems((cur) => [...cur, { id, msg, kind }]);
-      setTimeout(() => setItems((cur) => cur.filter((t) => t.id !== id)), 2600);
+      setItems((cur) => [...cur, { id, msg, kind, action }]);
+      setTimeout(() => setItems((cur) => cur.filter((t) => t.id !== id)), action ? 6000 : 2600);
     });
   }, []);
+  const dismiss = (id) => setItems((cur) => cur.filter((t) => t.id !== id));
   return html`<div class="toast-wrap">
-    ${items.map((t) => html`<div class=${'toast ' + t.kind}>${t.kind === 'ok' ? Icon.check({ size: 15 }) : Icon.alert({ size: 15 })} ${t.msg}</div>`)}
+    ${items.map((t) => html`<div class=${'toast ' + t.kind}>
+      ${t.kind === 'ok' ? Icon.check({ size: 15 }) : Icon.alert({ size: 15 })} <span>${t.msg}</span>
+      ${t.action ? html`<button class="toast-action" onClick=${() => { t.action.fn(); dismiss(t.id); }}>${Icon.undo({ size: 13 })} ${t.action.label}</button>` : null}
+    </div>`)}
   </div>`;
 }
 
