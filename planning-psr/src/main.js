@@ -189,6 +189,7 @@ function App() {
             <div class="topbar-sub">Coordination des sections PSR & MELEC</div>
           </div>
           <div class="topbar-actions">
+            <a class="btn ghost" href="../" title="Revenir au portail" style="text-decoration:none">‹ Portail</a>
             ${interv ? html`
               <span class="badge info">${Icon.calendarCheck({ size: 14 })} Vue intervenant · lecture seule</span>
               ${isAdmin ? html`<button class="btn" onClick=${toggleMode}>${Icon.settings({ size: 15 })} Coordination</button>` : null}
