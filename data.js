@@ -124,12 +124,34 @@ const THEMATIQUES = [
     icon: "heart",
     enfants: [
       {
-        titre: "Les missions de l'AESH",
-        desc: "Au fond, accompagner quoi ? Les 3 domaines (circulaire 2017-084), la juste posture, l'équipe autour de l'élève, et tous les textes officiels. Guide multipage, pensé pour le mobile.",
-        lien: "guides/aesh-missions.html",
-        type: "Guide",
+        titre: "Comprendre le métier",
+        desc: "Les missions, la posture, le cadre.",
         icon: "users",
-        badge: "Nouveau",
+        enfants: [
+          {
+            titre: "Les missions de l'AESH",
+            desc: "Au fond, accompagner quoi ? Les 3 domaines (circulaire 2017-084), la juste posture, l'équipe autour de l'élève, et tous les textes officiels. Guide multipage, pensé pour le mobile.",
+            lien: "guides/aesh-missions.html",
+            type: "Guide",
+            icon: "users",
+            badge: "Nouveau",
+          },
+        ],
+      },
+      {
+        titre: "Les examens",
+        desc: "Le rôle de l'AESH pendant les épreuves aménagées.",
+        icon: "scale",
+        enfants: [
+          {
+            titre: "Secrétaire & scripteur",
+            desc: "Écrire ou lire pour un candidat en situation de handicap : le cadre légal (L. 112-4, D. 351-27), les règles d'or de la neutralité, le déroulé de l'épreuve, les rôles. Multipage, mobile.",
+            lien: "guides/aesh-secretaire-scripteur.html",
+            type: "Guide",
+            icon: "scale",
+            badge: "Nouveau",
+          },
+        ],
       },
     ],
   },
