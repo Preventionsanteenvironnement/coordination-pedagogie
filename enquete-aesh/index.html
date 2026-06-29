@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<title>Enquête AESH — vos besoins</title>
+<style>
+  :root{
+    --bg:#f1f5f4;--card:#fff;--ink:#16241f;--soft:#56685f;--line:#dde6e1;--line2:#eaf1ed;
+    --c1:#0f766e;--c1d:#0b5a54;--c1soft:#dcefea;--acc:#c2710a;
+    --r:18px;--r-sm:12px;
+    --shadow:0 1px 2px rgba(14,40,33,.05),0 12px 30px rgba(14,40,33,.08);--shadow-lg:0 14px 50px rgba(14,40,33,.2);
+  }
+  @media (prefers-color-scheme:dark){:root{--bg:#0b1311;--card:#13201c;--ink:#e7efeb;--soft:#9bb0a8;--line:#243029;--line2:#19231f;--c1:#3fb5a6;--c1d:#2f9b8e;--c1soft:#12302b;--acc:#e0a24e;--shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px rgba(0,0,0,.45);--shadow-lg:0 16px 54px rgba(0,0,0,.6)}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+  svg{flex:none}
+  a.back{position:fixed;top:14px;left:14px;z-index:40;display:inline-flex;align-items:center;gap:6px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.82rem;font-weight:650;padding:8px 13px;border-radius:999px;border:1px solid var(--line);box-shadow:var(--shadow)}
+  a.back:hover{color:var(--c1);border-color:var(--c1)}
+  header.hero{background:radial-gradient(120% 150% at 0% 0%,#13897e 0%,#0f766e 45%,#0b4f49 100%);color:#fff;padding:50px 20px 54px;text-align:center;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;inset:auto -10% -55% -10%;height:110px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0}
+  .hero-in{max-width:680px;margin:0 auto;position:relative;z-index:1}
+  .kicker{display:inline-block;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;opacity:.92;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px}
+  header.hero h1{margin:.4em 0 .12em;font-size:clamp(1.5rem,5vw,2.1rem);font-weight:850;letter-spacing:-.01em}
+  header.hero p{margin:0;opacity:.94;font-size:.97rem;max-width:34em;margin-inline:auto}
+  main{max-width:680px;margin:0 auto;padding:6px 16px 110px}
+  .prog{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);margin:0 -16px;padding:11px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px}
+  .prog-bar{flex:1;height:8px;background:var(--line2);border-radius:999px;overflow:hidden}
+  .prog-fill{height:100%;background:var(--c1);border-radius:999px;transition:width .35s cubic-bezier(.2,.8,.2,1)}
+  .prog-tx{font-size:.78rem;font-weight:700;color:var(--c1);white-space:nowrap}
+  .sec-h{font-size:.74rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--c1);margin:30px 0 4px;display:flex;align-items:center;gap:8px}
+  .q{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin:13px 0;animation:rise .4s ease both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .q.answered{border-color:color-mix(in srgb,var(--c1) 45%,var(--line))}
+  .q-lab{font-size:1.04rem;font-weight:700;margin-bottom:3px;display:flex;gap:9px}
+  .q-num{flex:none;color:var(--c1);font-weight:800}
+  .q-hint{font-size:.8rem;color:var(--soft);margin:0 0 12px 26px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{display:flex;align-items:center;gap:11px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;cursor:pointer;transition:.13s;font-size:.95rem;text-align:left;width:100%;color:var(--ink)}
+  .opt:hover{border-color:var(--c1)}
+  .opt.on{border-color:var(--c1);background:var(--c1soft);font-weight:600}
+  .opt .mk{flex:none;width:22px;height:22px;border:2px solid var(--line);display:grid;place-items:center;color:#fff;transition:.13s}
+  .opt.single .mk{border-radius:50%} .opt:not(.single) .mk{border-radius:7px}
+  .opt.on .mk{background:var(--c1);border-color:var(--c1)}
+  textarea{width:100%;padding:12px 13px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-sm);resize:vertical;min-height:74px}
+  textarea:focus{outline:none;border-color:var(--c1);box-shadow:0 0 0 3px var(--c1soft)}
+  .submit-wrap{margin-top:26px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:var(--r-sm);background:var(--c1);color:#fff;font:inherit;font-weight:750;border:none;cursor:pointer;box-shadow:0 3px 12px rgba(15,118,110,.3);width:100%;font-size:1.02rem}
+  .btn:hover{background:var(--c1d)} .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--soft);box-shadow:none;width:auto;padding:10px 16px;font-size:.9rem}
+  .rgpd{display:flex;gap:11px;align-items:flex-start;font-size:.82rem;color:var(--soft);background:var(--card);border:1px dashed var(--line);border-radius:var(--r-sm);padding:13px 15px;margin-top:14px}
+  .done{text-align:center;padding:30px 16px}
+  .done .ic{width:74px;height:74px;border-radius:50%;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;margin:0 auto 16px}
+  .done h2{font-size:1.4rem;margin:0 0 8px}
+  /* résultats */
+  .live{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;color:var(--c1);font-weight:650}
+  .live .pulse{width:9px;height:9px;border-radius:50%;background:var(--c1);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(15,118,110,.5)}70%{box-shadow:0 0 0 8px rgba(15,118,110,0)}100%{box-shadow:0 0 0 0 rgba(15,118,110,0)}}
+  .count-card{background:var(--c1);color:#fff;border-radius:var(--r);padding:18px 20px;margin:14px 0;display:flex;align-items:center;gap:14px}
+  .count-card .big{font-size:2.2rem;font-weight:850;line-height:1}
+  .rq{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin:13px 0}
+  .rq h3{font-size:1.02rem;margin:0 0 13px;display:flex;gap:9px}
+  .rrow{margin-bottom:11px}
+  .rrow-h{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:5px;gap:10px}
+  .rrow-h .v{color:var(--soft);font-weight:700;flex:none}
+  .rtrack{height:13px;background:var(--bg);border:1px solid var(--line2);border-radius:999px;overflow:hidden}
+  .rfill{height:100%;border-radius:999px;background:var(--c1);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .rfill.top{background:var(--acc)}
+  .ans{background:var(--bg);border-left:3px solid var(--c1);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 13px;margin-bottom:8px;font-size:.92rem;font-style:italic}
+  .banner{background:#fdeecf;color:#8a5a12;border:1.5px solid #f0cd86;border-radius:var(--r-sm);padding:13px 16px;margin:14px 0;font-weight:650;font-size:.9rem;display:flex;gap:10px;align-items:flex-start}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(22px);background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;transition:.27s;pointer-events:none;z-index:80;box-shadow:var(--shadow-lg)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<a class="back" href="../"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg> Portail</a>
+<header class="hero"><div class="hero-in" id="hero">
+  <span class="kicker">Espace AESH</span>
+  <h1>Vos besoins comptent</h1>
+  <p>Quelques minutes pour dire ce qui vous aiderait vraiment au quotidien. C'est <b>anonyme</b>, et ça servira à construire un espace utile, fait pour vous.</p>
+</div></header>
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",authDomain:"devoirs-pse.firebaseapp.com",projectId:"devoirs-pse",storageBucket:"devoirs-pse.firebasestorage.app",messagingSenderId:"614730413904",appId:"1:614730413904:web:a5dd478af5de30f6bede55"};
+const db=getFirestore(initializeApp(firebaseConfig));
+const COL="coordination_enquete_aesh";
+const $=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search);
+const uid=()=>(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random());
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let toastT;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2200);}
+const ic=p=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const CHK=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>`;
+
+const SECTIONS=[
+  {id:"quotidien",t:"Votre quotidien"},
+  {id:"edt",t:"L'emploi du temps en ligne"},
+  {id:"eleves",t:"Les élèves"},
+  {id:"ressources",t:"Ressources & fiches"},
+  {id:"com",t:"Communication"},
+  {id:"espace",t:"L'espace en ligne"}
+];
+const Q=[
+  {id:"diff",sec:"quotidien",type:"multi",q:"Vos principales difficultés au quotidien ?",hint:"Plusieurs réponses possibles.",opts:["Changements fréquents d'emploi du temps","Manque d'infos sur les élèves accompagnés","Manque d'infos sur les lieux / salles / ateliers","Où aller quand un élève est absent","Quoi faire quand un enseignant est absent","Communiquer avec certains enseignants","Connaître précisément mon rôle auprès d'un élève","Manque de temps d'échange avec l'équipe","Comportements de certains élèves","Besoins liés au handicap"]},
+  {id:"perte",sec:"quotidien",type:"text",q:"Qu'est-ce qui vous fait perdre le plus de temps dans une journée ?"},
+  {id:"edt_voir",sec:"edt",type:"multi",q:"Un emploi du temps en ligne devrait permettre de voir…",opts:["Mon emploi du temps personnel","L'emploi du temps de toute l'équipe","Les élèves accompagnés par créneau","Les classes concernées","Les salles / lieux d'intervention","Les changements du jour","Les absences connues","Les priorités d'accompagnement","Les temps de pause / concertation","Les PFMP / stages des élèves","Les sorties ou événements"]},
+  {id:"format",sec:"edt",type:"multi",q:"Quel format vous semble le plus pratique ?",opts:["Par AESH","Par classe","Par élève (codé)","Par jour","Par semaine","Vue collective globale","Vue individuelle","Version imprimable","Sur téléphone"]},
+  {id:"creneau",sec:"edt",type:"multi",q:"Sur chaque créneau, ce qui doit absolument apparaître ?",opts:["Code de l'élève","Classe","Salle","Matière / activité","Enseignant concerné","Type d'aide attendue","Vigilance particulière","Priorité du créneau","Remarque courte"]},
+  {id:"info_chg",sec:"edt",type:"single",q:"En cas de modification, comment préférez-vous être informé ?",opts:["Directement sur le site","Par mail","Par message Pronote","Par SMS","Par messagerie (WhatsApp…)","Par affichage papier","Oralement le matin"]},
+  {id:"info_eleve",sec:"eleves",type:"multi",q:"Quelles infos seraient utiles (sans rien de confidentiel) ?",opts:["Besoins principaux","Difficultés repérées","Points d'appui","Ce qui aide l'élève","Ce qui peut le mettre en difficulté","Niveau d'autonomie","Besoins dans les déplacements","Besoins en atelier pratique","Besoins sur les cours écrits","Besoins lors des évaluations","Attitudes à privilégier","Objectifs d'autonomie"]},
+  {id:"fiches",sec:"ressources",type:"multi",q:"Quelles fiches « Que faire si… » seraient les plus utiles ?",opts:["L'élève est absent","L'enseignant est absent","L'élève refuse de travailler","L'élève est en crise","Conflit avec un élève","Difficulté avec un enseignant","Lors d'une sortie","Lors d'un examen","En atelier professionnel","Élève TSA / TDAH","Élève déficient visuel"]},
+  {id:"remontee",sec:"com",type:"single",q:"Comment préférez-vous faire remonter une difficulté au coordinateur ?",opts:["Mail","Message Pronote","Message court","Oralement","Formulaire en ligne","Fiche de liaison"]},
+  {id:"freq",sec:"com",type:"single",q:"À quelle fréquence un temps d'échange AESH / coordinateur serait utile ?",opts:["Chaque semaine","Tous les quinze jours","Une fois par mois","Seulement si besoin"]},
+  {id:"rubriques",sec:"espace",type:"multi",q:"Quelles rubriques créer en priorité sur l'espace ?",opts:["Emploi du temps AESH","Changements du jour","Fiches pratiques","Ressources handicap","Infos par classe","Procédures en cas d'imprévu","Contacts utiles","Documents à télécharger","Espace de remontée d'infos","Fiches élèves codées"]},
+  {id:"idee",sec:"espace",type:"text",q:"Une idée ou une remarque pour améliorer l'organisation AESH ?"}
+];
+
+/* ============ FORMULAIRE ============ */
+function initForm(){
+  const ans={}; // qid -> [idx] | idx | "text"
+  const lsResp="enquete_aesh_resp";
+  let respId=localStorage.getItem(lsResp)||null;
+
+  $("main").innerHTML=`<div class="prog"><div class="prog-bar"><div class="prog-fill" id="pf" style="width:0%"></div></div><span class="prog-tx" id="pt">0 / ${Q.length}</span></div><div id="qs"></div>
+    <div class="submit-wrap"><button class="btn" id="send">${ic('<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>')} Envoyer mes réponses</button>
+    <div class="rgpd">${ic('<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>')}<span><b>Anonyme.</b> Aucune donnée personnelle, aucun nom. Vos réponses servent uniquement à améliorer l'organisation et l'espace en ligne.</span></div></div>`;
+
+  let html="";
+  SECTIONS.forEach(s=>{
+    const qs=Q.filter(q=>q.sec===s.id); if(!qs.length) return;
+    html+=`<div class="sec-h">${esc(s.t)}</div>`;
+    qs.forEach(q=>{
+      const n=Q.indexOf(q)+1;
+      html+=`<div class="q" data-q="${q.id}"><div class="q-lab"><span class="q-num">${n}.</span><span>${esc(q.q)}</span></div>`;
+      if(q.hint) html+=`<div class="q-hint">${esc(q.hint)}</div>`;
+      if(q.type==="text"){ html+=`<textarea data-text="${q.id}" maxlength="400" placeholder="Votre réponse…"></textarea>`; }
+      else { html+=`<div class="opts">`+q.opts.map((o,i)=>`<button class="opt ${q.type==="single"?"single":""}" data-opt="${q.id}" data-i="${i}"><span class="mk"></span><span>${esc(o)}</span></button>`).join("")+`</div>`; }
+      html+=`</div>`;
+    });
+  });
+  $("qs").innerHTML=html;
+
+  function answered(qid){ const v=ans[qid]; if(Array.isArray(v)) return v.length>0; return v!=null&&v!==""; }
+  function updateProg(){
+    const done=Q.filter(q=>answered(q.id)).length;
+    $("pf").style.width=Math.round(done/Q.length*100)+"%"; $("pt").textContent=done+" / "+Q.length;
+    Q.forEach(q=>{ const el=document.querySelector(`.q[data-q="${q.id}"]`); if(el) el.classList.toggle("answered",answered(q.id)); });
+  }
+  $("qs").addEventListener("click",e=>{
+    const b=e.target.closest("[data-opt]"); if(!b) return;
+    const qid=b.dataset.opt, i=+b.dataset.i, q=Q.find(x=>x.id===qid);
+    if(q.type==="single"){ ans[qid]=i; [...b.parentElement.children].forEach(x=>x.classList.toggle("on",x===b)); }
+    else { const arr=Array.isArray(ans[qid])?ans[qid]:(ans[qid]=[]); const k=arr.indexOf(i); if(k>-1)arr.splice(k,1); else arr.push(i); b.classList.toggle("on",arr.includes(i)); }
+    updateProg();
+  });
+  $("qs").addEventListener("input",e=>{ const t=e.target.closest("[data-text]"); if(t){ ans[t.dataset.text]=t.value.trim(); updateProg(); } });
+
+  $("send").addEventListener("click",async()=>{
+    const done=Q.filter(q=>answered(q.id)).length;
+    if(done===0){ toast("Cochez au moins une réponse 🙂"); return; }
+    const btn=$("send"); btn.disabled=true; btn.textContent="Envoi…";
+    try{
+      if(!respId){ respId=uid(); localStorage.setItem(lsResp,respId); }
+      await setDoc(doc(db,COL,respId),{ answers:ans, n:done, updatedAt:serverTimestamp() });
+      showDone();
+    }catch(e){ console.error(e); btn.disabled=false; btn.innerHTML=`${ic('<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>')} Envoyer mes réponses`; toast("Envoi impossible — règle Firestore à publier ?"); }
+  });
+  function showDone(){
+    $("hero").innerHTML=`<span class="kicker">Espace AESH</span><h1>Merci !</h1><p>Vos réponses sont bien enregistrées. Elles vont nourrir directement l'espace AESH.</p>`;
+    $("main").innerHTML=`<div class="done"><div class="ic">${ic('<path d="M5 12.5l4.5 4.5L19 7"/>')}</div><h2>C'est envoyé.</h2><p class="prog-tx" style="color:var(--soft);font-weight:500;display:block;margin-bottom:18px">Vous pouvez modifier votre réponse à tout moment.</p><button class="btn ghost" id="redo">Modifier ma réponse</button></div>`;
+    $("redo").addEventListener("click",()=>location.reload());
+  }
+}
+
+/* ============ RÉSULTATS ============ */
+function initResultats(){
+  $("hero").innerHTML=`<span class="kicker">Espace AESH · Coordination</span><h1>Résultats de l'enquête</h1><p>Ce que votre équipe demande, en temps réel. Anonyme et agrégé.</p>`;
+  $("main").innerHTML=`<div style="display:flex;justify-content:flex-end;margin:14px 0 0"><span class="live"><span class="pulse"></span> mis à jour en direct</span></div><div id="rfb"></div><div id="res"><p style="color:var(--soft);text-align:center;padding:30px">Chargement…</p></div>`;
+  onSnapshot(collection(db,COL), snap=>{
+    const resp=snap.docs.map(d=>d.data());
+    render(resp);
+  }, err=>{ console.error(err); $("rfb").innerHTML=`<div class="banner">${ic('<path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>')} <span><b>Activation Firestore requise.</b> Publiez la règle de <code>coordination_enquete_aesh</code>.</span></div>`; $("res").innerHTML=""; });
+
+  function render(resp){
+    const N=resp.length;
+    let html=`<div class="count-card"><span class="big">${N}</span><div><b>réponse${N>1?"s":""}</b><div style="opacity:.9;font-size:.86rem">${N===0?"En attente des premières réponses.":"Merci à votre équipe."}</div></div></div>`;
+    SECTIONS.forEach(s=>{
+      const qs=Q.filter(q=>q.sec===s.id); if(!qs.length) return;
+      html+=`<div class="sec-h">${esc(s.t)}</div>`;
+      qs.forEach(q=>{
+        html+=`<div class="rq"><h3>${esc(q.q)}</h3>`;
+        if(q.type==="text"){
+          const txts=resp.map(r=>r.answers&&r.answers[q.id]).filter(t=>t&&String(t).trim());
+          html+= txts.length? txts.map(t=>`<div class="ans">${esc(t)}</div>`).join("") : `<p style="color:var(--soft);font-size:.88rem;margin:0">Pas encore de réponse.</p>`;
+        } else {
+          const cnt=q.opts.map(()=>0);
+          resp.forEach(r=>{ const v=r.answers&&r.answers[q.id]; if(v==null)return; (Array.isArray(v)?v:[v]).forEach(i=>{ if(cnt[i]!=null)cnt[i]++; }); });
+          const max=Math.max(0,...cnt);
+          const order=q.opts.map((o,i)=>({o,i,c:cnt[i]})).sort((a,b)=>b.c-a.c);
+          html+=order.map(it=>{ const pct=N?Math.round(it.c/N*100):0; const top=it.c===max&&max>0;
+            return `<div class="rrow"><div class="rrow-h"><span>${esc(it.o)}</span><span class="v">${it.c} · ${pct}%</span></div><div class="rtrack"><div class="rfill ${top?"top":""}" style="width:${pct}%"></div></div></div>`;
+          }).join("");
+        }
+        html+=`</div>`;
+      });
+    });
+    $("res").innerHTML=html;
+  }
+}
+
+if(params.has("resultats")) initResultats(); else initForm();
+</script>
+</body>
+</html>

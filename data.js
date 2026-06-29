@@ -187,9 +187,24 @@ const THEMATIQUES = [
       },
       {
         titre: "La coordination",
-        desc: "Les outils de l'équipe : planning, réunions, échanges.",
+        desc: "Sonder l'équipe, planifier, échanger.",
         icon: "calendar",
         enfants: [
+          {
+            titre: "Enquête besoins (à remplir)",
+            desc: "Le questionnaire à envoyer aux AESH pour partir de leurs besoins réels : difficultés, attentes pour l'emploi du temps, fiches utiles, communication. Anonyme, dynamique, sur téléphone (~5 min).",
+            lien: "enquete-aesh/",
+            type: "Enquête",
+            icon: "chart",
+            badge: "Nouveau",
+          },
+          {
+            titre: "Enquête — résultats",
+            desc: "Le tableau de bord des réponses, en temps réel : ce que l'équipe demande vraiment, agrégé et anonyme. Réservé au coordinateur.",
+            lien: "enquete-aesh/?resultats",
+            type: "Résultats",
+            icon: "chart",
+          },
           {
             titre: "Planning AESH",
             desc: "Qui accompagne qui, quand et où — partagé avec toute l'équipe, en temps réel. Codes élèves uniquement (RGPD), jamais de nom.",
