@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<title>Planning AESH — Espace AESH</title>
+<style>
+  :root{
+    --bg:#f1f5f4; --card:#fff; --ink:#16241f; --soft:#56685f; --line:#dde6e1; --line2:#eaf1ed;
+    --c1:#0f766e; --c1d:#0b5a54; --c1soft:#dcefea; --acc:#c2710a;
+    --r:18px; --r-sm:12px;
+    --shadow:0 1px 2px rgba(14,40,33,.05),0 12px 30px rgba(14,40,33,.08);
+    --shadow-lg:0 14px 50px rgba(14,40,33,.2);
+  }
+  @media (prefers-color-scheme:dark){:root{--bg:#0b1311;--card:#13201c;--ink:#e7efeb;--soft:#9bb0a8;--line:#243029;--line2:#19231f;--c1:#3fb5a6;--c1d:#2f9b8e;--c1soft:#12302b;--acc:#e0a24e;--shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px rgba(0,0,0,.45);--shadow-lg:0 16px 54px rgba(0,0,0,.6)}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  svg{flex:none}
+  a.back{position:fixed;top:14px;left:14px;z-index:40;display:inline-flex;align-items:center;gap:6px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.82rem;font-weight:650;padding:8px 13px;border-radius:999px;border:1px solid var(--line);box-shadow:var(--shadow)}
+  a.back:hover{color:var(--c1);border-color:var(--c1)}
+  header.hero{background:radial-gradient(120% 150% at 0% 0%,#13897e 0%,#0f766e 45%,#0b4f49 100%);color:#fff;padding:52px 20px 56px;text-align:center;position:relative;overflow:hidden}
+  header.hero::after{content:"";position:absolute;inset:auto -10% -55% -10%;height:110px;background:var(--bg);border-radius:50% 50% 0 0/100% 100% 0 0}
+  .hero-in{max-width:820px;margin:0 auto;position:relative;z-index:1}
+  .kicker{display:inline-block;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;opacity:.92;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px}
+  header.hero h1{margin:.4em 0 .12em;font-size:clamp(1.5rem,4.4vw,2rem);font-weight:800}
+  header.hero p{margin:0;opacity:.94;font-size:.95rem}
+  main{max-width:820px;margin:0 auto;padding:6px 16px 100px}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0 10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:var(--r-sm);background:var(--c1);color:#fff;font:inherit;font-weight:700;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(15,118,110,.28)}
+  .btn:hover{background:var(--c1d)}
+  .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--soft);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--c1);color:var(--c1)}
+  .filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .fil{flex:none;background:var(--card);border:1px solid var(--line);color:var(--soft);border-radius:999px;padding:8px 14px;font:inherit;font-size:.85rem;font-weight:650;cursor:pointer}
+  .fil.on{background:var(--c1);color:#fff;border-color:var(--c1)}
+  .day{margin-top:22px}
+  .day-h{font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c1);margin:0 0 10px;display:flex;align-items:center;gap:8px}
+  .row{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:13px 15px;margin-bottom:10px;display:flex;align-items:center;gap:13px}
+  .ava{flex:none;width:42px;height:42px;border-radius:12px;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;font-weight:800;font-size:.9rem}
+  .row-main{flex:1;min-width:0}
+  .row-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .row-top b{font-size:1rem}
+  .tag{font-size:.74rem;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--c1soft);color:var(--c1)}
+  .tag.cls{background:var(--line2);color:var(--soft)}
+  .row-sub{font-size:.84rem;color:var(--soft);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap}
+  .row-sub span{display:inline-flex;align-items:center;gap:5px}
+  .row-act{display:flex;gap:4px}
+  .ico-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
+  .ico-btn:hover{border-color:var(--c1);color:var(--c1)}
+  .ico-btn.del:hover{border-color:#cf5a45;color:#cf5a45}
+  .empty{text-align:center;color:var(--soft);padding:40px 16px;font-size:.95rem}
+  .rgpd{display:flex;gap:11px;align-items:flex-start;font-size:.82rem;color:var(--soft);background:var(--card);border:1px dashed var(--line);border-radius:var(--r-sm);padding:13px 15px;margin-top:24px}
+  .banner{background:#fdeecf;color:#8a5a12;border:1.5px solid #f0cd86;border-radius:var(--r-sm);padding:13px 16px;margin:14px 0;font-weight:650;font-size:.9rem;display:flex;gap:10px;align-items:flex-start}
+  .live{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;color:var(--c1);font-weight:650}
+  .live .pulse{width:9px;height:9px;border-radius:50%;background:var(--c1);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(15,118,110,.5)}70%{box-shadow:0 0 0 8px rgba(15,118,110,0)}100%{box-shadow:0 0 0 0 rgba(15,118,110,0)}}
+  /* sheet form */
+  .sheet-bg{position:fixed;inset:0;background:rgba(10,25,21,.55);z-index:60;opacity:0;pointer-events:none;transition:.22s}
+  .sheet-bg.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-radius:24px 24px 0 0;padding:22px 20px calc(24px + env(safe-area-inset-bottom));box-shadow:var(--shadow-lg);transform:translateY(102%);transition:transform .28s cubic-bezier(.2,.8,.2,1);max-width:560px;margin:0 auto;max-height:90vh;overflow:auto}
+  .sheet.on{transform:none}
+  .sheet h3{margin:0 0 14px;font-size:1.1rem}
+  label{display:block;font-weight:650;font-size:.84rem;margin:12px 0 5px}
+  input,select{width:100%;padding:11px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-sm)}
+  input:focus,select:focus{outline:none;border-color:var(--c1);box-shadow:0 0 0 3px var(--c1soft)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .sheet-act{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(22px);background:var(--ink);color:var(--bg);padding:11px 20px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;transition:.27s;pointer-events:none;z-index:80;box-shadow:var(--shadow-lg)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<a class="back" href="../"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg> Portail</a>
+<header class="hero"><div class="hero-in">
+  <span class="kicker">Espace AESH · Coordination</span>
+  <h1>Planning AESH</h1>
+  <p>Qui accompagne qui, quand et où — partagé avec toute l'équipe, en temps réel.</p>
+</div></header>
+<main>
+  <div class="bar">
+    <span class="live"><span class="pulse"></span> mis à jour en direct</span>
+    <button class="btn" id="add"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Ajouter un accompagnement</button>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div id="fb"></div>
+  <div id="list"><p class="empty">Chargement…</p></div>
+  <div class="rgpd"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg><span><strong>RGPD — codes élèves uniquement.</strong> On note un <strong>code</strong> ou des <strong>initiales</strong> d'élève (ex. «&nbsp;É1&nbsp;», «&nbsp;A.B.&nbsp;»), <strong>jamais le nom complet</strong>. Pour l'AESH aussi : initiales.</span></div>
+</main>
+
+<div class="sheet-bg" id="sheet-bg"></div>
+<div class="sheet" id="sheet">
+  <h3 id="sheet-title">Nouvel accompagnement</h3>
+  <div class="grid2">
+    <div><label for="f-aesh">AESH (initiales)</label><input id="f-aesh" maxlength="8" placeholder="ex. M.D." /></div>
+    <div><label for="f-eleve">Code élève</label><input id="f-eleve" maxlength="10" placeholder="ex. É1 / A.B." /></div>
+  </div>
+  <div class="grid2">
+    <div><label for="f-classe">Classe</label><input id="f-classe" maxlength="16" placeholder="ex. 2nde A" /></div>
+    <div><label for="f-jour">Jour</label><select id="f-jour"></select></div>
+  </div>
+  <div class="grid2">
+    <div><label for="f-creneau">Créneau</label><input id="f-creneau" maxlength="20" placeholder="ex. 8h–9h" /></div>
+    <div><label for="f-lieu">Lieu</label><input id="f-lieu" maxlength="24" placeholder="ex. Salle B12" /></div>
+  </div>
+  <label for="f-note">Note <span style="font-weight:400;color:var(--soft)">— facultatif</span></label>
+  <input id="f-note" maxlength="80" placeholder="ex. besoin d'un ordinateur" />
+  <div class="sheet-act"><button class="btn ghost" id="f-cancel">Annuler</button><button class="btn" id="f-save">Enregistrer</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",authDomain:"devoirs-pse.firebaseapp.com",projectId:"devoirs-pse",storageBucket:"devoirs-pse.firebasestorage.app",messagingSenderId:"614730413904",appId:"1:614730413904:web:a5dd478af5de30f6bede55"};
+const db=getFirestore(initializeApp(firebaseConfig));
+const COL="coordination_planning_aesh";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let toastT; function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2000);}
+const ic=p=>`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const JOURS=["Lundi","Mardi","Mercredi","Jeudi","Vendredi"];
+$("f-jour").innerHTML=JOURS.map(j=>`<option>${j}</option>`).join("");
+
+let rows=[], filter="all", editId=null;
+$("filters").innerHTML=`<button class="fil on" data-f="all">Toute la semaine</button>`+JOURS.map(j=>`<button class="fil" data-f="${j}">${j}</button>`).join("");
+$("filters").addEventListener("click",e=>{const b=e.target.closest("[data-f]"); if(b){filter=b.dataset.f; [...$("filters").children].forEach(x=>x.classList.toggle("on",x===b)); render();}});
+
+function order(j){const i=JOURS.indexOf(j); return i<0?99:i;}
+function timeKey(c){const m=String(c||"").match(/(\d{1,2})\s*h\s*(\d{0,2})/); return m?(+m[1])*60+(+(m[2]||0)):9999;}
+function render(){
+  const list=$("list");
+  const data=rows.filter(r=>filter==="all"||r.jour===filter);
+  if(!rows.length){ list.innerHTML=`<p class="empty">Aucun accompagnement pour l'instant. Cliquez «&nbsp;Ajouter&nbsp;» pour commencer.</p>`; return; }
+  if(!data.length){ list.innerHTML=`<p class="empty">Rien ce jour-là.</p>`; return; }
+  const byDay={};
+  data.forEach(r=>{(byDay[r.jour]=byDay[r.jour]||[]).push(r);});
+  const days=Object.keys(byDay).sort((a,b)=>order(a)-order(b));
+  list.innerHTML=days.map(j=>{
+    const items=byDay[j].sort((a,b)=>timeKey(a.creneau)-timeKey(b.creneau)||String(a.aesh).localeCompare(b.aesh));
+    return `<div class="day"><div class="day-h">${ic('<rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 9.5h16M8 3.5v4M16 3.5v4"/>')} ${esc(j)} <span style="color:var(--soft);font-weight:600">· ${items.length}</span></div>`+
+      items.map(r=>`<div class="row">
+        <span class="ava">${esc((r.aesh||"?").slice(0,4))}</span>
+        <div class="row-main">
+          <div class="row-top"><b>${esc(r.aesh||"AESH")}</b> ${ic('<path d="m9 6 6 6-6 6"/>')} <span class="tag">${esc(r.eleveCode||"—")}</span>${r.classe?`<span class="tag cls">${esc(r.classe)}</span>`:""}</div>
+          <div class="row-sub">${r.creneau?`<span>${ic('<circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 2"/>')} ${esc(r.creneau)}</span>`:""}${r.lieu?`<span>${ic('<path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>')} ${esc(r.lieu)}</span>`:""}${r.note?`<span>${ic('<path d="M5 7h14M5 12h10M5 17h7"/>')} ${esc(r.note)}</span>`:""}</div>
+        </div>
+        <div class="row-act"><button class="ico-btn" data-edit="${r.id}" aria-label="Modifier">${ic('<path d="M4 20h4L18.5 9.5a2 2 0 0 0-3-3L5 17v3z"/><path d="m13.5 6.5 3 3"/>')}</button><button class="ico-btn del" data-del="${r.id}" aria-label="Supprimer">${ic('<path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/>')}</button></div>
+      </div>`).join("")+`</div>`;
+  }).join("");
+}
+$("list").addEventListener("click",e=>{
+  const ed=e.target.closest("[data-edit]"); if(ed) return openForm(rows.find(r=>r.id===ed.dataset.edit));
+  const dl=e.target.closest("[data-del]"); if(dl){ if(confirm("Supprimer cet accompagnement ?")) deleteDoc(doc(db,COL,dl.dataset.del)).catch(()=>toast("Suppression impossible.")); }
+});
+
+const bg=$("sheet-bg"), sheet=$("sheet");
+function openForm(r){
+  editId=r?r.id:null;
+  $("sheet-title").textContent=r?"Modifier l'accompagnement":"Nouvel accompagnement";
+  $("f-aesh").value=r?r.aesh||"":""; $("f-eleve").value=r?r.eleveCode||"":""; $("f-classe").value=r?r.classe||"":"";
+  $("f-jour").value=r?r.jour||"Lundi":"Lundi"; $("f-creneau").value=r?r.creneau||"":""; $("f-lieu").value=r?r.lieu||"":""; $("f-note").value=r?r.note||"":"";
+  bg.classList.add("on"); sheet.classList.add("on"); setTimeout(()=>$("f-aesh").focus(),60);
+}
+function closeForm(){ bg.classList.remove("on"); sheet.classList.remove("on"); }
+$("add").addEventListener("click",()=>openForm(null));
+$("f-cancel").addEventListener("click",closeForm); bg.addEventListener("click",closeForm);
+$("f-save").addEventListener("click",async()=>{
+  const data={ aesh:$("f-aesh").value.trim(), eleveCode:$("f-eleve").value.trim(), classe:$("f-classe").value.trim(),
+    jour:$("f-jour").value, creneau:$("f-creneau").value.trim(), lieu:$("f-lieu").value.trim(), note:$("f-note").value.trim() };
+  if(!data.aesh||!data.eleveCode){ toast("Indiquez au moins l'AESH et le code élève."); return; }
+  try{
+    if(editId){ await updateDoc(doc(db,COL,editId),data); }
+    else { await addDoc(collection(db,COL),{...data,createdAt:serverTimestamp()}); }
+    closeForm(); toast("Enregistré ✓");
+  }catch(e){ console.error(e); toast("Enregistrement impossible — règle Firestore à publier ?"); }
+});
+
+onSnapshot(collection(db,COL), snap=>{
+  rows=snap.docs.map(d=>({id:d.id,...d.data()})); render();
+}, err=>{ console.error(err); $("fb").innerHTML=`<div class="banner">${ic('<path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>')} <span><b>Activation Firestore requise.</b> Publiez la règle de <code>coordination_planning_aesh</code>.</span></div>`; $("list").innerHTML=""; });
+</script>
+</body>
+</html>

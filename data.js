@@ -125,7 +125,7 @@ const THEMATIQUES = [
     enfants: [
       {
         titre: "Comprendre le métier",
-        desc: "Les missions, la posture, le cadre.",
+        desc: "Les missions, la posture, le cadre — et où va le métier.",
         icon: "users",
         enfants: [
           {
@@ -134,6 +134,22 @@ const THEMATIQUES = [
             lien: "guides/aesh-missions.html",
             type: "Guide",
             icon: "users",
+            badge: "Nouveau",
+          },
+          {
+            titre: "Accompagner en classe",
+            desc: "La juste distance, le binôme avec l'enseignant, et les gestes concrets qui aident vraiment, au quotidien. Avec des exemples.",
+            lien: "guides/aesh-accompagner-classe.html",
+            type: "Guide",
+            icon: "school",
+            badge: "Nouveau",
+          },
+          {
+            titre: "Où va le métier",
+            desc: "La réforme 2026 : le constat du rapport IGAS, le virage de l'accessibilité, et les pôles d'appui à la scolarité qui remplacent les PIAL.",
+            lien: "guides/aesh-reforme.html",
+            type: "Repères",
+            icon: "compass",
             badge: "Nouveau",
           },
         ],
@@ -150,6 +166,51 @@ const THEMATIQUES = [
             type: "Guide",
             icon: "scale",
             badge: "Nouveau",
+          },
+          {
+            titre: "Un examen aménagé",
+            desc: "Le déroulé d'une épreuve aménagée : la notification, l'installation, le tiers-temps, l'encadrement, les oraux. Du concret pour le jour J.",
+            lien: "guides/aesh-examen-amenage.html",
+            type: "Guide",
+            icon: "calendar",
+            badge: "Nouveau",
+          },
+          {
+            titre: "Les aménagements d'examens",
+            desc: "Le panorama complet : la procédure (demande, avis du médecin CDAPH, décision du recteur, INCLUSCOL) et les 5 grands types d'aménagements (D. 351-27 à 32).",
+            lien: "guides/aesh-amenagements-examens.html",
+            type: "Guide",
+            icon: "book",
+            badge: "Nouveau",
+          },
+        ],
+      },
+      {
+        titre: "La coordination",
+        desc: "Les outils de l'équipe : planning, réunions, échanges.",
+        icon: "calendar",
+        enfants: [
+          {
+            titre: "Planning AESH",
+            desc: "Qui accompagne qui, quand et où — partagé avec toute l'équipe, en temps réel. Codes élèves uniquement (RGPD), jamais de nom.",
+            lien: "planning-aesh/",
+            type: "Outil",
+            icon: "calendar",
+            badge: "Nouveau",
+          },
+          {
+            titre: "Réunions de l'équipe AESH",
+            desc: "Trouver un créneau de réunion d'équipe, partager l'ordre du jour, suivre les réponses. (L'outil Réunions de l'équipe.)",
+            lien: "reunions/",
+            type: "Outil",
+            icon: "clock",
+          },
+          {
+            titre: "Mur d'échanges",
+            desc: "Un espace pour déposer infos, questions et bons plans de l'équipe AESH, et voter pour les idées. (L'outil Mur d'idées.)",
+            lien: "murs/",
+            type: "Outil",
+            icon: "bulb",
           },
         ],
       },
