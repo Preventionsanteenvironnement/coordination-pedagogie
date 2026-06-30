@@ -30,7 +30,6 @@
   .av:first-child{margin-left:0}
   .me{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 11px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
   main{max-width:820px;margin:0 auto;padding:0 14px 120px}
-  /* timeline */
   .tlwrap{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);margin:0 -14px;padding:11px 14px 9px;border-bottom:1px solid var(--line)}
   .tl{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
   .tl::-webkit-scrollbar{display:none}
@@ -47,7 +46,6 @@
   .ld{width:9px;height:9px;border-radius:50%}
   .tbtn{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer}
   .tbtn:hover{border-color:var(--c1);color:var(--c1)}
-  /* phase header */
   .phase{display:flex;align-items:center;gap:12px;margin:30px 2px 12px;scroll-margin-top:96px}
   .pnum2{flex:none;width:42px;height:42px;border-radius:13px;background:var(--pc,#0e7490);color:#fff;display:grid;place-items:center;font-weight:850;font-size:1.3rem;box-shadow:0 6px 16px color-mix(in srgb,var(--pc) 40%,transparent)}
   .ptitlewrap{display:flex;flex-direction:column;gap:1px;min-width:0}
@@ -56,8 +54,10 @@
   .pname:hover{color:var(--pc)}
   .conn{width:2px;height:14px;background:var(--line);margin:2px 0 2px 22px}
   .card{position:relative;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--pc,#0e7490);border-radius:var(--r);box-shadow:var(--sh);padding:14px 15px}
+  .card.done{border-color:color-mix(in srgb,var(--ok-tx) 32%,var(--line));border-left-color:var(--ok-tx);background:color-mix(in srgb,var(--ok-bg) 20%,var(--card))}
   .chead{display:flex;gap:11px;align-items:flex-start}
   .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--pc,#0e7490);color:#fff;display:grid;place-items:center;font-weight:750;font-size:.92rem}
+  .card.done .num{background:var(--ok-tx)}
   .title{flex:1;margin:3px 0;font-size:1.04rem;font-weight:700;cursor:text}
   .title:hover{color:var(--c1)}
   .stp{flex:none;font-size:.74rem;font-weight:700;border:none;border-radius:999px;padding:4px 11px;cursor:pointer}
@@ -65,7 +65,15 @@
   .qline{display:flex;gap:8px;align-items:flex-start;margin:9px 0 4px 41px;font-size:.9rem;color:var(--soft)}
   .qline .qm{flex:none;width:20px;height:20px;border-radius:50%;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;font-weight:800;font-size:.78rem}
   .qline span.qx{cursor:text} .qline span.qx:hover{color:var(--c1)}
-  .retenu{margin:8px 0 2px 41px;display:flex;gap:7px;align-items:center;background:var(--ok-bg);color:var(--ok-tx);border-radius:var(--rs);padding:8px 11px;font-size:.86rem;font-weight:650}
+  .meta{margin:9px 0 0 41px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .doc{display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 6px 3px 9px;font-size:.78rem;color:var(--soft)}
+  .doc .dx{cursor:pointer;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;color:var(--soft)}
+  .doc .dx:hover{background:var(--line);color:#b3261e}
+  .adddoc,.textbtn{display:inline-flex;align-items:center;gap:5px;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:999px;padding:4px 10px;font-size:.78rem;font-weight:600;cursor:pointer}
+  .adddoc:hover,.textbtn:hover{border-color:var(--c1);color:var(--c1)}
+  .textbtn{border-style:solid;background:var(--c1soft);border-color:transparent;color:var(--c1)}
+  .conf{display:inline-flex;align-items:center;gap:5px;font-size:.76rem;font-weight:700;color:var(--ok-tx);background:var(--ok-bg);border-radius:999px;padding:3px 9px}
+  .retenu{margin:9px 0 2px 41px;display:flex;gap:7px;align-items:center;background:var(--ok-bg);color:var(--ok-tx);border-radius:var(--rs);padding:8px 11px;font-size:.86rem;font-weight:650}
   .props{margin:9px 0 0 41px;display:flex;flex-direction:column;gap:7px}
   .prop{display:flex;flex-direction:column;gap:8px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--rs);padding:9px 11px}
   .prop.lead{border-color:var(--c1)}
@@ -75,6 +83,7 @@
   .picon{flex:none;display:grid;place-items:center;margin-top:1px}
   .ptxt{flex:1;font-size:.9rem;min-width:0;line-height:1.4}
   .ptxt small{color:var(--soft);font-weight:600}
+  .soutien{display:inline-flex;align-items:center;gap:4px;margin-top:3px;font-size:.78rem;color:var(--soft);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
   .prow2{display:flex;align-items:center;gap:7px}
   .prow2 .sp{flex:1}
   .sup{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.8rem;font-weight:700;color:var(--ink);cursor:pointer}
@@ -97,7 +106,7 @@
   .ins button{background:none;border:none;color:var(--soft);font-size:.78rem;font-weight:600;cursor:pointer;display:inline-flex;gap:5px;align-items:center;opacity:.65;padding:5px 10px;border-radius:999px}
   .ins button:hover{opacity:1;color:var(--c1);background:var(--c1soft)}
   .ov{position:fixed;inset:0;background:rgba(8,18,22,.55);display:grid;place-items:center;z-index:90;padding:18px}
-  .modal{background:var(--card);border-radius:var(--r);box-shadow:var(--shl);width:100%;max-width:420px;padding:20px}
+  .modal{background:var(--card);border-radius:var(--r);box-shadow:var(--shl);width:100%;max-width:440px;padding:20px}
   .modal h3{margin:0 0 5px;font-size:1.15rem}
   .modal .msub{margin:0 0 14px;font-size:.85rem;color:var(--soft)}
   .mfield{display:block;margin-bottom:12px}
@@ -108,10 +117,22 @@
   .mbtns{display:flex;gap:9px;justify-content:flex-end;margin-top:6px}
   .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--rs);background:var(--c1);color:#fff;font:inherit;font-weight:700;border:none;cursor:pointer}
   .btn:hover{background:var(--c1d)} .btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--soft)}
+  .sheetbg{position:fixed;inset:0;background:rgba(8,18,22,.5);z-index:88;opacity:0;pointer-events:none;transition:.22s}
+  .sheetbg.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:89;background:var(--card);border-radius:18px 18px 0 0;box-shadow:var(--shl);max-width:820px;margin:0 auto;max-height:84vh;overflow:auto;transform:translateY(103%);transition:.28s cubic-bezier(.2,.8,.2,1);padding:6px 18px 26px}
+  .sheet.on{transform:none}
+  .sheet .grip{width:42px;height:5px;border-radius:999px;background:var(--line);margin:8px auto 12px}
+  .sheet h4{margin:0 0 3px;font-size:1.05rem}
+  .sheet .sh-sub{margin:0 0 14px;font-size:.84rem;color:var(--soft)}
+  .tref{border-left:3px solid var(--c1);background:var(--bg);border-radius:0 10px 10px 0;padding:10px 13px;margin-bottom:9px}
+  .tref b{display:block;font-size:.85rem;color:var(--c1);margin-bottom:3px}
+  .tref p{margin:0;font-size:.88rem}
+  .tref a{color:var(--c1);font-size:.8rem;display:inline-block;margin-top:6px}
+  .disc{font-size:.78rem;color:var(--soft);font-style:italic;margin:4px 0 14px}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 19px;border-radius:999px;font-size:.86rem;font-weight:600;opacity:0;transition:.26s;pointer-events:none;z-index:95;box-shadow:var(--shl)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   @media print{
-    a.back,.who,.tbtn,.stp,.sup,.ibtn,.addprop,.addnote,.cfoot,.ins,.me,.tlwrap,.tete,.prank{display:none!important}
+    a.back,.who,.tbtn,.stp,.sup,.ibtn,.addprop,.addnote,.cfoot,.ins,.me,.tlwrap,.tete,.prank,.adddoc,.textbtn{display:none!important}
     header.hero{background:#0e7490!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .card{box-shadow:none;break-inside:avoid}
   }
@@ -131,12 +152,14 @@
     <div class="legend">
       <span><span class="ld" style="background:var(--flou-tx)"></span>À clarifier</span>
       <span><span class="ld" style="background:var(--deb-tx)"></span>En discussion</span>
-      <span><span class="ld" style="background:var(--ok-tx)"></span>Officialisé</span>
+      <span><span class="ld" style="background:var(--ok-tx)"></span>Validé</span>
     </div>
     <button class="tbtn" id="tprint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg> Générer la carte</button>
   </div>
   <div id="list"></div>
 </main>
+<div class="sheetbg" id="sheetbg"></div>
+<div class="sheet" id="sheet"></div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -160,6 +183,7 @@ let PHASE_NAMES={...DEFAULT_PHASES};
 const PHASE_IDS=[1,2,3,4,5];
 
 const ACTEURS=["Élève","Professeur principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
+const DOCS_SUGGEST=["Fiche de négociation","Pré-convention","Convention","Annexe pédagogique","Annexe activités","Annexe handicap","Attestation de PFMP","Journal de bord","Compte rendu d'évaluation","Passeport professionnel (Cerise Pro)","Copies de la convention"];
 const AMETA={
   "Élève":["student","#475569"],"Professeur principal":["person","#7c3aed"],"Référent":["person","#0f766e"],
   "Enseignant pro":["briefcase","#b45309"],"DDF":["building","#4338ca"],"Bureau des entreprises":["building","#be185d"],
@@ -173,31 +197,32 @@ const ICONS={
   building:'<rect x="5" y="3.5" width="14" height="17" rx="1.4"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h2M13 16h2"/>',
   people:'<circle cx="9" cy="8.4" r="2.6"/><path d="M3.6 19a5.4 5.4 0 0 1 10.8 0"/><path d="M16 6.4a2.6 2.6 0 0 1 0 5M20.6 19a5.4 5.4 0 0 0-4-5.2"/>'
 };
-const actIcon=(role,size)=>{const m=AMETA[role];if(!m)return "";return `<svg width="${size||18}" height="${size||18}" viewBox="0 0 24 24" fill="none" stroke="${m[1]}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[m[0]]}</svg>`;};
-const STATUTS={flou:"À clarifier",deb:"En discussion",ok:"Officialisé"};
+const actIcon=(role,size)=>{if(!role)return "";const m=AMETA[role]||["person","#64748b"];return `<svg width="${size||18}" height="${size||18}" viewBox="0 0 24 24" fill="none" stroke="${m[1]}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[m[0]]}</svg>`;};
+const fileIc='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5M7 3h8l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>';
+const STATUTS={flou:"À clarifier",deb:"En discussion",ok:"Validé"};
 const NEXTST={flou:"deb",deb:"ok",ok:"flou"};
 
 const SEED=[
-  {id:"s01",ordre:10,phase:1,titre:"Attribution d'un référent à chaque élève",question:"Qui organise la répartition des référents ?",props:[{id:"a",txt:"Le professeur principal",role:"Professeur principal"},{id:"b",txt:"Le DDF",role:"DDF"}],retenu:null,statut:"flou"},
-  {id:"s02",ordre:20,phase:1,titre:"L'élève reçoit la fiche de négociation et la pré-convention",question:"Qui imprime et remet ces deux documents à l'élève ?",props:[{id:"a",txt:"Le référent",role:"Référent"},{id:"b",txt:"L'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Le professeur principal",role:"Professeur principal"}],retenu:null,statut:"flou"},
-  {id:"s03",ordre:30,phase:1,titre:"Sur le terrain, le tuteur coche les activités AGORA possibles",question:"",props:[{id:"a",txt:"Le tuteur du futur lieu de stage",role:"Tuteur"}],retenu:null,statut:"deb"},
-  {id:"s04",ordre:40,phase:2,titre:"L'élève rapporte les deux documents remplis",question:"À qui les rapporte-t-il, et qui est informé ensuite ?",props:[{id:"a",txt:"Au référent attitré",role:"Référent"},{id:"b",txt:"À l'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Au professeur principal",role:"Professeur principal"}],retenu:null,statut:"flou"},
-  {id:"s05",ordre:50,phase:2,titre:"Saisie de la pré-convention pour générer la convention (Pronote)",question:"Qui saisit, et en combien de temps ?",props:[{id:"a",txt:"Le référent saisit",role:"Référent"},{id:"b",txt:"Le DDF saisit / contrôle",role:"DDF"}],retenu:null,statut:"flou"},
-  {id:"s06",ordre:60,phase:2,titre:"Vérification puis circuit de signatures de la convention",question:"Dans quel ordre : bureau des entreprises, DDF, cheffe d'établissement ?",props:[{id:"a",txt:"Le bureau des entreprises vérifie d'abord",role:"Bureau des entreprises"},{id:"b",txt:"Le DDF fait signer la cheffe",role:"DDF"}],retenu:null,statut:"deb"},
-  {id:"s07",ordre:70,phase:2,titre:"Diffusion des copies (familles + entreprise)",question:"",props:[{id:"a",txt:"Le DDF diffuse les copies",role:"DDF"},{id:"b",txt:"Le professeur principal relaie aux familles",role:"Professeur principal"}],retenu:null,statut:"flou"},
-  {id:"s08",ordre:80,phase:3,titre:"Règle d'or : aucun départ sans convention signée par les 5 parties",question:"",props:[],retenu:null,statut:"ok"},
-  {id:"s09",ordre:90,phase:3,titre:"Jour J : documents remis à l'entreprise",question:"Convention + annexe activités + attestation à remplir + journal de bord : tout y est ?",props:[{id:"a",txt:"Le référent remet le dossier complet",role:"Référent"}],retenu:null,statut:"deb"},
-  {id:"s10",ordre:100,phase:4,titre:"Présence vérifiée sous 2 jours, visite de fin fixée",question:"",props:[{id:"a",txt:"L'enseignant référent",role:"Référent"}],retenu:"a",statut:"ok"},
-  {id:"s10b",ordre:105,phase:4,titre:"Pendant la PFMP : journal de bord suivi, contact en cas de besoin",question:"",props:[{id:"a",txt:"Le référent suit, le tuteur signale",role:"Référent"}],retenu:null,statut:"deb"},
-  {id:"s11",ordre:110,phase:5,titre:"Visite de fin de période (2 phases) → compte rendu d'évaluation",question:"",props:[{id:"a",txt:"Référent + tuteur ensemble",role:"Référent"}],retenu:"a",statut:"ok"},
-  {id:"s12",ordre:120,phase:5,titre:"Attestation : nombre de jours réellement effectués",question:"Quand la remplir si le bilan tombe avant la fin du stage ?",props:[{id:"a",txt:"Le tuteur le dernier jour",role:"Tuteur"}],retenu:null,statut:"deb"},
-  {id:"s13",ordre:130,phase:5,titre:"Transmission de l'attestation → allocation",question:"Référent → DDF → bureau des entreprises → ASP : qui fait quoi ?",props:[{id:"a",txt:"Le référent transmet au DDF",role:"Référent"},{id:"b",txt:"Le bureau des entreprises envoie à l'ASP",role:"Bureau des entreprises"}],retenu:null,statut:"flou"},
-  {id:"s14",ordre:140,phase:5,titre:"Exploitation pédagogique du retour de stage en classe",question:"",props:[{id:"a",txt:"Toute l'équipe pédagogique",role:"Équipe"}],retenu:"a",statut:"ok"}
+  {id:"s01",ordre:10,phase:1,titre:"Attribution d'un référent à chaque élève",question:"Qui organise la répartition des référents ?",props:[{id:"a",txt:"Le professeur principal",role:"Professeur principal"},{id:"b",txt:"Le DDF",role:"DDF"}],retenu:null,statut:"flou",textes:[{ref:"Procédure interne — désignation des référents",desc:"Le professeur principal transmet au DDF la liste des enseignants référents de la classe ; chaque élève a un référent identifié avant le départ."}]},
+  {id:"s02",ordre:20,phase:1,titre:"L'élève reçoit la fiche de négociation et la pré-convention",question:"Qui imprime et remet ces deux documents à l'élève ?",props:[{id:"a",txt:"Le référent",role:"Référent"},{id:"b",txt:"L'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Le professeur principal",role:"Professeur principal"}],retenu:null,statut:"flou",docs:["Fiche de négociation","Pré-convention"],textes:[{ref:"Convention-type, annexe pédagogique",desc:"La pré-convention (« Accord pour formation professionnelle en entreprise ») valide le principe de l'accueil avant l'établissement de la convention."}]},
+  {id:"s03",ordre:30,phase:1,titre:"Sur le terrain, le tuteur coche les activités AGORA possibles",question:"",props:[{id:"a",txt:"Le tuteur du futur lieu de stage",role:"Tuteur"}],retenu:null,statut:"deb",docs:["Fiche de négociation"],textes:[{ref:"Convention-type, art. 2 et 16",desc:"Le tuteur confie à l'élève des activités conformes au projet pédagogique et aux objectifs de formation."}]},
+  {id:"s04",ordre:40,phase:2,titre:"L'élève rapporte les deux documents remplis",question:"À qui les rapporte-t-il, et qui est informé ensuite ?",props:[{id:"a",txt:"Au référent attitré",role:"Référent"},{id:"b",txt:"À l'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Au professeur principal",role:"Professeur principal"}],retenu:null,statut:"flou",docs:["Fiche de négociation (remplie)","Pré-convention (remplie)"],textes:[{ref:"Procédure interne",desc:"Circulation de la pré-convention : à clarifier en équipe pour éviter les pertes de document et savoir qui saisit ensuite."}]},
+  {id:"s05",ordre:50,phase:2,titre:"Saisie de la pré-convention pour générer la convention (Pronote)",question:"Qui saisit, et en combien de temps ?",props:[{id:"a",txt:"Le référent saisit",role:"Référent"},{id:"b",txt:"Le DDF saisit / contrôle",role:"DDF"}],retenu:null,statut:"flou",docs:["Pré-convention","Convention"],textes:[{ref:"Convention-type, art. 3",desc:"La convention et ses annexes sont éditées par l'établissement à partir de la pré-convention (saisie dans Pronote)."}]},
+  {id:"s06",ordre:60,phase:2,titre:"Vérification puis circuit de signatures de la convention",question:"Dans quel ordre : bureau des entreprises, DDF, cheffe d'établissement ?",props:[{id:"a",txt:"Le bureau des entreprises vérifie d'abord",role:"Bureau des entreprises"},{id:"b",txt:"Le DDF fait signer la cheffe",role:"DDF"}],retenu:null,statut:"deb",docs:["Convention + annexes"],textes:[{ref:"Convention-type, art. 3",desc:"La convention accompagnée de ses annexes est signée par 5 parties : le chef d'établissement, le représentant de l'entreprise, l'élève (ou son représentant légal s'il est mineur), l'enseignant référent et le tuteur."}]},
+  {id:"s07",ordre:70,phase:2,titre:"Diffusion des copies (familles + entreprise)",question:"",props:[{id:"a",txt:"Le DDF diffuse les copies",role:"DDF"},{id:"b",txt:"Le professeur principal relaie aux familles",role:"Professeur principal"}],retenu:null,statut:"flou",docs:["Copies de la convention"],textes:[{ref:"Convention-type, art. 3",desc:"La convention est adressée à la famille pour information ; des copies sont remises aux parents et à l'entreprise."}]},
+  {id:"s08",ordre:80,phase:3,titre:"Règle d'or : aucun départ sans convention signée par les 5 parties",question:"",props:[],retenu:null,statut:"ok",textes:[{ref:"Convention-type, art. 3",desc:"Aucun départ en PFMP sans convention complète et signée par les 5 parties."}]},
+  {id:"s09",ordre:90,phase:3,titre:"Jour J : documents remis à l'entreprise",question:"Convention + annexe activités + attestation à remplir + journal de bord : tout y est ?",props:[{id:"a",txt:"Le référent remet le dossier complet",role:"Référent"}],retenu:null,statut:"deb",docs:["Convention","Annexe activités","Attestation de PFMP","Journal de bord"],textes:[{ref:"Convention-type, annexe pédagogique",desc:"L'élève emporte les documents de suivi et d'évaluation ; l'attestation sera complétée par le tuteur en fin de période."}]},
+  {id:"s10",ordre:100,phase:4,titre:"Présence vérifiée sous 2 jours, visite de fin fixée",question:"",props:[{id:"a",txt:"L'enseignant référent",role:"Référent"}],retenu:"a",statut:"ok",textes:[{ref:"Convention-type, annexe pédagogique",desc:"Le référent s'assure de la présence de l'élève dans les deux premiers jours et fixe le rendez-vous de visite de fin de période."}]},
+  {id:"s10b",ordre:105,phase:4,titre:"Pendant la PFMP : journal de bord suivi, contact en cas de besoin",question:"",props:[{id:"a",txt:"Le référent suit, le tuteur signale",role:"Référent"}],retenu:null,statut:"deb",docs:["Journal de bord","Passeport professionnel (Cerise Pro)"],textes:[{ref:"Convention-type, annexe pédagogique",desc:"Suivi du journal de bord et du passeport professionnel ; en cas de difficulté, le référent crée un événement dans Pronote."}]},
+  {id:"s11",ordre:110,phase:5,titre:"Visite de fin de période (2 phases) → compte rendu d'évaluation",question:"",props:[{id:"a",txt:"Référent + tuteur ensemble",role:"Référent"}],retenu:"a",statut:"ok",docs:["Compte rendu d'évaluation"],textes:[{ref:"Convention-type, art. 19",desc:"La visite de fin se déroule en deux temps (avec l'élève et le tuteur, puis avec le tuteur seul) ; le compte rendu d'évaluation est complété et signé."}]},
+  {id:"s12",ordre:120,phase:5,titre:"Attestation : nombre de jours réellement effectués",question:"Quand la remplir si le bilan tombe avant la fin du stage ?",props:[{id:"a",txt:"Le tuteur le dernier jour",role:"Tuteur"}],retenu:null,statut:"deb",docs:["Attestation de PFMP"],textes:[{ref:"Code de l'éducation, art. D.124-9",desc:"L'attestation est délivrée par l'organisme d'accueil ; elle mentionne la durée effective (nombre de jours réellement effectués), qui sert au calcul de l'allocation."}]},
+  {id:"s13",ordre:130,phase:5,titre:"Transmission de l'attestation → allocation",question:"Référent → DDF → bureau des entreprises → ASP : qui fait quoi ?",props:[{id:"a",txt:"Le référent transmet au DDF",role:"Référent"},{id:"b",txt:"Le bureau des entreprises envoie à l'ASP",role:"Bureau des entreprises"}],retenu:null,statut:"flou",docs:["Attestation signée"],textes:[{ref:"Décret n° 2023-765 (allocation PFMP) — procédure interne",desc:"L'attestation (avec le nombre de jours) est transmise au DDF / bureau des entreprises, puis à l'ASP pour le versement de l'allocation."}]},
+  {id:"s14",ordre:140,phase:5,titre:"Exploitation pédagogique du retour de stage en classe",question:"",props:[{id:"a",txt:"Toute l'équipe pédagogique",role:"Équipe"}],retenu:"a",statut:"ok",textes:[{ref:"Convention-type, annexe pédagogique",desc:"Exploitation pédagogique du retour de stage et valorisation des compétences acquises."}]}
 ];
 
-let ME=null, STEPS=[], DEMO=false, seeding=false;
+let ME=null, STEPS=[], DEMO=false, seeding=false, sheetStep=null;
 try{ ME=JSON.parse(localStorage.getItem("parcours_id")||"null"); }catch(e){}
-if(ME&&ME.pseudo&&typeof ME==="object")ME={pseudo:ME.pseudo};
+if(ME&&ME.pseudo)ME={pseudo:ME.pseudo};
 let MYPID=localStorage.getItem("parcours_pid"); if(!MYPID){MYPID=uid();localStorage.setItem("parcours_pid",MYPID);}
 
 /* ---------- modale générique ---------- */
@@ -212,7 +237,9 @@ function openForm(title, sub, fields, okLabel){
       let c;
       if(f.type==="textarea"){c=document.createElement("textarea");}
       else if(f.type==="select"){c=document.createElement("select");(f.options||[]).forEach(o=>{const op=document.createElement("option");op.value=o;op.textContent=o;c.appendChild(op);});}
-      else{c=document.createElement("input");c.type="text";}
+      else{c=document.createElement("input");c.type="text";
+        if(f.list){const did="dl_"+f.key+Math.random().toString(16).slice(2);const dl=document.createElement("datalist");dl.id=did;f.list.forEach(o=>{const op=document.createElement("option");op.value=o;dl.appendChild(op);});w.appendChild(dl);c.setAttribute("list",did);}
+      }
       if(f.value!=null)c.value=f.value; if(f.ph)c.placeholder=f.ph; c.dataset.k=f.key;
       w.appendChild(c);mf.appendChild(w);
     });
@@ -253,34 +280,44 @@ function renderWho(connected){
 }
 
 /* ---------- rendu ---------- */
+const okCheck='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 function stepCard(s,n){
-  const pc=PCOLORS[s.phase]||PCOLORS[1];
+  const pc=PCOLORS[s.phase]||PCOLORS[1], done=s.statut==="ok";
   const votes=s.votes||[];
   const arr=(s.props||[]).map(p=>({p,c:votes.filter(v=>v.indexOf(p.id+"||")===0).length})).sort((a,b)=>b.c-a.c);
   const retText=s.retenu?(s.props||[]).find(p=>p.id===s.retenu):null;
   const multi=arr.length>1;
   const props=arr.map((o,idx)=>{
     const p=o.p, c=o.c, voted=ME&&votes.includes(p.id+"||"+ME.pseudo), isret=s.retenu===p.id, tete=multi&&idx===0&&c>0;
+    const sout=p.soutien?`<span class="soutien">en soutien : ${actIcon(p.soutien,14)} ${esc(p.soutien)}</span>`:"";
     return `<div class="prop${tete?" lead":""}${isret?" ret":""}">
-      <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${p.role?`<span class="picon">${actIcon(p.role,18)}</span>`:""}<span class="ptxt">${esc(p.txt)}${p.role?` <small>· ${esc(p.role)}</small>`:""}</span></div>
+      <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${p.role?`<span class="picon">${actIcon(p.role,18)}</span>`:""}<span class="ptxt">${esc(p.txt)}${p.role?` <small>· ${esc(p.role)}</small>`:""}${sout}</span></div>
       <div class="prow2">
-        <button class="sup${voted?" on":""}" data-act="support" data-id="${s.id}" data-pid="${p.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>D'accord${c?" · "+c:""}</button>
+        <button class="sup${voted?" on":""}" data-act="support" data-id="${s.id}" data-pid="${p.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>D'accord${c?" · "+c:""}</button>
         ${tete?`<span class="tete">en tête</span>`:""}
         <span class="sp"></span>
-        <button class="ibtn ret${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="Officialiser cette réponse"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+        <button class="ibtn ret${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="Officialiser (valider) cette réponse">${okCheck}</button>
         <button class="ibtn" data-act="delprop" data-id="${s.id}" data-pid="${p.id}" title="Supprimer cette proposition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
     </div>`;
   }).join("");
   const notes=(s.notes||[]).map(nt=>`<div class="note"><b>${esc(nt.p)}</b> — ${esc(nt.t)}</div>`).join("");
-  return `<article class="card" style="--pc:${pc}">
+  const docs=(s.documents||[]).map(d=>`<span class="doc">${fileIc} ${esc(d)}<span class="dx" data-act="deldoc" data-id="${s.id}" data-doc="${esc(d)}">×</span></span>`).join("");
+  const nTextes=(s.textes||[]).length;
+  return `<article class="card${done?" done":""}" style="--pc:${pc}">
     <div class="chead">
-      <span class="num">${n}</span>
+      <span class="num">${done?okCheck:n}</span>
       <h3 class="title" data-act="title" data-id="${s.id}">${esc(s.titre)}</h3>
       <button class="stp st-${s.statut}" data-act="statut" data-id="${s.id}" title="Cliquer pour changer le statut">${STATUTS[s.statut]||"À clarifier"}</button>
     </div>
     <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span></div>
-    ${retText?`<div class="retenu"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Réponse officialisée : ${esc(retText.txt)}</div>`:""}
+    <div class="meta">
+      ${docs}
+      <button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button>
+      <button class="textbtn" data-act="textes" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg> Que disent les textes ?${nTextes?" · "+nTextes:""}</button>
+      ${s.conforme?`<span class="conf">${okCheck} conforme aux textes</span>`:""}
+    </div>
+    ${retText?`<div class="retenu">${okCheck} Réponse retenue : ${esc(retText.txt)}${retText.soutien?` (en soutien : ${esc(retText.soutien)})`:""}</div>`:""}
     <div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>
     <div class="notes">${notes}<button class="addnote" data-act="addnote" data-id="${s.id}">+ ajouter un commentaire</button></div>
     <div class="cfoot"><button data-act="delstep" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Supprimer l'étape</button></div>
@@ -296,7 +333,7 @@ function renderTimeline(){
     const pct=tot?Math.round(done/tot*100):0, pc=PCOLORS[ph];
     return `<div class="tlnode" style="--pc:${pc}" data-go="ph-${ph}">
       <div class="tlh"><span class="tlnum">${ph}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(PHASE_NAMES[ph]||DEFAULT_PHASES[ph])}</span></div>
-      <div class="tlc">${done}/${tot} officialisée${done>1?"s":""}</div>
+      <div class="tlc">${done}/${tot} validée${done>1?"s":""}</div>
       <div class="tlbar"><div class="tlfill" style="width:${pct}%"></div></div>
     </div>`;
   }).join("");
@@ -313,23 +350,46 @@ function render(){
     n++; html+=stepCard(s,n); html+=insRow(s.id);
   });
   list.innerHTML=html;
+  if(sheetStep) refreshSheet();
 }
+
+/* ---------- panneau « textes » ---------- */
+function refreshSheet(){
+  const s=findStep(sheetStep); if(!s){closeSheet();return;}
+  const refs=(s.textes||[]).map((t,i)=>`<div class="tref"><b>${esc(t.ref)}</b><p>${esc(t.desc)}</p>${t.lien?`<a href="${esc(t.lien)}" target="_blank" rel="noopener">Voir le texte ↗</a>`:""} <button class="dx" data-act="delref" data-id="${s.id}" data-i="${i}" style="float:right;background:none;border:none;color:var(--soft);cursor:pointer">supprimer</button></div>`).join("")||`<p class="sh-sub">Aucune référence pour l'instant.</p>`;
+  $("sheet").innerHTML=`<div class="grip"></div>
+    <h4>Que disent les textes ?</h4>
+    <p class="sh-sub">${esc(s.titre)}</p>
+    ${refs}
+    <p class="disc">Références indicatives, à vérifier avec la convention-type de l'établissement et le Code de l'éducation (dossier PFMP).</p>
+    <div style="display:flex;gap:9px;flex-wrap:wrap">
+      <button class="btn ghost" data-act="addref" data-id="${s.id}">+ Ajouter une référence</button>
+      <button class="btn" data-act="conforme" data-id="${s.id}">${s.conforme?okCheck+" Conforme — retirer":okCheck+" Marquer conforme aux textes"}</button>
+    </div>`;
+}
+function openSheet(id){ sheetStep=id; refreshSheet(); $("sheet").classList.add("on"); $("sheetbg").classList.add("on"); }
+function closeSheet(){ sheetStep=null; $("sheet").classList.remove("on"); $("sheetbg").classList.remove("on"); }
+$("sheetbg").addEventListener("click",closeSheet);
 
 /* ---------- actions ---------- */
 function findStep(id){return STEPS.find(s=>s.id===id);}
-$("list").addEventListener("click",async e=>{
-  const b=e.target.closest("[data-act]"); if(!b) return;
-  const act=b.dataset.act, id=b.dataset.id, pid=b.dataset.pid, s=findStep(id);
-  const ref=id?doc(etapesCol,id):null;
+async function handle(act,id,pid,b){
+  const s=findStep(id), ref=id?doc(etapesCol,id):null;
   if(act==="phasename"){ if(!await need())return; const ph=b.dataset.ph; const v=await openForm("Renommer la phase","",[{key:"t",label:"Nom de la phase",type:"text",value:PHASE_NAMES[ph]||DEFAULT_PHASES[ph]}]); if(v&&v.t)await updateDoc(parcoursRef,{["phases."+ph]:v.t,updatedAt:serverTimestamp()}); return; }
   if(act==="statut"){ if(!await need())return; await updateDoc(ref,{statut:NEXTST[s.statut]||"deb",updatedAt:serverTimestamp()}); return; }
   if(act==="title"){ if(!await need())return; const v=await openForm("Modifier le titre de l'étape","Tout est modifiable : si le titre n'est pas bon, corrige-le.",[{key:"t",label:"Titre",type:"text",value:s.titre}]); if(v&&v.t)await updateDoc(ref,{titre:v.t,updatedAt:serverTimestamp()}); return; }
   if(act==="question"){ if(!await need())return; const v=await openForm("La question à trancher","",[{key:"t",label:"Question",type:"textarea",value:s.question||"",ph:"ex. Qui remet la pré-convention à l'élève ?"}]); if(v)await updateDoc(ref,{question:v.t,updatedAt:serverTimestamp()}); return; }
-  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Une proposition par personne ; les plus soutenues remontent en priorité.",[{key:"txt",label:"Ta proposition",type:"text",ph:"ex. Le référent imprime et la remet"},{key:"role",label:"Qui ? (facultatif, pour l'icône)",type:"select",options:["—"].concat(ACTEURS)}]); if(v&&v.txt)await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role==="—"?"":v.role}),updatedAt:serverTimestamp()}); return; }
+  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Les plus soutenues remontent en priorité. Si plusieurs acteurs, indique qui FAIT et qui est EN SOUTIEN — pour ne jamais rester dans le flou.",[{key:"txt",label:"Ta proposition",type:"text",ph:"ex. Le référent imprime et la remet"},{key:"role",label:"Qui fait ? (acteur principal — ou tape un autre)",type:"text",list:ACTEURS,ph:"Référent, DDF, Professeur principal…"},{key:"soutien",label:"En soutien ? (facultatif)",type:"text",list:ACTEURS,ph:"ex. en appui : DDF"}]); if(v&&v.txt)await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role||"",soutien:v.soutien||""}),updatedAt:serverTimestamp()}); return; }
   if(act==="support"){ if(!await need())return; const key=pid+"||"+ME.pseudo; const has=(s.votes||[]).includes(key); await updateDoc(ref,{votes:has?arrayRemove(key):arrayUnion(key),updatedAt:serverTimestamp()}); return; }
-  if(act==="retain"){ if(!await need())return; const nv=s.retenu===pid?null:pid; await updateDoc(ref,nv?{retenu:nv,statut:"ok",updatedAt:serverTimestamp()}:{retenu:null,updatedAt:serverTimestamp()}); return; }
+  if(act==="retain"){ if(!await need())return; const nv=s.retenu===pid?null:pid; await updateDoc(ref,nv?{retenu:nv,statut:"ok",updatedAt:serverTimestamp()}:{retenu:null,updatedAt:serverTimestamp()}); if(nv)toast("Étape validée ✓"); return; }
   if(act==="delprop"){ if(!await need())return; if(!confirm("Supprimer cette proposition ?"))return; const np=(s.props||[]).filter(p=>p.id!==pid); const nvv=(s.votes||[]).filter(v=>v.indexOf(pid+"||")!==0); await updateDoc(ref,{props:np,votes:nvv,retenu:s.retenu===pid?null:s.retenu,updatedAt:serverTimestamp()}); return; }
   if(act==="addnote"){ if(!await need())return; const v=await openForm("Ajouter un commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",ph:"Une remarque, une précision, une objection…"}]); if(v&&v.t)await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now()}),updatedAt:serverTimestamp()}); return; }
+  if(act==="adddoc"){ if(!await need())return; const v=await openForm("Ajouter un document à remettre","",[{key:"d",label:"Nom du document",type:"text",list:DOCS_SUGGEST,ph:"ex. Pré-convention"}]); if(v&&v.d)await updateDoc(ref,{documents:arrayUnion(v.d),updatedAt:serverTimestamp()}); return; }
+  if(act==="deldoc"){ if(!await need())return; await updateDoc(ref,{documents:arrayRemove(b.dataset.doc),updatedAt:serverTimestamp()}); return; }
+  if(act==="textes"){ openSheet(id); return; }
+  if(act==="addref"){ if(!await need())return; const v=await openForm("Ajouter une référence de texte","",[{key:"ref",label:"Référence",type:"text",ph:"ex. Code de l'éducation, art. D.124-9"},{key:"desc",label:"Ce que dit le texte",type:"textarea"},{key:"lien",label:"Lien (facultatif)",type:"text",ph:"https://www.legifrance.gouv.fr/…"}]); if(v&&v.ref)await updateDoc(ref,{textes:arrayUnion({ref:v.ref,desc:v.desc||"",lien:v.lien||""}),updatedAt:serverTimestamp()}); return; }
+  if(act==="delref"){ if(!await need())return; const i=+b.dataset.i; const nt=(s.textes||[]).filter((_,k)=>k!==i); await updateDoc(ref,{textes:nt,updatedAt:serverTimestamp()}); return; }
+  if(act==="conforme"){ if(!await need())return; await updateDoc(ref,{conforme:!s.conforme,updatedAt:serverTimestamp()}); return; }
   if(act==="delstep"){ if(!await need())return; if(!confirm("Supprimer définitivement cette étape ? Cette action est irréversible."))return; await deleteDoc(ref); toast("Étape supprimée"); return; }
   if(act==="insert"){ if(!await need())return;
     const idx=id?STEPS.findIndex(x=>x.id===id):-1;
@@ -337,23 +397,25 @@ $("list").addEventListener("click",async e=>{
     let ordre; if(!prev)ordre=(STEPS[0]?STEPS[0].ordre:10)-5; else if(!next)ordre=prev.ordre+10; else ordre=(prev.ordre+next.ordre)/2;
     const phase=prev?prev.phase:(STEPS[0]?STEPS[0].phase:1);
     const v=await openForm("Insérer une étape","Pour ce qu'on aurait oublié entre deux étapes.",[{key:"t",label:"Titre de la nouvelle étape",type:"text",ph:"ex. Vérification des dates par le DDF"},{key:"ph",label:"Phase",type:"select",options:PHASE_IDS.map(i=>i+" · "+(PHASE_NAMES[i]||DEFAULT_PHASES[i]))}]);
-    if(v&&v.t){const pnum=parseInt(v.ph)||phase; await addDoc(etapesCol,{ordre,phase:pnum,titre:v.t,question:"",props:[],votes:[],notes:[],retenu:null,statut:"flou",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});}
+    if(v&&v.t){const pnum=parseInt(v.ph)||phase; await addDoc(etapesCol,{ordre,phase:pnum,titre:v.t,question:"",props:[],votes:[],notes:[],documents:[],textes:[],conforme:false,retenu:null,statut:"flou",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});}
     return;
   }
-});
+}
+$("list").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;handle(b.dataset.act,b.dataset.id,b.dataset.pid,b);});
+$("sheet").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;handle(b.dataset.act,b.dataset.id,b.dataset.pid,b);});
 $("timeline").addEventListener("click",e=>{const n=e.target.closest("[data-go]");if(!n)return;const t=document.getElementById(n.dataset.go);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
 $("tprint").addEventListener("click",()=>window.print());
 
 /* ---------- démarrage ---------- */
-function toStep(d){const x=d.data();return {id:d.id,ordre:x.ordre,phase:x.phase,titre:x.titre,question:x.question,props:x.props||[],votes:x.votes||[],notes:x.notes||[],retenu:x.retenu??null,statut:x.statut||"flou"};}
+function toStep(d){const x=d.data();return {id:d.id,ordre:x.ordre,phase:x.phase,titre:x.titre,question:x.question,props:x.props||[],votes:x.votes||[],notes:x.notes||[],documents:x.documents||[],textes:x.textes||[],conforme:!!x.conforme,retenu:x.retenu??null,statut:x.statut||"flou"};}
 async function seedIfEmpty(){
   if(seeding)return; seeding=true;
   try{
     await setDoc(parcoursRef,{phases:DEFAULT_PHASES,updatedAt:serverTimestamp()},{merge:true});
-    for(const s of SEED){ await setDoc(doc(etapesCol,s.id),{ordre:s.ordre,phase:s.phase,titre:s.titre,question:s.question,props:s.props,votes:[],notes:[],retenu:s.retenu,statut:s.statut,createdAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true}); }
+    for(const s of SEED){ await setDoc(doc(etapesCol,s.id),{ordre:s.ordre,phase:s.phase,titre:s.titre,question:s.question,props:s.props,votes:[],notes:[],documents:s.docs||[],textes:s.textes||[],conforme:false,retenu:s.retenu,statut:s.statut,createdAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true}); }
   }catch(e){ console.error(e); }
 }
-function startDemo(){ DEMO=true; STEPS=SEED.map(s=>({...s,votes:[],notes:[]})); render(); renderWho([]); }
+function startDemo(){ DEMO=true; STEPS=SEED.map(s=>({...s,votes:[],notes:[],documents:s.docs||[],textes:s.textes||[],conforme:false})); render(); renderWho([]); }
 
 renderWho([]);
 onSnapshot(parcoursRef, d=>{ if(d.exists()&&d.data().phases){PHASE_NAMES={...DEFAULT_PHASES,...d.data().phases}; if(STEPS.length)render();} }, ()=>{});
