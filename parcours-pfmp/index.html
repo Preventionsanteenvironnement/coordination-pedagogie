@@ -429,7 +429,7 @@ function decision(s){
   const voters=new Set(votes.map(v=>v.split("||")[1]||"?")).size;
   const topC=arr[0]?arr[0].c:0, withVotes=arr.filter(x=>x.c>0);
   let state="vide";
-  if(topC>0){ if(withVotes.length===1) state="final"; else if(arr[1]&&arr[1].c===topC) state="egalite"; else state="tete"; }
+  if(topC>0){ if(withVotes.length===1) state=(voters>=2?"final":"tete"); else if(arr[1]&&arr[1].c===topC) state="egalite"; else state="tete"; }
   return {arr,topC,withVotes,voters,state,top:arr[0]?arr[0].p:null};
 }
 function liveStatut(s){const st=decision(s).state;return st==="final"?"ok":st==="vide"?"flou":"deb";}
@@ -461,8 +461,10 @@ function stepCard(s,n){
     if(d.state==="final"){
       bloc=`<div class="finale"><div class="finale-h"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="m12 2.5 2.9 6 6.6.6-5 4.4 1.5 6.4L12 17.7 6 20.4l1.5-6.4-5-4.4 6.6-.6z"/></svg> Proposition finale de l'équipe</div><div class="finale-body">${inside}<div class="finale-meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Accord de l'équipe — ${topC} vote${topC>1?"s":""}</div>${s.decisionNote?`<div class="dec-note"><b>Info de l'équipe :</b> ${esc(s.decisionNote)} <button class="lnk" data-act="decnote" data-id="${s.id}">modifier</button></div>`:`<button class="dec-add" data-act="decnote" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> ajouter une info à la décision</button>`}</div></div>`;
     } else {
-      const tag=d.state==="egalite"?"Égalité — à trancher ensemble":"En tête — à départager";
-      const meta=d.state==="egalite"?`${arr.filter(x=>x.c===topC).length} propositions à égalité (${topC} vote${topC>1?"s":""} chacune). Continuez à voter ou discutez-en.`:`${topC} vote${topC>1?"s":""} en tête, mais ${dissent} personne${dissent>1?"s":""} en préfère${dissent>1?"nt":""} une autre. À trancher ensemble.`;
+      let tag,meta;
+      if(d.state==="egalite"){tag="Égalité — à trancher ensemble";meta=`${arr.filter(x=>x.c===topC).length} propositions à égalité (${topC} vote${topC>1?"s":""} chacune). Continuez à voter ou discutez-en.`;}
+      else if(dissent<=0){tag="En tête — en attente";meta=`${topC} vote${topC>1?"s":""} pour l'instant. Il faut au moins 2 collègues d'accord pour valider l'étape.`;}
+      else{tag="En tête — à départager";meta=`${topC} vote${topC>1?"s":""} en tête, mais ${dissent} personne${dissent>1?"s":""} en préfère${dissent>1?"nt":""} une autre. À trancher ensemble.`;}
       bloc=`<div class="finale split"><div class="finale-h"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg> ${tag}</div><div class="finale-body">${inside}<div class="finale-meta split">${meta}</div></div></div>`;
     }
   }
