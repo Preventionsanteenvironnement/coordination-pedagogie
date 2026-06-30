@@ -128,6 +128,12 @@
   .tref b{display:block;font-size:.85rem;color:var(--c1);margin-bottom:3px}
   .tref p{margin:0;font-size:.88rem}
   .tref a{color:var(--c1);font-size:.8rem;display:inline-block;margin-top:6px}
+  .rbtns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}
+  .rbtn{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.82rem;font-weight:650;color:var(--ink);cursor:pointer}
+  .rbtn:hover{border-color:var(--c1)}
+  .rbtn.on{background:var(--c1);border-color:var(--c1);color:#fff}
+  .rbtn.on svg{stroke:#fff}
+  .trole-head{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem;margin-bottom:11px}
   .disc{font-size:.78rem;color:var(--soft);font-style:italic;margin:4px 0 14px}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 19px;border-radius:999px;font-size:.86rem;font-weight:600;opacity:0;transition:.26s;pointer-events:none;z-index:95;box-shadow:var(--shl)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -187,16 +193,35 @@ const PHASE_IDS=[1,2,3,4,5];
 
 const ACTEURS=["Élève","Professeur principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
 const DOCS_SUGGEST=["Fiche de négociation","Pré-convention","Convention","Annexe pédagogique","Annexe activités","Annexe handicap","Attestation de PFMP","Journal de bord","Compte rendu d'évaluation","Passeport professionnel (Cerise Pro)","Copies de la convention"];
-const ACTOR_ROLES=[
-  {role:"Référent",desc:"Lien entre l'élève, l'entreprise et le lycée. Il s'assure de la présence dans les deux premiers jours et fixe la visite de fin ; il suit le déroulement, signale les difficultés et participe à l'évaluation ; il vérifie et récupère l'attestation (nombre de jours) et le compte rendu d'évaluation.",ref:"Convention-type, annexe pédagogique ; art. 19"},
-  {role:"Professeur principal",desc:"Coordonne le suivi de la classe et la circulation des informations — il n'est pas responsable unique de la procédure. Il transmet au DDF la liste des référents, repère les élèves sans lieu et informe les familles.",ref:"Procédure interne"},
-  {role:"DDF",desc:"Coordonne l'organisation générale et valide le calendrier (voté en CA) ; supervise le conventionnement et la signature par la cheffe d'établissement ; reçoit l'attestation et les documents de fin de période.",ref:"Procédure interne ; convention-type, annexe pédagogique"},
-  {role:"Tuteur",desc:"Accueille et encadre l'élève, lui confie des activités conformes au projet pédagogique ; informe l'établissement des retards, absences ou incidents ; complète et signe l'attestation et l'évaluation en fin de période.",ref:"Convention-type, art. 2, 16 et 19"},
-  {role:"Bureau des entreprises",desc:"Aide à la recherche de lieux d'accueil et au lien avec les entreprises ; suit les conventions, les attestations et les pièces nécessaires au paiement ; gère les démarches d'allocation (transmission à l'ASP).",ref:"Décret n° 2023-765 ; procédure interne"},
-  {role:"Enseignant pro",desc:"Vérifie la cohérence du lieu avec la formation AGORA et aide à définir les activités attendues ; accompagne la préparation et l'exploitation pédagogique ; peut être référent.",ref:"Procédure interne"},
-  {role:"Cheffe d'établissement",desc:"Garantit l'organisation générale des PFMP et arbitre les difficultés ; signe les conventions au nom de l'établissement ; l'élève reste sous sa responsabilité pendant la période.",ref:"Convention-type, art. 3 et 4"},
-  {role:"Élève",desc:"Recherche activement son lieu de PFMP et demeure sous statut scolaire ; respecte les règles de l'entreprise (sécurité, horaires, discrétion) ; signale immédiatement toute absence avec un justificatif écrit.",ref:"Convention-type, art. 4"},
-  {role:"Famille",desc:"Signe la convention si l'élève est mineur et en est destinataire pour information ; justifie les absences auprès de l'établissement.",ref:"Convention-type, art. 3"}
+const OFF=[
+  {key:"eleve",label:"L'élève",ic:"student",c:"#475569",refs:[
+    {a:"Code de l'éducation, art. L.124-1",t:"La PFMP est obligatoire : l'élève y acquiert des compétences et met en œuvre les acquis de sa formation en vue du diplôme. Les missions confiées doivent être conformes au projet pédagogique défini par l'établissement et approuvées par l'organisme d'accueil."},
+    {a:"Code de l'éducation, art. L.124-4",t:"À l'issue de la PFMP, l'élève transmet à son établissement un document évaluant la qualité de l'accueil ; ce document n'est pas pris en compte dans son évaluation ni dans l'obtention du diplôme."}
+  ]},
+  {key:"referent",label:"L'enseignant référent",ic:"person",c:"#0f766e",refs:[
+    {a:"Code de l'éducation, art. L.124-1 (renvoi L.124-2 et L.124-9)",t:"L'enseignant référent, désigné par l'établissement, est tenu de s'assurer auprès du tuteur, à plusieurs reprises durant la PFMP, de son bon déroulement, et de proposer le cas échéant à l'organisme d'accueil une redéfinition d'une ou des missions."}
+  ]},
+  {key:"tuteur",label:"Le tuteur",ic:"briefcase",c:"#15803d",refs:[
+    {a:"Code de l'éducation, art. L.124-1 et L.124-9",t:"Dans l'organisme d'accueil, le tuteur accueille et accompagne l'élève. Les missions qu'il confie sont conformes au projet pédagogique de l'établissement et approuvées par l'organisme. Il est l'interlocuteur de l'enseignant référent pour le suivi."}
+  ]},
+  {key:"entreprise",label:"L'organisme d'accueil",ic:"building",c:"#be185d",refs:[
+    {a:"Code de l'éducation, art. D.124-9",t:"À la fin de la PFMP, l'organisme d'accueil délivre à l'élève une attestation de stage mentionnant la durée effective totale (et le montant de la gratification, le cas échéant)."},
+    {a:"Code de l'éducation, art. L.124-6",t:"Lorsque la durée dépasse deux mois (consécutifs ou non sur l'année scolaire), une gratification mensuelle est due, au minimum 15 % du plafond horaire de la sécurité sociale."}
+  ]},
+  {key:"etablissement",label:"L'établissement / le chef",ic:"building",c:"#334155",refs:[
+    {a:"Code de l'éducation, art. L.124-1",t:"L'établissement est l'une des trois parties signataires de la convention et définit le projet pédagogique de la PFMP."},
+    {a:"Décret n° 2023-765 ; fiche ministérielle « rôle des acteurs » (oct. 2025)",t:"Pour l'allocation, le chef ou directeur d'établissement agit comme ordonnateur : il valide dans l'application ApLyPro la décision d'attribution annuelle puis l'état liquidatif (nombre de jours effectués), ce qui permet le paiement."}
+  ]},
+  {key:"convention",label:"La convention",ic:"file",c:"#4338ca",refs:[
+    {a:"Code de l'éducation, art. L.124-1",t:"La PFMP fait l'objet d'une convention entre trois parties : le stagiaire (ou son représentant légal s'il est mineur), l'organisme d'accueil et l'établissement. Ses mentions obligatoires sont fixées par décret."},
+    {a:"Fiche ministérielle « rôle des acteurs » (oct. 2025)",t:"Seules les PFMP couvertes par une convention de stage tripartite ouvrent le droit à l'allocation. En cas d'absence, les jours manqués sont récupérés (report, prolongement, ou nouvelle PFMP)."}
+  ]},
+  {key:"allocation",label:"L'allocation (ASP)",ic:"euro",c:"#b45309",refs:[
+    {a:"Décret n° 2023-765 du 11 août 2023 ; fiche ministérielle (oct. 2025)",t:"L'allocation est versée au lycéen professionnel par l'Agence de services de paiement (ASP), à partir des informations validées par l'établissement (décision d'attribution puis état liquidatif). L'état liquidatif doit être émis dans les deux mois suivant la fin de la PFMP."}
+  ]},
+  {key:"interne",label:"Prof principal & DDF",ic:"people",c:"#64748b",refs:[
+    {a:"Hors Code de l'éducation — organisation interne",t:"Le Code de l'éducation ne définit pas de rôle PFMP propre au professeur principal ou au DDF. La désignation des référents, la circulation des documents et le suivi de la classe relèvent de l'organisation interne de l'établissement — c'est précisément ce que cet atelier sert à clarifier ensemble."}
+  ]}
 ];
 const AMETA={
   "Élève":["student","#475569"],"Professeur principal":["person","#7c3aed"],"Référent":["person","#0f766e"],
@@ -209,7 +234,9 @@ const ICONS={
   student:'<path d="M12 4 2 9l10 5 10-5-10-5z"/><path d="M6 11v4c0 1.4 2.7 2.8 6 2.8s6-1.4 6-2.8v-4"/>',
   briefcase:'<rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M8.5 7.5V6a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.5"/>',
   building:'<rect x="5" y="3.5" width="14" height="17" rx="1.4"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h2M13 16h2"/>',
-  people:'<circle cx="9" cy="8.4" r="2.6"/><path d="M3.6 19a5.4 5.4 0 0 1 10.8 0"/><path d="M16 6.4a2.6 2.6 0 0 1 0 5M20.6 19a5.4 5.4 0 0 0-4-5.2"/>'
+  people:'<circle cx="9" cy="8.4" r="2.6"/><path d="M3.6 19a5.4 5.4 0 0 1 10.8 0"/><path d="M16 6.4a2.6 2.6 0 0 1 0 5M20.6 19a5.4 5.4 0 0 0-4-5.2"/>',
+  file:'<path d="M14 3v5h5M7 3h8l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/>',
+  euro:'<circle cx="12" cy="12" r="8.5"/><path d="M15.5 9.2a4 4 0 1 0 0 5.6M8 11h5M8 13h5"/>'
 };
 const actIcon=(role,size)=>{if(!role)return "";const m=AMETA[role]||["person","#64748b"];return `<svg width="${size||18}" height="${size||18}" viewBox="0 0 24 24" fill="none" stroke="${m[1]}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[m[0]]}</svg>`;};
 const fileIc='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5M7 3h8l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg>';
@@ -360,17 +387,23 @@ function render(){
   list.innerHTML=html;
 }
 
-/* ---------- panneau discret « Rôles & textes » (par acteur) ---------- */
+/* ---------- panneau discret « Rôles & textes » (boutons par acteur) ---------- */
+const offIc=(k,col)=>`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${col||"currentColor"}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]||ICONS.person}</svg>`;
+let curRole="eleve";
+const rolesBtns=()=>OFF.map(e=>`<button class="rbtn${e.key===curRole?" on":""}" data-rk="${e.key}">${offIc(e.ic)} ${esc(e.label)}</button>`).join("");
+const roleContent=()=>{const e=OFF.find(x=>x.key===curRole)||OFF[0];return `<div class="trole-head" style="color:${e.c}">${offIc(e.ic,e.c)} ${esc(e.label)}</div>${e.refs.map(r=>`<div class="tref" style="border-left-color:${e.c}"><b style="color:${e.c}">${esc(r.a)}</b><p>${esc(r.t)}</p></div>`).join("")}`;};
 function openRolesSheet(){
   $("sheet").innerHTML=`<div class="grip"></div>
     <h4>Le rôle de chacun selon les textes</h4>
-    <p class="sh-sub">Repère d'appui — convention-type, Code de l'éducation, procédure interne.</p>
-    ${ACTOR_ROLES.map(a=>{const col=(AMETA[a.role]||["","#0e7490"])[1];return `<div class="tref" style="border-left-color:${col}"><b style="color:${col};display:flex;align-items:center;gap:7px">${actIcon(a.role,16)} ${esc(a.role)}</b><p>${esc(a.desc)}</p><span style="font-size:.76rem;color:var(--soft)">${esc(a.ref)}</span></div>`;}).join("")}
-    <p class="disc">Références indicatives, à confirmer avec la convention-type de l'établissement et le Code de l'éducation (dossier PFMP).</p>`;
+    <p class="sh-sub">Sources officielles : Code de l'éducation (art. L.124-1, L.124-4, L.124-6, D.124-9), décret n° 2023-765, fiche ministérielle « rôle des acteurs » (oct. 2025).</p>
+    <div class="rbtns" id="rbtns">${rolesBtns()}</div>
+    <div id="rcontent">${roleContent()}</div>
+    <p class="disc">Synthèse fidèle aux textes officiels (dossier PFMP). Les rôles internes (professeur principal, DDF…) ne sont pas dans le Code : c'est justement l'objet de cet atelier.</p>`;
   $("sheet").classList.add("on"); $("sheetbg").classList.add("on");
 }
 function closeSheet(){ $("sheet").classList.remove("on"); $("sheetbg").classList.remove("on"); }
 $("sheetbg").addEventListener("click",closeSheet);
+$("sheet").addEventListener("click",e=>{const b=e.target.closest("[data-rk]");if(!b)return;curRole=b.dataset.rk;$("rbtns").innerHTML=rolesBtns();$("rcontent").innerHTML=roleContent();});
 
 /* ---------- actions ---------- */
 function findStep(id){return STEPS.find(s=>s.id===id);}
