@@ -72,6 +72,13 @@ const THEMATIQUES = [
         type: "Outil",
         badge: "Nouveau",
       },
+      {
+        titre: "Le parcours PFMP — on le construit ensemble",
+        desc: "Atelier d'équipe : on trace le parcours d'un élève, étape par étape, et on tranche ensemble qui fait quoi et quand (pré-convention, convention, attestation…). Chacun entre avec un pseudo, propose, vote, jusqu'à un parcours clair sans zone de flou.",
+        lien: "parcours-pfmp/",
+        type: "Atelier d'équipe",
+        badge: "Nouveau",
+      },
     ],
   },
   {
