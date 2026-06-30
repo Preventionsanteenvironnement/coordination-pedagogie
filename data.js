@@ -349,12 +349,20 @@ const THEMATIQUES = [
     nom: "Référentiels & textes officiels",
     couleur: "#9a5ba5",
     icon: "scale",
+    desc: "Les référentiels en version interactive et consultable : le référentiel des compétences professionnelles des enseignants, et le référentiel complet du Bac pro AGOrA.",
     enfants: [
       {
         titre: "Le référentiel des compétences professionnelles",
         desc: "Le référentiel des compétences professionnelles des métiers du professorat et de l'éducation, en version interactive : compétence par compétence, ce qu'elle recouvre concrètement.",
         lien: "guides/referentiel-competences.html",
         type: "Référentiel",
+        icon: "scale",
+      },
+      {
+        titre: "Référentiel Bac pro AGOrA — outil de l'enseignant",
+        desc: "Le référentiel du Bac pro AGOrA (Assistance à la gestion des organisations et de leurs activités) réorganisé en instrument de travail : architecture du diplôme, pôles et compétences, indicateurs et savoirs, épreuves et unités, PFMP, et un constructeur de séquence imprimable. Recherche intégrée, à jour 2026.",
+        lien: "referentiel-agora/",
+        type: "Site",
         icon: "scale",
       },
     ],

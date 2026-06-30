@@ -1,0 +1,39 @@
+RÉFÉRENTIEL BAC PRO AGOrA — Outil de l'enseignant
+==================================================
+
+COMMENT OUVRIR
+--------------
+Double-cliquez sur le fichier « index.html ».
+L'application s'ouvre dans votre navigateur (Chrome, Edge, Firefox, Safari).
+Aucune installation, aucune connexion internet nécessaire : tout fonctionne hors-ligne.
+Vous pouvez déplacer ou copier le dossier entier (il doit rester complet : index.html + css + js).
+
+CE QUE VOUS TROUVEREZ
+---------------------
+• Accueil — vue d'ensemble et accès rapides.
+• Architecture du diplôme — le schéma pôles → blocs → unités → épreuves.
+• Matrice de cohérence — le lien activité ↔ compétence ↔ unité ↔ épreuve.
+• Pôles 1, 2, 3 — activités, compétences, indicateurs d'évaluation, savoirs, moyens, résultats attendus.
+• Savoirs associés — les trois familles et leurs indications complémentaires.
+• Épreuves & unités — finalités, critères, modalités (CCF / ponctuel), coefficients.
+• PFMP — objectifs, organisation, lien avec les épreuves.
+• Métier & contexte — le référentiel des activités professionnelles.
+• Progression 2de→Tle — repères de progressivité (proposition pédagogique).
+• Constructeur de séquence — choisissez une activité et des compétences : l'outil génère
+  indicateurs, savoirs et objectifs opérationnels, puis imprime ou enregistre la fiche.
+• Textes & mises à jour — le cadre réglementaire à jour.
+
+RECHERCHE
+---------
+La barre de recherche (en haut) interroge toutes les compétences, activités, savoirs et épreuves.
+
+IMPRESSION / PDF
+----------------
+Dans le constructeur de séquence, le bouton « Imprimer / PDF » met en page la fiche pour
+l'impression ou l'export PDF (la navigation est masquée à l'impression).
+
+SOURCES
+-------
+Arrêté du 18 février 2020 (version consolidée), fiche RNCP40705 (remplace RNCP34606),
+arrêté du 16 décembre 2024 (règlement d'examen, session 2026) et textes de la réforme
+de la voie professionnelle. Le contenu réglementaire est reproduit fidèlement.
