@@ -137,10 +137,51 @@
   .disc{font-size:.78rem;color:var(--soft);font-style:italic;margin:4px 0 14px}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 19px;border-radius:999px;font-size:.86rem;font-weight:600;opacity:0;transition:.26s;pointer-events:none;z-index:95;box-shadow:var(--shl)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .docwrap{display:none;position:fixed;inset:0;z-index:100;background:var(--bg);flex-direction:column}
+  .docwrap.on{display:flex}
+  .docbar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 16px;background:var(--card);border-bottom:1px solid var(--line)}
+  .dbar-title{font-weight:700;font-size:.86rem;color:var(--soft)}
+  .dbtn{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:999px;background:var(--c1);color:#fff;font:inherit;font-weight:700;border:none;cursor:pointer;font-size:.84rem}
+  .dbtn:hover{background:var(--c1d)} .dbtn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+  .docscroll{flex:1;overflow:auto;padding:22px 14px 60px}
+  .docpage{max-width:820px;margin:0 auto;background:#fff;color:#1a2730;border-radius:14px;box-shadow:var(--sh);overflow:hidden}
+  .dp-cover{background:linear-gradient(135deg,#0e7490,#0a4254);color:#fff;padding:30px 30px 26px}
+  .dp-cover-k{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;opacity:.9}
+  .dp-cover h1{margin:.28em 0 .18em;font-size:1.6rem;font-weight:850;letter-spacing:-.01em;line-height:1.12}
+  .dp-cover-s{opacity:.92;font-size:.92rem}
+  .dp-prog{margin-top:18px}
+  .dp-prog-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden;margin-bottom:8px}
+  .dp-prog-bar>div{height:100%;border-radius:999px;background:#9be15d}
+  .dp-prog-tx{font-size:.9rem}
+  .doc-legend{display:flex;gap:16px;flex-wrap:wrap;padding:13px 30px;border-bottom:1px solid #eef2f4;font-size:.8rem;color:#5a6a74}
+  .doc-legend span{display:inline-flex;align-items:center;gap:6px}
+  .dl-dot{width:9px;height:9px;border-radius:50%}
+  .docphase{padding:18px 30px 4px;break-inside:avoid}
+  .dp-head{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .dp-num{flex:none;width:34px;height:34px;border-radius:10px;color:#fff;display:grid;place-items:center;font-weight:850;font-size:1.05rem}
+  .dp-head h2{margin:0;font-size:1.18rem;font-weight:800}
+  .dp-count{margin-left:auto;font-size:.76rem;color:#5a6a74;font-weight:600}
+  .ds{padding:11px 0;border-top:1px solid #eef2f4;break-inside:avoid}
+  .ds-top{display:flex;align-items:flex-start;gap:9px}
+  .ds-dot{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;margin-top:1px;color:#fff}
+  .ds-dot.df{background:#d99a2b} .ds-dot.dd{background:#3b82c4} .ds-dot.do{background:#3b6d11}
+  .ds-n{font-weight:800;color:#94a3b2}
+  .ds-t{flex:1;font-weight:700;font-size:1rem;color:#1a2730}
+  .ds-badge{flex:none;font-size:.7rem;font-weight:700;border-radius:999px;padding:3px 9px}
+  .ds-badge.df{background:#faeeda;color:#854f0b} .ds-badge.dd{background:#e6f1fb;color:#185fa5} .ds-badge.do{background:#eaf3de;color:#3b6d11}
+  .ds-meta{margin:6px 0 0 27px;font-size:.88rem;color:#33424d;display:flex;flex-direction:column;gap:3px}
+  .ds-meta b{color:#0e7490} .ds-meta svg{vertical-align:-3px}
+  .ds-tovalid{color:#9a6a12;font-style:italic}
+  .docfoot{padding:18px 30px 28px;border-top:1px solid #eef2f4;font-size:.78rem;color:#5a6a74;line-height:1.6}
   @media print{
-    a.back,.who,.tbtn,.stp,.sup,.ibtn,.addprop,.addnote,.cfoot,.ins,.me,.tlwrap,.tete,.prank,.adddoc,.textbtn{display:none!important}
-    header.hero{background:#0e7490!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .card{box-shadow:none;break-inside:avoid}
+    body.docopen>*{display:none!important}
+    body.docopen>.docwrap{display:block!important;position:static!important;background:#fff!important}
+    .docbar{display:none!important}
+    .docscroll{overflow:visible!important;padding:0!important}
+    .docpage{max-width:none!important;box-shadow:none!important;border-radius:0!important}
+    .dp-cover,.dp-num,.ds-badge,.ds-dot,.dp-prog-bar>div{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .docphase,.ds{break-inside:avoid}
+    @page{margin:12mm}
   }
 </style>
 </head>
@@ -162,13 +203,21 @@
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="tbtn" id="troles"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg> Rôles &amp; textes</button>
-      <button class="tbtn" id="tprint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg> Générer la carte</button>
+      <button class="tbtn" id="tdoc"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5M7 3h8l5 5v11a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 13h6M9 16h4"/></svg> Feuille de route</button>
     </div>
   </div>
   <div id="list"></div>
 </main>
 <div class="sheetbg" id="sheetbg"></div>
 <div class="sheet" id="sheet"></div>
+<div class="docwrap" id="doc">
+  <div class="docbar">
+    <button class="dbtn ghost" id="docclose"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Fermer</button>
+    <span class="dbar-title">Aperçu de la feuille de route</span>
+    <button class="dbtn" id="docprint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg> Imprimer / PDF</button>
+  </div>
+  <div class="docscroll"><div class="docpage" id="docpage"></div></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -435,7 +484,40 @@ $("list").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if
 $("sheet").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;handle(b.dataset.act,b.dataset.id,b.dataset.pid,b);});
 $("timeline").addEventListener("click",e=>{const n=e.target.closest("[data-go]");if(!n)return;const t=document.getElementById(n.dataset.go);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
 $("troles").addEventListener("click",openRolesSheet);
-$("tprint").addEventListener("click",()=>window.print());
+const checkSm='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const statutCls=s=>s==="ok"?"do":s==="deb"?"dd":"df";
+function quiFait(s){
+  const arr=(s.props||[]).map(p=>({p,c:(s.votes||[]).filter(v=>v.indexOf(p.id+"||")===0).length})).sort((a,b)=>b.c-a.c);
+  if(s.retenu){const p=(s.props||[]).find(x=>x.id===s.retenu);if(p)return {p,valide:true};}
+  if(arr.length)return {p:arr[0].p,valide:false};
+  return null;
+}
+function renderDoc(){
+  const tot=STEPS.length, ok=STEPS.filter(s=>s.statut==="ok").length, flou=STEPS.filter(s=>s.statut==="flou").length;
+  const pct=tot?Math.round(ok/tot*100):0;
+  let date=""; try{date=new Date().toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});}catch(e){}
+  let html=`<div class="dp-cover"><div class="dp-cover-k">Feuille de route · PFMP</div><h1>Le parcours d'un élève, de la recherche au bilan</h1><div class="dp-cover-s">2nde Bac Pro AGORA · document construit en équipe</div><div class="dp-prog"><div class="dp-prog-bar"><div style="width:${pct}%"></div></div><div class="dp-prog-tx"><b>${ok}</b> étape${ok>1?"s":""} validée${ok>1?"s":""} sur <b>${tot}</b>${flou?` · <b>${flou}</b> encore à clarifier`:""}</div></div></div>`;
+  html+=`<div class="doc-legend"><span><span class="dl-dot" style="background:#d99a2b"></span>À clarifier</span><span><span class="dl-dot" style="background:#3b82c4"></span>En discussion</span><span><span class="dl-dot" style="background:#3b6d11"></span>Validé</span></div>`;
+  PHASE_IDS.forEach(ph=>{
+    const steps=STEPS.filter(s=>s.phase===ph); if(!steps.length)return;
+    const dok=steps.filter(s=>s.statut==="ok").length, pc=PCOLORS[ph];
+    html+=`<section class="docphase"><div class="dp-head"><span class="dp-num" style="background:${pc}">${ph}</span><h2>${esc(PHASE_NAMES[ph]||DEFAULT_PHASES[ph])}</h2><span class="dp-count">${dok}/${steps.length} validée${dok>1?"s":""}</span></div>`;
+    steps.forEach(s=>{
+      const gi=STEPS.indexOf(s)+1, cls=statutCls(s.statut), q=quiFait(s);
+      const qui=q?`${q.p.role?actIcon(q.p.role,15)+" ":""}${esc(q.p.txt)}${q.p.role?` <span style="color:#94a3b2">(${esc(q.p.role)})</span>`:""}${q.p.soutien?` — en soutien : ${esc(q.p.soutien)}`:""}`:`<span class="ds-tovalid">à trancher en équipe</span>`;
+      const docs=(s.documents||[]).length?`<span><b>Documents :</b> ${s.documents.map(esc).join(" · ")}</span>`:"";
+      html+=`<div class="ds"><div class="ds-top"><span class="ds-dot ${cls}">${s.statut==="ok"?checkSm:""}</span><span class="ds-n">${gi}</span><span class="ds-t">${esc(s.titre)}</span><span class="ds-badge ${cls}">${STATUTS[s.statut]}</span></div><div class="ds-meta"><span><b>Qui :</b> ${qui}</span>${docs}</div></div>`;
+    });
+    html+=`</section>`;
+  });
+  html+=`<div class="docfoot">Document généré le ${date}. Les étapes « à clarifier » restent à trancher ensemble — rouvre cet aperçu à tout moment pour suivre l'avancement. Construit collectivement, sans donnée nominative d'élève.</div>`;
+  $("docpage").innerHTML=html;
+}
+function openDoc(){ renderDoc(); $("doc").classList.add("on"); document.body.classList.add("docopen"); }
+function closeDoc(){ $("doc").classList.remove("on"); document.body.classList.remove("docopen"); }
+$("tdoc").addEventListener("click",openDoc);
+$("docclose").addEventListener("click",closeDoc);
+$("docprint").addEventListener("click",()=>window.print());
 
 /* ---------- démarrage ---------- */
 function toStep(d){const x=d.data();return {id:d.id,ordre:x.ordre,phase:x.phase,titre:x.titre,question:x.question,props:x.props||[],votes:x.votes||[],notes:x.notes||[],documents:x.documents||[],textes:x.textes||[],conforme:!!x.conforme,retenu:x.retenu??null,statut:x.statut||"flou"};}
