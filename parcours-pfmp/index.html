@@ -65,9 +65,10 @@
   .title:hover{color:var(--c1)}
   .stp{flex:none;font-size:.74rem;font-weight:700;border:none;border-radius:999px;padding:4px 11px;cursor:pointer}
   .st-flou{background:var(--flou-bg);color:var(--flou-tx)} .st-deb{background:var(--deb-bg);color:var(--deb-tx)} .st-ok{background:var(--ok-bg);color:var(--ok-tx)}
-  .qline{display:flex;gap:8px;align-items:flex-start;margin:9px 0 4px 41px;font-size:.9rem;color:var(--soft)}
-  .qline .qm{flex:none;width:20px;height:20px;border-radius:50%;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;font-weight:800;font-size:.78rem}
+  .qline{display:flex;gap:8px;align-items:flex-start;margin:11px 0 4px 41px;font-size:.97rem;font-weight:600;color:var(--ink)}
+  .qline .qm{flex:none;width:21px;height:21px;border-radius:50%;background:var(--c1);color:#fff;display:grid;place-items:center;font-weight:800;font-size:.8rem}
   .qline span.qx{cursor:text} .qline span.qx:hover{color:var(--c1)}
+  .editmark{font-size:.66rem;font-style:italic;font-weight:500;color:var(--soft);opacity:.75;margin-left:6px;white-space:nowrap;cursor:text}
   .meta{margin:9px 0 0 41px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
   .doc{display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 6px 3px 9px;font-size:.78rem;color:var(--soft)}
   .doc .dx{cursor:pointer;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;color:var(--soft)}
@@ -84,24 +85,35 @@
   .prow1{display:flex;align-items:flex-start;gap:9px}
   .prank{flex:none;width:21px;height:21px;border-radius:50%;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;font-size:.74rem;font-weight:800;margin-top:1px}
   .picon{flex:none;display:grid;place-items:center;margin-top:1px}
-  .ptxt{flex:1;display:flex;flex-direction:column;gap:5px;font-size:.9rem;min-width:0;line-height:1.35}
-  .paction{font-weight:650}
-  .plabel{color:var(--soft);font-size:.74rem;font-weight:750;text-transform:uppercase;letter-spacing:.04em;margin-right:5px}
-  .actors{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-  .actor{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;color:var(--soft);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
-  .actor b{color:var(--ink);font-weight:700}
-  .actor.main{border-color:color-mix(in srgb,var(--c1) 34%,var(--line));background:color-mix(in srgb,var(--c1soft) 48%,var(--card))}
-  .prow2{display:flex;align-items:center;gap:7px}
-  .prow2 .sp{flex:1}
-  .sup{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.8rem;font-weight:700;color:var(--ink);cursor:pointer}
-  .sup.on{background:var(--c1);border-color:var(--c1);color:#fff}
-  .tete{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;color:var(--c1)}
-  .ibtn{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
+  .ptxt{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.3}
+  .pwho{font-size:1rem;font-weight:750;color:var(--ink);display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+  .pwho .ptag{font-size:.66rem;font-weight:800;color:var(--soft);text-transform:uppercase;letter-spacing:.05em}
+  .psub{font-size:.83rem;color:var(--soft);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+  .psub.appui b{color:var(--ink);font-weight:700}
+  .pnote{font-size:.83rem;color:var(--soft);font-style:italic}
+  .prow2{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .sup{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 13px;font-size:.82rem;font-weight:750;color:var(--ink);cursor:pointer}
+  .sup.on{background:var(--ok-tx);border-color:var(--ok-tx);color:#fff}
+  .tete{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:800;color:var(--c1)}
+  .ibtn{flex:none;width:32px;height:32px;border-radius:9px;border:1.5px solid var(--line);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
   .ibtn:hover{color:var(--c1);border-color:var(--c1)}
-  .ibtn.ret.on{background:var(--ok-bg);color:var(--ok-tx);border-color:var(--ok-tx)}
-  .valbtn{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 11px;font-size:.78rem;font-weight:700;color:var(--soft);cursor:pointer}
-  .valbtn:hover{border-color:var(--ok-tx);color:var(--ok-tx)}
-  .valbtn.on{background:var(--ok-bg);border-color:var(--ok-tx);color:var(--ok-tx)}
+  .ibtn.del:hover{color:#b3261e;border-color:#b3261e}
+  .adopt{display:inline-flex;align-items:center;gap:5px;background:var(--c1soft);border:1.5px solid transparent;border-radius:999px;padding:6px 13px;font-size:.8rem;font-weight:800;color:var(--c1);cursor:pointer}
+  .adopt:hover{background:var(--c1);color:#fff}
+  .adopt.on{background:var(--ok-bg);border-color:var(--ok-tx);color:var(--ok-tx)}
+  .finale{margin:12px 0 6px 41px;border:2px solid var(--ok-tx);border-radius:14px;overflow:hidden;box-shadow:0 8px 22px color-mix(in srgb,var(--ok-tx) 16%,transparent)}
+  .finale-h{display:flex;align-items:center;gap:8px;background:var(--ok-tx);color:#fff;padding:9px 15px;font-size:.76rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase}
+  .finale-body{padding:14px 16px;background:color-mix(in srgb,var(--ok-bg) 55%,var(--card))}
+  .fw-main{display:flex;align-items:center;gap:9px;font-size:1.2rem;font-weight:850;color:var(--ink)}
+  .fw-sub{margin-top:6px;font-size:.92rem;color:var(--soft)} .fw-sub b{color:var(--ink);font-weight:700}
+  .fw-note{margin-top:4px;font-size:.88rem;font-style:italic;color:var(--soft)}
+  .finale-meta{margin-top:11px;font-size:.78rem;font-weight:750;color:var(--ok-tx);display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid color-mix(in srgb,var(--ok-tx) 30%,var(--line));border-radius:999px;padding:5px 12px}
+  .dactions{margin:9px 0 0 41px;display:flex;gap:16px;flex-wrap:wrap}
+  .lnk{background:none;border:none;color:var(--c1);font-size:.85rem;font-weight:750;cursor:pointer;padding:4px 0}
+  .lnk:hover{text-decoration:underline} .lnk.warn{color:var(--soft)} .lnk.warn:hover{color:var(--flou-tx)}
+  .note-actions{display:inline-flex;gap:9px;margin-left:9px}
+  .note-actions button{background:none;border:none;color:var(--soft);cursor:pointer;font-size:.74rem;font-weight:600;padding:0}
+  .note-actions button:hover{color:var(--c1)}
   .addprop{align-self:flex-start;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:999px;padding:6px 12px;font-size:.8rem;font-weight:600;cursor:pointer}
   .addprop:hover{border-color:var(--c1);color:var(--c1)}
   .notes{margin:11px 0 0 41px;display:flex;flex-direction:column;gap:6px}
@@ -324,7 +336,8 @@ const SEED=[
   {id:"s14",ordre:140,phase:5,titre:"Exploitation pédagogique du retour de stage en classe",question:"",props:[{id:"a",txt:"Toute l'équipe pédagogique",role:"Équipe"}],retenu:"a",statut:"ok",textes:[{ref:"Convention-type, annexe pédagogique",desc:"Exploitation pédagogique du retour de stage et valorisation des compétences acquises."}]}
 ];
 
-let ME=null, STEPS=[], DEMO=false, seeding=false, onlyFlou=false;
+let ME=null, STEPS=[], DEMO=false, seeding=false, onlyFlou=false, connectedCount=0;
+const expanded=new Set();
 try{ ME=JSON.parse(localStorage.getItem("parcours_id")||"null"); }catch(e){}
 if(ME&&ME.pseudo)ME={pseudo:ME.pseudo};
 let MYPID=localStorage.getItem("parcours_pid"); if(!MYPID){MYPID=uid();localStorage.setItem("parcours_pid",MYPID);}
@@ -376,7 +389,7 @@ function joinPresence(){
   beat(); clearInterval(window.__pb); window.__pb=setInterval(beat,25000);
 }
 function renderWho(connected){
-  const box=$("who"); const list=(connected||[]).filter(p=>Date.now()-(p.ts||0)<70000);
+  const box=$("who"); const list=(connected||[]).filter(p=>Date.now()-(p.ts||0)<70000); connectedCount=list.length;
   const avs=list.slice(0,8).map(p=>`<span class="av" title="${esc(p.pseudo)}">${esc((p.pseudo||"?").slice(0,3))}</span>`).join("");
   const meTxt=ME?`Tu participes en <b>${esc(ME.pseudo)}</b>`:"Rejoindre pour participer";
   box.innerHTML=`${list.length?`<span class="avs">${avs}</span>`:""}<span class="me" id="mebtn">${meTxt} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>`;
@@ -389,38 +402,51 @@ function stepCard(s,n){
   const pc=PCOLORS[s.phase]||PCOLORS[1], done=s.statut==="ok";
   const votes=s.votes||[];
   const arr=(s.props||[]).map(p=>({p,c:votes.filter(v=>v.indexOf(p.id+"||")===0).length})).sort((a,b)=>b.c-a.c);
-  const retText=s.retenu?(s.props||[]).find(p=>p.id===s.retenu):null;
-  const multi=arr.length>1;
-  const propHtml=p=>{
-    const main=p.role?`<span class="actor main">${actIcon(p.role,14)} <span>Responsable : <b>${esc(p.role)}</b></span></span>`:"";
-    const soutien=p.soutien?`<span class="actor">${actIcon(p.soutien,14)} <span>Appui : <b>${esc(p.soutien)}</b> · ${esc(p.lien||"en appui")}</span></span>`:"";
-    return `<span class="ptxt"><span class="paction"><span class="plabel">Action :</span> ${esc(p.txt)}</span>${main||soutien?`<span class="actors">${main}${soutien}</span>`:""}</span>`;
-  };
+  const retP=s.retenu?(s.props||[]).find(p=>p.id===s.retenu):null;
+  const propsOpen=!done||expanded.has(s.id), multi=arr.length>1;
+  const headOf=p=>p.role||p.txt||p.note||"Réponse";
+  const extraOf=p=>{const h=headOf(p);return p.note||(p.txt&&p.role&&!p.txt.toLowerCase().includes((p.role||"x").toLowerCase())?p.txt:"");};
   const props=arr.map((o,idx)=>{
     const p=o.p, c=o.c, voted=ME&&votes.includes(p.id+"||"+ME.pseudo), isret=s.retenu===p.id, tete=multi&&idx===0&&c>0;
+    const head=headOf(p), extra=extraOf(p);
     return `<div class="prop${tete?" lead":""}${isret?" ret":""}">
-      <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${p.role?`<span class="picon">${actIcon(p.role,18)}</span>`:""}${propHtml(p)}</div>
+      <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${(p.role&&AMETA[p.role])?`<span class="picon">${actIcon(p.role,18)}</span>`:""}<div class="ptxt"><div class="pwho"><span class="ptag">Responsable</span> ${esc(head)}</div>${p.soutien?`<div class="psub appui">${esc(p.lien||"en appui")} : ${actIcon(p.soutien,13)} <b>${esc(p.soutien)}</b></div>`:""}${extra?`<div class="pnote">« ${esc(extra)} »</div>`:""}</div></div>
       <div class="prow2">
-        <button class="sup${voted?" on":""}" data-act="support" data-id="${s.id}" data-pid="${p.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>D'accord${c?" · "+c:""}</button>
+        <button class="sup${voted?" on":""}" data-act="support" data-id="${s.id}" data-pid="${p.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Valider${c?" · "+c:""}</button>
         ${tete?`<span class="tete">en tête</span>`:""}
-        <span class="sp"></span>
-        <button class="valbtn${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="Officialiser : c'est la réponse que l'équipe retient">${okCheck}${isret?" Validée":" Valider"}</button>
-        <button class="ibtn" data-act="delprop" data-id="${s.id}" data-pid="${p.id}" title="Supprimer cette proposition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+        <button class="ibtn" data-act="editprop" data-id="${s.id}" data-pid="${p.id}" title="Modifier cette proposition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+        <button class="adopt${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="En faire la proposition finale de l'équipe"><svg width="13" height="13" viewBox="0 0 24 24" fill="${isret?"currentColor":"none"}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2.5 2.9 6 6.6.6-5 4.4 1.5 6.4L12 17.7 6 20.4l1.5-6.4-5-4.4 6.6-.6z"/></svg>${isret?"Finale":"Retenir"}</button>
+        <button class="ibtn del" data-act="delprop" data-id="${s.id}" data-pid="${p.id}" title="Supprimer cette proposition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
     </div>`;
   }).join("");
-  const notes=(s.notes||[]).map(nt=>`<div class="note"><b>${esc(nt.p)}</b> — ${esc(nt.t)}</div>`).join("");
+  const notes=(s.notes||[]).map((nt,i)=>`<div class="note"><b>${esc(nt.p)}</b> — ${esc(nt.t)}${ME&&nt.p===ME.pseudo?`<span class="note-actions"><button data-act="editnote" data-id="${s.id}" data-i="${i}">modifier</button><button data-act="delnote" data-id="${s.id}" data-i="${i}">supprimer</button></span>`:""}</div>`).join("");
   const docs=(s.documents||[]).map(d=>`<span class="doc">${fileIc} ${esc(d)}<span class="dx" data-act="deldoc" data-id="${s.id}" data-doc="${esc(d)}">×</span></span>`).join("");
+  let finale="";
+  if(done&&retP){const head=headOf(retP),extra=extraOf(retP),nv=votes.filter(v=>v.indexOf(retP.id+"||")===0).length;
+    finale=`<div class="finale">
+      <div class="finale-h"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="m12 2.5 2.9 6 6.6.6-5 4.4 1.5 6.4L12 17.7 6 20.4l1.5-6.4-5-4.4 6.6-.6z"/></svg> Proposition finale de l'équipe</div>
+      <div class="finale-body">
+        <div class="fw-main">${(retP.role&&AMETA[retP.role])?actIcon(retP.role,22):""} ${esc(head)}</div>
+        ${retP.soutien?`<div class="fw-sub">${esc(retP.lien||"en appui")} : <b>${esc(retP.soutien)}</b></div>`:""}
+        ${extra?`<div class="fw-note">« ${esc(extra)} »</div>`:""}
+        <div class="finale-meta"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> ${nv>0?`Adoptée — ${nv} validation${nv>1?"s":""}${connectedCount>1?` · sur ${connectedCount} connectés`:""}`:"Adoptée par l'équipe"}</div>
+      </div>
+    </div>`;
+  }
+  const doneBar=done?`<div class="dactions"><button class="lnk" data-act="toggleprops" data-id="${s.id}">${propsOpen?"Masquer":"Voir"} les ${arr.length} proposition${arr.length>1?"s":""}</button><button class="lnk warn" data-act="unvalidate" data-id="${s.id}">Remettre en discussion</button></div>`:"";
+  const propsSection=propsOpen?`<div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>`:"";
   return `<article class="card${done?" done":""}" style="--pc:${pc}">
     <div class="chead">
       <span class="num">${done?okCheck:n}</span>
-      <h3 class="title" data-act="title" data-id="${s.id}">${esc(s.titre)}</h3>
+      <h3 class="title" data-act="title" data-id="${s.id}">${esc(s.titre)} <span class="editmark">(modifiable)</span></h3>
       <button class="stp st-${s.statut}" data-act="statut" data-id="${s.id}" title="Cliquer pour changer le statut">${STATUTS[s.statut]||"À clarifier"}</button>
     </div>
-    <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span></div>
-    ${docs||(s.documents&&s.documents.length)?`<div class="meta">${docs}<button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button></div>`:`<div class="meta"><button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document à remettre</button></div>`}
-    ${retText?`<div class="retenu">${okCheck} Réponse retenue : ${propHtml(retText)}</div>`:""}
-    <div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>
+    <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span><span class="editmark" data-act="question" data-id="${s.id}">(modifiable)</span></div>
+    ${(docs||(s.documents&&s.documents.length))?`<div class="meta">${docs}<button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button></div>`:`<div class="meta"><button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document à remettre</button></div>`}
+    ${finale}
+    ${doneBar}
+    ${propsSection}
     <div class="notes">${notes}<button class="addnote" data-act="addnote" data-id="${s.id}">+ ajouter un commentaire</button></div>
     <div class="cfoot"><button data-act="delstep" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Supprimer l'étape</button></div>
   </article>`;
@@ -480,15 +506,20 @@ $("sheet").addEventListener("click",e=>{const b=e.target.closest("[data-rk]");if
 function findStep(id){return STEPS.find(s=>s.id===id);}
 async function handle(act,id,pid,b){
   const s=findStep(id), ref=id?doc(etapesCol,id):null;
+  if(act==="toggleprops"){ if(expanded.has(id))expanded.delete(id); else expanded.add(id); render(); return; }
   if(act==="phasename"){ if(!await need())return; const ph=b.dataset.ph; const v=await openForm("Renommer la phase","",[{key:"t",label:"Nom de la phase",type:"text",value:PHASE_NAMES[ph]||DEFAULT_PHASES[ph]}]); if(v&&v.t)await updateDoc(parcoursRef,{["phases."+ph]:v.t,updatedAt:serverTimestamp()}); return; }
   if(act==="statut"){ if(!await need())return; await updateDoc(ref,{statut:NEXTST[s.statut]||"deb",updatedAt:serverTimestamp()}); return; }
   if(act==="title"){ if(!await need())return; const v=await openForm("Modifier le titre de l'étape","Tout est modifiable : si le titre n'est pas bon, corrige-le.",[{key:"t",label:"Titre",type:"text",value:s.titre}]); if(v&&v.t)await updateDoc(ref,{titre:v.t,updatedAt:serverTimestamp()}); return; }
   if(act==="question"){ if(!await need())return; const v=await openForm("La question à trancher","",[{key:"t",label:"Question",type:"textarea",value:s.question||"",ph:"ex. Qui remet la pré-convention à l'élève ?"}]); if(v)await updateDoc(ref,{question:v.t,updatedAt:serverTimestamp()}); return; }
-  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Écris d'abord l'action proposée, puis indique qui en est responsable. L'appui éventuel sert seulement à préciser avec qui ou sous quelle validation.",[{key:"txt",label:"Action proposée (ce qu'on décide de faire)",type:"text",ph:"ex. Le professeur principal organise la répartition"},{key:"role",label:"Responsable principal",type:"text",list:ACTEURS,ph:"ex. Professeur principal"},{key:"soutien",label:"Appui éventuel (facultatif)",type:"text",list:ACTEURS,ph:"ex. Enseignant pro, DDF…"},{key:"lien",label:"Rôle de cet appui",type:"text",list:LIENS,value:"en appui"}]); if(v&&v.txt){ if(!v.role)return toast("Indique le responsable principal pour éviter le flou."); await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):""}),updatedAt:serverTimestamp()}); } return; }
+  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Indique surtout QUI est responsable de l'action. Tu peux ajouter un appui et une précision.",[{key:"role",label:"Qui est responsable ? (la personne qui fait)",type:"text",list:ACTEURS,ph:"ex. Professeur principal"},{key:"soutien",label:"En appui / avec qui ? (facultatif)",type:"text",list:ACTEURS,ph:"ex. DDF"},{key:"lien",label:"Comment intervient l'appui ?",type:"text",list:LIENS,value:"en appui"},{key:"note",label:"Précision (facultatif)",type:"text",ph:"ex. sous 5 jours, via Pronote…"}]); if(v){ if(!v.role&&!v.note)return toast("Indique au moins le responsable."); await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):"",note:v.note||""}),updatedAt:serverTimestamp()}); } return; }
+  if(act==="editprop"){ if(!await need())return; const p=(s.props||[]).find(x=>x.id===pid); if(!p)return; const v=await openForm("Modifier la proposition","",[{key:"role",label:"Qui est responsable ?",type:"text",list:ACTEURS,value:p.role||p.txt||""},{key:"soutien",label:"En appui / avec qui ? (facultatif)",type:"text",list:ACTEURS,value:p.soutien||""},{key:"lien",label:"Comment intervient l'appui ?",type:"text",list:LIENS,value:p.lien||"en appui"},{key:"note",label:"Précision (facultatif)",type:"text",value:p.note||""}]); if(v){ const np=(s.props||[]).map(x=>x.id===pid?{id:x.id,role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):"",note:v.note||""}:x); await updateDoc(ref,{props:np,updatedAt:serverTimestamp()}); } return; }
   if(act==="support"){ if(!await need())return; const key=pid+"||"+ME.pseudo; const has=(s.votes||[]).includes(key); await updateDoc(ref,{votes:has?arrayRemove(key):arrayUnion(key),updatedAt:serverTimestamp()}); return; }
-  if(act==="retain"){ if(!await need())return; const nv=s.retenu===pid?null:pid; await updateDoc(ref,nv?{retenu:nv,statut:"ok",updatedAt:serverTimestamp()}:{retenu:null,updatedAt:serverTimestamp()}); if(nv)toast("Étape validée ✓"); return; }
+  if(act==="retain"){ if(!await need())return; if(s.retenu===pid){ await updateDoc(ref,{retenu:null,statut:"deb",updatedAt:serverTimestamp()}); return; } if(!confirm("En faire la proposition finale de l'équipe ? L'étape sera marquée « Validé » et c'est cette réponse qui s'affichera en grand.")) return; await updateDoc(ref,{retenu:pid,statut:"ok",updatedAt:serverTimestamp()}); toast("Proposition finale adoptée"); return; }
+  if(act==="unvalidate"){ if(!await need())return; await updateDoc(ref,{retenu:null,statut:"deb",updatedAt:serverTimestamp()}); return; }
   if(act==="delprop"){ if(!await need())return; if(!confirm("Supprimer cette proposition ?"))return; const np=(s.props||[]).filter(p=>p.id!==pid); const nvv=(s.votes||[]).filter(v=>v.indexOf(pid+"||")!==0); await updateDoc(ref,{props:np,votes:nvv,retenu:s.retenu===pid?null:s.retenu,updatedAt:serverTimestamp()}); return; }
   if(act==="addnote"){ if(!await need())return; const v=await openForm("Ajouter un commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",ph:"Une remarque, une précision, une objection…"}]); if(v&&v.t)await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now()}),updatedAt:serverTimestamp()}); return; }
+  if(act==="editnote"){ if(!await need())return; const i=+b.dataset.i; const nt=(s.notes||[])[i]; if(!nt)return; const v=await openForm("Modifier le commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",value:nt.t}]); if(v&&v.t){ const nn=(s.notes||[]).map((x,k)=>k===i?{...x,t:v.t}:x); await updateDoc(ref,{notes:nn,updatedAt:serverTimestamp()}); } return; }
+  if(act==="delnote"){ if(!await need())return; if(!confirm("Supprimer ce commentaire ?"))return; const i=+b.dataset.i; const nn=(s.notes||[]).filter((_,k)=>k!==i); await updateDoc(ref,{notes:nn,updatedAt:serverTimestamp()}); return; }
   if(act==="adddoc"){ if(!await need())return; const v=await openForm("Ajouter un document à remettre","",[{key:"d",label:"Nom du document",type:"text",list:DOCS_SUGGEST,ph:"ex. Pré-convention"}]); if(v&&v.d)await updateDoc(ref,{documents:arrayUnion(v.d),updatedAt:serverTimestamp()}); return; }
   if(act==="deldoc"){ if(!await need())return; await updateDoc(ref,{documents:arrayRemove(b.dataset.doc),updatedAt:serverTimestamp()}); return; }
   if(act==="delstep"){ if(!await need())return; if(!confirm("Supprimer définitivement cette étape ? Cette action est irréversible."))return; await deleteDoc(ref); toast("Étape supprimée"); return; }
@@ -529,7 +560,7 @@ function renderDoc(){
     steps.forEach(s=>{
       const gi=STEPS.indexOf(s)+1, cls=statutCls(s.statut), q=quiFait(s);
       let qui;
-      if(q){ const t=`${q.p.role?actIcon(q.p.role,15)+" ":""}${esc(q.p.txt)}${q.p.role?` <span style="color:#94a3b2">(${esc(q.p.role)})</span>`:""}${q.p.soutien?` — ${esc(q.p.lien||"en soutien")} : ${esc(q.p.soutien)}`:""}`;
+      if(q){ const head=q.p.role||q.p.txt||q.p.note||"—"; const t=`${(q.p.role&&AMETA[q.p.role])?actIcon(q.p.role,15)+" ":""}${esc(head)}${q.p.soutien?` — ${esc(q.p.lien||"en appui")} : ${esc(q.p.soutien)}`:""}`;
         qui=q.valide?t:`<span style="color:#9a6a12;font-style:italic">Pressenti (à valider) :</span> ${t}`;
       } else { qui=`<span class="ds-tovalid">à trancher en équipe</span>`; }
       const docs=(s.documents||[]).length?`<span><b>Documents :</b> ${s.documents.map(esc).join(" · ")}</span>`:"";
