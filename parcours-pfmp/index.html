@@ -13,14 +13,14 @@
     --r:16px;--rs:11px;
     --sh:0 1px 2px rgba(16,34,43,.05),0 10px 28px rgba(16,34,43,.07);--shl:0 16px 50px rgba(16,34,43,.22);
   }
-  @media (prefers-color-scheme:dark){:root{--bg:#0a1216;--card:#121e24;--ink:#e6eef2;--soft:#9bafb8;--line:#22303700;--line:#243036;--line2:#18242a;--c1:#39b6cf;--c1d:#2f9bb2;--c1soft:#10333d;--flou-bg:#412402;--flou-tx:#fac775;--deb-bg:#042c53;--deb-tx:#85b7eb;--ok-bg:#173404;--ok-tx:#97c459;--sh:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.45);--shl:0 18px 56px rgba(0,0,0,.6)}}
+  @media (prefers-color-scheme:dark){:root{--bg:#0a1216;--card:#121e24;--ink:#e6eef2;--soft:#9bafb8;--line:#243036;--line2:#18242a;--c1:#39b6cf;--c1d:#2f9bb2;--c1soft:#10333d;--flou-bg:#412402;--flou-tx:#fac775;--deb-bg:#042c53;--deb-tx:#85b7eb;--ok-bg:#173404;--ok-tx:#97c459;--sh:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.45);--shl:0 18px 56px rgba(0,0,0,.6)}}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
   svg{flex:none}
   a.back{position:fixed;top:13px;left:13px;z-index:40;display:inline-flex;align-items:center;gap:6px;background:var(--card);color:var(--ink);text-decoration:none;font-size:.82rem;font-weight:650;padding:8px 13px;border-radius:999px;border:1px solid var(--line);box-shadow:var(--sh)}
   a.back:hover{color:var(--c1);border-color:var(--c1)}
-  header.hero{background:radial-gradient(120% 150% at 0% 0%,#13899f 0%,#0e7490 48%,#0a4254 100%);color:#fff;padding:46px 18px 30px;text-align:center}
-  .hero-in{max-width:780px;margin:0 auto}
+  header.hero{background:radial-gradient(120% 150% at 0% 0%,#13899f 0%,#0e7490 48%,#0a4254 100%);color:#fff;padding:46px 18px 28px;text-align:center}
+  .hero-in{max-width:820px;margin:0 auto}
   .kick{display:inline-block;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;opacity:.92;background:rgba(255,255,255,.16);padding:5px 12px;border-radius:999px}
   header.hero h1{margin:.4em 0 .14em;font-size:clamp(1.4rem,4.6vw,2rem);font-weight:850;letter-spacing:-.01em}
   header.hero p{margin:0 auto;opacity:.95;font-size:.95rem;max-width:32em}
@@ -29,19 +29,33 @@
   .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:700;color:#0a4254;background:#bfe6ef;border:2px solid #0e7490;margin-left:-7px}
   .av:first-child{margin-left:0}
   .me{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 11px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
-  main{max-width:780px;margin:0 auto;padding:8px 14px 120px}
-  .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;margin:14px 2px 6px}
+  main{max-width:820px;margin:0 auto;padding:0 14px 120px}
+  /* timeline */
+  .tlwrap{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);margin:0 -14px;padding:11px 14px 9px;border-bottom:1px solid var(--line)}
+  .tl{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}
+  .tl::-webkit-scrollbar{display:none}
+  .tlnode{flex:none;min-width:128px;display:flex;flex-direction:column;gap:5px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--pc,#0e7490);border-radius:10px;padding:8px 11px;cursor:pointer}
+  .tlnode:hover{border-color:var(--pc,#0e7490)}
+  .tlnode .tlh{display:flex;align-items:center;gap:7px;font-size:.8rem;font-weight:750}
+  .tlnode .tlnum{width:19px;height:19px;border-radius:50%;background:var(--pc);color:#fff;display:grid;place-items:center;font-size:.7rem;flex:none}
+  .tlnode .tlc{font-size:.7rem;color:var(--soft)}
+  .tlnode .tlbar{height:5px;border-radius:999px;background:var(--line2);overflow:hidden}
+  .tlnode .tlfill{height:100%;border-radius:999px;background:var(--pc);transition:width .4s}
+  .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between;margin:14px 2px 4px}
   .legend{display:flex;gap:13px;flex-wrap:wrap;font-size:.76rem;color:var(--soft)}
   .legend span{display:inline-flex;align-items:center;gap:6px}
   .ld{width:9px;height:9px;border-radius:50%}
-  .tools{display:flex;gap:8px;flex-wrap:wrap}
   .tbtn{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 13px;font-size:.82rem;font-weight:600;cursor:pointer}
   .tbtn:hover{border-color:var(--c1);color:var(--c1)}
-  .banner{display:flex;gap:11px;align-items:flex-start;background:#fdeecf;color:#8a5a12;border:1.5px solid #f0cd86;border-radius:var(--rs);padding:13px 15px;margin:12px 2px;font-size:.86rem;font-weight:600}
-  .phase{margin:26px 0 2px}
-  .pbadge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:4px 13px;font-size:.78rem;font-weight:750}
-  .conn{width:2px;height:16px;background:var(--line);margin:2px 0 2px 33px}
-  .card{position:relative;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--pc,#0e7490);border-radius:var(--r);box-shadow:var(--sh);padding:14px 15px;margin:0}
+  /* phase header */
+  .phase{display:flex;align-items:center;gap:12px;margin:30px 2px 12px;scroll-margin-top:96px}
+  .pnum2{flex:none;width:42px;height:42px;border-radius:13px;background:var(--pc,#0e7490);color:#fff;display:grid;place-items:center;font-weight:850;font-size:1.3rem;box-shadow:0 6px 16px color-mix(in srgb,var(--pc) 40%,transparent)}
+  .ptitlewrap{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .pkick{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--pc,#0e7490);font-weight:800}
+  .pname{font-size:1.3rem;font-weight:850;letter-spacing:-.01em;cursor:text;line-height:1.15}
+  .pname:hover{color:var(--pc)}
+  .conn{width:2px;height:14px;background:var(--line);margin:2px 0 2px 22px}
+  .card{position:relative;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--pc,#0e7490);border-radius:var(--r);box-shadow:var(--sh);padding:14px 15px}
   .chead{display:flex;gap:11px;align-items:flex-start}
   .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--pc,#0e7490);color:#fff;display:grid;place-items:center;font-weight:750;font-size:.92rem}
   .title{flex:1;margin:3px 0;font-size:1.04rem;font-weight:700;cursor:text}
@@ -51,21 +65,22 @@
   .qline{display:flex;gap:8px;align-items:flex-start;margin:9px 0 4px 41px;font-size:.9rem;color:var(--soft)}
   .qline .qm{flex:none;width:20px;height:20px;border-radius:50%;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;font-weight:800;font-size:.78rem}
   .qline span.qx{cursor:text} .qline span.qx:hover{color:var(--c1)}
-  .retenu{margin:8px 0 2px 41px;display:flex;gap:7px;align-items:center;background:var(--ok-bg);color:var(--ok-tx);border-radius:var(--rs);padding:7px 11px;font-size:.86rem;font-weight:650}
+  .retenu{margin:8px 0 2px 41px;display:flex;gap:7px;align-items:center;background:var(--ok-bg);color:var(--ok-tx);border-radius:var(--rs);padding:8px 11px;font-size:.86rem;font-weight:650}
   .props{margin:9px 0 0 41px;display:flex;flex-direction:column;gap:7px}
   .prop{display:flex;flex-direction:column;gap:8px;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--rs);padding:9px 11px}
-  .prop.lead{border-color:var(--c1);background:var(--c1soft)}
-  .prop.ret{border-color:var(--ok-tx)}
+  .prop.lead{border-color:var(--c1)}
+  .prop.ret{border-color:var(--ok-tx);background:color-mix(in srgb,var(--ok-bg) 50%,var(--card))}
   .prow1{display:flex;align-items:flex-start;gap:9px}
-  .prow2{display:flex;align-items:center;gap:7px}
-  .prow2 .sp{flex:1}
+  .prank{flex:none;width:21px;height:21px;border-radius:50%;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;font-size:.74rem;font-weight:800;margin-top:1px}
   .picon{flex:none;display:grid;place-items:center;margin-top:1px}
   .ptxt{flex:1;font-size:.9rem;min-width:0;line-height:1.4}
   .ptxt small{color:var(--soft);font-weight:600}
-  .lead-tag{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;color:var(--c1)}
-  .vote{flex:none;display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:4px 11px;font-size:.82rem;font-weight:750;color:var(--ink);cursor:pointer}
-  .vote.on{background:var(--c1);border-color:var(--c1);color:#fff}
-  .ibtn{flex:none;width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
+  .prow2{display:flex;align-items:center;gap:7px}
+  .prow2 .sp{flex:1}
+  .sup{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.8rem;font-weight:700;color:var(--ink);cursor:pointer}
+  .sup.on{background:var(--c1);border-color:var(--c1);color:#fff}
+  .tete{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;color:var(--c1)}
+  .ibtn{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
   .ibtn:hover{color:var(--c1);border-color:var(--c1)}
   .ibtn.ret.on{background:var(--ok-bg);color:var(--ok-tx);border-color:var(--ok-tx)}
   .addprop{align-self:flex-start;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:999px;padding:6px 12px;font-size:.8rem;font-weight:600;cursor:pointer}
@@ -83,7 +98,8 @@
   .ins button:hover{opacity:1;color:var(--c1);background:var(--c1soft)}
   .ov{position:fixed;inset:0;background:rgba(8,18,22,.55);display:grid;place-items:center;z-index:90;padding:18px}
   .modal{background:var(--card);border-radius:var(--r);box-shadow:var(--shl);width:100%;max-width:420px;padding:20px}
-  .modal h3{margin:0 0 14px;font-size:1.15rem}
+  .modal h3{margin:0 0 5px;font-size:1.15rem}
+  .modal .msub{margin:0 0 14px;font-size:.85rem;color:var(--soft)}
   .mfield{display:block;margin-bottom:12px}
   .mfield span{display:block;font-size:.82rem;color:var(--soft);margin-bottom:5px;font-weight:600}
   .mfield input,.mfield textarea,.mfield select{width:100%;padding:10px 12px;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:var(--rs)}
@@ -95,7 +111,7 @@
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 19px;border-radius:999px;font-size:.86rem;font-weight:600;opacity:0;transition:.26s;pointer-events:none;z-index:95;box-shadow:var(--shl)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   @media print{
-    a.back,.who,.tools,.banner,.stp,.vote,.ibtn,.addprop,.addnote,.cfoot,.ins,.me{display:none!important}
+    a.back,.who,.tbtn,.stp,.sup,.ibtn,.addprop,.addnote,.cfoot,.ins,.me,.tlwrap,.tete,.prank{display:none!important}
     header.hero{background:#0e7490!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .card{box-shadow:none;break-inside:avoid}
   }
@@ -106,32 +122,31 @@
 <header class="hero"><div class="hero-in">
   <span class="kick">PFMP · 2nde AGORA</span>
   <h1>Le parcours, on le construit ensemble</h1>
-  <p>De la recherche du lieu jusqu'au bilan : on trace chaque étape, on tranche qui fait quoi, on enlève les zones de flou.</p>
+  <p>De la recherche du stage jusqu'au bilan : on trace chaque étape, on tranche qui fait quoi, on enlève les zones de flou.</p>
   <div class="who" id="who"></div>
 </div></header>
 <main id="main">
+  <div class="tlwrap"><div class="tl" id="timeline"></div></div>
   <div class="bar">
     <div class="legend">
       <span><span class="ld" style="background:var(--flou-tx)"></span>À clarifier</span>
-      <span><span class="ld" style="background:var(--deb-tx)"></span>En débat</span>
-      <span><span class="ld" style="background:var(--ok-tx)"></span>Validé</span>
+      <span><span class="ld" style="background:var(--deb-tx)"></span>En discussion</span>
+      <span><span class="ld" style="background:var(--ok-tx)"></span>Officialisé</span>
     </div>
-    <div class="tools">
-      <button class="tbtn" id="tprint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg> Générer la carte</button>
-    </div>
+    <button class="tbtn" id="tprint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg> Générer la carte</button>
   </div>
-  <div id="bannerbox"></div>
   <div id="list"></div>
 </main>
 <div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, addDoc, getDocs, onSnapshot, updateDoc, deleteDoc, query, orderBy, arrayUnion, arrayRemove, serverTimestamp }
+import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot, updateDoc, deleteDoc, query, orderBy, arrayUnion, arrayRemove, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",authDomain:"devoirs-pse.firebaseapp.com",projectId:"devoirs-pse",storageBucket:"devoirs-pse.firebasestorage.app",messagingSenderId:"614730413904",appId:"1:614730413904:web:a5dd478af5de30f6bede55"};
 const db=getFirestore(initializeApp(firebaseConfig));
 const PCOL="coordination_parcours", PID="agora-pfmp";
+const parcoursRef=doc(db,PCOL,PID);
 const etapesCol=collection(db,PCOL,PID,"etapes");
 const presCol=collection(db,PCOL,PID,"presence");
 const $=id=>document.getElementById(id);
@@ -139,15 +154,14 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():"x"+Date.now()+Math.random().toString(16).slice(2));
 let toastT;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2400);}
 
-const PHASES={
-  1:{t:"Recherche & négociation",c:"#7c3aed",bg:"#efe9fd",tx:"#5b21b6"},
-  2:{t:"Conventionnement",c:"#0f766e",bg:"#dcefea",tx:"#0b5a54"},
-  3:{t:"Départ & stage",c:"#b45309",bg:"#faeeda",tx:"#7c3d06"},
-  4:{t:"Bilan & après",c:"#c2410c",bg:"#faece7",tx:"#7c2d12"}
-};
-const ROLES=["Élève","Prof principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
-const RMETA={
-  "Élève":["student","#475569"],"Prof principal":["person","#7c3aed"],"Référent":["person","#0f766e"],
+const PCOLORS={1:"#7c3aed",2:"#0f766e",3:"#b45309",4:"#0e7490",5:"#c2410c"};
+const DEFAULT_PHASES={1:"Recherche de stage",2:"Conventionnement",3:"Départ et stage",4:"Suivi du stage",5:"Bilan et après"};
+let PHASE_NAMES={...DEFAULT_PHASES};
+const PHASE_IDS=[1,2,3,4,5];
+
+const ACTEURS=["Élève","Professeur principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
+const AMETA={
+  "Élève":["student","#475569"],"Professeur principal":["person","#7c3aed"],"Référent":["person","#0f766e"],
   "Enseignant pro":["briefcase","#b45309"],"DDF":["building","#4338ca"],"Bureau des entreprises":["building","#be185d"],
   "Cheffe d'établissement":["building","#334155"],"Tuteur":["briefcase","#15803d"],"Famille":["people","#0e7490"],
   "Vie scolaire":["person","#475569"],"Équipe":["people","#475569"]
@@ -159,36 +173,38 @@ const ICONS={
   building:'<rect x="5" y="3.5" width="14" height="17" rx="1.4"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h2M13 16h2"/>',
   people:'<circle cx="9" cy="8.4" r="2.6"/><path d="M3.6 19a5.4 5.4 0 0 1 10.8 0"/><path d="M16 6.4a2.6 2.6 0 0 1 0 5M20.6 19a5.4 5.4 0 0 0-4-5.2"/>'
 };
-const roleIcon=(role,size)=>{const m=RMETA[role]||["person","#475569"];return `<svg width="${size||16}" height="${size||16}" viewBox="0 0 24 24" fill="none" stroke="${m[1]}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[m[0]]}</svg>`;};
-const STATUTS={flou:"À clarifier",deb:"En débat",ok:"Validé"};
+const actIcon=(role,size)=>{const m=AMETA[role];if(!m)return "";return `<svg width="${size||18}" height="${size||18}" viewBox="0 0 24 24" fill="none" stroke="${m[1]}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[m[0]]}</svg>`;};
+const STATUTS={flou:"À clarifier",deb:"En discussion",ok:"Officialisé"};
 const NEXTST={flou:"deb",deb:"ok",ok:"flou"};
 
 const SEED=[
-  {id:"s01",ordre:10,phase:1,titre:"Attribution d'un référent à chaque élève",question:"",props:[{id:"a",txt:"Le professeur principal organise la répartition",role:"Prof principal"}],retenu:"a",statut:"ok"},
-  {id:"s02",ordre:20,phase:1,titre:"L'élève reçoit la fiche de négociation et la pré-convention",question:"Qui imprime et remet ces deux documents à l'élève ?",props:[{id:"a",txt:"Le référent",role:"Référent"},{id:"b",txt:"L'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Le professeur principal",role:"Prof principal"}],retenu:null,statut:"flou"},
+  {id:"s01",ordre:10,phase:1,titre:"Attribution d'un référent à chaque élève",question:"Qui organise la répartition des référents ?",props:[{id:"a",txt:"Le professeur principal",role:"Professeur principal"},{id:"b",txt:"Le DDF",role:"DDF"}],retenu:null,statut:"flou"},
+  {id:"s02",ordre:20,phase:1,titre:"L'élève reçoit la fiche de négociation et la pré-convention",question:"Qui imprime et remet ces deux documents à l'élève ?",props:[{id:"a",txt:"Le référent",role:"Référent"},{id:"b",txt:"L'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Le professeur principal",role:"Professeur principal"}],retenu:null,statut:"flou"},
   {id:"s03",ordre:30,phase:1,titre:"Sur le terrain, le tuteur coche les activités AGORA possibles",question:"",props:[{id:"a",txt:"Le tuteur du futur lieu de stage",role:"Tuteur"}],retenu:null,statut:"deb"},
-  {id:"s04",ordre:40,phase:2,titre:"L'élève rapporte les deux documents remplis",question:"À qui les rapporte-t-il, et qui est informé ensuite ?",props:[{id:"a",txt:"Au référent attitré",role:"Référent"},{id:"b",txt:"À l'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Au professeur principal",role:"Prof principal"}],retenu:null,statut:"flou"},
+  {id:"s04",ordre:40,phase:2,titre:"L'élève rapporte les deux documents remplis",question:"À qui les rapporte-t-il, et qui est informé ensuite ?",props:[{id:"a",txt:"Au référent attitré",role:"Référent"},{id:"b",txt:"À l'enseignant pro",role:"Enseignant pro"},{id:"c",txt:"Au professeur principal",role:"Professeur principal"}],retenu:null,statut:"flou"},
   {id:"s05",ordre:50,phase:2,titre:"Saisie de la pré-convention pour générer la convention (Pronote)",question:"Qui saisit, et en combien de temps ?",props:[{id:"a",txt:"Le référent saisit",role:"Référent"},{id:"b",txt:"Le DDF saisit / contrôle",role:"DDF"}],retenu:null,statut:"flou"},
   {id:"s06",ordre:60,phase:2,titre:"Vérification puis circuit de signatures de la convention",question:"Dans quel ordre : bureau des entreprises, DDF, cheffe d'établissement ?",props:[{id:"a",txt:"Le bureau des entreprises vérifie d'abord",role:"Bureau des entreprises"},{id:"b",txt:"Le DDF fait signer la cheffe",role:"DDF"}],retenu:null,statut:"deb"},
-  {id:"s07",ordre:70,phase:2,titre:"Diffusion des copies (familles + entreprise)",question:"",props:[{id:"a",txt:"Le DDF diffuse les copies",role:"DDF"},{id:"b",txt:"Le professeur principal relaie aux familles",role:"Prof principal"}],retenu:null,statut:"flou"},
+  {id:"s07",ordre:70,phase:2,titre:"Diffusion des copies (familles + entreprise)",question:"",props:[{id:"a",txt:"Le DDF diffuse les copies",role:"DDF"},{id:"b",txt:"Le professeur principal relaie aux familles",role:"Professeur principal"}],retenu:null,statut:"flou"},
   {id:"s08",ordre:80,phase:3,titre:"Règle d'or : aucun départ sans convention signée par les 5 parties",question:"",props:[],retenu:null,statut:"ok"},
   {id:"s09",ordre:90,phase:3,titre:"Jour J : documents remis à l'entreprise",question:"Convention + annexe activités + attestation à remplir + journal de bord : tout y est ?",props:[{id:"a",txt:"Le référent remet le dossier complet",role:"Référent"}],retenu:null,statut:"deb"},
-  {id:"s10",ordre:100,phase:3,titre:"Référent : présence vérifiée sous 2 jours, visite de fin fixée",question:"",props:[{id:"a",txt:"L'enseignant référent",role:"Référent"}],retenu:"a",statut:"ok"},
-  {id:"s11",ordre:110,phase:4,titre:"Visite de fin de période (2 phases) → compte rendu d'évaluation",question:"",props:[{id:"a",txt:"Référent + tuteur ensemble",role:"Référent"}],retenu:"a",statut:"ok"},
-  {id:"s12",ordre:120,phase:4,titre:"Attestation : nombre de jours réellement effectués",question:"Quand la remplir si le bilan tombe avant la fin du stage ?",props:[{id:"a",txt:"Le tuteur le dernier jour",role:"Tuteur"}],retenu:null,statut:"deb"},
-  {id:"s13",ordre:130,phase:4,titre:"Transmission de l'attestation → allocation",question:"Référent → DDF → bureau des entreprises → ASP : qui fait quoi ?",props:[{id:"a",txt:"Le référent transmet au DDF",role:"Référent"},{id:"b",txt:"Le bureau des entreprises envoie à l'ASP",role:"Bureau des entreprises"}],retenu:null,statut:"flou"},
-  {id:"s14",ordre:140,phase:4,titre:"Exploitation pédagogique du retour de stage en classe",question:"",props:[{id:"a",txt:"Toute l'équipe pédagogique",role:"Équipe"}],retenu:"a",statut:"ok"}
+  {id:"s10",ordre:100,phase:4,titre:"Présence vérifiée sous 2 jours, visite de fin fixée",question:"",props:[{id:"a",txt:"L'enseignant référent",role:"Référent"}],retenu:"a",statut:"ok"},
+  {id:"s10b",ordre:105,phase:4,titre:"Pendant la PFMP : journal de bord suivi, contact en cas de besoin",question:"",props:[{id:"a",txt:"Le référent suit, le tuteur signale",role:"Référent"}],retenu:null,statut:"deb"},
+  {id:"s11",ordre:110,phase:5,titre:"Visite de fin de période (2 phases) → compte rendu d'évaluation",question:"",props:[{id:"a",txt:"Référent + tuteur ensemble",role:"Référent"}],retenu:"a",statut:"ok"},
+  {id:"s12",ordre:120,phase:5,titre:"Attestation : nombre de jours réellement effectués",question:"Quand la remplir si le bilan tombe avant la fin du stage ?",props:[{id:"a",txt:"Le tuteur le dernier jour",role:"Tuteur"}],retenu:null,statut:"deb"},
+  {id:"s13",ordre:130,phase:5,titre:"Transmission de l'attestation → allocation",question:"Référent → DDF → bureau des entreprises → ASP : qui fait quoi ?",props:[{id:"a",txt:"Le référent transmet au DDF",role:"Référent"},{id:"b",txt:"Le bureau des entreprises envoie à l'ASP",role:"Bureau des entreprises"}],retenu:null,statut:"flou"},
+  {id:"s14",ordre:140,phase:5,titre:"Exploitation pédagogique du retour de stage en classe",question:"",props:[{id:"a",txt:"Toute l'équipe pédagogique",role:"Équipe"}],retenu:"a",statut:"ok"}
 ];
 
 let ME=null, STEPS=[], DEMO=false, seeding=false;
 try{ ME=JSON.parse(localStorage.getItem("parcours_id")||"null"); }catch(e){}
+if(ME&&ME.pseudo&&typeof ME==="object")ME={pseudo:ME.pseudo};
 let MYPID=localStorage.getItem("parcours_pid"); if(!MYPID){MYPID=uid();localStorage.setItem("parcours_pid",MYPID);}
 
 /* ---------- modale générique ---------- */
-function openForm(title, fields, okLabel){
+function openForm(title, sub, fields, okLabel){
   return new Promise(res=>{
     const ov=document.createElement("div");ov.className="ov";
-    ov.innerHTML=`<div class="modal"><h3>${esc(title)}</h3><div class="mfields"></div><div class="mbtns"><button class="btn ghost" data-x="c">Annuler</button><button class="btn" data-x="o">${esc(okLabel||"Valider")}</button></div></div>`;
+    ov.innerHTML=`<div class="modal"><h3>${esc(title)}</h3>${sub?`<p class="msub">${esc(sub)}</p>`:""}<div class="mfields"></div><div class="mbtns"><button class="btn ghost" data-x="c">Annuler</button><button class="btn" data-x="o">${esc(okLabel||"Valider")}</button></div></div>`;
     const mf=ov.querySelector(".mfields");
     fields.forEach(f=>{
       const w=document.createElement("label");w.className="mfield";
@@ -209,87 +225,94 @@ function openForm(title, fields, okLabel){
   });
 }
 
-/* ---------- identité ---------- */
+/* ---------- identité (anonyme, identifiant libre) ---------- */
 async function ensureMe(){
   if(ME&&ME.pseudo) return true;
-  const v=await openForm("Bienvenue — qui es-tu ?",[
-    {key:"pseudo",label:"Ton identifiant (ex. PSE, ou ton prénom)",type:"text",ph:"PSE"},
-    {key:"role",label:"Ton rôle (ça reste anonyme)",type:"select",options:ROLES.concat(["Autre"])}
+  const v=await openForm("Entrer dans l'atelier","C'est anonyme : mets ce que tu veux comme identifiant (PSE, un prénom, des initiales…).",[
+    {key:"pseudo",label:"Ton identifiant",type:"text",ph:"PSE"}
   ],"Entrer");
   if(!v||!v.pseudo){return false;}
-  ME={pseudo:v.pseudo.replace(/\|/g,"").slice(0,24),role:v.role||"Équipe"};
+  ME={pseudo:v.pseudo.replace(/\|/g,"").slice(0,24)};
   localStorage.setItem("parcours_id",JSON.stringify(ME));
   joinPresence(); renderWho(); return true;
 }
-async function need(){ if(DEMO){toast("Aperçu — publie la règle Firestore pour participer");return false;} return await ensureMe(); }
+async function need(){ if(DEMO){toast("Aperçu — la collaboration s'activera après publication de la règle");return false;} return await ensureMe(); }
 
 /* ---------- présence ---------- */
 function joinPresence(){
   if(DEMO||!ME) return;
-  const beat=()=>setDoc(doc(presCol,MYPID),{pseudo:ME.pseudo,role:ME.role,ts:Date.now()}).catch(()=>{});
+  const beat=()=>setDoc(doc(presCol,MYPID),{pseudo:ME.pseudo,ts:Date.now()}).catch(()=>{});
   beat(); clearInterval(window.__pb); window.__pb=setInterval(beat,25000);
 }
 function renderWho(connected){
   const box=$("who"); const list=(connected||[]).filter(p=>Date.now()-(p.ts||0)<70000);
-  const avs=list.slice(0,6).map(p=>`<span class="av" title="${esc(p.pseudo)} · ${esc(p.role||"")}">${esc((p.pseudo||"?").slice(0,3))}</span>`).join("");
-  const meTxt=ME?`Tu es <b>${esc(ME.pseudo)}</b> · ${esc(ME.role)}`:"Rejoindre pour participer";
+  const avs=list.slice(0,8).map(p=>`<span class="av" title="${esc(p.pseudo)}">${esc((p.pseudo||"?").slice(0,3))}</span>`).join("");
+  const meTxt=ME?`Tu participes en <b>${esc(ME.pseudo)}</b>`:"Rejoindre pour participer";
   box.innerHTML=`${list.length?`<span class="avs">${avs}</span>`:""}<span class="me" id="mebtn">${meTxt} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>`;
   $("mebtn").onclick=async()=>{ME=null;localStorage.removeItem("parcours_id");await ensureMe();};
 }
 
 /* ---------- rendu ---------- */
 function stepCard(s,n){
-  const ph=PHASES[s.phase]||PHASES[1];
+  const pc=PCOLORS[s.phase]||PCOLORS[1];
   const votes=s.votes||[];
-  const counts={}; let maxc=0;
-  (s.props||[]).forEach(p=>{const c=votes.filter(v=>v.indexOf(p.id+"||")===0).length;counts[p.id]=c;if(c>maxc)maxc=c;});
+  const arr=(s.props||[]).map(p=>({p,c:votes.filter(v=>v.indexOf(p.id+"||")===0).length})).sort((a,b)=>b.c-a.c);
   const retText=s.retenu?(s.props||[]).find(p=>p.id===s.retenu):null;
-  const props=(s.props||[]).map(p=>{
-    const c=counts[p.id]||0, voted=ME&&votes.includes(p.id+"||"+ME.pseudo);
-    const lead=c>0&&c===maxc, isret=s.retenu===p.id;
-    return `<div class="prop${lead?" lead":""}${isret?" ret":""}">
-      <div class="prow1"><span class="picon">${roleIcon(p.role,18)}</span><span class="ptxt">${esc(p.txt)}${p.role?` <small>· ${esc(p.role)}</small>`:""}</span></div>
+  const multi=arr.length>1;
+  const props=arr.map((o,idx)=>{
+    const p=o.p, c=o.c, voted=ME&&votes.includes(p.id+"||"+ME.pseudo), isret=s.retenu===p.id, tete=multi&&idx===0&&c>0;
+    return `<div class="prop${tete?" lead":""}${isret?" ret":""}">
+      <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${p.role?`<span class="picon">${actIcon(p.role,18)}</span>`:""}<span class="ptxt">${esc(p.txt)}${p.role?` <small>· ${esc(p.role)}</small>`:""}</span></div>
       <div class="prow2">
-        <button class="vote${voted?" on":""}" data-act="vote" data-id="${s.id}" data-pid="${p.id}" title="Voter">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>${c} vote${c>1?"s":""}</button>
-        ${lead?`<span class="lead-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg> majorité</span>`:""}
+        <button class="sup${voted?" on":""}" data-act="support" data-id="${s.id}" data-pid="${p.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>D'accord${c?" · "+c:""}</button>
+        ${tete?`<span class="tete">en tête</span>`:""}
         <span class="sp"></span>
-        <button class="ibtn ret${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="Marquer comme réponse retenue"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></button>
+        <button class="ibtn ret${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="Officialiser cette réponse"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
         <button class="ibtn" data-act="delprop" data-id="${s.id}" data-pid="${p.id}" title="Supprimer cette proposition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
     </div>`;
   }).join("");
-  const notes=(s.notes||[]).map(nt=>`<div class="note"><b>${esc(nt.p)}${nt.r?" · "+esc(nt.r):""}</b> — ${esc(nt.t)}</div>`).join("");
-  return `<article class="card" style="--pc:${ph.c}">
+  const notes=(s.notes||[]).map(nt=>`<div class="note"><b>${esc(nt.p)}</b> — ${esc(nt.t)}</div>`).join("");
+  return `<article class="card" style="--pc:${pc}">
     <div class="chead">
       <span class="num">${n}</span>
       <h3 class="title" data-act="title" data-id="${s.id}">${esc(s.titre)}</h3>
       <button class="stp st-${s.statut}" data-act="statut" data-id="${s.id}" title="Cliquer pour changer le statut">${STATUTS[s.statut]||"À clarifier"}</button>
     </div>
-    ${(s.question||"")?`<div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}">${esc(s.question)}</span></div>`:`<div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}" style="opacity:.6">Ajouter une question à trancher…</span></div>`}
-    ${retText?`<div class="retenu"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg> Réponse retenue : ${esc(retText.txt)}</div>`:""}
+    <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span></div>
+    ${retText?`<div class="retenu"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Réponse officialisée : ${esc(retText.txt)}</div>`:""}
     <div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>
-    <div class="notes">${notes}<button class="addnote" data-act="addnote" data-id="${s.id}">+ ajouter une note</button></div>
+    <div class="notes">${notes}<button class="addnote" data-act="addnote" data-id="${s.id}">+ ajouter un commentaire</button></div>
     <div class="cfoot"><button data-act="delstep" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Supprimer l'étape</button></div>
   </article>`;
 }
 function insRow(afterId){return `<div class="ins"><button data-act="insert" data-id="${afterId||""}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> insérer une étape ici</button></div>`;}
 
+function renderTimeline(){
+  const tl=$("timeline");
+  tl.innerHTML=PHASE_IDS.map(ph=>{
+    const steps=STEPS.filter(s=>s.phase===ph);
+    const done=steps.filter(s=>s.statut==="ok").length, tot=steps.length;
+    const pct=tot?Math.round(done/tot*100):0, pc=PCOLORS[ph];
+    return `<div class="tlnode" style="--pc:${pc}" data-go="ph-${ph}">
+      <div class="tlh"><span class="tlnum">${ph}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(PHASE_NAMES[ph]||DEFAULT_PHASES[ph])}</span></div>
+      <div class="tlc">${done}/${tot} officialisée${done>1?"s":""}</div>
+      <div class="tlbar"><div class="tlfill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
 function render(){
+  renderTimeline();
   const list=$("list");
   if(!STEPS.length){list.innerHTML=`<p style="color:var(--soft);text-align:center;padding:40px">Chargement du parcours…</p>`;return;}
   let html=insRow(""); let n=0, curPhase=null;
   STEPS.forEach(s=>{
-    if(s.phase!==curPhase){const ph=PHASES[s.phase]||PHASES[1];curPhase=s.phase;html+=`<div class="phase"><span class="pbadge" style="background:${ph.bg};color:${ph.tx}">Phase ${s.phase} · ${ph.t}</span></div>`;}
-    else{html+=`<div class="conn"></div>`;}
+    if(s.phase!==curPhase){const pc=PCOLORS[s.phase]||PCOLORS[1];curPhase=s.phase;
+      html+=`<div class="phase" id="ph-${s.phase}" style="--pc:${pc}"><span class="pnum2">${s.phase}</span><div class="ptitlewrap"><span class="pkick">Phase ${s.phase}</span><span class="pname" data-act="phasename" data-ph="${s.phase}">${esc(PHASE_NAMES[s.phase]||DEFAULT_PHASES[s.phase])}</span></div></div>`;
+    } else { html+=`<div class="conn"></div>`; }
     n++; html+=stepCard(s,n); html+=insRow(s.id);
   });
   list.innerHTML=html;
-}
-function renderBanner(){
-  $("bannerbox").innerHTML = DEMO
-    ? `<div class="banner"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><span>Mode aperçu — la collaboration en direct s'activera une fois la règle Firestore <b>coordination_parcours</b> publiée.</span></div>`
-    : "";
 }
 
 /* ---------- actions ---------- */
@@ -298,44 +321,49 @@ $("list").addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]"); if(!b) return;
   const act=b.dataset.act, id=b.dataset.id, pid=b.dataset.pid, s=findStep(id);
   const ref=id?doc(etapesCol,id):null;
+  if(act==="phasename"){ if(!await need())return; const ph=b.dataset.ph; const v=await openForm("Renommer la phase","",[{key:"t",label:"Nom de la phase",type:"text",value:PHASE_NAMES[ph]||DEFAULT_PHASES[ph]}]); if(v&&v.t)await updateDoc(parcoursRef,{["phases."+ph]:v.t,updatedAt:serverTimestamp()}); return; }
   if(act==="statut"){ if(!await need())return; await updateDoc(ref,{statut:NEXTST[s.statut]||"deb",updatedAt:serverTimestamp()}); return; }
-  if(act==="title"){ if(!await need())return; const v=await openForm("Modifier le titre de l'étape",[{key:"t",label:"Titre",type:"text",value:s.titre}]); if(v&&v.t)await updateDoc(ref,{titre:v.t,updatedAt:serverTimestamp()}); return; }
-  if(act==="question"){ if(!await need())return; const v=await openForm("La question à trancher",[{key:"t",label:"Question",type:"textarea",value:s.question||"",ph:"ex. Qui remet la pré-convention à l'élève ?"}]); if(v)await updateDoc(ref,{question:v.t,updatedAt:serverTimestamp()}); return; }
-  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse",[{key:"txt",label:"Ta proposition",type:"text",ph:"ex. Le référent imprime et la remet"},{key:"role",label:"Acteur concerné (facultatif)",type:"select",options:["—"].concat(ROLES)}]); if(v&&v.txt)await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role==="—"?"":v.role}),updatedAt:serverTimestamp()}); return; }
-  if(act==="vote"){ if(!await need())return; const key=pid+"||"+ME.pseudo; const has=(s.votes||[]).includes(key); await updateDoc(ref,{votes:has?arrayRemove(key):arrayUnion(key),updatedAt:serverTimestamp()}); return; }
+  if(act==="title"){ if(!await need())return; const v=await openForm("Modifier le titre de l'étape","Tout est modifiable : si le titre n'est pas bon, corrige-le.",[{key:"t",label:"Titre",type:"text",value:s.titre}]); if(v&&v.t)await updateDoc(ref,{titre:v.t,updatedAt:serverTimestamp()}); return; }
+  if(act==="question"){ if(!await need())return; const v=await openForm("La question à trancher","",[{key:"t",label:"Question",type:"textarea",value:s.question||"",ph:"ex. Qui remet la pré-convention à l'élève ?"}]); if(v)await updateDoc(ref,{question:v.t,updatedAt:serverTimestamp()}); return; }
+  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Une proposition par personne ; les plus soutenues remontent en priorité.",[{key:"txt",label:"Ta proposition",type:"text",ph:"ex. Le référent imprime et la remet"},{key:"role",label:"Qui ? (facultatif, pour l'icône)",type:"select",options:["—"].concat(ACTEURS)}]); if(v&&v.txt)await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role==="—"?"":v.role}),updatedAt:serverTimestamp()}); return; }
+  if(act==="support"){ if(!await need())return; const key=pid+"||"+ME.pseudo; const has=(s.votes||[]).includes(key); await updateDoc(ref,{votes:has?arrayRemove(key):arrayUnion(key),updatedAt:serverTimestamp()}); return; }
   if(act==="retain"){ if(!await need())return; const nv=s.retenu===pid?null:pid; await updateDoc(ref,nv?{retenu:nv,statut:"ok",updatedAt:serverTimestamp()}:{retenu:null,updatedAt:serverTimestamp()}); return; }
   if(act==="delprop"){ if(!await need())return; if(!confirm("Supprimer cette proposition ?"))return; const np=(s.props||[]).filter(p=>p.id!==pid); const nvv=(s.votes||[]).filter(v=>v.indexOf(pid+"||")!==0); await updateDoc(ref,{props:np,votes:nvv,retenu:s.retenu===pid?null:s.retenu,updatedAt:serverTimestamp()}); return; }
-  if(act==="addnote"){ if(!await need())return; const v=await openForm("Ajouter une note",[{key:"t",label:"Ta note",type:"textarea",ph:"Une remarque, une précision, une objection…"}]); if(v&&v.t)await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,r:ME.role,t:v.t,ts:Date.now()}),updatedAt:serverTimestamp()}); return; }
+  if(act==="addnote"){ if(!await need())return; const v=await openForm("Ajouter un commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",ph:"Une remarque, une précision, une objection…"}]); if(v&&v.t)await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now()}),updatedAt:serverTimestamp()}); return; }
   if(act==="delstep"){ if(!await need())return; if(!confirm("Supprimer définitivement cette étape ? Cette action est irréversible."))return; await deleteDoc(ref); toast("Étape supprimée"); return; }
   if(act==="insert"){ if(!await need())return;
     const idx=id?STEPS.findIndex(x=>x.id===id):-1;
     const prev=idx>=0?STEPS[idx]:null, next=STEPS[idx+1];
     let ordre; if(!prev)ordre=(STEPS[0]?STEPS[0].ordre:10)-5; else if(!next)ordre=prev.ordre+10; else ordre=(prev.ordre+next.ordre)/2;
     const phase=prev?prev.phase:(STEPS[0]?STEPS[0].phase:1);
-    const v=await openForm("Insérer une étape",[{key:"t",label:"Titre de la nouvelle étape",type:"text",ph:"ex. Vérification des dates par le DDF"},{key:"ph",label:"Phase",type:"select",options:["1 · Recherche & négociation","2 · Conventionnement","3 · Départ & stage","4 · Bilan & après"]}]);
+    const v=await openForm("Insérer une étape","Pour ce qu'on aurait oublié entre deux étapes.",[{key:"t",label:"Titre de la nouvelle étape",type:"text",ph:"ex. Vérification des dates par le DDF"},{key:"ph",label:"Phase",type:"select",options:PHASE_IDS.map(i=>i+" · "+(PHASE_NAMES[i]||DEFAULT_PHASES[i]))}]);
     if(v&&v.t){const pnum=parseInt(v.ph)||phase; await addDoc(etapesCol,{ordre,phase:pnum,titre:v.t,question:"",props:[],votes:[],notes:[],retenu:null,statut:"flou",createdAt:serverTimestamp(),updatedAt:serverTimestamp()});}
     return;
   }
 });
+$("timeline").addEventListener("click",e=>{const n=e.target.closest("[data-go]");if(!n)return;const t=document.getElementById(n.dataset.go);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
 $("tprint").addEventListener("click",()=>window.print());
 
 /* ---------- démarrage ---------- */
-function toStep(d){const x=d.data?d.data():d;return {id:d.id||x.id,ordre:x.ordre,phase:x.phase,titre:x.titre,question:x.question,props:x.props||[],votes:x.votes||[],notes:x.notes||[],retenu:x.retenu??null,statut:x.statut||"flou"};}
+function toStep(d){const x=d.data();return {id:d.id,ordre:x.ordre,phase:x.phase,titre:x.titre,question:x.question,props:x.props||[],votes:x.votes||[],notes:x.notes||[],retenu:x.retenu??null,statut:x.statut||"flou"};}
 async function seedIfEmpty(){
   if(seeding)return; seeding=true;
-  try{ for(const s of SEED){ await setDoc(doc(etapesCol,s.id),{ordre:s.ordre,phase:s.phase,titre:s.titre,question:s.question,props:s.props,votes:[],notes:[],retenu:s.retenu,statut:s.statut,createdAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true}); } }
-  catch(e){ console.error(e); }
+  try{
+    await setDoc(parcoursRef,{phases:DEFAULT_PHASES,updatedAt:serverTimestamp()},{merge:true});
+    for(const s of SEED){ await setDoc(doc(etapesCol,s.id),{ordre:s.ordre,phase:s.phase,titre:s.titre,question:s.question,props:s.props,votes:[],notes:[],retenu:s.retenu,statut:s.statut,createdAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true}); }
+  }catch(e){ console.error(e); }
 }
-function startDemo(){ DEMO=true; STEPS=SEED.map(s=>({...s,votes:[],notes:[]})); renderBanner(); render(); renderWho([]); }
+function startDemo(){ DEMO=true; STEPS=SEED.map(s=>({...s,votes:[],notes:[]})); render(); renderWho([]); }
 
 renderWho([]);
+onSnapshot(parcoursRef, d=>{ if(d.exists()&&d.data().phases){PHASE_NAMES={...DEFAULT_PHASES,...d.data().phases}; if(STEPS.length)render();} }, ()=>{});
 onSnapshot(query(etapesCol,orderBy("ordre")), snap=>{
   if(snap.empty){ seedIfEmpty(); return; }
-  STEPS=snap.docs.map(toStep); DEMO=false; renderBanner(); render();
+  STEPS=snap.docs.map(toStep); DEMO=false; render();
 }, err=>{ console.warn("Firestore indisponible:",err.code); startDemo(); });
 onSnapshot(presCol, snap=>{ renderWho(snap.docs.map(d=>d.data())); }, ()=>{});
 
-if(ME) joinPresence();
+if(ME) joinPresence(); else setTimeout(()=>{ if(!ME&&!DEMO) ensureMe(); },900);
 </script>
 </body>
 </html>
