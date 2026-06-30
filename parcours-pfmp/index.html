@@ -241,6 +241,7 @@ let PHASE_NAMES={...DEFAULT_PHASES};
 const PHASE_IDS=[1,2,3,4,5];
 
 const ACTEURS=["Élève","Professeur principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
+const LIENS=["en soutien","conjointement avec","sous la validation de","pour information"];
 const DOCS_SUGGEST=["Fiche de négociation","Pré-convention","Convention","Annexe pédagogique","Annexe activités","Annexe handicap","Attestation de PFMP","Journal de bord","Compte rendu d'évaluation","Passeport professionnel (Cerise Pro)","Copies de la convention"];
 const OFF=[
   {key:"eleve",label:"L'élève",ic:"student",c:"#475569",refs:[
@@ -379,7 +380,7 @@ function stepCard(s,n){
   const multi=arr.length>1;
   const props=arr.map((o,idx)=>{
     const p=o.p, c=o.c, voted=ME&&votes.includes(p.id+"||"+ME.pseudo), isret=s.retenu===p.id, tete=multi&&idx===0&&c>0;
-    const sout=p.soutien?`<span class="soutien">en soutien : ${actIcon(p.soutien,14)} ${esc(p.soutien)}</span>`:"";
+    const sout=p.soutien?`<span class="soutien">${esc(p.lien||"en soutien")} : ${actIcon(p.soutien,14)} ${esc(p.soutien)}</span>`:"";
     return `<div class="prop${tete?" lead":""}${isret?" ret":""}">
       <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${p.role?`<span class="picon">${actIcon(p.role,18)}</span>`:""}<span class="ptxt">${esc(p.txt)}${p.role?` <small>· ${esc(p.role)}</small>`:""}${sout}</span></div>
       <div class="prow2">
@@ -401,7 +402,7 @@ function stepCard(s,n){
     </div>
     <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span></div>
     ${docs||(s.documents&&s.documents.length)?`<div class="meta">${docs}<button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button></div>`:`<div class="meta"><button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document à remettre</button></div>`}
-    ${retText?`<div class="retenu">${okCheck} Réponse retenue : ${esc(retText.txt)}${retText.soutien?` (en soutien : ${esc(retText.soutien)})`:""}</div>`:""}
+    ${retText?`<div class="retenu">${okCheck} Réponse retenue : ${esc(retText.txt)}${retText.soutien?` (${esc(retText.lien||"en soutien")} : ${esc(retText.soutien)})`:""}</div>`:""}
     <div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>
     <div class="notes">${notes}<button class="addnote" data-act="addnote" data-id="${s.id}">+ ajouter un commentaire</button></div>
     <div class="cfoot"><button data-act="delstep" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Supprimer l'étape</button></div>
@@ -462,7 +463,7 @@ async function handle(act,id,pid,b){
   if(act==="statut"){ if(!await need())return; await updateDoc(ref,{statut:NEXTST[s.statut]||"deb",updatedAt:serverTimestamp()}); return; }
   if(act==="title"){ if(!await need())return; const v=await openForm("Modifier le titre de l'étape","Tout est modifiable : si le titre n'est pas bon, corrige-le.",[{key:"t",label:"Titre",type:"text",value:s.titre}]); if(v&&v.t)await updateDoc(ref,{titre:v.t,updatedAt:serverTimestamp()}); return; }
   if(act==="question"){ if(!await need())return; const v=await openForm("La question à trancher","",[{key:"t",label:"Question",type:"textarea",value:s.question||"",ph:"ex. Qui remet la pré-convention à l'élève ?"}]); if(v)await updateDoc(ref,{question:v.t,updatedAt:serverTimestamp()}); return; }
-  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Les plus soutenues remontent en priorité. Si plusieurs acteurs, indique qui FAIT et qui est EN SOUTIEN — pour ne jamais rester dans le flou.",[{key:"txt",label:"Ta proposition",type:"text",ph:"ex. Le référent imprime et la remet"},{key:"role",label:"Qui fait ? (acteur principal — ou tape un autre)",type:"text",list:ACTEURS,ph:"Référent, DDF, Professeur principal…"},{key:"soutien",label:"En soutien ? (facultatif)",type:"text",list:ACTEURS,ph:"ex. en appui : DDF"}]); if(v&&v.txt)await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role||"",soutien:v.soutien||""}),updatedAt:serverTimestamp()}); return; }
+  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Si plusieurs personnes interviennent, précise le second acteur ET son implication — pour ne jamais rester dans le flou sur « qui fait quoi ».",[{key:"txt",label:"Ta proposition",type:"text",ph:"ex. Le référent imprime et la remet"},{key:"role",label:"Qui fait ? (acteur principal — ou tape un autre)",type:"text",list:ACTEURS,ph:"Référent, DDF, Professeur principal…"},{key:"soutien",label:"Un second acteur ? (facultatif)",type:"text",list:ACTEURS,ph:"ex. DDF"},{key:"lien",label:"Son implication",type:"select",options:LIENS}]); if(v&&v.txt)await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):""}),updatedAt:serverTimestamp()}); return; }
   if(act==="support"){ if(!await need())return; const key=pid+"||"+ME.pseudo; const has=(s.votes||[]).includes(key); await updateDoc(ref,{votes:has?arrayRemove(key):arrayUnion(key),updatedAt:serverTimestamp()}); return; }
   if(act==="retain"){ if(!await need())return; const nv=s.retenu===pid?null:pid; await updateDoc(ref,nv?{retenu:nv,statut:"ok",updatedAt:serverTimestamp()}:{retenu:null,updatedAt:serverTimestamp()}); if(nv)toast("Étape validée ✓"); return; }
   if(act==="delprop"){ if(!await need())return; if(!confirm("Supprimer cette proposition ?"))return; const np=(s.props||[]).filter(p=>p.id!==pid); const nvv=(s.votes||[]).filter(v=>v.indexOf(pid+"||")!==0); await updateDoc(ref,{props:np,votes:nvv,retenu:s.retenu===pid?null:s.retenu,updatedAt:serverTimestamp()}); return; }
@@ -504,7 +505,7 @@ function renderDoc(){
     html+=`<section class="docphase"><div class="dp-head"><span class="dp-num" style="background:${pc}">${ph}</span><h2>${esc(PHASE_NAMES[ph]||DEFAULT_PHASES[ph])}</h2><span class="dp-count">${dok}/${steps.length} validée${dok>1?"s":""}</span></div>`;
     steps.forEach(s=>{
       const gi=STEPS.indexOf(s)+1, cls=statutCls(s.statut), q=quiFait(s);
-      const qui=q?`${q.p.role?actIcon(q.p.role,15)+" ":""}${esc(q.p.txt)}${q.p.role?` <span style="color:#94a3b2">(${esc(q.p.role)})</span>`:""}${q.p.soutien?` — en soutien : ${esc(q.p.soutien)}`:""}`:`<span class="ds-tovalid">à trancher en équipe</span>`;
+      const qui=q?`${q.p.role?actIcon(q.p.role,15)+" ":""}${esc(q.p.txt)}${q.p.role?` <span style="color:#94a3b2">(${esc(q.p.role)})</span>`:""}${q.p.soutien?` — ${esc(q.p.lien||"en soutien")} : ${esc(q.p.soutien)}`:""}`:`<span class="ds-tovalid">à trancher en équipe</span>`;
       const docs=(s.documents||[]).length?`<span><b>Documents :</b> ${s.documents.map(esc).join(" · ")}</span>`:"";
       html+=`<div class="ds"><div class="ds-top"><span class="ds-dot ${cls}">${s.statut==="ok"?checkSm:""}</span><span class="ds-n">${gi}</span><span class="ds-t">${esc(s.titre)}</span><span class="ds-badge ${cls}">${STATUTS[s.statut]}</span></div><div class="ds-meta"><span><b>Qui :</b> ${qui}</span>${docs}</div></div>`;
     });
