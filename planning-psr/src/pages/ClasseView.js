@@ -6,7 +6,7 @@ import { WeekControl } from '../components/WeekControl.js';
 import { SeanceModal } from '../components/SeanceModal.js';
 import { fmt } from '../components/shared.js';
 import { DISCIPLINES } from '../data/constants.js';
-import { heuresClasse, byId } from '../lib/selectors.js';
+import { heuresClasse, byId, couvertureClasse } from '../lib/selectors.js';
 import { navigate } from '../router.js';
 
 export function ClasseView({ state, params, readOnly = false }) {
@@ -18,6 +18,7 @@ export function ClasseView({ state, params, readOnly = false }) {
   const canEdit = !readOnly && editMode;
 
   if (!classe) return html`<div class="empty">Classe introuvable.</div>`;
+  const couverture = couvertureClasse(state, classeId);
 
   const openAdd = (jour, creneau) => setDraft({ classe: classeId, jour, creneau, disc: 'pole1', profs: [], salle: '', semaine: 'AB' });
   const openEdit = (seance) => setDraft(seance);
@@ -35,8 +36,12 @@ export function ClasseView({ state, params, readOnly = false }) {
           </div>
           <div>
             <h1 class="page-title">${classe.nom}</h1>
-            <div class="page-desc">${classe.niveau} · ${classe.effectif} élèves · ${fmt(heuresClasse(state, classeId))} h d'accompagnement positionnées</div>
+            <div class="page-desc">${classe.niveau} · ${classe.effectif} élèves · ${fmt(heuresClasse(state, classeId))} h positionnées · ${couverture.percent}% des besoins couverts</div>
           </div>
+        </div>
+        <div class="row gap-2 wrap">
+          <span class=${'badge ' + (couverture.missingSlots ? 'warn' : 'ok')}>${couverture.coveredSlots}/${couverture.expectedSlots} créneaux couverts</span>
+          <span class="badge accent">${fmt(couverture.coveredHours)} / ${fmt(couverture.expectedHours)} h attendues</span>
         </div>
       </div>
       <div class="spread wrap gap-4" style="margin-top:16px">

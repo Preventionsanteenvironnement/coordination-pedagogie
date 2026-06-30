@@ -3,7 +3,7 @@
 import { html } from '@ui';
 import { Icon } from './icons.js';
 import { JOURS, CRENEAUX, DISCIPLINES } from '../data/constants.js';
-import { byId, bilanAesh, estAffecte, aeshOccupeAt } from '../lib/selectors.js';
+import { byId, bilanAesh, estAffecte, aeshOccupeAt, couvertureSeance } from '../lib/selectors.js';
 import { semaineLabel, semaineColor } from '../lib/week.js';
 import { addAffectation, removeAffectation } from '../store.js';
 import { fmt, toast } from './shared.js';
@@ -15,6 +15,7 @@ function SeanceToggle({ state, aesh, seance }) {
   const conflits = assigned ? [] : aeshOccupeAt(state, aesh.id, seance.jour, seance.creneau, seance.semaine, seance.id);
   const conflit = conflits.length > 0;
   const sem = state.config.semaine;
+  const cov = couvertureSeance(state, seance);
 
   const click = () => {
     if (assigned) {
@@ -38,6 +39,7 @@ function SeanceToggle({ state, aesh, seance }) {
         ${seance.semaine !== 'AB' ? html`<span class="sch-sem" style=${`color:${semaineColor(sem, seance.semaine)}`}>${semaineLabel(sem, seance.semaine)}</span>` : null}
       </span>
       <span class="sch-cell-sub">${classe ? classe.nom : ''}${seance.salle ? ' · ' + seance.salle : ''}</span>
+      ${cov.attendu > 0 ? html`<span class=${'sch-need ' + cov.statut}>${cov.label} AESH</span>` : null}
       <span class="sch-mark">${assigned ? Icon.check({ size: 13 }) : conflit ? Icon.alert({ size: 12 }) : Icon.plus({ size: 13 })}</span>
     </button>`;
 }

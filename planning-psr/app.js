@@ -622,10 +622,64 @@ function heuresClasse(state, classeId) {
     }, 0);
 }
 
+function besoinAeshSeance(state, seance) {
+  const raw = Number(seance.besoinAesh);
+  if (Number.isFinite(raw)) return Math.max(0, Math.min(4, raw));
+  const classe = byId(state.classes, seance.classe);
+  return classe && classe.dispositif !== 'none' ? 1 : 0;
+}
+
 // AESH affectés à une séance donnée.
 function aeshDeSeance(state, seanceId) {
   const ids = state.affectations.filter((a) => a.seance === seanceId).map((a) => a.aesh);
   return ids.map((id) => byId(state.aesh, id)).filter(Boolean);
+}
+
+function couvertureSeance(state, seance) {
+  const attendu = besoinAeshSeance(state, seance);
+  const positionnes = aeshDeSeance(state, seance.id).length;
+  const manquants = Math.max(0, attendu - positionnes);
+  const statut = attendu <= 0
+    ? 'none'
+    : positionnes >= attendu
+      ? 'covered'
+      : positionnes > 0
+        ? 'partial'
+        : 'missing';
+  return { attendu, positionnes, manquants, statut, label: `${positionnes}/${attendu}` };
+}
+
+function couvertureClasse(state, classeId) {
+  const seances = state.seances.filter((s) => s.classe === classeId);
+  return couvertureListe(state, seances);
+}
+
+function couvertureBesoins(state) {
+  return couvertureListe(state, state.seances);
+}
+
+function couvertureListe(state, seances) {
+  const total = {
+    expectedSlots: 0,
+    coveredSlots: 0,
+    partialSlots: 0,
+    missingSlots: 0,
+    expectedHours: 0,
+    coveredHours: 0,
+  };
+  seances.forEach((se) => {
+    const cov = couvertureSeance(state, se);
+    if (cov.attendu <= 0) return;
+    const h = creneauById(se.creneau)?.h || 0;
+    total.expectedSlots += 1;
+    total.expectedHours += h * cov.attendu;
+    total.coveredHours += h * Math.min(cov.positionnes, cov.attendu);
+    if (cov.statut === 'covered') total.coveredSlots += 1;
+    else if (cov.statut === 'partial') total.partialSlots += 1;
+    else total.missingSlots += 1;
+  });
+  total.percent = total.expectedHours > 0 ? Math.round((total.coveredHours / total.expectedHours) * 100) : 100;
+  return total;
 }
 
 // Récupère la (ou les) séance(s) d'une classe sur un créneau, filtrées par semaine affichée.
@@ -749,17 +803,18 @@ function computeAlerts(state) {
     });
   });
 
-  // 3) Séances sans aucun accompagnement (classes à dispositif)
+  // 3) Besoins AESH non couverts (sans données élèves nominatives)
   state.seances.forEach((se) => {
     const classe = byId(state.classes, se.classe);
     if (!classe || classe.dispositif === 'none') return;
     if (creneauById(se.creneau)?.soiree) return; // soirée traitée à part
-    const aesh = aeshDeSeance(state, se.id);
-    if (aesh.length === 0) {
+    const cov = couvertureSeance(state, se);
+    if (cov.attendu > 0 && cov.manquants > 0) {
       out.push({
-        sev: 'info', cat: 'Couverture',
-        title: `${classe.nom} : créneau sans AESH`,
-        desc: `${jourById(se.jour)?.label} ${creneauById(se.creneau)?.debut} — ${DISCIPLINES[se.disc]?.label}${se.semaine !== 'AB' ? ` (sem. ${se.semaine})` : ''}.`,
+        sev: cov.positionnes === 0 ? 'warn' : 'info',
+        cat: 'Couverture',
+        title: `${classe.nom} : besoin AESH à couvrir`,
+        desc: `${jourById(se.jour)?.label} ${creneauById(se.creneau)?.debut} — ${DISCIPLINES[se.disc]?.label}${se.semaine !== 'AB' ? ` (sem. ${se.semaine})` : ''} : ${cov.positionnes}/${cov.attendu} AESH positionné(s).`,
         ref: { type: 'seance', id: se.id, classe: se.classe },
       });
     }
@@ -1301,6 +1356,8 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
   const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
   const sem = state.config.semaine;
   const aeshList = aeshDeSeance(state, seance.id);
+  const cov = couvertureSeance(state, seance);
+  const showCoverage = cov.attendu > 0 && !mini;
 
   const onDrop = (e) => {
     e.preventDefault();
@@ -1318,7 +1375,7 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
   };
 
   return html`
-    <div class=${'seance' + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '')}
+    <div class=${'seance coverage-' + cov.statut + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '')}
       style=${`--disc:${disc.color};--disc-soft:${disc.soft}`}
       draggable=${editSeances}
       onDragStart=${editSeances ? (e) => { e.dataTransfer.setData('seanceId', seance.id); e.dataTransfer.effectAllowed = 'move'; } : null}
@@ -1326,10 +1383,20 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
       onDragLeave=${(e) => e.currentTarget.classList.remove('dropzone')}
       onDrop=${onDrop}
       onClick=${editSeances && onEditSeance ? () => onEditSeance(seance) : null}>
-      ${seance.semaine !== 'AB' && !mini
-        ? html`<span class="sem-tag" style=${`background:${hexFade(semaineColor(sem, seance.semaine))};color:${semaineColor(sem, seance.semaine)}`}>${semaineLabel(sem, seance.semaine)}</span>` : null}
-      <div class="seance-title">${disc.court}${editSeances ? html`<span class="seance-edit">${Icon.edit({ size: 12 })}</span>` : null}</div>
+      <div class="seance-head">
+        <div class="seance-title">${disc.court}${editSeances ? html`<span class="seance-edit">${Icon.edit({ size: 12 })}</span>` : null}</div>
+        <div class="seance-tags">
+          ${seance.semaine !== 'AB' && !mini
+            ? html`<span class="sem-tag" style=${`background:${hexFade(semaineColor(sem, seance.semaine))};color:${semaineColor(sem, seance.semaine)}`}>${semaineLabel(sem, seance.semaine)}</span>` : null}
+          ${showCoverage ? html`
+            <span class=${'coverage-badge ' + cov.statut} title=${`${cov.positionnes}/${cov.attendu} AESH positionné(s)`}>
+              ${cov.label}
+            </span>` : null}
+        </div>
+      </div>
       ${seance.salle ? html`<div class="seance-meta"><span class="seance-room">${/^\d/.test(seance.salle) ? 'Salle ' : ''}${seance.salle}</span></div>` : null}
+      ${showCoverage && cov.statut !== 'covered' ? html`
+        <div class="seance-need">${cov.attendu} AESH attendu${cov.attendu > 1 ? 's' : ''}</div>` : null}
       ${aeshList.length
         ? html`<div class="seance-aesh">
             ${aeshList.map((a) => html`<${AeshPill} aesh=${a} seanceId=${seance.id}
@@ -1403,6 +1470,7 @@ function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = null, e
   };
 
   return html`
+    <div class="edt-scroll">
     <div class=${'edt mode-' + mode}>
       <div class="edt-corner"></div>
       ${JOURS.map((j) => html`<div class="edt-day">${j.label}</div>`)}
@@ -1427,6 +1495,7 @@ function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = null, e
             </div>`;
           })}`;
       })}
+    </div>
     </div>`;
 }
 
@@ -1457,6 +1526,7 @@ function SeanceModal({ state, draft, onClose }) {
   const [profs, setProfs] = useState(draft.profs ? [...draft.profs] : []);
   const [salle, setSalle] = useState(draft.salle || '');
   const [semaine, setSemaine] = useState(draft.semaine || 'AB');
+  const [besoinAesh, setBesoinAesh] = useState(Number.isFinite(Number(draft.besoinAesh)) ? Number(draft.besoinAesh) : 1);
   const sem = state.config.semaine;
 
   const cr = creneauById(draft.creneau);
@@ -1466,7 +1536,7 @@ function SeanceModal({ state, draft, onClose }) {
     const seance = {
       id: draft.id || makeId(),
       classe: draft.classe, jour: draft.jour, creneau: draft.creneau,
-      disc, profs, salle: salle.trim(), semaine,
+      disc, profs, salle: salle.trim(), semaine, besoinAesh,
     };
     upsertSeance(seance);
     toast(isNew ? 'Cours ajouté' : 'Cours modifié');
@@ -1527,6 +1597,19 @@ function SeanceModal({ state, draft, onClose }) {
                 <button class=${semaine === 'A' ? 'active a' : ''} onClick=${() => setSemaine('A')}>${sem.labelA}</button>
                 <button class=${semaine === 'B' ? 'active b' : ''} onClick=${() => setSemaine('B')}>${sem.labelB}</button>
               </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Besoin AESH attendu</label>
+            <div class="seg">
+              ${[0, 1, 2].map((n) => html`
+                <button class=${besoinAesh === n ? 'active both' : ''} onClick=${() => setBesoinAesh(n)}>
+                  ${n === 0 ? 'Aucun' : `${n} AESH`}
+                </button>`)}
+            </div>
+            <div class="muted" style="font-size:12px">
+              Donnée anonyme : on indique le volume d'accompagnement attendu sur le créneau, sans nom d'élève.
             </div>
           </div>
         </div>
@@ -1684,6 +1767,102 @@ function AeshPalette({ state, activeId, onSelect }) {
 }
 
 
+// ───── components/AeshScheduleEditor.js ─────
+// Éditeur du planning d'UN intervenant — on coche/décoche les cours qu'il accompagne,
+// sur tous les jours et toutes les classes, avec détection de conflit en direct.
+
+
+
+
+
+
+
+
+function SeanceToggle({ state, aesh, seance }) {
+  const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
+  const classe = byId(state.classes, seance.classe);
+  const assigned = estAffecte(state, aesh.id, seance.id);
+  const conflits = assigned ? [] : aeshOccupeAt(state, aesh.id, seance.jour, seance.creneau, seance.semaine, seance.id);
+  const conflit = conflits.length > 0;
+  const sem = state.config.semaine;
+  const cov = couvertureSeance(state, seance);
+
+  const click = () => {
+    if (assigned) {
+      removeAffectation(aesh.id, seance.id);
+      toast(`Retiré de ${disc.court}`, 'warn', { label: 'Annuler', fn: () => addAffectation(aesh.id, seance.id) });
+    } else if (conflit) {
+      const c = conflits[0]; const cd = DISCIPLINES[c.disc];
+      toast(`Conflit : déjà sur ${cd ? cd.court : 'un cours'} à ce créneau`, 'warn');
+    } else {
+      addAffectation(aesh.id, seance.id);
+    }
+  };
+
+  return html`
+    <button class=${'sch-cell ' + (assigned ? 'on' : conflit ? 'conflit' : 'off')}
+      style=${assigned ? `--disc:${aesh.color}` : `--disc:${disc.color}`}
+      title=${conflit ? 'Conflit d\'horaire' : (assigned ? 'Cliquer pour retirer' : 'Cliquer pour affecter')}
+      onClick=${click}>
+      <span class="sch-cell-top">
+        <b>${disc.court}</b>
+        ${seance.semaine !== 'AB' ? html`<span class="sch-sem" style=${`color:${semaineColor(sem, seance.semaine)}`}>${semaineLabel(sem, seance.semaine)}</span>` : null}
+      </span>
+      <span class="sch-cell-sub">${classe ? classe.nom : ''}${seance.salle ? ' · ' + seance.salle : ''}</span>
+      ${cov.attendu > 0 ? html`<span class=${'sch-need ' + cov.statut}>${cov.label} AESH</span>` : null}
+      <span class="sch-mark">${assigned ? Icon.check({ size: 13 }) : conflit ? Icon.alert({ size: 12 }) : Icon.plus({ size: 13 })}</span>
+    </button>`;
+}
+
+function AeshScheduleEditor({ state, aeshId, onClose }) {
+  const aesh = byId(state.aesh, aeshId);
+  if (!aesh) return null;
+  const b = bilanAesh(state, aeshId);
+  const reste = b.cible - b.total;
+
+  return html`
+    <div class="overlay" onClick=${onClose}>
+      <div class="modal modal-wide" onClick=${(e) => e.stopPropagation()}>
+        <div class="modal-head">
+          <div class="row gap-2">
+            <span class="aesh-pill" style=${`background:${aesh.color};font-size:13px`}>${aesh.code || aesh.initiales}</span>
+            <div>
+              <h2>Composer le planning</h2>
+              <div class="muted" style="font-size:12px">Cochez les cours accompagnés — les conflits sont signalés</div>
+            </div>
+          </div>
+          <div class="row gap-2">
+            <span class=${'badge ' + (Math.abs(reste) < 0.01 ? 'ok' : reste > 0 ? 'warn' : 'danger')}>
+              ${fmt(b.total)} / ${fmt(b.cible)} h ${reste > 0.01 ? `· ${fmt(reste)} à placer` : reste < -0.01 ? `· +${fmt(-reste)}` : ''}
+            </span>
+            <button class="btn icon ghost" onClick=${onClose}>${Icon.x({ size: 18 })}</button>
+          </div>
+        </div>
+        <div class="modal-body" style="padding:14px">
+          <div class="sch-grid">
+            <div class="sch-corner"></div>
+            ${JOURS.map((j) => html`<div class="sch-day">${j.court}</div>`)}
+            ${CRENEAUX.filter((c) => !c.pause).map((c) => html`
+              <div class="sch-time">${c.debut}<br/>${c.fin}</div>
+              ${JOURS.map((j) => {
+                const seances = state.seances.filter((s) => s.jour === j.id && s.creneau === c.id);
+                return html`<div class="sch-slot">
+                  ${seances.length
+                    ? seances.map((s) => html`<${SeanceToggle} state=${state} aesh=${aesh} seance=${s} />`)
+                    : html`<span class="sch-empty"></span>`}
+                </div>`;
+              })}`)}
+          </div>
+        </div>
+        <div class="modal-foot">
+          <span class="muted" style="margin-right:auto;font-size:12px">${Icon.sparkle({ size: 13 })} Vert = accompagné · gris = libre · rouge = conflit d'horaire</span>
+          <button class="btn primary" onClick=${onClose}>${Icon.check({ size: 15 })} Terminé</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+
 // ───── pages/Dashboard.js ─────
 // Page Tableau de bord — vue d'ensemble : KPI, alertes, état des AESH et classes.
 
@@ -1708,12 +1887,12 @@ function Stat({ icon, value, label, foot, tone }) {
 function Dashboard({ state }) {
   const t = totauxGeneraux(state);
   const alerts = alertsSummary(state);
-  const tauxCouverture = t.totalCible > 0 ? Math.round((t.totalServiceH / t.totalCible) * 100) : 0;
+  const cov = couvertureBesoins(state);
 
   return html`
     <div class="page-header">
       <h1 class="page-title">Tableau de bord</h1>
-      <div class="page-desc">Coordination CAP PSR · année ${state.annee} · vue d'ensemble en temps réel</div>
+      <div class="page-desc">Coordination PSR & MELEC · année ${state.annee} · besoins, couverture et volumes en temps réel</div>
     </div>
 
     <div class="grid grid-4" style="margin-bottom:24px">
@@ -1721,8 +1900,8 @@ function Dashboard({ state }) {
         foot=${`${state.enseignants.length} enseignants · ${state.classes.length} classes`} tone="#7c8cff" />
       <${Stat} icon=${Icon.clock({size:20})} value=${fmt(t.totalServiceH) + ' h'} label="Service hebdo positionné"
         foot=${`dont ${fmt(t.totalAffecteH)} h en classe · ${fmt(t.totalHorsH)} h hors-classe`} tone="#3ecf8e" />
-      <${Stat} icon=${Icon.check({size:20})} value=${tauxCouverture + ' %'} label="Couverture du volume cible"
-        foot=${`${fmt(t.totalServiceH)} / ${fmt(t.totalCible)} h contractuelles`} tone="#4cc3f5" />
+      <${Stat} icon=${Icon.check({size:20})} value=${cov.percent + ' %'} label="Besoins couverts"
+        foot=${`${cov.coveredSlots}/${cov.expectedSlots} créneaux · ${fmt(cov.coveredHours)} / ${fmt(cov.expectedHours)} h attendues`} tone=${cov.missingSlots ? '#b5670a' : '#138a52'} />
       <${Stat} icon=${Icon.alert({size:20})} value=${alerts.total} label="Alertes à traiter"
         foot=${`${alerts.danger} bloquantes · ${alerts.warn} à surveiller`}
         tone=${alerts.danger ? '#f76d6d' : alerts.warn ? '#f5b14c' : '#3ecf8e'} />
@@ -1772,7 +1951,9 @@ function Dashboard({ state }) {
         <div class="card">
           <h2 style="margin-bottom:14px">${Icon.grid({size:16})} Classes</h2>
           <div class="col gap-2">
-            ${state.classes.map((c) => html`
+            ${state.classes.map((c) => {
+              const cc = couvertureClasse(state, c.id);
+              return html`
               <div class="row spread" style="cursor:pointer;padding:6px 0" onClick=${() => navigate(`/classe/${c.id}`)}>
                 <div class="row">
                   <span class="dot" style=${`background:${c.color}`}></span>
@@ -1781,8 +1962,10 @@ function Dashboard({ state }) {
                     <div class="muted" style="font-size:11px">${c.niveau} · ${c.effectif} élèves</div>
                   </div>
                 </div>
+                <span class=${'badge ' + (cc.missingSlots ? 'warn' : 'ok')}>${cc.percent}% besoins</span>
                 <span class="badge accent">${fmt(heuresClasse(state, c.id))} h AESH</span>
-              </div>`)}
+              </div>`;
+            })}
           </div>
         </div>
       </div>
@@ -1811,6 +1994,7 @@ function ClasseView({ state, params, readOnly = false }) {
   const canEdit = !readOnly && editMode;
 
   if (!classe) return html`<div class="empty">Classe introuvable.</div>`;
+  const couverture = couvertureClasse(state, classeId);
 
   const openAdd = (jour, creneau) => setDraft({ classe: classeId, jour, creneau, disc: 'pole1', profs: [], salle: '', semaine: 'AB' });
   const openEdit = (seance) => setDraft(seance);
@@ -1828,8 +2012,12 @@ function ClasseView({ state, params, readOnly = false }) {
           </div>
           <div>
             <h1 class="page-title">${classe.nom}</h1>
-            <div class="page-desc">${classe.niveau} · ${classe.effectif} élèves · ${fmt(heuresClasse(state, classeId))} h d'accompagnement positionnées</div>
+            <div class="page-desc">${classe.niveau} · ${classe.effectif} élèves · ${fmt(heuresClasse(state, classeId))} h positionnées · ${couverture.percent}% des besoins couverts</div>
           </div>
+        </div>
+        <div class="row gap-2 wrap">
+          <span class=${'badge ' + (couverture.missingSlots ? 'warn' : 'ok')}>${couverture.coveredSlots}/${couverture.expectedSlots} créneaux couverts</span>
+          <span class="badge accent">${fmt(couverture.coveredHours)} / ${fmt(couverture.expectedHours)} h attendues</span>
         </div>
       </div>
       <div class="spread wrap gap-4" style="margin-top:16px">
@@ -1972,12 +2160,13 @@ function AffectationView({ state }) {
   const { weekMode, weekPriority } = state.config.ui;
   const classe = byId(state.classes, classeId);
   const alerts = alertsSummary(state);
+  const couverture = classe ? couvertureClasse(state, classe.id) : null;
 
   return html`
     <div class="page-header">
       <div>
         <h1 class="page-title">Affectation des AESH</h1>
-        <div class="page-desc">Glissez un intervenant depuis la droite sur un créneau · le volume se recalcule en direct</div>
+        <div class="page-desc">Couvrez les besoins par créneau, sans données élèves nominatives · les volumes se recalculent en direct</div>
       </div>
       <div style="margin-top:16px"><${WeekControl} state=${state} /></div>
     </div>
@@ -1986,12 +2175,25 @@ function AffectationView({ state }) {
       ${state.classes.map((c) => html`
         <button class=${'btn ' + (c.id === classeId ? 'primary' : '')} onClick=${() => setClasseId(c.id)}>
           <span class="dot" style=${`background:${c.id === classeId ? '#fff' : c.color}`}></span>
-          ${c.nom} <span style="opacity:.7">· ${fmt(heuresClasse(state, c.id))} h</span>
+          ${c.nom} <span style="opacity:.7">· ${couvertureClasse(state, c.id).percent}% couverts</span>
         </button>`)}
     </div>
 
-    <div class="grid" style="grid-template-columns:1fr 320px;align-items:start">
+    <div class="grid affect-grid">
       <div class="col gap-4">
+        ${classe && couverture ? html`
+          <div class="card pad-sm coverage-panel">
+            <div>
+              <div class="card-eyebrow">Besoins ${classe.nom}</div>
+              <h2>${couverture.percent}% couverts</h2>
+            </div>
+            <div class="row gap-2 wrap">
+              <span class="badge ok">${couverture.coveredSlots} complets</span>
+              <span class="badge info">${couverture.partialSlots} partiels</span>
+              <span class=${'badge ' + (couverture.missingSlots ? 'warn' : 'ok')}>${couverture.missingSlots} non couverts</span>
+              <span class="badge accent">${fmt(couverture.coveredHours)} / ${fmt(couverture.expectedHours)} h attendues</span>
+            </div>
+          </div>` : null}
         <${ScheduleGrid} state=${state} classeId=${classeId} mode=${weekMode} priority=${weekPriority} editable=${true} />
         ${alerts.danger > 0 ? html`
           <div class="alert danger">
@@ -2049,8 +2251,8 @@ function ConsultationView({ state, params }) {
       <div class="page-header no-print">
         <div class="spread wrap gap-4">
           <div>
-            <h1 class="page-title">Consultation des emplois du temps</h1>
-            <div class="page-desc">Vue lecture seule · à destination des intervenants</div>
+            <h1 class="page-title">Mon emploi du temps</h1>
+            <div class="page-desc">Vue lecture seule · claire, imprimable et mise à jour par la coordination</div>
           </div>
           <button class="btn" onClick=${() => window.print()}>${Icon.download({ size: 15 })} Imprimer</button>
         </div>

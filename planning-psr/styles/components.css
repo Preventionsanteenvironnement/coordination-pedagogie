@@ -4,7 +4,7 @@
 
 /* — Cartes — */
 .card {
-  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   padding: var(--sp-5);
@@ -17,7 +17,7 @@
 /* — KPI / stat — */
 .stat { display: flex; flex-direction: column; gap: var(--sp-2); }
 .stat-value { font-size: 30px; font-weight: 750; letter-spacing: -0.02em; line-height: 1; }
-.stat-label { font-size: 12px; color: var(--text-3); }
+.stat-label { font-size: 12px; color: var(--text-2); font-weight: 650; }
 .stat-foot { font-size: 11.5px; color: var(--text-2); }
 .stat-ico {
   width: 40px; height: 40px; border-radius: var(--r-md);
@@ -31,13 +31,14 @@
   padding: 9px 15px; border-radius: var(--r-sm);
   background: var(--surface); color: var(--text);
   border: 1px solid var(--border); font-weight: 650; font-size: 13.5px;
-  transition: background .15s, border-color .15s, transform .05s;
+  transition: background .15s, border-color .15s, transform .05s, box-shadow .15s;
 }
 .btn:hover { background: var(--surface-hover); }
 .btn:active { transform: translateY(1px); }
 .btn.primary {
   background: linear-gradient(140deg, var(--accent), var(--accent-2));
   border-color: transparent; color: white;
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
 }
 .btn.primary:hover { filter: brightness(1.07); }
 .btn.ghost { background: transparent; border-color: transparent; color: var(--text-2); }
@@ -53,7 +54,7 @@
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 10px; border-radius: var(--r-pill);
   font-size: 12px; font-weight: 700;
-  background: var(--surface-3); color: var(--text-2);
+  background: var(--surface-3); color: var(--text);
   border: 1px solid var(--border);
 }
 .badge.ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
@@ -119,14 +120,26 @@
    GRILLE EMPLOI DU TEMPS
    ============================================================ */
 .edt {
-  --col: minmax(140px, 1fr);
+  --col: minmax(148px, 1fr);
   display: grid;
   grid-template-columns: 76px repeat(6, var(--col));
+  min-width: 980px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
+}
+.edt-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: var(--r-lg);
+  padding-bottom: 2px;
+}
+.affect-grid .edt {
+  --col: minmax(108px, 1fr);
+  min-width: 724px;
 }
 .edt-corner { background: var(--surface-2); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
 .edt-day {
@@ -154,25 +167,47 @@
 }
 .edt-cell:last-child { border-right: none; }
 .edt-cell.dropzone { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--accent-border); }
-.edt-cell.pause-row { background: rgba(0,0,0,0.15); }
+.edt-cell.pause-row { background: repeating-linear-gradient(45deg, var(--surface-2), var(--surface-2) 8px, var(--surface-3) 8px, var(--surface-3) 16px); }
 
 /* Séance (cours) */
 .seance {
-  flex: 1 1 auto; border-radius: var(--r-sm); padding: 6px 9px;
+  flex: 1 1 auto; border-radius: var(--r-sm); padding: 7px 9px;
   display: flex; flex-direction: column; gap: 3px; min-height: 50px;
   border-left: 3px solid var(--disc, var(--accent));
   background: var(--disc-soft, var(--surface-3));
   position: relative; overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(23, 33, 43, 0.03);
 }
+.seance.coverage-missing { box-shadow: inset 0 0 0 1.5px rgba(181, 103, 10, 0.28); }
+.seance.coverage-partial { box-shadow: inset 0 0 0 1.5px rgba(11, 114, 184, 0.24); }
+.seance-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.seance-tags { display: flex; align-items: center; justify-content: flex-end; gap: 4px; flex-wrap: wrap; max-width: 58px; }
 .seance-title { font-weight: 750; font-size: 12.5px; line-height: 1.2; color: var(--text); }
 .seance-meta { font-size: 11px; color: var(--text-2); display: flex; gap: 6px; flex-wrap: wrap; }
 .seance-room { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); }
 .sem-tag {
-  position: absolute; top: 4px; right: 4px;
   font-size: 8.5px; font-weight: 800; padding: 1px 5px; border-radius: var(--r-pill);
 }
 .sem-tag.a { background: var(--sem-a-soft); color: var(--sem-a); }
 .sem-tag.b { background: var(--sem-b-soft); color: var(--sem-b); }
+
+.coverage-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 19px; padding: 0 7px;
+  border-radius: var(--r-pill); font-size: 10.5px; font-weight: 850;
+  border: 1px solid transparent; background: var(--surface);
+  color: var(--text); flex: none;
+}
+.coverage-badge.covered { color: var(--ok); background: var(--ok-soft); }
+.coverage-badge.partial { color: var(--info); background: var(--info-soft); }
+.coverage-badge.missing { color: var(--warn); background: var(--warn-soft); }
+.coverage-badge.none { color: var(--text-3); background: var(--surface-3); }
+.seance-need {
+  display: inline-flex; align-items: center; align-self: flex-start;
+  padding: 2px 7px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,.72); color: var(--warn);
+  font-size: 10.5px; font-weight: 760; border: 1px solid rgba(181, 103, 10, .2);
+}
 
 /* AESH affectés dans une séance */
 .seance-aesh { display: flex; gap: 3px; margin-top: auto; flex-wrap: wrap; }
@@ -278,6 +313,13 @@
 }
 .sch-cell-top { display: flex; align-items: center; gap: 4px; font-size: 10.5px; }
 .sch-cell-sub { font-size: 9px; color: var(--text-3); }
+.sch-need {
+  margin-top: 2px; padding: 1px 6px; border-radius: var(--r-pill);
+  font-size: 9px; font-weight: 800; background: var(--surface-3); color: var(--text-2);
+}
+.sch-need.covered { background: var(--ok-soft); color: var(--ok); }
+.sch-need.partial { background: var(--info-soft); color: var(--info); }
+.sch-need.missing { background: var(--warn-soft); color: var(--warn); }
 .sch-sem { font-weight: 800; font-size: 9px; }
 .sch-mark { position: absolute; top: 3px; right: 4px; opacity: .5; }
 .sch-cell.off:hover { border-color: var(--accent-border); background: var(--accent-soft); }
@@ -297,6 +339,12 @@
 /* — Panneau latéral (palette AESH) — */
 .palette { display: flex; flex-direction: column; gap: var(--sp-3); }
 .palette-aesh { display: flex; flex-direction: column; gap: 7px; }
+
+.coverage-panel {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-4); border-left: 4px solid var(--accent);
+}
+.coverage-panel h2 { font-size: 21px; }
 
 /* ============================================================
    CONTRÔLE SEMAINE A / B (switch animé)

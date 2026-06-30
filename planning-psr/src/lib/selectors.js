@@ -46,10 +46,64 @@ export function heuresClasse(state, classeId) {
     }, 0);
 }
 
+export function besoinAeshSeance(state, seance) {
+  const raw = Number(seance.besoinAesh);
+  if (Number.isFinite(raw)) return Math.max(0, Math.min(4, raw));
+  const classe = byId(state.classes, seance.classe);
+  return classe && classe.dispositif !== 'none' ? 1 : 0;
+}
+
 // AESH affectés à une séance donnée.
 export function aeshDeSeance(state, seanceId) {
   const ids = state.affectations.filter((a) => a.seance === seanceId).map((a) => a.aesh);
   return ids.map((id) => byId(state.aesh, id)).filter(Boolean);
+}
+
+export function couvertureSeance(state, seance) {
+  const attendu = besoinAeshSeance(state, seance);
+  const positionnes = aeshDeSeance(state, seance.id).length;
+  const manquants = Math.max(0, attendu - positionnes);
+  const statut = attendu <= 0
+    ? 'none'
+    : positionnes >= attendu
+      ? 'covered'
+      : positionnes > 0
+        ? 'partial'
+        : 'missing';
+  return { attendu, positionnes, manquants, statut, label: `${positionnes}/${attendu}` };
+}
+
+export function couvertureClasse(state, classeId) {
+  const seances = state.seances.filter((s) => s.classe === classeId);
+  return couvertureListe(state, seances);
+}
+
+export function couvertureBesoins(state) {
+  return couvertureListe(state, state.seances);
+}
+
+function couvertureListe(state, seances) {
+  const total = {
+    expectedSlots: 0,
+    coveredSlots: 0,
+    partialSlots: 0,
+    missingSlots: 0,
+    expectedHours: 0,
+    coveredHours: 0,
+  };
+  seances.forEach((se) => {
+    const cov = couvertureSeance(state, se);
+    if (cov.attendu <= 0) return;
+    const h = creneauById(se.creneau)?.h || 0;
+    total.expectedSlots += 1;
+    total.expectedHours += h * cov.attendu;
+    total.coveredHours += h * Math.min(cov.positionnes, cov.attendu);
+    if (cov.statut === 'covered') total.coveredSlots += 1;
+    else if (cov.statut === 'partial') total.partialSlots += 1;
+    else total.missingSlots += 1;
+  });
+  total.percent = total.expectedHours > 0 ? Math.round((total.coveredHours / total.expectedHours) * 100) : 100;
+  return total;
 }
 
 // Récupère la (ou les) séance(s) d'une classe sur un créneau, filtrées par semaine affichée.

@@ -2,7 +2,7 @@
 import { html } from '@ui';
 import { Icon } from '../components/icons.js';
 import { Avatar, HourMeter, fmt } from '../components/shared.js';
-import { totauxGeneraux, bilanAesh, heuresClasse } from '../lib/selectors.js';
+import { totauxGeneraux, bilanAesh, heuresClasse, couvertureBesoins, couvertureClasse } from '../lib/selectors.js';
 import { alertsSummary } from '../lib/alerts.js';
 import { navigate } from '../router.js';
 
@@ -21,12 +21,12 @@ function Stat({ icon, value, label, foot, tone }) {
 export function Dashboard({ state }) {
   const t = totauxGeneraux(state);
   const alerts = alertsSummary(state);
-  const tauxCouverture = t.totalCible > 0 ? Math.round((t.totalServiceH / t.totalCible) * 100) : 0;
+  const cov = couvertureBesoins(state);
 
   return html`
     <div class="page-header">
       <h1 class="page-title">Tableau de bord</h1>
-      <div class="page-desc">Coordination CAP PSR · année ${state.annee} · vue d'ensemble en temps réel</div>
+      <div class="page-desc">Coordination PSR & MELEC · année ${state.annee} · besoins, couverture et volumes en temps réel</div>
     </div>
 
     <div class="grid grid-4" style="margin-bottom:24px">
@@ -34,8 +34,8 @@ export function Dashboard({ state }) {
         foot=${`${state.enseignants.length} enseignants · ${state.classes.length} classes`} tone="#7c8cff" />
       <${Stat} icon=${Icon.clock({size:20})} value=${fmt(t.totalServiceH) + ' h'} label="Service hebdo positionné"
         foot=${`dont ${fmt(t.totalAffecteH)} h en classe · ${fmt(t.totalHorsH)} h hors-classe`} tone="#3ecf8e" />
-      <${Stat} icon=${Icon.check({size:20})} value=${tauxCouverture + ' %'} label="Couverture du volume cible"
-        foot=${`${fmt(t.totalServiceH)} / ${fmt(t.totalCible)} h contractuelles`} tone="#4cc3f5" />
+      <${Stat} icon=${Icon.check({size:20})} value=${cov.percent + ' %'} label="Besoins couverts"
+        foot=${`${cov.coveredSlots}/${cov.expectedSlots} créneaux · ${fmt(cov.coveredHours)} / ${fmt(cov.expectedHours)} h attendues`} tone=${cov.missingSlots ? '#b5670a' : '#138a52'} />
       <${Stat} icon=${Icon.alert({size:20})} value=${alerts.total} label="Alertes à traiter"
         foot=${`${alerts.danger} bloquantes · ${alerts.warn} à surveiller`}
         tone=${alerts.danger ? '#f76d6d' : alerts.warn ? '#f5b14c' : '#3ecf8e'} />
@@ -85,7 +85,9 @@ export function Dashboard({ state }) {
         <div class="card">
           <h2 style="margin-bottom:14px">${Icon.grid({size:16})} Classes</h2>
           <div class="col gap-2">
-            ${state.classes.map((c) => html`
+            ${state.classes.map((c) => {
+              const cc = couvertureClasse(state, c.id);
+              return html`
               <div class="row spread" style="cursor:pointer;padding:6px 0" onClick=${() => navigate(`/classe/${c.id}`)}>
                 <div class="row">
                   <span class="dot" style=${`background:${c.color}`}></span>
@@ -94,8 +96,10 @@ export function Dashboard({ state }) {
                     <div class="muted" style="font-size:11px">${c.niveau} · ${c.effectif} élèves</div>
                   </div>
                 </div>
+                <span class=${'badge ' + (cc.missingSlots ? 'warn' : 'ok')}>${cc.percent}% besoins</span>
                 <span class="badge accent">${fmt(heuresClasse(state, c.id))} h AESH</span>
-              </div>`)}
+              </div>`;
+            })}
           </div>
         </div>
       </div>

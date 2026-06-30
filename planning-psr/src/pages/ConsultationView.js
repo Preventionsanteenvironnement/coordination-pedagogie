@@ -41,8 +41,8 @@ export function ConsultationView({ state, params }) {
       <div class="page-header no-print">
         <div class="spread wrap gap-4">
           <div>
-            <h1 class="page-title">Consultation des emplois du temps</h1>
-            <div class="page-desc">Vue lecture seule · à destination des intervenants</div>
+            <h1 class="page-title">Mon emploi du temps</h1>
+            <div class="page-desc">Vue lecture seule · claire, imprimable et mise à jour par la coordination</div>
           </div>
           <button class="btn" onClick=${() => window.print()}>${Icon.download({ size: 15 })} Imprimer</button>
         </div>

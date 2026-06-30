@@ -15,6 +15,7 @@ export function SeanceModal({ state, draft, onClose }) {
   const [profs, setProfs] = useState(draft.profs ? [...draft.profs] : []);
   const [salle, setSalle] = useState(draft.salle || '');
   const [semaine, setSemaine] = useState(draft.semaine || 'AB');
+  const [besoinAesh, setBesoinAesh] = useState(Number.isFinite(Number(draft.besoinAesh)) ? Number(draft.besoinAesh) : 1);
   const sem = state.config.semaine;
 
   const cr = creneauById(draft.creneau);
@@ -24,7 +25,7 @@ export function SeanceModal({ state, draft, onClose }) {
     const seance = {
       id: draft.id || makeId(),
       classe: draft.classe, jour: draft.jour, creneau: draft.creneau,
-      disc, profs, salle: salle.trim(), semaine,
+      disc, profs, salle: salle.trim(), semaine, besoinAesh,
     };
     upsertSeance(seance);
     toast(isNew ? 'Cours ajouté' : 'Cours modifié');
@@ -85,6 +86,19 @@ export function SeanceModal({ state, draft, onClose }) {
                 <button class=${semaine === 'A' ? 'active a' : ''} onClick=${() => setSemaine('A')}>${sem.labelA}</button>
                 <button class=${semaine === 'B' ? 'active b' : ''} onClick=${() => setSemaine('B')}>${sem.labelB}</button>
               </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Besoin AESH attendu</label>
+            <div class="seg">
+              ${[0, 1, 2].map((n) => html`
+                <button class=${besoinAesh === n ? 'active both' : ''} onClick=${() => setBesoinAesh(n)}>
+                  ${n === 0 ? 'Aucun' : `${n} AESH`}
+                </button>`)}
+            </div>
+            <div class="muted" style="font-size:12px">
+              Donnée anonyme : on indique le volume d'accompagnement attendu sur le créneau, sans nom d'élève.
             </div>
           </div>
         </div>

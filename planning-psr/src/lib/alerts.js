@@ -1,6 +1,6 @@
 // Moteur d'alertes — détecte automatiquement les incohérences de coordination.
 // C'est la valeur ajoutée vs Excel : tout est vérifié en continu.
-import { byId, bilanAesh, conflitsAesh, aeshDeSeance, seancesAesh } from './selectors.js';
+import { byId, bilanAesh, conflitsAesh, couvertureSeance } from './selectors.js';
 import { DISCIPLINES, creneauById, jourById } from '../data/constants.js';
 
 const sevRank = { danger: 0, warn: 1, info: 2 };
@@ -40,17 +40,18 @@ export function computeAlerts(state) {
     });
   });
 
-  // 3) Séances sans aucun accompagnement (classes à dispositif)
+  // 3) Besoins AESH non couverts (sans données élèves nominatives)
   state.seances.forEach((se) => {
     const classe = byId(state.classes, se.classe);
     if (!classe || classe.dispositif === 'none') return;
     if (creneauById(se.creneau)?.soiree) return; // soirée traitée à part
-    const aesh = aeshDeSeance(state, se.id);
-    if (aesh.length === 0) {
+    const cov = couvertureSeance(state, se);
+    if (cov.attendu > 0 && cov.manquants > 0) {
       out.push({
-        sev: 'info', cat: 'Couverture',
-        title: `${classe.nom} : créneau sans AESH`,
-        desc: `${jourById(se.jour)?.label} ${creneauById(se.creneau)?.debut} — ${DISCIPLINES[se.disc]?.label}${se.semaine !== 'AB' ? ` (sem. ${se.semaine})` : ''}.`,
+        sev: cov.positionnes === 0 ? 'warn' : 'info',
+        cat: 'Couverture',
+        title: `${classe.nom} : besoin AESH à couvrir`,
+        desc: `${jourById(se.jour)?.label} ${creneauById(se.creneau)?.debut} — ${DISCIPLINES[se.disc]?.label}${se.semaine !== 'AB' ? ` (sem. ${se.semaine})` : ''} : ${cov.positionnes}/${cov.attendu} AESH positionné(s).`,
         ref: { type: 'seance', id: se.id, classe: se.classe },
       });
     }

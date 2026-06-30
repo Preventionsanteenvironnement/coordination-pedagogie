@@ -9,10 +9,7 @@ html, body { height: 100%; }
 body {
   font-family: var(--font);
   color: var(--text);
-  background:
-    radial-gradient(1200px 800px at 85% -10%, rgba(75,86,214,0.06), transparent 60%),
-    radial-gradient(900px 700px at -10% 110%, rgba(123,77,219,0.05), transparent 55%),
-    linear-gradient(160deg, var(--bg-grad-1), var(--bg-grad-2));
+  background: linear-gradient(180deg, var(--bg-grad-1), var(--bg-grad-2));
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

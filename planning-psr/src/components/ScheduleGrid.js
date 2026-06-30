@@ -3,7 +3,7 @@
 // Si editSeances : ajout/édition/déplacement des cours directement dans la grille.
 import { html } from '@ui';
 import { JOURS, CRENEAUX, DISCIPLINES } from '../data/constants.js';
-import { aeshDeSeance, byId } from '../lib/selectors.js';
+import { aeshDeSeance, byId, couvertureSeance } from '../lib/selectors.js';
 import { semaineLabel, semaineColor } from '../lib/week.js';
 import { addAffectation, removeAffectation, moveSeance } from '../store.js';
 import { toast } from './shared.js';
@@ -27,6 +27,8 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
   const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
   const sem = state.config.semaine;
   const aeshList = aeshDeSeance(state, seance.id);
+  const cov = couvertureSeance(state, seance);
+  const showCoverage = cov.attendu > 0 && !mini;
 
   const onDrop = (e) => {
     e.preventDefault();
@@ -44,7 +46,7 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
   };
 
   return html`
-    <div class=${'seance' + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '')}
+    <div class=${'seance coverage-' + cov.statut + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '')}
       style=${`--disc:${disc.color};--disc-soft:${disc.soft}`}
       draggable=${editSeances}
       onDragStart=${editSeances ? (e) => { e.dataTransfer.setData('seanceId', seance.id); e.dataTransfer.effectAllowed = 'move'; } : null}
@@ -52,10 +54,20 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
       onDragLeave=${(e) => e.currentTarget.classList.remove('dropzone')}
       onDrop=${onDrop}
       onClick=${editSeances && onEditSeance ? () => onEditSeance(seance) : null}>
-      ${seance.semaine !== 'AB' && !mini
-        ? html`<span class="sem-tag" style=${`background:${hexFade(semaineColor(sem, seance.semaine))};color:${semaineColor(sem, seance.semaine)}`}>${semaineLabel(sem, seance.semaine)}</span>` : null}
-      <div class="seance-title">${disc.court}${editSeances ? html`<span class="seance-edit">${Icon.edit({ size: 12 })}</span>` : null}</div>
+      <div class="seance-head">
+        <div class="seance-title">${disc.court}${editSeances ? html`<span class="seance-edit">${Icon.edit({ size: 12 })}</span>` : null}</div>
+        <div class="seance-tags">
+          ${seance.semaine !== 'AB' && !mini
+            ? html`<span class="sem-tag" style=${`background:${hexFade(semaineColor(sem, seance.semaine))};color:${semaineColor(sem, seance.semaine)}`}>${semaineLabel(sem, seance.semaine)}</span>` : null}
+          ${showCoverage ? html`
+            <span class=${'coverage-badge ' + cov.statut} title=${`${cov.positionnes}/${cov.attendu} AESH positionné(s)`}>
+              ${cov.label}
+            </span>` : null}
+        </div>
+      </div>
       ${seance.salle ? html`<div class="seance-meta"><span class="seance-room">${/^\d/.test(seance.salle) ? 'Salle ' : ''}${seance.salle}</span></div>` : null}
+      ${showCoverage && cov.statut !== 'covered' ? html`
+        <div class="seance-need">${cov.attendu} AESH attendu${cov.attendu > 1 ? 's' : ''}</div>` : null}
       ${aeshList.length
         ? html`<div class="seance-aesh">
             ${aeshList.map((a) => html`<${AeshPill} aesh=${a} seanceId=${seance.id}
@@ -129,6 +141,7 @@ export function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = 
   };
 
   return html`
+    <div class="edt-scroll">
     <div class=${'edt mode-' + mode}>
       <div class="edt-corner"></div>
       ${JOURS.map((j) => html`<div class="edt-day">${j.label}</div>`)}
@@ -153,6 +166,7 @@ export function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = 
             </div>`;
           })}`;
       })}
+    </div>
     </div>`;
 }
 
