@@ -94,6 +94,9 @@
   .ibtn{flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
   .ibtn:hover{color:var(--c1);border-color:var(--c1)}
   .ibtn.ret.on{background:var(--ok-bg);color:var(--ok-tx);border-color:var(--ok-tx)}
+  .valbtn{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 11px;font-size:.78rem;font-weight:700;color:var(--soft);cursor:pointer}
+  .valbtn:hover{border-color:var(--ok-tx);color:var(--ok-tx)}
+  .valbtn.on{background:var(--ok-bg);border-color:var(--ok-tx);color:var(--ok-tx)}
   .addprop{align-self:flex-start;background:none;border:1px dashed var(--line);color:var(--soft);border-radius:999px;padding:6px 12px;font-size:.8rem;font-weight:600;cursor:pointer}
   .addprop:hover{border-color:var(--c1);color:var(--c1)}
   .notes{margin:11px 0 0 41px;display:flex;flex-direction:column;gap:6px}
@@ -350,8 +353,8 @@ function openForm(title, sub, fields, okLabel){
 /* ---------- identité (anonyme, identifiant libre) ---------- */
 async function ensureMe(){
   if(ME&&ME.pseudo) return true;
-  const v=await openForm("Entrer dans l'atelier","C'est anonyme : mets ce que tu veux comme identifiant (PSE, un prénom, des initiales…).",[
-    {key:"pseudo",label:"Ton identifiant",type:"text",ph:"PSE"}
+  const v=await openForm("Entrer dans l'atelier","C'est anonyme et entre professionnels : mets tes initiales, ta matière ou ton rôle (ex. PSE, M.D, Maths). Pas de nom complet.",[
+    {key:"pseudo",label:"Ton identifiant (initiales, matière ou rôle)",type:"text",ph:"PSE"}
   ],"Entrer");
   if(!v||!v.pseudo){return false;}
   ME={pseudo:v.pseudo.replace(/\|/g,"").slice(0,24)};
@@ -391,7 +394,7 @@ function stepCard(s,n){
         <button class="sup${voted?" on":""}" data-act="support" data-id="${s.id}" data-pid="${p.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>D'accord${c?" · "+c:""}</button>
         ${tete?`<span class="tete">en tête</span>`:""}
         <span class="sp"></span>
-        <button class="ibtn ret${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="Officialiser (valider) cette réponse">${okCheck}</button>
+        <button class="valbtn${isret?" on":""}" data-act="retain" data-id="${s.id}" data-pid="${p.id}" title="Officialiser : c'est la réponse que l'équipe retient">${okCheck}${isret?" Validée":" Valider"}</button>
         <button class="ibtn" data-act="delprop" data-id="${s.id}" data-pid="${p.id}" title="Supprimer cette proposition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
       </div>
     </div>`;
@@ -485,8 +488,9 @@ async function handle(act,id,pid,b){
     return;
   }
 }
-$("list").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;handle(b.dataset.act,b.dataset.id,b.dataset.pid,b);});
-$("sheet").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;handle(b.dataset.act,b.dataset.id,b.dataset.pid,b);});
+const onAct=e=>{const b=e.target.closest("[data-act]");if(!b)return;Promise.resolve(handle(b.dataset.act,b.dataset.id,b.dataset.pid,b)).catch(err=>{console.error(err);toast("Échec d'enregistrement — vérifie ta connexion et réessaie");});};
+$("list").addEventListener("click",onAct);
+$("sheet").addEventListener("click",onAct);
 $("timeline").addEventListener("click",e=>{const n=e.target.closest("[data-go]");if(!n)return;const t=document.getElementById(n.dataset.go);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
 $("troles").addEventListener("click",openRolesSheet);
 const checkSm='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
@@ -509,7 +513,10 @@ function renderDoc(){
     html+=`<section class="docphase"><div class="dp-head"><span class="dp-num" style="background:${pc}">${ph}</span><h2>${esc(PHASE_NAMES[ph]||DEFAULT_PHASES[ph])}</h2><span class="dp-count">${dok}/${steps.length} validée${dok>1?"s":""}</span></div>`;
     steps.forEach(s=>{
       const gi=STEPS.indexOf(s)+1, cls=statutCls(s.statut), q=quiFait(s);
-      const qui=q?`${q.p.role?actIcon(q.p.role,15)+" ":""}${esc(q.p.txt)}${q.p.role?` <span style="color:#94a3b2">(${esc(q.p.role)})</span>`:""}${q.p.soutien?` — ${esc(q.p.lien||"en soutien")} : ${esc(q.p.soutien)}`:""}`:`<span class="ds-tovalid">à trancher en équipe</span>`;
+      let qui;
+      if(q){ const t=`${q.p.role?actIcon(q.p.role,15)+" ":""}${esc(q.p.txt)}${q.p.role?` <span style="color:#94a3b2">(${esc(q.p.role)})</span>`:""}${q.p.soutien?` — ${esc(q.p.lien||"en soutien")} : ${esc(q.p.soutien)}`:""}`;
+        qui=q.valide?t:`<span style="color:#9a6a12;font-style:italic">Pressenti (à valider) :</span> ${t}`;
+      } else { qui=`<span class="ds-tovalid">à trancher en équipe</span>`; }
       const docs=(s.documents||[]).length?`<span><b>Documents :</b> ${s.documents.map(esc).join(" · ")}</span>`:"";
       html+=`<div class="ds"><div class="ds-top"><span class="ds-dot ${cls}">${s.statut==="ok"?checkSm:""}</span><span class="ds-n">${gi}</span><span class="ds-t">${esc(s.titre)}</span><span class="ds-badge ${cls}">${STATUTS[s.statut]}</span></div><div class="ds-meta"><span><b>Qui :</b> ${qui}</span>${docs}</div></div>`;
     });
@@ -538,7 +545,8 @@ function importJSON(){
     let data; try{ data=JSON.parse(await f.text()); }catch(e){ return toast("Fichier illisible"); }
     if(!data||!Array.isArray(data.etapes)) return toast("Ce n'est pas un parcours valide");
     if(!await need())return;
-    if(!confirm("Importer ce fichier remplacera le parcours actuel pour toute l'équipe. Continuer ?"))return;
+    if(!confirm("Importer ce fichier remplacera le parcours actuel pour toute l'équipe. Une sauvegarde de l'état actuel va d'abord être téléchargée. Continuer ?"))return;
+    try{ exportJSON(); }catch(e){}
     try{
       if(data.phases) await setDoc(parcoursRef,{phases:{...DEFAULT_PHASES,...data.phases},updatedAt:serverTimestamp()},{merge:true});
       const keep=new Set();
