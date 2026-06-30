@@ -84,9 +84,13 @@
   .prow1{display:flex;align-items:flex-start;gap:9px}
   .prank{flex:none;width:21px;height:21px;border-radius:50%;background:var(--c1soft);color:var(--c1);display:grid;place-items:center;font-size:.74rem;font-weight:800;margin-top:1px}
   .picon{flex:none;display:grid;place-items:center;margin-top:1px}
-  .ptxt{flex:1;font-size:.9rem;min-width:0;line-height:1.4}
-  .ptxt small{color:var(--soft);font-weight:600}
-  .soutien{display:inline-flex;align-items:center;gap:4px;margin-top:3px;font-size:.78rem;color:var(--soft);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+  .ptxt{flex:1;display:flex;flex-direction:column;gap:5px;font-size:.9rem;min-width:0;line-height:1.35}
+  .paction{font-weight:650}
+  .plabel{color:var(--soft);font-size:.74rem;font-weight:750;text-transform:uppercase;letter-spacing:.04em;margin-right:5px}
+  .actors{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .actor{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;color:var(--soft);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  .actor b{color:var(--ink);font-weight:700}
+  .actor.main{border-color:color-mix(in srgb,var(--c1) 34%,var(--line));background:color-mix(in srgb,var(--c1soft) 48%,var(--card))}
   .prow2{display:flex;align-items:center;gap:7px}
   .prow2 .sp{flex:1}
   .sup{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.8rem;font-weight:700;color:var(--ink);cursor:pointer}
@@ -250,7 +254,7 @@ let PHASE_NAMES={...DEFAULT_PHASES};
 const PHASE_IDS=[1,2,3,4,5];
 
 const ACTEURS=["Élève","Professeur principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
-const LIENS=["en soutien","conjointement avec","sous la validation de","pour information"];
+const LIENS=["en appui","conjointement avec","sous la validation de","pour information"];
 const DOCS_SUGGEST=["Fiche de négociation","Pré-convention","Convention","Annexe pédagogique","Annexe activités","Annexe handicap","Attestation de PFMP","Journal de bord","Compte rendu d'évaluation","Passeport professionnel (Cerise Pro)","Copies de la convention"];
 const OFF=[
   {key:"eleve",label:"L'élève",ic:"student",c:"#475569",refs:[
@@ -387,11 +391,15 @@ function stepCard(s,n){
   const arr=(s.props||[]).map(p=>({p,c:votes.filter(v=>v.indexOf(p.id+"||")===0).length})).sort((a,b)=>b.c-a.c);
   const retText=s.retenu?(s.props||[]).find(p=>p.id===s.retenu):null;
   const multi=arr.length>1;
+  const propHtml=p=>{
+    const main=p.role?`<span class="actor main">${actIcon(p.role,14)} <span>Responsable : <b>${esc(p.role)}</b></span></span>`:"";
+    const soutien=p.soutien?`<span class="actor">${actIcon(p.soutien,14)} <span>Appui : <b>${esc(p.soutien)}</b> · ${esc(p.lien||"en appui")}</span></span>`:"";
+    return `<span class="ptxt"><span class="paction"><span class="plabel">Action :</span> ${esc(p.txt)}</span>${main||soutien?`<span class="actors">${main}${soutien}</span>`:""}</span>`;
+  };
   const props=arr.map((o,idx)=>{
     const p=o.p, c=o.c, voted=ME&&votes.includes(p.id+"||"+ME.pseudo), isret=s.retenu===p.id, tete=multi&&idx===0&&c>0;
-    const sout=p.soutien?`<span class="soutien">${esc(p.lien||"en soutien")} : ${actIcon(p.soutien,14)} ${esc(p.soutien)}</span>`:"";
     return `<div class="prop${tete?" lead":""}${isret?" ret":""}">
-      <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${p.role?`<span class="picon">${actIcon(p.role,18)}</span>`:""}<span class="ptxt">${esc(p.txt)}${p.role?` <small>· ${esc(p.role)}</small>`:""}${sout}</span></div>
+      <div class="prow1">${multi?`<span class="prank">${idx+1}</span>`:""}${p.role?`<span class="picon">${actIcon(p.role,18)}</span>`:""}${propHtml(p)}</div>
       <div class="prow2">
         <button class="sup${voted?" on":""}" data-act="support" data-id="${s.id}" data-pid="${p.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>D'accord${c?" · "+c:""}</button>
         ${tete?`<span class="tete">en tête</span>`:""}
@@ -411,7 +419,7 @@ function stepCard(s,n){
     </div>
     <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span></div>
     ${docs||(s.documents&&s.documents.length)?`<div class="meta">${docs}<button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button></div>`:`<div class="meta"><button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document à remettre</button></div>`}
-    ${retText?`<div class="retenu">${okCheck} Réponse retenue : ${esc(retText.txt)}${retText.soutien?` (${esc(retText.lien||"en soutien")} : ${esc(retText.soutien)})`:""}</div>`:""}
+    ${retText?`<div class="retenu">${okCheck} Réponse retenue : ${propHtml(retText)}</div>`:""}
     <div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>
     <div class="notes">${notes}<button class="addnote" data-act="addnote" data-id="${s.id}">+ ajouter un commentaire</button></div>
     <div class="cfoot"><button data-act="delstep" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Supprimer l'étape</button></div>
@@ -476,7 +484,7 @@ async function handle(act,id,pid,b){
   if(act==="statut"){ if(!await need())return; await updateDoc(ref,{statut:NEXTST[s.statut]||"deb",updatedAt:serverTimestamp()}); return; }
   if(act==="title"){ if(!await need())return; const v=await openForm("Modifier le titre de l'étape","Tout est modifiable : si le titre n'est pas bon, corrige-le.",[{key:"t",label:"Titre",type:"text",value:s.titre}]); if(v&&v.t)await updateDoc(ref,{titre:v.t,updatedAt:serverTimestamp()}); return; }
   if(act==="question"){ if(!await need())return; const v=await openForm("La question à trancher","",[{key:"t",label:"Question",type:"textarea",value:s.question||"",ph:"ex. Qui remet la pré-convention à l'élève ?"}]); if(v)await updateDoc(ref,{question:v.t,updatedAt:serverTimestamp()}); return; }
-  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Si plusieurs personnes interviennent, précise le second acteur ET son implication — pour ne jamais rester dans le flou sur « qui fait quoi ».",[{key:"txt",label:"Ta proposition",type:"text",ph:"ex. Le référent imprime et la remet"},{key:"role",label:"Qui fait ? (acteur principal — ou tape un autre)",type:"text",list:ACTEURS,ph:"Référent, DDF, Professeur principal…"},{key:"soutien",label:"Un second acteur ? (facultatif — ou tape un autre)",type:"text",list:ACTEURS,ph:"ex. DDF"},{key:"lien",label:"Son implication (choisis ou tape autre chose)",type:"text",list:LIENS,value:"en soutien"}]); if(v&&v.txt)await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):""}),updatedAt:serverTimestamp()}); return; }
+  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Écris d'abord l'action proposée, puis indique qui en est responsable. L'appui éventuel sert seulement à préciser avec qui ou sous quelle validation.",[{key:"txt",label:"Action proposée (ce qu'on décide de faire)",type:"text",ph:"ex. Le professeur principal organise la répartition"},{key:"role",label:"Responsable principal",type:"text",list:ACTEURS,ph:"ex. Professeur principal"},{key:"soutien",label:"Appui éventuel (facultatif)",type:"text",list:ACTEURS,ph:"ex. Enseignant pro, DDF…"},{key:"lien",label:"Rôle de cet appui",type:"text",list:LIENS,value:"en appui"}]); if(v&&v.txt){ if(!v.role)return toast("Indique le responsable principal pour éviter le flou."); await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),txt:v.txt,role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):""}),updatedAt:serverTimestamp()}); } return; }
   if(act==="support"){ if(!await need())return; const key=pid+"||"+ME.pseudo; const has=(s.votes||[]).includes(key); await updateDoc(ref,{votes:has?arrayRemove(key):arrayUnion(key),updatedAt:serverTimestamp()}); return; }
   if(act==="retain"){ if(!await need())return; const nv=s.retenu===pid?null:pid; await updateDoc(ref,nv?{retenu:nv,statut:"ok",updatedAt:serverTimestamp()}:{retenu:null,updatedAt:serverTimestamp()}); if(nv)toast("Étape validée ✓"); return; }
   if(act==="delprop"){ if(!await need())return; if(!confirm("Supprimer cette proposition ?"))return; const np=(s.props||[]).filter(p=>p.id!==pid); const nvv=(s.votes||[]).filter(v=>v.indexOf(pid+"||")!==0); await updateDoc(ref,{props:np,votes:nvv,retenu:s.retenu===pid?null:s.retenu,updatedAt:serverTimestamp()}); return; }
