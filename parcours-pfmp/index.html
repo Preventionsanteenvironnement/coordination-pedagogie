@@ -154,7 +154,10 @@
       <span><span class="ld" style="background:var(--deb-tx)"></span>En discussion</span>
       <span><span class="ld" style="background:var(--ok-tx)"></span>Validé</span>
     </div>
-    <button class="tbtn" id="tprint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg> Générer la carte</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="tbtn" id="troles"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg> Rôles &amp; textes</button>
+      <button class="tbtn" id="tprint"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg> Générer la carte</button>
+    </div>
   </div>
   <div id="list"></div>
 </main>
@@ -184,6 +187,17 @@ const PHASE_IDS=[1,2,3,4,5];
 
 const ACTEURS=["Élève","Professeur principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
 const DOCS_SUGGEST=["Fiche de négociation","Pré-convention","Convention","Annexe pédagogique","Annexe activités","Annexe handicap","Attestation de PFMP","Journal de bord","Compte rendu d'évaluation","Passeport professionnel (Cerise Pro)","Copies de la convention"];
+const ACTOR_ROLES=[
+  {role:"Référent",desc:"Lien entre l'élève, l'entreprise et le lycée. Il s'assure de la présence dans les deux premiers jours et fixe la visite de fin ; il suit le déroulement, signale les difficultés et participe à l'évaluation ; il vérifie et récupère l'attestation (nombre de jours) et le compte rendu d'évaluation.",ref:"Convention-type, annexe pédagogique ; art. 19"},
+  {role:"Professeur principal",desc:"Coordonne le suivi de la classe et la circulation des informations — il n'est pas responsable unique de la procédure. Il transmet au DDF la liste des référents, repère les élèves sans lieu et informe les familles.",ref:"Procédure interne"},
+  {role:"DDF",desc:"Coordonne l'organisation générale et valide le calendrier (voté en CA) ; supervise le conventionnement et la signature par la cheffe d'établissement ; reçoit l'attestation et les documents de fin de période.",ref:"Procédure interne ; convention-type, annexe pédagogique"},
+  {role:"Tuteur",desc:"Accueille et encadre l'élève, lui confie des activités conformes au projet pédagogique ; informe l'établissement des retards, absences ou incidents ; complète et signe l'attestation et l'évaluation en fin de période.",ref:"Convention-type, art. 2, 16 et 19"},
+  {role:"Bureau des entreprises",desc:"Aide à la recherche de lieux d'accueil et au lien avec les entreprises ; suit les conventions, les attestations et les pièces nécessaires au paiement ; gère les démarches d'allocation (transmission à l'ASP).",ref:"Décret n° 2023-765 ; procédure interne"},
+  {role:"Enseignant pro",desc:"Vérifie la cohérence du lieu avec la formation AGORA et aide à définir les activités attendues ; accompagne la préparation et l'exploitation pédagogique ; peut être référent.",ref:"Procédure interne"},
+  {role:"Cheffe d'établissement",desc:"Garantit l'organisation générale des PFMP et arbitre les difficultés ; signe les conventions au nom de l'établissement ; l'élève reste sous sa responsabilité pendant la période.",ref:"Convention-type, art. 3 et 4"},
+  {role:"Élève",desc:"Recherche activement son lieu de PFMP et demeure sous statut scolaire ; respecte les règles de l'entreprise (sécurité, horaires, discrétion) ; signale immédiatement toute absence avec un justificatif écrit.",ref:"Convention-type, art. 4"},
+  {role:"Famille",desc:"Signe la convention si l'élève est mineur et en est destinataire pour information ; justifie les absences auprès de l'établissement.",ref:"Convention-type, art. 3"}
+];
 const AMETA={
   "Élève":["student","#475569"],"Professeur principal":["person","#7c3aed"],"Référent":["person","#0f766e"],
   "Enseignant pro":["briefcase","#b45309"],"DDF":["building","#4338ca"],"Bureau des entreprises":["building","#be185d"],
@@ -220,7 +234,7 @@ const SEED=[
   {id:"s14",ordre:140,phase:5,titre:"Exploitation pédagogique du retour de stage en classe",question:"",props:[{id:"a",txt:"Toute l'équipe pédagogique",role:"Équipe"}],retenu:"a",statut:"ok",textes:[{ref:"Convention-type, annexe pédagogique",desc:"Exploitation pédagogique du retour de stage et valorisation des compétences acquises."}]}
 ];
 
-let ME=null, STEPS=[], DEMO=false, seeding=false, sheetStep=null;
+let ME=null, STEPS=[], DEMO=false, seeding=false;
 try{ ME=JSON.parse(localStorage.getItem("parcours_id")||"null"); }catch(e){}
 if(ME&&ME.pseudo)ME={pseudo:ME.pseudo};
 let MYPID=localStorage.getItem("parcours_pid"); if(!MYPID){MYPID=uid();localStorage.setItem("parcours_pid",MYPID);}
@@ -303,7 +317,6 @@ function stepCard(s,n){
   }).join("");
   const notes=(s.notes||[]).map(nt=>`<div class="note"><b>${esc(nt.p)}</b> — ${esc(nt.t)}</div>`).join("");
   const docs=(s.documents||[]).map(d=>`<span class="doc">${fileIc} ${esc(d)}<span class="dx" data-act="deldoc" data-id="${s.id}" data-doc="${esc(d)}">×</span></span>`).join("");
-  const nTextes=(s.textes||[]).length;
   return `<article class="card${done?" done":""}" style="--pc:${pc}">
     <div class="chead">
       <span class="num">${done?okCheck:n}</span>
@@ -311,12 +324,7 @@ function stepCard(s,n){
       <button class="stp st-${s.statut}" data-act="statut" data-id="${s.id}" title="Cliquer pour changer le statut">${STATUTS[s.statut]||"À clarifier"}</button>
     </div>
     <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span></div>
-    <div class="meta">
-      ${docs}
-      <button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button>
-      <button class="textbtn" data-act="textes" data-id="${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg> Que disent les textes ?${nTextes?" · "+nTextes:""}</button>
-      ${s.conforme?`<span class="conf">${okCheck} conforme aux textes</span>`:""}
-    </div>
+    ${docs||(s.documents&&s.documents.length)?`<div class="meta">${docs}<button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button></div>`:`<div class="meta"><button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document à remettre</button></div>`}
     ${retText?`<div class="retenu">${okCheck} Réponse retenue : ${esc(retText.txt)}${retText.soutien?` (en soutien : ${esc(retText.soutien)})`:""}</div>`:""}
     <div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>
     <div class="notes">${notes}<button class="addnote" data-act="addnote" data-id="${s.id}">+ ajouter un commentaire</button></div>
@@ -350,25 +358,18 @@ function render(){
     n++; html+=stepCard(s,n); html+=insRow(s.id);
   });
   list.innerHTML=html;
-  if(sheetStep) refreshSheet();
 }
 
-/* ---------- panneau « textes » ---------- */
-function refreshSheet(){
-  const s=findStep(sheetStep); if(!s){closeSheet();return;}
-  const refs=(s.textes||[]).map((t,i)=>`<div class="tref"><b>${esc(t.ref)}</b><p>${esc(t.desc)}</p>${t.lien?`<a href="${esc(t.lien)}" target="_blank" rel="noopener">Voir le texte ↗</a>`:""} <button class="dx" data-act="delref" data-id="${s.id}" data-i="${i}" style="float:right;background:none;border:none;color:var(--soft);cursor:pointer">supprimer</button></div>`).join("")||`<p class="sh-sub">Aucune référence pour l'instant.</p>`;
+/* ---------- panneau discret « Rôles & textes » (par acteur) ---------- */
+function openRolesSheet(){
   $("sheet").innerHTML=`<div class="grip"></div>
-    <h4>Que disent les textes ?</h4>
-    <p class="sh-sub">${esc(s.titre)}</p>
-    ${refs}
-    <p class="disc">Références indicatives, à vérifier avec la convention-type de l'établissement et le Code de l'éducation (dossier PFMP).</p>
-    <div style="display:flex;gap:9px;flex-wrap:wrap">
-      <button class="btn ghost" data-act="addref" data-id="${s.id}">+ Ajouter une référence</button>
-      <button class="btn" data-act="conforme" data-id="${s.id}">${s.conforme?okCheck+" Conforme — retirer":okCheck+" Marquer conforme aux textes"}</button>
-    </div>`;
+    <h4>Le rôle de chacun selon les textes</h4>
+    <p class="sh-sub">Repère d'appui — convention-type, Code de l'éducation, procédure interne.</p>
+    ${ACTOR_ROLES.map(a=>{const col=(AMETA[a.role]||["","#0e7490"])[1];return `<div class="tref" style="border-left-color:${col}"><b style="color:${col};display:flex;align-items:center;gap:7px">${actIcon(a.role,16)} ${esc(a.role)}</b><p>${esc(a.desc)}</p><span style="font-size:.76rem;color:var(--soft)">${esc(a.ref)}</span></div>`;}).join("")}
+    <p class="disc">Références indicatives, à confirmer avec la convention-type de l'établissement et le Code de l'éducation (dossier PFMP).</p>`;
+  $("sheet").classList.add("on"); $("sheetbg").classList.add("on");
 }
-function openSheet(id){ sheetStep=id; refreshSheet(); $("sheet").classList.add("on"); $("sheetbg").classList.add("on"); }
-function closeSheet(){ sheetStep=null; $("sheet").classList.remove("on"); $("sheetbg").classList.remove("on"); }
+function closeSheet(){ $("sheet").classList.remove("on"); $("sheetbg").classList.remove("on"); }
 $("sheetbg").addEventListener("click",closeSheet);
 
 /* ---------- actions ---------- */
@@ -386,10 +387,6 @@ async function handle(act,id,pid,b){
   if(act==="addnote"){ if(!await need())return; const v=await openForm("Ajouter un commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",ph:"Une remarque, une précision, une objection…"}]); if(v&&v.t)await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now()}),updatedAt:serverTimestamp()}); return; }
   if(act==="adddoc"){ if(!await need())return; const v=await openForm("Ajouter un document à remettre","",[{key:"d",label:"Nom du document",type:"text",list:DOCS_SUGGEST,ph:"ex. Pré-convention"}]); if(v&&v.d)await updateDoc(ref,{documents:arrayUnion(v.d),updatedAt:serverTimestamp()}); return; }
   if(act==="deldoc"){ if(!await need())return; await updateDoc(ref,{documents:arrayRemove(b.dataset.doc),updatedAt:serverTimestamp()}); return; }
-  if(act==="textes"){ openSheet(id); return; }
-  if(act==="addref"){ if(!await need())return; const v=await openForm("Ajouter une référence de texte","",[{key:"ref",label:"Référence",type:"text",ph:"ex. Code de l'éducation, art. D.124-9"},{key:"desc",label:"Ce que dit le texte",type:"textarea"},{key:"lien",label:"Lien (facultatif)",type:"text",ph:"https://www.legifrance.gouv.fr/…"}]); if(v&&v.ref)await updateDoc(ref,{textes:arrayUnion({ref:v.ref,desc:v.desc||"",lien:v.lien||""}),updatedAt:serverTimestamp()}); return; }
-  if(act==="delref"){ if(!await need())return; const i=+b.dataset.i; const nt=(s.textes||[]).filter((_,k)=>k!==i); await updateDoc(ref,{textes:nt,updatedAt:serverTimestamp()}); return; }
-  if(act==="conforme"){ if(!await need())return; await updateDoc(ref,{conforme:!s.conforme,updatedAt:serverTimestamp()}); return; }
   if(act==="delstep"){ if(!await need())return; if(!confirm("Supprimer définitivement cette étape ? Cette action est irréversible."))return; await deleteDoc(ref); toast("Étape supprimée"); return; }
   if(act==="insert"){ if(!await need())return;
     const idx=id?STEPS.findIndex(x=>x.id===id):-1;
@@ -404,6 +401,7 @@ async function handle(act,id,pid,b){
 $("list").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;handle(b.dataset.act,b.dataset.id,b.dataset.pid,b);});
 $("sheet").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;handle(b.dataset.act,b.dataset.id,b.dataset.pid,b);});
 $("timeline").addEventListener("click",e=>{const n=e.target.closest("[data-go]");if(!n)return;const t=document.getElementById(n.dataset.go);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});});
+$("troles").addEventListener("click",openRolesSheet);
 $("tprint").addEventListener("click",()=>window.print());
 
 /* ---------- démarrage ---------- */
