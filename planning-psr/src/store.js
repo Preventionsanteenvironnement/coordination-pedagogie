@@ -39,6 +39,7 @@ function migrate(s) {
   s.config.calendrier = { ...d.calendrier, ...(s.config.calendrier || {}) };
   s.config.ui = { ...d.ui, ...(s.config.ui || {}) };
   if (!Array.isArray(s.evenements)) s.evenements = [];
+  if (!Array.isArray(s.exceptions)) s.exceptions = [];
   return s;
 }
 
@@ -201,6 +202,20 @@ export function upsertEvenement(e) {
 
 export function removeEvenement(id) {
   update((d) => { d.evenements = (d.evenements || []).filter((x) => x.id !== id); });
+}
+
+// ─── Exceptions datées (couche vivante) : absence / remplacement ponctuel ───
+// Une exception ne touche PAS le modèle hebdomadaire : elle s'applique à une date
+// (ou une période) et décrit qui est absent, remplacé par qui, sur quelle portée.
+export function addException(exc) {
+  update((d) => {
+    if (!Array.isArray(d.exceptions)) d.exceptions = [];
+    d.exceptions.push({ id: `exc-${Date.now().toString(36)}-${d.exceptions.length}`, createdAt: Date.now(), ...exc });
+  });
+}
+
+export function removeException(id) {
+  update((d) => { d.exceptions = (d.exceptions || []).filter((x) => x.id !== id); });
 }
 
 // Ajout en masse (import .ics) avec dédoublonnage par type+classe+date.

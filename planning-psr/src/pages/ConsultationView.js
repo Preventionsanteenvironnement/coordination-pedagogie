@@ -5,8 +5,8 @@ import { Icon } from '../components/icons.js';
 import { ScheduleGrid } from '../components/ScheduleGrid.js';
 import { WeekControl } from '../components/WeekControl.js';
 import { fmt } from '../components/shared.js';
-import { DISCIPLINES, JOURS, TYPES_ACCOMPAGNEMENT, creneauById, jourById } from '../data/constants.js';
-import { byId, bilanAesh, heuresAeshParite, listeAesh } from '../lib/selectors.js';
+import { DISCIPLINES, JOURS, TYPES_ACCOMPAGNEMENT, PORTEES, creneauById, jourById } from '../data/constants.js';
+import { byId, bilanAesh, heuresAeshParite, listeAesh, exceptionsAesh, todayISO } from '../lib/selectors.js';
 import { weeksByMonth, monthName } from '../lib/calendar.js';
 import { semaineLabel, semaineColor, fmtDate } from '../lib/week.js';
 import { navigate } from '../router.js';
@@ -35,6 +35,14 @@ export function ConsultationView({ state, params }) {
 
   if (!aesh) return html`<div class="empty">Intervenant introuvable.</div>`;
   const b = bilanAesh(state, aeshId);
+  const today = todayISO();
+  const codeDe = (id) => { const a = byId(state.aesh, id); return a ? (a.code || a.initiales) : '?'; };
+  const { absences, remplacements } = exceptionsAesh(state, aeshId);
+  const aVenir = (e) => (e.dateFin || e.date || '') >= today;
+  const parDate = (a, c) => (a.date || '').localeCompare(c.date || '');
+  const mesAbs = absences.filter(aVenir).sort(parDate);
+  const mesRempl = remplacements.filter(aVenir).sort(parDate);
+  const dateLbl = (e) => fmtDate(e.date) + (e.portee === 'periode' && e.dateFin ? ' → ' + fmtDate(e.dateFin) : '');
 
   return html`
     <div class="consult">
@@ -80,6 +88,23 @@ export function ConsultationView({ state, params }) {
           </div>
         </div>
       </div>
+
+      ${(mesAbs.length || mesRempl.length) ? html`
+        <div class="card pad-sm exc-card" style="margin-top:16px">
+          <div class="card-eyebrow">${Icon.calendar({ size: 13 })} À venir · absences & remplacements</div>
+          <div class="col gap-2" style="margin-top:10px">
+            ${mesAbs.map((e) => html`
+              <div class="exc-line abs">
+                <span class="exc-date">${dateLbl(e)}</span>
+                <span>Vous êtes noté(e) <b>absent(e)</b> · ${(PORTEES[e.portee] || {}).court || ''}${e.remplacant ? html` · remplacé(e) par <b>${codeDe(e.remplacant)}</b>` : ''}${e.note ? ' — ' + e.note : ''}</span>
+              </div>`)}
+            ${mesRempl.map((e) => html`
+              <div class="exc-line rempl">
+                <span class="exc-date">${dateLbl(e)}</span>
+                <span>Vous <b>remplacez ${codeDe(e.aesh)}</b> · ${(PORTEES[e.portee] || {}).court || ''}${e.note ? ' — ' + e.note : ''}</span>
+              </div>`)}
+          </div>
+        </div>` : null}
 
       ${vue === 'semaine' ? html`
         <div class="no-print" style="margin:16px 0"><${WeekControl} state=${state} /></div>

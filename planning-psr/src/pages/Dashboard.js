@@ -1,9 +1,12 @@
 // Page Tableau de bord — vue d'ensemble : KPI, alertes, état des AESH et classes.
 import { html } from '@ui';
 import { Icon } from '../components/icons.js';
+import { PORTEES } from '../data/constants.js';
 import { Avatar, HourMeter, fmt } from '../components/shared.js';
-import { totauxGeneraux, bilanAesh, heuresClasse, couvertureBesoins, couvertureClasse } from '../lib/selectors.js';
+import { totauxGeneraux, bilanAesh, heuresClasse, couvertureBesoins, couvertureClasse, exceptionsAVenir } from '../lib/selectors.js';
 import { alertsSummary } from '../lib/alerts.js';
+import { fmtDate } from '../lib/week.js';
+import { removeException } from '../store.js';
 import { navigate } from '../router.js';
 
 function Stat({ icon, value, label, foot, tone }) {
@@ -22,6 +25,8 @@ export function Dashboard({ state }) {
   const t = totauxGeneraux(state);
   const alerts = alertsSummary(state);
   const cov = couvertureBesoins(state);
+  const journal = exceptionsAVenir(state);
+  const codeDe = (id) => { const a = state.aesh.find((x) => x.id === id); return a ? (a.code || a.initiales) : '?'; };
 
   return html`
     <div class="page-header">
@@ -103,5 +108,24 @@ export function Dashboard({ state }) {
           </div>
         </div>
       </div>
-    </div>`;
+    </div>
+
+    ${journal.length ? html`
+      <div class="card" style="margin-top:24px">
+        <div class="spread" style="margin-bottom:14px">
+          <h2>${Icon.calendar({ size: 16 })} Absences & remplacements à venir</h2>
+          <span class="badge">${journal.length}</span>
+        </div>
+        <div class="col gap-2">
+          ${journal.map((e) => html`
+            <div class="exc-row">
+              <span class="exc-date">${fmtDate(e.date)}${e.portee === 'periode' && e.dateFin ? ' → ' + fmtDate(e.dateFin) : ''}</span>
+              <span class="exc-body">
+                <b>${codeDe(e.aesh)}</b> absent · ${(PORTEES[e.portee] || {}).court || ''}${e.remplacant ? html` → <b style="color:var(--ok)">${codeDe(e.remplacant)}</b>` : ' · non remplacé'}
+                ${e.note ? html`<div class="muted" style="font-size:11px">${e.note}</div>` : null}
+              </span>
+              <button class="btn icon ghost" title="Supprimer" onClick=${() => removeException(e.id)}>${Icon.x({ size: 14 })}</button>
+            </div>`)}
+        </div>
+      </div>` : null}`;
 }

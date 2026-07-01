@@ -97,6 +97,13 @@ const TYPES_ACCOMPAGNEMENT = {
 };
 const TYPE_ACCOMP_DEFAUT = 'mutualise';
 
+// Portée d'une exception datée (absence/remplacement) : jusqu'où s'applique le changement.
+const PORTEES = {
+  creneau: { label: 'Ce créneau seulement', court: 'Ce créneau' },
+  journee: { label: 'Toute la journée', court: 'La journée' },
+  periode: { label: 'Une période (du…au…)', court: 'Période' },
+};
+
 const creneauById = (id) => CRENEAUX.find((c) => c.id === id);
 const jourById = (id) => JOURS.find((j) => j.id === id);
 const heuresCreneaux = (ids) => ids.reduce((s, id) => s + (creneauById(id)?.h || 0), 0);
@@ -425,6 +432,7 @@ function migrate(s) {
   s.config.calendrier = { ...d.calendrier, ...(s.config.calendrier || {}) };
   s.config.ui = { ...d.ui, ...(s.config.ui || {}) };
   if (!Array.isArray(s.evenements)) s.evenements = [];
+  if (!Array.isArray(s.exceptions)) s.exceptions = [];
   return s;
 }
 
@@ -589,6 +597,20 @@ function removeEvenement(id) {
   update((d) => { d.evenements = (d.evenements || []).filter((x) => x.id !== id); });
 }
 
+// ─── Exceptions datées (couche vivante) : absence / remplacement ponctuel ───
+// Une exception ne touche PAS le modèle hebdomadaire : elle s'applique à une date
+// (ou une période) et décrit qui est absent, remplacé par qui, sur quelle portée.
+function addException(exc) {
+  update((d) => {
+    if (!Array.isArray(d.exceptions)) d.exceptions = [];
+    d.exceptions.push({ id: `exc-${Date.now().toString(36)}-${d.exceptions.length}`, createdAt: Date.now(), ...exc });
+  });
+}
+
+function removeException(id) {
+  update((d) => { d.exceptions = (d.exceptions || []).filter((x) => x.id !== id); });
+}
+
 // Ajout en masse (import .ics) avec dédoublonnage par type+classe+date.
 function addEvenementsBulk(list) {
   let added = 0;
@@ -611,6 +633,7 @@ function addEvenementsBulk(list) {
 // ───── lib/selectors.js ─────
 // Sélecteurs — calculs dérivés de l'état (heures, couverture, conflits).
 // Aucune mutation ici : uniquement de la lecture.
+
 
 
 const byId = (list, id) => list.find((x) => x.id === id);
@@ -792,6 +815,56 @@ function totauxGeneraux(state) {
   const totalHorsH = state.aesh.reduce((s, a) => s + heuresAeshHorsClasse(state, a.id), 0);
   const totalCible = state.aesh.reduce((s, a) => s + (a.volumeCible || 0), 0);
   return { totalAffecteH, totalHorsH, totalServiceH: totalAffecteH + totalHorsH, totalCible };
+}
+
+// ─── Exceptions datées (absences / remplacements) ───
+const JOUR_IDS = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+function jourIdOfDate(dateStr) { return JOUR_IDS[parseISO(dateStr).getDay()]; }
+
+function todayISO() {
+  const x = new Date(); const p = (n) => String(n).padStart(2, '0');
+  return `${x.getFullYear()}-${p(x.getMonth() + 1)}-${p(x.getDate())}`;
+}
+
+// La plage [startISO, endISO] contient-elle un jour de semaine donné (lun…sam) ?
+function rangeHasWeekday(startISO, endISO, jourId) {
+  const e = parseISO(endISO), cur = parseISO(startISO);
+  for (let i = 0; i < 400 && cur <= e; i++) {
+    if (JOUR_IDS[cur.getDay()] === jourId) return true;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return false;
+}
+
+// Cette exception affecte-t-elle ce créneau (compte tenu de la portée) ?
+function exceptionTouchesSeance(state, exc, seance) {
+  if (exc.portee === 'creneau') return exc.seance === seance.id;
+  if (!estAffecte(state, exc.aesh, seance.id)) return false;
+  if (exc.portee === 'journee') return jourIdOfDate(exc.date) === seance.jour;
+  if (exc.portee === 'periode') return rangeHasWeekday(exc.date, exc.dateFin || exc.date, seance.jour);
+  return false;
+}
+
+// Exceptions touchant un créneau donné (pour le panneau).
+function exceptionsSeance(state, seance) {
+  return (state.exceptions || []).filter((exc) => exceptionTouchesSeance(state, exc, seance));
+}
+
+// Absences d'un AESH + créneaux où il est proposé comme remplaçant.
+function exceptionsAesh(state, aeshId) {
+  const list = state.exceptions || [];
+  return {
+    absences: list.filter((e) => e.aesh === aeshId),
+    remplacements: list.filter((e) => e.remplacant === aeshId),
+  };
+}
+
+// Toutes les exceptions encore d'actualité (fin ≥ aujourd'hui), triées par date.
+function exceptionsAVenir(state) {
+  const today = todayISO();
+  return (state.exceptions || [])
+    .filter((e) => (e.dateFin || e.date || '') >= today)
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 }
 
 
@@ -1913,6 +1986,15 @@ function AeshScheduleEditor({ state, aeshId, onClose }) {
 
 
 
+// Prochaine date (à partir d'aujourd'hui) qui tombe sur le jour de semaine du créneau.
+const JOUR_IDS_SI = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+function nextDateForJour(jourId) {
+  const x = new Date();
+  for (let i = 0; i < 14; i++) { if (JOUR_IDS_SI[x.getDay()] === jourId) break; x.setDate(x.getDate() + 1); }
+  const p = (n) => String(n).padStart(2, '0');
+  return `${x.getFullYear()}-${p(x.getMonth() + 1)}-${p(x.getDate())}`;
+}
+
 function SlotInspector({ state, seance, onClose }) {
   const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
   const cr = creneauById(seance.creneau);
@@ -1940,6 +2022,27 @@ function SlotInspector({ state, seance, onClose }) {
   const [remarque, setRemarque] = useState(seance.remarque || '');
   // On lit la valeur du champ au moment du blur (évite toute valeur périmée).
   const saveRemarque = (e) => { const v = (e.target.value || '').trim(); if ((seance.remarque || '') !== v) setSeanceRemarque(seance.id, v); };
+
+  // Exceptions datées (absences / remplacements) touchant ce créneau.
+  const excs = exceptionsSeance(state, seance);
+  const codeDe = (id) => { const a = byId(state.aesh, id); return a ? (a.code || a.initiales) : '?'; };
+  const [absForm, setAbsForm] = useState(null);
+  const makeAbsForm = () => ({ aesh: (affectes[0] && affectes[0].aesh.id) || '', date: nextDateForJour(seance.jour), portee: 'creneau', dateFin: '', remplacant: '', note: '' });
+  const enregistrerAbs = () => {
+    if (!absForm.aesh || !absForm.date) { toast('Choisis un AESH et une date', 'warn'); return; }
+    if (absForm.portee === 'periode' && (!absForm.dateFin || absForm.dateFin < absForm.date)) { toast('Indique une date de fin valide', 'warn'); return; }
+    addException({
+      aesh: absForm.aesh,
+      seance: absForm.portee === 'creneau' ? seance.id : null,
+      portee: absForm.portee,
+      date: absForm.date,
+      dateFin: absForm.portee === 'periode' ? absForm.dateFin : null,
+      remplacant: absForm.remplacant || null,
+      note: (absForm.note || '').trim(),
+    });
+    setAbsForm(null);
+    toast('Absence enregistrée', 'ok');
+  };
 
   const covClass = cov.statut === 'covered' ? 'ok' : cov.statut === 'partial' ? 'info' : cov.statut === 'missing' ? 'warn' : '';
   const covLabel = cov.attendu <= 0 ? 'Aucun besoin'
@@ -2026,6 +2129,65 @@ function SlotInspector({ state, seance, onClose }) {
           <textarea class="input" rows="2" placeholder="ex. accompagnement renforcé ce jour, matériel spécifique…"
             value=${remarque} onInput=${(e) => setRemarque(e.target.value)} onBlur=${saveRemarque}></textarea>
         </div>
+
+        <div class="field slot-abs">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <label style="margin:0">Absences & remplacements ponctuels</label>
+            ${affectes.length ? html`<button class="btn ghost btn-mini" onClick=${() => setAbsForm(absForm ? null : makeAbsForm())}>
+              ${absForm ? 'Fermer' : html`${Icon.plus({ size: 13 })} Signaler`}</button>` : null}
+          </div>
+
+          ${absForm ? html`
+            <div class="abs-form">
+              <div class="field">
+                <label>Qui est absent ?</label>
+                <select class="select" value=${absForm.aesh} onChange=${(e) => setAbsForm({ ...absForm, aesh: e.target.value })}>
+                  ${affectes.map(({ aesh }) => html`<option value=${aesh.id} selected=${aesh.id === absForm.aesh}>${aesh.code || aesh.initiales}</option>`)}
+                </select>
+              </div>
+              <div class="field">
+                <label>Portée du changement</label>
+                <div class="seg">
+                  ${Object.entries(PORTEES).map(([k, v]) => html`<button class=${absForm.portee === k ? 'active both' : ''} onClick=${() => setAbsForm({ ...absForm, portee: k })}>${v.court}</button>`)}
+                </div>
+              </div>
+              <div class="row gap-2">
+                <div class="field grow"><label>${absForm.portee === 'periode' ? 'Du' : 'Date'}</label>
+                  <input class="input" type="date" value=${absForm.date} onInput=${(e) => setAbsForm({ ...absForm, date: e.target.value })} /></div>
+                ${absForm.portee === 'periode' ? html`<div class="field grow"><label>Au</label>
+                  <input class="input" type="date" value=${absForm.dateFin} onInput=${(e) => setAbsForm({ ...absForm, dateFin: e.target.value })} /></div>` : null}
+              </div>
+              <div class="field">
+                <label>Remplacé par (facultatif)</label>
+                <select class="select" value=${absForm.remplacant} onChange=${(e) => setAbsForm({ ...absForm, remplacant: e.target.value })}>
+                  <option value="" selected=${!absForm.remplacant}>— personne —</option>
+                  ${state.aesh.filter((a) => a.id !== absForm.aesh).map((a) => html`<option value=${a.id} selected=${a.id === absForm.remplacant}>${a.code || a.initiales}</option>`)}
+                </select>
+              </div>
+              <div class="field">
+                <label>Note (facultatif)</label>
+                <input class="input" value=${absForm.note} placeholder="ex. arrêt maladie, RDV…" onInput=${(e) => setAbsForm({ ...absForm, note: e.target.value })} />
+              </div>
+              <div class="row gap-2" style="justify-content:flex-end">
+                <button class="btn ghost" onClick=${() => setAbsForm(null)}>Annuler</button>
+                <button class="btn primary" onClick=${enregistrerAbs}>${Icon.check({ size: 14 })} Enregistrer</button>
+              </div>
+            </div>` : null}
+
+          ${excs.length ? html`
+            <div class="col gap-2" style="margin-top:8px">
+              ${excs.map((exc) => html`
+                <div class="exc-row">
+                  <span class="exc-date">${fmtDate(exc.date)}${exc.portee === 'periode' && exc.dateFin ? ' → ' + fmtDate(exc.dateFin) : ''}</span>
+                  <span class="exc-body">
+                    <b>${codeDe(exc.aesh)}</b> absent · ${(PORTEES[exc.portee] || {}).court || exc.portee}${exc.remplacant ? html` → <b style="color:var(--ok)">${codeDe(exc.remplacant)}</b>` : ' · non remplacé'}
+                    ${exc.note ? html`<div class="muted" style="font-size:11px">${exc.note}</div>` : null}
+                  </span>
+                  <button class="btn icon ghost" title="Supprimer" onClick=${() => removeException(exc.id)}>${Icon.x({ size: 14 })}</button>
+                </div>`)}
+            </div>`
+            : (affectes.length && !absForm ? html`<div class="muted" style="font-size:12px">Aucune absence signalée sur ce créneau.</div>` : null)}
+        </div>
       </div>
     </aside>`;
 }
@@ -2033,6 +2195,9 @@ function SlotInspector({ state, seance, onClose }) {
 
 // ───── pages/Dashboard.js ─────
 // Page Tableau de bord — vue d'ensemble : KPI, alertes, état des AESH et classes.
+
+
+
 
 
 
@@ -2056,6 +2221,8 @@ function Dashboard({ state }) {
   const t = totauxGeneraux(state);
   const alerts = alertsSummary(state);
   const cov = couvertureBesoins(state);
+  const journal = exceptionsAVenir(state);
+  const codeDe = (id) => { const a = state.aesh.find((x) => x.id === id); return a ? (a.code || a.initiales) : '?'; };
 
   return html`
     <div class="page-header">
@@ -2137,7 +2304,26 @@ function Dashboard({ state }) {
           </div>
         </div>
       </div>
-    </div>`;
+    </div>
+
+    ${journal.length ? html`
+      <div class="card" style="margin-top:24px">
+        <div class="spread" style="margin-bottom:14px">
+          <h2>${Icon.calendar({ size: 16 })} Absences & remplacements à venir</h2>
+          <span class="badge">${journal.length}</span>
+        </div>
+        <div class="col gap-2">
+          ${journal.map((e) => html`
+            <div class="exc-row">
+              <span class="exc-date">${fmtDate(e.date)}${e.portee === 'periode' && e.dateFin ? ' → ' + fmtDate(e.dateFin) : ''}</span>
+              <span class="exc-body">
+                <b>${codeDe(e.aesh)}</b> absent · ${(PORTEES[e.portee] || {}).court || ''}${e.remplacant ? html` → <b style="color:var(--ok)">${codeDe(e.remplacant)}</b>` : ' · non remplacé'}
+                ${e.note ? html`<div class="muted" style="font-size:11px">${e.note}</div>` : null}
+              </span>
+              <button class="btn icon ghost" title="Supprimer" onClick=${() => removeException(e.id)}>${Icon.x({ size: 14 })}</button>
+            </div>`)}
+        </div>
+      </div>` : null}`;
 }
 
 
@@ -2418,6 +2604,14 @@ function ConsultationView({ state, params }) {
 
   if (!aesh) return html`<div class="empty">Intervenant introuvable.</div>`;
   const b = bilanAesh(state, aeshId);
+  const today = todayISO();
+  const codeDe = (id) => { const a = byId(state.aesh, id); return a ? (a.code || a.initiales) : '?'; };
+  const { absences, remplacements } = exceptionsAesh(state, aeshId);
+  const aVenir = (e) => (e.dateFin || e.date || '') >= today;
+  const parDate = (a, c) => (a.date || '').localeCompare(c.date || '');
+  const mesAbs = absences.filter(aVenir).sort(parDate);
+  const mesRempl = remplacements.filter(aVenir).sort(parDate);
+  const dateLbl = (e) => fmtDate(e.date) + (e.portee === 'periode' && e.dateFin ? ' → ' + fmtDate(e.dateFin) : '');
 
   return html`
     <div class="consult">
@@ -2463,6 +2657,23 @@ function ConsultationView({ state, params }) {
           </div>
         </div>
       </div>
+
+      ${(mesAbs.length || mesRempl.length) ? html`
+        <div class="card pad-sm exc-card" style="margin-top:16px">
+          <div class="card-eyebrow">${Icon.calendar({ size: 13 })} À venir · absences & remplacements</div>
+          <div class="col gap-2" style="margin-top:10px">
+            ${mesAbs.map((e) => html`
+              <div class="exc-line abs">
+                <span class="exc-date">${dateLbl(e)}</span>
+                <span>Vous êtes noté(e) <b>absent(e)</b> · ${(PORTEES[e.portee] || {}).court || ''}${e.remplacant ? html` · remplacé(e) par <b>${codeDe(e.remplacant)}</b>` : ''}${e.note ? ' — ' + e.note : ''}</span>
+              </div>`)}
+            ${mesRempl.map((e) => html`
+              <div class="exc-line rempl">
+                <span class="exc-date">${dateLbl(e)}</span>
+                <span>Vous <b>remplacez ${codeDe(e.aesh)}</b> · ${(PORTEES[e.portee] || {}).court || ''}${e.note ? ' — ' + e.note : ''}</span>
+              </div>`)}
+          </div>
+        </div>` : null}
 
       ${vue === 'semaine' ? html`
         <div class="no-print" style="margin:16px 0"><${WeekControl} state=${state} /></div>

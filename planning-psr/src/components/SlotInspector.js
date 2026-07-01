@@ -5,11 +5,20 @@
 // Étape 1 : reste sur le modèle hebdomadaire (pas encore d'exception datée).
 import { html, useState } from '@ui';
 import { Icon } from './icons.js';
-import { DISCIPLINES, TYPES_ACCOMPAGNEMENT, TYPE_ACCOMP_DEFAUT, creneauById, jourById } from '../data/constants.js';
-import { byId, couvertureSeance, bilanAesh, aeshOccupeAt } from '../lib/selectors.js';
-import { semaineLabel } from '../lib/week.js';
-import { addAffectation, removeAffectation, setAffectationType, setSeanceRemarque, setBesoinAesh } from '../store.js';
+import { DISCIPLINES, TYPES_ACCOMPAGNEMENT, TYPE_ACCOMP_DEFAUT, PORTEES, creneauById, jourById } from '../data/constants.js';
+import { byId, couvertureSeance, bilanAesh, aeshOccupeAt, exceptionsSeance } from '../lib/selectors.js';
+import { semaineLabel, fmtDate } from '../lib/week.js';
+import { addAffectation, removeAffectation, setAffectationType, setSeanceRemarque, setBesoinAesh, addException, removeException } from '../store.js';
 import { fmt, toast } from './shared.js';
+
+// Prochaine date (à partir d'aujourd'hui) qui tombe sur le jour de semaine du créneau.
+const JOUR_IDS_SI = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+function nextDateForJour(jourId) {
+  const x = new Date();
+  for (let i = 0; i < 14; i++) { if (JOUR_IDS_SI[x.getDay()] === jourId) break; x.setDate(x.getDate() + 1); }
+  const p = (n) => String(n).padStart(2, '0');
+  return `${x.getFullYear()}-${p(x.getMonth() + 1)}-${p(x.getDate())}`;
+}
 
 export function SlotInspector({ state, seance, onClose }) {
   const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
@@ -38,6 +47,27 @@ export function SlotInspector({ state, seance, onClose }) {
   const [remarque, setRemarque] = useState(seance.remarque || '');
   // On lit la valeur du champ au moment du blur (évite toute valeur périmée).
   const saveRemarque = (e) => { const v = (e.target.value || '').trim(); if ((seance.remarque || '') !== v) setSeanceRemarque(seance.id, v); };
+
+  // Exceptions datées (absences / remplacements) touchant ce créneau.
+  const excs = exceptionsSeance(state, seance);
+  const codeDe = (id) => { const a = byId(state.aesh, id); return a ? (a.code || a.initiales) : '?'; };
+  const [absForm, setAbsForm] = useState(null);
+  const makeAbsForm = () => ({ aesh: (affectes[0] && affectes[0].aesh.id) || '', date: nextDateForJour(seance.jour), portee: 'creneau', dateFin: '', remplacant: '', note: '' });
+  const enregistrerAbs = () => {
+    if (!absForm.aesh || !absForm.date) { toast('Choisis un AESH et une date', 'warn'); return; }
+    if (absForm.portee === 'periode' && (!absForm.dateFin || absForm.dateFin < absForm.date)) { toast('Indique une date de fin valide', 'warn'); return; }
+    addException({
+      aesh: absForm.aesh,
+      seance: absForm.portee === 'creneau' ? seance.id : null,
+      portee: absForm.portee,
+      date: absForm.date,
+      dateFin: absForm.portee === 'periode' ? absForm.dateFin : null,
+      remplacant: absForm.remplacant || null,
+      note: (absForm.note || '').trim(),
+    });
+    setAbsForm(null);
+    toast('Absence enregistrée', 'ok');
+  };
 
   const covClass = cov.statut === 'covered' ? 'ok' : cov.statut === 'partial' ? 'info' : cov.statut === 'missing' ? 'warn' : '';
   const covLabel = cov.attendu <= 0 ? 'Aucun besoin'
@@ -123,6 +153,65 @@ export function SlotInspector({ state, seance, onClose }) {
           <label>Remarque (facultatif)</label>
           <textarea class="input" rows="2" placeholder="ex. accompagnement renforcé ce jour, matériel spécifique…"
             value=${remarque} onInput=${(e) => setRemarque(e.target.value)} onBlur=${saveRemarque}></textarea>
+        </div>
+
+        <div class="field slot-abs">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <label style="margin:0">Absences & remplacements ponctuels</label>
+            ${affectes.length ? html`<button class="btn ghost btn-mini" onClick=${() => setAbsForm(absForm ? null : makeAbsForm())}>
+              ${absForm ? 'Fermer' : html`${Icon.plus({ size: 13 })} Signaler`}</button>` : null}
+          </div>
+
+          ${absForm ? html`
+            <div class="abs-form">
+              <div class="field">
+                <label>Qui est absent ?</label>
+                <select class="select" value=${absForm.aesh} onChange=${(e) => setAbsForm({ ...absForm, aesh: e.target.value })}>
+                  ${affectes.map(({ aesh }) => html`<option value=${aesh.id} selected=${aesh.id === absForm.aesh}>${aesh.code || aesh.initiales}</option>`)}
+                </select>
+              </div>
+              <div class="field">
+                <label>Portée du changement</label>
+                <div class="seg">
+                  ${Object.entries(PORTEES).map(([k, v]) => html`<button class=${absForm.portee === k ? 'active both' : ''} onClick=${() => setAbsForm({ ...absForm, portee: k })}>${v.court}</button>`)}
+                </div>
+              </div>
+              <div class="row gap-2">
+                <div class="field grow"><label>${absForm.portee === 'periode' ? 'Du' : 'Date'}</label>
+                  <input class="input" type="date" value=${absForm.date} onInput=${(e) => setAbsForm({ ...absForm, date: e.target.value })} /></div>
+                ${absForm.portee === 'periode' ? html`<div class="field grow"><label>Au</label>
+                  <input class="input" type="date" value=${absForm.dateFin} onInput=${(e) => setAbsForm({ ...absForm, dateFin: e.target.value })} /></div>` : null}
+              </div>
+              <div class="field">
+                <label>Remplacé par (facultatif)</label>
+                <select class="select" value=${absForm.remplacant} onChange=${(e) => setAbsForm({ ...absForm, remplacant: e.target.value })}>
+                  <option value="" selected=${!absForm.remplacant}>— personne —</option>
+                  ${state.aesh.filter((a) => a.id !== absForm.aesh).map((a) => html`<option value=${a.id} selected=${a.id === absForm.remplacant}>${a.code || a.initiales}</option>`)}
+                </select>
+              </div>
+              <div class="field">
+                <label>Note (facultatif)</label>
+                <input class="input" value=${absForm.note} placeholder="ex. arrêt maladie, RDV…" onInput=${(e) => setAbsForm({ ...absForm, note: e.target.value })} />
+              </div>
+              <div class="row gap-2" style="justify-content:flex-end">
+                <button class="btn ghost" onClick=${() => setAbsForm(null)}>Annuler</button>
+                <button class="btn primary" onClick=${enregistrerAbs}>${Icon.check({ size: 14 })} Enregistrer</button>
+              </div>
+            </div>` : null}
+
+          ${excs.length ? html`
+            <div class="col gap-2" style="margin-top:8px">
+              ${excs.map((exc) => html`
+                <div class="exc-row">
+                  <span class="exc-date">${fmtDate(exc.date)}${exc.portee === 'periode' && exc.dateFin ? ' → ' + fmtDate(exc.dateFin) : ''}</span>
+                  <span class="exc-body">
+                    <b>${codeDe(exc.aesh)}</b> absent · ${(PORTEES[exc.portee] || {}).court || exc.portee}${exc.remplacant ? html` → <b style="color:var(--ok)">${codeDe(exc.remplacant)}</b>` : ' · non remplacé'}
+                    ${exc.note ? html`<div class="muted" style="font-size:11px">${exc.note}</div>` : null}
+                  </span>
+                  <button class="btn icon ghost" title="Supprimer" onClick=${() => removeException(exc.id)}>${Icon.x({ size: 14 })}</button>
+                </div>`)}
+            </div>`
+            : (affectes.length && !absForm ? html`<div class="muted" style="font-size:12px">Aucune absence signalée sur ce créneau.</div>` : null)}
         </div>
       </div>
     </aside>`;

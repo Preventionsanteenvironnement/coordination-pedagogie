@@ -86,6 +86,13 @@ export const TYPES_ACCOMPAGNEMENT = {
 };
 export const TYPE_ACCOMP_DEFAUT = 'mutualise';
 
+// Portée d'une exception datée (absence/remplacement) : jusqu'où s'applique le changement.
+export const PORTEES = {
+  creneau: { label: 'Ce créneau seulement', court: 'Ce créneau' },
+  journee: { label: 'Toute la journée', court: 'La journée' },
+  periode: { label: 'Une période (du…au…)', court: 'Période' },
+};
+
 export const creneauById = (id) => CRENEAUX.find((c) => c.id === id);
 export const jourById = (id) => JOURS.find((j) => j.id === id);
 export const heuresCreneaux = (ids) => ids.reduce((s, id) => s + (creneauById(id)?.h || 0), 0);

@@ -1,6 +1,7 @@
 // Sélecteurs — calculs dérivés de l'état (heures, couverture, conflits).
 // Aucune mutation ici : uniquement de la lecture.
 import { creneauById, heuresCreneaux } from '../data/constants.js';
+import { parseISO } from './week.js';
 
 export const byId = (list, id) => list.find((x) => x.id === id);
 
@@ -181,4 +182,54 @@ export function totauxGeneraux(state) {
   const totalHorsH = state.aesh.reduce((s, a) => s + heuresAeshHorsClasse(state, a.id), 0);
   const totalCible = state.aesh.reduce((s, a) => s + (a.volumeCible || 0), 0);
   return { totalAffecteH, totalHorsH, totalServiceH: totalAffecteH + totalHorsH, totalCible };
+}
+
+// ─── Exceptions datées (absences / remplacements) ───
+const JOUR_IDS = ['dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam'];
+export function jourIdOfDate(dateStr) { return JOUR_IDS[parseISO(dateStr).getDay()]; }
+
+export function todayISO() {
+  const x = new Date(); const p = (n) => String(n).padStart(2, '0');
+  return `${x.getFullYear()}-${p(x.getMonth() + 1)}-${p(x.getDate())}`;
+}
+
+// La plage [startISO, endISO] contient-elle un jour de semaine donné (lun…sam) ?
+function rangeHasWeekday(startISO, endISO, jourId) {
+  const e = parseISO(endISO), cur = parseISO(startISO);
+  for (let i = 0; i < 400 && cur <= e; i++) {
+    if (JOUR_IDS[cur.getDay()] === jourId) return true;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return false;
+}
+
+// Cette exception affecte-t-elle ce créneau (compte tenu de la portée) ?
+export function exceptionTouchesSeance(state, exc, seance) {
+  if (exc.portee === 'creneau') return exc.seance === seance.id;
+  if (!estAffecte(state, exc.aesh, seance.id)) return false;
+  if (exc.portee === 'journee') return jourIdOfDate(exc.date) === seance.jour;
+  if (exc.portee === 'periode') return rangeHasWeekday(exc.date, exc.dateFin || exc.date, seance.jour);
+  return false;
+}
+
+// Exceptions touchant un créneau donné (pour le panneau).
+export function exceptionsSeance(state, seance) {
+  return (state.exceptions || []).filter((exc) => exceptionTouchesSeance(state, exc, seance));
+}
+
+// Absences d'un AESH + créneaux où il est proposé comme remplaçant.
+export function exceptionsAesh(state, aeshId) {
+  const list = state.exceptions || [];
+  return {
+    absences: list.filter((e) => e.aesh === aeshId),
+    remplacements: list.filter((e) => e.remplacant === aeshId),
+  };
+}
+
+// Toutes les exceptions encore d'actualité (fin ≥ aujourd'hui), triées par date.
+export function exceptionsAVenir(state) {
+  const today = todayISO();
+  return (state.exceptions || [])
+    .filter((e) => (e.dateFin || e.date || '') >= today)
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
 }
