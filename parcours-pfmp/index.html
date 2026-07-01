@@ -70,6 +70,7 @@
   .qline span.qx{cursor:text} .qline span.qx:hover{color:var(--c1)}
   .editmark{font-size:.66rem;font-style:italic;font-weight:500;color:var(--soft);opacity:.75;margin-left:6px;white-space:nowrap;cursor:text}
   .meta{margin:9px 0 0 41px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .meta-lbl{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.03em;margin-right:1px}
   .doc{display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 6px 3px 9px;font-size:.78rem;color:var(--soft)}
   .doc .dx{cursor:pointer;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;color:var(--soft)}
   .doc .dx:hover{background:var(--line);color:#b3261e}
@@ -283,7 +284,7 @@ const PHASE_IDS=[1,2,3,4,5];
 
 const ACTEURS=["Élève","Professeur principal","Référent","Enseignant pro","DDF","Bureau des entreprises","Cheffe d'établissement","Tuteur","Famille","Vie scolaire","Équipe"];
 const LIENS=["en appui","en soutien","en conseil","conjointement avec","sous la validation de","validé par","signé par","pour information"];
-const DOCS_SUGGEST=["Fiche de négociation","Pré-convention","Convention","Annexe pédagogique","Annexe activités","Annexe handicap","Attestation de PFMP","Journal de bord","Compte rendu d'évaluation","Passeport professionnel (Cerise Pro)","Copies de la convention"];
+const DOCS_SUGGEST=["Calendrier PFMP","Pré-convention","Fiche de négociation","Convention","Annexe pédagogique","Annexe activités","Annexe handicap","Fiche régime demi-pension","Ordre de mission (visite)","Ordre de mission (accompagnement)","Compte rendu d'évaluation","Fiche d'activité significative","Attestation de PFMP","Journal de bord","Passeport professionnel (Cerise Pro)","Tableau de suivi des recherches","Demande de remboursement de frais de stage","Copies de la convention","Mail de remerciements","Mail de bilan (envoi des documents)"];
 const OFF=[
   {key:"eleve",label:"L'élève",ic:"student",c:"#475569",refs:[
     {a:"Code de l'éducation, art. L.124-1",t:"La PFMP est obligatoire : l'élève y acquiert des compétences et met en œuvre les acquis de sa formation en vue du diplôme. Les missions confiées doivent être conformes au projet pédagogique défini par l'établissement et approuvées par l'organisme d'accueil."},
@@ -477,7 +478,7 @@ function stepCard(s,n){
       <span class="stp st-${st}">${STATUTS[st]||"À clarifier"}</span>
     </div>
     <div class="qline"><span class="qm">?</span><span class="qx" data-act="question" data-id="${s.id}"${(s.question||"")?"":' style="opacity:.6"'}>${(s.question||"")?esc(s.question):"Ajouter une question à trancher…"}</span><span class="editmark" data-act="question" data-id="${s.id}">(modifiable)</span></div>
-    ${(docs||(s.documents&&s.documents.length))?`<div class="meta">${docs}<button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document</button></div>`:`<div class="meta"><button class="adddoc" data-act="adddoc" data-id="${s.id}">+ document à remettre</button></div>`}
+    <div class="meta"><span class="meta-lbl">${fileIc} Documents liés</span>${docs}<button class="adddoc" data-act="adddoc" data-id="${s.id}">+ ajouter</button></div>
     ${bloc}
     ${doneBar}
     ${propsSection}
