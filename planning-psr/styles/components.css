@@ -512,3 +512,36 @@
   .seance { break-inside: avoid; }
   @page { margin: 12mm; }
 }
+
+/* — Panneau de créneau (cockpit) : tiroir latéral droit — */
+.drawer-scrim { position: fixed; inset: 0; background: rgba(5,8,14,0.34); z-index: 60; animation: fade-in .14s ease; }
+.drawer {
+  position: fixed; top: 0; right: 0; height: 100vh; width: min(400px, 94vw);
+  background: var(--surface); border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg); z-index: 61; display: flex; flex-direction: column;
+  animation: drawer-in .2s cubic-bezier(.2,.7,.2,1);
+}
+@keyframes drawer-in { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.drawer-head { padding: var(--sp-4) var(--sp-5); border-bottom: 1px solid var(--border-soft); display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-2); }
+.drawer-body { padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-5); overflow: auto; flex: 1; }
+.drawer-disc { width: 12px; height: 12px; border-radius: 4px; flex: none; margin-top: 3px; }
+
+.slot-aesh { display: flex; align-items: center; gap: 8px; }
+.slot-aesh .slot-type { flex: 1; min-width: 0; padding: 6px 8px; font-size: 12.5px; }
+
+.slot-add {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--r-md);
+  background: var(--surface-2); cursor: pointer; transition: all .12s;
+}
+.slot-add:hover { background: var(--surface-hover); border-color: var(--accent); }
+.slot-add-info { flex: 1; min-width: 0; font-size: 12px; }
+.slot-add .plus { color: var(--accent); flex: none; display: inline-flex; }
+.slot-add.has-conflit { opacity: .9; }
+.slot-add .conflit { display: inline-flex; align-items: center; gap: 4px; color: var(--warn); font-weight: 600; }
+.slot-add .conflit .ic { display: inline-flex; }
+
+.seance-note { font-size: 10.5px; color: var(--text-3); margin-top: 2px; display: flex; align-items: center; gap: 3px; line-height: 1.25; }
+.hint-inline { font-size: 12px; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+
+@media (max-width: 640px) { .drawer { width: 100vw; } }

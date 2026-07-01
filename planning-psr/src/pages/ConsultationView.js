@@ -5,7 +5,7 @@ import { Icon } from '../components/icons.js';
 import { ScheduleGrid } from '../components/ScheduleGrid.js';
 import { WeekControl } from '../components/WeekControl.js';
 import { fmt } from '../components/shared.js';
-import { DISCIPLINES, JOURS, creneauById, jourById } from '../data/constants.js';
+import { DISCIPLINES, JOURS, TYPES_ACCOMPAGNEMENT, creneauById, jourById } from '../data/constants.js';
 import { byId, bilanAesh, heuresAeshParite, listeAesh } from '../lib/selectors.js';
 import { weeksByMonth, monthName } from '../lib/calendar.js';
 import { semaineLabel, semaineColor, fmtDate } from '../lib/week.js';
@@ -99,15 +99,21 @@ function ListeVue({ state, aeshId }) {
   return html`
     <div class="card" style="margin-top:16px">
       <table class="tbl">
-        <thead><tr><th>Jour</th><th>Horaire</th><th>Matière</th><th>Salle</th><th>Semaine</th></tr></thead>
+        <thead><tr><th>Jour</th><th>Horaire</th><th>Matière</th><th>Accompagnement</th><th>Salle</th><th>Semaine</th></tr></thead>
         <tbody>
           ${liste.map((s) => {
             const d = DISCIPLINES[s.disc] || DISCIPLINES.autre;
             const cr = creneauById(s.creneau);
+            const aff = state.affectations.find((a) => a.aesh === aeshId && a.seance === s.id);
+            const t = TYPES_ACCOMPAGNEMENT[aff && aff.type] || TYPES_ACCOMPAGNEMENT.mutualise;
             return html`<tr>
               <td style="font-weight:650">${jourById(s.jour)?.label}</td>
               <td class="mono dim">${cr?.debut}–${cr?.fin}</td>
-              <td><span class="row gap-2"><span class="dot" style=${`background:${d.color}`}></span> ${d.label}</span></td>
+              <td>
+                <span class="row gap-2"><span class="dot" style=${`background:${d.color}`}></span> ${d.label}</span>
+                ${s.remarque ? html`<div class="muted" style="font-size:11.5px;margin-top:2px">${Icon.pin({ size: 11 })} ${s.remarque}</div>` : null}
+              </td>
+              <td><span class="badge" style=${`color:${t.color};background:${t.color}1e`}>${t.label}</span></td>
               <td class="dim">${s.salle || '—'}</td>
               <td>${s.semaine === 'AB' ? html`<span class="badge">toutes</span>`
                 : html`<span class="badge" style=${`color:${semaineColor(sem, s.semaine)};background:${semaineColor(sem, s.semaine)}22`}>${semaineLabel(sem, s.semaine)}</span>`}</td>

@@ -5,6 +5,7 @@ import { Icon } from '../components/icons.js';
 import { ScheduleGrid } from '../components/ScheduleGrid.js';
 import { WeekControl } from '../components/WeekControl.js';
 import { AeshPalette } from '../components/AeshPalette.js';
+import { SlotInspector } from '../components/SlotInspector.js';
 import { fmt } from '../components/shared.js';
 import { byId, couvertureClasse } from '../lib/selectors.js';
 import { alertsSummary } from '../lib/alerts.js';
@@ -12,10 +13,12 @@ import { alertsSummary } from '../lib/alerts.js';
 export function AffectationView({ state }) {
   const [classeId, setClasseId] = useState(state.classes[0] && state.classes[0].id);
   const [activeAesh, setActiveAesh] = useState(null);
+  const [inspectId, setInspectId] = useState(null);
   const { weekMode, weekPriority } = state.config.ui;
   const classe = byId(state.classes, classeId);
   const alerts = alertsSummary(state);
   const couverture = classe ? couvertureClasse(state, classe.id) : null;
+  const inspectSeance = inspectId ? byId(state.seances, inspectId) : null;
 
   return html`
     <div class="page-header">
@@ -49,7 +52,8 @@ export function AffectationView({ state }) {
               <span class="badge accent">${fmt(couverture.coveredHours)} / ${fmt(couverture.expectedHours)} h attendues</span>
             </div>
           </div>` : null}
-        <${ScheduleGrid} state=${state} classeId=${classeId} mode=${weekMode} priority=${weekPriority} editable=${true} />
+        <div class="hint-inline muted">${Icon.pin({ size: 13 })} Cliquez un créneau pour ouvrir son panneau (besoin, AESH, type d'accompagnement, remarque).</div>
+        <${ScheduleGrid} state=${state} classeId=${classeId} mode=${weekMode} priority=${weekPriority} editable=${true} onSlotClick=${(se) => setInspectId(se.id)} />
         ${alerts.danger > 0 ? html`
           <div class="alert danger">
             <span class="alert-ico">${Icon.alert({size:16})}</span>
@@ -58,5 +62,6 @@ export function AffectationView({ state }) {
           </div>` : null}
       </div>
       <${AeshPalette} state=${state} activeId=${activeAesh} onSelect=${setActiveAesh} />
-    </div>`;
+    </div>
+    ${inspectSeance ? html`<${SlotInspector} state=${state} seance=${inspectSeance} onClose=${() => setInspectId(null)} />` : null}`;
 }

@@ -23,7 +23,7 @@ function AeshPill({ aesh, seanceId, editable }) {
     </span>`;
 }
 
-function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeances, onEditSeance }) {
+function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeances, onEditSeance, onSlotClick }) {
   const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
   const sem = state.config.semaine;
   const aeshList = aeshDeSeance(state, seance.id);
@@ -46,14 +46,14 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
   };
 
   return html`
-    <div class=${'seance coverage-' + cov.statut + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '')}
+    <div class=${'seance coverage-' + cov.statut + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '') + (onSlotClick ? ' clickable' : '')}
       style=${`--disc:${disc.color};--disc-soft:${disc.soft}`}
       draggable=${editSeances}
       onDragStart=${editSeances ? (e) => { e.dataTransfer.setData('seanceId', seance.id); e.dataTransfer.effectAllowed = 'move'; } : null}
       onDragOver=${(e) => { e.preventDefault(); e.currentTarget.classList.add('dropzone'); }}
       onDragLeave=${(e) => e.currentTarget.classList.remove('dropzone')}
       onDrop=${onDrop}
-      onClick=${editSeances && onEditSeance ? () => onEditSeance(seance) : null}>
+      onClick=${onSlotClick ? () => onSlotClick(seance) : (editSeances && onEditSeance ? () => onEditSeance(seance) : null)}>
       <div class="seance-head">
         <div class="seance-title">${disc.court}${editSeances ? html`<span class="seance-edit">${Icon.edit({ size: 12 })}</span>` : null}</div>
         <div class="seance-tags">
@@ -74,10 +74,11 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
                 editable=${editable && (!highlightAesh || highlightAesh === a.id)} />`)}
           </div>`
         : null}
+      ${seance.remarque && !mini ? html`<div class="seance-note" title=${seance.remarque}>${Icon.pin({ size: 11 })} ${seance.remarque}</div>` : null}
     </div>`;
 }
 
-function CellContent({ state, seances, mode, priority, editable, highlightAesh, editSeances, onEditSeance, onAddCell, jour, creneau }) {
+function CellContent({ state, seances, mode, priority, editable, highlightAesh, editSeances, onEditSeance, onSlotClick, onAddCell, jour, creneau }) {
   const sem = state.config.semaine;
 
   if (!seances.length) {
@@ -87,7 +88,7 @@ function CellContent({ state, seances, mode, priority, editable, highlightAesh, 
     return html`<div class="cell-empty-hint">·</div>`;
   }
 
-  const props = { state, editable, highlightAesh, editSeances, onEditSeance };
+  const props = { state, editable, highlightAesh, editSeances, onEditSeance, onSlotClick };
 
   if (mode === 'compare') {
     const common = seances.filter((s) => s.semaine === 'AB');
@@ -124,7 +125,7 @@ function visibleSeances(state, list, jour, creneauId, mode) {
   });
 }
 
-export function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = null, editable = true, editSeances = false, onAddCell, onEditSeance }) {
+export function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = null, editable = true, editSeances = false, onAddCell, onEditSeance, onSlotClick }) {
   let pool;
   if (classeId) pool = state.seances.filter((s) => s.classe === classeId);
   else if (aeshId) {
@@ -161,7 +162,7 @@ export function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = 
               onDrop=${editSeances ? cellDrop(j.id, c.id) : null}>
               <${CellContent} state=${state} seances=${seances} mode=${mode} priority=${priority}
                 editable=${editable} highlightAesh=${aeshId}
-                editSeances=${editSeances} onEditSeance=${onEditSeance} onAddCell=${onAddCell}
+                editSeances=${editSeances} onEditSeance=${onEditSeance} onSlotClick=${onSlotClick} onAddCell=${onAddCell}
                 jour=${j.id} creneau=${c.id} />
             </div>`;
           })}`;

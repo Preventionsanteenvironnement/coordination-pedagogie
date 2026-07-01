@@ -86,6 +86,17 @@ const DISPOSITIFS = {
   none: { label: '—', color: '#6f7c92' },
 };
 
+// Type d'accompagnement d'un AESH sur un créneau (couche vivante).
+// Aucune donnée nominative : on décrit la nature de l'accompagnement, pas l'élève.
+const TYPES_ACCOMPAGNEMENT = {
+  mutualise:   { label: 'Mutualisé', court: 'Mut.', color: '#5b8def' },
+  individuel:  { label: 'Individuel (anonymisé)', court: 'Indiv.', color: '#9a7cff' },
+  repas:       { label: 'Repas', court: 'Repas', color: '#e0a44c' },
+  atelier:     { label: 'Atelier', court: 'Atelier', color: '#7fa86a' },
+  deplacement: { label: 'Déplacement', court: 'Dépl.', color: '#4cb0c3' },
+};
+const TYPE_ACCOMP_DEFAUT = 'mutualise';
+
 const creneauById = (id) => CRENEAUX.find((c) => c.id === id);
 const jourById = (id) => JOURS.find((j) => j.id === id);
 const heuresCreneaux = (ids) => ids.reduce((s, id) => s + (creneauById(id)?.h || 0), 0);
@@ -486,10 +497,34 @@ function updateSemaine(patch) {
   update((d) => { d.config.semaine = { ...d.config.semaine, ...patch }; });
 }
 
-function addAffectation(aeshId, seanceId) {
+function addAffectation(aeshId, seanceId, type = 'mutualise') {
   update((d) => {
     const exists = d.affectations.some((a) => a.aesh === aeshId && a.seance === seanceId);
-    if (!exists) d.affectations.push({ id: `af-${aeshId}-${seanceId}-${d.affectations.length}`, aesh: aeshId, seance: seanceId });
+    if (!exists) d.affectations.push({ id: `af-${aeshId}-${seanceId}-${d.affectations.length}`, aesh: aeshId, seance: seanceId, type });
+  });
+}
+
+// Change le type d'accompagnement d'un AESH sur un créneau (mutualisé, individuel…).
+function setAffectationType(aeshId, seanceId, type) {
+  update((d) => {
+    const a = d.affectations.find((x) => x.aesh === aeshId && x.seance === seanceId);
+    if (a) a.type = type;
+  });
+}
+
+// Enregistre une remarque courte sur un créneau (couche vivante, non nominative).
+function setSeanceRemarque(seanceId, remarque) {
+  update((d) => {
+    const s = d.seances.find((x) => x.id === seanceId);
+    if (s) s.remarque = remarque;
+  });
+}
+
+// Change le besoin d'AESH attendu sur un créneau (0 à 4).
+function setBesoinAesh(seanceId, n) {
+  update((d) => {
+    const s = d.seances.find((x) => x.id === seanceId);
+    if (s) s.besoinAesh = Math.max(0, Math.min(4, n));
   });
 }
 
@@ -1352,7 +1387,7 @@ function AeshPill({ aesh, seanceId, editable }) {
     </span>`;
 }
 
-function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeances, onEditSeance }) {
+function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeances, onEditSeance, onSlotClick }) {
   const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
   const sem = state.config.semaine;
   const aeshList = aeshDeSeance(state, seance.id);
@@ -1375,14 +1410,14 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
   };
 
   return html`
-    <div class=${'seance coverage-' + cov.statut + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '')}
+    <div class=${'seance coverage-' + cov.statut + (faded ? ' faded' : '') + (mini ? ' mini' : '') + (editSeances ? ' editable' : '') + (onSlotClick ? ' clickable' : '')}
       style=${`--disc:${disc.color};--disc-soft:${disc.soft}`}
       draggable=${editSeances}
       onDragStart=${editSeances ? (e) => { e.dataTransfer.setData('seanceId', seance.id); e.dataTransfer.effectAllowed = 'move'; } : null}
       onDragOver=${(e) => { e.preventDefault(); e.currentTarget.classList.add('dropzone'); }}
       onDragLeave=${(e) => e.currentTarget.classList.remove('dropzone')}
       onDrop=${onDrop}
-      onClick=${editSeances && onEditSeance ? () => onEditSeance(seance) : null}>
+      onClick=${onSlotClick ? () => onSlotClick(seance) : (editSeances && onEditSeance ? () => onEditSeance(seance) : null)}>
       <div class="seance-head">
         <div class="seance-title">${disc.court}${editSeances ? html`<span class="seance-edit">${Icon.edit({ size: 12 })}</span>` : null}</div>
         <div class="seance-tags">
@@ -1403,10 +1438,11 @@ function Seance({ state, seance, editable, highlightAesh, faded, mini, editSeanc
                 editable=${editable && (!highlightAesh || highlightAesh === a.id)} />`)}
           </div>`
         : null}
+      ${seance.remarque && !mini ? html`<div class="seance-note" title=${seance.remarque}>${Icon.pin({ size: 11 })} ${seance.remarque}</div>` : null}
     </div>`;
 }
 
-function CellContent({ state, seances, mode, priority, editable, highlightAesh, editSeances, onEditSeance, onAddCell, jour, creneau }) {
+function CellContent({ state, seances, mode, priority, editable, highlightAesh, editSeances, onEditSeance, onSlotClick, onAddCell, jour, creneau }) {
   const sem = state.config.semaine;
 
   if (!seances.length) {
@@ -1416,7 +1452,7 @@ function CellContent({ state, seances, mode, priority, editable, highlightAesh, 
     return html`<div class="cell-empty-hint">·</div>`;
   }
 
-  const props = { state, editable, highlightAesh, editSeances, onEditSeance };
+  const props = { state, editable, highlightAesh, editSeances, onEditSeance, onSlotClick };
 
   if (mode === 'compare') {
     const common = seances.filter((s) => s.semaine === 'AB');
@@ -1453,7 +1489,7 @@ function visibleSeances(state, list, jour, creneauId, mode) {
   });
 }
 
-function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = null, editable = true, editSeances = false, onAddCell, onEditSeance }) {
+function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = null, editable = true, editSeances = false, onAddCell, onEditSeance, onSlotClick }) {
   let pool;
   if (classeId) pool = state.seances.filter((s) => s.classe === classeId);
   else if (aeshId) {
@@ -1490,7 +1526,7 @@ function ScheduleGrid({ state, classeId, aeshId, mode = 'AB', priority = null, e
               onDrop=${editSeances ? cellDrop(j.id, c.id) : null}>
               <${CellContent} state=${state} seances=${seances} mode=${mode} priority=${priority}
                 editable=${editable} highlightAesh=${aeshId}
-                editSeances=${editSeances} onEditSeance=${onEditSeance} onAddCell=${onAddCell}
+                editSeances=${editSeances} onEditSeance=${onEditSeance} onSlotClick=${onSlotClick} onAddCell=${onAddCell}
                 jour=${j.id} creneau=${c.id} />
             </div>`;
           })}`;
@@ -1863,6 +1899,138 @@ function AeshScheduleEditor({ state, aeshId, onClose }) {
 }
 
 
+// ───── components/SlotInspector.js ─────
+// Panneau de créneau — cockpit coordinateur.
+// On clique un créneau de la grille ; ce panneau latéral s'ouvre pour piloter
+// l'accompagnement AESH DE CE CRÉNEAU : besoin attendu, AESH positionnés +
+// type d'accompagnement, ajout (avec conflit/heures restantes), couverture, remarque.
+// Étape 1 : reste sur le modèle hebdomadaire (pas encore d'exception datée).
+
+
+
+
+
+
+
+
+function SlotInspector({ state, seance, onClose }) {
+  const disc = DISCIPLINES[seance.disc] || DISCIPLINES.autre;
+  const cr = creneauById(seance.creneau);
+  const classe = byId(state.classes, seance.classe);
+  const sem = state.config.semaine;
+  const cov = couvertureSeance(state, seance);
+
+  // AESH déjà positionnés sur ce créneau, avec leur type d'accompagnement.
+  const affectes = state.affectations
+    .filter((a) => a.seance === seance.id)
+    .map((a) => ({ aff: a, aesh: byId(state.aesh, a.aesh) }))
+    .filter((x) => x.aesh);
+  const affectedIds = new Set(affectes.map((x) => x.aesh.id));
+
+  // AESH disponibles à ajouter, triés par heures restantes (les plus disponibles en premier).
+  const disponibles = state.aesh
+    .filter((a) => !affectedIds.has(a.id))
+    .map((a) => {
+      const b = bilanAesh(state, a.id);
+      const conflit = aeshOccupeAt(state, a.id, seance.jour, seance.creneau, seance.semaine, seance.id);
+      return { aesh: a, reste: b.cible - b.total, conflit };
+    })
+    .sort((x, y) => y.reste - x.reste);
+
+  const [remarque, setRemarque] = useState(seance.remarque || '');
+  // On lit la valeur du champ au moment du blur (évite toute valeur périmée).
+  const saveRemarque = (e) => { const v = (e.target.value || '').trim(); if ((seance.remarque || '') !== v) setSeanceRemarque(seance.id, v); };
+
+  const covClass = cov.statut === 'covered' ? 'ok' : cov.statut === 'partial' ? 'info' : cov.statut === 'missing' ? 'warn' : '';
+  const covLabel = cov.attendu <= 0 ? 'Aucun besoin'
+    : cov.statut === 'covered' ? 'Couvert'
+    : cov.statut === 'partial' ? `Partiel · ${cov.manquants} manquant${cov.manquants > 1 ? 's' : ''}`
+    : 'Non couvert';
+
+  const ajouter = (a) => {
+    addAffectation(a.id, seance.id, TYPE_ACCOMP_DEFAUT);
+    toast(`AESH ${a.code || a.initiales} positionné`, 'ok', { label: 'Annuler', fn: () => removeAffectation(a.id, seance.id) });
+  };
+  const retirer = (a) => {
+    removeAffectation(a.id, seance.id);
+    toast(`AESH ${a.code || a.initiales} retiré`, 'warn', { label: 'Annuler', fn: () => addAffectation(a.id, seance.id) });
+  };
+
+  return html`
+    <div class="drawer-scrim" onClick=${onClose}></div>
+    <aside class="drawer" onClick=${(e) => e.stopPropagation()}>
+      <div class="drawer-head">
+        <div class="row gap-2" style="align-items:center;min-width:0">
+          <span class="drawer-disc" style=${`background:${disc.color}`}></span>
+          <div style="min-width:0">
+            <h2 style="font-size:16px;margin:0">${disc.label}</h2>
+            <div class="muted" style="font-size:12px">
+              ${classe ? classe.nom + ' · ' : ''}${jourById(seance.jour)?.label} · ${cr?.debut}–${cr?.fin}${seance.salle ? ' · salle ' + seance.salle : ''}${seance.semaine !== 'AB' ? ' · sem. ' + semaineLabel(sem, seance.semaine) : ''}
+            </div>
+          </div>
+        </div>
+        <button class="btn icon ghost" onClick=${onClose}>${Icon.x({ size: 18 })}</button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="field">
+          <label>Besoin en AESH sur ce créneau</label>
+          <div class="seg">
+            ${[0, 1, 2, 3, 4].map((n) => html`
+              <button class=${cov.attendu === n ? 'active both' : ''} onClick=${() => setBesoinAesh(seance.id, n)}>
+                ${n === 0 ? 'Aucun' : n}
+              </button>`)}
+          </div>
+          <div class="row gap-2" style="margin-top:8px;align-items:center">
+            <span class=${'badge ' + covClass}>${covLabel}</span>
+            <span class="muted" style="font-size:12px">${cov.positionnes}/${cov.attendu} positionné(s)</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>AESH positionnés · type d'accompagnement</label>
+          ${affectes.length ? html`
+            <div class="col gap-2">
+              ${affectes.map(({ aff, aesh }) => html`
+                <div class="slot-aesh">
+                  <span class="aesh-pill" style=${`background:${aesh.color}`}>${aesh.code || aesh.initiales}</span>
+                  <select class="select slot-type" value=${aff.type || TYPE_ACCOMP_DEFAUT}
+                    onChange=${(e) => setAffectationType(aesh.id, seance.id, e.target.value)}>
+                    ${Object.entries(TYPES_ACCOMPAGNEMENT).map(([k, v]) => html`
+                      <option value=${k} selected=${k === (aff.type || TYPE_ACCOMP_DEFAUT)}>${v.label}</option>`)}
+                  </select>
+                  <button class="btn icon ghost" title="Retirer ce créneau" onClick=${() => retirer(aesh)}>${Icon.x({ size: 15 })}</button>
+                </div>`)}
+            </div>` : html`<div class="muted" style="font-size:12.5px">Aucun AESH positionné pour l'instant.</div>`}
+        </div>
+
+        <div class="field">
+          <label>Ajouter un AESH</label>
+          <div class="col gap-2">
+            ${disponibles.map(({ aesh, reste, conflit }) => html`
+              <button class=${'slot-add' + (conflit.length ? ' has-conflit' : '')} onClick=${() => ajouter(aesh)}>
+                <span class="aesh-pill" style=${`background:${aesh.color}`}>${aesh.code || aesh.initiales}</span>
+                <span class="slot-add-info">
+                  ${conflit.length
+                    ? html`<span class="conflit"><span class="ic">${Icon.alert({ size: 13 })}</span> déjà occupé ce créneau</span>`
+                    : html`<span class="muted">${fmt(Math.max(0, reste))} h restantes${reste < -0.01 ? ' · dépassé' : ''}</span>`}
+                </span>
+                <span class="plus">${Icon.plus({ size: 15 })}</span>
+              </button>`)}
+            ${!disponibles.length ? html`<div class="muted" style="font-size:12.5px">Tous les AESH sont déjà positionnés ici.</div>` : null}
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Remarque (facultatif)</label>
+          <textarea class="input" rows="2" placeholder="ex. accompagnement renforcé ce jour, matériel spécifique…"
+            value=${remarque} onInput=${(e) => setRemarque(e.target.value)} onBlur=${saveRemarque}></textarea>
+        </div>
+      </div>
+    </aside>`;
+}
+
+
 // ───── pages/Dashboard.js ─────
 // Page Tableau de bord — vue d'ensemble : KPI, alertes, état des AESH et classes.
 
@@ -2154,13 +2322,16 @@ function IntervenantView({ state, params }) {
 
 
 
+
 function AffectationView({ state }) {
   const [classeId, setClasseId] = useState(state.classes[0] && state.classes[0].id);
   const [activeAesh, setActiveAesh] = useState(null);
+  const [inspectId, setInspectId] = useState(null);
   const { weekMode, weekPriority } = state.config.ui;
   const classe = byId(state.classes, classeId);
   const alerts = alertsSummary(state);
   const couverture = classe ? couvertureClasse(state, classe.id) : null;
+  const inspectSeance = inspectId ? byId(state.seances, inspectId) : null;
 
   return html`
     <div class="page-header">
@@ -2194,7 +2365,8 @@ function AffectationView({ state }) {
               <span class="badge accent">${fmt(couverture.coveredHours)} / ${fmt(couverture.expectedHours)} h attendues</span>
             </div>
           </div>` : null}
-        <${ScheduleGrid} state=${state} classeId=${classeId} mode=${weekMode} priority=${weekPriority} editable=${true} />
+        <div class="hint-inline muted">${Icon.pin({ size: 13 })} Cliquez un créneau pour ouvrir son panneau (besoin, AESH, type d'accompagnement, remarque).</div>
+        <${ScheduleGrid} state=${state} classeId=${classeId} mode=${weekMode} priority=${weekPriority} editable=${true} onSlotClick=${(se) => setInspectId(se.id)} />
         ${alerts.danger > 0 ? html`
           <div class="alert danger">
             <span class="alert-ico">${Icon.alert({size:16})}</span>
@@ -2203,7 +2375,8 @@ function AffectationView({ state }) {
           </div>` : null}
       </div>
       <${AeshPalette} state=${state} activeId=${activeAesh} onSelect=${setActiveAesh} />
-    </div>`;
+    </div>
+    ${inspectSeance ? html`<${SlotInspector} state=${state} seance=${inspectSeance} onClose=${() => setInspectId(null)} />` : null}`;
 }
 
 
@@ -2309,15 +2482,21 @@ function ListeVue({ state, aeshId }) {
   return html`
     <div class="card" style="margin-top:16px">
       <table class="tbl">
-        <thead><tr><th>Jour</th><th>Horaire</th><th>Matière</th><th>Salle</th><th>Semaine</th></tr></thead>
+        <thead><tr><th>Jour</th><th>Horaire</th><th>Matière</th><th>Accompagnement</th><th>Salle</th><th>Semaine</th></tr></thead>
         <tbody>
           ${liste.map((s) => {
             const d = DISCIPLINES[s.disc] || DISCIPLINES.autre;
             const cr = creneauById(s.creneau);
+            const aff = state.affectations.find((a) => a.aesh === aeshId && a.seance === s.id);
+            const t = TYPES_ACCOMPAGNEMENT[aff && aff.type] || TYPES_ACCOMPAGNEMENT.mutualise;
             return html`<tr>
               <td style="font-weight:650">${jourById(s.jour)?.label}</td>
               <td class="mono dim">${cr?.debut}–${cr?.fin}</td>
-              <td><span class="row gap-2"><span class="dot" style=${`background:${d.color}`}></span> ${d.label}</span></td>
+              <td>
+                <span class="row gap-2"><span class="dot" style=${`background:${d.color}`}></span> ${d.label}</span>
+                ${s.remarque ? html`<div class="muted" style="font-size:11.5px;margin-top:2px">${Icon.pin({ size: 11 })} ${s.remarque}</div>` : null}
+              </td>
+              <td><span class="badge" style=${`color:${t.color};background:${t.color}1e`}>${t.label}</span></td>
               <td class="dim">${s.salle || '—'}</td>
               <td>${s.semaine === 'AB' ? html`<span class="badge">toutes</span>`
                 : html`<span class="badge" style=${`color:${semaineColor(sem, s.semaine)};background:${semaineColor(sem, s.semaine)}22`}>${semaineLabel(sem, s.semaine)}</span>`}</td>

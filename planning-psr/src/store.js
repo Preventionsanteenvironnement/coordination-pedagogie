@@ -111,10 +111,34 @@ export function updateSemaine(patch) {
   update((d) => { d.config.semaine = { ...d.config.semaine, ...patch }; });
 }
 
-export function addAffectation(aeshId, seanceId) {
+export function addAffectation(aeshId, seanceId, type = 'mutualise') {
   update((d) => {
     const exists = d.affectations.some((a) => a.aesh === aeshId && a.seance === seanceId);
-    if (!exists) d.affectations.push({ id: `af-${aeshId}-${seanceId}-${d.affectations.length}`, aesh: aeshId, seance: seanceId });
+    if (!exists) d.affectations.push({ id: `af-${aeshId}-${seanceId}-${d.affectations.length}`, aesh: aeshId, seance: seanceId, type });
+  });
+}
+
+// Change le type d'accompagnement d'un AESH sur un créneau (mutualisé, individuel…).
+export function setAffectationType(aeshId, seanceId, type) {
+  update((d) => {
+    const a = d.affectations.find((x) => x.aesh === aeshId && x.seance === seanceId);
+    if (a) a.type = type;
+  });
+}
+
+// Enregistre une remarque courte sur un créneau (couche vivante, non nominative).
+export function setSeanceRemarque(seanceId, remarque) {
+  update((d) => {
+    const s = d.seances.find((x) => x.id === seanceId);
+    if (s) s.remarque = remarque;
+  });
+}
+
+// Change le besoin d'AESH attendu sur un créneau (0 à 4).
+export function setBesoinAesh(seanceId, n) {
+  update((d) => {
+    const s = d.seances.find((x) => x.id === seanceId);
+    if (s) s.besoinAesh = Math.max(0, Math.min(4, n));
   });
 }
 

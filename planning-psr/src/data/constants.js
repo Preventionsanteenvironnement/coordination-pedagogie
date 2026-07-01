@@ -75,6 +75,17 @@ export const DISPOSITIFS = {
   none: { label: '—', color: '#6f7c92' },
 };
 
+// Type d'accompagnement d'un AESH sur un créneau (couche vivante).
+// Aucune donnée nominative : on décrit la nature de l'accompagnement, pas l'élève.
+export const TYPES_ACCOMPAGNEMENT = {
+  mutualise:   { label: 'Mutualisé', court: 'Mut.', color: '#5b8def' },
+  individuel:  { label: 'Individuel (anonymisé)', court: 'Indiv.', color: '#9a7cff' },
+  repas:       { label: 'Repas', court: 'Repas', color: '#e0a44c' },
+  atelier:     { label: 'Atelier', court: 'Atelier', color: '#7fa86a' },
+  deplacement: { label: 'Déplacement', court: 'Dépl.', color: '#4cb0c3' },
+};
+export const TYPE_ACCOMP_DEFAUT = 'mutualise';
+
 export const creneauById = (id) => CRENEAUX.find((c) => c.id === id);
 export const jourById = (id) => JOURS.find((j) => j.id === id);
 export const heuresCreneaux = (ids) => ids.reduce((s, id) => s + (creneauById(id)?.h || 0), 0);

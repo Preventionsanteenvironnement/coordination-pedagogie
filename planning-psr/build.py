@@ -30,6 +30,7 @@ ORDER = [
     "components/EvenementModal.js",
     "components/AeshPalette.js",
     "components/AeshScheduleEditor.js",
+    "components/SlotInspector.js",
     "pages/Dashboard.js",
     "pages/ClasseView.js",
     "pages/IntervenantView.js",
