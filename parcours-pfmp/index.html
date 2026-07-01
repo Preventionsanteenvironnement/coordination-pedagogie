@@ -27,6 +27,10 @@
   .who{margin-top:14px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;font-size:.82rem}
   .avs{display:inline-flex}
   .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.66rem;font-weight:700;color:#0a4254;background:#bfe6ef;border:2px solid #0e7490;margin-left:-7px}
+  .npill{display:inline-flex;align-items:center;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--c1soft);color:var(--c1d);border:1px solid var(--c1);border-radius:999px;padding:3px 10px;font-size:.72rem;font-weight:750;margin-left:5px}
+  .npill.more{background:var(--line2);color:var(--soft);border-color:var(--line)}
+  .npill.new{animation:pillpop .35s ease-out}
+  @keyframes pillpop{from{transform:scale(.6);opacity:0}60%{transform:scale(1.12)}to{transform:scale(1);opacity:1}}
   .av:first-child{margin-left:0}
   .me{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 11px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
   main{max-width:820px;margin:0 auto;padding:0 14px 120px}
@@ -447,7 +451,10 @@ async function ensureMe(){
   ME={pseudo:v.pseudo.replace(/\|/g,"").slice(0,24)};
   localStorage.setItem("parcours_id",JSON.stringify(ME));
   if(v.isNew){ try{ await setDoc(parcoursRef,{participants:arrayUnion(ME.pseudo),updatedAt:serverTimestamp()},{merge:true}); }catch(e){} }
-  joinPresence(); renderWho(); return true;
+  joinPresence(); renderWho();
+  toast(v.isNew?`Bienvenue ${ME.pseudo} 🙌 Merci de venir construire le parcours avec l'équipe !`:`Content de te revoir ${ME.pseudo} 🙌 Merci de poursuivre le travail !`);
+  setTimeout(()=>burst($("who"),"#7c3aed"),160);
+  return true;
 }
 async function need(){ if(DEMO){toast("Aperçu — la collaboration s'activera après publication de la règle");return false;} return await ensureMe(); }
 
@@ -457,9 +464,12 @@ function joinPresence(){
   const beat=()=>setDoc(doc(presCol,MYPID),{pseudo:ME.pseudo,ts:Date.now()}).catch(()=>{});
   beat(); clearInterval(window.__pb); window.__pb=setInterval(beat,25000);
 }
+let prevWho=new Set();
 function renderWho(connected){
   const box=$("who"); const list=(connected||[]).filter(p=>Date.now()-(p.ts||0)<70000); connectedCount=list.length;
-  const avs=list.slice(0,8).map(p=>`<span class="av" title="${esc(p.pseudo)}">${esc((p.pseudo||"?").slice(0,3))}</span>`).join("");
+  const cur=new Set(list.map(p=>p.pseudo));
+  const avs=list.slice(0,6).map(p=>`<span class="npill${prevWho.has(p.pseudo)?"":" new"}" title="${esc(p.pseudo)}">${esc(p.pseudo)}</span>`).join("")+(list.length>6?`<span class="npill more">+${list.length-6}</span>`:"");
+  prevWho=cur;
   const meTxt=ME?`Tu participes en <b>${esc(ME.pseudo)}</b>`:"Rejoindre pour participer";
   box.innerHTML=`${list.length?`<span class="avs">${avs}</span>`:""}<span class="me" id="mebtn">${meTxt} <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>`;
   $("mebtn").onclick=async()=>{ME=null;localStorage.removeItem("parcours_id");await ensureMe();};
@@ -610,14 +620,14 @@ async function handle(act,id,pid,b){
   if(act==="statut"){ if(!await need())return; await updateDoc(ref,{statut:NEXTST[s.statut]||"deb",updatedAt:serverTimestamp()}); return; }
   if(act==="title"){ if(!await need())return; const v=await openForm("Modifier le titre de l'étape","⚠ Ce titre est partagé : ta modification s'appliquera pour toute l'équipe.",[{key:"t",label:"Titre",type:"text",value:s.titre}]); if(v&&v.t)await updateDoc(ref,{titre:v.t,editedBy:ME.pseudo,editedAt:Date.now(),updatedAt:serverTimestamp()}); return; }
   if(act==="question"){ if(!await need())return; const v=await openForm("La question à trancher","⚠ Cette question est partagée avec toute l'équipe.",[{key:"t",label:"Question",type:"textarea",value:s.question||"",ph:"ex. Qui remet la pré-convention à l'élève ?"}]); if(v)await updateDoc(ref,{question:v.t,editedBy:ME.pseudo,editedAt:Date.now(),updatedAt:serverTimestamp()}); return; }
-  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Indique surtout QUI est responsable de l'action. Tu peux ajouter un appui et une précision.",[{key:"role",label:"Qui est responsable ? (la personne qui fait)",type:"text",list:ACTEURS,ph:"ex. Professeur principal"},{key:"soutien",label:"En appui / avec qui ? (facultatif)",type:"text",list:ACTEURS,ph:"ex. DDF"},{key:"lien",label:"Comment intervient l'appui ?",type:"select",options:LIENS,value:"en appui"},{key:"note",label:"Précision (facultatif)",type:"text",ph:"ex. sous 5 jours, via Pronote…"}]); if(v){ if(!v.role&&!v.note)return toast("Indique au moins le responsable."); await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):"",note:v.note||"",by:ME.pseudo}),updatedAt:serverTimestamp()}); burst(b,"#7c3aed"); } return; }
+  if(act==="addprop"){ if(!await need())return; const v=await openForm("Proposer une réponse","Indique surtout QUI est responsable de l'action. Tu peux ajouter un appui et une précision.",[{key:"role",label:"Qui est responsable ? (la personne qui fait)",type:"text",list:ACTEURS,ph:"ex. Professeur principal"},{key:"soutien",label:"En appui / avec qui ? (facultatif)",type:"text",list:ACTEURS,ph:"ex. DDF"},{key:"lien",label:"Comment intervient l'appui ?",type:"select",options:LIENS,value:"en appui"},{key:"note",label:"Précision (facultatif)",type:"text",ph:"ex. sous 5 jours, via Pronote…"}]); if(v){ if(!v.role&&!v.note)return toast("Indique au moins le responsable."); await updateDoc(ref,{props:arrayUnion({id:uid().slice(0,8),role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):"",note:v.note||"",by:ME.pseudo}),updatedAt:serverTimestamp()}); burst(b,"#7c3aed"); toast(`Belle proposition, merci ${ME.pseudo} 🙌`); } return; }
   if(act==="editprop"){ if(!await need())return; const p=(s.props||[]).find(x=>x.id===pid); if(!p)return; const v=await openForm("Modifier la proposition","",[{key:"role",label:"Qui est responsable ?",type:"text",list:ACTEURS,value:p.role||p.txt||""},{key:"soutien",label:"En appui / avec qui ? (facultatif)",type:"text",list:ACTEURS,value:p.soutien||""},{key:"lien",label:"Comment intervient l'appui ?",type:"select",options:LIENS,value:p.lien||"en appui"},{key:"note",label:"Précision (facultatif)",type:"text",value:p.note||""}]); if(v){ const np=(s.props||[]).map(x=>x.id===pid?{id:x.id,role:v.role||"",soutien:v.soutien||"",lien:v.soutien?(v.lien||LIENS[0]):"",note:v.note||"",by:x.by||ME.pseudo}:x); await updateDoc(ref,{props:np,updatedAt:serverTimestamp()}); } return; }
   if(act==="support"){ if(!await need())return; const me=ME.pseudo, cur=s.votes||[], myKeys=cur.filter(v=>v.split("||")[1]===me), onThis=cur.includes(pid+"||"+me); if(myKeys.length)await updateDoc(ref,{votes:arrayRemove(...myKeys)}); if(!onThis){ await updateDoc(ref,{votes:arrayUnion(pid+"||"+me),updatedAt:serverTimestamp()}); burst(b,"#0e7490"); } return; }
   if(act==="retain"){ if(!await need())return; if(s.retenu===pid){ await updateDoc(ref,{retenu:null,statut:"deb",updatedAt:serverTimestamp()}); return; } if(!confirm("En faire la proposition finale de l'équipe ? L'étape sera marquée « Validé » et c'est cette réponse qui s'affichera en grand.")) return; await updateDoc(ref,{retenu:pid,statut:"ok",updatedAt:serverTimestamp()}); toast("Proposition finale adoptée"); return; }
   if(act==="unvalidate"){ if(!await need())return; await updateDoc(ref,{retenu:null,statut:"deb",updatedAt:serverTimestamp()}); return; }
   if(act==="delprop"){ if(!await need())return; if(!confirm("Supprimer cette proposition ?"))return; const np=(s.props||[]).filter(p=>p.id!==pid); const nvv=(s.votes||[]).filter(v=>v.indexOf(pid+"||")!==0); await updateDoc(ref,{props:np,votes:nvv,retenu:s.retenu===pid?null:s.retenu,updatedAt:serverTimestamp()}); return; }
-  if(act==="addnote"){ if(!await need())return; const v=await openForm("Ajouter un commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",ph:"Une remarque, une précision, une objection…"}]); if(v&&v.t)await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now(),id:uid()}),updatedAt:serverTimestamp()}); return; }
-  if(act==="replynote"){ if(!await need())return; const parentId=b.dataset.note; if(!parentId)return; const par=(s.notes||[]).find(x=>x.id===parentId); const v=await openForm("Répondre au commentaire",par?`En réponse à ${par.p} : « ${par.t.slice(0,80)}${par.t.length>80?"…":""} »`:"",[{key:"t",label:"Ta réponse",type:"textarea",ph:"Répondre à ce commentaire…"}]); if(v&&v.t)await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now(),id:uid(),replyTo:parentId}),updatedAt:serverTimestamp()}); return; }
+  if(act==="addnote"){ if(!await need())return; const v=await openForm("Ajouter un commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",ph:"Une remarque, une précision, une objection…"}]); if(v&&v.t){ burst(b,"#7c3aed"); await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now(),id:uid()}),updatedAt:serverTimestamp()}); toast(`Merci pour ta contribution ${ME.pseudo} 🙌`); } return; }
+  if(act==="replynote"){ if(!await need())return; const parentId=b.dataset.note; if(!parentId)return; const par=(s.notes||[]).find(x=>x.id===parentId); const v=await openForm("Répondre au commentaire",par?`En réponse à ${par.p} : « ${par.t.slice(0,80)}${par.t.length>80?"…":""} »`:"",[{key:"t",label:"Ta réponse",type:"textarea",ph:"Répondre à ce commentaire…"}]); if(v&&v.t){ burst(b,"#7c3aed"); await updateDoc(ref,{notes:arrayUnion({p:ME.pseudo,t:v.t,ts:Date.now(),id:uid(),replyTo:parentId}),updatedAt:serverTimestamp()}); toast(`Merci pour ta réponse ${ME.pseudo} 🙌`); } return; }
   if(act==="editnote"){ if(!await need())return; const i=+b.dataset.i; const nt=(s.notes||[])[i]; if(!nt)return; const v=await openForm("Modifier le commentaire","",[{key:"t",label:"Ton commentaire",type:"textarea",value:nt.t}]); if(v&&v.t){ const nn=(s.notes||[]).map((x,k)=>k===i?{...x,t:v.t}:x); await updateDoc(ref,{notes:nn,updatedAt:serverTimestamp()}); } return; }
   if(act==="delnote"){ if(!await need())return; if(!confirm("Supprimer ce commentaire ?"))return; const i=+b.dataset.i; const nn=(s.notes||[]).filter((_,k)=>k!==i); await updateDoc(ref,{notes:nn,updatedAt:serverTimestamp()}); return; }
   if(act==="decnote"){ if(!await need())return; const v=await openForm("Info à la décision","Une précision pour conforter le choix de l'équipe (elle reste dans l'encadré).",[{key:"t",label:"Note de l'équipe",type:"textarea",value:s.decisionNote||"",ph:"ex. validé en réunion du 30/06, à revoir si l'organisation change…"}]); if(v)await updateDoc(ref,{decisionNote:v.t,updatedAt:serverTimestamp()}); return; }
