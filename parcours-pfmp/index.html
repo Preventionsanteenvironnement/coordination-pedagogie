@@ -71,6 +71,16 @@
   .editmark{font-size:.66rem;font-style:italic;font-weight:500;color:var(--soft);opacity:.75;margin-left:6px;white-space:nowrap;cursor:text}
   .meta{margin:9px 0 0 41px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
   .meta-lbl{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.03em;margin-right:1px}
+  .gate .gate-known{margin:2px 0 15px}
+  .gate-lbl{font-size:.8rem;font-weight:700;color:var(--soft);margin-bottom:7px}
+  .gate-chips{display:flex;flex-wrap:wrap;gap:7px}
+  .gate-chip{background:var(--c1soft);border:1px solid var(--line);color:var(--c1d);border-radius:999px;padding:6px 13px;font-size:.86rem;font-weight:650;cursor:pointer;transition:.12s}
+  .gate-chip:hover{border-color:var(--c1);background:var(--c1);color:#fff}
+  .gate-confirm{display:none;margin:13px 0 0}
+  .gate-confirm.on{display:block}
+  .gate-cf-txt{font-size:.88rem;background:var(--flou-bg);border:1px solid var(--flou-tx);color:var(--ink);border-radius:11px;padding:10px 12px;margin-bottom:9px}
+  .gate-cf-btns{display:flex;flex-wrap:wrap;gap:8px}
+  .btn.sm{padding:6px 12px;font-size:.82rem}
   .doc{display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 6px 3px 9px;font-size:.78rem;color:var(--soft)}
   .doc .dx{cursor:pointer;width:16px;height:16px;display:grid;place-items:center;border-radius:50%;color:var(--soft)}
   .doc .dx:hover{background:var(--line);color:#b3261e}
@@ -392,15 +402,40 @@ function openForm(title, sub, fields, okLabel){
   });
 }
 
-/* ---------- identité (anonyme, identifiant libre) ---------- */
+/* ---------- identité (anonyme, identifiant libre, avec reprise) ---------- */
+let PARTICIPANTS=[];
+function openGate(){
+  return new Promise(res=>{
+    const names=[...PARTICIPANTS].filter(Boolean);
+    const ov=document.createElement("div"); ov.className="ov";
+    ov.innerHTML=`<div class="modal gate"><h3>Entrer dans l'atelier</h3><p class="msub">C'est anonyme et entre professionnels : mets tes initiales, ta matière ou ton rôle (ex. PSE, M.D, Maths). Pas de nom complet.</p>${names.length?`<div class="gate-known"><div class="gate-lbl">Déjà venu·e ? Reprends ton nom :</div><div class="gate-chips">${names.map(n=>`<button type="button" class="gate-chip" data-name="${esc(n)}">${esc(n)}</button>`).join("")}</div></div>`:""}<label class="mfield"><span>${names.length?"Ou entre un nouveau nom":"Ton identifiant (initiales, matière ou rôle)"}</span><input id="gate-input" type="text" placeholder="PSE"></label><div class="gate-confirm" id="gate-confirm"></div><div class="mbtns"><button class="btn ghost" data-x="c">Annuler</button><button class="btn" id="gate-ok">Entrer</button></div></div>`;
+    document.body.appendChild(ov);
+    const input=ov.querySelector("#gate-input"); setTimeout(()=>input&&input.focus(),40);
+    const norm=s=>(s||"").trim().toLowerCase();
+    function close(v){ov.remove();res(v);}
+    ov.querySelectorAll(".gate-chip").forEach(b=>b.onclick=()=>close({pseudo:b.dataset.name,isNew:false}));
+    function submit(){
+      const raw=(input.value||"").replace(/\|/g,"").trim().slice(0,24); if(!raw)return;
+      const ex=names.find(n=>norm(n)===norm(raw));
+      if(ex){ const cf=ov.querySelector("#gate-confirm"); cf.classList.add("on");
+        cf.innerHTML=`<div class="gate-cf-txt">« <b>${esc(ex)}</b> » est déjà utilisé. C'est toi qui reviens ?</div><div class="gate-cf-btns"><button type="button" class="btn sm" data-yes>Oui, c'est moi — reprendre</button><button type="button" class="btn ghost sm" data-no>Non, un autre nom</button></div>`;
+        cf.querySelector("[data-yes]").onclick=()=>close({pseudo:ex,isNew:false});
+        cf.querySelector("[data-no]").onclick=()=>{cf.classList.remove("on");cf.innerHTML="";input.value="";input.focus();};
+        return; }
+      close({pseudo:raw,isNew:true});
+    }
+    ov.querySelector("#gate-ok").onclick=submit;
+    input.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();submit();}});
+    ov.addEventListener("click",e=>{if(e.target===ov)return close(null);const x=e.target.closest("[data-x]");if(x&&x.dataset.x==="c")close(null);});
+  });
+}
 async function ensureMe(){
   if(ME&&ME.pseudo) return true;
-  const v=await openForm("Entrer dans l'atelier","C'est anonyme et entre professionnels : mets tes initiales, ta matière ou ton rôle (ex. PSE, M.D, Maths). Pas de nom complet.",[
-    {key:"pseudo",label:"Ton identifiant (initiales, matière ou rôle)",type:"text",ph:"PSE"}
-  ],"Entrer");
+  const v=await openGate();
   if(!v||!v.pseudo){return false;}
   ME={pseudo:v.pseudo.replace(/\|/g,"").slice(0,24)};
   localStorage.setItem("parcours_id",JSON.stringify(ME));
+  if(v.isNew){ try{ await setDoc(parcoursRef,{participants:arrayUnion(ME.pseudo),updatedAt:serverTimestamp()},{merge:true}); }catch(e){} }
   joinPresence(); renderWho(); return true;
 }
 async function need(){ if(DEMO){toast("Aperçu — la collaboration s'activera après publication de la règle");return false;} return await ensureMe(); }
@@ -664,7 +699,7 @@ async function seedIfEmpty(){
 function startDemo(){ DEMO=true; STEPS=SEED.map(s=>({...s,votes:[],notes:[],documents:s.docs||[],textes:s.textes||[],conforme:false})); render(); renderWho([]); }
 
 renderWho([]);
-onSnapshot(parcoursRef, d=>{ if(d.exists()&&d.data().phases){PHASE_NAMES={...DEFAULT_PHASES,...d.data().phases}; if(STEPS.length)render();} }, ()=>{});
+onSnapshot(parcoursRef, d=>{ if(!d.exists())return; const dt=d.data(); if(dt.phases){PHASE_NAMES={...DEFAULT_PHASES,...dt.phases}; if(STEPS.length)render();} if(Array.isArray(dt.participants))PARTICIPANTS=dt.participants; }, ()=>{});
 onSnapshot(query(etapesCol,orderBy("ordre")), snap=>{
   if(snap.empty){ seedIfEmpty(); return; }
   STEPS=snap.docs.map(toStep); DEMO=false; render();
