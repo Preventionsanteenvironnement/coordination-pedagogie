@@ -136,6 +136,9 @@
   .sup{transition:transform .12s} .sup:active{transform:scale(.94)}
   @media (prefers-reduced-motion:reduce){.finale.justfinal{animation:none}.spark{display:none}}
   .dactions{margin:9px 0 0 41px;display:flex;gap:16px;flex-wrap:wrap}
+  .dactions.reopen{gap:9px;align-items:center;background:var(--c1soft);border:1px dashed var(--c1);border-radius:12px;padding:8px 14px;width:fit-content;max-width:100%}
+  .dactions.reopen .lnk{padding:0}
+  .dactions-hint{font-size:.83rem;color:var(--c1d);font-weight:650}
   .lnk{background:none;border:none;color:var(--c1);font-size:.85rem;font-weight:750;cursor:pointer;padding:4px 0}
   .lnk:hover{text-decoration:underline} .lnk.warn{color:var(--soft)} .lnk.warn:hover{color:var(--flou-tx)}
   .note-actions{display:inline-flex;gap:9px;margin-left:9px}
@@ -509,7 +512,10 @@ function stepCard(s,n){
       bloc=`<div class="finale split"><div class="finale-h"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg> ${tag}</div><div class="finale-body">${inside}<div class="finale-meta split">${meta}</div></div></div>`;
     }
   }
-  const doneBar=done?`<div class="dactions"><button class="lnk" data-act="toggleprops" data-id="${s.id}">${propsOpen?"Masquer":"Voir"} les ${arr.length} proposition${arr.length>1?"s":""}</button></div>`:"";
+  const doneBar=done?(propsOpen
+    ? `<div class="dactions"><button class="lnk" data-act="toggleprops" data-id="${s.id}">${arr.length>1?`Masquer les ${arr.length} propositions`:"Masquer la proposition"}</button></div>`
+    : `<div class="dactions reopen"><span class="dactions-hint">Pas d'accord, ou une autre idée ?</span><button class="lnk" data-act="toggleprops" data-id="${s.id}">${arr.length>1?`Voir les ${arr.length} propositions`:"Voir la proposition"} pour voter ou proposer</button></div>`)
+    :"";
   const propsSection=propsOpen?`<div class="props">${props}<button class="addprop" data-act="addprop" data-id="${s.id}">+ proposer une réponse</button></div>`:"";
   return `<article class="card${done?" done":""}" data-step="${s.id}" style="--pc:${pc}">
     <div class="chead">
