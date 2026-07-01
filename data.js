@@ -213,9 +213,17 @@ const THEMATIQUES = [
             icon: "chart",
           },
           {
-            titre: "Planning AESH",
+            titre: "Planning AESH — accompagnement",
             desc: "Qui accompagne qui, quand et où — partagé avec toute l'équipe, en temps réel. Codes élèves uniquement (RGPD), jamais de nom.",
             lien: "planning-aesh/",
+            type: "Outil",
+            icon: "calendar",
+            badge: "Nouveau",
+          },
+          {
+            titre: "Planning AESH — sections PSR & MELEC",
+            desc: "Emplois du temps des sections PSR & MELEC, affectation des AESH (semaine A/B), périodes PFMP et événements. Les intervenants y consultent leur planning ; l'éditeur est réservé au coordinateur.",
+            lien: "planning-psr/",
             type: "Outil",
             icon: "calendar",
             badge: "Nouveau",
@@ -349,7 +357,6 @@ const THEMATIQUES = [
     nom: "Référentiels & textes officiels",
     couleur: "#9a5ba5",
     icon: "scale",
-    desc: "Les référentiels en version interactive et consultable : le référentiel des compétences professionnelles des enseignants, et le référentiel complet du Bac pro AGOrA.",
     enfants: [
       {
         titre: "Le référentiel des compétences professionnelles",
@@ -417,6 +424,21 @@ const THEMATIQUES = [
         icon: "cap",
         badge: "Nouveau",
       },
+      {
+        titre: "Lancer un sondage",
+        desc: "Une question, 2 à 6 réponses (ou Oui/Non, ou une note sur 5) : tout le monde clique, les résultats tombent en direct. Mode réunion avec QR code à projeter. C'est ici qu'on lance.",
+        lien: "sondages/",
+        type: "Créer",
+        icon: "target",
+        badge: "Nouveau",
+      },
+      {
+        titre: "Sondages — suivi",
+        desc: "Tous les sondages de l'équipe d'un coup d'œil : ouvert ou clôturé, nombre de votes, réponse en tête — en temps réel. C'est ici qu'on suit.",
+        lien: "sondages/?suivi",
+        type: "Suivi",
+        icon: "chart",
+      },
     ],
   },
   {
@@ -449,42 +471,10 @@ const THEMATIQUES = [
       },
     ],
   },
-  {
-    id: "consulter",
-    nom: "Consulter l'équipe",
-    couleur: "#2f5fe0",
-    icon: "chart",
-    enfants: [
-      {
-        titre: "Lancer un sondage",
-        desc: "Une question, 2 à 6 réponses (ou Oui/Non, ou une note sur 5) : tout le monde clique, les résultats tombent en direct. Mode réunion avec QR code à projeter. C'est ici qu'on lance.",
-        lien: "sondages/",
-        type: "Créer",
-        icon: "target",
-        badge: "Nouveau",
-      },
-      {
-        titre: "Sondages — suivi",
-        desc: "Tous les sondages de l'équipe d'un coup d'œil : ouvert ou clôturé, nombre de votes, réponse en tête — en temps réel. C'est ici qu'on suit.",
-        lien: "sondages/?suivi",
-        type: "Suivi",
-        icon: "chart",
-      },
-    ],
-  },
 ];
 
 /* =====================================================================
    ESPACE DE GESTION — outils interactifs (on AGIT dedans).
    Séparé des ressources ci-dessus. Réservé à l'équipe pédagogique.
    ===================================================================== */
-const OUTILS = [
-  {
-    titre: "Planning AESH — PSR & MELEC",
-    desc: "Emplois du temps des sections PSR & MELEC, affectation des AESH (semaine A/B), périodes PFMP et événements. Les intervenants y consultent leur planning ; l'éditeur est réservé au coordinateur.",
-    lien: "planning-psr/",
-    couleur: "#2bb6a3",
-    icon: "calendar",
-    badge: "Nouveau",
-  },
-];
+const OUTILS = [];
