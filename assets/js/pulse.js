@@ -35,15 +35,16 @@ function monthKey() {
 }
 
 // Nom de la page = chemin, sans le préfixe du dépôt, sans .html, propre.
+// Robuste : "/parcours-pfmp/", "/parcours-pfmp/index.html" -> même clé "parcours-pfmp".
 function normalizePath(p) {
   let s = (p || '/').split('?')[0].split('#')[0];
   s = s.replace(/^\/+|\/+$/g, '');                 // retire / de début/fin
   s = s.replace(/^coordination-pedagogie\/?/, ''); // retire le préfixe du dépôt
+  s = s.replace(/\.html?$/, '');                   // retire .html
+  s = s.replace(/\/index$/, '').replace(/^index$/, ''); // .../index -> dossier
+  s = s.replace(/\/+$/, '');
   if (!s) return 'home';
-  s = s.replace(/index$/, '').replace(/\/+$/, ''); // .../index -> dossier
-  if (!s) return 'home';
-  s = s.replace(/\.html?$/, '').replace(/[\/\.]/g, '_');
-  return s.substring(0, 80) || 'home';
+  return s.replace(/[\/\.]/g, '_').substring(0, 80) || 'home';
 }
 
 function visitMoment() {
