@@ -454,5 +454,6 @@ const bar=document.getElementById('progress');
 window.addEventListener('scroll',()=>{const h=document.documentElement;bar.style.width=((h.scrollTop)/(h.scrollHeight-h.clientHeight)*100||0)+'%';},{passive:true});
 const start=location.hash.replace('#','');if(start&&document.getElementById(start))go(start);
 </script>
+<script type="module" src="../assets/js/pulse.js"></script>
 </body>
 </html>

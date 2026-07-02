@@ -182,5 +182,6 @@ onSnapshot(collection(db,COL), snap=>{
   rows=snap.docs.map(d=>({id:d.id,...d.data()})); render();
 }, err=>{ console.error(err); $("fb").innerHTML=`<div class="banner">${ic('<path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>')} <span><b>Activation Firestore requise.</b> Publiez la règle de <code>coordination_planning_aesh</code>.</span></div>`; $("list").innerHTML=""; });
 </script>
+<script type="module" src="../assets/js/pulse.js"></script>
 </body>
 </html>

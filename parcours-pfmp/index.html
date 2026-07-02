@@ -740,5 +740,6 @@ onSnapshot(presCol, snap=>{ renderWho(snap.docs.map(d=>d.data())); }, ()=>{});
 
 if(ME) joinPresence(); else setTimeout(()=>{ if(!ME&&!DEMO) ensureMe(); },900);
 </script>
+<script type="module" src="../assets/js/pulse.js"></script>
 </body>
 </html>
