@@ -1,0 +1,1202 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<title>Espace EDT — équipe AESH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --accent:#0f766e; --accent-d:#0b5f59; --accent-l:#ecfdf9; --accent-b:#99f6e4;
+  --bg:#f5f7fa; --card:#ffffff; --ink:#111827; --ink-2:#4b5563; --muted:#8b95a5;
+  --line:#e5e9f0; --line-2:#eef2f7;
+  --shadow-s:0 1px 2px rgba(16,24,40,.06);
+  --shadow-m:0 4px 16px rgba(16,24,40,.08);
+  --shadow-l:0 -8px 40px rgba(16,24,40,.16);
+  --r:16px; --r-l:22px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --accent:#2dd4bf; --accent-d:#5eead4; --accent-l:#0c2b2a; --accent-b:#155e57;
+    --bg:#0b1016; --card:#141b24; --ink:#f1f5f9; --ink-2:#b6c2d1; --muted:#7c8899;
+    --line:#232e3b; --line-2:#1b242f;
+    --shadow-s:0 1px 2px rgba(0,0,0,.4); --shadow-m:0 4px 16px rgba(0,0,0,.45);
+    --shadow-l:0 -8px 40px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.45;overscroll-behavior-y:none;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+.hide{display:none!important}
+
+/* ---------- écran code ---------- */
+#ecran-code{
+  position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:26px 22px calc(26px + var(--safe-b));
+  background:linear-gradient(165deg,var(--accent) 0%,var(--accent-d) 62%,#083f3c 100%);
+  color:#fff;text-align:center;
+}
+#ecran-code h1{margin:0;font-size:1.55rem;font-weight:800;letter-spacing:-.03em}
+#ecran-code .sub{margin:9px 0 0;opacity:.82;font-size:.95rem;max-width:19rem;line-height:1.5}
+.plots{display:flex;gap:12px;margin:32px 0 6px}
+.plot{
+  width:52px;height:62px;border-radius:14px;background:rgba(255,255,255,.14);
+  border:1.5px solid rgba(255,255,255,.26);display:flex;align-items:center;justify-content:center;
+  font-size:1.7rem;font-weight:700;transition:.18s;
+}
+.plot.on{background:rgba(255,255,255,.96);color:var(--accent-d);border-color:#fff;transform:translateY(-2px)}
+.plot.err{animation:secousse .38s}
+@keyframes secousse{0%,100%{transform:translateX(0)}22%{transform:translateX(-7px)}62%{transform:translateX(7px)}}
+#msg-code{min-height:1.4em;margin:16px 0 0;font-size:.9rem;font-weight:600;opacity:.9}
+.pave{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:22px;width:100%;max-width:17rem}
+.pave button{
+  height:62px;border-radius:17px;background:rgba(255,255,255,.13);
+  border:1px solid rgba(255,255,255,.16);font-size:1.4rem;font-weight:600;color:#fff;
+  transition:.12s;
+}
+.pave button:active{background:rgba(255,255,255,.32);transform:scale(.95)}
+.pave .fn{font-size:1.05rem;font-weight:600;background:transparent;border-color:transparent;opacity:.8}
+
+/* ---------- écran bonjour ---------- */
+#ecran-bonjour{
+  position:fixed;inset:0;z-index:58;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:34px;
+  padding:30px 26px calc(30px + var(--safe-b));text-align:center;color:#fff;
+  background:linear-gradient(165deg,var(--accent) 0%,var(--accent-d) 62%,#083f3c 100%);
+}
+.salut{max-width:24rem}
+#ecran-bonjour h1{margin:0 0 26px;font-size:2rem;font-weight:800;letter-spacing:-.035em}
+#ecran-bonjour blockquote{
+  margin:0;font-family:Georgia,"Times New Roman",serif;font-size:1.22rem;
+  line-height:1.62;font-style:italic;text-wrap:balance;
+}
+#ecran-bonjour blockquote:before{content:"«\00a0"}
+#ecran-bonjour blockquote:after{content:"\00a0»"}
+.signe{margin:16px 0 0;font-size:.8rem;font-weight:800;letter-spacing:.14em;
+  text-transform:uppercase;opacity:.72}
+.salut-b{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:15rem}
+#autre-pensee{padding:9px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.32);
+  background:transparent;color:#fff;font-size:.85rem;font-weight:700;opacity:.9}
+#autre-pensee:active{background:rgba(255,255,255,.16)}
+#entrer{width:100%;flex:none;background:#fff;color:var(--accent-d);box-shadow:0 6px 20px rgba(0,0,0,.18)}
+
+/* ---------- écran contrat ---------- */
+#ecran-contrat{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:26px;background:var(--bg);text-align:center}
+#ecran-contrat h2{margin:0 0 6px;font-size:1.35rem;font-weight:800;letter-spacing:-.02em}
+#ecran-contrat p{margin:0 0 24px;color:var(--ink-2);max-width:20rem;line-height:1.55}
+.chips-h{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:22rem}
+.chip-h{padding:11px 17px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);
+  font-weight:700;font-size:.95rem;box-shadow:var(--shadow-s);transition:.14s}
+.chip-h.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.saisie-h{display:flex;align-items:center;gap:10px;margin-top:18px}
+.saisie-h input{width:96px;padding:12px 14px;border-radius:13px;border:1.5px solid var(--line);
+  background:var(--card);text-align:center;font-weight:700;font-size:1.05rem}
+
+/* ---------- coque ---------- */
+#appli{display:flex;flex-direction:column;height:100%}
+header.barre{
+  position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);
+  padding:calc(10px + env(safe-area-inset-top,0px)) 14px 0;box-shadow:var(--shadow-s);
+}
+.barre-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.moi{display:flex;align-items:center;gap:10px;min-width:0}
+.pastille{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  font-weight:800;font-size:.78rem;color:#fff;flex:none;font-variant-numeric:tabular-nums;
+  letter-spacing:.02em}
+.moi .n{font-weight:800;letter-spacing:.02em;line-height:1.15;font-variant-numeric:tabular-nums}
+.moi .c{font-size:.76rem;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+.compteur{text-align:right;line-height:1.15;flex:none}
+.compteur b{font-size:1.12rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.compteur span{display:block;font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.nav-sem{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px}
+.nav-sem button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card);display:grid;place-items:center;font-size:1.1rem;color:var(--ink-2)}
+.nav-sem button:disabled{opacity:.3}
+.sem-t{text-align:center;line-height:1.2;flex:1;min-width:0}
+.sem-t b{font-size:.95rem;font-weight:700;letter-spacing:-.01em}
+.badge-p{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;
+  font-size:.72rem;font-weight:800;background:var(--accent-l);color:var(--accent);border:1px solid var(--accent-b)}
+.sem-t span{display:block;font-size:.75rem;color:var(--muted);font-weight:600}
+.jours{display:flex;gap:7px;padding:11px 0 10px;overflow-x:auto;scrollbar-width:none}
+.jours::-webkit-scrollbar{display:none}
+.jour{flex:1;min-width:56px;padding:8px 4px;border-radius:13px;border:1.5px solid var(--line);
+  background:var(--card);text-align:center;line-height:1.2;transition:.14s}
+.jour b{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.jour i{display:block;font-style:normal;font-size:1.15rem;font-weight:800;letter-spacing:-.02em}
+.jour.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.jour.on b{color:rgba(255,255,255,.8)}
+.jour .pt{display:block;width:5px;height:5px;border-radius:50%;background:var(--accent);margin:3px auto 0}
+.jour.on .pt{background:#fff}
+.jour.vide{opacity:.4}
+
+main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit-overflow-scrolling:touch}
+
+/* ---------- filtres classes ---------- */
+.filtres{display:flex;gap:7px;overflow-x:auto;padding-bottom:12px;scrollbar-width:none}
+.filtres::-webkit-scrollbar{display:none}
+.f-cl{padding:7px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);
+  font-size:.84rem;font-weight:700;white-space:nowrap;transition:.14s}
+.f-cl.on{color:#fff}
+
+/* ---------- carte de cours ---------- */
+.cours{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:13px 14px;margin-bottom:9px;display:flex;gap:12px;align-items:flex-start;
+  box-shadow:var(--shadow-s);transition:.14s;position:relative;overflow:hidden;
+}
+.cours:active{transform:scale(.985)}
+.cours.pris{border-color:var(--accent);background:var(--accent-l)}
+.cours .bar{position:absolute;left:0;top:0;bottom:0;width:4px}
+.cours .h{flex:none;width:52px;text-align:center;font-variant-numeric:tabular-nums;padding-left:4px}
+.cours .h b{display:block;font-size:.95rem;font-weight:800;letter-spacing:-.02em}
+.cours .h span{display:block;font-size:.76rem;color:var(--muted);font-weight:600}
+.cours .c{flex:1;min-width:0}
+.cours .t{font-weight:700;font-size:.95rem;line-height:1.3;letter-spacing:-.01em}
+.cours .m{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:5px}
+.tag-cl{padding:2px 8px;border-radius:7px;font-size:.74rem;font-weight:800;color:#fff}
+.salle{font-size:.78rem;color:var(--muted);font-weight:600}
+.qui{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.qui-p{padding:3px 9px;border-radius:999px;font-size:.75rem;font-weight:800;
+  font-variant-numeric:tabular-nums;background:var(--line-2);color:var(--ink-2);border:1px solid var(--line)}
+.qui-p.moi{background:var(--accent);color:#fff;border-color:var(--accent)}
+.vide-j{text-align:center;padding:46px 20px;color:var(--muted)}
+.vide-j .em{font-size:2.2rem;display:block;margin-bottom:10px;opacity:.5}
+
+/* ---------- onglets ---------- */
+.onglets{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;
+  background:var(--card);border-top:1px solid var(--line);
+  padding:7px 8px calc(7px + var(--safe-b));box-shadow:0 -2px 12px rgba(16,24,40,.05);
+}
+.ong{flex:1;padding:6px 2px;border-radius:12px;text-align:center;color:var(--muted);transition:.14s}
+.ong b{display:block;font-size:1.15rem;line-height:1.25}
+.ong span{font-size:.7rem;font-weight:700;letter-spacing:.01em}
+.ong.on{color:var(--accent);background:var(--accent-l)}
+
+/* ---------- feuille ---------- */
+#voile{position:fixed;inset:0;z-index:40;background:rgba(8,15,26,.5);backdrop-filter:blur(3px);
+  opacity:0;pointer-events:none;transition:.22s}
+#voile.on{opacity:1;pointer-events:auto}
+#feuille{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--card);
+  border-radius:26px 26px 0 0;box-shadow:var(--shadow-l);
+  transform:translateY(101%);transition:transform .3s cubic-bezier(.32,.72,0,1);
+  max-height:92vh;display:flex;flex-direction:column;
+}
+#feuille.on{transform:translateY(0)}
+.poignee{width:38px;height:4px;border-radius:99px;background:var(--line);margin:9px auto 0;flex:none}
+.f-corps{overflow-y:auto;padding:14px 18px 0}
+.f-t{font-size:1.18rem;font-weight:800;letter-spacing:-.025em;line-height:1.28;margin:6px 0 0}
+.f-st{color:var(--ink-2);font-size:.88rem;margin-top:5px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.bloc{margin-top:20px}
+.bloc>h4{margin:0 0 9px;font-size:.74rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{padding:10px 15px;border-radius:13px;border:1.5px solid var(--line);background:var(--card);
+  font-size:.88rem;font-weight:700;transition:.14s;text-align:left}
+.opt.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt small{display:block;font-weight:600;font-size:.74rem;opacity:.7;margin-top:1px}
+.opt.on small{opacity:.85}
+.horaires{display:flex;align-items:center;gap:9px}
+.horaires select{flex:1;padding:12px;border-radius:13px;border:1.5px solid var(--line);
+  background:var(--card);font-weight:700;text-align:center;font-variant-numeric:tabular-nums;
+  -webkit-appearance:none;appearance:none;text-align-last:center}
+.info-p{background:var(--accent-l);border:1px solid var(--accent-b);border-radius:13px;
+  padding:11px 13px;font-size:.85rem;color:var(--ink-2);line-height:1.5;margin-bottom:10px}
+.f-pied{padding:13px 18px calc(15px + var(--safe-b));border-top:1px solid var(--line-2);
+  display:flex;gap:9px;flex:none;background:var(--card)}
+.btn{flex:1;padding:15px;border-radius:15px;font-weight:800;font-size:.97rem;transition:.14s}
+.btn:active{transform:scale(.98)}
+.btn-p{background:var(--accent);color:#fff;box-shadow:0 3px 12px rgba(15,118,110,.3)}
+.btn-s{background:var(--line-2);color:var(--ink-2);flex:0 0 auto;padding:15px 20px}
+.btn-d{background:#fee2e2;color:#b91c1c;flex:0 0 auto;padding:15px 20px}
+@media (prefers-color-scheme:dark){.btn-d{background:#3b1a1a;color:#fca5a5}}
+
+/* ---------- récap & services ---------- */
+.ligne{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-s)}
+.ligne .g{flex:1;min-width:0}
+.ligne .t{font-weight:700;font-size:.92rem;letter-spacing:-.01em}
+.ligne .s{font-size:.79rem;color:var(--muted);font-weight:600;margin-top:3px}
+.ligne .x{flex:none;width:34px;height:34px;border-radius:10px;background:var(--line-2);
+  display:grid;place-items:center;color:var(--muted);font-size:1rem}
+.somme{background:linear-gradient(135deg,var(--accent),var(--accent-d));color:#fff;
+  border-radius:var(--r-l);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-m)}
+.somme .v{font-size:2.4rem;font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.somme .l{opacity:.85;font-size:.85rem;font-weight:600;margin-top:6px}
+.somme .d{margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.22);
+  font-size:.83rem;opacity:.92;line-height:1.55}
+.sect-t{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--muted);margin:20px 0 9px}
+.ajout{width:100%;padding:14px;border-radius:15px;border:1.5px dashed var(--line);
+  background:transparent;color:var(--accent);font-weight:800;font-size:.92rem}
+.prets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.pret{padding:12px 13px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);
+  text-align:left;transition:.14s}
+.pret.on{border-color:var(--accent);background:var(--accent-l)}
+.pret b{display:block;font-size:.88rem;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+.pret small{display:block;font-size:.75rem;color:var(--muted);font-weight:600;margin-top:3px}
+.pret.large{grid-column:1 / -1}
+.champ{margin-bottom:12px}
+.champ label{display:block;font-size:.74rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.champ input,.champ select{width:100%;padding:13px;border-radius:13px;border:1.5px solid var(--line);
+  background:var(--card);font-weight:600}
+.pers{background:var(--card);border:1px solid var(--line);border-radius:var(--r-l);
+  padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow-s)}
+.pers.est-moi{border-color:var(--accent);background:var(--accent-l)}
+.pers-h{display:flex;align-items:center;gap:10px}
+.pers-h .p{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  font-weight:800;font-size:.72rem;color:#fff;flex:none;font-variant-numeric:tabular-nums}
+.pers-h .n{flex:1;min-width:0;font-weight:800;letter-spacing:.03em;line-height:1.2;
+  font-variant-numeric:tabular-nums}
+.pers-h .n small{display:block;font-weight:600;font-size:.74rem;color:var(--muted);
+  font-variant-numeric:tabular-nums;letter-spacing:0}
+.pers-h .tot{text-align:right;flex:none;line-height:1.15}
+.pers-h .tot b{font-size:.98rem;font-weight:800;font-variant-numeric:tabular-nums}
+.pers-h .tot span{display:block;font-size:.68rem;color:var(--muted);font-weight:700;
+  text-transform:uppercase;letter-spacing:.05em}
+.pers-c{margin-top:11px;display:flex;flex-direction:column;gap:6px}
+.cr{display:flex;gap:9px;align-items:center;font-size:.85rem;padding:7px 9px;
+  border-radius:10px;background:var(--line-2)}
+.cr b{font-variant-numeric:tabular-nums;font-weight:800;flex:none;font-size:.82rem}
+.cr .q{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cr .tag-cl{flex:none}
+.pers-v{margin-top:9px;font-size:.83rem;color:var(--muted)}
+#etat{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + var(--safe-b));z-index:35;
+  background:var(--ink);color:var(--bg);padding:10px 17px;border-radius:999px;font-size:.83rem;
+  font-weight:700;box-shadow:var(--shadow-m);opacity:0;transition:.24s;pointer-events:none;white-space:nowrap}
+#etat.on{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ═══ 1. code ═══ -->
+<div id="ecran-code">
+  <h1>Espace EDT</h1>
+  <p class="sub">Votre emploi du temps d'accompagnement. Entrez votre code à quatre chiffres.</p>
+  <div class="plots" id="plots">
+    <div class="plot"></div><div class="plot"></div><div class="plot"></div><div class="plot"></div>
+  </div>
+  <p id="msg-code"></p>
+  <div class="pave" id="pave"></div>
+</div>
+
+<!-- ═══ 2. la pensée du jour ═══ -->
+<div id="ecran-bonjour" class="hide">
+  <div class="salut">
+    <h1>Bonjour</h1>
+    <blockquote id="pensee-t"></blockquote>
+    <p class="signe" id="pensee-a"></p>
+  </div>
+  <div class="salut-b">
+    <button id="autre-pensee">Une autre pensée</button>
+    <button class="btn btn-p" id="entrer">Entrer</button>
+  </div>
+</div>
+
+<!-- ═══ 3. contrat ═══ -->
+<div id="ecran-contrat" class="hide">
+  <h2 id="bonjour">Encore une chose</h2>
+  <p>Vous êtes à combien d'heures ? C'est une simple indication : rien ne sera bloqué.</p>
+  <div class="chips-h" id="chips-h"></div>
+  <div class="saisie-h">
+    <input id="h-libre" type="number" inputmode="decimal" step="0.5" min="0" max="60" placeholder="autre">
+    <span style="color:var(--ink-2);font-weight:600">heures</span>
+  </div>
+  <button class="btn btn-p" id="valider-h" style="margin-top:26px;max-width:15rem;width:100%;flex:none">Continuer</button>
+</div>
+
+<!-- ═══ 3. application ═══ -->
+<div id="appli" class="hide">
+  <header class="barre">
+    <div class="barre-h">
+      <div class="moi">
+        <div class="pastille" id="ma-pastille"></div>
+        <div>
+          <div class="n" id="mon-nom"></div>
+          <div class="c" id="mon-code"></div>
+        </div>
+      </div>
+      <div class="compteur">
+        <b id="total-sem">0 h</b>
+        <span>cette semaine</span>
+      </div>
+    </div>
+    <div class="nav-sem">
+      <button id="sem-prec">‹</button>
+      <div class="sem-t">
+        <b id="sem-lib"></b>
+        <span id="sem-dates"></span>
+      </div>
+      <button id="sem-suiv">›</button>
+    </div>
+    <div class="jours" id="jours"></div>
+  </header>
+
+  <main id="vue-semaine">
+    <div class="filtres" id="filtres"></div>
+    <div id="liste-cours"></div>
+  </main>
+
+  <main id="vue-services" class="hide">
+    <div class="sect-t">Mes services hors classe</div>
+    <div id="liste-services"></div>
+    <button class="ajout" id="ajout-service">+ Ajouter un service</button>
+    <p style="color:var(--muted);font-size:.82rem;line-height:1.6;margin-top:16px">
+      Cantine, internat, PIAL, coordination… tout ce qui n'est pas un cours et qui compte dans vos heures.
+    </p>
+  </main>
+
+  <main id="vue-equipe" class="hide">
+    <p style="color:var(--muted);font-size:.83rem;line-height:1.55;margin:0 0 14px">
+      Qui est où, ce jour-là. Mis à jour en direct dès que quelqu'un pose un créneau.
+    </p>
+    <div id="liste-equipe"></div>
+  </main>
+
+  <main id="vue-recap" class="hide">
+    <div class="somme">
+      <div class="v" id="r-total">0 h</div>
+      <div class="l" id="r-legende">sur la semaine affichée</div>
+      <div class="d" id="r-detail"></div>
+    </div>
+    <div class="sect-t">Mes créneaux</div>
+    <div id="r-liste"></div>
+    <button class="ajout" id="changer-code" style="margin-top:20px;border-style:solid">Quitter cet espace</button>
+  </main>
+
+  <nav class="onglets">
+    <button class="ong on" data-vue="semaine"><b>🗓️</b><span>Semaine</span></button>
+    <button class="ong" data-vue="equipe"><b>👥</b><span>L'équipe</span></button>
+    <button class="ong" data-vue="services"><b>☕</b><span>Services</span></button>
+    <button class="ong" data-vue="recap"><b>📊</b><span>Mon récap</span></button>
+  </nav>
+</div>
+
+<div id="voile"></div>
+<div id="feuille">
+  <div class="poignee"></div>
+  <div class="f-corps" id="f-corps"></div>
+  <div class="f-pied" id="f-pied"></div>
+</div>
+<div id="etat"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc }
+  from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com",
+  projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
+  messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55"
+};
+const db = getFirestore(initializeApp(firebaseConfig));
+const COL_INTER = 'coordination_edt_aesh_intervenants';
+const COL_SAISIES = 'coordination_edt_aesh_saisies';
+
+/* ─────────── constantes ─────────── */
+const PREMIER_LUNDI = '2026-09-07';        // les saisies commencent ici
+const JOURS = ['lun','mar','mer','jeu','ven'];
+const JOURS_LONG = {lun:'lundi',mar:'mardi',mer:'mercredi',jeu:'jeudi',ven:'vendredi'};
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+/* ─────────── état ─────────── */
+let G = null;                 // grille.json
+let intervenants = [];        // tous les AESH
+let saisies = [];             // toutes les saisies de tout le monde
+let moi = null;               // mon intervenant
+let lundiCourant = PREMIER_LUNDI;
+let jourCourant = 'lun';
+let filtreClasse = null;      // null = toutes
+let vue = 'semaine';
+const $ = s => document.querySelector(s);
+
+/* ─────────── dates ─────────── */
+const iso = d => d.toISOString().slice(0,10);
+const dat = s => new Date(s + 'T12:00:00');
+function ajouteJours(s,n){ const d=dat(s); d.setDate(d.getDate()+n); return iso(d); }
+function lundiDe(s){ const d=dat(s); const j=(d.getDay()+6)%7; d.setDate(d.getDate()-j); return iso(d); }
+function joliDate(s){ const d=dat(s); return d.getDate()+' '+MOIS[d.getMonth()]; }
+function jourDe(s){ return JOURS[(dat(s).getDay()+6)%7] || null; }
+function minutes(h){ const [a,b]=h.split(':').map(Number); return a*60+b; }
+function versH(m){ return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
+function duree(a,b){ return (minutes(b)-minutes(a))/60; }
+function fmtH(h){
+  const s = Math.round(h*60), hh = Math.floor(s/60), mm = s%60;
+  return mm ? hh+' h '+String(mm).padStart(2,'0') : hh+' h';
+}
+function enVacances(d){ return G.vacances.some(v => d >= v.debut && d <= v.fin); }
+function enPfmp(classeId,d){
+  const c = G.classes.find(x=>x.id===classeId);
+  return !!c && (c.pfmp||[]).some(p => d >= p.debut && d <= p.fin);
+}
+function pariteDe(d){
+  const dd = dat(d), an = dd.getFullYear();
+  const t = new Date(Date.UTC(an, dd.getMonth(), dd.getDate()));
+  const j = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - j);
+  const jan = new Date(Date.UTC(t.getUTCFullYear(),0,1));
+  const sem = Math.ceil(((t - jan)/86400000 + 1)/7);
+  return G.pariteParSemaine[t.getUTCFullYear()+'-W'+String(sem).padStart(2,'0')] || '';
+}
+/* fin de vacances la plus proche après une date : sert à la portée « jusqu'aux vacances » */
+function veilleDesVacances(d){
+  const v = G.vacances.filter(x => x.debut > d).sort((a,b)=>a.debut<b.debut?-1:1)[0];
+  return v ? ajouteJours(v.debut,-1) : G.cours[G.cours.length-1][1];
+}
+
+/* ─────────── cours ─────────── */
+function coursDuJour(d){
+  return G.cours.filter(c => c[1] === d).map(c => ({
+    classe: G.classes[c[0]], date: c[1], debut: c[2], fin: c[3],
+    matiere: G.matieres[c[4]], salle: G.salles[c[5]], parite: c[6]
+  })).sort((a,b) => a.debut === b.debut ? a.classe.court.localeCompare(b.classe.court) : (a.debut < b.debut ? -1 : 1));
+}
+
+/* ─────────── règles de saisie ─────────── */
+/* Une saisie est une règle hebdomadaire ; on regarde si elle couvre une date. */
+/* Quantième du jour dans le mois : le 2e lundi du mois a le rang 2.
+   C'est ce qui permet « une fois par mois » sans date fixe. */
+function rangDansMois(d){ return Math.floor((dat(d).getDate() - 1) / 7) + 1; }
+
+/* La date retenue, dans le mois de « d », pour une règle mensuelle.
+   On vise le même rang qu'au départ (1er lundi, 2e lundi…) ; si ce jour-là
+   tombe en vacances, on glisse au suivant du même mois plutôt que de sauter le mois. */
+function dateMensuelle(d, s){
+  const dd = dat(d), an = dd.getFullYear(), mo = dd.getMonth(), occ = [];
+  for (let k = 1; k <= 31; k++){
+    const x = new Date(an, mo, k, 12);
+    if (x.getMonth() !== mo) break;
+    if (JOURS[(x.getDay() + 6) % 7] === s.jour) occ.push(iso(x));
+  }
+  const libres = occ.filter(o => !enVacances(o));
+  if (!libres.length) return null;
+  const vise = occ[Math.min(rangDansMois(s.dateDebut), occ.length) - 1];
+  return libres.find(o => o >= vise) || libres[libres.length - 1];
+}
+
+function couvre(s, d){
+  if (d < s.dateDebut || d > s.dateFin) return false;
+  if (jourDe(d) !== s.jour) return false;
+  if (s.frequence === 'mensuel' && d !== dateMensuelle(d, s)) return false;
+  if (s.parite && s.parite !== 'toutes' && pariteDe(d) !== s.parite) return false;
+  if (enVacances(d)) return false;
+  if (s.type === 'cours' && enPfmp(s.classeId, d)) return false;
+  return true;
+}
+function surCeCours(c, d){
+  return saisies.filter(s =>
+    s.type === 'cours' && s.classeId === c.classe.id && couvre(s, d) &&
+    minutes(s.debut) < minutes(c.fin) && minutes(s.fin) > minutes(c.debut));
+}
+function heuresSemaine(aeshId, lundi){
+  let t = 0;
+  for (let i = 0; i < 5; i++){
+    const d = ajouteJours(lundi, i);
+    saisies.forEach(s => { if (s.aeshId === aeshId && couvre(s, d)) t += duree(s.debut, s.fin); });
+  }
+  return t;
+}
+const codeDe = id => (intervenants.find(i => i.id === id) || {}).code || '····';
+
+/* Comparaison des codes : on ignore la casse, les espaces et les caractères
+   invisibles. Les codes sont des chiffres, mais rien ne doit pouvoir bloquer
+   quelqu'un — ni un code enregistré comme nombre, ni une espace en trop. */
+const normCode = v => String(v == null ? '' : v).replace(/\s|\u00a0/g, '').toUpperCase();
+
+/* Pensées du jour — éducation, accompagnement, sens du travail.
+   Uniquement des citations dont l'attribution est établie : les formules
+   célèbres mais mal attribuées ont été écartées ou rendues à leur auteur :
+   « implique-moi et je comprends » n'est pas de Confucius, et le « feu à
+   allumer » revient à Plutarque, non à Montaigne ni à Rabelais. */
+const PENSEES = [
+  ["Mieux vaut une tête bien faite qu'une tête bien pleine.", "Montaigne"],
+  ["Science sans conscience n'est que ruine de l'âme.", "Rabelais"],
+  ["On ne naît pas homme, on le devient.", "Érasme"],
+  ["L'homme ne peut devenir homme que par l'éducation.", "Kant"],
+  ["L'éducation de l'homme commence à sa naissance.", "Rousseau"],
+  ["Ne pas railler, ne pas déplorer, ne pas maudire, mais comprendre.", "Spinoza"],
+  ["C'est en enseignant que l'on apprend.", "Sénèque"],
+  ["Ce n'est pas parce que les choses sont difficiles que nous n'osons pas ; c'est parce que nous n'osons pas qu'elles sont difficiles.", "Sénèque"],
+  ["Ce ne sont pas les choses qui troublent les hommes, mais les jugements qu'ils portent sur elles.", "Épictète"],
+  ["On n'enseigne pas ce que l'on sait, on enseigne ce que l'on est.", "Jean Jaurès"],
+  ["Ouvrir une école, c'est fermer une prison.", "Victor Hugo"],
+  ["L'attention est la forme la plus rare et la plus pure de la générosité.", "Simone Weil"],
+  ["L'éducation est le point où se décide si nous aimons assez le monde pour en assumer la responsabilité.", "Hannah Arendt"],
+  ["Rien dans la vie n'est à craindre, tout est à comprendre.", "Marie Curie"],
+  ["On connaît contre une connaissance antérieure.", "Gaston Bachelard"],
+  ["L'éducation n'est pas la préparation à la vie : elle est la vie même.", "John Dewey"],
+  ["Le but de l'éducation est de former des esprits capables de créer, non de répéter.", "Jean Piaget"],
+  ["On ne peut enseigner directement à autrui ; on ne peut que faciliter son apprentissage.", "Carl Rogers"],
+  ["Ce que l'enfant sait faire aujourd'hui avec de l'aide, il saura le faire seul demain.", "Lev Vygotski"],
+  ["Personne n'éduque autrui, personne ne s'éduque seul : les hommes s'éduquent ensemble.", "Paulo Freire"],
+  ["Aide-moi à faire seul.", "Maria Montessori"],
+  ["Il n'y a pas d'enfants : il y a des hommes.", "Janusz Korczak"],
+  ["On ne fait pas boire un cheval qui n'a pas soif.", "Célestin Freinet"],
+  ["L'éducation doit atteindre la tête, le cœur et la main.", "Pestalozzi"],
+  ["L'éducation est l'arme la plus puissante pour changer le monde.", "Nelson Mandela"],
+  ["Traite les gens comme s'ils étaient ce qu'ils devraient être, et tu les aideras à devenir ce qu'ils peuvent être.", "Goethe"],
+  ["Il n'y a pas de vent favorable pour celui qui ne sait où il va.", "Sénèque"],
+  ["Le temps ne respecte pas ce qui se fait sans lui.", "Paul Claudel"],
+  ["L'esprit n'est pas un vase à remplir, mais un feu à allumer.", "Plutarque"],
+  ["Enseigner, c'est apprendre deux fois.", "Joseph Joubert"],
+  ["La patience est amère, mais son fruit est doux.", "Rousseau"],
+  ["Le doute est le commencement de la sagesse.", "Aristote"],
+  ["Ce que nous devons apprendre à faire, nous l'apprenons en le faisant.", "Aristote"],
+  ["Connais-toi toi-même.", "Socrate"],
+  ["Je ne peux enseigner à personne : je peux seulement les faire réfléchir.", "Socrate"],
+  ["Il faut cultiver notre jardin.", "Voltaire"],
+  ["Un homme n'est pas ce qu'il cache, mais ce qu'il fait.", "André Malraux"],
+  ["Le travail éloigne de nous trois grands maux : l'ennui, le vice et le besoin.", "Voltaire"],
+  ["Chaque enfant qu'on enseigne est un homme qu'on gagne.", "Victor Hugo"],
+  ["La vraie générosité envers l'avenir consiste à tout donner au présent.", "Albert Camus"]
+];
+
+/* Une pensée ne se répète pas. Deux garde-fous, parce que le premier seul
+   laissait une pensée revenir deux tirages plus tard, au passage d'un tour
+   à l'autre : (1) le tour en cours, qui fait défiler tout le recueil ;
+   (2) une fenêtre des DERNIERES vues, qui vaut par-dessus les tours. */
+const K_VUES = 'edt-aesh-pensees-vues';
+const K_RECENTES = 'edt-aesh-pensees-recentes';
+const K_SALUT = 'edt-aesh-salut-le';
+const RECENTES = 10;
+
+function lisListe(cle){
+  try { const v = JSON.parse(localStorage.getItem(cle) || '[]'); return Array.isArray(v) ? v : []; }
+  catch(e){ return []; }
+}
+function ecrisListe(cle, v){ try { localStorage.setItem(cle, JSON.stringify(v)); } catch(e){} }
+
+function tirePensee(){
+  const tous = PENSEES.map((_,i) => i);
+  let vues = lisListe(K_VUES);
+  const recentes = lisListe(K_RECENTES);
+  let libres = tous.filter(i => vues.indexOf(i) < 0 && recentes.indexOf(i) < 0);
+  if (!libres.length){                        // tour terminé : on repart
+    vues = [];
+    libres = tous.filter(i => recentes.indexOf(i) < 0);
+  }
+  const k = libres[Math.floor(Math.random() * libres.length)];
+  vues.push(k);
+  recentes.push(k);
+  while (recentes.length > RECENTES) recentes.shift();
+  ecrisListe(K_VUES, vues);
+  ecrisListe(K_RECENTES, recentes);
+  $('#pensee-t').textContent = PENSEES[k][0];
+  $('#pensee-a').textContent = PENSEES[k][1];
+}
+const dejaSalue = () => { try { return localStorage.getItem(K_SALUT) === iso(new Date()); } catch(e){ return false; } };
+
+function montreBonjour(){
+  $('#ecran-code').classList.add('hide');
+  $('#ecran-bonjour').classList.remove('hide');
+  tirePensee();
+}
+$('#autre-pensee').onclick = tirePensee;
+$('#entrer').onclick = () => {
+  try { localStorage.setItem(K_SALUT, iso(new Date())); } catch(e){}
+  $('#ecran-bonjour').classList.add('hide');
+  suite();
+};
+/* Après le code : on salue une fois par jour, puis on entre. */
+function ouvreSuite(){ dejaSalue() ? suite() : montreBonjour(); }
+function suite(){ moi.contrat ? entre() : demandeContrat(); }
+
+/* ─────────── écran code ─────────── */
+let tampon = '';
+const pave = $('#pave');
+[1,2,3,4,5,6,7,8,9,'effacer',0,'ok'].forEach(t => {
+  const b = document.createElement('button');
+  if (t === 'effacer'){ b.textContent='⌫'; b.className='fn'; b.onclick=()=>{ tampon=tampon.slice(0,-1); dessinePlots(); }; }
+  else if (t === 'ok'){ b.textContent='OK'; b.className='fn'; b.onclick=tenteCode; }
+  else { b.textContent=t; b.onclick=()=>{ if(tampon.length<4){ tampon+=t; dessinePlots(); if(tampon.length===4) setTimeout(tenteCode,180);} }; }
+  pave.appendChild(b);
+});
+function dessinePlots(){
+  document.querySelectorAll('.plot').forEach((p,i) => {
+    p.textContent = tampon[i] ? '•' : '';
+    p.classList.toggle('on', !!tampon[i]);
+  });
+}
+function tenteCode(){
+  if (tampon.length < 4) return;
+  const trouve = intervenants.find(i => normCode(i.code) === normCode(tampon));
+  if (!trouve){
+    $('#msg-code').textContent = 'Code inconnu. Réessayez.';
+    document.querySelectorAll('.plot').forEach(p => { p.classList.add('err'); setTimeout(()=>p.classList.remove('err'),400); });
+    tampon = ''; setTimeout(dessinePlots, 400);
+    return;
+  }
+  $('#msg-code').textContent = '';
+  moi = trouve;
+  localStorage.setItem('edt-aesh-code', tampon);
+  tampon = ''; dessinePlots();
+  ouvreSuite();
+}
+
+/* ─────────── contrat ─────────── */
+let contratChoisi = null;
+function demandeContrat(){
+  $('#ecran-code').classList.add('hide');
+  $('#ecran-contrat').classList.remove('hide');
+  $('#bonjour').textContent = 'Encore une chose';
+  const z = $('#chips-h'); z.innerHTML = '';
+  [20,22,24,26,30,35,39].forEach(h => {
+    const b = document.createElement('button');
+    b.className = 'chip-h'; b.textContent = h + ' h';
+    b.onclick = () => {
+      contratChoisi = h; $('#h-libre').value = '';
+      document.querySelectorAll('.chip-h').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+    };
+    z.appendChild(b);
+  });
+  $('#h-libre').oninput = e => {
+    contratChoisi = parseFloat(e.target.value) || null;
+    document.querySelectorAll('.chip-h').forEach(x => x.classList.remove('on'));
+  };
+}
+$('#valider-h').onclick = async () => {
+  if (contratChoisi) {
+    moi.contrat = contratChoisi;
+    try { await updateDoc(doc(db, COL_INTER, moi.id), { contrat: contratChoisi }); } catch(e){}
+  }
+  $('#ecran-contrat').classList.add('hide');
+  entre();
+};
+
+/* ─────────── entrée ─────────── */
+function entre(){
+  $('#ecran-code').classList.add('hide');
+  $('#appli').classList.remove('hide');
+  // Aucun prénom en ligne : chacun est désigné par son code à quatre chiffres.
+  $('#ma-pastille').textContent = moi.code;
+  $('#ma-pastille').style.background = moi.couleur || '#0f766e';
+  $('#mon-nom').textContent = moi.code;
+  $('#mon-code').textContent = 'c\'est vous' + (moi.contrat ? ' · contrat ' + fmtH(moi.contrat) : '');
+  const auj = iso(new Date());
+  lundiCourant = lundiDe(auj) < PREMIER_LUNDI ? PREMIER_LUNDI : lundiDe(auj);
+  // on n'ouvre sur le jour du jour que si c'est bien la semaine en cours
+  jourCourant = (lundiDe(auj) === lundiCourant && jourDe(auj)) ? jourDe(auj) : 'lun';
+  dessineFiltres(); rendu();
+}
+
+/* ─────────── filtres ─────────── */
+function dessineFiltres(){
+  const z = $('#filtres'); z.innerHTML = '';
+  const mk = (lib, id, coul) => {
+    const b = document.createElement('button');
+    b.className = 'f-cl' + (filtreClasse === id ? ' on' : '');
+    b.textContent = lib;
+    if (filtreClasse === id) b.style.background = b.style.borderColor = coul || 'var(--accent)';
+    b.onclick = () => { filtreClasse = id; dessineFiltres(); rendu(); };
+    z.appendChild(b);
+  };
+  mk('Toutes', null, null);
+  G.classes.forEach(c => mk(c.court, c.id, c.couleur));
+}
+
+/* ─────────── rendu ─────────── */
+function rendu(){
+  const par = pariteDe(ajouteJours(lundiCourant,0));
+  $('#sem-lib').innerHTML = 'Semaine du ' + joliDate(lundiCourant) +
+    (par ? ' <span class="badge-p">semaine ' + par + '</span>' : '');
+  $('#sem-dates').textContent = joliDate(lundiCourant) + ' → ' + joliDate(ajouteJours(lundiCourant,4));
+  $('#sem-prec').disabled = lundiCourant <= PREMIER_LUNDI;
+
+  const z = $('#jours'); z.innerHTML = '';
+  JOURS.forEach((j,i) => {
+    const d = ajouteJours(lundiCourant, i);
+    const b = document.createElement('button');
+    const nb = saisies.filter(s => s.aeshId === moi.id && couvre(s, d)).length;
+    b.className = 'jour' + (j === jourCourant ? ' on' : '') + (enVacances(d) ? ' vide' : '');
+    b.innerHTML = '<b>' + j + '</b><i>' + dat(d).getDate() + '</i>' + (nb ? '<span class="pt"></span>' : '');
+    b.onclick = () => { jourCourant = j; rendu(); };
+    z.appendChild(b);
+  });
+
+  $('#total-sem').textContent = fmtH(heuresSemaine(moi.id, lundiCourant));
+  if (vue === 'semaine') rendCours();
+  if (vue === 'equipe') rendEquipe();
+  if (vue === 'services') rendServices();
+  if (vue === 'recap') rendRecap();
+}
+
+function rendCours(){
+  const d = ajouteJours(lundiCourant, JOURS.indexOf(jourCourant));
+  const z = $('#liste-cours'); z.innerHTML = '';
+  if (enVacances(d)){
+    const v = G.vacances.find(x => d >= x.debut && d <= x.fin);
+    z.innerHTML = '<div class="vide-j"><span class="em">🌴</span><b>' + v.label + '</b><br>Pas de cours ce jour.</div>';
+    return;
+  }
+  let liste = coursDuJour(d);
+  if (filtreClasse) liste = liste.filter(c => c.classe.id === filtreClasse);
+  liste = liste.filter(c => !enPfmp(c.classe.id, d));
+  if (!liste.length){
+    z.innerHTML = '<div class="vide-j"><span class="em">📭</span>Aucun cours ' + JOURS_LONG[jourCourant] + '.</div>';
+    return;
+  }
+  liste.forEach(c => {
+    const dessus = surCeCours(c, d);
+    const jySuis = dessus.some(s => s.aeshId === moi.id);
+    const el = document.createElement('div');
+    el.className = 'cours' + (jySuis ? ' pris' : '');
+    el.innerHTML =
+      '<div class="bar" style="background:' + c.classe.couleur + '"></div>' +
+      '<div class="h"><b>' + c.debut + '</b><span>' + c.fin + '</span></div>' +
+      '<div class="c"><div class="t">' + c.matiere + '</div>' +
+        '<div class="m"><span class="tag-cl" style="background:' + c.classe.couleur + '">' + c.classe.court + '</span>' +
+        '<span class="salle">' + c.salle + '</span></div>' +
+        (dessus.length ? '<div class="qui">' + dessus.map(s =>
+          '<span class="qui-p' + (s.aeshId === moi.id ? ' moi' : '') + '">' +
+          (s.aeshId === moi.id ? 'moi' : codeDe(s.aeshId)) +
+          (s.debut !== c.debut || s.fin !== c.fin ? ' · ' + s.debut + '–' + s.fin : '') +
+          '</span>').join('') + '</div>' : '') +
+      '</div>';
+    el.onclick = () => ouvreCours(c, d);
+    z.appendChild(el);
+  });
+}
+
+/* ─────────── feuille : prendre un créneau ─────────── */
+let brouillon = null;
+function ouvreCours(c, d){
+  const mien = surCeCours(c, d).find(s => s.aeshId === moi.id);
+  const par = pariteDe(d);
+  brouillon = mien
+    ? { ...mien, existant: true, cours: c, date: d, parite0: par }
+    : { existant:false, cours:c, date:d, parite0:par,
+        debut:c.debut, fin:c.fin, portee:'annee', parite: par ? par : 'toutes' };
+
+  const mins = [], deb = minutes(c.debut), fin = minutes(c.fin);
+  for (let m = deb; m <= fin; m += 30) mins.push(m);
+  const dessus = surCeCours(c, d).filter(s => s.aeshId !== moi.id);
+
+  $('#f-corps').innerHTML =
+    '<div class="f-t">' + c.matiere + '</div>' +
+    '<div class="f-st"><span class="tag-cl" style="background:' + c.classe.couleur + '">' + c.classe.court + '</span>' +
+      JOURS_LONG[jourDe(d)] + ' ' + joliDate(d) + ' · ' + c.debut + '–' + c.fin + ' · ' + c.salle + '</div>' +
+    (dessus.length
+      ? '<div class="bloc"><h4>Déjà sur ce créneau</h4><div class="qui">' +
+        dessus.map(s => '<span class="qui-p">' + codeDe(s.aeshId) +
+          (s.debut !== c.debut || s.fin !== c.fin ? ' · ' + s.debut + '–' + s.fin : '') + '</span>').join('') +
+        '</div></div>'
+      : '<div class="bloc"><h4>Déjà sur ce créneau</h4><p style="margin:0;color:var(--muted);font-size:.87rem">Personne pour l\'instant.</p></div>') +
+    '<div class="bloc"><h4>Horaire — vous pouvez découper</h4><div class="horaires">' +
+      '<select id="s-debut">' + mins.slice(0,-1).map(m => '<option value="'+versH(m)+'"'+(versH(m)===brouillon.debut?' selected':'')+'>'+versH(m)+'</option>').join('') + '</select>' +
+      '<span style="color:var(--muted);font-weight:700">→</span>' +
+      '<select id="s-fin">' + mins.slice(1).map(m => '<option value="'+versH(m)+'"'+(versH(m)===brouillon.fin?' selected':'')+'>'+versH(m)+'</option>').join('') + '</select>' +
+    '</div></div>' +
+    '<div class="bloc"><h4>Pendant combien de temps ?</h4><div class="opts" id="o-portee">' +
+      opt('ponctuel','Cette fois seulement', joliDate(d)) +
+      opt('4sem','4 semaines', 'jusqu\'au ' + joliDate(ajouteJours(d,21))) +
+      opt('vacances','Jusqu\'aux vacances', 'jusqu\'au ' + joliDate(veilleDesVacances(d))) +
+      opt('annee','Toute l\'année', 'jusqu\'en juillet') +
+    '</div></div>' +
+    '<div class="bloc" id="bloc-parite">' +
+      '<h4>Quelles semaines ?</h4>' +
+      (par ? '<div class="info-p">Le ' + joliDate(d) + ' est une <b>semaine ' + par + '</b>. Une semaine sur deux, l\'emploi du temps change.</div>' : '') +
+      '<div class="opts" id="o-parite">' +
+        opt('toutes','Toutes les semaines','A et B', 'parite') +
+        (par ? opt(par,'Seulement les ' + par,'une semaine sur deux','parite') : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="bloc"><h4>Ce que ça donne</h4><div class="info-p" id="recap-occ"></div></div>' +
+    '<div style="height:8px"></div>';
+
+  $('#f-pied').innerHTML =
+    (brouillon.existant ? '<button class="btn btn-d" id="f-suppr">Retirer</button>' : '<button class="btn btn-s" id="f-annul">Annuler</button>') +
+    '<button class="btn btn-p" id="f-ok">' + (brouillon.existant ? 'Enregistrer' : 'Je prends ce créneau') + '</button>';
+
+  brancheFeuille();
+  ouvreFeuille();
+}
+function opt(v, t, s, groupe){
+  const g = groupe || 'portee';
+  const on = brouillon[g] === v ? ' on' : '';
+  return '<button class="opt' + on + '" data-g="' + g + '" data-v="' + v + '">' + t + '<small>' + s + '</small></button>';
+}
+function brancheFeuille(){
+  $('#f-corps').querySelectorAll('.opt').forEach(b => {
+    b.onclick = () => {
+      const g = b.dataset.g;
+      brouillon[g] = b.dataset.v;
+      $('#f-corps').querySelectorAll('.opt[data-g="'+g+'"]').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      if (g === 'portee') $('#bloc-parite').classList.toggle('hide', b.dataset.v === 'ponctuel');
+      resumeOccurrences();
+    };
+  });
+  const sd = $('#s-debut'), sf = $('#s-fin');
+  if (sd) sd.onchange = () => { brouillon.debut = sd.value; if (minutes(sf.value) <= minutes(sd.value)) sf.value = versH(minutes(sd.value)+30); brouillon.fin = sf.value; resumeOccurrences(); };
+  if (sf) sf.onchange = () => { brouillon.fin = sf.value; if (minutes(sf.value) <= minutes(sd.value)) sd.value = versH(minutes(sf.value)-30); brouillon.debut = sd.value; resumeOccurrences(); };
+  if ($('#bloc-parite')) $('#bloc-parite').classList.toggle('hide', brouillon.portee === 'ponctuel');
+  const ok = $('#f-ok'); if (ok) ok.onclick = enregistre;
+  const an = $('#f-annul'); if (an) an.onclick = fermeFeuille;
+  const su = $('#f-suppr'); if (su) su.onclick = supprime;
+  resumeOccurrences();
+}
+/* Les dates réellement couvertes par la règle en cours de saisie, avec ce qu'on
+   y trouve : une même case peut porter une autre matière en semaine A. */
+function occurrences(b){
+  const out = [], jr = jourDe(b.date), fin = finDePortee(b.date, b.portee);
+  for (let d = b.date; d <= fin; d = ajouteJours(d, 7)){
+    if (enVacances(d) || enPfmp(b.cours.classe.id, d)) continue;
+    if (b.portee !== 'ponctuel' && b.parite !== 'toutes' && pariteDe(d) !== b.parite) continue;
+    const ici = coursDuJour(d).filter(c => c.classe.id === b.cours.classe.id &&
+      minutes(c.debut) < minutes(b.fin) && minutes(c.fin) > minutes(b.debut));
+    if (ici.length) out.push({ date: d, matieres: [...new Set(ici.map(c => c.matiere))] });
+  }
+  return out;
+}
+function resumeOccurrences(){
+  const z = $('#recap-occ'); if (!z || !brouillon || !brouillon.cours) return;
+  const occ = occurrences(brouillon), n = occ.length;
+  const autres = occ.filter(o => !o.matieres.includes(brouillon.cours.matiere));
+  const noms = [...new Set(autres.flatMap(o => o.matieres))];
+  z.innerHTML = !n
+    ? '<b>Aucune séance</b> ne correspond : vérifiez la portée ou les semaines.'
+    : '<b>' + n + (n > 1 ? ' séances' : ' séance') + '</b> — ' +
+      occ.slice(0,3).map(o => joliDate(o.date)).join(', ') +
+      (n > 3 ? '… jusqu\'au ' + joliDate(occ[n-1].date) : '') +
+      ' · <b>' + fmtH(n * duree(brouillon.debut, brouillon.fin)) + '</b> au total' +
+      (autres.length
+        ? '<div style="margin-top:7px;color:#b45309;font-weight:600">⚠️ Sur ' + autres.length +
+          ' de ces semaines, ce créneau porte une autre matière : ' + noms.join(', ') + '.</div>'
+        : '');
+}
+function finDePortee(d, portee){
+  if (portee === 'ponctuel') return d;
+  if (portee === '4sem') return ajouteJours(d, 21);
+  if (portee === 'vacances') return veilleDesVacances(d);
+  return G.cours[G.cours.length - 1][1];
+}
+async function enregistre(){
+  const b = brouillon, c = b.cours;
+  const id = b.existant ? b.id : (moi.id + '_' + Date.now().toString(36));
+  const donnee = {
+    id, aeshId: moi.id, type: 'cours',
+    classeId: c.classe.id, classe: c.classe.court,
+    matiere: c.matiere, salle: c.salle,
+    jour: jourDe(b.date), debut: b.debut, fin: b.fin,
+    coursDebut: c.debut, coursFin: c.fin,
+    dateDebut: b.date, dateFin: finDePortee(b.date, b.portee),
+    portee: b.portee, parite: b.portee === 'ponctuel' ? 'toutes' : b.parite,
+    majLe: new Date().toISOString()
+  };
+  fermeFeuille();
+  try { await setDoc(doc(db, COL_SAISIES, id), donnee); dis('Créneau enregistré'); }
+  catch(e){ dis('Échec de l\'enregistrement'); }
+}
+async function supprime(){
+  const id = brouillon.id;
+  fermeFeuille();
+  try { await deleteDoc(doc(db, COL_SAISIES, id)); dis('Créneau retiré'); }
+  catch(e){ dis('Échec de la suppression'); }
+}
+function ouvreFeuille(){ $('#voile').classList.add('on'); $('#feuille').classList.add('on'); }
+function fermeFeuille(){ $('#voile').classList.remove('on'); $('#feuille').classList.remove('on'); }
+$('#voile').onclick = fermeFeuille;
+
+/* ─────────── services ─────────── */
+function libFrequence(s){
+  if (s.frequence === 'mensuel') return 'une fois par mois';
+  if (s.parite && s.parite !== 'toutes') return 'semaines ' + s.parite;
+  return 'chaque semaine';
+}
+function rendServices(){
+  const z = $('#liste-services'); z.innerHTML = '';
+  const miens = saisies.filter(s => s.aeshId === moi.id && s.type === 'service')
+    .sort((a,b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || (a.debut < b.debut ? -1 : 1));
+  if (!miens.length){
+    z.innerHTML = '<div class="vide-j"><span class="em">☕</span>Aucun service pour l\'instant.</div>';
+    return;
+  }
+  miens.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'ligne';
+    el.innerHTML = '<div class="g"><div class="t">' + s.label + '</div>' +
+      '<div class="s">' + JOURS_LONG[s.jour] + ' · ' + s.debut + '–' + s.fin + ' · ' +
+      fmtH(duree(s.debut,s.fin)) + ' · ' + libFrequence(s) + '</div></div>' +
+      '<button class="x">✕</button>';
+    el.querySelector('.x').onclick = async () => {
+      try { await deleteDoc(doc(db, COL_SAISIES, s.id)); dis('Service retiré'); } catch(e){}
+    };
+    z.appendChild(el);
+  });
+}
+/* Créneaux tout prêts. La réunion d'équipe PSR est le lundi 13 h–14 h par défaut :
+   proposée, jamais imposée — jour et heure restent modifiables juste en dessous. */
+const PRETS = [
+  { cle:'reunion',  titre:'Réunion d\'équipe', detail:'lundi 13:00–14:00, chaque semaine',
+    label:'Réunion d\'équipe', jour:'lun', debut:'13:00', fin:'14:00', frequence:'hebdo' },
+  { cle:'mensuelle',titre:'Réunion mensuelle', detail:'lundi 08:30–09:30, une fois par mois',
+    label:'Réunion mensuelle', jour:'lun', debut:'08:30', fin:'09:30', frequence:'mensuel' },
+  { cle:'cantine',  titre:'Cantine', detail:'à vous de dire quand',
+    label:'Cantine', jour:'lun', debut:'12:30', fin:'13:30', frequence:'hebdo' },
+  { cle:'internat', titre:'Internat', detail:'à vous de dire quand',
+    label:'Internat', jour:'lun', debut:'17:00', fin:'18:00', frequence:'hebdo' },
+  { cle:'autre',    titre:'Autre', detail:'PIAL, coordination, surveillance…',
+    label:'', jour:'lun', debut:'12:30', fin:'13:30', frequence:'hebdo' }
+];
+
+$('#ajout-service').onclick = () => {
+  brouillon = { type:'service', pret:'reunion', ...PRETS[0], parite:'toutes' };
+  dessineFeuilleService();
+  ouvreFeuille();
+};
+
+function dessineFeuilleService(){
+  const b = brouillon;
+  const heures = [];
+  for (let m = 7*60; m <= 22*60; m += 30) heures.push(versH(m));
+  const sel = (id, liste, val, libelle) =>
+    '<select id="' + id + '">' + liste.map(v =>
+      '<option value="' + v + '"' + (v === val ? ' selected' : '') + '>' +
+      (libelle ? libelle(v) : v) + '</option>').join('') + '</select>';
+
+  $('#f-corps').innerHTML =
+    '<div class="f-t">Ajouter un service</div>' +
+    '<div class="f-st">Ce qui n\'est pas un cours et qui compte dans vos heures.</div>' +
+    '<div class="bloc"><h4>Créneaux tout prêts</h4><div class="prets">' +
+      PRETS.map(p => '<button class="pret' + (b.pret === p.cle ? ' on' : '') +
+        (p.cle === 'autre' ? ' large' : '') + '" data-pret="' + p.cle + '">' +
+        '<b>' + p.titre + '</b><small>' + p.detail + '</small></button>').join('') +
+    '</div></div>' +
+    '<div class="bloc"><h4>À ajuster si besoin</h4>' +
+      '<div class="champ"><label>Quoi ?</label>' +
+        '<input id="sv-label" value="' + (b.label || '').replace(/"/g,'&quot;') +
+        '" placeholder="Cantine, internat, PIAL…"></div>' +
+      '<div class="champ"><label>Quel jour ?</label>' +
+        sel('sv-jour', JOURS, b.jour, j => JOURS_LONG[j]) + '</div>' +
+      '<div class="champ"><label>Horaire</label><div class="horaires">' +
+        sel('s-debut', heures.slice(0,-1), b.debut) +
+        '<span style="color:var(--muted);font-weight:700">→</span>' +
+        sel('s-fin', heures.slice(1), b.fin) +
+      '</div></div></div>' +
+    '<div class="bloc"><h4>À quelle fréquence ?</h4><div class="opts" id="o-freq">' +
+      optS('hebdo',   'Chaque semaine',    'tous les ' + JOURS_LONG[b.jour] + 's', b.frequence === 'hebdo' && b.parite === 'toutes') +
+      optS('A',       'Semaines A',        'une semaine sur deux', b.frequence === 'hebdo' && b.parite === 'A') +
+      optS('B',       'Semaines B',        'une semaine sur deux', b.frequence === 'hebdo' && b.parite === 'B') +
+      optS('mensuel', 'Une fois par mois', 'le même ' + JOURS_LONG[b.jour] + ' chaque mois', b.frequence === 'mensuel') +
+    '</div></div>' +
+    '<div class="bloc"><h4>Ce que ça donne</h4><div class="info-p" id="recap-svc"></div></div>' +
+    '<div style="height:8px"></div>';
+
+  $('#f-pied').innerHTML = '<button class="btn btn-s" id="f-annul">Annuler</button>' +
+    '<button class="btn btn-p" id="f-ok">Ajouter</button>';
+
+  $('#f-corps').querySelectorAll('.pret').forEach(el => {
+    el.onclick = () => {
+      const p = PRETS.find(x => x.cle === el.dataset.pret);
+      brouillon = { type:'service', pret:p.cle, ...p, parite:'toutes' };
+      dessineFeuilleService();
+    };
+  });
+  $('#f-corps').querySelectorAll('#o-freq .opt').forEach(el => {
+    el.onclick = () => {
+      const v = el.dataset.v;
+      brouillon.frequence = (v === 'mensuel') ? 'mensuel' : 'hebdo';
+      brouillon.parite = (v === 'A' || v === 'B') ? v : 'toutes';
+      $('#f-corps').querySelectorAll('#o-freq .opt').forEach(x => x.classList.remove('on'));
+      el.classList.add('on');
+      resumeService();
+    };
+  });
+  const lire = () => {
+    brouillon.label = $('#sv-label').value;
+    brouillon.jour  = $('#sv-jour').value;
+    brouillon.debut = $('#s-debut').value;
+    brouillon.fin   = $('#s-fin').value;
+  };
+  ['sv-label','sv-jour','s-debut','s-fin'].forEach(id => {
+    const e = $('#' + id); if (e) e.oninput = e.onchange = () => { lire(); resumeService(); };
+  });
+  $('#f-annul').onclick = fermeFeuille;
+  $('#f-ok').onclick = enregistreService;
+  resumeService();
+}
+function optS(v, t, s, actif){
+  return '<button class="opt' + (actif ? ' on' : '') + '" data-v="' + v + '">' +
+    t + '<small>' + s + '</small></button>';
+}
+/* Première date où ce service tombe, à partir du 7 septembre. */
+function premierJour(b){
+  for (let d = PREMIER_LUNDI, n = 0; n < 400; d = ajouteJours(d, 1), n++)
+    if (jourDe(d) === b.jour && !enVacances(d)) return d;
+  return PREMIER_LUNDI;
+}
+function resumeService(){
+  const z = $('#recap-svc'); if (!z) return;
+  const b = brouillon;
+  if (minutes(b.fin) <= minutes(b.debut)){
+    z.innerHTML = '<b>L\'heure de fin doit suivre le début.</b>'; return;
+  }
+  const regle = { ...b, dateDebut: premierJour(b), dateFin: G.cours[G.cours.length-1][1] };
+  let n = 0;
+  const premieres = [];
+  for (let d = regle.dateDebut; d <= regle.dateFin; d = ajouteJours(d, 1))
+    if (jourDe(d) === regle.jour && couvre(regle, d)){
+      n++; if (premieres.length < 3) premieres.push(joliDate(d));
+    }
+  z.innerHTML = !n ? '<b>Aucune séance</b> ne correspond.'
+    : '<b>' + n + (n > 1 ? ' fois' : ' fois') + '</b> — ' + premieres.join(', ') +
+      (n > 3 ? '…' : '') + ' · <b>' + fmtH(n * duree(b.debut, b.fin)) + '</b> sur l\'année';
+}
+async function enregistreService(){
+  const b = brouillon;
+  const label = (b.label || '').trim() || 'Service';
+  if (minutes(b.fin) <= minutes(b.debut)){ dis('L\'heure de fin doit suivre le début'); return; }
+  const id = moi.id + '_sv_' + Date.now().toString(36);
+  fermeFeuille();
+  try {
+    await setDoc(doc(db, COL_SAISIES, id), {
+      id, aeshId: moi.id, type:'service', label,
+      jour: b.jour, debut: b.debut, fin: b.fin,
+      dateDebut: premierJour(b), dateFin: G.cours[G.cours.length-1][1],
+      portee: 'annee', frequence: b.frequence || 'hebdo', parite: b.parite || 'toutes',
+      majLe: new Date().toISOString()
+    });
+    dis('Service ajouté');
+  } catch(e){ dis('Échec de l\'enregistrement'); }
+}
+
+/* ─────────── l'équipe, en direct ─────────── */
+function rendEquipe(){
+  const d = ajouteJours(lundiCourant, JOURS.indexOf(jourCourant));
+  const z = $('#liste-equipe'); z.innerHTML = '';
+  if (enVacances(d)){
+    const v = G.vacances.find(x => d >= x.debut && d <= x.fin);
+    z.innerHTML = '<div class="vide-j"><span class="em">🌴</span><b>' + v.label + '</b></div>';
+    return;
+  }
+  intervenants.forEach(p => {
+    const jour = saisies.filter(s => s.aeshId === p.id && couvre(s, d))
+      .sort((a,b) => a.debut < b.debut ? -1 : 1);
+    const hJour = jour.reduce((t,s) => t + duree(s.debut, s.fin), 0);
+    const el = document.createElement('div');
+    el.className = 'pers' + (p.id === moi.id ? ' est-moi' : '');
+    el.innerHTML =
+      '<div class="pers-h"><div class="p" style="background:' + (p.couleur||'#0f766e') + '">' +
+        p.code + '</div>' +
+      '<div class="n">' + p.code + '<small>' + (p.id === moi.id ? 'c\'est vous' : 'collègue') + '</small></div>' +
+      '<div class="tot"><b>' + fmtH(heuresSemaine(p.id, lundiCourant)) + '</b><span>la semaine</span></div></div>' +
+      (jour.length
+        ? '<div class="pers-c">' + jour.map(s => {
+            const cl = G.classes.find(c => c.id === s.classeId);
+            return '<div class="cr"><b>' + s.debut + '–' + s.fin + '</b>' +
+              (cl ? '<span class="tag-cl" style="background:' + cl.couleur + '">' + cl.court + '</span>' : '') +
+              '<span class="q">' + (s.type === 'service' ? s.label : s.matiere) + '</span></div>';
+          }).join('') + '</div>' +
+          '<div class="pers-v">' + fmtH(hJour) + ' ce jour-là</div>'
+        : '<div class="pers-v">Rien de posé ce jour-là.</div>');
+    z.appendChild(el);
+  });
+}
+
+/* ─────────── récap ─────────── */
+function rendRecap(){
+  const t = heuresSemaine(moi.id, lundiCourant);
+  $('#r-total').textContent = fmtH(t);
+  $('#r-legende').textContent = 'semaine du ' + joliDate(lundiCourant) +
+    (pariteDe(lundiCourant) ? ' · semaine ' + pariteDe(lundiCourant) : '');
+  let d = '';
+  if (moi.contrat){
+    const e = t - moi.contrat;
+    d = 'Contrat annoncé : <b>' + fmtH(moi.contrat) + '</b><br>' +
+        (Math.abs(e) < 0.01 ? 'Vous y êtes exactement.'
+          : e > 0 ? 'Soit <b>' + fmtH(e) + '</b> de plus que votre contrat.'
+                  : 'Soit <b>' + fmtH(-e) + '</b> de moins que votre contrat.') +
+        '<br><span style="opacity:.75">Simple repère : rien n\'est bloqué, on en reparle en réunion.</span>';
+  } else d = 'Aucun contrat renseigné.';
+  $('#r-detail').innerHTML = d;
+
+  const z = $('#r-liste'); z.innerHTML = '';
+  const miens = saisies.filter(s => s.aeshId === moi.id)
+    .sort((a,b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || (a.debut < b.debut ? -1 : 1));
+  if (!miens.length){
+    z.innerHTML = '<div class="vide-j"><span class="em">🗒️</span>Vous n\'avez encore rien posé.</div>';
+    return;
+  }
+  const LIB = {ponctuel:'une fois', '4sem':'4 semaines', vacances:'jusqu\'aux vacances', annee:'toute l\'année'};
+  miens.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'ligne';
+    const cl = G.classes.find(c => c.id === s.classeId);
+    el.innerHTML = '<div class="g"><div class="t">' +
+      (s.type === 'service' ? s.label : s.matiere) + '</div><div class="s">' +
+      (cl ? cl.court + ' · ' : '') + JOURS_LONG[s.jour] + ' ' + s.debut + '–' + s.fin +
+      ' · ' + fmtH(duree(s.debut, s.fin)) + ' · ' +
+      (s.type === 'service' ? libFrequence(s) : (LIB[s.portee] || '') +
+        (s.parite !== 'toutes' ? ' · sem. ' + s.parite : '')) + '</div></div>' +
+      '<button class="x">✕</button>';
+    el.querySelector('.x').onclick = async () => {
+      try { await deleteDoc(doc(db, COL_SAISIES, s.id)); dis('Retiré'); } catch(e){}
+    };
+    z.appendChild(el);
+  });
+}
+$('#changer-code').onclick = () => {
+  localStorage.removeItem('edt-aesh-code');
+  location.reload();
+};
+
+/* ─────────── navigation ─────────── */
+$('#sem-prec').onclick = () => { if (lundiCourant > PREMIER_LUNDI){ lundiCourant = ajouteJours(lundiCourant,-7); rendu(); } };
+$('#sem-suiv').onclick = () => { lundiCourant = ajouteJours(lundiCourant, 7); rendu(); };
+document.querySelectorAll('.ong').forEach(b => {
+  b.onclick = () => {
+    vue = b.dataset.vue;
+    document.querySelectorAll('.ong').forEach(x => x.classList.toggle('on', x === b));
+    $('#vue-semaine').classList.toggle('hide', vue !== 'semaine');
+    $('#vue-equipe').classList.toggle('hide', vue !== 'equipe');
+    $('#vue-services').classList.toggle('hide', vue !== 'services');
+    $('#vue-recap').classList.toggle('hide', vue !== 'recap');
+    rendu();
+  };
+});
+let minuteur = null;
+function dis(t){
+  const e = $('#etat'); e.textContent = t; e.classList.add('on');
+  clearTimeout(minuteur); minuteur = setTimeout(() => e.classList.remove('on'), 2200);
+}
+
+/* ─────────── démarrage ─────────── */
+(async function(){
+  G = await (await fetch('grille.json?v=' + Date.now())).json();
+  onSnapshot(collection(db, COL_INTER), snap => {
+    // on nettoie le code une bonne fois : tout l'affichage en dépend
+    intervenants = snap.docs.map(d => { const x = d.data(); return { ...x, code: normCode(x.code) }; })
+      .sort((a,b) => (a.ordre||0) - (b.ordre||0));
+    if (moi){ const m = intervenants.find(i => i.id === moi.id); if (m) moi = m; }
+    else {
+      const memo = localStorage.getItem('edt-aesh-code');
+      if (memo){
+        const t = intervenants.find(i => normCode(i.code) === normCode(memo));
+        if (t){ moi = t; ouvreSuite(); }
+      }
+    }
+  }, () => $('#msg-code').textContent = 'Connexion impossible.');
+  onSnapshot(collection(db, COL_SAISIES), snap => {
+    saisies = snap.docs.map(d => d.data());
+    if (moi && !$('#appli').classList.contains('hide')) rendu();
+  });
+})();
+</script>
+</body>
+</html>

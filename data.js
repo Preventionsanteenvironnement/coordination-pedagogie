@@ -221,6 +221,14 @@ const THEMATIQUES = [
             badge: "Nouveau",
           },
           {
+            titre: "Espace EDT — je pose mes créneaux",
+            desc: "Chaque AESH entre son code à quatre chiffres et remplit lui-même son emploi du temps, depuis son téléphone : il choisit ses créneaux dans les classes PSR & MELEC, voit qui est déjà là, ajoute ses services (cantine, internat, PIAL). Semaine A / semaine B gérées.",
+            lien: "edt-aesh/",
+            type: "Outil",
+            icon: "calendar",
+            badge: "Nouveau",
+          },
+          {
             titre: "Planning AESH — sections PSR & MELEC",
             desc: "Emplois du temps des sections PSR & MELEC, affectation des AESH (semaine A/B), périodes PFMP et événements. Les intervenants y consultent leur planning ; l'éditeur est réservé au coordinateur.",
             lien: "planning-psr/",
