@@ -275,6 +275,40 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
 .bloc-c.vide{opacity:.45}
 .edt-vide{padding:40px 20px;text-align:center;color:var(--muted);width:100%}
 
+.bascule{display:flex;gap:4px;padding:4px;border-radius:13px;background:var(--line-2);
+  margin-bottom:12px}
+.bascule button{flex:1;padding:9px;border-radius:10px;font-size:.86rem;font-weight:800;
+  color:var(--muted);transition:.14s}
+.bascule button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow-s)}
+
+/* ---------- le mois ---------- */
+.mois-t{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.mois-t b{font-size:1.05rem;font-weight:800;letter-spacing:-.02em;text-transform:capitalize}
+.mois-t button{width:34px;height:34px;border-radius:11px;border:1px solid var(--line);
+  background:var(--card);display:grid;place-items:center;color:var(--ink-2);font-size:1.05rem}
+.sem-l{display:flex;gap:6px;margin-bottom:6px;align-items:stretch}
+.sem-l .par{flex:none;width:26px;border-radius:9px;display:grid;place-items:center;
+  font-size:.72rem;font-weight:800;background:var(--line-2);color:var(--muted)}
+.sem-l .par.A{background:#eef2ff;color:#4338ca}
+.sem-l .par.B{background:#fff7ed;color:#c2410c}
+/* un <button> n'empile pas ses enfants de façon fiable : on impose la colonne */
+.jr{flex:1;min-width:0;border-radius:11px;border:1px solid var(--line);background:var(--card);
+  padding:6px 3px 7px;text-align:center;box-shadow:var(--shadow-s);transition:.14s;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px}
+.jr.moi{border-color:var(--accent);background:var(--accent-l)}
+.jr.rien{opacity:.42}
+.jr.ferme{background:var(--line-2);border-style:dashed;opacity:.55}
+  .jr b{font-size:.86rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;flex:none}
+.jr .pts{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;min-height:6px;flex:none}
+.jr .pts i{width:6px;height:6px;border-radius:50%;display:block}
+.jr .pts i.moi{box-shadow:0 0 0 1.5px var(--card),0 0 0 3px var(--accent)}
+.jr .h{font-size:.62rem;font-weight:800;color:var(--accent);white-space:nowrap;
+  font-variant-numeric:tabular-nums;min-height:.8em;flex:none}
+.mois-e{display:flex;gap:6px;margin-bottom:8px;padding-left:32px}
+.mois-e span{flex:1;text-align:center;font-size:.66rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted)}
+.mois-p{margin-top:14px;font-size:.8rem;color:var(--muted);line-height:1.6}
+
 /* ---------- récap & services ---------- */
 .ligne{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-s)}
@@ -412,9 +446,14 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
   </main>
 
   <main id="vue-equipe" class="hide">
+    <div class="bascule">
+      <button class="on" data-vue2="semaine">Semaine</button>
+      <button data-vue2="mois">Mois</button>
+    </div>
     <div class="bande" id="bande-equipe"></div>
     <div class="filtres" id="filtres-edt"></div>
     <div class="edt" id="edt"></div>
+    <div id="mois" class="hide"></div>
   </main>
 
   <main id="vue-recap" class="hide">
@@ -1200,8 +1239,80 @@ function rendEquipe(){
     fz.appendChild(b);
   });
 
-  dessineEdt();
+  if (vue2 === 'mois') rendMois(); else dessineEdt();
 }
+
+/* ─────────── la vue du mois ─────────── */
+let vue2 = 'semaine', moisVu = null;
+
+/* format resserré pour les cases du mois : « 1h », « 1h30 » */
+function fmtCourt(h){
+  const s = Math.round(h * 60), a = Math.floor(s / 60), b = s % 60;
+  return b ? a + 'h' + String(b).padStart(2,'0') : a + 'h';
+}
+function rendMois(){
+  const z = $('#mois');
+  const ref = dat(moisVu || lundiCourant);
+  const an = ref.getFullYear(), mo = ref.getMonth();
+  const premier = new Date(an, mo, 1, 12);
+  let d = iso(premier);
+  d = lundiDe(d);                                   // on part du lundi de la 1re semaine
+
+  let html = '<div class="mois-t">' +
+    '<button id="mois-prec">‹</button><b>' + MOIS[mo] + ' ' + an + '</b>' +
+    '<button id="mois-suiv">›</button></div>' +
+    '<div class="mois-e">' + JOURS.map(j => '<span>' + j + '</span>').join('') + '</div>';
+
+  const miens = intervenants.filter(p => !moi.section || !p.section || p.section === moi.section);
+
+  for (let sem = 0; sem < 6; sem++){
+    const lundiSem = ajouteJours(d, sem * 7);
+    if (dat(lundiSem).getMonth() !== mo && dat(ajouteJours(lundiSem,4)).getMonth() !== mo) continue;
+    const par = pariteDe(lundiSem);
+    html += '<div class="sem-l"><div class="par ' + par + '">' + (par || '·') + '</div>';
+    for (let i = 0; i < 5; i++){
+      const jour = ajouteJours(lundiSem, i);
+      const dedans = dat(jour).getMonth() === mo;
+      const ferme = enVacances(jour);
+      const presents = miens.filter(p => saisies.some(s => s.aeshId === p.id && couvre(s, jour)));
+      const aMoi = saisies.filter(s => s.aeshId === moi.id && couvre(s, jour))
+        .reduce((t,s) => t + duree(s.debut, s.fin), 0);
+      html += '<button class="jr' + (aMoi ? ' moi' : '') + (ferme ? ' ferme' : '') +
+        (!dedans ? ' rien' : '') + '" data-j="' + jour + '">' +
+        '<b>' + dat(jour).getDate() + '</b>' +
+        '<span class="pts">' + presents.map(p => '<i' + (p.id === moi.id ? ' class="moi"' : '') +
+          ' style="background:' + (p.couleur||'#0f766e') + '"></i>').join('') + '</span>' +
+        '<span class="h">' + (aMoi ? fmtCourt(aMoi) : '') + '</span></button>';
+    }
+    html += '</div>';
+  }
+  html += '<p class="mois-p">Un point par personne présente ce jour-là — le vôtre est cerclé. ' +
+    'La lettre à gauche donne la semaine A ou B. Touchez un jour pour l\'ouvrir.</p>';
+  z.innerHTML = html;
+
+  $('#mois-prec').onclick = () => { const x = new Date(an, mo - 1, 15, 12); moisVu = iso(x); rendMois(); };
+  $('#mois-suiv').onclick = () => { const x = new Date(an, mo + 1, 15, 12); moisVu = iso(x); rendMois(); };
+  z.querySelectorAll('.jr').forEach(b => {
+    b.onclick = () => {
+      const j = b.dataset.j;
+      lundiCourant = lundiDe(j) < PREMIER_LUNDI ? PREMIER_LUNDI : lundiDe(j);
+      jourCourant = jourDe(j) || 'lun';
+      basculeVue2('semaine');
+      rendu();
+    };
+  });
+}
+
+function basculeVue2(v){
+  vue2 = v;
+  document.querySelectorAll('.bascule button').forEach(b => b.classList.toggle('on', b.dataset.vue2 === v));
+  $('#edt').classList.toggle('hide', v !== 'semaine');
+  $('#filtres-edt').classList.toggle('hide', v !== 'semaine');
+  $('#mois').classList.toggle('hide', v !== 'mois');
+}
+document.querySelectorAll('.bascule button').forEach(b => {
+  b.onclick = () => { basculeVue2(b.dataset.vue2); if (vue2 === 'mois'){ moisVu = lundiCourant; rendMois(); } };
+});
 
 function dessineEdt(){
   const z = $('#edt'); z.innerHTML = '';
