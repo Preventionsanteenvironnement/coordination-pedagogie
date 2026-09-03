@@ -1449,10 +1449,24 @@ function dis(t){
       .sort((a,b) => (a.ordre||0) - (b.ordre||0));
     if (moi){ const m = intervenants.find(i => i.id === moi.id); if (m) moi = m; }
     else {
-      const memo = localStorage.getItem('edt-aesh-code');
-      if (memo){
-        const t = intervenants.find(i => normCode(i.code) === normCode(memo));
-        if (t){ moi = t; ouvreSuite(); }
+      // Le QR de l'étiquette porte le code : « …/edt-aesh/?c=4475 ». On ouvre
+      // la session, on mémorise, puis on efface le code de la barre d'adresse.
+      const p = new URLSearchParams(location.search);
+      const parUrl = normCode(p.get('c') || p.get('code') || '');
+      const memo = normCode(localStorage.getItem('edt-aesh-code') || '');
+      const cherche = parUrl || memo;
+      if (cherche){
+        const t = intervenants.find(i => normCode(i.code) === cherche);
+        if (t){
+          moi = t;
+          if (parUrl){
+            try { localStorage.setItem('edt-aesh-code', parUrl); } catch(e){}
+            try { history.replaceState({}, '', location.pathname); } catch(e){}
+          }
+          ouvreSuite();
+        } else if (parUrl){
+          $('#msg-code').textContent = 'Ce code ne correspond à personne.';
+        }
       }
     }
   }, () => $('#msg-code').textContent = 'Connexion impossible.');
