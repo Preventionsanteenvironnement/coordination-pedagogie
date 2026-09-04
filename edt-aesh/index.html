@@ -528,11 +528,12 @@ function fmtH(h){
   const s = Math.round(h*60), hh = Math.floor(s/60), mm = s%60;
   return mm ? hh+' h '+String(mm).padStart(2,'0') : hh+' h';
 }
-function enVacances(d){ return G.vacances.some(v => d >= v.debut && d <= v.fin); }
+function enVacances(d){ return G.vacances.some(v => d >= v.debut && d < v.fin); }
 function enPfmp(classeId,d){
   const c = G.classes.find(x=>x.id===classeId);
   return !!c && (c.pfmp||[]).some(p => d >= p.debut && d <= p.fin);
 }
+function saisieDeCetteAnnee(s){ return !s.annee || !G.annee || s.annee === G.annee; }
 function pariteDe(d){
   const dd = dat(d), an = dd.getFullYear();
   const t = new Date(Date.UTC(an, dd.getMonth(), dd.getDate()));
@@ -1018,7 +1019,7 @@ async function enregistre(){
   const b = brouillon, c = b.cours;
   const id = b.existant ? b.id : (moi.id + '_' + Date.now().toString(36));
   const donnee = {
-    id, aeshId: moi.id, type: 'cours',
+    id, annee: G.annee || '2026-2027', aeshId: moi.id, type: 'cours',
     classeId: c.classe.id, classe: c.classe.court,
     matiere: c.matiere, salle: c.salle,
     jour: jourDe(b.date), debut: b.debut, fin: b.fin,
@@ -1164,7 +1165,7 @@ function optS(v, t, s, actif){
   return '<button class="opt' + (actif ? ' on' : '') + '" data-v="' + v + '">' +
     t + '<small>' + s + '</small></button>';
 }
-/* Première date où ce service tombe, à partir du 7 septembre. */
+/* Première date où ce service tombe, à partir de la semaine de rentrée. */
 function premierJour(b){
   for (let d = PREMIER_LUNDI, n = 0; n < 400; d = ajouteJours(d, 1), n++)
     if (jourDe(d) === b.jour && !enVacances(d)) return d;
@@ -1195,7 +1196,7 @@ async function enregistreService(){
   fermeFeuille();
   try {
     await setDoc(doc(db, COL_SAISIES, id), {
-      id, aeshId: moi.id, type:'service', label,
+      id, annee: G.annee || '2026-2027', aeshId: moi.id, type:'service', label,
       jour: b.jour, debut: b.debut, fin: b.fin,
       dateDebut: premierJour(b), dateFin: G.cours[G.cours.length-1][1],
       portee: 'annee', frequence: b.frequence || 'hebdo', parite: b.parite || 'toutes',
@@ -1471,7 +1472,7 @@ function dis(t){
     }
   }, () => $('#msg-code').textContent = 'Connexion impossible.');
   onSnapshot(collection(db, COL_SAISIES), snap => {
-    saisies = snap.docs.map(d => d.data());
+    saisies = snap.docs.map(d => d.data()).filter(saisieDeCetteAnnee);
     if (moi && !$('#appli').classList.contains('hide')) rendu();
   });
 })();
