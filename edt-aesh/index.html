@@ -103,6 +103,9 @@ input,select{font:inherit;color:inherit}
 .saisie-h{display:flex;align-items:center;gap:10px;margin-top:18px}
 .saisie-h input{width:96px;padding:12px 14px;border-radius:13px;border:1.5px solid var(--line);
   background:var(--card);text-align:center;font-weight:700;font-size:1.05rem}
+.contrat-msg{min-height:1.35em;margin-top:14px;color:var(--ink-2);font-size:.86rem;font-weight:700}
+.contrat-actions{display:flex;gap:10px;margin-top:22px;width:100%;max-width:20rem}
+.contrat-actions .btn{width:auto;max-width:none;flex:1}
 
 /* ---------- coque ---------- */
 #appli{display:flex;flex-direction:column;height:100%}
@@ -120,6 +123,12 @@ header.barre{
 .compteur{text-align:right;line-height:1.15;flex:none}
 .compteur b{font-size:1.12rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .compteur span{display:block;font-size:.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.delegation{display:flex;align-items:center;gap:7px;overflow-x:auto;margin-top:10px;padding-bottom:2px;scrollbar-width:none}
+.delegation::-webkit-scrollbar{display:none}
+.delegation span{flex:none;color:var(--muted);font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.delegation button{flex:none;padding:6px 11px;border-radius:999px;border:1.5px solid var(--line);
+  background:var(--card);font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}
+.delegation button.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .nav-sem{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px}
 .nav-sem button{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);
   background:var(--card);display:grid;place-items:center;font-size:1.1rem;color:var(--ink-2)}
@@ -226,6 +235,19 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
   -webkit-appearance:none;appearance:none;text-align-last:center}
 .info-p{background:var(--accent-l);border:1px solid var(--accent-b);border-radius:13px;
   padding:11px 13px;font-size:.85rem;color:var(--ink-2);line-height:1.5;margin-bottom:10px}
+.retour-box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;box-shadow:var(--shadow-s)}
+.retour-tabs,.retour-choix{display:flex;flex-wrap:wrap;gap:8px}
+.retour-tabs button,.retour-choix button{padding:9px 12px;border-radius:999px;border:1.5px solid var(--line);
+  background:var(--card);font-size:.83rem;font-weight:800;color:var(--ink-2)}
+.retour-tabs button.on,.retour-choix button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.retour-check{display:flex;align-items:center;gap:9px;margin-top:14px;font-weight:800;color:var(--ink-2)}
+.retour-check input{width:18px;height:18px;accent-color:var(--accent)}
+.retour-aide{margin:14px 0 10px;padding:10px 12px;border-radius:13px;background:var(--accent-l);
+  border:1px solid var(--accent-b);color:var(--ink-2);font-size:.84rem;font-weight:700;line-height:1.45}
+.retour-box textarea{width:100%;min-height:112px;margin-top:12px;padding:13px 14px;border-radius:14px;
+  border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;resize:vertical}
+.retour-etat{min-height:1.4em;margin-top:11px;color:var(--muted);font-size:.84rem;font-weight:700}
 .f-pied{padding:13px 18px calc(15px + var(--safe-b));border-top:1px solid var(--line-2);
   display:flex;gap:9px;flex:none;background:var(--card)}
 .btn{flex:1;padding:15px;border-radius:15px;font-weight:800;font-size:.97rem;transition:.14s}
@@ -401,7 +423,11 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <input id="h-libre" type="number" inputmode="decimal" step="0.5" min="0" max="60" placeholder="autre">
     <span style="color:var(--ink-2);font-weight:600">heures</span>
   </div>
-  <button class="btn btn-p" id="valider-h" style="margin-top:26px;max-width:15rem;width:100%;flex:none">Continuer</button>
+  <div class="contrat-msg" id="msg-contrat"></div>
+  <div class="contrat-actions">
+    <button class="btn btn-s" id="passer-h">Passer</button>
+    <button class="btn btn-p" id="valider-h">Enregistrer</button>
+  </div>
 </div>
 
 <!-- ═══ 3. application ═══ -->
@@ -420,6 +446,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
         <span>cette semaine</span>
       </div>
     </div>
+    <div class="delegation hide" id="delegation"></div>
     <div class="nav-sem">
       <button id="sem-prec">‹</button>
       <div class="sem-t">
@@ -437,7 +464,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
   </main>
 
   <main id="vue-services" class="hide">
-    <div class="sect-t">Mes services hors classe</div>
+    <div class="sect-t" id="titre-services">Mes services hors classe</div>
     <div id="liste-services"></div>
     <button class="ajout" id="ajout-service">+ Ajouter un service</button>
     <p style="color:var(--muted);font-size:.82rem;line-height:1.6;margin-top:16px">
@@ -456,14 +483,28 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <div id="mois" class="hide"></div>
   </main>
 
+  <main id="vue-retour" class="hide">
+    <div class="sect-t">Retour à transmettre</div>
+    <div class="retour-box">
+      <div class="retour-tabs" id="retour-types"></div>
+      <label class="retour-check"><input type="checkbox" id="retour-urgent"> Urgent aujourd'hui</label>
+      <div class="retour-aide">Ne nommez pas d'élève. Utilisez la classe, le créneau ou un code si nécessaire.</div>
+      <div class="retour-choix" id="retour-choix"></div>
+      <textarea id="retour-message" maxlength="600" placeholder="Message court, si besoin"></textarea>
+      <button class="ajout" id="retour-envoyer" style="margin-top:12px;border-style:solid">Envoyer le retour</button>
+      <div class="retour-etat" id="retour-etat"></div>
+    </div>
+  </main>
+
   <main id="vue-recap" class="hide">
     <div class="somme">
       <div class="v" id="r-total">0 h</div>
       <div class="l" id="r-legende">sur la semaine affichée</div>
       <div class="d" id="r-detail"></div>
     </div>
-    <div class="sect-t">Mes créneaux</div>
+    <div class="sect-t" id="titre-creneaux">Mes créneaux</div>
     <div id="r-liste"></div>
+    <button class="ajout" id="modifier-contrat" style="margin-top:20px;border-style:solid">Modifier mes heures</button>
     <button class="ajout" id="changer-code" style="margin-top:20px;border-style:solid">Quitter cet espace</button>
   </main>
 
@@ -471,6 +512,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <button class="ong on" data-vue="semaine"><b>🗓️</b><span>Semaine</span></button>
     <button class="ong" data-vue="equipe"><b>👥</b><span>L'équipe</span></button>
     <button class="ong" data-vue="services"><b>☕</b><span>Services</span></button>
+    <button class="ong" data-vue="retour"><b>✉</b><span>Retour</span></button>
     <button class="ong" data-vue="recap"><b>📊</b><span>Mon récap</span></button>
   </nav>
 </div>
@@ -485,7 +527,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, updateDoc }
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, arrayUnion }
   from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -496,6 +538,7 @@ const firebaseConfig = {
 const db = getFirestore(initializeApp(firebaseConfig));
 const COL_INTER = 'coordination_edt_aesh_intervenants';
 const COL_SAISIES = 'coordination_edt_aesh_saisies';
+const COL_RETOURS = 'coordination_edt_aesh_retours';
 
 /* ─────────── constantes ─────────── */
 const PREMIER_LUNDI = '2026-08-31';        // semaine de rentrée 2026-2027
@@ -508,11 +551,36 @@ let G = null;                 // grille.json
 let intervenants = [];        // tous les AESH
 let saisies = [];             // toutes les saisies de tout le monde
 let moi = null;               // mon intervenant
+let cibleAeshId = null;        // Antoine peut saisir pour une personne PSR
 let lundiCourant = PREMIER_LUNDI;
 let jourCourant = 'lun';
 let filtreClasse = null;      // null = toutes
 let vue = 'semaine';
+const REFERENT_PSR_ID = 'a1';
 const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RETOUR_TYPES = [
+  {id:'planning',label:'Planning'},
+  {id:'horaire',label:'Horaire faux'},
+  {id:'cours',label:'Cours introuvable'},
+  {id:'service',label:'Service oublié'},
+  {id:'technique',label:'Problème technique'},
+  {id:'suggestion',label:'Suggestion'}
+];
+const RETOUR_CHOIX = [
+  'Je n’arrive pas à enregistrer',
+  'La classe n’apparaît pas',
+  'Le créneau ne correspond pas',
+  'Il manque une information',
+  'À voir en réunion',
+  'Je propose un ajustement'
+];
+const K_RETOURS_ATTENTE = 'edt-aesh-retours-attente-v1';
+let retourType = 'planning';
+let retourChoix = new Set();
+let retourMessage = '';
+let retourUrgent = false;
+let retourEnvoi = false;
 
 /* ─────────── dates ─────────── */
 const iso = d => d.toISOString().slice(0,10);
@@ -558,6 +626,37 @@ function mesClasses(){
   return sect ? G.classes.filter(c => c.section === sect) : G.classes;
 }
 const dansMonSecteur = classeId => mesClasses().some(c => c.id === classeId);
+function estPsrIntervenant(p){
+  return !!p && (String(p.section||'').toUpperCase() === 'PSR' || ['a1','a2','a3','a4'].indexOf(p.id) >= 0);
+}
+function estReferentPsr(){ return !!moi && (moi.id === REFERENT_PSR_ID || moi.role === 'referent-psr'); }
+function ciblesPossibles(){
+  if (!moi) return [];
+  return estReferentPsr() ? intervenants.filter(estPsrIntervenant) : [moi];
+}
+function cibleSaisie(){
+  const l = ciblesPossibles();
+  if (!l.length) return moi;
+  if (!cibleAeshId || !l.some(p => p.id === cibleAeshId)) cibleAeshId = moi.id;
+  return l.find(p => p.id === cibleAeshId) || moi;
+}
+function codeCible(id){
+  if (moi && id === moi.id) return 'moi';
+  return codeDe(id);
+}
+function dessineDelegation(){
+  const z = $('#delegation'); if (!z) return;
+  if (!estReferentPsr()){ z.classList.add('hide'); z.innerHTML = ''; return; }
+  const actif = cibleSaisie(), l = ciblesPossibles();
+  z.classList.remove('hide');
+  z.innerHTML = '<span>Je saisis pour</span>' + l.map(p =>
+    '<button data-cible="' + p.id + '" class="' + (actif && p.id === actif.id ? 'on' : '') + '">' +
+    codeCible(p.id) + '</button>').join('');
+  z.querySelectorAll('[data-cible]').forEach(b => b.onclick = () => {
+    cibleAeshId = b.dataset.cible;
+    dessineDelegation(); rendu();
+  });
+}
 
 /* ─────────── cours ─────────── */
 function coursDuJour(d){
@@ -715,7 +814,10 @@ $('#entrer').onclick = () => {
 };
 /* Après le code : on salue une fois par jour, puis on entre. */
 function ouvreSuite(){ dejaSalue() ? suite() : montreBonjour(); }
-function suite(){ moi.contrat ? entre() : demandeContrat(); }
+function suite(){
+  cibleAeshId = moi && moi.id;
+  moi.contrat ? entre() : demandeContrat();
+}
 
 /* ─────────── écran code ─────────── */
 let tampon = '';
@@ -753,12 +855,17 @@ function tenteCode(){
 let contratChoisi = null;
 function demandeContrat(){
   $('#ecran-code').classList.add('hide');
+  $('#ecran-bonjour').classList.add('hide');
+  $('#appli').classList.add('hide');
   $('#ecran-contrat').classList.remove('hide');
   $('#bonjour').textContent = 'Encore une chose';
+  $('#msg-contrat').textContent = '';
   const z = $('#chips-h'); z.innerHTML = '';
+  const actuel = contratValide(moi && moi.contrat);
   [20,22,24,26,30,35,39].forEach(h => {
     const b = document.createElement('button');
-    b.className = 'chip-h'; b.textContent = h + ' h';
+    b.className = 'chip-h' + (actuel === h ? ' on' : '');
+    b.textContent = h + ' h';
     b.onclick = () => {
       contratChoisi = h; $('#h-libre').value = '';
       document.querySelectorAll('.chip-h').forEach(x => x.classList.remove('on'));
@@ -766,16 +873,37 @@ function demandeContrat(){
     };
     z.appendChild(b);
   });
+  contratChoisi = actuel;
+  $('#h-libre').value = actuel && [20,22,24,26,30,35,39].indexOf(actuel) < 0 ? actuel : '';
   $('#h-libre').oninput = e => {
-    contratChoisi = parseFloat(e.target.value) || null;
+    contratChoisi = parseFloat(String(e.target.value).replace(',','.')) || null;
     document.querySelectorAll('.chip-h').forEach(x => x.classList.remove('on'));
   };
 }
+function contratValide(v){
+  const n = parseFloat(String(v).replace(',','.'));
+  return Number.isFinite(n) && n > 0 && n <= 60 ? n : null;
+}
 $('#valider-h').onclick = async () => {
-  if (contratChoisi) {
-    moi.contrat = contratChoisi;
-    try { await updateDoc(doc(db, COL_INTER, moi.id), { contrat: contratChoisi }); } catch(e){}
+  const h = contratValide(contratChoisi);
+  if (!h){ $('#msg-contrat').textContent = 'Choisissez un volume horaire, ou passez pour le renseigner plus tard.'; return; }
+  const date = new Date().toISOString();
+  const entree = { heures:h, date, annee:(G && G.annee) || '2026-2027', source:'espace-edt' };
+  $('#msg-contrat').textContent = 'Enregistrement...';
+  try {
+    await setDoc(doc(db, COL_INTER, moi.id), {
+      contrat:h, contratMajLe:date, contratHistorique:arrayUnion(entree)
+    }, { merge:true });
+    moi.contrat = h;
+    moi.contratMajLe = date;
+    moi.contratHistorique = [...(moi.contratHistorique || []), entree];
+    $('#ecran-contrat').classList.add('hide');
+    entre();
+  } catch(e){
+    $('#msg-contrat').textContent = 'Enregistrement impossible. Vous pouvez réessayer ou passer pour entrer.';
   }
+};
+$('#passer-h').onclick = () => {
   $('#ecran-contrat').classList.add('hide');
   entre();
 };
@@ -783,17 +911,20 @@ $('#valider-h').onclick = async () => {
 /* ─────────── entrée ─────────── */
 function entre(){
   $('#ecran-code').classList.add('hide');
+  $('#ecran-contrat').classList.add('hide');
   $('#appli').classList.remove('hide');
+  if (!cibleAeshId) cibleAeshId = moi.id;
   // Aucun prénom en ligne : chacun est désigné par son code à quatre chiffres.
   $('#ma-pastille').textContent = moi.code;
   $('#ma-pastille').style.background = moi.couleur || '#0f766e';
   $('#mon-nom').textContent = moi.code;
-  $('#mon-code').textContent = 'c\'est vous' + (moi.contrat ? ' · contrat ' + fmtH(moi.contrat) : '');
+  $('#mon-code').textContent = 'c\'est vous' + (estReferentPsr() ? ' · référent PSR' : '') +
+    (moi.contrat ? ' · contrat ' + fmtH(moi.contrat) : '');
   const auj = iso(new Date());
   lundiCourant = lundiDe(auj) < PREMIER_LUNDI ? PREMIER_LUNDI : lundiDe(auj);
   // on n'ouvre sur le jour du jour que si c'est bien la semaine en cours
   jourCourant = (lundiDe(auj) === lundiCourant && jourDe(auj)) ? jourDe(auj) : 'lun';
-  dessineFiltres(); rendu();
+  dessineFiltres(); dessineDelegation(); rendu();
 }
 
 /* ─────────── filtres ─────────── */
@@ -814,6 +945,8 @@ function dessineFiltres(){
 
 /* ─────────── rendu ─────────── */
 function rendu(){
+  const cible = cibleSaisie() || moi;
+  dessineDelegation();
   const par = pariteDe(ajouteJours(lundiCourant,0));
   $('#sem-lib').innerHTML = 'Semaine du ' + joliDate(lundiCourant) +
     (par ? ' <span class="badge-p">semaine ' + par + '</span>' : '');
@@ -824,21 +957,23 @@ function rendu(){
   JOURS.forEach((j,i) => {
     const d = ajouteJours(lundiCourant, i);
     const b = document.createElement('button');
-    const nb = saisies.filter(s => s.aeshId === moi.id && couvre(s, d)).length;
+    const nb = saisies.filter(s => s.aeshId === cible.id && couvre(s, d)).length;
     b.className = 'jour' + (j === jourCourant ? ' on' : '') + (enVacances(d) ? ' vide' : '');
     b.innerHTML = '<b>' + j + '</b><i>' + dat(d).getDate() + '</i>' + (nb ? '<span class="pt"></span>' : '');
     b.onclick = () => { jourCourant = j; rendu(); };
     z.appendChild(b);
   });
 
-  $('#total-sem').textContent = fmtH(heuresSemaine(moi.id, lundiCourant));
+  $('#total-sem').textContent = fmtH(heuresSemaine(cible.id, lundiCourant));
   if (vue === 'semaine') rendCours();
   if (vue === 'equipe') rendEquipe();
   if (vue === 'services') rendServices();
+  if (vue === 'retour') rendRetour();
   if (vue === 'recap') rendRecap();
 }
 
 function rendCours(){
+  const cible = cibleSaisie() || moi;
   const d = ajouteJours(lundiCourant, JOURS.indexOf(jourCourant));
   const z = $('#liste-cours'); z.innerHTML = '';
   if (enVacances(d)){
@@ -855,7 +990,7 @@ function rendCours(){
   }
   liste.forEach(c => {
     const dessus = surCeCours(c, d);
-    const jySuis = dessus.some(s => s.aeshId === moi.id);
+    const jySuis = dessus.some(s => s.aeshId === cible.id);
     const el = document.createElement('div');
     el.className = 'cours' + (jySuis ? ' pris' : '');
     el.innerHTML =
@@ -865,8 +1000,8 @@ function rendCours(){
         '<div class="m"><span class="tag-cl" style="background:' + c.classe.couleur + '">' + c.classe.court + '</span>' +
         '<span class="salle">' + c.salle + '</span></div>' +
         (dessus.length ? '<div class="qui">' + dessus.map(s =>
-          '<span class="qui-p' + (s.aeshId === moi.id ? ' moi' : '') + '">' +
-          (s.aeshId === moi.id ? 'moi' : codeDe(s.aeshId)) +
+          '<span class="qui-p' + (s.aeshId === cible.id ? ' moi' : '') + '">' +
+          codeCible(s.aeshId) +
           (s.debut !== c.debut || s.fin !== c.fin ? ' · ' + s.debut + '–' + s.fin : '') +
           '</span>').join('') + '</div>' : '') +
       '</div>';
@@ -878,21 +1013,23 @@ function rendCours(){
 /* ─────────── feuille : prendre un créneau ─────────── */
 let brouillon = null;
 function ouvreCours(c, d){
-  const mien = surCeCours(c, d).find(s => s.aeshId === moi.id);
+  const cible = cibleSaisie() || moi;
+  const mien = surCeCours(c, d).find(s => s.aeshId === cible.id);
   const par = pariteDe(d);
   brouillon = mien
-    ? { ...mien, existant: true, cours: c, date: d, parite0: par, semaines: mien.semaines || 2 }
+    ? { ...mien, existant: true, cours: c, date: d, parite0: par, semaines: mien.semaines || 2, aeshId: cible.id }
     : { existant:false, cours:c, date:d, parite0:par, semaines:2,
-        debut:c.debut, fin:c.fin, portee:'annee', parite: par ? par : 'toutes' };
+        debut:c.debut, fin:c.fin, portee:'annee', parite: par ? par : 'toutes', aeshId: cible.id };
 
   const mins = [], deb = minutes(c.debut), fin = minutes(c.fin);
   for (let m = deb; m <= fin; m += 30) mins.push(m);
-  const dessus = surCeCours(c, d).filter(s => s.aeshId !== moi.id);
+  const dessus = surCeCours(c, d).filter(s => s.aeshId !== cible.id);
 
   $('#f-corps').innerHTML =
     '<div class="f-t">' + c.matiere + '</div>' +
     '<div class="f-st"><span class="tag-cl" style="background:' + c.classe.couleur + '">' + c.classe.court + '</span>' +
-      JOURS_LONG[jourDe(d)] + ' ' + joliDate(d) + ' · ' + c.debut + '–' + c.fin + ' · ' + c.salle + '</div>' +
+      JOURS_LONG[jourDe(d)] + ' ' + joliDate(d) + ' · ' + c.debut + '–' + c.fin + ' · ' + c.salle +
+      (cible.id !== moi.id ? ' · pour ' + codeDe(cible.id) : '') + '</div>' +
     (dessus.length
       ? '<div class="bloc"><h4>Déjà sur ce créneau</h4><div class="qui">' +
         dessus.map(s => '<span class="qui-p">' + codeDe(s.aeshId) +
@@ -932,7 +1069,7 @@ function ouvreCours(c, d){
 
   $('#f-pied').innerHTML =
     (brouillon.existant ? '<button class="btn btn-d" id="f-suppr">Retirer</button>' : '<button class="btn btn-s" id="f-annul">Annuler</button>') +
-    '<button class="btn btn-p" id="f-ok">' + (brouillon.existant ? 'Enregistrer' : 'Je prends ce créneau') + '</button>';
+    '<button class="btn btn-p" id="f-ok">' + (brouillon.existant ? 'Enregistrer' : (brouillon.aeshId !== moi.id ? 'Positionner' : 'Je prends ce créneau')) + '</button>';
 
   brancheFeuille();
   ouvreFeuille();
@@ -1017,9 +1154,10 @@ function finDePortee(d, portee, semaines){
 }
 async function enregistre(){
   const b = brouillon, c = b.cours;
-  const id = b.existant ? b.id : (moi.id + '_' + Date.now().toString(36));
+  const aid = b.aeshId || (cibleSaisie() || moi).id;
+  const id = b.existant ? b.id : (aid + '_' + Date.now().toString(36));
   const donnee = {
-    id, annee: G.annee || '2026-2027', aeshId: moi.id, type: 'cours',
+    id, annee: G.annee || '2026-2027', aeshId: aid, type: 'cours',
     classeId: c.classe.id, classe: c.classe.court,
     matiere: c.matiere, salle: c.salle,
     jour: jourDe(b.date), debut: b.debut, fin: b.fin,
@@ -1027,6 +1165,8 @@ async function enregistre(){
     dateDebut: b.date, dateFin: finDePortee(b.date, b.portee, b.semaines),
     portee: b.portee, semaines: b.portee === 'choix' ? b.semaines : null,
     parite: b.portee === 'ponctuel' ? 'toutes' : b.parite,
+    auteurId: moi.id,
+    delegue: aid !== moi.id,
     majLe: new Date().toISOString()
   };
   fermeFeuille();
@@ -1050,8 +1190,11 @@ function libFrequence(s){
   return 'chaque semaine';
 }
 function rendServices(){
+  const cible = cibleSaisie() || moi;
+  const titre = $('#titre-services');
+  if (titre) titre.textContent = cible.id === moi.id ? 'Mes services hors classe' : 'Services de ' + codeDe(cible.id);
   const z = $('#liste-services'); z.innerHTML = '';
-  const miens = saisies.filter(s => s.aeshId === moi.id && s.type === 'service')
+  const miens = saisies.filter(s => s.aeshId === cible.id && s.type === 'service')
     .sort((a,b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || (a.debut < b.debut ? -1 : 1));
   if (!miens.length){
     z.innerHTML = '<div class="vide-j"><span class="em">☕</span>Aucun service pour l\'instant.</div>';
@@ -1086,13 +1229,15 @@ const PRETS = [
 ];
 
 $('#ajout-service').onclick = () => {
-  brouillon = { type:'service', pret:'reunion', ...PRETS[0], parite:'toutes' };
+  const cible = cibleSaisie() || moi;
+  brouillon = { type:'service', pret:'reunion', ...PRETS[0], parite:'toutes', aeshId:cible.id };
   dessineFeuilleService();
   ouvreFeuille();
 };
 
 function dessineFeuilleService(){
   const b = brouillon;
+  const cible = intervenants.find(p => p.id === b.aeshId) || moi;
   const heures = [];
   for (let m = 7*60; m <= 22*60; m += 30) heures.push(versH(m));
   const sel = (id, liste, val, libelle) =>
@@ -1102,7 +1247,8 @@ function dessineFeuilleService(){
 
   $('#f-corps').innerHTML =
     '<div class="f-t">Ajouter un service</div>' +
-    '<div class="f-st">Ce qui n\'est pas un cours et qui compte dans vos heures.</div>' +
+    '<div class="f-st">Ce qui n\'est pas un cours et qui compte dans vos heures' +
+      (cible && cible.id !== moi.id ? ' · pour ' + codeDe(cible.id) : '') + '.</div>' +
     '<div class="bloc"><h4>Créneaux tout prêts</h4><div class="prets">' +
       PRETS.map(p => '<button class="pret' + (b.pret === p.cle ? ' on' : '') +
         (p.cle === 'autre' ? ' large' : '') + '" data-pret="' + p.cle + '">' +
@@ -1134,7 +1280,7 @@ function dessineFeuilleService(){
   $('#f-corps').querySelectorAll('.pret').forEach(el => {
     el.onclick = () => {
       const p = PRETS.find(x => x.cle === el.dataset.pret);
-      brouillon = { type:'service', pret:p.cle, ...p, parite:'toutes' };
+      brouillon = { type:'service', pret:p.cle, ...p, parite:'toutes', aeshId:b.aeshId || cible.id };
       dessineFeuilleService();
     };
   });
@@ -1190,16 +1336,19 @@ function resumeService(){
 }
 async function enregistreService(){
   const b = brouillon;
+  const aid = b.aeshId || (cibleSaisie() || moi).id;
   const label = (b.label || '').trim() || 'Service';
   if (minutes(b.fin) <= minutes(b.debut)){ dis('L\'heure de fin doit suivre le début'); return; }
-  const id = moi.id + '_sv_' + Date.now().toString(36);
+  const id = aid + '_sv_' + Date.now().toString(36);
   fermeFeuille();
   try {
     await setDoc(doc(db, COL_SAISIES, id), {
-      id, annee: G.annee || '2026-2027', aeshId: moi.id, type:'service', label,
+      id, annee: G.annee || '2026-2027', aeshId: aid, type:'service', label,
       jour: b.jour, debut: b.debut, fin: b.fin,
       dateDebut: premierJour(b), dateFin: G.cours[G.cours.length-1][1],
       portee: 'annee', frequence: b.frequence || 'hebdo', parite: b.parite || 'toutes',
+      auteurId: moi.id,
+      delegue: aid !== moi.id,
       majLe: new Date().toISOString()
     });
     dis('Service ajouté');
@@ -1214,6 +1363,7 @@ const EDT_DEB = 8*60, EDT_FIN = 18*60+30, PX_MIN = 1.45;
 let classeEdt = null;
 
 function rendEquipe(){
+  const actif = cibleSaisie() || moi;
   const miennes = mesClasses();
   if (!classeEdt || !miennes.some(c => c.id === classeEdt)) classeEdt = miennes[0] && miennes[0].id;
 
@@ -1222,10 +1372,13 @@ function rendEquipe(){
   intervenants.forEach(p => {
     if (moi.section && p.section && p.section !== moi.section) return;
     const el = document.createElement('div');
-    el.className = 'qn' + (p.id === moi.id ? ' est-moi' : '');
+    el.className = 'qn' + (p.id === actif.id ? ' est-moi' : '');
     el.innerHTML = '<i style="background:' + (p.couleur||'#0f766e') + '"></i>' +
-      '<b>' + (p.id === moi.id ? 'moi' : p.code) + '</b>' +
+      '<b>' + codeCible(p.id) + '</b>' +
       '<span>' + fmtH(heuresSemaine(p.id, lundiCourant)) + '</span>';
+    if (estReferentPsr() && estPsrIntervenant(p)) el.onclick = () => {
+      cibleAeshId = p.id; dessineDelegation(); rendu();
+    };
     bz.appendChild(el);
   });
 
@@ -1252,6 +1405,7 @@ function fmtCourt(h){
   return b ? a + 'h' + String(b).padStart(2,'0') : a + 'h';
 }
 function rendMois(){
+  const cible = cibleSaisie() || moi;
   const z = $('#mois');
   const ref = dat(moisVu || lundiCourant);
   const an = ref.getFullYear(), mo = ref.getMonth();
@@ -1276,18 +1430,18 @@ function rendMois(){
       const dedans = dat(jour).getMonth() === mo;
       const ferme = enVacances(jour);
       const presents = miens.filter(p => saisies.some(s => s.aeshId === p.id && couvre(s, jour)));
-      const aMoi = saisies.filter(s => s.aeshId === moi.id && couvre(s, jour))
+      const aMoi = saisies.filter(s => s.aeshId === cible.id && couvre(s, jour))
         .reduce((t,s) => t + duree(s.debut, s.fin), 0);
       html += '<button class="jr' + (aMoi ? ' moi' : '') + (ferme ? ' ferme' : '') +
         (!dedans ? ' rien' : '') + '" data-j="' + jour + '">' +
         '<b>' + dat(jour).getDate() + '</b>' +
-        '<span class="pts">' + presents.map(p => '<i' + (p.id === moi.id ? ' class="moi"' : '') +
+        '<span class="pts">' + presents.map(p => '<i' + (p.id === cible.id ? ' class="moi"' : '') +
           ' style="background:' + (p.couleur||'#0f766e') + '"></i>').join('') + '</span>' +
         '<span class="h">' + (aMoi ? fmtCourt(aMoi) : '') + '</span></button>';
     }
     html += '</div>';
   }
-  html += '<p class="mois-p">Un point par personne présente ce jour-là — le vôtre est cerclé. ' +
+  html += '<p class="mois-p">Un point par personne présente ce jour-là — la personne sélectionnée est cerclée. ' +
     'La lettre à gauche donne la semaine A ou B. Touchez un jour pour l\'ouvrir.</p>';
   z.innerHTML = html;
 
@@ -1316,6 +1470,7 @@ document.querySelectorAll('.bascule button').forEach(b => {
 });
 
 function dessineEdt(){
+  const cible = cibleSaisie() || moi;
   const z = $('#edt'); z.innerHTML = '';
   const cl = G.classes.find(c => c.id === classeEdt);
   if (!cl){ z.innerHTML = '<div class="edt-vide">Aucune classe.</div>'; return; }
@@ -1357,8 +1512,8 @@ function dessineEdt(){
         b.innerHTML = '<div class="m">' + c.matiere + '</div>' +
           '<div class="s">' + c.debut + '–' + c.fin + (c.salle ? ' · ' + c.salle : '') + '</div>' +
           (dessus.length ? '<div class="p">' + dessus.map(x =>
-            '<em' + (x.aeshId === moi.id ? ' class="moi"' : '') + '>' +
-            (x.aeshId === moi.id ? 'moi' : codeDe(x.aeshId)) + '</em>').join('') + '</div>' : '');
+            '<em' + (x.aeshId === cible.id ? ' class="moi"' : '') + '>' +
+            codeCible(x.aeshId) + '</em>').join('') + '</div>' : '');
         b.onclick = () => ouvreCours(c, d);
         corps.appendChild(b);
       });
@@ -1375,26 +1530,32 @@ const mn = minutes;
 
 /* ─────────── récap ─────────── */
 function rendRecap(){
-  const t = heuresSemaine(moi.id, lundiCourant);
+  const cible = cibleSaisie() || moi;
+  const t = heuresSemaine(cible.id, lundiCourant);
+  const titre = $('#titre-creneaux');
+  if (titre) titre.textContent = cible.id === moi.id ? 'Mes créneaux' : 'Créneaux de ' + codeDe(cible.id);
   $('#r-total').textContent = fmtH(t);
   $('#r-legende').textContent = 'semaine du ' + joliDate(lundiCourant) +
-    (pariteDe(lundiCourant) ? ' · semaine ' + pariteDe(lundiCourant) : '');
+    (pariteDe(lundiCourant) ? ' · semaine ' + pariteDe(lundiCourant) : '') +
+    (cible.id !== moi.id ? ' · ' + codeDe(cible.id) : '');
   let d = '';
-  if (moi.contrat){
-    const e = t - moi.contrat;
-    d = 'Contrat annoncé : <b>' + fmtH(moi.contrat) + '</b><br>' +
-        (Math.abs(e) < 0.01 ? 'Vous y êtes exactement.'
-          : e > 0 ? 'Soit <b>' + fmtH(e) + '</b> de plus que votre contrat.'
-                  : 'Soit <b>' + fmtH(-e) + '</b> de moins que votre contrat.') +
+  if (cible.contrat){
+    const e = t - cible.contrat;
+    d = 'Contrat annoncé : <b>' + fmtH(cible.contrat) + '</b><br>' +
+        (Math.abs(e) < 0.01 ? 'Le volume est exactement atteint.'
+          : e > 0 ? 'Soit <b>' + fmtH(e) + '</b> de plus que le contrat annoncé.'
+                  : 'Soit <b>' + fmtH(-e) + '</b> de moins que le contrat annoncé.') +
         '<br><span style="opacity:.75">Simple repère : rien n\'est bloqué, on en reparle en réunion.</span>';
   } else d = 'Aucun contrat renseigné.';
   $('#r-detail').innerHTML = d;
 
   const z = $('#r-liste'); z.innerHTML = '';
-  const miens = saisies.filter(s => s.aeshId === moi.id)
+  const miens = saisies.filter(s => s.aeshId === cible.id)
     .sort((a,b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || (a.debut < b.debut ? -1 : 1));
   if (!miens.length){
-    z.innerHTML = '<div class="vide-j"><span class="em">🗒️</span>Vous n\'avez encore rien posé.</div>';
+    z.innerHTML = '<div class="vide-j"><span class="em">🗒️</span>' +
+      (cible.id === moi.id ? 'Vous n\'avez encore rien posé.' : 'Rien n\'est encore posé pour cette personne.') +
+      '</div>';
     return;
   }
   const LIB = {ponctuel:'une fois', '4sem':'4 semaines', vacances:'jusqu\'aux vacances', annee:'toute l\'année'};
@@ -1420,6 +1581,106 @@ $('#changer-code').onclick = () => {
   localStorage.removeItem('edt-aesh-code');
   location.reload();
 };
+$('#modifier-contrat').onclick = () => demandeContrat();
+
+/* ─────────── retours AESH ─────────── */
+function typeRetour(id){ return RETOUR_TYPES.find(x => x.id === id) || RETOUR_TYPES[0]; }
+function retoursEnAttente(){
+  try {
+    const l = JSON.parse(localStorage.getItem(K_RETOURS_ATTENTE) || '[]');
+    return Array.isArray(l) ? l : [];
+  } catch(e){ return []; }
+}
+function ecrisRetoursEnAttente(l){
+  try { localStorage.setItem(K_RETOURS_ATTENTE, JSON.stringify(l)); } catch(e){}
+}
+function captureRetour(){
+  const m = $('#retour-message'), u = $('#retour-urgent');
+  if (m) retourMessage = m.value;
+  if (u) retourUrgent = u.checked;
+}
+function contexteRetour(){
+  const d = ajouteJours(lundiCourant, JOURS.indexOf(jourCourant));
+  const clId = filtreClasse || classeEdt || '';
+  const cl = G && G.classes ? G.classes.find(c => c.id === clId) : null;
+  return {semaine:lundiCourant,date:d,jour:jourCourant,classeId:clId,classe:cl ? cl.court : ''};
+}
+function fabriqueRetour(){
+  captureRetour();
+  const msg = retourMessage.trim().slice(0,600);
+  if (!msg && !retourChoix.size){ dis('Cochez une indication ou ajoutez un message.'); return null; }
+  const cible = cibleSaisie() || moi, date = new Date().toISOString();
+  const id = (moi ? moi.id : 'aesh') + '_ret_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  return {
+    id, annee:(G && G.annee) || '2026-2027',
+    aeshId:moi.id, aeshCode:moi.code, auteurId:moi.id,
+    cibleAeshId:cible.id, cibleCode:codeDe(cible.id), section:moi.section || '',
+    categorie:retourType, categorieLabel:typeRetour(retourType).label,
+    urgent:!!retourUrgent, choix:[...retourChoix], message:msg,
+    contexte:contexteRetour(), statut:'nouveau', creeLe:date, majLe:date
+  };
+}
+async function envoieRetour(r){ await setDoc(doc(db, COL_RETOURS, r.id), r, { merge:true }); }
+function majRetourEtat(t){
+  const e = $('#retour-etat'); if (!e) return;
+  const n = retoursEnAttente().length;
+  e.textContent = t || (n ? n + ' retour' + (n > 1 ? 's' : '') + ' en attente d’envoi.' : '');
+}
+async function flushRetours(){
+  if (retourEnvoi) return;
+  const l = retoursEnAttente();
+  if (!l.length) return;
+  retourEnvoi = true;
+  const reste = [];
+  for (const r of l){
+    try { await envoieRetour(r); }
+    catch(e){ reste.push(r); }
+  }
+  ecrisRetoursEnAttente(reste);
+  retourEnvoi = false;
+  majRetourEtat(reste.length ? '' : 'Retours en attente envoyés.');
+}
+function rendRetour(){
+  captureRetour();
+  $('#retour-types').innerHTML = RETOUR_TYPES.map(t =>
+    '<button data-ret-type="' + t.id + '" class="' + (retourType === t.id ? 'on' : '') + '">' + t.label + '</button>'
+  ).join('');
+  $('#retour-choix').innerHTML = RETOUR_CHOIX.map((t,i) =>
+    '<button data-ret-choix="' + i + '" class="' + (retourChoix.has(t) ? 'on' : '') + '">' + t + '</button>'
+  ).join('');
+  $('#retour-urgent').checked = retourUrgent;
+  $('#retour-message').value = retourMessage;
+  $('#retour-types').querySelectorAll('[data-ret-type]').forEach(b => b.onclick = () => {
+    retourType = b.dataset.retType; rendRetour();
+  });
+  $('#retour-choix').querySelectorAll('[data-ret-choix]').forEach(b => b.onclick = () => {
+    const t = RETOUR_CHOIX[+b.dataset.retChoix];
+    retourChoix.has(t) ? retourChoix.delete(t) : retourChoix.add(t);
+    b.classList.toggle('on', retourChoix.has(t));
+  });
+  $('#retour-urgent').onchange = e => { retourUrgent = e.target.checked; };
+  $('#retour-message').oninput = e => { retourMessage = e.target.value; };
+  $('#retour-envoyer').onclick = envoyerRetour;
+  majRetourEtat();
+}
+async function envoyerRetour(){
+  const r = fabriqueRetour();
+  if (!r) return;
+  $('#retour-envoyer').disabled = true;
+  majRetourEtat('Envoi...');
+  try {
+    await envoieRetour(r);
+    retourChoix.clear(); retourMessage = ''; retourUrgent = false;
+    rendRetour(); dis('Retour envoyé'); majRetourEtat('Retour envoyé.');
+  } catch(e){
+    ecrisRetoursEnAttente([...retoursEnAttente(), r]);
+    retourChoix.clear(); retourMessage = ''; retourUrgent = false;
+    rendRetour(); dis('Gardé pour envoi'); majRetourEtat('Connexion absente : retour gardé sur ce téléphone.');
+  } finally {
+    const b = $('#retour-envoyer'); if (b) b.disabled = false;
+  }
+}
+window.addEventListener('online', flushRetours);
 
 /* ─────────── navigation ─────────── */
 $('#sem-prec').onclick = () => { if (lundiCourant > PREMIER_LUNDI){ lundiCourant = ajouteJours(lundiCourant,-7); rendu(); } };
@@ -1431,6 +1692,7 @@ document.querySelectorAll('.ong').forEach(b => {
     $('#vue-semaine').classList.toggle('hide', vue !== 'semaine');
     $('#vue-equipe').classList.toggle('hide', vue !== 'equipe');
     $('#vue-services').classList.toggle('hide', vue !== 'services');
+    $('#vue-retour').classList.toggle('hide', vue !== 'retour');
     $('#vue-recap').classList.toggle('hide', vue !== 'recap');
     rendu();
   };
@@ -1470,11 +1732,13 @@ function dis(t){
         }
       }
     }
+    if (moi && !$('#appli').classList.contains('hide')) rendu();
   }, () => $('#msg-code').textContent = 'Connexion impossible.');
   onSnapshot(collection(db, COL_SAISIES), snap => {
     saisies = snap.docs.map(d => d.data()).filter(saisieDeCetteAnnee);
     if (moi && !$('#appli').classList.contains('hide')) rendu();
   });
+  flushRetours();
 })();
 </script>
 </body>
