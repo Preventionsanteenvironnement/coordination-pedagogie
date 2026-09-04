@@ -538,7 +538,7 @@ const firebaseConfig = {
 const db = getFirestore(initializeApp(firebaseConfig));
 const COL_INTER = 'coordination_edt_aesh_intervenants';
 const COL_SAISIES = 'coordination_edt_aesh_saisies';
-const COL_RETOURS = 'coordination_edt_aesh_retours';
+const COL_RETOURS = COL_SAISIES;
 
 /* ─────────── constantes ─────────── */
 const PREMIER_LUNDI = '2026-08-31';        // semaine de rentrée 2026-2027
@@ -601,6 +601,7 @@ function enPfmp(classeId,d){
   const c = G.classes.find(x=>x.id===classeId);
   return !!c && (c.pfmp||[]).some(p => d >= p.debut && d <= p.fin);
 }
+function estRetour(s){ return !!s && (s.type === 'retour' || s.retour === true); }
 function saisieDeCetteAnnee(s){ return !s.annee || !G.annee || s.annee === G.annee; }
 function pariteDe(d){
   const dd = dat(d), an = dd.getFullYear();
@@ -1612,7 +1613,7 @@ function fabriqueRetour(){
   const cible = cibleSaisie() || moi, date = new Date().toISOString();
   const id = (moi ? moi.id : 'aesh') + '_ret_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
   return {
-    id, annee:(G && G.annee) || '2026-2027',
+    id, type:'retour', retour:true, annee:(G && G.annee) || '2026-2027',
     aeshId:moi.id, aeshCode:moi.code, auteurId:moi.id,
     cibleAeshId:cible.id, cibleCode:codeDe(cible.id), section:moi.section || '',
     categorie:retourType, categorieLabel:typeRetour(retourType).label,
@@ -1620,7 +1621,15 @@ function fabriqueRetour(){
     contexte:contexteRetour(), statut:'nouveau', creeLe:date, majLe:date
   };
 }
-async function envoieRetour(r){ await setDoc(doc(db, COL_RETOURS, r.id), r, { merge:true }); }
+async function envoieRetour(r){ await setDoc(doc(db, COL_RETOURS, r.id), {...r,type:'retour',retour:true}, { merge:true }); }
+function detailErreurRetour(e){
+  const code = e && e.code ? String(e.code) : '';
+  const msg = e && e.message ? String(e.message) : String(e || '');
+  if (navigator.onLine === false) return 'Connexion absente : retour gardé sur ce téléphone.';
+  if (/permission|PERMISSION_DENIED/i.test(code + ' ' + msg))
+    return 'Envoi Firestore refusé : retour gardé sur ce téléphone, il repartira après correction des droits.';
+  return 'Envoi impossible : retour gardé sur ce téléphone.' + (code || msg ? ' Détail : ' + (code || msg).slice(0,90) : '');
+}
 function majRetourEtat(t){
   const e = $('#retour-etat'); if (!e) return;
   const n = retoursEnAttente().length;
@@ -1675,7 +1684,7 @@ async function envoyerRetour(){
   } catch(e){
     ecrisRetoursEnAttente([...retoursEnAttente(), r]);
     retourChoix.clear(); retourMessage = ''; retourUrgent = false;
-    rendRetour(); dis('Gardé pour envoi'); majRetourEtat('Connexion absente : retour gardé sur ce téléphone.');
+    rendRetour(); dis('Gardé pour envoi'); majRetourEtat(detailErreurRetour(e));
   } finally {
     const b = $('#retour-envoyer'); if (b) b.disabled = false;
   }
@@ -1735,7 +1744,7 @@ function dis(t){
     if (moi && !$('#appli').classList.contains('hide')) rendu();
   }, () => $('#msg-code').textContent = 'Connexion impossible.');
   onSnapshot(collection(db, COL_SAISIES), snap => {
-    saisies = snap.docs.map(d => d.data()).filter(saisieDeCetteAnnee);
+    saisies = snap.docs.map(d => d.data()).filter(s => !estRetour(s) && saisieDeCetteAnnee(s));
     if (moi && !$('#appli').classList.contains('hide')) rendu();
   });
   flushRetours();
