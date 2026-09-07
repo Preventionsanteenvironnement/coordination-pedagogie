@@ -172,6 +172,8 @@ import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.g
 const firebaseConfig={apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",authDomain:"devoirs-pse.firebaseapp.com",projectId:"devoirs-pse",storageBucket:"devoirs-pse.appspot.com",messagingSenderId:"614730413904",appId:"1:614730413904:web:a5dd478af5de30f6bede55"};
 const db=getFirestore(initializeApp(firebaseConfig));
 const COL="psr_observations";
+// code de l'AESH observateur, transmis par l'app EDT AESH (?aesh=…) ; vide en accès direct.
+const AESH_CODE=(new URLSearchParams(location.search).get("aesh")||"").trim();
 
 const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
 const AC=n=>['var(--a0)','var(--a1)','var(--a2)','var(--a3)','var(--a4)','var(--a5)'][n];
@@ -306,7 +308,7 @@ async function envoyer(payload){
     await addDoc(collection(db,COL),Object.assign({
       eleveCode:state.code, classe:state.ctx.classe, classeId:state.ctx.classeId||"", classeNom:state.ctx.classeNom||"",
       matiere:state.ctx.matiere||"", salle:state.ctx.salle||"", parite:state.ctx.parite||"",
-      date:todayISO(), createdAt:serverTimestamp()
+      observateur:AESH_CODE, date:todayISO(), createdAt:serverTimestamp()
     },payload));
     return true;
   }catch(e){ console.error(e); toast("Échec de l'envoi — réessaie"); return false; }

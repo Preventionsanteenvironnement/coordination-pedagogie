@@ -508,10 +508,15 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <button class="ajout" id="changer-code" style="margin-top:20px;border-style:solid">Quitter cet espace</button>
   </main>
 
+  <main id="vue-observation" class="hide" style="padding:0">
+    <div id="obs-host" style="width:100%;height:calc(100dvh - 64px)"></div>
+  </main>
+
   <nav class="onglets">
     <button class="ong on" data-vue="semaine"><b>🗓️</b><span>Semaine</span></button>
     <button class="ong" data-vue="equipe"><b>👥</b><span>L'équipe</span></button>
     <button class="ong" data-vue="services"><b>☕</b><span>Services</span></button>
+    <button class="ong" data-vue="observation"><b>👁️</b><span>Observation</span></button>
     <button class="ong" data-vue="retour"><b>✉</b><span>Retour</span></button>
     <button class="ong" data-vue="recap"><b>📊</b><span>Mon récap</span></button>
   </nav>
@@ -551,7 +556,7 @@ let G = null;                 // grille.json
 let intervenants = [];        // tous les AESH
 let saisies = [];             // toutes les saisies de tout le monde
 let moi = null;               // mon intervenant
-let cibleAeshId = null;        // Antoine peut saisir pour une personne PSR
+let cibleAeshId = null;        // Antoine peut saisir en PSR ; le coordinateur peut saisir pour toute l'équipe
 let lundiCourant = PREMIER_LUNDI;
 let jourCourant = 'lun';
 let filtreClasse = null;      // null = toutes
@@ -575,7 +580,7 @@ const RETOUR_CHOIX = [
   'À voir en réunion',
   'Je propose un ajustement'
 ];
-const K_RETOURS_ATTENTE = 'edt-aesh-retours-attente-v1';
+const K_RETOURS_ATTENTE = 'edt-aesh-retours-attente-v2';
 let retourType = 'planning';
 let retourChoix = new Set();
 let retourMessage = '';
@@ -623,34 +628,40 @@ function veilleDesVacances(d){
    Cécile et Nathalie en MELEC (B1, B2, BT). Chacun ne voit que le sien.
    Faute de secteur renseigné, on n'ampute rien : tout reste visible. */
 function mesClasses(){
+  if (estCoordinateur()) return G.classes;
   const sect = moi && moi.section;
   return sect ? G.classes.filter(c => c.section === sect) : G.classes;
 }
 const dansMonSecteur = classeId => mesClasses().some(c => c.id === classeId);
+function estCoordinateur(p = moi){
+  return !!p && (p.role === 'coordonnateur' || p.role === 'coordinateur' || p.id === 'coordo');
+}
 function estPsrIntervenant(p){
   return !!p && (String(p.section||'').toUpperCase() === 'PSR' || ['a1','a2','a3','a4'].indexOf(p.id) >= 0);
 }
 function estReferentPsr(){ return !!moi && (moi.id === REFERENT_PSR_ID || moi.role === 'referent-psr'); }
 function ciblesPossibles(){
   if (!moi) return [];
+  if (estCoordinateur()) return intervenants.filter(p => !estCoordinateur(p));
   return estReferentPsr() ? intervenants.filter(estPsrIntervenant) : [moi];
 }
 function cibleSaisie(){
   const l = ciblesPossibles();
   if (!l.length) return moi;
-  if (!cibleAeshId || !l.some(p => p.id === cibleAeshId)) cibleAeshId = moi.id;
-  return l.find(p => p.id === cibleAeshId) || moi;
+  if (!cibleAeshId || !l.some(p => p.id === cibleAeshId)) cibleAeshId = estCoordinateur() ? l[0].id : moi.id;
+  return l.find(p => p.id === cibleAeshId) || l[0] || moi;
 }
 function codeCible(id){
+  if (estCoordinateur()) return codeDe(id);
   if (moi && id === moi.id) return 'moi';
   return codeDe(id);
 }
 function dessineDelegation(){
   const z = $('#delegation'); if (!z) return;
-  if (!estReferentPsr()){ z.classList.add('hide'); z.innerHTML = ''; return; }
+  if (!estCoordinateur() && !estReferentPsr()){ z.classList.add('hide'); z.innerHTML = ''; return; }
   const actif = cibleSaisie(), l = ciblesPossibles();
   z.classList.remove('hide');
-  z.innerHTML = '<span>Je saisis pour</span>' + l.map(p =>
+  z.innerHTML = '<span>' + (estCoordinateur() ? 'Accès coordinateur' : 'Je saisis pour') + '</span>' + l.map(p =>
     '<button data-cible="' + p.id + '" class="' + (actif && p.id === actif.id ? 'on' : '') + '">' +
     codeCible(p.id) + '</button>').join('');
   z.querySelectorAll('[data-cible]').forEach(b => b.onclick = () => {
@@ -817,7 +828,7 @@ $('#entrer').onclick = () => {
 function ouvreSuite(){ dejaSalue() ? suite() : montreBonjour(); }
 function suite(){
   cibleAeshId = moi && moi.id;
-  moi.contrat ? entre() : demandeContrat();
+  estCoordinateur() || moi.contrat ? entre() : demandeContrat();
 }
 
 /* ─────────── écran code ─────────── */
@@ -919,7 +930,8 @@ function entre(){
   $('#ma-pastille').textContent = moi.code;
   $('#ma-pastille').style.background = moi.couleur || '#0f766e';
   $('#mon-nom').textContent = moi.code;
-  $('#mon-code').textContent = 'c\'est vous' + (estReferentPsr() ? ' · référent PSR' : '') +
+  $('#mon-code').textContent = (estCoordinateur() ? 'accès coordinateur' : 'c\'est vous') +
+    (estReferentPsr() ? ' · référent PSR' : '') +
     (moi.contrat ? ' · contrat ' + fmtH(moi.contrat) : '');
   const auj = iso(new Date());
   lundiCourant = lundiDe(auj) < PREMIER_LUNDI ? PREMIER_LUNDI : lundiDe(auj);
@@ -971,6 +983,19 @@ function rendu(){
   if (vue === 'services') rendServices();
   if (vue === 'retour') rendRetour();
   if (vue === 'recap') rendRecap();
+  if (vue === 'observation') rendObservation();
+}
+
+/* Onglet Observation : embarque l'app d'observation de l'autonomie, avec le code
+   de l'AESH connecté (pour tracer qui observe). Chargée une seule fois. */
+function rendObservation(){
+  const host = $('#obs-host');
+  if (host && !host.dataset.loaded){
+    host.dataset.loaded = '1';
+    const code = (moi && moi.code) ? moi.code : '';
+    host.innerHTML = '<iframe title="Observation élève" src="../observation/?aesh=' + encodeURIComponent(code) +
+      '" style="display:block;width:100%;height:100%;border:0"></iframe>';
+  }
 }
 
 function rendCours(){
@@ -1371,13 +1396,14 @@ function rendEquipe(){
   // bande des collègues et de leurs heures
   const bz = $('#bande-equipe'); bz.innerHTML = '';
   intervenants.forEach(p => {
-    if (moi.section && p.section && p.section !== moi.section) return;
+    if (estCoordinateur(p)) return;
+    if (!estCoordinateur() && moi.section && p.section && p.section !== moi.section) return;
     const el = document.createElement('div');
     el.className = 'qn' + (p.id === actif.id ? ' est-moi' : '');
     el.innerHTML = '<i style="background:' + (p.couleur||'#0f766e') + '"></i>' +
       '<b>' + codeCible(p.id) + '</b>' +
       '<span>' + fmtH(heuresSemaine(p.id, lundiCourant)) + '</span>';
-    if (estReferentPsr() && estPsrIntervenant(p)) el.onclick = () => {
+    if ((estCoordinateur() || estReferentPsr()) && (estCoordinateur() || estPsrIntervenant(p))) el.onclick = () => {
       cibleAeshId = p.id; dessineDelegation(); rendu();
     };
     bz.appendChild(el);
@@ -1419,7 +1445,7 @@ function rendMois(){
     '<button id="mois-suiv">›</button></div>' +
     '<div class="mois-e">' + JOURS.map(j => '<span>' + j + '</span>').join('') + '</div>';
 
-  const miens = intervenants.filter(p => !moi.section || !p.section || p.section === moi.section);
+  const miens = intervenants.filter(p => !estCoordinateur(p) && (estCoordinateur() || !moi.section || !p.section || p.section === moi.section));
 
   for (let sem = 0; sem < 6; sem++){
     const lundiSem = ajouteJours(d, sem * 7);
@@ -1703,6 +1729,7 @@ document.querySelectorAll('.ong').forEach(b => {
     $('#vue-services').classList.toggle('hide', vue !== 'services');
     $('#vue-retour').classList.toggle('hide', vue !== 'retour');
     $('#vue-recap').classList.toggle('hide', vue !== 'recap');
+    $('#vue-observation').classList.toggle('hide', vue !== 'observation');
     rendu();
   };
 });
