@@ -124,6 +124,23 @@ input:focus,select:focus{outline:none;border-color:var(--accent);background:var(
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast .tk{color:var(--a0)}
 .loading{padding:40px 16px;text-align:center;color:var(--muted)}
+
+/* grille de codes de la classe (choix de l'élève) */
+.egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.ecard{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:15px 8px 12px;box-shadow:var(--sh-1);transition:transform .12s,border-color .12s}
+.ecard:active{transform:scale(.96)}
+.ecard .cd{font-family:"Bricolage Grotesque";font-weight:800;font-size:21px;letter-spacing:.06em;line-height:1}
+.ecard .dot{width:11px;height:11px;border-radius:50%;background:var(--line-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--line-2) 35%,transparent)}
+.ecard .st{font-size:9.5px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;line-height:1.1;text-align:center;min-height:11px}
+.ecard[data-a="0"] .dot{background:var(--a0);box-shadow:0 0 0 3px var(--a0-soft)}
+.ecard[data-a="0"]{border-color:color-mix(in srgb,var(--a0) 35%,var(--line))}
+.ecard[data-a="1"] .dot{background:var(--a2);box-shadow:0 0 0 3px color-mix(in srgb,var(--a2) 20%,transparent)}
+.ecard[data-a="2"] .dot{background:var(--a4);box-shadow:0 0 0 3px color-mix(in srgb,var(--a4) 18%,transparent)}
+.ecard .n{position:absolute;top:7px;right:9px;font-family:"Bricolage Grotesque";font-weight:800;font-size:11px;color:var(--faint)}
+.elegend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:14px 2px 2px;font-size:11px;color:var(--muted)}
+.elegend span{display:inline-flex;align-items:center;gap:6px}
+.elegend i{width:9px;height:9px;border-radius:50%}
+.echoisir{background:none;color:var(--accent);font-weight:600;font-size:13px;padding:12px 0 2px;display:block;margin:0 auto}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -168,7 +185,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent);background:var(
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",authDomain:"devoirs-pse.firebaseapp.com",projectId:"devoirs-pse",storageBucket:"devoirs-pse.appspot.com",messagingSenderId:"614730413904",appId:"1:614730413904:web:a5dd478af5de30f6bede55"};
 const db=getFirestore(initializeApp(firebaseConfig));
 const COL="psr_observations";
@@ -196,6 +213,10 @@ const APRES=["Poursuit seul","Poursuit un temps","Redemande de l'aide","S'arrêt
 
 /* ---- EDT réel (grille.json du portail) ---- */
 let G=null;
+/* ---- annuaire des codes par classe (roster.json — codes SEULS, aucun nom, RGPD) ---- */
+let ROSTER=null;
+/* cache d'autonomie agrégée par code {classeNom:{code:{n,avg}}} pour colorer les pastilles */
+const AUTO_CACHE={};
 const pad=n=>String(n).padStart(2,'0');
 const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
 const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes();};
@@ -212,7 +233,34 @@ async function boot(){
     const res=await fetch("../edt-aesh/grille.json",{cache:"no-store"});
     G=await res.json();
   }catch(e){ G=null; }
+  try{
+    const rr=await fetch("./roster.json",{cache:"no-store"});
+    ROSTER=(await rr.json()).classes||{};
+  }catch(e){ ROSTER=null; }
   renderAccueil();
+}
+function codesDeClasse(nom){ return (ROSTER&&ROSTER[nom])?ROSTER[nom]:null; }
+/* autonomie moyenne par code, à partir des observations de la classe (Firestore) */
+async function chargeAutonomie(nom){
+  if(!nom) return {};
+  if(AUTO_CACHE[nom]) return AUTO_CACHE[nom];
+  const acc={};
+  try{
+    const snap=await getDocs(query(collection(db,COL),where("classeNom","==",nom)));
+    snap.forEach(d=>{ const o=d.data(); const c=(o.eleveCode||"").toUpperCase(); if(!c)return;
+      const v=typeof o.niveau==="number"?o.niveau:null; if(v==null)return;
+      (acc[c]||(acc[c]={s:0,n:0})); acc[c].s+=v; acc[c].n++;
+    });
+  }catch(e){ console.warn("autonomie indispo",e); }
+  const out={}; for(const c in acc) out[c]={n:acc[c].n,avg:acc[c].s/acc[c].n};
+  AUTO_CACHE[nom]=out; return out;
+}
+/* niveau moyen d'aide (0=autonome … 5=continu) → bucket pastille 0/1/2, ou null=à observer */
+function bucketAutonomie(info){
+  if(!info||!info.n) return {a:"",st:"à observer"};
+  if(info.avg<1)   return {a:"0",st:"autonome"};
+  if(info.avg<2.5) return {a:"1",st:"aide par moments"};
+  return {a:"2",st:"aide soutenue"};
 }
 function renderAccueil(){
   const body=$("#accueil-body");
@@ -232,12 +280,49 @@ function renderAccueil(){
   } else {
     h+=`<div class="cours-now"><div class="none">Aucun cours détecté à cette heure.</div><button class="linkbtn" onclick="P.changer()">Choisir un cours de la journée →</button></div>`;
   }
-  h+=`<label for="code">Code de l'élève</label>
-    <input id="code" placeholder="ex. RX62" autocomplete="off" inputmode="text" value="${esc(state.code)}">
-    <button class="primary" id="goObs" onclick="P.observer()">Observer cet élève ›</button>
-    <p class="hint">Le code t'est donné par le professeur principal. Aucun nom n'est saisi ni transmis (RGPD).</p>`;
-  body.innerHTML=h;
-  $("#code").addEventListener("input",e=>{state.code=e.target.value.toUpperCase();e.target.value=state.code;});
+  const codes = ctx ? codesDeClasse(ctx.classeNom) : null;
+  if(ctx && codes && codes.length){
+    // grille des codes de la classe — on touche un code, aucun nom n'apparaît (RGPD)
+    h+=`<p class="eyebrow">Élèves de la classe — touche un code</p>
+      <div class="egrid" id="egrid">${codes.map(c=>`
+        <button class="ecard" data-code="${esc(c)}" onclick="P.pickEleve('${esc(c)}')">
+          <span class="dot"></span><span class="cd">${esc(c)}</span><span class="st">à observer</span>
+        </button>`).join("")}</div>
+      <div class="elegend">
+        <span><i style="background:var(--a0)"></i> autonome</span>
+        <span><i style="background:var(--a2)"></i> aide par moments</span>
+        <span><i style="background:var(--a4)"></i> aide soutenue</span>
+        <span><i style="background:var(--line-2)"></i> à observer</span>
+      </div>
+      <button class="echoisir" onclick="P.autreCode()">＋ Saisir un autre code</button>
+      <div id="autreWrap" hidden>
+        <label for="code">Autre code élève</label>
+        <input id="code" placeholder="ex. RX62" autocomplete="off" inputmode="text" value="${esc(state.code)}">
+        <button class="primary" onclick="P.observer()">Observer cet élève ›</button>
+      </div>`;
+    body.innerHTML=h;
+    const inp=$("#code"); if(inp) inp.addEventListener("input",e=>{state.code=e.target.value.toUpperCase();e.target.value=state.code;});
+    peindreAutonomie(ctx.classeNom);   // colore les pastilles quand l'agrégat arrive
+  } else {
+    h+=`<label for="code">Code de l'élève</label>
+      <input id="code" placeholder="ex. RX62" autocomplete="off" inputmode="text" value="${esc(state.code)}">
+      <button class="primary" id="goObs" onclick="P.observer()">Observer cet élève ›</button>
+      <p class="hint">Le code t'est donné par le professeur principal. Aucun nom n'est saisi ni transmis (RGPD).</p>`;
+    body.innerHTML=h;
+    $("#code").addEventListener("input",e=>{state.code=e.target.value.toUpperCase();e.target.value=state.code;});
+  }
+}
+async function peindreAutonomie(nom){
+  const auto=await chargeAutonomie(nom);
+  const grid=$("#egrid"); if(!grid) return;
+  grid.querySelectorAll(".ecard").forEach(card=>{
+    const c=card.dataset.code, info=auto[c], b=bucketAutonomie(info);
+    if(b.a) card.dataset.a=b.a; else card.removeAttribute("data-a");
+    const st=card.querySelector(".st"); if(st) st.textContent=b.st;
+    let nEl=card.querySelector(".n");
+    if(info&&info.n){ if(!nEl){nEl=el("span","n");card.appendChild(nEl);} nEl.textContent=info.n; }
+    else if(nEl) nEl.remove();
+  });
 }
 function manuelHTML(){
   const opts=(G?G.classes:[]).map((c,i)=>`<option value="${i}">${esc(classeLabel(c))}</option>`).join("");
@@ -260,6 +345,8 @@ window.P={
       `<button class="linkbtn" onclick="renderAccueilRefresh()">‹ Retour</button>`;
   },
   pickCours(i){ state.ctx=coursDuJour()[i]; go('accueil'); renderAccueil(); },
+  pickEleve(code){ if(!state.ctx){ toast("Choisis d'abord le cours."); return; } state.code=String(code).toUpperCase(); openObs(); },
+  autreCode(){ const w=$("#autreWrap"); if(w){ w.hidden=false; const i=$("#code"); if(i) i.focus(); } },
   observer(){
     if(!state.code){ toast("Saisis le code de l'élève."); return; }
     if(!state.ctx){ toast("Choisis d'abord le cours."); return; }
