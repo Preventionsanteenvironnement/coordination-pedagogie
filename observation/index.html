@@ -209,6 +209,9 @@ const DOMAINS=[
 ];
 const SCALE=[{n:0,l:"autonome",x:"Réalise seul, sans intervention."},{n:1,l:"un rappel",x:"Un rappel, un encouragement ou une vérification suffit."},{n:2,l:"démarrage",x:"Aide pour comprendre / démarrer, puis poursuit seul."},{n:3,l:"ponctuelle",x:"Quelques interventions pendant l'activité."},{n:4,l:"régulière",x:"L'adulte doit intervenir fréquemment."},{n:5,l:"continu",x:"Ne peut pas réaliser sans présence rapprochée."}];
 const AIDES=["Reformuler","Montrer un exemple","Découper en étapes","Support visuel","Lire la consigne","Démarrer avec lui","Plus de temps","Aide d'un pair","Geste guidé"];
+/* petits mots d'encouragement à l'enregistrement — le regard de l'AESH compte */
+const OBS_BRAVOS=["Merci, votre regard compte 🌱","Beau geste pour cet élève.","C'est précieux, merci.","Bravo — un pas de plus.","Ça compte, vraiment 💛"];
+const motBravo=()=>OBS_BRAVOS[Math.floor(Math.random()*OBS_BRAVOS.length)];
 const APRES=["Poursuit seul","Poursuit un temps","Redemande de l'aide","S'arrête","Abandonne"];
 
 /* ---- EDT réel (grille.json du portail) ---- */
@@ -405,7 +408,7 @@ window.quickRAS=async function(){
   if(now){
     b.classList.add("done"); $("#rasValider").textContent="✓ Validé"; bump();
     const ok=await envoyer({type:"autonome", autonome:true, domaine:"Autonomie globale", observable:"Rien à signaler — autonome", niveau:0});
-    toast(ok?`Autonome enregistré · ${state.code}`:"Non enregistré");
+    toast(ok?`Autonome · ${state.code} — ${motBravo()}`:"Non enregistré");
   } else { b.classList.remove("done"); $("#rasValider").textContent="Valider"; state.tally=Math.max(0,state.tally-1); $("#tally-n").textContent=state.tally; toast("Annulé (non envoyé)"); }
 };
 function openSheet(dom,obs,elBtn){
@@ -440,7 +443,7 @@ async function saveObs(){
   if(ok){
     const key=dr.dom+"|"+dr.obs, was=state.saved[key]!=null; state.saved[key]=dr.niveau; if(!was) bump();
     if(dr.el){ dr.el.classList.add("filled"); const m=dr.el.querySelector(".mark"); if(m)m.innerHTML=`<span class="lvlchip" style="background:${AC(dr.niveau)}">✓ ${dr.niveau}</span>`; const box=dr.el.closest(".dom"); if(box)refreshDomBadge(box); }
-    toast(`Enregistré · niveau ${dr.niveau} · ${dr.obs}`);
+    toast(`Niveau ${dr.niveau} enregistré — ${motBravo()}`);
     closeSheet();
   } else { $("#saveBtn").disabled=false; $("#saveBtn").textContent="Enregistrer l'observation"; }
 }

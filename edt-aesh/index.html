@@ -879,9 +879,18 @@ const BRAVOS = [
 ];
 const motBravo = () => BRAVOS[Math.floor(Math.random() * BRAVOS.length)];
 
+/* Salutation selon le moment de la journée. */
+function salutHoraire(){
+  const h = new Date().getHours();
+  if (h < 12) return 'Bonne matinée';
+  if (h < 14) return 'Bon appétit';
+  if (h < 18) return 'Bel après-midi';
+  return 'Bonne soirée';
+}
 function montreBonjour(){
   $('#ecran-code').classList.add('hide');
   $('#ecran-bonjour').classList.remove('hide');
+  const h1 = document.querySelector('#ecran-bonjour h1'); if (h1) h1.textContent = salutHoraire();
   tirePensee();
   montreHumeur();
 }
