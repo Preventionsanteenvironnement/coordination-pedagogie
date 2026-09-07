@@ -387,6 +387,14 @@ const THEMATIQUES = [
         type: "Suivi",
         icon: "chart",
       },
+      {
+        titre: "Soutien au parcours",
+        desc: "Le tableau partagé des mercredis (10h30–11h30) : à deux, en direct, on programme chaque séance — thème, objectif, activité, fiches PDF. Calendrier, bibliothèque d'activités et repères officiels.",
+        lien: "soutien-parcours/",
+        type: "Tableau partagé",
+        icon: "compass",
+        badge: "Nouveau",
+      },
     ],
   },
   {

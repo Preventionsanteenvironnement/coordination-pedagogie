@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Soutien au parcours · 2de GATL</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.card{padding:12px 14px 10px 14px;cursor:pointer}
+.card::before{display:none}
+.card .top{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mute);font-weight:500;margin-bottom:4px}
+.card .top .st{position:static;margin-left:auto}
+.blk{display:grid;grid-template-columns:4px 1fr;gap:10px;padding:5px 0}
+.blk i{border-radius:99px;background:var(--c)}
+.blk .th{font-size:11.5px;font-weight:600;color:var(--c)}
+.blk .ti{font-size:15.5px;font-weight:600;line-height:1.25}
+.blk .ob{font-size:13px;color:var(--mute)}
+.card.prop{border:1.5px dashed #b9c0cc}
+.card.prop .top::after{content:"proposition";margin-left:6px;color:#b9c0cc;font-weight:500}
+.card.prop .top .st{margin-left:auto}
+/* fiche synthèse */
+.fh{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.fh .seg{margin-left:auto}
+.meta{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:14px 0 6px;font-size:14px}
+.meta label{color:var(--mute);font-weight:600;font-size:13px}
+.meta input{border:0;border-bottom:1.5px solid var(--line);padding:4px 2px;background:transparent;min-width:180px}
+.meta input:focus{outline:none;border-color:var(--ink)}
+.sb{display:grid;grid-template-columns:4px 1fr auto;gap:12px;padding:12px 0;border-top:1px solid var(--line);align-items:start}
+.sb i{border-radius:99px;background:var(--c);align-self:stretch}
+.sb .th{font-size:12px;font-weight:600;color:var(--c)}
+.sb .ti{font-size:17px;font-weight:600;margin:1px 0 4px}
+.sb .ln{font-size:14px;margin:2px 0}
+.sb .ln b{font-weight:600;color:var(--mute);font-size:12.5px;margin-right:6px}
+.sb .rs a{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;text-decoration:none;background:#eef0f4;padding:3px 10px;border-radius:99px;margin:4px 6px 0 0}
+.sb .ops{display:flex;flex-direction:column;gap:4px}
+.sb .ops button{font-size:13px}
+.empty-f{color:var(--mute);padding:18px 0;border-top:1px solid var(--line)}
+/* builder */
+.bh{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.bh button{border:0;background:transparent;font-weight:600;color:var(--mute);cursor:pointer;font-size:14px;padding:0}
+.tiles.small{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.tile.small{padding:7px 10px;font-size:13.5px}
+select.sel{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;font-size:15px}
+select.sel:focus{outline:none;border-color:var(--ink)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.acts button{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:5px 11px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.acts button.on{border-color:var(--ink);background:#f3f4f7}
+.acts button a{font-size:11px;color:var(--mute);text-decoration:none}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <h1>Soutien au parcours <small>2de GATL1 · GATL2 — les mercredis 10h30–11h30, du 9 septembre au 16 décembre</small></h1>
+  <div id="navslot"></div>
+  <div class="sync" id="sync"><i></i><span>…</span></div>
+</header>
+<div class="note" id="note"></div>
+<main id="cal"></main>
+<div class="veil" id="veil"><div class="dlg" id="dlg"></div></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+(async()=>{
+document.getElementById("navslot").innerHTML = nav("index.html");
+const $=s=>document.querySelector(s);
+const lib=()=>[...ACTS,...Object.values(state.custom||{})];
+const actById=id=>lib().find(a=>a.id===id);
+const slot=d=>state.slots[d]||{mode:"separe"};
+const themeOf=b=>THEMES[b.theme]||THEMES.autre;
+const themeLabel=b=>b.theme==="autre"&&b.themeLibre?b.themeLibre:themeOf(b).t;
+const emptyEntry=()=>({lieu:"",statut:"todo",blocks:[]});
+
+/* ================= calendrier ================= */
+function cardHtml(d,g,e){
+  if(!e||!(e.blocks||[]).length) return `<button class="card empty" data-d="${d}" data-g="${g}">+ Programmer <span style="font-weight:400">· ${GROUPS[g]}</span></button>`;
+  return `<button class="card ${e.proposition?"prop":""}" data-d="${d}" data-g="${g}">
+    <div class="top">${GROUPS[g]}${e.lieu?` · ${esc(e.lieu)}`:""}${e.statut&&e.statut!=="todo"?`<span class="st ${e.statut}">${STATUS[e.statut]}</span>`:""}</div>
+    ${e.blocks.map(b=>`<div class="blk" style="--c:${themeOf(b).c}"><i></i><div><div class="th">${esc(themeLabel(b))}</div><div class="ti">${esc(b.sub)}</div>${b.objectif?`<div class="ob">${esc(b.objectif)}</div>`:""}</div></div>`).join("")}
+  </button>`;
+}
+function render(){
+  const t=today(); let h="",month="";
+  const all=[...SLOTS.map(d=>({d})),...HOLI.map(([d,l])=>({d,l}))].sort((a,b)=>a.d.localeCompare(b.d));
+  for(const it of all){
+    const m=fmtMonth(it.d); if(m!==month){ month=m; h+=`<div class="month"><h2>${m}</h2></div>`; }
+    if(it.l){ h+=`<div class="holiday"><b>${dayOf(it.d)}</b><span>${it.l}</span></div>`; continue; }
+    const s=slot(it.d);
+    h+=`<div class="week ${s.mode==="both"?"both":""}"><div class="day ${it.d<t?"past":""}"><b>${dayOf(it.d)}</b><span>mercredi</span></div>`;
+    h+= s.mode==="both" ? cardHtml(it.d,"both",s.both) : cardHtml(it.d,"g1",s.g1)+cardHtml(it.d,"g2",s.g2);
+    h+=`</div>`;
+  }
+  $("#cal").innerHTML=h;
+  $("#cal").querySelectorAll(".card").forEach(b=>b.onclick=()=>openFiche(b.dataset.d,b.dataset.g));
+}
+onChange(()=>{ render(); if(F) drawFiche(); });
+
+/* ================= fiche synthèse ================= */
+let F=null; // {d,g}
+function entry(d,g){ return JSON.parse(JSON.stringify(slot(d)[g]||emptyEntry())); }
+function openFiche(d,g){ F={d,g}; drawFiche(); $("#veil").classList.add("on"); }
+function drawFiche(){
+  const {d,g}=F; const e=entry(d,g);
+  $("#dlg").innerHTML=`
+    <div class="fh"><h2>${esc(fmtLong(d))} <small>10h30 – 11h30</small></h2>
+      <div class="seg">${["g1","g2","both"].map(k=>`<button data-g="${k}" class="${g===k?"on":""}">${GROUPS[k]}</button>`).join("")}</div></div>
+    <div class="meta"><span><label>Lieu</label> <input id="f-lieu" list="lieux" value="${esc(e.lieu)}" placeholder="Salle habituelle"><datalist id="lieux">${LIEUX.map(l=>`<option>${l}</option>`).join("")}</datalist></span>
+      <span class="pills">${Object.entries(STATUS).map(([k,v])=>`<button class="pill ${e.statut===k?"on":""}" data-st="${k}">${v}</button>`).join("")}</span></div>
+    ${(e.blocks||[]).length? e.blocks.map((b,i)=>`<div class="sb" style="--c:${themeOf(b).c}"><i></i><div>
+        <div class="th">${esc(themeLabel(b))}</div><div class="ti">${esc(b.sub)}</div>
+        ${b.objectif?`<div class="ln"><b>Objectif</b>${esc(b.objectif)}</div>`:""}
+        ${b.activite?`<div class="ln"><b>Activité</b>${esc(b.activite)}</div>`:""}
+        ${b.note?`<div class="ln"><b>Note</b>${esc(b.note)}</div>`:""}
+        <div class="rs">${(b.res||[]).map(r=>`<a href="${esc(r.url)}" target="_blank">${esc(r.t||r.url)}</a>`).join("")}${b.act&&actById(b.act)&&actById(b.act).pdf?`<a href="${actById(b.act).pdf}" target="_blank">Fiche PDF</a>`:""}</div>
+      </div><div class="ops"><button class="btn s" data-edit="${i}">Modifier</button><button class="btn s" data-del="${i}" style="color:#a12626">Retirer</button></div></div>`).join("")
+      : `<div class="empty-f">Rien de programmé pour ${GROUPS[g]}. Ajoute un premier thème.</div>`}
+    <div class="actions"><button class="btn p" id="f-add">+ Ajouter un thème</button><button class="btn" id="f-close">Fermer</button>${(e.blocks||[]).length?`<button class="btn d" id="f-clear">Vider la séance</button>`:""}</div>`;
+  const dlg=$("#dlg");
+  dlg.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>switchGroup(b.dataset.g));
+  $("#f-lieu").onchange=async ev=>{ const s=slot(d); const en=entry(d,g); en.lieu=ev.target.value; delete en.proposition; await save(`slots.${d}.${g}`,en); };
+  dlg.querySelectorAll("[data-st]").forEach(b=>b.onclick=async()=>{ const en=entry(d,g); en.statut=b.dataset.st; delete en.proposition; await save(`slots.${d}.${g}`,en); });
+  dlg.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>openBuilder(+b.dataset.edit));
+  dlg.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{ const en=entry(d,g); en.blocks.splice(+b.dataset.del,1); delete en.proposition; await save(`slots.${d}.${g}`,en); toast("Retiré"); });
+  $("#f-add").onclick=()=>openBuilder(-1);
+  $("#f-close").onclick=close;
+  const cl=$("#f-clear"); if(cl) cl.onclick=async()=>{ if(!confirm("Vider toute la séance pour "+GROUPS[g]+" ?")) return; await save(`slots.${d}.${g}`,null); if(g==="both") await save(`slots.${d}.mode`,"separe"); close(); };
+}
+/* changer de groupe : un seul groupe ↔ les deux. L'autre groupe redevient vide. */
+async function switchGroup(ng){
+  const {d,g}=F; if(ng===g) return;
+  const s=JSON.parse(JSON.stringify(slot(d))); const cur=s[g];
+  if(ng==="both"){ s.mode="both"; s.both=cur||s.g1||s.g2||emptyEntry(); delete s.g1; delete s.g2; }
+  else { if(s.mode==="both"){ s[ng]=s.both||emptyEntry(); delete s.both; } else { s[ng]=s[ng]||emptyEntry(); } s.mode="separe"; if(g==="both"){} }
+  if(s[ng]) delete s[ng].proposition;
+  await save(`slots.${d}`,s); F.g=ng; drawFiche();
+}
+
+/* ================= construction d'un bloc ================= */
+let Bd=null; // {idx, b}
+function openBuilder(idx){
+  const e=entry(F.d,F.g);
+  Bd={idx, b: idx>=0 ? JSON.parse(JSON.stringify(e.blocks[idx])) : {theme:"",themeLibre:"",sub:"",objectif:"",activite:"",act:"",res:[],note:""}};
+  drawBuilder();
+}
+function drawBuilder(){
+  const {b}=Bd; const th=THEMES[b.theme]; const subs=th?th.subs:[]; const cur=subs.find(x=>x.t===b.sub);
+  const proposedActs = cur ? (cur.acts||[]).map(actById).filter(Boolean) : [];
+  const isLibreSub = b.theme && !cur;
+  $("#dlg").innerHTML=`
+    <div class="bh"><button id="b-back">← Retour à la séance</button></div>
+    <h2>${Bd.idx>=0?"Modifier":"Ajouter"} <small>${esc(fmtLong(F.d))} · ${GROUPS[F.g]}</small></h2>
+    <div class="step"><label>Sur quel thème souhaitez-vous travailler ?</label>
+      <div class="tiles small">${Object.entries(THEMES).map(([k,v])=>`<button class="tile small ${b.theme===k?"on":""}" style="--c:${v.c}" data-theme="${k}"><i></i>${v.t}</button>`).join("")}</div>
+      ${b.theme==="autre"?`<div class="fld"><label>Quel thème ?</label><input id="b-tl" class="big" value="${esc(b.themeLibre)}" placeholder="J'écris le thème"></div>`:""}
+    </div>
+    ${b.theme?`<div class="step"><label>Sur quoi allez-vous travailler ? <span style="font-weight:400">(c'est le titre dans le calendrier)</span></label>
+      ${subs.length?`<select class="sel" id="b-sub"><option value="">— Choisir —</option>${subs.map(s=>`<option ${b.sub===s.t?"selected":""}>${esc(s.t)}</option>`).join("")}<option value="__libre" ${isLibreSub&&b.sub?"selected":""}>Autre — je l'écris</option></select>`:""}
+      ${(!subs.length||isLibreSub)?`<div class="fld" style="margin-top:8px"><input id="b-subl" class="big" value="${esc(cur?"":b.sub)}" placeholder="Titre de ce qu'on va travailler"></div>`:""}
+    </div>`:""}
+    ${b.theme&&b.sub?`<div class="step" style="border-top:1px solid var(--line);padding-top:4px">
+      <div class="fld"><label>Objectif</label><textarea id="b-obj" placeholder="${esc(cur?cur.o:"Ce que les élèves auront fait ou compris")}">${esc(b.objectif)}</textarea>${cur&&!b.objectif?`<div class="hint">Proposé : ${esc(cur.o)} — <a href="#" id="b-useo">reprendre</a></div>`:""}</div>
+      <div class="fld"><label>Activité</label><textarea id="b-act" placeholder="${esc(cur?cur.a:"Ce qu'on fait concrètement")}">${esc(b.activite)}</textarea>
+        ${cur&&!b.activite?`<div class="hint">Proposé : ${esc(cur.a)} — <a href="#" id="b-usea">reprendre</a></div>`:""}
+        ${proposedActs.length?`<div class="acts">${proposedActs.map(a=>`<button data-lib="${a.id}" class="${b.act===a.id?"on":""}">${esc(a.t)} ${a.pdf?`<a href="${a.pdf}" target="_blank" onclick="event.stopPropagation()">PDF</a>`:""}${a.url?`<a href="${a.url}" target="_blank" onclick="event.stopPropagation()">site</a>`:""}</button>`).join("")}</div><div class="hint">Fiches de la bibliothèque pour ce sujet — un clic met le titre dans l'activité et rattache la fiche.</div>`:""}
+      </div>
+      <div class="fld"><label>Ressources</label><div class="links">${(b.res||[]).map((r,i)=>`<a href="${esc(r.url)}" target="_blank">${esc(r.t||r.url)} <span data-rml="${i}">×</span></a>`).join("")}<button class="btn s" id="b-addl">+ Lien</button>${cur&&(cur.res||[]).filter(r=>!(b.res||[]).some(x=>x.url===r.url)).map((r,i)=>`<button class="btn s" data-pr="${i}" style="border-style:dashed">+ ${esc(r.t)}</button>`).join("")}</div></div>
+      <div class="fld"><label>Note (facultatif)</label><input id="b-note" value="${esc(b.note)}" placeholder="Matériel, consigne, à dire à l'autre…"></div>
+    </div>`:""}
+    <div class="actions">${b.theme&&b.sub?`<button class="btn p" id="b-ok">Enregistrer</button>`:""}<button class="btn" id="b-cancel">Annuler</button></div>`;
+  const dlg=$("#dlg");
+  dlg.querySelectorAll("[data-theme]").forEach(t=>t.onclick=()=>{ grab(); if(Bd.b.theme!==t.dataset.theme){ Bd.b.theme=t.dataset.theme; Bd.b.sub=""; Bd.b.act=""; } drawBuilder(); });
+  const tl=$("#b-tl"); if(tl) tl.oninput=ev=>Bd.b.themeLibre=ev.target.value;
+  const sel=$("#b-sub"); if(sel) sel.onchange=()=>{ grab(); const v=sel.value; if(v==="__libre"){ Bd.b.sub=" "; } else { Bd.b.sub=v; const c=subs.find(x=>x.t===v); if(c){ Bd.b.objectif=c.o; Bd.b.activite=c.a; Bd.b.res=(c.res||[]).map(r=>({...r})); Bd.b.act=""; } } drawBuilder(); if(v==="__libre") $("#b-subl")?.focus(); };
+  const subl=$("#b-subl"); if(subl){ subl.oninput=ev=>{ Bd.b.sub=ev.target.value; }; subl.onchange=()=>{ grab(); drawBuilder(); }; }
+  const uo=$("#b-useo"); if(uo) uo.onclick=ev=>{ ev.preventDefault(); grab(); Bd.b.objectif=cur.o; drawBuilder(); };
+  const ua=$("#b-usea"); if(ua) ua.onclick=ev=>{ ev.preventDefault(); grab(); Bd.b.activite=cur.a; drawBuilder(); };
+  dlg.querySelectorAll("[data-lib]").forEach(x=>x.onclick=()=>{ grab(); const a=actById(x.dataset.lib); if(Bd.b.act===a.id){ Bd.b.act=""; } else { Bd.b.act=a.id; Bd.b.activite=a.t; } drawBuilder(); });
+  dlg.querySelectorAll("[data-rml]").forEach(x=>x.onclick=ev=>{ ev.preventDefault(); grab(); Bd.b.res.splice(+x.dataset.rml,1); drawBuilder(); });
+  dlg.querySelectorAll("[data-pr]").forEach(x=>x.onclick=()=>{ grab(); const list=(cur.res||[]).filter(r=>!(Bd.b.res||[]).some(y=>y.url===r.url)); Bd.b.res.push({...list[+x.dataset.pr]}); drawBuilder(); });
+  const al=$("#b-addl"); if(al) al.onclick=()=>{ grab(); const url=prompt("Adresse (https://…)"); if(!url) return; const t=prompt("Titre du lien (facultatif)")||""; Bd.b.res.push({t,url}); drawBuilder(); };
+  $("#b-back").onclick=drawFiche; $("#b-cancel").onclick=drawFiche;
+  const ok=$("#b-ok"); if(ok) ok.onclick=commitBlock;
+}
+function grab(){ const v=id=>$(id)?.value; if($("#b-obj")){ Bd.b.objectif=v("#b-obj"); Bd.b.activite=v("#b-act"); Bd.b.note=v("#b-note"); } if($("#b-subl")) Bd.b.sub=v("#b-subl"); if($("#b-tl")) Bd.b.themeLibre=v("#b-tl"); }
+async function commitBlock(){
+  grab(); const b=Bd.b; b.sub=(b.sub||"").trim();
+  if(!b.sub){ toast("Il manque le titre"); return; }
+  if(b.theme==="autre"&&!(b.themeLibre||"").trim()){ toast("Écris le thème"); $("#b-tl").focus(); return; }
+  const {d,g}=F; const s=JSON.parse(JSON.stringify(slot(d)));
+  if(g==="both"){ s.mode="both"; delete s.g1; delete s.g2; } else { if(s.mode==="both"){ delete s.both; } s.mode="separe"; }
+  const en=s[g]||emptyEntry(); delete en.proposition; en.blocks=en.blocks||[];
+  if(Bd.idx>=0) en.blocks[Bd.idx]=b; else en.blocks.push(b);
+  if(!en.lieu) en.lieu="Salle habituelle";
+  s[g]=en; s.updatedAt=Date.now();
+  await save(`slots.${d}`,s); toast("Enregistré"); drawFiche();
+}
+function close(){ $("#veil").classList.remove("on"); F=null; Bd=null; }
+$("#veil").onclick=ev=>{ if(ev.target.id==="veil") close(); };
+document.addEventListener("keydown",ev=>{ if(ev.key==="Escape") close(); });
+
+/* ================= arrivée depuis la bibliothèque ================= */
+function fromLibrary(theme,sub,actId,obj,acti){
+  $("#dlg").innerHTML=`<h2>${esc(sub||THEMES[theme]?.t||"")} <small>Quel mercredi ?</small></h2><div class="step"><div class="list" style="max-height:60vh">${SLOTS.map(d=>{const s=slot(d); const en=s.mode==="both"?s.both:null; const titles=s.mode==="both"?(s.both?.blocks||[]).map(b=>b.sub):[...(s.g1?.blocks||[]),...(s.g2?.blocks||[])].map(b=>b.sub); return `<button class="opt" data-d="${d}"><span><b>${esc(fmtLong(d))}</b><small>${esc(titles.join(" · ")||"libre")}</small></span></button>`;}).join("")}</div></div><div class="actions"><button class="btn" id="f-close">Annuler</button></div>`;
+  $("#veil").classList.add("on"); $("#f-close").onclick=close;
+  $("#dlg").querySelectorAll("[data-d]").forEach(x=>x.onclick=()=>{ const d=x.dataset.d; const s=slot(d); F={d,g:s.mode==="both"?"both":"g2"}; const c=(THEMES[theme]?.subs||[]).find(y=>y.t===sub); const a=actId?actById(actId):null;
+    Bd={idx:-1,b:{theme,themeLibre:"",sub:sub||(a?a.t:""),objectif:obj||(c?c.o:""),activite:acti||(a?a.t:(c?c.a:"")),act:a?a.id:"",res:c?(c.res||[]).map(r=>({...r})):[],note:""}}; drawBuilder(); });
+  history.replaceState(null,"",location.pathname);
+}
+
+await init({}); render();
+const q=new URLSearchParams(location.search); if(q.get("theme")) fromLibrary(q.get("theme"),q.get("sub")||"",q.get("act")||"",q.get("obj")||"",q.get("acti")||"");
+})();
+</script>
+</body>
+</html>

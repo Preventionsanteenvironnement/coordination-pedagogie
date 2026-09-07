@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bibliothèque · Soutien au parcours</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.th{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden}
+.th summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:16px}
+.th summary::-webkit-details-marker{display:none}
+.th summary i{width:12px;height:12px;border-radius:50%;background:var(--c)}
+.th summary small{margin-left:auto;color:var(--mute);font-weight:500;font-size:13px}
+.row{display:grid;grid-template-columns:1.1fr 1.4fr 1.4fr auto;gap:14px;padding:12px 18px;border-top:1px solid var(--line);font-size:14px;align-items:start}
+.row b{font-weight:600;font-size:15px}
+.row .k{font-size:11.5px;color:var(--mute);font-weight:600;display:block}
+.row .fl a{display:inline-block;font-size:12px;font-weight:600;text-decoration:none;background:#eef0f4;padding:2px 8px;border-radius:99px;margin:4px 4px 0 0}
+.row .btn{white-space:nowrap}
+.hd{display:grid;grid-template-columns:1.1fr 1.4fr 1.4fr auto;gap:14px;padding:6px 18px 8px;font-size:11.5px;color:var(--mute);font-weight:600;border-top:1px solid var(--line);background:#f9fafb}
+@media(max-width:760px){.row,.hd{grid-template-columns:1fr}.hd{display:none}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <h1>Bibliothèque <small>Thèmes, sous-thèmes, objectifs et activités proposés — tout est modifiable au moment de programmer</small></h1>
+  <div id="navslot"></div>
+  <div class="sync" id="sync"><i></i><span>…</span></div>
+</header>
+<main>
+  <div class="search"><input id="q" placeholder="Chercher : délégués, stress, PFMP, blason, Avenir(s)…"></div>
+  <h2 style="font-size:18px;font-weight:700;margin:22px 0 10px">Progression proposée par la collègue — 1ʳᵉ période</h2>
+  <p style="color:var(--mute);margin:0 0 10px;font-size:14px">Sa trame, dans l'ordre. Rien n'est posé sur le calendrier : chaque ligne s'ajoute sur le mercredi de votre choix.</p>
+  <div class="th" style="--c:#1c1f2a" id="trame"></div>
+  <h2 style="font-size:18px;font-weight:700;margin:34px 0 10px">Thèmes et sujets</h2>
+  <div id="themes"></div>
+  <h2 style="font-size:18px;font-weight:700;margin:34px 0 10px">Toutes les fiches (PDF et sites)</h2>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+(async()=>{
+document.getElementById("navslot").innerHTML = nav("bibliotheque.html");
+const $=s=>document.querySelector(s);
+const lib=()=>[...ACTS,...Object.values(state.custom||{})];
+const actById=id=>lib().find(a=>a.id===id);
+function renderTrame(){
+  const rows=[]; Object.entries(TRAME).forEach(([d,s])=>{ const en=s.both||s.g2||s.g1; (en.blocks||[]).forEach(bl=>rows.push({d,bl,lieu:en.lieu})); });
+  $("#trame").innerHTML=`<div class="hd"><span>Sur quoi on travaille</span><span>Objectif</span><span>Activité</span><span></span></div>`+rows.map((r,i)=>{const th=THEMES[r.bl.theme]; return `<div class="row"><div><span class="k" style="color:${th.c}">${esc(th.t)}</span><b>${esc(r.bl.sub)}</b><div class="k" style="margin-top:4px">Suggéré : ${esc(fmtLong(r.d))}${r.lieu&&r.lieu!=="Salle habituelle"?" · "+esc(r.lieu):""}</div></div><div><span class="k">Objectif</span>${esc(r.bl.objectif)}</div><div><span class="k">Activité</span>${esc(r.bl.activite)}</div><button class="btn s p" data-tr="${i}">Ajouter au calendrier</button></div>`;}).join("");
+  $("#trame").querySelectorAll("[data-tr]").forEach(x=>x.onclick=()=>{ const r=rows[+x.dataset.tr]; location.href=`index.html?theme=${r.bl.theme}&sub=${encodeURIComponent(r.bl.sub)}&obj=${encodeURIComponent(r.bl.objectif)}&acti=${encodeURIComponent(r.bl.activite)}&act=${r.bl.act||""}`; });
+}
+function render(){
+  const q=$("#q").value.trim().toLowerCase();
+  $("#themes").innerHTML=Object.entries(THEMES).filter(([k])=>k!=="autre").map(([k,th])=>{
+    const subs=th.subs.filter(s=>!q||(s.t+" "+s.o+" "+s.a+" "+(s.acts||[]).map(id=>actById(id)?.t||"").join(" ")).toLowerCase().includes(q)||th.t.toLowerCase().includes(q));
+    if(!subs.length) return "";
+    return `<details class="th" style="--c:${th.c}" ${q?"open":""}><summary><i></i>${esc(th.t)}<small>${subs.length} sujet${subs.length>1?"s":""}</small></summary>
+      <div class="hd"><span>Sur quoi on travaille</span><span>Objectif proposé</span><span>Activité proposée</span><span></span></div>
+      ${subs.map(s=>`<div class="row"><div><b>${esc(s.t)}</b><div class="fl">${(s.acts||[]).map(id=>{const a=actById(id); if(!a) return ""; return a.pdf?`<a href="${a.pdf}" target="_blank" title="${esc(a.t)}">${esc(a.t)}</a>`:a.url?`<a href="${a.url}" target="_blank">${esc(a.t)} ↗</a>`:`<a>${esc(a.t)}</a>`;}).join("")}${(s.res||[]).map(r=>`<a href="${r.url}" target="_blank">${esc(r.t)} ↗</a>`).join("")}</div></div>
+        <div><span class="k">Objectif</span>${esc(s.o)}</div><div><span class="k">Activité</span>${esc(s.a)}</div>
+        <button class="btn s p" data-theme="${k}" data-sub="${esc(s.t)}">Ajouter au calendrier</button></div>`).join("")}</details>`;
+  }).join("") || `<p style="color:var(--mute)">Rien pour « ${esc(q)} ». Au moment de programmer, choisis « Autre — je l'écris ».</p>`;
+  $("#themes").querySelectorAll("[data-theme]").forEach(b=>b.onclick=()=>location.href=`index.html?theme=${b.dataset.theme}&sub=${encodeURIComponent(b.dataset.sub)}`);
+  const themeForAct=a=>THEMES[a.cat]?a.cat:"autre";
+  $("#grid").innerHTML=lib().filter(a=>(a.pdf||a.url)&&(!q||(a.t+" "+a.p+" "+a.src).toLowerCase().includes(q))).map(a=>{const th=THEMES[themeForAct(a)];
+    return `<div class="lib" style="--c:${th.c}"><div class="cat">${esc(th.t)}</div><h3>${esc(a.t)}</h3><div class="meta">${esc(a.src)} · ${esc(a.dur)}</div><p>${esc(a.p)}</p>
+      <div class="row" style="display:flex;padding:0;border:0">${a.pdf?`<a href="${a.pdf}" target="_blank">PDF</a>`:""}${a.pdf2?`<a href="${a.pdf2}" target="_blank">PDF 2</a>`:""}${a.url?`<a href="${a.url}" target="_blank">Site ↗</a>`:""}<button class="add" data-act="${a.id}">Ajouter</button></div></div>`;}).join("");
+  $("#grid").querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{ const a=actById(b.dataset.act); location.href=`index.html?theme=${themeForAct(a)}&act=${a.id}`; });
+}
+$("#q").oninput=render; onChange(render);
+await init(); renderTrame(); render();
+})();
+</script>
+</body>
+</html>
