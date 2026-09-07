@@ -85,6 +85,19 @@ input,select{font:inherit;color:inherit}
 #ecran-bonjour blockquote:after{content:"\00a0»"}
 .signe{margin:16px 0 0;font-size:.8rem;font-weight:800;letter-spacing:.14em;
   text-transform:uppercase;opacity:.72}
+/* humeur du jour — privée, un seul tap, jamais bloquante */
+.humeur{margin:28px 0 4px;width:100%;max-width:22rem;text-align:center}
+.humeur-q{margin:0 0 12px;font-size:.92rem;font-weight:700;opacity:.85}
+.humeur-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.humeur-row button{width:52px;height:52px;border-radius:16px;border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.08);font-size:1.7rem;line-height:1;display:flex;align-items:center;
+  justify-content:center;transition:transform .12s,background .12s,border-color .12s;padding:0}
+.humeur-row button:active{transform:scale(.9)}
+.humeur-row button[aria-pressed=true]{background:#fff;border-color:#fff;transform:scale(1.06);
+  box-shadow:0 6px 18px rgba(0,0,0,.22)}
+.humeur-r{margin:14px 0 0;min-height:1.2em;font-size:.9rem;font-weight:700;opacity:0;
+  transition:opacity .25s;text-wrap:balance}
+.humeur-r.on{opacity:.95}
 .salut-b{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:15rem}
 #autre-pensee{padding:9px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.32);
   background:transparent;color:#fff;font-size:.85rem;font-weight:700;opacity:.9}
@@ -407,6 +420,11 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <h1>Bonjour</h1>
     <blockquote id="pensee-t"></blockquote>
     <p class="signe" id="pensee-a"></p>
+  </div>
+  <div class="humeur" id="humeur">
+    <p class="humeur-q">Comment vous sentez-vous aujourd'hui ?</p>
+    <div class="humeur-row" id="humeur-row"></div>
+    <p class="humeur-r" id="humeur-r"></p>
   </div>
   <div class="salut-b">
     <button id="autre-pensee">Une autre pensée</button>
@@ -813,10 +831,59 @@ function tirePensee(){
 }
 const dejaSalue = () => { try { return localStorage.getItem(K_SALUT) === iso(new Date()); } catch(e){ return false; } };
 
+/* Humeur du jour — 100 % privée : reste sur ce téléphone, n'est ni envoyée
+   ni partagée. Un simple rituel bienveillant, un tap, non bloquant. */
+const HUMEURS = [
+  ['😄', "Belle énergie — ça se transmet aux élèves ✨"],
+  ['🙂', "Contente de vous voir. Belle journée 🌿"],
+  ['😐', "Une chose à la fois. On avance 🤍"],
+  ['😔', "Ménagez-vous aujourd'hui. Vous comptez 💛"],
+  ['😣', "Jour difficile — vous n'êtes pas seule. Courage 🫶"]
+];
+const K_HUMEUR = 'edt-aesh-humeur';
+function humeurDuJour(){
+  try { const v = JSON.parse(localStorage.getItem(K_HUMEUR) || 'null');
+        return (v && v.le === iso(new Date())) ? v.i : null; } catch(e){ return null; }
+}
+function poseHumeur(i){
+  try { localStorage.setItem(K_HUMEUR, JSON.stringify({ le: iso(new Date()), i })); } catch(e){}
+  const row = $('#humeur-row');
+  [...row.children].forEach((b,k) => b.setAttribute('aria-pressed', k === i));
+  const r = $('#humeur-r'); r.textContent = HUMEURS[i][1]; r.classList.add('on');
+}
+function montreHumeur(){
+  const row = $('#humeur-row'); row.innerHTML = '';
+  const deja = humeurDuJour();
+  HUMEURS.forEach(([emo], i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = emo;
+    b.setAttribute('aria-label', HUMEURS[i][1]);
+    b.setAttribute('aria-pressed', deja === i);
+    b.onclick = () => poseHumeur(i);
+    row.appendChild(b);
+  });
+  const r = $('#humeur-r');
+  if (deja != null){ r.textContent = HUMEURS[deja][1]; r.classList.add('on'); }
+  else { r.textContent = ''; r.classList.remove('on'); }
+}
+
+/* Petits mots d'encouragement à l'enregistrement — le geste compte. */
+const BRAVOS = [
+  "Merci — votre regard fait la différence.",
+  "C'est noté. Vous comptez pour eux.",
+  "Un créneau de plus, un élève mieux accompagné.",
+  "Bravo, c'est bien enregistré 🌱",
+  "Votre présence change les choses.",
+  "Enregistré — prenez soin de vous aussi 💛",
+  "Chaque geste posé aide un élève à grandir."
+];
+const motBravo = () => BRAVOS[Math.floor(Math.random() * BRAVOS.length)];
+
 function montreBonjour(){
   $('#ecran-code').classList.add('hide');
   $('#ecran-bonjour').classList.remove('hide');
   tirePensee();
+  montreHumeur();
 }
 $('#autre-pensee').onclick = tirePensee;
 $('#entrer').onclick = () => {
@@ -1196,7 +1263,7 @@ async function enregistre(){
     majLe: new Date().toISOString()
   };
   fermeFeuille();
-  try { await setDoc(doc(db, COL_SAISIES, id), donnee); dis('Créneau enregistré'); }
+  try { await setDoc(doc(db, COL_SAISIES, id), donnee); dis('✓ ' + motBravo()); }
   catch(e){ dis('Échec de l\'enregistrement'); }
 }
 async function supprime(){
@@ -1377,7 +1444,7 @@ async function enregistreService(){
       delegue: aid !== moi.id,
       majLe: new Date().toISOString()
     });
-    dis('Service ajouté');
+    dis('✓ ' + motBravo());
   } catch(e){ dis('Échec de l\'enregistrement'); }
 }
 
