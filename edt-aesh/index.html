@@ -229,6 +229,12 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
 .bloc-repere button{display:block;margin-top:10px;width:100%;padding:10px 12px;border-radius:10px;
   border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer}
 .bloc-repere button:hover{background:#c2410c;border-color:#c2410c}
+.sem-repere{display:block;width:100%;margin:8px 0 0;padding:8px 12px;border-radius:10px;
+  background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;font-size:.82rem;font-weight:600;
+  text-align:left;cursor:pointer;line-height:1.4}
+.sem-repere:hover{background:#ffedd5;border-color:#fdba74}
+.sem-repere b{color:#7c2d12}
+.sem-repere u{text-decoration-color:#ea580c;text-underline-offset:2px}
 .bloc>h4{margin:0 0 9px;font-size:.74rem;font-weight:800;text-transform:uppercase;
   letter-spacing:.07em;color:var(--muted)}
 .opts{display:flex;flex-wrap:wrap;gap:8px}
@@ -479,6 +485,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
       </div>
       <button id="sem-suiv">›</button>
     </div>
+    <button type="button" class="sem-repere hide" id="sem-repere"></button>
     <div class="jours" id="jours"></div>
   </header>
 
@@ -1047,6 +1054,19 @@ function rendu(){
     (par ? ' <span class="badge-p">semaine ' + par + '</span>' : '');
   $('#sem-dates').textContent = joliDate(lundiCourant) + ' → ' + joliDate(ajouteJours(lundiCourant,4));
   $('#sem-prec').disabled = lundiCourant <= PREMIER_LUNDI;
+
+  // Rappel discret quand on s'éloigne de la semaine en cours (ne bloque rien).
+  const semAujR = lundiDe(iso(new Date()));
+  const semNow = semAujR < PREMIER_LUNDI ? PREMIER_LUNDI : semAujR;
+  const ecN = Math.round((dat(lundiCourant) - dat(semNow)) / 604800000);
+  const rep = $('#sem-repere');
+  if (Math.abs(ecN) >= 2){
+    rep.innerHTML = '📅 Vous regardez <b>' + (ecN > 0 ? 'dans ' + ecN + ' semaines' : 'il y a ' + Math.abs(ecN) + ' semaines') +
+      '</b> · <u>Revenir à la semaine en cours (' + joliDate(semNow) + ')</u>';
+    rep.classList.remove('hide');
+  } else {
+    rep.classList.add('hide');
+  }
 
   const z = $('#jours'); z.innerHTML = '';
   JOURS.forEach((j,i) => {
@@ -1816,6 +1836,10 @@ window.addEventListener('online', flushRetours);
 /* ─────────── navigation ─────────── */
 $('#sem-prec').onclick = () => { if (lundiCourant > PREMIER_LUNDI){ lundiCourant = ajouteJours(lundiCourant,-7); rendu(); } };
 $('#sem-suiv').onclick = () => { lundiCourant = ajouteJours(lundiCourant, 7); rendu(); };
+$('#sem-repere').onclick = () => {
+  const a = lundiDe(iso(new Date()));
+  lundiCourant = a < PREMIER_LUNDI ? PREMIER_LUNDI : a; rendu();
+};
 document.querySelectorAll('.ong').forEach(b => {
   b.onclick = () => {
     vue = b.dataset.vue;
