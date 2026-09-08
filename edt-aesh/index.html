@@ -223,6 +223,12 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
 .f-t{font-size:1.18rem;font-weight:800;letter-spacing:-.025em;line-height:1.28;margin:6px 0 0}
 .f-st{color:var(--ink-2);font-size:.88rem;margin-top:5px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
 .bloc{margin-top:20px}
+.bloc-repere{margin:2px 0 4px;padding:12px 14px;border-radius:14px;background:#fff7ed;border:1.5px solid #fdba74;
+  color:#7c2d12;font-size:.92rem;line-height:1.45;font-weight:600}
+.bloc-repere b{color:#9a3412}
+.bloc-repere button{display:block;margin-top:10px;width:100%;padding:10px 12px;border-radius:10px;
+  border:1.5px solid #ea580c;background:#ea580c;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer}
+.bloc-repere button:hover{background:#c2410c;border-color:#c2410c}
 .bloc>h4{margin:0 0 9px;font-size:.74rem;font-weight:800;text-transform:uppercase;
   letter-spacing:.07em;color:var(--muted)}
 .opts{display:flex;flex-wrap:wrap;gap:8px}
@@ -1127,7 +1133,19 @@ function ouvreCours(c, d){
   for (let m = deb; m <= fin; m += 30) mins.push(m);
   const dessus = surCeCours(c, d).filter(s => s.aeshId !== cible.id);
 
+  // Repère de semaine : informe (sans bloquer) si on positionne loin de la semaine en cours.
+  const semAujReel = lundiDe(iso(new Date()));
+  const semAuj = semAujReel < PREMIER_LUNDI ? PREMIER_LUNDI : semAujReel;
+  const ecartSem = Math.round((dat(lundiCourant) - dat(semAuj)) / 604800000);
+  const repereSemaine = Math.abs(ecartSem) >= 2
+    ? '<div class="bloc-repere">⚠️ Vous êtes sur la semaine du <b>' + joliDate(lundiCourant) + '</b> — ' +
+        (ecartSem > 0 ? 'dans ' + ecartSem + ' semaines' : 'il y a ' + Math.abs(ecartSem) + ' semaines') + '. ' +
+        'La semaine en cours est celle du <b>' + joliDate(semAuj) + '</b>. C\'est bien cette semaine-là que vous voulez ?' +
+        '<button type="button" id="f-retour-sem">↩︎ Revenir à la semaine en cours</button></div>'
+    : '';
+
   $('#f-corps').innerHTML =
+    repereSemaine +
     '<div class="f-t">' + c.matiere + '</div>' +
     '<div class="f-st"><span class="tag-cl" style="background:' + c.classe.couleur + '">' + c.classe.court + '</span>' +
       JOURS_LONG[jourDe(d)] + ' ' + joliDate(d) + ' · ' + c.debut + '–' + c.fin + ' · ' + c.salle +
@@ -1174,6 +1192,8 @@ function ouvreCours(c, d){
     '<button class="btn btn-p" id="f-ok">' + (brouillon.existant ? 'Enregistrer' : (brouillon.aeshId !== moi.id ? 'Positionner' : 'Je prends ce créneau')) + '</button>';
 
   brancheFeuille();
+  const rs = $('#f-retour-sem');
+  if (rs) rs.onclick = () => { lundiCourant = semAuj; fermeFeuille(); rendu(); };
   ouvreFeuille();
 }
 function opt(v, t, s, groupe){
