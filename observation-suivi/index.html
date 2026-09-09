@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f3d38">
+<title>Suivi des élèves — Autonomie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..48,600;12..48,700;12..48,800&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#e9ede9;--surface:#fff;--surface-2:#f4f7f4;--surface-3:#eef2ee;
+  --ink:#132320;--muted:#576661;--faint:#83948e;--line:#e0e6e1;--line-2:#d3dbd4;
+  --brand:#0f3d38;--accent:#0c887b;--accent-soft:#dcefec;
+  --a0:#1c9c62;--a1:#5aa551;--a2:#a79a34;--a3:#d68a28;--a4:#d5622a;--a5:#bf3a33;
+  --a0-soft:#e4f4ea;--r:18px;--r-sm:12px;--pill:999px;
+  --sh-1:0 1px 2px rgba(15,40,36,.06);--sh-2:0 8px 26px rgba(15,40,36,.10);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --paper:#0b110f;--surface:#151f1c;--surface-2:#1b2723;--surface-3:#20302b;
+  --ink:#e9f1ee;--muted:#a2b2ac;--faint:#6f827c;--line:#27332f;--line-2:#324039;
+  --brand:#0f3d38;--accent:#2ec3b0;--accent-soft:#12302b;
+  --a0:#33b978;--a1:#6cbf5f;--a2:#c4b23f;--a3:#e59a3a;--a4:#e5713a;--a5:#e0554d;--a0-soft:#12291f;
+  --sh-1:0 1px 2px rgba(0,0,0,.4);--sh-2:0 8px 26px rgba(0,0,0,.5);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Onest",-apple-system,system-ui,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:20px}
+h1,h2,h3{font-family:"Bricolage Grotesque","Onest",sans-serif;margin:0;font-weight:700;letter-spacing:-.015em;line-height:1.15;text-wrap:balance}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+.wrap{max-width:620px;margin:0 auto}
+.top{position:sticky;top:0;z-index:20;background:var(--brand);color:#eafffb;padding:calc(14px + env(safe-area-inset-top,0)) 18px 14px;display:flex;align-items:center;gap:12px}
+.top .bk{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex:none;font-size:20px}
+.top .tt{flex:1;min-width:0}
+.top h1{font-size:17px;color:#fff}
+.top p{margin:2px 0 0;font-size:11.5px;color:#a9d8d0;font-weight:500}
+.top .rgpd{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#8fcabf;background:rgba(255,255,255,.10);padding:5px 9px;border-radius:var(--pill);white-space:nowrap}
+.pad{padding:16px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);margin:0 0 10px}
+.cours-now{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-1);padding:16px;margin-bottom:14px}
+.cours-now .live{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+.cours-now .live i{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.cours-now .mat{font-family:"Bricolage Grotesque";font-weight:800;font-size:22px;margin:8px 0 2px}
+.cours-now .det{font-size:13px;color:var(--muted)}
+.cours-now .none{font-size:14px;color:var(--muted)}
+.linkbtn{background:none;color:var(--accent);font-weight:600;font-size:13px;padding:8px 0;margin-top:6px}
+label{display:block;font-weight:600;font-size:13.5px;margin:14px 0 7px;color:var(--ink)}
+select,input{width:100%;border:1.5px solid var(--line-2);border-radius:var(--r-sm);padding:13px 13px;font-size:16px;background:var(--surface-2);font-family:inherit;color:var(--ink)}
+input#code{text-transform:uppercase;font-weight:700;letter-spacing:.08em;font-family:"Bricolage Grotesque";font-size:20px;text-align:center}
+input:focus,select:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.primary{width:100%;background:var(--brand);color:#fff;border-radius:var(--r);padding:15px;font-size:16.5px;font-weight:700;font-family:"Bricolage Grotesque";margin-top:18px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:var(--sh-2)}
+.primary:disabled{opacity:.45}
+.hint{font-size:12px;color:var(--faint);margin-top:9px;text-align:center}
+
+/* observe */
+.ohead{background:var(--brand);color:#eafffb;padding:calc(14px + env(safe-area-inset-top,0)) 18px 16px}
+.ohead .r1{display:flex;align-items:center;gap:12px}
+.ohead .bk{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex:none;font-size:20px}
+.ohead .who{flex:1}
+.ohead .who .c{font-family:"Bricolage Grotesque";font-weight:800;font-size:24px;color:#fff;letter-spacing:.02em}
+.ohead .who .cl{font-size:12px;color:#a9d8d0;margin-top:1px}
+.choicetitle{font-family:"Bricolage Grotesque";font-weight:700;font-size:15.5px;margin:18px 16px 12px}
+.opt{display:flex;align-items:center;gap:13px;width:calc(100% - 32px);margin:0 16px;border-radius:var(--r);padding:15px 16px;text-align:left;border:1.5px solid var(--line);background:var(--surface);box-shadow:var(--sh-1)}
+.opt .ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:none;font-size:22px}
+.opt .tx{flex:1;min-width:0}
+.opt .tx b{display:block;font-size:16px;font-weight:700}
+.opt .tx span{font-size:12.5px;color:var(--muted)}
+.opt-ok .ic{background:transparent;border:2px solid var(--line-2);color:transparent}
+.opt-ok .valider{flex:none;font-family:"Bricolage Grotesque";font-weight:700;font-size:15px;color:var(--paper);background:var(--ink);border-radius:12px;padding:11px 18px;white-space:nowrap;transition:.15s}
+.opt-ok.done{background:var(--a0-soft);border-color:color-mix(in srgb,var(--a0) 50%,transparent)}
+.opt-ok.done .ic{background:var(--a0);border-color:var(--a0);color:#fff}
+.opt-ok.done .valider{background:var(--a0);color:#fff}
+.orline{display:flex;align-items:center;gap:12px;margin:15px 16px 12px;color:var(--faint);font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.orline::before,.orline::after{content:"";height:1px;background:var(--line);flex:1}
+.obslabel{display:flex;align-items:center;gap:9px;margin:2px 16px;font-family:"Bricolage Grotesque";font-weight:700;font-size:16.5px}
+.obslabel .eye{color:var(--accent);display:flex}
+.obslabel .eye svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.downarrow{text-align:center;color:var(--faint);font-size:20px;margin:6px 0 10px}
+.dom{margin:0 16px 10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-1);overflow:hidden}
+.dom>.dh{display:flex;align-items:center;gap:13px;padding:14px 15px;width:100%;text-align:left}
+.dom .di{width:38px;height:38px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex:none}
+.dom .di svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.dom .dt{flex:1}.dom .dt b{font-size:15px;font-weight:600;display:block}.dom .dt span{font-size:11.5px;color:var(--faint)}
+.dom .chev{color:var(--faint);transition:transform .18s}
+.dom[data-open=true] .chev{transform:rotate(90deg)}
+.dombadge{font-size:11px;font-weight:700;color:var(--a0);background:var(--a0-soft);border-radius:var(--pill);padding:3px 9px;flex:none}
+.obs-list{display:none;padding:2px 12px 12px}
+.dom[data-open=true] .obs-list{display:block}
+.obs{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 12px;border-radius:var(--r-sm)}
+.obs+.obs{border-top:1px solid var(--line)}
+.obs .q{flex:1;font-size:14px;font-weight:500}.obs.filled .q{font-weight:600}
+.obs .plus{color:var(--accent);font-size:19px;font-weight:700}
+.lvlchip{font-family:"Bricolage Grotesque";font-weight:800;font-size:12.5px;color:#fff;border-radius:var(--pill);padding:3px 10px;white-space:nowrap}
+.tally{margin:6px 16px 22px;display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);background:var(--surface-3);border-radius:var(--r-sm);padding:11px 13px}
+.tally b{color:var(--ink);font-family:"Bricolage Grotesque";font-weight:700}
+.scrim{position:fixed;inset:0;background:rgba(10,20,17,.42);opacity:0;pointer-events:none;transition:.2s;z-index:50}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);border-radius:26px 26px 0 0;box-shadow:0 -18px 50px rgba(10,20,17,.28);transform:translateY(102%);transition:transform .26s cubic-bezier(.22,1,.36,1);max-height:92vh;overflow-y:auto;padding:8px 18px calc(18px + env(safe-area-inset-bottom,0));max-width:620px;margin:0 auto}
+.sheet.on{transform:translateY(0)}
+.grab{width:44px;height:5px;border-radius:var(--pill);background:var(--line-2);margin:8px auto 12px;cursor:pointer}
+.sheet .closex{position:absolute;top:12px;right:14px;width:40px;height:40px;border-radius:50%;border:0;
+  background:var(--line-2);color:var(--ink);font-size:20px;font-weight:800;line-height:1;cursor:pointer;
+  display:grid;place-items:center;z-index:3}
+.sheet .closex:hover{background:var(--line);}
+.sheet .closex:active{transform:scale(.94)}
+.sheet .obl{font-family:"Bricolage Grotesque";font-weight:700;font-size:18px}
+.sheet .obd{font-size:12px;color:var(--muted);margin-bottom:14px}
+.slab{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);margin:16px 0 9px}
+.slab .req{color:var(--a5);font-size:10px}
+.slab .opt2{color:var(--faint);font-weight:600;text-transform:none;letter-spacing:0}
+.scale{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.sc{border:1.5px solid var(--line-2);background:var(--surface);border-radius:var(--r-sm);padding:9px 2px 7px;text-align:center}
+.sc .n{font-family:"Bricolage Grotesque";font-weight:800;font-size:17px;line-height:1;display:block}
+.sc .l{font-size:8.5px;font-weight:600;color:var(--muted);margin-top:3px;display:block;line-height:1.15}
+.sc[data-sel=true]{color:#fff;border-color:transparent}.sc[data-sel=true] .l{color:rgba(255,255,255,.9)}
+.sc[data-sel=true][data-v="0"]{background:var(--a0)}.sc[data-sel=true][data-v="1"]{background:var(--a1)}.sc[data-sel=true][data-v="2"]{background:var(--a2)}.sc[data-sel=true][data-v="3"]{background:var(--a3)}.sc[data-sel=true][data-v="4"]{background:var(--a4)}.sc[data-sel=true][data-v="5"]{background:var(--a5)}
+.scale-exp{margin-top:9px;font-size:12.5px;color:var(--muted);background:var(--surface-2);border-radius:var(--r-sm);padding:9px 12px;min-height:20px}
+.scale-exp b{color:var(--ink)}
+.tagwrap{display:flex;flex-wrap:wrap;gap:7px}
+.tag{border:1.5px solid var(--line-2);background:var(--surface);border-radius:var(--pill);padding:7px 13px;font-size:13px;font-weight:500;color:var(--muted)}
+.tag[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.optnote{width:100%;border:1.5px solid var(--line-2);border-radius:var(--r-sm);padding:11px 12px;font:inherit;font-size:14px;background:var(--surface-2);color:var(--ink);resize:vertical;min-height:52px}
+.save{margin-top:18px;width:100%;background:var(--brand);color:#fff;border-radius:var(--r);padding:15px;font-size:16px;font-weight:700;font-family:"Bricolage Grotesque";display:flex;align-items:center;justify-content:center;gap:9px}
+.save:disabled{opacity:.45}
+.opthint{font-size:11.5px;color:var(--faint);text-align:center;margin-top:9px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:var(--pill);font-size:14px;font-weight:600;box-shadow:var(--sh-2);opacity:0;pointer-events:none;transition:.25s;z-index:70;display:flex;gap:9px}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast .tk{color:var(--a0)}
+.loading{padding:40px 16px;text-align:center;color:var(--muted)}
+
+/* grille de codes de la classe (choix de l'élève) */
+.egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
+.ecard{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);padding:15px 8px 12px;box-shadow:var(--sh-1);transition:transform .12s,border-color .12s}
+.ecard:active{transform:scale(.96)}
+.ecard .cd{font-family:"Bricolage Grotesque";font-weight:800;font-size:21px;letter-spacing:.06em;line-height:1}
+.ecard .dot{width:11px;height:11px;border-radius:50%;background:var(--line-2);box-shadow:0 0 0 3px color-mix(in srgb,var(--line-2) 35%,transparent)}
+.ecard .st{font-size:9.5px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.03em;line-height:1.1;text-align:center;min-height:11px}
+.ecard[data-a="0"] .dot{background:var(--a0);box-shadow:0 0 0 3px var(--a0-soft)}
+.ecard[data-a="0"]{border-color:color-mix(in srgb,var(--a0) 35%,var(--line))}
+.ecard[data-a="1"] .dot{background:var(--a2);box-shadow:0 0 0 3px color-mix(in srgb,var(--a2) 20%,transparent)}
+.ecard[data-a="2"] .dot{background:var(--a4);box-shadow:0 0 0 3px color-mix(in srgb,var(--a4) 18%,transparent)}
+.ecard .n{position:absolute;top:7px;right:9px;font-family:"Bricolage Grotesque";font-weight:800;font-size:11px;color:var(--faint)}
+.elegend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:14px 2px 2px;font-size:11px;color:var(--muted)}
+.elegend span{display:inline-flex;align-items:center;gap:6px}
+.elegend i{width:9px;height:9px;border-radius:50%}
+.echoisir{background:none;color:var(--accent);font-weight:600;font-size:13px;padding:12px 0 2px;display:block;margin:0 auto}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ACCUEIL : cours + élève -->
+  <div id="v-accueil">
+    <header class="top">
+      <div class="tt"><h1>Suivi des élèves</h1><p>Observation de l'autonomie</p></div>
+      <span class="rgpd">Codes</span>
+    </header>
+    <div class="pad" id="accueil-body"><div class="loading">Chargement de l'emploi du temps…</div></div>
+  </div>
+
+  <!-- OBSERVER -->
+  <div id="v-obs" hidden>
+    <header class="ohead">
+      <div class="r1">
+        <button class="bk" onclick="go('accueil')" aria-label="Retour">‹</button>
+        <div class="who"><div class="c" id="o-code">—</div><div class="cl" id="o-ctx">—</div></div>
+      </div>
+    </header>
+
+    <p class="choicetitle">Comment ça s'est passé pour cet élève ?</p>
+    <button class="opt opt-ok" id="rasBtn" onclick="quickRAS()">
+      <span class="ic">✓</span>
+      <span class="tx"><b>Autonome — rien à signaler</b><span>il s'est débrouillé seul, aucune intervention</span></span>
+      <span class="valider" id="rasValider">Valider</span>
+    </button>
+    <div class="orline"><span>ou</span></div>
+    <p class="obslabel"><span class="eye"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/></svg></span> J'ai observé quelque chose</p>
+    <div class="downarrow" aria-hidden="true">↓</div>
+    <div id="domains"></div>
+    <div class="tally"><span>🕒</span><span>Ce cours, sur cet élève : <b id="tally-n">0</b> observation(s) enregistrée(s).</span></div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",authDomain:"devoirs-pse.firebaseapp.com",projectId:"devoirs-pse",storageBucket:"devoirs-pse.appspot.com",messagingSenderId:"614730413904",appId:"1:614730413904:web:a5dd478af5de30f6bede55"};
+const db=getFirestore(initializeApp(firebaseConfig));
+const COL="suivi_observations";   // collection SÉPARÉE des observations PSR-MELEC
+// Code de l'AESH observateur. Via ?aesh=… (lien direct) OU mémorisé sur l'appareil
+// (première ouverture : l'app le demande). Permet plusieurs AESH, chacune son code.
+const AESH_KEY="suivi_aesh_code";
+let AESH_CODE=(new URLSearchParams(location.search).get("aesh")||"").trim().toUpperCase();
+try{ if(!AESH_CODE) AESH_CODE=(localStorage.getItem(AESH_KEY)||"").trim().toUpperCase(); }catch(e){}
+
+const $=s=>document.querySelector(s), el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const AC=n=>['var(--a0)','var(--a1)','var(--a2)','var(--a3)','var(--a4)','var(--a5)'][n];
+const esc=v=>String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+
+/* ---- modèle d'observation (identique à la maquette validée) ---- */
+const DOMAINS=[
+ {t:"Comprendre / consignes",d:"orale, écrite, reformuler",ic:'<path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4V6a1 1 0 0 1 1-1z"/>',o:["Comprend la consigne orale","Comprend la consigne écrite","Reformule ce qu'il faut faire","Demande de l'aide à bon escient"]},
+ {t:"Entrer dans la tâche",d:"démarrer, oser",ic:'<path d="M5 3l14 9-14 9z"/>',o:["Démarre seul","Attend l'adulte pour commencer","Sait ce qu'il faut faire","Accepte la tâche"]},
+ {t:"Attention",d:"tenir, filtrer",ic:'<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>',o:["Reste concentré","Se disperse / décroche","Tient dans la durée","Gère le bruit ambiant"]},
+ {t:"Organisation / matériel",d:"préparer, planifier",ic:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',o:["Prépare son poste / matériel","Suit les étapes","Gère son temps","Range et nettoie"]},
+ {t:"Réaliser le travail",d:"faire, contrôler",ic:'<path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/>',o:["Réalise la tâche","Gestes techniques (atelier)","Contrôle son travail","Transfère à une situation voisine"]},
+ {t:"Sécurité en atelier",d:"EPI, gestes sûrs",ic:'<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="m9.2 12 2 2 3.6-3.8"/>',o:["Respecte les consignes de sécurité","Porte ses EPI","Gestes sûrs sur machine / poste","Signale un problème"]},
+ {t:"Relations / comportement",d:"cadre, coopérer",ic:'<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6a3 3 0 0 1 0 6"/>',o:["Respecte le cadre","Coopère avec les autres","Gère la frustration / l'échec","Relation aux adultes"]},
+ {t:"Autonomie globale",d:"le cœur du bilan",ic:'<path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/><circle cx="12" cy="12" r="3.4"/>',o:["Démarre seul","Poursuit sans relance","Sollicite à bon escient","Termine et vérifie seul"]}
+];
+const SCALE=[{n:0,l:"autonome",x:"Réalise seul, sans intervention."},{n:1,l:"un rappel",x:"Un rappel, un encouragement ou une vérification suffit."},{n:2,l:"démarrage",x:"Aide pour comprendre / démarrer, puis poursuit seul."},{n:3,l:"ponctuelle",x:"Quelques interventions pendant l'activité."},{n:4,l:"régulière",x:"L'adulte doit intervenir fréquemment."},{n:5,l:"continu",x:"Ne peut pas réaliser sans présence rapprochée."}];
+const AIDES=["Reformuler","Montrer un exemple","Découper en étapes","Support visuel","Lire la consigne","Démarrer avec lui","Plus de temps","Aide d'un pair","Geste guidé"];
+/* petits mots d'encouragement à l'enregistrement — le regard de l'AESH compte */
+const OBS_BRAVOS=["Merci, votre regard compte 🌱","Beau geste pour cet élève.","C'est précieux, merci.","Bravo — un pas de plus.","Ça compte, vraiment 💛"];
+const motBravo=()=>OBS_BRAVOS[Math.floor(Math.random()*OBS_BRAVOS.length)];
+const APRES=["Poursuit seul","Poursuit un temps","Redemande de l'aide","S'arrête","Abandonne"];
+
+/* ---- EDT réel (grille.json du portail) ---- */
+let G=null;
+/* ---- annuaire des codes par classe (roster.json — codes SEULS, aucun nom, RGPD) ---- */
+let ROSTER=null;
+/* cache d'autonomie agrégée par code {classeNom:{code:{n,avg}}} pour colorer les pastilles */
+const AUTO_CACHE={};
+const pad=n=>String(n).padStart(2,'0');
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;};
+const nowMin=()=>{const d=new Date();return d.getHours()*60+d.getMinutes();};
+const toMin=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||"");return m?+m[1]*60+ +m[2]:null;};
+function classeLabel(cl){return cl?((cl.court&&cl.section)?cl.court+" "+cl.section:cl.nom):"";}
+function decode(c){const cl=G.classes[c[0]]||{};return {classeId:cl.id,classe:classeLabel(cl),classeNom:cl.nom,debut:c[2],fin:c[3],matiere:G.matieres[c[4]]||"",salle:G.salles[c[5]]||"",parite:c[6]||""};}
+function coursDuJour(){const t=todayISO();return (G.cours||[]).filter(c=>c[1]===t).map(decode).sort((a,b)=>(toMin(a.debut)||0)-(toMin(b.debut)||0));}
+function coursMaintenant(list){const n=nowMin();return list.find(c=>{const a=toMin(c.debut),b=toMin(c.fin);return a!=null&&b!=null&&a<=n&&n<b;})||null;}
+
+let state={ctx:null,code:"",tally:0,saved:{},draft:null};
+
+async function boot(){
+  try{
+    const rr=await fetch("./roster.json",{cache:"no-store"});
+    ROSTER=(await rr.json()).classes||{};
+  }catch(e){ ROSTER=null; }
+  renderAccueil();
+}
+function codesDeClasse(nom){ return (ROSTER&&ROSTER[nom])?ROSTER[nom]:null; }
+/* autonomie moyenne par code, à partir des observations de la classe (Firestore) */
+async function chargeAutonomie(nom){
+  if(!nom) return {};
+  if(AUTO_CACHE[nom]) return AUTO_CACHE[nom];
+  const acc={};
+  try{
+    const snap=await getDocs(query(collection(db,COL),where("classeNom","==",nom)));
+    snap.forEach(d=>{ const o=d.data(); const c=(o.eleveCode||"").toUpperCase(); if(!c)return;
+      const v=typeof o.niveau==="number"?o.niveau:null; if(v==null)return;
+      (acc[c]||(acc[c]={s:0,n:0})); acc[c].s+=v; acc[c].n++;
+    });
+  }catch(e){ console.warn("autonomie indispo",e); }
+  const out={}; for(const c in acc) out[c]={n:acc[c].n,avg:acc[c].s/acc[c].n};
+  AUTO_CACHE[nom]=out; return out;
+}
+/* niveau moyen d'aide (0=autonome … 5=continu) → bucket pastille 0/1/2, ou null=à observer */
+function bucketAutonomie(info){
+  if(!info||!info.n) return {a:"",st:"à observer"};
+  if(info.avg<1)   return {a:"0",st:"autonome"};
+  if(info.avg<2.5) return {a:"1",st:"aide par moments"};
+  return {a:"2",st:"aide soutenue"};
+}
+function renderAccueil(){
+  const body=$("#accueil-body");
+  if(!AESH_CODE){ body.innerHTML=aeshFormHTML(); const i=$("#aeshCode"); if(i){ i.addEventListener("input",e=>{e.target.value=e.target.value.toUpperCase();}); i.focus(); } return; }
+  if(!state.ctx){ body.innerHTML=classPickerHTML(); return; }
+  body.innerHTML=codeGridHTML(state.ctx.classeNom);
+  peindreAutonomie(state.ctx.classeNom);   // colore les pastilles quand l'agrégat arrive
+}
+function aeshFormHTML(){
+  return `<div class="cours-now">
+      <span class="live"><i></i> Bienvenue</span>
+      <div class="mat">Votre code AESH</div>
+      <div class="det">Il identifie vos observations. Aucun nom n'est demandé (RGPD).</div>
+    </div>
+    <label for="aeshCode">Votre code AESH</label>
+    <input id="aeshCode" placeholder="ex. MSH" autocomplete="off" inputmode="text" value="">
+    <button class="primary" onclick="P.saveAesh()">Continuer ›</button>
+    <p class="hint">Retenu sur cet appareil — vous ne le ressaisirez plus. (Changement possible en bas.)</p>`;
+}
+function classPickerHTML(){
+  const classes=ROSTER?Object.keys(ROSTER):[];
+  if(!classes.length) return `<div class="cours-now"><div class="none">⚠️ Aucune classe configurée. Réessaie plus tard.</div></div>`;
+  const cards=classes.map(nom=>`<button class="opt" style="margin:0 0 8px" onclick="P.pickClasse('${esc(nom)}')"><span class="tx"><b>${esc(nom)}</b><span>${(ROSTER[nom]||[]).length} élève(s)</span></span></button>`).join("");
+  return `<p class="eyebrow">AESH ${esc(AESH_CODE)} — touche une classe</p>${cards}
+    <button class="echoisir" onclick="P.changeAesh()">Changer de code AESH</button>`;
+}
+function codeGridHTML(nom){
+  const codes=codesDeClasse(nom)||[];
+  return `<div class="cours-now">
+      <span class="live"><i></i> Classe choisie</span>
+      <div class="mat">${esc(nom)}</div>
+      <div class="det">AESH ${esc(AESH_CODE)}</div>
+      <button class="linkbtn" onclick="P.changeClasse()">Changer de classe</button>
+    </div>
+    <p class="eyebrow">Élèves de la classe — touche un code</p>
+    <div class="egrid" id="egrid">${codes.map(c=>`
+      <button class="ecard" data-code="${esc(c)}" onclick="P.pickEleve('${esc(c)}')">
+        <span class="dot"></span><span class="cd">${esc(c)}</span><span class="st">à observer</span>
+      </button>`).join("")}</div>
+    <div class="elegend">
+      <span><i style="background:var(--a0)"></i> autonome</span>
+      <span><i style="background:var(--a2)"></i> aide par moments</span>
+      <span><i style="background:var(--a4)"></i> aide soutenue</span>
+      <span><i style="background:var(--line-2)"></i> à observer</span>
+    </div>`;
+}
+async function peindreAutonomie(nom){
+  const auto=await chargeAutonomie(nom);
+  const grid=$("#egrid"); if(!grid) return;
+  grid.querySelectorAll(".ecard").forEach(card=>{
+    const c=card.dataset.code, info=auto[c], b=bucketAutonomie(info);
+    if(b.a) card.dataset.a=b.a; else card.removeAttribute("data-a");
+    const st=card.querySelector(".st"); if(st) st.textContent=b.st;
+    let nEl=card.querySelector(".n");
+    if(info&&info.n){ if(!nEl){nEl=el("span","n");card.appendChild(nEl);} nEl.textContent=info.n; }
+    else if(nEl) nEl.remove();
+  });
+}
+window.P={
+  saveAesh(){ const v=($("#aeshCode")?$("#aeshCode").value:"").trim().toUpperCase(); if(!v){ toast("Saisis ton code AESH."); return; } AESH_CODE=v; try{ localStorage.setItem(AESH_KEY,v); }catch(e){} state.ctx=null; renderAccueil(); },
+  changeAesh(){ AESH_CODE=""; try{ localStorage.removeItem(AESH_KEY); }catch(e){} state.ctx=null; renderAccueil(); },
+  pickClasse(nom){ state.ctx={classeId:"",classe:nom,classeNom:nom,matiere:"",salle:"",debut:"",fin:"",parite:""}; go('accueil'); renderAccueil(); },
+  changeClasse(){ state.ctx=null; renderAccueil(); },
+  pickEleve(code){ if(!state.ctx){ toast("Choisis d'abord la classe."); return; } state.code=String(code).toUpperCase(); openObs(); }
+};
+window.renderAccueilRefresh=function(){ go('accueil'); renderAccueil(); };
+
+/* ---- écran observation ---- */
+function go(v){ ["accueil","obs"].forEach(x=>$("#v-"+x).hidden=(x!==v)); window.scrollTo(0,0); }
+function openObs(){
+  state.tally=0; state.saved={};
+  $("#o-code").textContent=state.code;
+  $("#o-ctx").textContent=[state.ctx.classe,state.ctx.matiere].filter(Boolean).join(" · ");
+  $("#tally-n").textContent="0";
+  const rb=$("#rasBtn"); rb.classList.remove("done"); $("#rasValider").textContent="Valider";
+  renderDomains(); go("obs");
+}
+function markHTML(k){const v=state.saved[k];return v==null?`<span class="plus">+</span>`:`<span class="lvlchip" style="background:${AC(v)}">✓ ${v}</span>`;}
+function refreshDomBadge(box){const n=[...box.querySelectorAll('.obs')].filter(o=>state.saved[o.dataset.key]!=null).length;let b=box.querySelector('.dombadge');const chev=box.querySelector('.dh .chev');if(n>0){if(!b){b=el('span','dombadge');chev.parentNode.insertBefore(b,chev);}b.textContent=`${n} noté${n>1?'s':''}`;}else if(b)b.remove();}
+function renderDomains(){
+  const w=$("#domains"); w.innerHTML="";
+  DOMAINS.forEach(d=>{
+    const box=el("div","dom"); box.dataset.open="false";
+    const head=el("button","dh",`<span class="di"><svg viewBox="0 0 24 24">${d.ic}</svg></span><span class="dt"><b>${esc(d.t)}</b><span>${esc(d.d)}</span></span><span class="chev">›</span>`);
+    head.onclick=()=>{const open=box.dataset.open==="true";document.querySelectorAll('.dom').forEach(x=>x.dataset.open="false");box.dataset.open=open?"false":"true";};
+    const list=el("div","obs-list");
+    d.o.forEach(q=>{const key=d.t+"|"+q;const b=el("button","obs"+(state.saved[key]!=null?" filled":""),`<span class="q">${esc(q)}</span><span class="mark">${markHTML(key)}</span>`);b.dataset.key=key;b.onclick=()=>openSheet(d.t,q,b);list.appendChild(b);});
+    box.appendChild(head);box.appendChild(list);w.appendChild(box);refreshDomBadge(box);
+  });
+}
+function toast(m){const t=$("#toast");t.innerHTML=`<span class="tk">✓</span> ${esc(m)}`;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),2000);}
+function bump(){ state.tally++; $("#tally-n").textContent=state.tally; }
+
+async function envoyer(payload){
+  try{
+    await addDoc(collection(db,COL),Object.assign({
+      eleveCode:state.code, classe:state.ctx.classe, classeId:state.ctx.classeId||"", classeNom:state.ctx.classeNom||"",
+      matiere:state.ctx.matiere||"", salle:state.ctx.salle||"", parite:state.ctx.parite||"",
+      observateur:AESH_CODE, date:todayISO(), createdAt:serverTimestamp()
+    },payload));
+    return true;
+  }catch(e){ console.error(e); toast("Échec de l'envoi — réessaie"); return false; }
+}
+window.quickRAS=async function(){
+  const b=$("#rasBtn"), now=!b.classList.contains("done");
+  if(now){
+    b.classList.add("done"); $("#rasValider").textContent="✓ Validé"; bump();
+    const ok=await envoyer({type:"autonome", autonome:true, domaine:"Autonomie globale", observable:"Rien à signaler — autonome", niveau:0});
+    toast(ok?`Autonome · ${state.code} — ${motBravo()}`:"Non enregistré");
+  } else { b.classList.remove("done"); $("#rasValider").textContent="Valider"; state.tally=Math.max(0,state.tally-1); $("#tally-n").textContent=state.tally; toast("Annulé (non envoyé)"); }
+};
+function openSheet(dom,obs,elBtn){
+  state.draft={dom,obs,el:elBtn,niveau:null,aides:new Set(),apres:null};
+  const s=$("#sheet");
+  s.innerHTML=`<div class="grab"></div>
+    <button class="closex" id="sheetClose" type="button" aria-label="Fermer" title="Fermer sans enregistrer">✕</button>
+    <div class="obl">${esc(obs)}</div>
+    <div class="obd">${esc(dom)} · ${esc(state.ctx.matiere)} · ${esc(state.code)}</div>
+    <div class="slab">Niveau d'autonomie <span class="req">requis</span></div>
+    <div class="scale" id="scale">${SCALE.map(sc=>`<button class="sc" data-v="${sc.n}"><span class="n">${sc.n}</span><span class="l">${sc.l}</span></button>`).join("")}</div>
+    <div class="scale-exp" id="scaleExp">Touchez un niveau — de <b>0 autonome</b> à <b>5 accompagnement continu</b>.</div>
+    <div class="slab">Quelle aide a fonctionné ? <span class="opt2">· optionnel</span></div>
+    <div class="tagwrap" id="aides">${AIDES.map(a=>`<button class="tag" data-a="${esc(a)}">${esc(a)}</button>`).join("")}</div>
+    <div class="slab">Quand on retire l'aide <span class="opt2">· optionnel</span></div>
+    <div class="tagwrap" id="apres">${APRES.map(a=>`<button class="tag" data-p="${esc(a)}">${esc(a)}</button>`).join("")}</div>
+    <div class="slab">Fait observé <span class="opt2">· optionnel</span></div>
+    <textarea class="optnote" id="note" placeholder="Ex. : après reformulation en une étape, réalise seul les 3 exercices."></textarea>
+    <button class="save" id="saveBtn" disabled>Enregistrer l'observation</button>
+    <p class="opthint">Seul le niveau est requis — le reste enrichit la synthèse.</p>`;
+  s.querySelectorAll("#scale .sc").forEach(b=>b.onclick=()=>{const v=+b.dataset.v;state.draft.niveau=v;s.querySelectorAll("#scale .sc").forEach(x=>x.dataset.sel=(x===b));$("#scaleExp").innerHTML=`<b>${v} · ${SCALE[v].l}</b> — ${SCALE[v].x}`;$("#saveBtn").disabled=false;});
+  s.querySelectorAll("#aides .tag").forEach(b=>b.onclick=()=>{const on=b.getAttribute("aria-pressed")==="true";b.setAttribute("aria-pressed",!on);on?state.draft.aides.delete(b.dataset.a):state.draft.aides.add(b.dataset.a);});
+  s.querySelectorAll("#apres .tag").forEach(b=>b.onclick=()=>{s.querySelectorAll("#apres .tag").forEach(x=>x.setAttribute("aria-pressed",x===b));state.draft.apres=b.dataset.p;});
+  $("#saveBtn").onclick=saveObs;
+  const cx=s.querySelector("#sheetClose"); if(cx)cx.onclick=closeSheet;
+  const gr=s.querySelector(".grab"); if(gr)gr.onclick=closeSheet;
+  const prev=state.saved[dom+"|"+obs]; if(prev!=null){const pb=s.querySelector(`#scale .sc[data-v="${prev}"]`);if(pb)pb.click();}
+  $("#scrim").classList.add("on"); s.classList.add("on");
+}
+window.closeSheet=function(){ $("#sheet").classList.remove("on"); $("#scrim").classList.remove("on"); };
+async function saveObs(){
+  const dr=state.draft; if(!dr||dr.niveau==null) return;
+  $("#saveBtn").disabled=true; $("#saveBtn").textContent="Enregistrement…";
+  const ok=await envoyer({type:"observation", autonome:false, domaine:dr.dom, observable:dr.obs, niveau:dr.niveau, aides:[...dr.aides], apresRetrait:dr.apres||"", note:($("#note")?$("#note").value:"")});
+  if(ok){
+    const key=dr.dom+"|"+dr.obs, was=state.saved[key]!=null; state.saved[key]=dr.niveau; if(!was) bump();
+    if(dr.el){ dr.el.classList.add("filled"); const m=dr.el.querySelector(".mark"); if(m)m.innerHTML=`<span class="lvlchip" style="background:${AC(dr.niveau)}">✓ ${dr.niveau}</span>`; const box=dr.el.closest(".dom"); if(box)refreshDomBadge(box); }
+    toast(`Niveau ${dr.niveau} enregistré — ${motBravo()}`);
+    closeSheet();
+  } else { $("#saveBtn").disabled=false; $("#saveBtn").textContent="Enregistrer l'observation"; }
+}
+window.go=go;
+boot();
+</script>
+</body>
+</html>

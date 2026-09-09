@@ -203,6 +203,22 @@ const THEMATIQUES = [
     ],
   },
   {
+    id: "suivi-eleves",
+    nom: "Suivi des élèves",
+    couleur: "#b45309",
+    icon: "compass",
+    enfants: [
+      {
+        titre: "Observation de l'autonomie",
+        desc: "Outil d'accompagnement individualisé : on touche un code élève, on note le niveau d'autonomie (0 à 5) et les aides qui ont fonctionné. Chaque AESH a son propre code. Aucun nom d'élève — codes seulement (RGPD).",
+        lien: "observation-suivi/",
+        type: "Code d'accès",
+        icon: "compass",
+        badge: "Nouveau",
+      },
+    ],
+  },
+  {
     id: "pratiques-pro",
     nom: "Ouvrages & réflexions",
     couleur: "#0e7c66",
