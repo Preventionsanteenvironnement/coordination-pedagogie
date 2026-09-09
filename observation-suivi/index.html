@@ -244,6 +244,10 @@ async function boot(){
     const rr=await fetch("./roster.json",{cache:"no-store"});
     ROSTER=(await rr.json()).classes||{};
   }catch(e){ ROSTER=null; }
+  try{
+    const rm=await fetch("./matieres.json",{cache:"no-store"});
+    MATIERES_PAR_CLASSE=await rm.json()||{};
+  }catch(e){ MATIERES_PAR_CLASSE={}; }
   renderAccueil();
 }
 function codesDeClasse(nom){ return (ROSTER&&ROSTER[nom])?ROSTER[nom]:null; }
@@ -269,12 +273,30 @@ function bucketAutonomie(info){
   if(info.avg<2.5) return {a:"1",st:"aide par moments"};
   return {a:"2",st:"aide soutenue"};
 }
+/* Humeur du jour — 100% privée (RGPD), jamais envoyée. + salutation horaire. */
+const HUMEURS=[['😄',"Belle énergie — ça se transmet aux élèves ✨"],['🙂',"Contente de vous voir. Belle journée 🌿"],['😐',"Une chose à la fois. On avance 🤍"],['😔',"Ménagez-vous aujourd'hui. Vous comptez 💛"],['😣',"Jour difficile — vous n'êtes pas seule. Courage 🫶"]];
+const K_HUM="suivi-humeur";
+function humeurJour(){ try{ const v=JSON.parse(localStorage.getItem(K_HUM)||"null"); return (v&&v.le===todayISO())?v.i:null; }catch(e){ return null; } }
+function salut(){ const h=new Date().getHours(); return h<12?"Bonne matinée":h<14?"Bon appétit":h<18?"Bel après-midi":"Bonne soirée"; }
+
+/* Matières proposées à chaque classe. Communes pour l'instant ; une liste par
+   classe pourra être branchée plus tard via MATIERES_PAR_CLASSE. */
+const MATIERES_COMMUNES=["PSE","Français","Maths-Sciences","Histoire-Géo / EMC","Anglais","Arts appliqués","EPS","Éco-gestion","Chef-d'œuvre","Accompagnement perso.","Enseignement pro.","Co-enseignement","Autre"];
+let MATIERES_PAR_CLASSE={};   // rempli depuis matieres.json (matières réelles par classe)
+function matieresDe(classe){ const m=MATIERES_PAR_CLASSE[classe]; return (m&&m.length)?m.concat(["Autre"]):MATIERES_COMMUNES; }
+
+let uiStep="code";   // code | welcome | classe | matiere | grille | synthese
+
 function renderAccueil(){
   const body=$("#accueil-body");
-  if(!AESH_CODE){ body.innerHTML=aeshFormHTML(); const i=$("#aeshCode"); if(i){ i.addEventListener("input",e=>{e.target.value=e.target.value.toUpperCase();}); i.focus(); } return; }
-  if(!state.ctx){ body.innerHTML=classPickerHTML(); return; }
-  body.innerHTML=codeGridHTML(state.ctx.classeNom);
-  peindreAutonomie(state.ctx.classeNom);   // colore les pastilles quand l'agrégat arrive
+  if(!AESH_CODE){ uiStep="code"; body.innerHTML=aeshFormHTML(); const i=$("#aeshCode"); if(i){ i.addEventListener("input",e=>{e.target.value=e.target.value.toUpperCase();}); i.focus(); } return; }
+  if(uiStep==="code") uiStep="welcome";
+  if(uiStep==="welcome"){ body.innerHTML=welcomeHTML(); montreHumeurRow(); return; }
+  if(uiStep==="synthese"){ body.innerHTML=`<div class="loading">Chargement de la synthèse…</div>`; renderSynthese(); return; }
+  if(uiStep==="classe"){ body.innerHTML=classPickerHTML(); return; }
+  if(uiStep==="matiere"){ body.innerHTML=matierePickerHTML(); return; }
+  body.innerHTML=codeGridHTML(state.ctx.classeNom);   // grille
+  peindreAutonomie(state.ctx.classeNom);
 }
 function aeshFormHTML(){
   return `<div class="cours-now">
@@ -287,20 +309,51 @@ function aeshFormHTML(){
     <button class="primary" onclick="P.saveAesh()">Continuer ›</button>
     <p class="hint">Retenu sur cet appareil — vous ne le ressaisirez plus. (Changement possible en bas.)</p>`;
 }
+function welcomeHTML(){
+  return `<div class="cours-now">
+      <span class="live"><i></i> ${esc(salut())}</span>
+      <div class="mat">Bonjour 👋</div>
+      <div class="det">Espace de suivi — AESH ${esc(AESH_CODE)}. Codes élèves seulement, aucun nom (RGPD).</div>
+    </div>
+    <p class="eyebrow">Comment vous sentez-vous aujourd'hui ?</p>
+    <div id="humeur-row" style="display:flex;gap:8px;justify-content:space-between;margin:4px 0 4px"></div>
+    <p id="humeur-r" class="hint" style="min-height:18px;margin:2px 0 14px;transition:.2s"></p>
+    <button class="primary" onclick="P.goClasses()">Choisir une classe ›</button>
+    <button class="echoisir" onclick="P.openSynthese()">📊 Voir la synthèse (classes &amp; élèves)</button>
+    <button class="echoisir" onclick="P.changeAesh()">Changer de code AESH</button>`;
+}
+function montreHumeurRow(){
+  const row=$("#humeur-row"); if(!row) return; row.innerHTML="";
+  const deja=humeurJour();
+  HUMEURS.forEach(([emo,msg],i)=>{
+    const b=document.createElement("button"); b.type="button"; b.textContent=emo; b.setAttribute("aria-label",msg);
+    b.style.cssText="flex:1;font-size:25px;padding:8px 0;border-radius:14px;border:1.5px solid var(--line-2);background:var(--surface);cursor:pointer;transition:.15s";
+    if(deja===i){ b.style.borderColor="var(--accent)"; b.style.background="var(--a0)"; }
+    b.onclick=()=>{ try{ localStorage.setItem(K_HUM,JSON.stringify({le:todayISO(),i})); }catch(e){} montreHumeurRow(); const r=$("#humeur-r"); if(r) r.textContent=msg; };
+    row.appendChild(b);
+  });
+  const d=humeurJour(), r=$("#humeur-r"); if(r&&d!=null) r.textContent=HUMEURS[d][1];
+}
 function classPickerHTML(){
   const classes=ROSTER?Object.keys(ROSTER):[];
   if(!classes.length) return `<div class="cours-now"><div class="none">⚠️ Aucune classe configurée. Réessaie plus tard.</div></div>`;
   const cards=classes.map(nom=>`<button class="opt" style="margin:0 0 8px" onclick="P.pickClasse('${esc(nom)}')"><span class="tx"><b>${esc(nom)}</b><span>${(ROSTER[nom]||[]).length} élève(s)</span></span></button>`).join("");
-  return `<p class="eyebrow">AESH ${esc(AESH_CODE)} — touche une classe</p>${cards}
-    <button class="echoisir" onclick="P.changeAesh()">Changer de code AESH</button>`;
+  return `<button class="linkbtn" onclick="P.backTo('welcome')">‹ Retour</button>
+    <p class="eyebrow">Touche ta classe</p>${cards}`;
+}
+function matierePickerHTML(){
+  const mats=matieresDe(state.ctx.classeNom);
+  const cards=mats.map(m=>`<button class="opt" style="margin:0 0 8px" onclick="P.pickMatiere('${esc(m)}')"><span class="tx"><b>${esc(m)}</b></span></button>`).join("");
+  return `<div class="cours-now"><span class="live"><i></i> ${esc(state.ctx.classeNom)}</span><div class="mat">Quelle matière ?</div><button class="linkbtn" onclick="P.backTo('classe')">‹ Changer de classe</button></div>
+    <p class="eyebrow">Touche la matière</p>${cards}`;
 }
 function codeGridHTML(nom){
   const codes=codesDeClasse(nom)||[];
   return `<div class="cours-now">
-      <span class="live"><i></i> Classe choisie</span>
-      <div class="mat">${esc(nom)}</div>
+      <span class="live"><i></i> ${esc(nom)}${state.ctx.matiere?' · '+esc(state.ctx.matiere):''}</span>
+      <div class="mat">Choisis un élève</div>
       <div class="det">AESH ${esc(AESH_CODE)}</div>
-      <button class="linkbtn" onclick="P.changeClasse()">Changer de classe</button>
+      <button class="linkbtn" onclick="P.backTo('matiere')">‹ Changer de matière</button>
     </div>
     <p class="eyebrow">Élèves de la classe — touche un code</p>
     <div class="egrid" id="egrid">${codes.map(c=>`
@@ -327,13 +380,45 @@ async function peindreAutonomie(nom){
   });
 }
 window.P={
-  saveAesh(){ const v=($("#aeshCode")?$("#aeshCode").value:"").trim().toUpperCase(); if(!v){ toast("Saisis ton code AESH."); return; } AESH_CODE=v; try{ localStorage.setItem(AESH_KEY,v); }catch(e){} state.ctx=null; renderAccueil(); },
-  changeAesh(){ AESH_CODE=""; try{ localStorage.removeItem(AESH_KEY); }catch(e){} state.ctx=null; renderAccueil(); },
-  pickClasse(nom){ state.ctx={classeId:"",classe:nom,classeNom:nom,matiere:"",salle:"",debut:"",fin:"",parite:""}; go('accueil'); renderAccueil(); },
-  changeClasse(){ state.ctx=null; renderAccueil(); },
+  saveAesh(){ const v=($("#aeshCode")?$("#aeshCode").value:"").trim().toUpperCase(); if(!v){ toast("Saisis ton code AESH."); return; } AESH_CODE=v; try{ localStorage.setItem(AESH_KEY,v); }catch(e){} state.ctx=null; uiStep="welcome"; renderAccueil(); },
+  changeAesh(){ AESH_CODE=""; try{ localStorage.removeItem(AESH_KEY); }catch(e){} state.ctx=null; uiStep="code"; renderAccueil(); },
+  goClasses(){ uiStep="classe"; go('accueil'); renderAccueil(); },
+  openSynthese(){ uiStep="synthese"; go('accueil'); renderAccueil(); },
+  backTo(s){ uiStep=s; if(s==="welcome"||s==="classe") state.ctx=null; go('accueil'); renderAccueil(); },
+  pickClasse(nom){ state.ctx={classeId:"",classe:nom,classeNom:nom,matiere:"",salle:"",debut:"",fin:"",parite:""}; uiStep="matiere"; go('accueil'); renderAccueil(); },
+  pickMatiere(m){ if(state.ctx) state.ctx.matiere=String(m); uiStep="grille"; go('accueil'); renderAccueil(); },
   pickEleve(code){ if(!state.ctx){ toast("Choisis d'abord la classe."); return; } state.code=String(code).toUpperCase(); openObs(); }
 };
 window.renderAccueilRefresh=function(){ go('accueil'); renderAccueil(); };
+
+/* Synthèse dans l'app : par classe → par élève (moyenne d'autonomie + nb obs + commentaires). */
+async function renderSynthese(){
+  const body=$("#accueil-body");
+  let docs=[];
+  try{ const snap=await getDocs(collection(db,COL)); snap.forEach(d=>docs.push(d.data())); }
+  catch(e){ body.innerHTML=`<button class="linkbtn" onclick="P.backTo('welcome')">‹ Retour</button><div class="cours-now"><div class="none">Synthèse indisponible (connexion).</div></div>`; return; }
+  const byCls={};
+  docs.forEach(o=>{ const c=o.classeNom||o.classe||"?", code=String(o.eleveCode||"").toUpperCase(); if(!code)return; (byCls[c]=byCls[c]||{}); (byCls[c][code]=byCls[c][code]||[]).push(o); });
+  const classes=Object.keys(byCls).sort();
+  let h=`<button class="linkbtn" onclick="P.backTo('welcome')">‹ Retour</button><p class="eyebrow">Synthèse — par classe et par élève</p>`;
+  if(!classes.length){ h+=`<div class="cours-now"><div class="none">Aucune observation enregistrée pour l'instant. Elles apparaîtront ici au fur et à mesure.</div></div>`; body.innerHTML=h; return; }
+  classes.forEach(c=>{
+    const codes=Object.keys(byCls[c]).sort();
+    const totObs=codes.reduce((n,cd)=>n+byCls[c][cd].length,0);
+    h+=`<div class="dom" data-open="false"><button class="dh" type="button"><span class="dt"><b>${esc(c)}</b><span>${codes.length} élève(s) · ${totObs} observation(s)</span></span><span class="chev">›</span></button><div class="obs-list">`;
+    codes.forEach(code=>{
+      const list=byCls[c][code];
+      const nivs=list.map(o=>o.niveau).filter(n=>typeof n==="number");
+      const avg=nivs.length?(nivs.reduce((a,b)=>a+b,0)/nivs.length):0;
+      const notes=list.filter(o=>o.note&&String(o.note).trim());
+      const derniers=notes.slice(-2).map(o=>`« ${esc(String(o.note))} »`).join("<br>");
+      h+=`<div class="obs" style="cursor:default"><span class="q">${esc(code)} <small style="color:var(--muted)">· ${list.length} obs.${notes.length?" · "+notes.length+" comm.":""}</small>${derniers?`<br><small style="color:var(--muted);font-style:italic">${derniers}</small>`:""}</span><span class="mark"><span class="lvlchip" style="background:${AC(Math.round(avg))}">${avg.toFixed(1)}/5</span></span></div>`;
+    });
+    h+=`</div></div>`;
+  });
+  body.innerHTML=h;
+  body.querySelectorAll(".dom .dh").forEach(head=>{ head.onclick=()=>{ const box=head.closest(".dom"); const open=box.dataset.open==="true"; body.querySelectorAll(".dom").forEach(x=>x.dataset.open="false"); box.dataset.open=open?"false":"true"; }; });
+}
 
 /* ---- écran observation ---- */
 function go(v){ ["accueil","obs"].forEach(x=>$("#v-"+x).hidden=(x!==v)); window.scrollTo(0,0); }
@@ -393,8 +478,8 @@ function openSheet(dom,obs,elBtn){
     <div class="tagwrap" id="aides">${AIDES.map(a=>`<button class="tag" data-a="${esc(a)}">${esc(a)}</button>`).join("")}</div>
     <div class="slab">Quand on retire l'aide <span class="opt2">· optionnel</span></div>
     <div class="tagwrap" id="apres">${APRES.map(a=>`<button class="tag" data-p="${esc(a)}">${esc(a)}</button>`).join("")}</div>
-    <div class="slab">Fait observé <span class="opt2">· optionnel</span></div>
-    <textarea class="optnote" id="note" placeholder="Ex. : après reformulation en une étape, réalise seul les 3 exercices."></textarea>
+    <div class="slab">💬 Commentaire <span class="opt2">· ce que vous avez observé, un mot sur le moment</span></div>
+    <textarea class="optnote" id="note" placeholder="Ex. : après reformulation en une étape, réalise seul les 3 exercices. — Tout commentaire remonte à la coordination pour améliorer l'accompagnement."></textarea>
     <button class="save" id="saveBtn" disabled>Enregistrer l'observation</button>
     <p class="opthint">Seul le niveau est requis — le reste enrichit la synthèse.</p>`;
   s.querySelectorAll("#scale .sc").forEach(b=>b.onclick=()=>{const v=+b.dataset.v;state.draft.niveau=v;s.querySelectorAll("#scale .sc").forEach(x=>x.dataset.sel=(x===b));$("#scaleExp").innerHTML=`<b>${v} · ${SCALE[v].l}</b> — ${SCALE[v].x}`;$("#saveBtn").disabled=false;});
