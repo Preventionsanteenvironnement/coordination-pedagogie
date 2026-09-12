@@ -321,11 +321,12 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
 <div id="ecran-code">
   <div class="mark">👁️</div>
   <h1>Observation &amp; besoins</h1>
-  <p class="sub">Ce que vous voyez chaque jour prépare la grille GEVA-Sco de l'élève. Entrez votre code à quatre chiffres.</p>
+  <p class="sub">Veuillez taper votre code.</p>
   <div class="points" id="points"><i></i><i></i><i></i><i></i></div>
   <p id="msg-code" role="status" aria-live="polite"></p>
   <div class="pave" id="pave"></div>
-  <p class="rgpd">Aucun nom ne circule : ni le vôtre, ni celui de l'élève. Seulement des codes.</p>
+  <p class="rgpd">Aucun nom ne circule : ni le vôtre, ni celui de l'élève. Seulement des codes.<br>
+    Votre code vous est remis par la coordination.</p>
 </div>
 
 <div id="app" class="hidden">
@@ -367,6 +368,38 @@ const db = getFirestore(initializeApp(firebaseConfig));
 const COL = 'coordination_besoins_eleves';
 const ANNEE = '2026-2027';
 let reglesOk = null;
+
+/* ═══ Les codes d'accès ═══
+   Ils vivent dans la même collection, en documents « type: intervenant », créés
+   depuis la Suite PSE par la coordination. Aucun nom en ligne : le code seul.
+   La liste est mise en cache pour qu'un code connu ouvre l'application même
+   sans réseau. Un code inconnu est refusé.
+   ⚠ Un code identifie, il ne protège pas : la collection est lisible côté
+   navigateur, comme tous les espaces coordination_*. */
+const CODE_COORDO = '2910';
+const K_CODES = 'obs-besoins-codes';
+let CODES = null;        // Set des codes autorisés, ou null si on ne sait pas encore
+let estCoordo = false;
+
+function codesEnCache(){
+  try{ const l=JSON.parse(localStorage.getItem(K_CODES)||'null'); return Array.isArray(l)?new Set(l):null; }
+  catch(e){ return null; }
+}
+async function chargeCodes(){
+  try{
+    const snap=await getDocs(query(collection(db,COL),where('type','==','intervenant')));
+    const l=[]; snap.forEach(d=>{ const o=d.data()||{}; if(o.code&&o.actif!==false) l.push(String(o.code)); });
+    CODES=new Set(l);
+    try{ localStorage.setItem(K_CODES,JSON.stringify([...CODES])); }catch(e){}
+  }catch(e){ CODES=codesEnCache(); }
+  return CODES;
+}
+function codeAutorise(c){
+  if(c===CODE_COORDO) return true;
+  if(!CODES) return null;              // on ne sait pas : on laisse passer, vérifié plus tard
+  if(CODES.size===0) return null;      // aucun code créé : on n'enferme personne dehors
+  return CODES.has(c);
+}
 
 /* ═══ AXE 1 — la grille GEVA-Sco (pages 4 et 5 du formulaire) ═══ */
 const RUBRIQUES = [
@@ -544,17 +577,27 @@ function construitPave(){
     p.appendChild(b);
   });
 }
-function valideCode(){
+async function valideCode(){
   if(!/^\d{4}$/.test(tampon)){ $('#msg-code').textContent='Il faut quatre chiffres.'; tampon=''; majPoints(); return; }
-  moi=tampon; try{ localStorage.setItem(K_CODE,moi); }catch(e){}
+  const essai=tampon;
+  $('#msg-code').textContent='';
+  if(CODES===null){ $('#msg-code').textContent='Vérification…'; await chargeCodes(); }
+  const ok=codeAutorise(essai);
+  if(ok===false){
+    $('#msg-code').textContent='Code inconnu. Demandez le vôtre à la coordination.';
+    tampon=''; majPoints(); return;
+  }
+  moi=essai; estCoordo=(moi===CODE_COORDO);
+  try{ localStorage.setItem(K_CODE,moi); }catch(e){}
   entre();
 }
 function entre(){
   $('#ecran-code').classList.add('hidden');
   $('#app').classList.remove('hidden');
   $('#moi-code').textContent=moi;
+  if(estCoordo){ $('#moi-code').title='Code de coordination'; $('#moi-code').textContent=moi+' ·\u00a0coordination'; }
   allerClasses();
-  sondeRegles().then(videFile);
+  sondeRegles().then(()=>{ chargeCodes(); videFile(); });
 }
 async function sondeRegles(){
   try{ await getDocs(query(collection(db,COL),limit(1))); reglesOk=true; }
@@ -1291,8 +1334,10 @@ function memoriseClasse(nom){
     return;
   }
   try{ MATIERES=await fetch('./matieres.json',{cache:'no-store'}).then(x=>x.json()); }catch(e){ MATIERES={}; }
+  CODES=codesEnCache();
   let memo=null; try{ memo=localStorage.getItem(K_CODE); }catch(e){}
-  if(memo&&/^\d{4}$/.test(memo)){ moi=memo; entre(); }
+  if(memo&&/^\d{4}$/.test(memo)&&codeAutorise(memo)!==false){ moi=memo; estCoordo=(moi===CODE_COORDO); entre(); }
+  else chargeCodes();
 })();
 </script>
 </body>
