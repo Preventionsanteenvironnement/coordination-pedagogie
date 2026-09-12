@@ -1,0 +1,377 @@
+{
+ "annee": "2026-2027",
+ "source": "codes_eleves_mapse_2026-2027 (Suite PSE) — CODES SEULS, aucun nom (RGPD)",
+ "classes": [
+  {
+   "nom": "B2GATL1",
+   "court": "B2",
+   "section": "GATL",
+   "diplome": "bacpro",
+   "groupe": "1",
+   "label": "2de Bac Pro GATL 1",
+   "affiche": "B2 GATL 1",
+   "ordre": 0,
+   "codes": [
+    "AN64",
+    "DL32",
+    "KW77",
+    "QB67",
+    "TS54",
+    "UC38",
+    "WX74",
+    "XP84"
+   ]
+  },
+  {
+   "nom": "B2GATL2",
+   "court": "B2",
+   "section": "GATL",
+   "diplome": "bacpro",
+   "groupe": "2",
+   "label": "2de Bac Pro GATL 2",
+   "affiche": "B2 GATL 2",
+   "ordre": 0,
+   "codes": [
+    "FF65",
+    "HH44",
+    "JB34",
+    "MR73",
+    "SR99",
+    "WK92",
+    "ZD38",
+    "ZT74"
+   ]
+  },
+  {
+   "nom": "B2MELEC",
+   "court": "B2",
+   "section": "MELEC",
+   "diplome": "bacpro",
+   "groupe": "",
+   "label": "2de Bac Pro MELEC",
+   "affiche": "B2 MELEC",
+   "ordre": 0,
+   "codes": [
+    "AV63",
+    "BJ75",
+    "CQ38",
+    "PZ98",
+    "RZ97",
+    "WE83",
+    "WF92",
+    "YX99"
+   ]
+  },
+  {
+   "nom": "B1AGO1",
+   "court": "B1",
+   "section": "AGORA",
+   "diplome": "bacpro",
+   "groupe": "1",
+   "label": "1re Bac Pro AGORA 1",
+   "affiche": "B1 AGORA 1",
+   "ordre": 1,
+   "codes": [
+    "EX87",
+    "GS78",
+    "HU84",
+    "LJ83",
+    "NP76",
+    "PD83",
+    "QU43",
+    "RQ37"
+   ]
+  },
+  {
+   "nom": "B1AGO2",
+   "court": "B1",
+   "section": "AGORA",
+   "diplome": "bacpro",
+   "groupe": "2",
+   "label": "1re Bac Pro AGORA 2",
+   "affiche": "B1 AGORA 2",
+   "ordre": 1,
+   "codes": [
+    "AR77",
+    "DG50",
+    "ET75",
+    "HA27",
+    "JC66",
+    "KA85",
+    "KE56",
+    "QH31",
+    "YS32"
+   ]
+  },
+  {
+   "nom": "B1MELEC",
+   "court": "B1",
+   "section": "MELEC",
+   "diplome": "bacpro",
+   "groupe": "",
+   "label": "1re Bac Pro MELEC",
+   "affiche": "B1 MELEC",
+   "ordre": 1,
+   "codes": [
+    "AC69",
+    "EZ75",
+    "HF26",
+    "KY93",
+    "SE67",
+    "TR33",
+    "XF25",
+    "XV92"
+   ]
+  },
+  {
+   "nom": "BTAGO1",
+   "court": "BT",
+   "section": "AGORA",
+   "diplome": "bacpro",
+   "groupe": "1",
+   "label": "Terminale Bac Pro AGORA 1",
+   "affiche": "BT AGORA 1",
+   "ordre": 2,
+   "codes": [
+    "BP97",
+    "CU38",
+    "DT39",
+    "LT47",
+    "QA44",
+    "WB67",
+    "ZS22",
+    "ZS84"
+   ]
+  },
+  {
+   "nom": "BTAGO2",
+   "court": "BT",
+   "section": "AGORA",
+   "diplome": "bacpro",
+   "groupe": "2",
+   "label": "Terminale Bac Pro AGORA 2",
+   "affiche": "BT AGORA 2",
+   "ordre": 2,
+   "codes": [
+    "BR88",
+    "GF37",
+    "HN67",
+    "KD57",
+    "LA53",
+    "QX99",
+    "UW99",
+    "VE42",
+    "XV49"
+   ]
+  },
+  {
+   "nom": "BTMELEC",
+   "court": "BT",
+   "section": "MELEC",
+   "diplome": "bacpro",
+   "groupe": "",
+   "label": "Terminale Bac Pro MELEC",
+   "affiche": "BT MELEC",
+   "ordre": 2,
+   "codes": [
+    "DS85",
+    "EK28",
+    "GM83",
+    "LD35",
+    "US28",
+    "YV34"
+   ]
+  },
+  {
+   "nom": "C1CAN",
+   "court": "C1",
+   "section": "CAN",
+   "diplome": "cap",
+   "groupe": "",
+   "label": "1re année CAP CAN",
+   "affiche": "C1 CAN",
+   "ordre": 3,
+   "codes": [
+    "BL28",
+    "GG44",
+    "JR34",
+    "QR63",
+    "VD59",
+    "VU94",
+    "YD66",
+    "YW95"
+   ]
+  },
+  {
+   "nom": "C1HORT",
+   "court": "C1",
+   "section": "HORT",
+   "diplome": "capa",
+   "groupe": "",
+   "label": "1re année CAPa HORT",
+   "affiche": "C1 HORT",
+   "ordre": 3,
+   "codes": [
+    "AN47",
+    "DE88",
+    "EZ27",
+    "GJ85",
+    "KJ97",
+    "LY26",
+    "MN68",
+    "ZP49",
+    "ZT68"
+   ]
+  },
+  {
+   "nom": "C1JP",
+   "court": "C1",
+   "section": "JP",
+   "diplome": "capa",
+   "groupe": "",
+   "label": "1re année CAPa JP",
+   "affiche": "C1 JP",
+   "ordre": 3,
+   "codes": [
+    "DW22",
+    "FF93",
+    "HZ88",
+    "TF92",
+    "VP38"
+   ]
+  },
+  {
+   "nom": "C1PSR",
+   "court": "C1",
+   "section": "PSR",
+   "diplome": "cap",
+   "groupe": "",
+   "label": "1re année CAP PSR",
+   "affiche": "C1 PSR",
+   "ordre": 3,
+   "codes": [
+    "AF53",
+    "BF76",
+    "BH55",
+    "ER62",
+    "NP66",
+    "PN84",
+    "SN29"
+   ]
+  },
+  {
+   "nom": "C1VAN",
+   "court": "C1",
+   "section": "VAN",
+   "diplome": "cap",
+   "groupe": "",
+   "label": "1re année CAP VAN",
+   "affiche": "C1 VAN",
+   "ordre": 3,
+   "codes": [
+    "KS86",
+    "PB26",
+    "VG79"
+   ]
+  },
+  {
+   "nom": "C2CAN",
+   "court": "C2",
+   "section": "CAN",
+   "diplome": "cap",
+   "groupe": "",
+   "label": "2e année CAP CAN",
+   "affiche": "C2 CAN",
+   "ordre": 4,
+   "codes": [
+    "CY57",
+    "DX59",
+    "HJ27",
+    "JA75",
+    "JD65",
+    "JP56",
+    "XA37",
+    "ZQ53"
+   ]
+  },
+  {
+   "nom": "C2HORT",
+   "court": "C2",
+   "section": "HORT",
+   "diplome": "capa",
+   "groupe": "",
+   "label": "2e année CAPa HORT",
+   "affiche": "C2 HORT",
+   "ordre": 4,
+   "codes": [
+    "AS49",
+    "BV66",
+    "EH59",
+    "NM57",
+    "PS59",
+    "PT75",
+    "RN39",
+    "SE98"
+   ]
+  },
+  {
+   "nom": "C2JP",
+   "court": "C2",
+   "section": "JP",
+   "diplome": "capa",
+   "groupe": "",
+   "label": "2e année CAPa JP",
+   "affiche": "C2 JP",
+   "ordre": 4,
+   "codes": [
+    "AK67",
+    "CP96",
+    "FH29",
+    "NA94",
+    "XA65",
+    "ZH25",
+    "ZH38",
+    "ZZ29"
+   ]
+  },
+  {
+   "nom": "C2PSR",
+   "court": "C2",
+   "section": "PSR",
+   "diplome": "cap",
+   "groupe": "",
+   "label": "2e année CAP PSR",
+   "affiche": "C2 PSR",
+   "ordre": 4,
+   "codes": [
+    "GE68",
+    "GF55",
+    "GQ25",
+    "KG84",
+    "SQ79",
+    "VE95",
+    "VJ49",
+    "XT48"
+   ]
+  },
+  {
+   "nom": "C2VAN",
+   "court": "C2",
+   "section": "VAN",
+   "diplome": "cap",
+   "groupe": "",
+   "label": "2e année CAP VAN",
+   "affiche": "C2 VAN",
+   "ordre": 4,
+   "codes": [
+    "BX22",
+    "FD66",
+    "FP58",
+    "HP57",
+    "LX25",
+    "RF93",
+    "WN48"
+   ]
+  }
+ ]
+}

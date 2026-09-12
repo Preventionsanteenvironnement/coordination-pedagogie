@@ -587,7 +587,7 @@ let G = null;                 // grille.json
 let intervenants = [];        // tous les AESH
 let saisies = [];             // toutes les saisies de tout le monde
 let moi = null;               // mon intervenant
-let cibleAeshId = null;        // Antoine peut saisir en PSR ; le coordinateur peut saisir pour toute l'équipe
+let cibleAeshId = null;        // certains intervenants saisissent pour un collègue ; le coordinateur saisit pour toute l'équipe
 let lundiCourant = PREMIER_LUNDI;
 let jourCourant = 'lun';
 let filtreClasse = null;      // null = toutes
@@ -655,8 +655,9 @@ function veilleDesVacances(d){
 }
 
 /* ─────────── le secteur : PSR ou MELEC ─────────── */
-/* Antoine, Timothée, Fiona, Stella sont en PSR (C1, C2) ;
-   Cécile et Nathalie en MELEC (B1, B2, BT). Chacun ne voit que le sien.
+/* Chaque intervenant est rattaché à un secteur — PSR (C1, C2) ou MELEC (B1, B2, BT) —
+   et ne voit que le sien. Le rattachement vit dans la fiche de l'intervenant, jamais ici :
+   aucun prénom ne doit figurer dans ce dépôt, qui est public.
    Faute de secteur renseigné, on n'ampute rien : tout reste visible. */
 function mesClasses(){
   if (estCoordinateur()) return G.classes;
