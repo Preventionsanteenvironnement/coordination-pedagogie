@@ -78,7 +78,7 @@ Ne jamais saisir les codes à la main.
 
 Quand une AESH touche un élève qui a une fiche, elle voit d'abord quatre pages courtes —
 **L'élève · Sa classe · Ma mission · Repères** —, puis « Commencer l'observation ». La fiche
-n'est montrée d'office qu'une fois par séance ; elle reste ensuite à portée par le bouton
+n'est montrée d'office qu'une fois par séance (bouton « Passer » pour aller droit au cours) ; elle reste ensuite à portée par le bouton
 « Sa présentation » de la fiche de l'élève. Elle est gardée sur le téléphone pour le hors-ligne.
 
 ```js
@@ -95,6 +95,24 @@ Les textes sont rédigés et **validés par la coordination sur son ordinateur**
 ligne : aucun nom (élève, AESH, établissement), aucune histoire familiale, aucun diagnostic sauf
 s'il sert en classe (conduite à tenir). Un contrôle automatique refuse l'envoi sinon.
 Une fiche n'a ni `eleveCode` ni `classeNom` : elle n'apparaît jamais parmi les observations.
+
+## Les suggestions des AESH
+
+Depuis l'écran des classes et la fiche d'un élève, « 💡 Une idée pour améliorer l'application ».
+Un document par suggestion, sans nom : le texte et le code de l'AESH.
+
+```js
+{ id:"suggestion_1234_<horodatage>", type:"suggestion", annee:"2026-2027",
+  aeshCode:"1234", texte:"…", date:"2026-09-13", creeLe:"<ISO>", source:"observation-besoins" }
+```
+
+La coordination les lit dans l'Atelier, onglet « Suggestions » (prénom de l'AESH en local).
+
+## Revenir en arrière
+
+Le geste « retour » du téléphone ferme d'abord ce qui est ouvert (présentation, feuille), puis
+remonte d'un écran ; ✕, « Précédent », « Passer » et Échap font de même. On ne quitte jamais
+l'application par erreur au milieu d'une saisie.
 
 ## Firestore
 
