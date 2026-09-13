@@ -1089,15 +1089,15 @@ function rendu(){
   if (vue === 'observation') rendObservation();
 }
 
-/* Onglet Observation : embarque l'app d'observation de l'autonomie, avec le code
-   de l'AESH connecté (pour tracer qui observe). Chargée une seule fois. */
+/* Onglet Observation : la même application que toutes les AESH de l'établissement,
+   « Observation & besoins ». Elle reconnaît le code déjà mémorisé ici (même site,
+   clé « edt-aesh-code ») : rien à retaper, et aucun code dans l'adresse. Chargée une seule fois. */
 function rendObservation(){
   const host = $('#obs-host');
   if (host && !host.dataset.loaded){
     host.dataset.loaded = '1';
-    const code = (moi && moi.code) ? moi.code : '';
-    host.innerHTML = '<iframe title="Observation élève" src="../observation/?aesh=' + encodeURIComponent(code) +
-      '" style="display:block;width:100%;height:100%;border:0"></iframe>';
+    host.innerHTML = '<iframe title="Observation &amp; besoins des élèves" src="../observation-besoins/"' +
+      ' style="display:block;width:100%;height:100%;border:0"></iframe>';
   }
 }
 
@@ -1869,7 +1869,7 @@ function dis(t){
       .sort((a,b) => (a.ordre||0) - (b.ordre||0));
     if (moi){ const m = intervenants.find(i => i.id === moi.id); if (m) moi = m; }
     else {
-      // Le QR de l'étiquette porte le code : « …/edt-aesh/?c=4475 ». On ouvre
+      // Le QR de l'étiquette porte le code : « …/edt-aesh/?c=1234 ». On ouvre
       // la session, on mémorise, puis on efface le code de la barre d'adresse.
       const p = new URLSearchParams(location.search);
       const parUrl = normCode(p.get('c') || p.get('code') || '');

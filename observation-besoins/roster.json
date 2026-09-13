@@ -1,6 +1,6 @@
 {
  "annee": "2026-2027",
- "source": "codes_eleves_mapse_2026-2027 (Suite PSE) — CODES SEULS, aucun nom (RGPD)",
+ "source": "codes de suivi — codes seuls, aucun nom (RGPD)",
  "classes": [
   {
    "nom": "B2GATL1",
@@ -12,14 +12,14 @@
    "affiche": "B2 GATL 1",
    "ordre": 0,
    "codes": [
-    "AN64",
-    "DL32",
-    "KW77",
-    "QB67",
-    "TS54",
-    "UC38",
-    "WX74",
-    "XP84"
+    "AFTV7",
+    "B6AMG",
+    "CUCPW",
+    "E2T6U",
+    "J7EFR",
+    "NXYYX",
+    "SXJ9J",
+    "UJG43"
    ]
   },
   {
@@ -32,14 +32,14 @@
    "affiche": "B2 GATL 2",
    "ordre": 0,
    "codes": [
-    "FF65",
-    "HH44",
-    "JB34",
-    "MR73",
-    "SR99",
-    "WK92",
-    "ZD38",
-    "ZT74"
+    "6T2EJ",
+    "BC4Q6",
+    "J6MTP",
+    "MGVV3",
+    "VQBDU",
+    "W5NWP",
+    "WWTRU",
+    "XG934"
    ]
   },
   {
@@ -52,14 +52,14 @@
    "affiche": "B2 MELEC",
    "ordre": 0,
    "codes": [
-    "AV63",
-    "BJ75",
-    "CQ38",
-    "PZ98",
-    "RZ97",
-    "WE83",
-    "WF92",
-    "YX99"
+    "6CEB5",
+    "GNZQM",
+    "JX8NX",
+    "S3QFU",
+    "SBG77",
+    "T4Q2J",
+    "VYTFT",
+    "Z56JP"
    ]
   },
   {
@@ -72,14 +72,14 @@
    "affiche": "B1 AGORA 1",
    "ordre": 1,
    "codes": [
-    "EX87",
-    "GS78",
-    "HU84",
-    "LJ83",
-    "NP76",
-    "PD83",
-    "QU43",
-    "RQ37"
+    "6RYQX",
+    "CC4CA",
+    "DTF5B",
+    "KNZXV",
+    "PTBGY",
+    "Q5ZGW",
+    "QTYFZ",
+    "TDKXG"
    ]
   },
   {
@@ -92,15 +92,15 @@
    "affiche": "B1 AGORA 2",
    "ordre": 1,
    "codes": [
-    "AR77",
-    "DG50",
-    "ET75",
-    "HA27",
-    "JC66",
-    "KA85",
-    "KE56",
-    "QH31",
-    "YS32"
+    "2EHH3",
+    "546HJ",
+    "7V4Q6",
+    "BWKS3",
+    "N6M7H",
+    "Q952P",
+    "VHMBD",
+    "YZ4A4",
+    "Z64QS"
    ]
   },
   {
@@ -113,14 +113,14 @@
    "affiche": "B1 MELEC",
    "ordre": 1,
    "codes": [
-    "AC69",
-    "EZ75",
-    "HF26",
-    "KY93",
-    "SE67",
-    "TR33",
-    "XF25",
-    "XV92"
+    "4HVGJ",
+    "4WVVB",
+    "9ED86",
+    "JP338",
+    "MUBSP",
+    "PMBQ3",
+    "WU3X7",
+    "YVHPN"
    ]
   },
   {
@@ -133,14 +133,14 @@
    "affiche": "BT AGORA 1",
    "ordre": 2,
    "codes": [
-    "BP97",
-    "CU38",
-    "DT39",
-    "LT47",
-    "QA44",
-    "WB67",
-    "ZS22",
-    "ZS84"
+    "6UTW5",
+    "AJNWK",
+    "BRHN6",
+    "JUNW7",
+    "N84QB",
+    "TGUKS",
+    "X5PVN",
+    "XR2HB"
    ]
   },
   {
@@ -153,15 +153,15 @@
    "affiche": "BT AGORA 2",
    "ordre": 2,
    "codes": [
-    "BR88",
-    "GF37",
-    "HN67",
-    "KD57",
-    "LA53",
-    "QX99",
-    "UW99",
-    "VE42",
-    "XV49"
+    "9X9MZ",
+    "CTYCJ",
+    "E3Z72",
+    "EJYCX",
+    "G8H3D",
+    "S3FWE",
+    "TT5HD",
+    "WURSX",
+    "X7BCJ"
    ]
   },
   {
@@ -174,12 +174,12 @@
    "affiche": "BT MELEC",
    "ordre": 2,
    "codes": [
-    "DS85",
-    "EK28",
-    "GM83",
-    "LD35",
-    "US28",
-    "YV34"
+    "448BF",
+    "8TVWD",
+    "PDX5U",
+    "TM9TX",
+    "WZ4J8",
+    "XYZAA"
    ]
   },
   {
@@ -192,14 +192,14 @@
    "affiche": "C1 CAN",
    "ordre": 3,
    "codes": [
-    "BL28",
-    "GG44",
-    "JR34",
-    "QR63",
-    "VD59",
-    "VU94",
-    "YD66",
-    "YW95"
+    "39F3F",
+    "82K9B",
+    "A795E",
+    "K7VCM",
+    "R4SYK",
+    "VTRHB",
+    "XGMRZ",
+    "ZWWQP"
    ]
   },
   {
@@ -212,15 +212,15 @@
    "affiche": "C1 HORT",
    "ordre": 3,
    "codes": [
-    "AN47",
-    "DE88",
-    "EZ27",
-    "GJ85",
-    "KJ97",
-    "LY26",
-    "MN68",
-    "ZP49",
-    "ZT68"
+    "68TPU",
+    "EV3JV",
+    "FPDYR",
+    "HZ8MW",
+    "QFKVB",
+    "S7XQV",
+    "WHFG6",
+    "YMVNR",
+    "YRMTU"
    ]
   },
   {
@@ -233,11 +233,11 @@
    "affiche": "C1 JP",
    "ordre": 3,
    "codes": [
-    "DW22",
-    "FF93",
-    "HZ88",
-    "TF92",
-    "VP38"
+    "4X8EX",
+    "93DYS",
+    "CT54H",
+    "EF6PR",
+    "SEA3C"
    ]
   },
   {
@@ -250,13 +250,13 @@
    "affiche": "C1 PSR",
    "ordre": 3,
    "codes": [
-    "AF53",
-    "BF76",
-    "BH55",
-    "ER62",
-    "NP66",
-    "PN84",
-    "SN29"
+    "43Y99",
+    "8UYC5",
+    "99TUW",
+    "C8A7N",
+    "GXVN7",
+    "PYEWF",
+    "QXEQF"
    ]
   },
   {
@@ -269,9 +269,9 @@
    "affiche": "C1 VAN",
    "ordre": 3,
    "codes": [
-    "KS86",
-    "PB26",
-    "VG79"
+    "AAQYC",
+    "DVSEJ",
+    "H427G"
    ]
   },
   {
@@ -284,14 +284,14 @@
    "affiche": "C2 CAN",
    "ordre": 4,
    "codes": [
-    "CY57",
-    "DX59",
-    "HJ27",
-    "JA75",
-    "JD65",
-    "JP56",
-    "XA37",
-    "ZQ53"
+    "4ERKD",
+    "4FBGP",
+    "9C77M",
+    "GWETT",
+    "V2928",
+    "WA7MD",
+    "WPV72",
+    "XZCE8"
    ]
   },
   {
@@ -304,14 +304,14 @@
    "affiche": "C2 HORT",
    "ordre": 4,
    "codes": [
-    "AS49",
-    "BV66",
-    "EH59",
-    "NM57",
-    "PS59",
-    "PT75",
-    "RN39",
-    "SE98"
+    "32M5D",
+    "3CFSR",
+    "ETUNC",
+    "HFU4B",
+    "JYMGR",
+    "P5VKB",
+    "Q9TDT",
+    "VFY4Q"
    ]
   },
   {
@@ -324,14 +324,14 @@
    "affiche": "C2 JP",
    "ordre": 4,
    "codes": [
-    "AK67",
-    "CP96",
-    "FH29",
-    "NA94",
-    "XA65",
-    "ZH25",
-    "ZH38",
-    "ZZ29"
+    "4TT3Z",
+    "DF48E",
+    "DZAW7",
+    "F5WK4",
+    "FXEKA",
+    "JYHPB",
+    "QESKZ",
+    "VHSYS"
    ]
   },
   {
@@ -344,14 +344,14 @@
    "affiche": "C2 PSR",
    "ordre": 4,
    "codes": [
-    "GE68",
-    "GF55",
-    "GQ25",
-    "KG84",
-    "SQ79",
-    "VE95",
-    "VJ49",
-    "XT48"
+    "3YHS4",
+    "DTF3B",
+    "FJ6TH",
+    "GNJ4Y",
+    "P5W9H",
+    "PZUXQ",
+    "WJUC6",
+    "Z4Z9V"
    ]
   },
   {
@@ -364,13 +364,13 @@
    "affiche": "C2 VAN",
    "ordre": 4,
    "codes": [
-    "BX22",
-    "FD66",
-    "FP58",
-    "HP57",
-    "LX25",
-    "RF93",
-    "WN48"
+    "A2637",
+    "CKF2N",
+    "EFRRJ",
+    "JGMAK",
+    "KW3US",
+    "UCFJE",
+    "XUGE3"
    ]
   }
  ]

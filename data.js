@@ -210,16 +210,8 @@ const THEMATIQUES = [
     enfants: [
       {
         titre: "Observation & besoins des élèves",
-        desc: "Pour toutes les AESH de l'établissement, sur les 19 classes. La classe, l'élève, la matière — puis ce qu'on a vu : la cotation GEVA-Sco, ce qui a bloqué, sur quoi l'élève s'appuie, et ce qui se passe quand on s'éloigne. Trente secondes. Au fil de l'année, la grille de l'ESS se remplit toute seule, et chacun voit la progression de son élève en graphiques. Code à quatre chiffres, aucun nom.",
+        desc: "Pour toutes les AESH de l'établissement : chacune voit ses classes et, en premier, les élèves qu'elle accompagne. La classe, l'élève, la matière — puis ce qu'on a vu : la cotation GEVA-Sco, ce qui a bloqué, sur quoi l'élève s'appuie, et ce qui se passe quand on s'éloigne. Trente secondes. Au fil de l'année, la grille de l'ESS se remplit toute seule, et chacun voit la progression de son élève en graphiques. Code à quatre chiffres — celui de l'emploi du temps pour les AESH PSR et MELEC —, aucun nom.",
         lien: "observation-besoins/",
-        type: "Code d'accès",
-        icon: "compass",
-        badge: "Nouveau",
-      },
-      {
-        titre: "Observation de l'autonomie",
-        desc: "Outil d'accompagnement individualisé : on touche un code élève, on note le niveau d'autonomie (0 à 5) et les aides qui ont fonctionné. Chaque AESH a son propre code. Aucun nom d'élève — codes seulement (RGPD).",
-        lien: "observation-suivi/",
         type: "Code d'accès",
         icon: "compass",
         badge: "Nouveau",

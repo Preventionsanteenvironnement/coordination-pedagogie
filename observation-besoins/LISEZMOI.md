@@ -1,12 +1,15 @@
 # Observation & besoins des élèves — module AESH
 
-Application mobile destinée à **toutes les AESH de l'établissement**, sur **toutes les classes**.
+Application mobile destinée à **toutes les AESH de l'établissement** : chacune voit ses classes
+et, en premier, les élèves qu'elle accompagne.
 Elle récolte au fil de l'année la matière des deux cadres de commentaires de la grille
 **GEVA-Sco** — « Obstacles à la réalisation de l'activité » et « Points d'appui » — pour que
 la grille officielle soit remplie à partir d'observations réelles, et non de souvenirs.
 
-À ne pas confondre avec `observation/` et `observation-suivi/`, qui sont l'outil d'autonomie
-de la **coordination PSR MELEC** et restent inchangés.
+C'est **la seule application d'observation**. Elle remplace les anciens `observation/` et
+`observation-suivi/` (outil d'autonomie de la coordination PSR MELEC, retirés) : les AESH PSR
+et MELEC l'ouvrent depuis l'onglet 👁️ de leur emploi du temps (`edt-aesh/`), avec le même code.
+Une modification faite ici vaut pour tout le monde.
 
 ## Les trois axes
 
@@ -31,50 +34,74 @@ même classe. Tout est modifiable après coup : toucher une ligne du journal la 
 avec un bouton pour supprimer. Une observation appartient à son auteur : on ne modifie
 pas celle d'un collègue.
 
+## Les codes d'accès — un seul code par personne
+
+L'application lit **deux listes**, sans aucun nom :
+
+| Qui | Où est le code | Ce qu'elle voit |
+|---|---|---|
+| AESH PSR et MELEC | `coordination_edt_aesh_intervenants` — **le code de leur emploi du temps** (champ `section` : `PSR` ou `MELEC`) | les classes de leur secteur (`section` de `roster.json`) |
+| Coordination | même collection, document `coordo` | toutes les classes |
+| Autres AESH | `coordination_besoins_eleves`, documents `type: "intervenant"` | les classes choisies pour elle (`classes`), sinon toutes |
+
+```js
+{ id:"intervenant_1234", type:"intervenant", code:"1234", actif:true, annee:"2026-2027",
+  classes:["B2GATL2"],            // facultatif : les classes visibles
+  eleves:["Q7K2M", "…"],          // facultatif : codes de suivi mis en avant
+  majLe:"<ISO>" }
+```
+
+- **Élèves mis en avant** : ceux de `eleves` s'ils sont renseignés, sinon les élèves notifiés.
+  Les autres restent visibles, grisés, et peuvent toujours être observés.
+- Un document `intervenant` avec `actif:false` ferme l'accès, même pour un code de l'emploi du temps.
+- Dans l'emploi du temps, le code est déjà mémorisé (`edt-aesh-code`, même site) : l'onglet
+  Observation l'utilise sans le redemander. Aucun code ne passe dans l'adresse.
+- Les deux listes sont mises en cache : un code connu ouvre l'application sans réseau.
+- Les codes PSR/MELEC se gèrent dans **Coordination PSR MELEC** ; les autres, dans l'Atelier,
+  onglet « Codes AESH » d'Observation & besoins, qui affiche tout le monde au même endroit.
+
 ## Fichiers
 
 | Fichier | Rôle |
 |---|---|
 | `index.html` | L'application (autonome, aucune dépendance hors Firebase et Google Fonts) |
-| `roster.json` | Annuaire des classes — **codes élèves seuls, aucun nom** |
-| `matieres.json` | Matières par classe — copie de celui de `observation-suivi/` |
+| `roster.json` | Annuaire des classes — **codes de suivi seuls, aucun nom** |
+| `matieres.json` | Matières par classe |
 
-`roster.json` est dérivé de `codes_eleves_mapse_2026-2027.json` (Suite PSE) :
-19 classes, 140 codes, format 2 lettres + 2 chiffres. Ce sont les mêmes codes que sur les
-documents distribués aux élèves. Pour le régénérer après un changement d'effectif, repartir
-de ce fichier source — jamais saisir les codes à la main.
+`roster.json` est exporté par l'Atelier de cours : Observation & besoins → « Codes de suivi »
+→ « Préparer la liste des téléphones » (fichier `roster-telephones.json`). 19 classes, codes
+de suivi à 5 caractères, **jamais les codes de connexion mapse.fr**. La table code de suivi ↔
+élève reste sur l'ordinateur de la coordination : elle ne va ni en ligne, ni sur GitHub.
+Ne jamais saisir les codes à la main.
 
 ## Firestore
 
 Collection dédiée : **`coordination_besoins_eleves`** (projet `devoirs-pse`).
 Elle ne se mélange avec aucune autre : ni `psr_observations`, ni `suivi_observations`,
-ni `coordination_gevasco`.
+ni `coordination_gevasco`. L'application **lit** aussi `coordination_edt_aesh_intervenants`
+(codes de l'emploi du temps), sans jamais y écrire.
 
-⚠️ **Une règle doit être publiée avant que les observations partent en ligne.** Les règles du
-projet nomment les collections une par une : tant que celle-ci n'y figure pas, lectures et
-écritures sont refusées. L'application le gère sans rien perdre — les observations sont
-gardées sur le téléphone et s'envoient toutes seules dès l'ouverture — mais elles n'arrivent
-pas dans la Suite PSE.
-
-Console Firebase → projet `devoirs-pse` → Firestore Database → Règles, ajouter :
+Règles publiées (vérifiées le 13/09/2026) :
 
 ```
 match /coordination_besoins_eleves/{docId} {
-  allow read: if true;                       // l'AESH relit le journal de l'élève
-  allow create: if true;                     // l'AESH dépose sans compte
-  allow update, delete: if request.auth != null;
+  allow read, create, update, delete: if true;
+}
+match /coordination_edt_aesh_intervenants/{docId} {
+  allow read, create, update, delete: if true;
 }
 ```
 
-Puis **Publier**. Pour vérifier : ouvrir l'application avec `?diag=1` à la fin de l'adresse —
-le bandeau d'état disparaît quand l'espace est ouvert.
+Si une règle venait à manquer, l'application ne perd rien : les observations sont gardées sur
+le téléphone et s'envoient toutes seules dès l'ouverture. Pour vérifier : ouvrir l'application
+avec `?diag=1` à la fin de l'adresse.
 
 ## Le document écrit
 
 ```js
 {
   id, annee:"2026-2027", source:"observation-besoins",
-  eleveCode:"AV63", classe:"B2 MELEC", classeNom:"B2MELEC",
+  eleveCode:"Q7K2M", classe:"B2 MELEC", classeNom:"B2MELEC",   // code de suivi
   classeLabel:"2de Bac Pro MELEC", section:"MELEC", diplome:"bacpro",
   aeshCode:"1234",                       // code à 4 chiffres, jamais de nom
   date:"2026-09-12", creeLe:"<ISO>",
@@ -104,23 +131,35 @@ Il sert à **comparer un élève à lui-même dans le temps**, jamais deux élè
 Les 32 activités reprennent **mot pour mot** les libellés du formulaire GEVA-Sco
 (« Observation des activités de l'élève », pages 4 et 5), en 5 rubriques.
 
-## Côté Suite PSE (Electron)
+## Les élèves notifiés
 
-`EDITEUR/besoins-eleves.html` + `EDITEUR/planning-psr/besoins-coordo.js` lisent cette
-collection et reconstituent, pour chaque élève : la **grille GEVA-Sco pré-remplie**
-(cotation retenue, Cadre 1, Cadre 2, micro-boucles et notes citées), le bloc **« besoin
-réel d'aide humaine »** (indice, évolution, part de fois où l'élève repart seul, profil par
-matière), le bloc **« ce qui est déjà en place »**, les missions et les évolutions. Impression,
-copie texte prête à coller, export JSON.
+Un seul document, coché par la coordination depuis l'Atelier de cours (onglet « Notifications ») :
+
+```js
+{ id:"notifications_2026-2027", type:"notifications", annee:"2026-2027",
+  codes:{ "Q7K2M": true, "R4T9X": false }, majLe:"…" }
+```
+
+Sur le téléphone, dans une classe qui compte au moins un élève mis en avant, ceux-ci passent en premier avec leur étiquette (« notifié », ou « suivi » pour un élève choisi pour l'AESH) ; les autres restent affichés en grisé et peuvent toujours être observés. Une classe sans aucun élève mis en avant s'affiche normalement. Aucun nom : le code et la case, rien d'autre.
+
+## Côté Atelier de cours (Electron)
+
+`EDITEUR/planning-psr/besoins-coordo.js` lit cette collection et reconstitue, pour chaque élève :
+la **grille GEVA-Sco pré-remplie** (cotation retenue, Cadre 1, Cadre 2, micro-boucles et notes
+citées), le bloc **« besoin réel d'aide humaine »** (indice, évolution, part de fois où l'élève
+repart seul, profil par matière), le bloc **« ce qui est déjà en place »**, les missions et les
+évolutions. Impression, copie texte prête à coller, export JSON.
 
 **Jamais de classement par AESH.** L'agrégation se fait par élève. Enregistrer ce que
 l'AESH a fait produit de la donnée sur sa pratique : si l'équipe se sent évaluée, elle
-cessera d'être honnête, et l'outil perdra ce qui fait sa valeur. Les codes y sont résolus en noms **en local** (`studentCodesAPI`) : aucune
-donnée nominative ne circule en ligne.
+cessera d'être honnête, et l'outil perdra ce qui fait sa valeur. Les codes y sont résolus en
+noms **en local** (table des codes de suivi, fiche de Coordination PSR MELEC pour les AESH) :
+aucune donnée nominative ne circule en ligne.
 
 ## RGPD
 
-Aucun nom, nulle part en ligne : l'élève est un code, l'AESH est un code à 4 chiffres.
-Ce code identifie la personne qui observe, pour la coordination — **il ne protège pas l'accès**
+Aucun nom, nulle part en ligne : l'élève est un code de suivi, l'AESH est un code à 4 chiffres.
+Le code de suivi n'est pas le code de connexion mapse.fr : aucun endroit en ligne ne relie les deux.
+Le code AESH identifie la personne qui observe, pour la coordination — **il ne protège pas l'accès**
 (Firebase est lu côté navigateur, sans authentification), exactement comme l'application
 d'emploi du temps AESH. La page est en `noindex`.
