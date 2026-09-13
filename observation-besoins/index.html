@@ -331,6 +331,77 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
 .hors{display:none;margin-top:10px;font-size:.8rem;font-weight:600;color:var(--C);background:var(--C-s);
   border-radius:var(--r-s);padding:10px 13px}
 .hors.on{display:block}
+
+/* ───────── fiche de présentation (4 pages) ─────────
+   Montrée avant la première observation d'un élève accompagné, puis à la demande.
+   Texte ≥ 18 px, pages courtes, jamais de défilement horizontal. */
+#fiche{position:fixed;inset:0;z-index:55;background:var(--bg);display:flex;flex-direction:column;max-width:560px;margin:0 auto}
+.fi-top{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 14px) 16px 6px}
+.fi-top .icobtn{width:46px;height:46px}
+.fi-tt{flex:1;min-width:0}
+.fi-tt b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:.01em}
+.fi-tt span{display:block;font-size:.88rem;color:var(--faint)}
+.fi-tag{flex:none;font-size:.76rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:var(--brand);padding:7px 12px;border-radius:var(--pill)}
+.fi-tag.cours{color:var(--C);background:var(--C-s)}
+.fi-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:8px 16px 12px}
+.fi-step{display:grid;gap:7px;text-align:left;padding:2px 0}
+.fi-step i{display:block;height:7px;border-radius:99px;background:var(--line-2);transition:background .25s}
+.fi-step span{font-size:.8rem;font-weight:600;color:var(--faint);white-space:nowrap}
+.fi-step.fait i{background:color-mix(in srgb,var(--brand) 45%,var(--line-2))}
+.fi-step.on i{background:var(--brand)}
+.fi-step.on span{color:var(--ink);font-weight:800}
+#fi-pages{flex:1;position:relative;overflow:hidden}
+.fi-page{position:absolute;inset:0;padding:4px 16px 14px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;
+  font-size:18px;line-height:1.45;transform:translateX(104%);opacity:0;transition:transform .4s cubic-bezier(.3,.8,.25,1),opacity .3s}
+.fi-page.on{transform:none;opacity:1}
+.fi-page.avant{transform:translateX(-104%)}
+.fi-eyebrow{font-size:.82rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--brand-d)}
+.fi-page h2{font-size:1.7rem;margin-top:3px}
+.fi-id{background:linear-gradient(150deg,var(--brand-d),var(--brand) 60%,var(--brand-l));color:#fff;border-radius:26px;padding:20px 22px;position:relative;overflow:hidden}
+.fi-id::after{content:"";position:absolute;right:-60px;top:-70px;width:210px;height:210px;border-radius:50%;background:rgba(255,255,255,.08)}
+.fi-kick{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.fi-code{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:3.8rem;line-height:1;letter-spacing:.02em;margin:10px 0 6px}
+.fi-cls{font-size:1.15rem;font-weight:600}
+.fi-acc{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.fi-h{text-align:center;padding-right:16px;border-right:1px solid var(--line);min-width:92px}
+.fi-h b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:2.4rem;font-weight:800;line-height:1;color:var(--brand-d);font-variant-numeric:tabular-nums}
+.fi-h span{font-size:.85rem;color:var(--faint);font-weight:600}
+.fi-t{display:grid;gap:8px;justify-items:start}
+.fi-t strong{font-size:1.08rem;line-height:1.25}
+.fi-pill{display:inline-flex;align-items:center;gap:7px;font-size:.88rem;font-weight:700;padding:6px 12px;border-radius:var(--pill);color:var(--C);background:var(--C-s)}
+.fi-lab{font-size:.8rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+.fi-lab.w{color:var(--C)} .fi-lab.g{color:var(--A)}
+.fi-glance{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.fi-glance div{background:var(--card-2);border:1px solid var(--line);border-radius:18px;padding:14px 8px 12px;display:grid;justify-items:center;gap:8px;text-align:center;color:var(--brand)}
+.fi-glance div.alerte{background:var(--C-s);border-color:color-mix(in srgb,var(--C) 35%,transparent);color:var(--C)}
+.fi-glance span{font-size:.88rem;font-weight:700;line-height:1.2;color:var(--ink)}
+.fi-list{display:grid;gap:10px}
+.fi-row{display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 15px 12px 12px}
+.fi-tile{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-d)}
+.fi-row b{display:block;font-size:1.02rem;line-height:1.25}
+.fi-row p{margin:3px 0 0;font-size:.92rem;color:var(--ink-2);line-height:1.35}
+.fi-row.now{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 55%,transparent)}
+.fi-row.now .fi-tile{background:var(--brand);color:#fff}
+.fi-now{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-d);margin-bottom:3px}
+.fi-row.w .fi-tile{background:var(--C-s);color:var(--C)}
+.fi-row.g .fi-tile{background:var(--A-s);color:var(--A)}
+.fi-row.fort{background:var(--C-s);border-color:color-mix(in srgb,var(--C) 45%,transparent)}
+.fi-row.fort .fi-tile{background:var(--C);color:#fff}
+.fi-row.slim{padding:9px 13px 9px 9px;grid-template-columns:44px 1fr}
+.fi-row.slim .fi-tile{width:44px;height:44px;border-radius:13px}
+.fi-row.slim b{font-size:.98rem;font-weight:600}
+.fi-vide{display:flex;gap:10px;align-items:center;font-size:.93rem;color:var(--ink-2);background:var(--card-2);border:1px dashed var(--line-2);border-radius:16px;padding:12px 14px}
+.fi-nav{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;padding:12px 16px calc(env(safe-area-inset-bottom) + 18px);border-top:1px solid var(--line);background:var(--bg)}
+.fi-btn{min-height:58px;border-radius:18px;font-size:1.02rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;transition:transform .12s,opacity .2s}
+.fi-btn:active{transform:scale(.97)}
+.fi-btn.sec{background:var(--card);border:1px solid var(--line)}
+.fi-btn.pri{background:var(--brand);color:#fff}
+.fi-btn[disabled]{opacity:.38}
+svg.fi-i{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fi-row.slim svg.fi-i{width:22px;height:22px}
+.fi-pill svg.fi-i{width:16px;height:16px}
+.fi-btn svg.fi-i{width:21px;height:21px}
+@media (prefers-reduced-motion:reduce){.fi-page,.fi-step i{transition:none}}
 </style>
 </head>
 <body>
@@ -368,6 +439,26 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
   <div class="f-pied" id="f-pied"></div>
 </div>
 <div id="etat" role="status" aria-live="polite"></div>
+
+<div id="fiche" class="hidden" role="dialog" aria-modal="true" aria-labelledby="fi-code">
+  <div class="fi-top">
+    <button class="icobtn" id="fi-x" aria-label="Fermer la présentation"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="fi-tt"><b id="fi-code"></b><span id="fi-sous"></span></div>
+    <span class="fi-tag" id="fi-tag"></span>
+  </div>
+  <nav class="fi-steps" id="fi-steps" aria-label="Pages de la présentation">
+    <button class="fi-step"><i></i><span>L’élève</span></button>
+    <button class="fi-step"><i></i><span>Sa classe</span></button>
+    <button class="fi-step"><i></i><span>Ma mission</span></button>
+    <button class="fi-step"><i></i><span>Repères</span></button>
+  </nav>
+  <div id="fi-pages"></div>
+  <div class="fi-nav">
+    <button class="fi-btn sec" id="fi-prec"><svg class="fi-i"><use href="#fi-back"/></svg><span>Précédent</span></button>
+    <button class="fi-btn pri" id="fi-suiv"><span>Suivant</span><svg class="fi-i"><use href="#fi-next"/></svg></button>
+  </div>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="fi-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol><symbol id="fi-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol><symbol id="fi-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol><symbol id="fi-renouv" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></symbol><symbol id="fi-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/></symbol><symbol id="fi-casque" viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="6.5" rx="1.6"/><rect x="16.5" y="14" width="4.5" height="6.5" rx="1.6"/></symbol><symbol id="fi-fond" viewBox="0 0 24 24"><path d="M5 4h14"/><circle cx="7" cy="10" r="1.3"/><circle cx="12" cy="10" r="1.3"/><circle cx="17" cy="10" r="1.3"/><circle cx="7" cy="15" r="1.3"/><circle cx="12" cy="15" r="1.3"/><circle cx="17" cy="19.5" r="2.3"/></symbol><symbol id="fi-chaise" viewBox="0 0 24 24"><path d="M7 3v9h10V3"/><path d="M5 12h14"/><path d="M7 12l-1 9M17 12l1 9"/></symbol><symbol id="fi-oeil" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol><symbol id="fi-elan" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol><symbol id="fi-son" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 9.5a4 4 0 0 1 0 5M18.5 7a8 8 0 0 1 0 10"/></symbol><symbol id="fi-energie" viewBox="0 0 24 24"><rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2M5.5 10v4"/></symbol><symbol id="fi-parole" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.1A8 8 0 1 1 21 12z"/></symbol><symbol id="fi-debout" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M8 10h8M9.5 22l2.5-8 2.5 8"/></symbol><symbol id="fi-langue" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol><symbol id="fi-horloge" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></symbol><symbol id="fi-loupe" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8M8 10.5h5M10.5 8v5"/></symbol><symbol id="fi-pause" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></symbol><symbol id="fi-usb" viewBox="0 0 24 24"><rect x="7" y="9" width="10" height="13" rx="2"/><path d="M9 9V3h6v6M11 5v1M13 5v1"/></symbol><symbol id="fi-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></symbol><symbol id="fi-tableau" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20l4-4 4 4"/></symbol><symbol id="fi-crayon" viewBox="0 0 24 24"><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z"/><path d="M14 7l3 3"/></symbol><symbol id="fi-alerte" viewBox="0 0 24 24"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17h.01"/></symbol><symbol id="fi-coeur" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.2-9.2A4.6 4.6 0 0 1 12 6.5a4.6 4.6 0 0 1 9.2 4.3C19.5 15.4 12 20 12 20z"/></symbol><symbol id="fi-valise" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M3 12h18"/></symbol><symbol id="fi-calendrier" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol><symbol id="fi-cible" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol><symbol id="fi-etapes" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></symbol><symbol id="fi-sortie" viewBox="0 0 24 24"><path d="M14 4h5v16h-5"/><path d="M10 16l4-4-4-4M14 12H3"/></symbol><symbol id="fi-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol><symbol id="fi-groupe" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0M14.5 20a5 5 0 0 1 7-4.6"/></symbol><symbol id="fi-notes" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></symbol></defs></svg>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js';
@@ -766,9 +857,10 @@ function allerEleves(c){
    +'<div class="actions" style="margin-top:16px"><button class="act" id="a-bilan-cl">'
    +'<span class="em">📊</span><span><b>Le bilan de la classe</b><span>Qui est le plus accompagné, qui progresse</span></span></button></div>'
    +'<p class="note-rgpd">Plusieurs AESH peuvent observer le même élève : les regards s\'additionnent, rien ne s\'écrase.</p>';
-  document.querySelectorAll('[data-el]').forEach(b=>b.onclick=()=>allerMatiere(b.dataset.el));
+  document.querySelectorAll('[data-el]').forEach(b=>b.onclick=()=>ouvreEleve(b.dataset.el));
   $('#a-bilan-cl').onclick=allerBilanClasse;
   chargeClasse(c);
+  actifs.forEach(k=>chargeFiche(k));   // les fiches des élèves accompagnés, prêtes avant qu'on les touche
   const avant=actifs.join(',');
   chargeNotifs().then(()=>{
     if(vue==='eleves'&&classeCour===c&&c.codes.filter(estActif).join(',')!==avant) allerEleves(c);
@@ -796,6 +888,107 @@ async function chargeClasse(c){
   });
   const e=$('#cnt-cl'); if(e) e.textContent = total? total+' observations' : 'aucune observation';
 }
+
+/* ═══ La fiche de présentation (4 pages) ═══
+   Un document « fiche_<code> » par élève accompagné, écrit par la coordination à partir
+   de textes validés : aucun nom, aucun établissement, aucune histoire familiale.
+   Montrée une fois avant la première observation de l'élève, puis à la demande.
+   Gardée sur le téléphone pour fonctionner sans réseau. */
+const K_FICHES='obs-besoins-fiches';
+const FICHES_VUES=new Set();
+function fichesEnCache(){ try{ const o=JSON.parse(localStorage.getItem(K_FICHES)||'{}'); return (o&&typeof o==='object')?o:{}; }catch(e){ return {}; } }
+const ficheEnCache=code=>fichesEnCache()[code]||null;
+async function chargeFiche(code){
+  try{
+    const s=await getDoc(doc(db,COL,'fiche_'+code));
+    const toutes=fichesEnCache();
+    if(s.exists()) toutes[code]=s.data(); else delete toutes[code];
+    try{ localStorage.setItem(K_FICHES,JSON.stringify(toutes)); }catch(e){}
+    return toutes[code]||null;
+  }catch(e){ return ficheEnCache(code); }
+}
+async function ouvreEleve(code){
+  if(FICHES_VUES.has(code)){ allerMatiere(code); chargeFiche(code); return; }
+  const f=await Promise.race([chargeFiche(code), new Promise(r=>setTimeout(()=>r(ficheEnCache(code)),1500))]);
+  if(f) montreFiche(f,()=>allerMatiere(code),code); else allerMatiere(code);
+}
+const FI=n=>'<svg class="fi-i" aria-hidden="true"><use href="#fi-'+n+'"/></svg>';
+let fichePage=0, ficheApres=null;
+function montreFiche(f,apres,code){
+  if(!f) return;
+  ficheApres=apres; FICHES_VUES.add(code||f.code);
+  const L=v=>Array.isArray(v)?v:[];
+  const aff=classeCour?classeCour.affiche:'';
+  const enCours=f.etat==='en_cours';
+  const grand=f.heures?[f.heures,'par semaine']:/^ULIS/.test(f.dispositif||'')?['ULIS','dispositif']:f.aide==='individualisée'?['IND','heures à venir']:['…','en cours'];
+  const titre=enCours?'Notification en cours':(f.dispositif||'')+(f.aide?' '+f.aide:'');
+  const pill=f.etat==='renouvellement'?'<span class="fi-pill">'+FI('renouv')+'Renouvellement en cours</span>'
+            :enCours?'<span class="fi-pill">'+FI('renouv')+'Notification attendue</span>':'';
+  const vide=t=>'<div class="fi-vide">'+FI('info')+'<span>'+esc(t)+'</span></div>';
+  const lignes=(l,cls,now)=>l.map((r,k)=>'<div class="fi-row '+(cls||'')+(now&&k===0?' now':'')+'"><div class="fi-tile">'+FI(r.i)+'</div><div>'
+      +(now&&k===0?'<span class="fi-now">En ce moment</span>':'')+'<b>'+esc(r.t)+'</b>'+(r.d?'<p>'+esc(r.d)+'</p>':'')+'</div></div>').join('');
+  const fines=(l,cls)=>l.map(r=>'<div class="fi-row slim '+cls+'"><div class="fi-tile">'+FI(r.i)+'</div><b>'+esc(r.t)+'</b></div>').join('');
+  const tete=(sur,titre)=>'<div tabindex="-1" class="fi-head"><div class="fi-eyebrow">'+sur+'</div><h2>'+titre+'</h2></div>';
+  const p1='<section class="fi-page"><div class="fi-id"><div class="fi-kick">'+(enCours?'Notification en cours · ':'Élève notifié · ')+esc(f.annee||ANNEE)+'</div>'
+    +'<div class="fi-code">'+esc(f.code)+'</div><div class="fi-cls">'+esc(aff)+'</div></div>'
+    +'<div class="fi-acc"><div class="fi-h"><b>'+esc(grand[0])+'</b><span>'+esc(grand[1])+'</span></div><div class="fi-t"><strong>'+esc(titre)+'</strong>'+pill+'</div></div>'
+    +'<div class="fi-lab">En classe, d’un coup d’œil</div>'
+    +(L(f.coup).length?'<div class="fi-glance">'+L(f.coup).map(c=>'<div'+(c.i==='alerte'?' class="alerte"':'')+'>'+FI(c.i)+'<span>'+esc(c.t)+'</span></div>').join('')+'</div>'
+                      :vide('Les repères arrivent avec le dossier. Observez librement.'))+'</section>';
+  const p2='<section class="fi-page">'+tete('Environnement','Ce qui est en place')
+    +(L(f.enClasse).length?'<div class="fi-list">'+lignes(L(f.enClasse))+'</div>':vide('Rien encore : le dossier arrive.'))+'</section>';
+  const p3='<section class="fi-page">'+tete('Rôle de l’AESH','Votre mission auprès de '+esc(f.code))
+    +'<div class="fi-list">'+lignes(L(f.mission),'',true)+'</div></section>';
+  const rien=!L(f.reperes).length&&!L(f.obstacles).length&&!L(f.appuis).length;
+  const p4='<section class="fi-page">'+tete('Pour bien observer','Ses repères')
+    +(L(f.reperes).length?'<div class="fi-lab w">À savoir</div><div class="fi-list">'+lignes(L(f.reperes),'fort')+'</div>':'')
+    +(L(f.obstacles).length?'<div class="fi-lab w">À prendre en compte</div><div class="fi-list">'+fines(L(f.obstacles),'w')+'</div>':'')
+    +(L(f.appuis).length?'<div class="fi-lab g">Points d’appui</div><div class="fi-list">'+fines(L(f.appuis),'g')+'</div>':'')
+    +(rien?vide('À découvrir en observant.'):'')+'</section>';
+  $('#fi-code').textContent=f.code;
+  $('#fi-sous').textContent=(aff?aff+' · ':'')+'présentation';
+  $('#fi-tag').textContent=enCours?'En cours':'Notifié';
+  $('#fi-tag').classList.toggle('cours',enCours);
+  $('#fi-pages').innerHTML=p1+p2+p3+p4;
+  $('#fiche').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+  ficheAller(0,false);
+}
+function ficheAller(i,focus){
+  const P=[...$('#fi-pages').children]; if(!P.length) return;
+  fichePage=Math.max(0,Math.min(P.length-1,i));
+  P.forEach((p,k)=>{ p.classList.toggle('on',k===fichePage); p.classList.toggle('avant',k<fichePage); p.inert=(k!==fichePage); });
+  document.querySelectorAll('#fi-steps .fi-step').forEach((s,k)=>{ s.classList.toggle('on',k===fichePage); s.classList.toggle('fait',k<fichePage); });
+  $('#fi-prec').disabled=(fichePage===0);
+  $('#fi-suiv').querySelector('span').textContent=(fichePage===P.length-1)?(ficheApres?'Commencer l’observation':'Fermer'):'Suivant';
+  if(focus){ const h=P[fichePage].querySelector('.fi-head'); if(h) h.focus({preventScroll:true}); }
+}
+function fermeFiche(lancer){
+  $('#fiche').classList.add('hidden');
+  document.body.style.overflow='';
+  const suite=ficheApres; ficheApres=null;
+  if(lancer&&suite) suite();
+}
+$('#fi-suiv').onclick=()=>{ if(fichePage>=$('#fi-pages').children.length-1) fermeFiche(true); else ficheAller(fichePage+1,true); };
+$('#fi-prec').onclick=()=>ficheAller(fichePage-1,true);
+$('#fi-x').onclick=()=>fermeFiche(false);
+document.querySelectorAll('#fi-steps .fi-step').forEach((s,k)=>s.onclick=()=>ficheAller(k,true));
+document.addEventListener('keydown',e=>{
+  if($('#fiche').classList.contains('hidden')) return;
+  if(e.key==='Escape') fermeFiche(false);
+  else if(e.key==='ArrowRight'&&fichePage<3) ficheAller(fichePage+1,true);
+  else if(e.key==='ArrowLeft'&&fichePage>0) ficheAller(fichePage-1,true);
+});
+(function(){
+  let x0=null; const z=$('#fi-pages');
+  z.addEventListener('pointerdown',e=>{ x0=e.clientX; });
+  z.addEventListener('pointerup',e=>{
+    if(x0==null) return; const dx=e.clientX-x0; x0=null;
+    if(Math.abs(dx)<60) return;
+    if(dx<0&&fichePage<3) ficheAller(fichePage+1,false);
+    if(dx>0&&fichePage>0) ficheAller(fichePage-1,false);
+  });
+})();
 
 /* ─── 3 · la matière ─── */
 const matieresDe=nom=>(MATIERES&&MATIERES[nom])?MATIERES[nom]:[];
@@ -847,6 +1040,7 @@ function allerEleve(code){
    +'<button class="act" id="a-mission"><span class="em">🤝</span><span><b>Ce que j\'ai fait avec lui</b><span>Vos missions d\'aide humaine</span></span></button>'
    +'<button class="act" id="a-progres"><span class="em">📈</span><span><b>Un progrès</b><span>Une évolution que vous avez vue</span></span></button>'
    +'<button class="act" id="a-adapt"><span class="em">🧩</span><span><b>Ce qui est en place pour lui</b><span>Les adaptations, et si elles suffisent</span></span></button>'
+   +(ficheEnCache(code)?'<button class="act" id="a-fiche"><span class="em">📇</span><span><b>Sa présentation</b><span>Ce qu’il faut savoir avant d’observer</span></span></button>':'')
    +'<button class="act" id="a-bilan"><span class="em">📊</span><span><b>Son bilan</b><span>Progression, matières, besoin réel</span></span></button>'
    +'<button class="act" id="a-grille"><span class="em">📋</span><span><b>Voir la grille</b><span>Les 32 activités, telles qu\'elles ressortent</span></span></button>'
    +'</div>'
@@ -861,6 +1055,7 @@ function allerEleve(code){
   $('#a-mission').onclick=feuilleMissions;
   $('#a-adapt').onclick=feuilleAdaptations;
   $('#a-bilan').onclick=allerBilan;
+  { const af=$('#a-fiche'); if(af) af.onclick=()=>montreFiche(ficheEnCache(code),null,code); }
   $('#a-grille').onclick=feuilleGrille;
   ecouteEleve(code);
   rendFiche();

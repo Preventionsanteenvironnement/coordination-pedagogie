@@ -74,6 +74,28 @@ de suivi à 5 caractères, **jamais les codes de connexion mapse.fr**. La table 
 élève reste sur l'ordinateur de la coordination : elle ne va ni en ligne, ni sur GitHub.
 Ne jamais saisir les codes à la main.
 
+## La fiche de présentation (4 pages)
+
+Quand une AESH touche un élève qui a une fiche, elle voit d'abord quatre pages courtes —
+**L'élève · Sa classe · Ma mission · Repères** —, puis « Commencer l'observation ». La fiche
+n'est montrée d'office qu'une fois par séance ; elle reste ensuite à portée par le bouton
+« Sa présentation » de la fiche de l'élève. Elle est gardée sur le téléphone pour le hors-ligne.
+
+```js
+{ id:"fiche_Q7K2M", type:"fiche", code:"Q7K2M", annee:"2026-2027",
+  etat:"notifie" | "renouvellement" | "en_cours",
+  dispositif:"ULIS + aide humaine", aide:"individualisée" | "mutualisée" | "", heures:"12 h",
+  coup:[{i:"horloge", t:"Timer"}],                          // 3 pastilles « d'un coup d'œil »
+  enClasse:[{i, t, d}], mission:[{i, t, d}],                 // i = icône, t = titre, d = détail
+  obstacles:[{i, t}], appuis:[{i, t}], reperes:[{i, t, d}],  // repères = à savoir (sécurité, emploi du temps)
+  majLe:"<ISO>" }
+```
+
+Les textes sont rédigés et **validés par la coordination sur son ordinateur** avant d'être mis en
+ligne : aucun nom (élève, AESH, établissement), aucune histoire familiale, aucun diagnostic sauf
+s'il sert en classe (conduite à tenir). Un contrôle automatique refuse l'envoi sinon.
+Une fiche n'a ni `eleveCode` ni `classeNom` : elle n'apparaît jamais parmi les observations.
+
 ## Firestore
 
 Collection dédiée : **`coordination_besoins_eleves`** (projet `devoirs-pse`).
