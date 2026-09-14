@@ -200,6 +200,14 @@ const THEMATIQUES = [
         icon: "calendar",
         badge: "Nouveau",
       },
+      {
+        titre: "Demander des AESH",
+        desc: "Pour les enseignants des classes PSR et MELEC : un test de positionnement, un CCF, une évaluation, une sortie — ou vos besoins réguliers dans vos cours de l'année. Vous choisissez votre matière, vos classes et vos créneaux ; les élèves apparaissent par code, sans aucun nom.",
+        lien: "demandes-aesh/",
+        type: "Formulaire",
+        icon: "users",
+        badge: "Nouveau",
+      },
     ],
   },
   {
