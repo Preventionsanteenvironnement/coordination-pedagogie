@@ -1,0 +1,1345 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f766e">
+<title>Demander des AESH — pôle PSR / MELEC</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   Demandes AESH — pôle PSR / MELEC (page en ligne, enseignants)
+
+   Lit   : referentiel_<année>, besoins_<année>, et toutes les demandes
+           et déclarations de l'année (en direct).
+   Écrit : demande_<id> (ponctuelle) et regulier_<id> (« Mes cours de l'année »).
+   Collection Firestore : coordination_demandes_aesh.
+
+   Aucun nom, nulle part : les élèves n'existent ici que par un code
+   à 5 caractères. Voir LISEZMOI.md.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --card-2:#f8fafb;
+  --ink:#111827; --ink-2:#374151; --muted:#4b5563;
+  --line:#c9d1da; --line-2:#e3e8ee;
+  --accent:#0f766e; --accent-d:#0b5f59; --accent-l:#e3f3ef; --on-accent:#ffffff;
+  --focus:#1d4ed8;
+  --warn-bg:#fff4d6; --warn-ink:#6b3b00; --warn-line:#b45309;
+  --err-bg:#fdecec; --err-ink:#8f1d1d; --err-line:#b91c1c;
+  --ok-bg:#e5f4ea; --ok-ink:#14532d; --ok-line:#15803d;
+  --info-bg:#e8f0fe; --info-ink:#1e3a8a; --info-line:#1d4ed8;
+  --r:14px; --r-s:10px;
+  --sh:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.05);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0d1217; --card:#161d25; --card-2:#1b242e;
+  --ink:#f1f5f9; --ink-2:#d6dee8; --muted:#b9c4d0;
+  --line:#3a4757; --line-2:#26313d;
+  --accent:#2dd4bf; --accent-d:#5eead4; --accent-l:#0f2e2b; --on-accent:#04211e;
+  --focus:#93c5fd;
+  --warn-bg:#3a2a08; --warn-ink:#fde68a; --warn-line:#f59e0b;
+  --err-bg:#3b1414; --err-ink:#fecaca; --err-line:#f87171;
+  --ok-bg:#0f2e1c; --ok-ink:#bbf7d0; --ok-line:#4ade80;
+  --info-bg:#132341; --info-ink:#c7d8fe; --info-line:#60a5fa;
+  --sh:0 1px 2px rgba(0,0,0,.4);
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{line-height:1.25;margin:0}
+h1{font-size:1.625rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.3rem;font-weight:750}
+h3{font-size:1.15rem;font-weight:700}
+h4{font-size:1rem;font-weight:700}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1[tabindex="-1"]:focus,h2[tabindex="-1"]:focus,h3[tabindex="-1"]:focus,main:focus{outline:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+[hidden]{display:none!important}
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.evitement{position:absolute;left:8px;top:-60px;background:var(--card);color:var(--ink);padding:10px 14px;border-radius:var(--r-s);z-index:50;border:2px solid var(--focus)}
+.evitement:focus{top:8px}
+code,.code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.06em;font-weight:700}
+
+/* ───────── barre ───────── */
+.barre{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;box-shadow:var(--sh)}
+.barre-in{max-width:1180px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.retour{color:var(--accent-d);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:10px 4px;min-height:44px;display:inline-flex;align-items:center}
+.barre nav{display:flex;gap:8px;flex-wrap:wrap}
+.lien-nav{min-height:44px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);font-weight:700}
+.lien-nav[aria-current="page"]{background:var(--accent-l);border-color:var(--accent);color:var(--accent-d)}
+
+main{max-width:1180px;margin:0 auto;padding:20px 16px calc(48px + env(safe-area-inset-bottom,0px))}
+main:focus{outline:none}
+.pile>*+*{margin-top:18px}
+
+/* ───────── blocs ───────── */
+.carte-bloc{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.rgpd{border-left:5px solid var(--accent);background:var(--accent-l);color:var(--ink);padding:12px 14px;border-radius:var(--r-s)}
+.message{border:2px solid;border-radius:var(--r-s);padding:12px 14px}
+.message>*+*{margin-top:8px}
+.message.err{background:var(--err-bg);color:var(--err-ink);border-color:var(--err-line)}
+.message.warn{background:var(--warn-bg);color:var(--warn-ink);border-color:var(--warn-line)}
+.message.ok{background:var(--ok-bg);color:var(--ok-ink);border-color:var(--ok-line)}
+.message.info{background:var(--info-bg);color:var(--info-ink);border-color:var(--info-line)}
+.message a{color:inherit;font-weight:700}
+.avert{color:var(--warn-ink);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:var(--r-s);padding:8px 12px}
+.discret{color:var(--muted)}
+
+/* ───────── cartes d'accueil ───────── */
+.cartes{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:640px){.cartes{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:980px){.cartes{grid-template-columns:repeat(3,1fr)}}
+.carte{width:100%;min-height:92px;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--sh)}
+.carte:hover:not(:disabled){border-color:var(--accent)}
+.carte:disabled{cursor:not-allowed;opacity:.65}
+.carte-t{font-size:1.15rem;font-weight:800;color:var(--ink)}
+.carte-s{color:var(--muted)}
+.carte.large{background:var(--accent-l);border-color:var(--accent)}
+
+/* ───────── boutons ───────── */
+.btn{min-height:48px;padding:10px 18px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:var(--ink)}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn.primaire{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primaire:hover:not(:disabled){background:var(--accent-d);border-color:var(--accent-d)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn.petit{min-height:44px;padding:8px 14px}
+.lien{background:none;border:0;padding:8px 2px;min-height:44px;color:var(--accent-d);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;margin-top:22px}
+.actions .droite{margin-left:auto}
+
+/* ───────── étapes ───────── */
+.etapes{list-style:none;margin:12px 0 0;padding:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+.etapes li{flex:none;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);color:var(--muted);white-space:nowrap}
+.etapes li.faite{color:var(--ink-2)}
+.etapes li.faite::before{content:"✓ "}
+.etapes li[aria-current="step"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+
+/* ───────── formulaires ───────── */
+fieldset{border:1px solid var(--line-2);border-radius:var(--r);padding:12px 14px 14px;margin:0;min-width:0}
+legend{font-weight:750;padding:0 6px;font-size:1.05rem}
+.champ{display:flex;flex-direction:column;gap:4px;min-width:0}
+.champ>label,.label{font-weight:650}
+input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{
+  width:100%;min-height:48px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--r-s);background:var(--card);font-size:1rem}
+textarea{min-height:110px;resize:vertical}
+input[aria-invalid="true"],textarea[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--err-line);border-width:2.5px}
+.err-champ{color:var(--err-ink);font-weight:650}
+.err-champ::before{content:"⚠ "}
+.options{display:grid;gap:8px;grid-template-columns:1fr}
+@media(min-width:640px){.options.deux{grid-template-columns:repeat(2,1fr)}}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--r-s);background:var(--card);min-height:48px;cursor:pointer}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-l)}
+.opt input{width:1.3rem;height:1.3rem;margin:.1rem 0 0;flex:none;accent-color:var(--accent)}
+.opt .sous{display:block;color:var(--muted)}
+.grille-ligne{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.grille-ligne .large2{grid-column:1 / -1}
+@media(min-width:760px){.grille-ligne{grid-template-columns:1.4fr 1fr 1fr 1fr 1fr}.grille-ligne .large2{grid-column:auto}}
+.ligne+.ligne{margin-top:12px}
+
+/* ───────── élèves ───────── */
+.eleves{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:760px){.eleves{grid-template-columns:repeat(2,1fr)}}
+.eleve{border:1.5px solid var(--line);border-radius:var(--r-s);padding:10px 12px;background:var(--card)}
+.eleve.coche{border-color:var(--accent);background:var(--accent-l)}
+.eleve-tete{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.eleve-tete label{display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer}
+.eleve-tete input{width:1.35rem;height:1.35rem;accent-color:var(--accent)}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;border:1.5px solid var(--ink-2);color:var(--ink);background:var(--card);font-weight:700;white-space:nowrap}
+.badge.notif{border-color:var(--info-line);background:var(--info-bg);color:var(--info-ink)}
+.badge.plan{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn-ink)}
+.puces{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.puce{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--card);cursor:pointer}
+.puce:has(input:checked){border-color:var(--accent);background:var(--accent-l);font-weight:700}
+.puce input{width:1.2rem;height:1.2rem;accent-color:var(--accent);margin:0}
+.indice{color:var(--muted);margin-top:6px}
+
+/* ───────── emploi du temps ───────── */
+.semaine-nav{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between;margin:8px 0 12px}
+.semaine-nav h3{flex:1 1 220px;text-align:center}
+.semaine{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:700px){.semaine{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:1100px){.semaine{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.jour-col{background:var(--card-2);border:1px solid var(--line-2);border-radius:var(--r);padding:10px}
+.jour-col h4{padding:2px 2px 8px;border-bottom:1px solid var(--line-2);margin-bottom:8px}
+.jour-col h4::first-letter,.cr legend::first-letter,.grille-jour::first-letter{text-transform:uppercase}
+.jour-col ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.cren{border:1.5px solid var(--line);border-radius:var(--r-s);background:var(--card);padding:8px 10px}
+.cren .h{font-weight:800;font-variant-numeric:tabular-nums}
+.cren.mien{border:3px solid var(--accent);background:var(--accent-l)}
+.cren.mien .etiq{display:inline-block;font-weight:800;color:var(--accent-d)}
+.cren.chev{border:3px dashed var(--warn-line);background:var(--warn-bg);color:var(--warn-ink)}
+.cren .alerte-chev{display:block;font-weight:800;margin-top:4px}
+.jour-vide{color:var(--muted);padding:4px 2px}
+.statut{display:inline-block;font-weight:700}
+.cren{overflow-wrap:anywhere;min-width:0}
+.statut::before{content:attr(data-icone) " "}
+
+/* ───────── régulier ───────── */
+.grille-cr{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:900px){.grille-cr{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cr{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r)}
+.cr.besoin-pos{border-color:var(--accent);border-width:2.5px}
+.cr legend{font-size:1.05rem}
+.places{margin:2px 0 8px;font-weight:650}
+.radios-besoin{display:flex;flex-wrap:wrap;gap:8px}
+.radios-besoin label{display:inline-flex;align-items:center;gap:8px;min-height:44px;min-width:64px;padding:6px 14px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:var(--card)}
+.radios-besoin label:has(input:checked){border-color:var(--accent);background:var(--accent-l);font-weight:800}
+.radios-besoin input{width:1.2rem;height:1.2rem;accent-color:var(--accent);margin:0}
+.sous-bloc{margin-top:12px}
+
+/* ───────── liste du pôle ───────── */
+.filtres{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:760px){.filtres{grid-template-columns:repeat(3,1fr)}}
+.liste-pole{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:12px}
+.dem{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.dem-tete{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;justify-content:space-between}
+.dem ul{margin:8px 0 0;padding-left:1.2rem}
+.dem .rep{margin-top:8px;border-left:4px solid var(--ok-line);padding-left:10px}
+.pastille-statut{padding:2px 10px;border-radius:999px;border:1.5px solid var(--line);font-weight:750;white-space:nowrap}
+.pastille-statut[data-statut="accordee"]{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
+.pastille-statut[data-statut="refusee"]{border-color:var(--err-line);background:var(--err-bg);color:var(--err-ink)}
+.pastille-statut[data-statut="partielle"],.pastille-statut[data-statut="a-revoir"]{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn-ink)}
+.pastille-statut[data-statut="nouvelle"],.pastille-statut[data-statut="vue"]{border-color:var(--info-line);background:var(--info-bg);color:var(--info-ink)}
+dl.recap{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0}
+dl.recap dt{font-weight:700}
+dl.recap dd{margin:0}
+.tableau-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{border-bottom:1px solid var(--line-2);padding:8px 10px;text-align:left;vertical-align:top}
+th{font-weight:750}
+</style>
+</head>
+<body>
+<a class="evitement" href="#vue">Aller au contenu</a>
+<header class="barre">
+  <div class="barre-in">
+    <a class="retour" href="../">← Portail coordination</a>
+    <nav aria-label="Espace des demandes AESH">
+      <button type="button" class="lien-nav" data-action="accueil" id="nav-accueil">Accueil</button>
+      <button type="button" class="lien-nav" data-action="pole" id="nav-pole">Demandes du pôle</button>
+    </nav>
+  </div>
+</header>
+<main id="vue" tabindex="-1">
+  <h1>Demander des AESH — pôle PSR / MELEC</h1>
+  <p class="rgpd" style="margin-top:12px"><strong>Aucun nom.</strong> Les élèves apparaissent par un code à 5 caractères ; la correspondance vous est envoyée par mail par le coordinateur.</p>
+  <p style="margin-top:12px" id="chargement">Chargement…</p>
+  <noscript><p class="message err" style="margin-top:12px">Cette page a besoin de JavaScript pour fonctionner.</p></noscript>
+</main>
+<div id="annonce" class="sr" role="status" aria-live="polite"></div>
+
+<script type="module">
+/* ═══════════════ Firebase ═══════════════ */
+const firebaseConfig = {
+  apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com",
+  projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
+  messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55"
+};
+const COL = 'coordination_demandes_aesh';
+const SOURCE = 'demandes-aesh';
+const DELAI_MS = 15000;
+const K_BROUILLONS = 'demandes-aesh-brouillons-v1';
+const K_CACHE = 'demandes-aesh-cache-v1';
+
+function anneeScolaire(d = new Date()){
+  const y = d.getFullYear();
+  return d.getMonth() >= 7 ? `${y}-${y+1}` : `${y-1}-${y}`;
+}
+const ANNEE = anneeScolaire();
+
+let FS = null, db = null, erreurChargement = null;
+try {
+  FS = window.__FIRESTORE_SHIM__ || await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+  let app = null;
+  if (!window.__FIRESTORE_SHIM__){
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
+    app = initializeApp(firebaseConfig, 'demandes-aesh');
+  }
+  db = FS.getFirestore(app);
+} catch(e){ erreurChargement = e; }
+
+/* ═══════════════ outils ═══════════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RE_CODE = /^[A-HJKMNP-Z2-9]{5}$/;
+const RE_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const RE_HEURE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const JOURS = ['lun','mar','mer','jeu','ven'];
+const JOURS_LONG = {lun:'lundi',mar:'mardi',mer:'mercredi',jeu:'jeudi',ven:'vendredi'};
+const MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const ORDRE_CLASSES = ['C1PSR','C2PSR','B2MELEC','B1MELEC','BTMELEC'];
+const PARITE = {A:'Semaine A', B:'Semaine B', '':'Toutes les semaines'};
+const STATUTS = {
+  'nouvelle':{label:'Nouvelle', icone:'●'},
+  'vue':{label:'Vue par la coordination', icone:'👁'},
+  'accordee':{label:'Accordée', icone:'✓'},
+  'partielle':{label:'Accordée en partie', icone:'◐'},
+  'refusee':{label:'Non accordée', icone:'✗'},
+  'a-revoir':{label:'À revoir', icone:'↺'}
+};
+const NATURES_DEFAUT = [
+  {id:'positionnement',label:'Test de positionnement'},{id:'ccf',label:'CCF'},
+  {id:'evaluation',label:'Évaluation'},{id:'sortie',label:'Sortie'},{id:'autre',label:'Autre'}
+];
+const NATURE_SOUS = {
+  positionnement:'Tests de début d’année ou de formation',
+  ccf:'Contrôle en cours de formation',
+  evaluation:'Devoir, évaluation écrite ou pratique',
+  sortie:'Sortie, visite, activité hors de la classe',
+  autre:'Tout autre besoin ponctuel'
+};
+const BESOINS_DEFAUT = [
+  {id:'tiersTemps',label:'1/3 temps'},{id:'lecteur',label:'Lecteur'},{id:'scripteur',label:'Scripteur'},
+  {id:'assistant',label:'Assistant'},{id:'ordinateur',label:'Ordinateur'},{id:'sujetAgrandi',label:'Sujet agrandi'}
+];
+const AIDES_DEFAUT = [
+  {id:'ecrit',label:'Écrit / prise de notes'},{id:'lecture',label:'Lecture'},
+  {id:'consignes',label:'Compréhension des consignes'},{id:'attention',label:'Attention / concentration'},
+  {id:'manipulation',label:'Manipulation / TP'},{id:'deplacements',label:'Déplacements'},{id:'autre',label:'Autre'}
+];
+const AVERT_NOM = '⚠ N’écrivez aucun nom : ni élève, ni enseignant, ni AESH. Utilisez les codes.';
+
+const z2 = n => String(n).padStart(2,'0');
+const isoLocal = (d = new Date()) => `${d.getFullYear()}-${z2(d.getMonth()+1)}-${z2(d.getDate())}`;
+function dateValide(s){
+  if (!RE_DATE.test(s || '')) return false;
+  const [y,m,d] = s.split('-').map(Number);
+  const dt = new Date(Date.UTC(y,m-1,d));
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === m-1 && dt.getUTCDate() === d;
+}
+const ajouteJours = (iso, n) => { const [y,m,d] = iso.split('-').map(Number); return new Date(Date.UTC(y,m-1,d+n)).toISOString().slice(0,10); };
+const joursemaine = iso => { const [y,m,d] = iso.split('-').map(Number); return (new Date(Date.UTC(y,m-1,d)).getUTCDay() + 6) % 7; }; // lundi = 0
+const lundiDe = iso => ajouteJours(iso, -joursemaine(iso));
+const minutes = h => { const [a,b] = h.split(':').map(Number); return a*60 + b; };
+const NOMS_JOURS = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+function dateLongue(iso){ if (!dateValide(iso)) return iso || ''; const [y,m,d] = iso.split('-').map(Number); return `${NOMS_JOURS[joursemaine(iso)]} ${d} ${MOIS[m-1]} ${y}`; }
+function dateSansAn(iso){ if (!dateValide(iso)) return iso || ''; const [,m,d] = iso.split('-').map(Number); return `${NOMS_JOURS[joursemaine(iso)]} ${d} ${MOIS[m-1]}`; }
+function dateHeure(isoComplet){ const d = new Date(isoComplet); if (isNaN(d)) return ''; return `${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()} à ${z2(d.getHours())} h ${z2(d.getMinutes())}`; }
+function titreSemaine(lundi){
+  const ven = ajouteJours(lundi, 4);
+  const [y1,m1,d1] = lundi.split('-').map(Number), [y2,m2,d2] = ven.split('-').map(Number);
+  if (m1 === m2) return `Semaine du lundi ${d1} au vendredi ${d2} ${MOIS[m2-1]} ${y2}`;
+  if (y1 === y2) return `Semaine du lundi ${d1} ${MOIS[m1-1]} au vendredi ${d2} ${MOIS[m2-1]} ${y2}`;
+  return `Semaine du lundi ${d1} ${MOIS[m1-1]} ${y1} au vendredi ${d2} ${MOIS[m2-1]} ${y2}`;
+}
+const nettoie = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g,'').trim().slice(0, max);
+function nouvelId(prefixe){
+  const a = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const r = crypto.getRandomValues(new Uint8Array(4));
+  return `${prefixe}_${Date.now().toString(36)}${[...r].map(x => a[x % 36]).join('')}`;
+}
+const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
+function annonce(t){ const a = $('#annonce'); a.textContent = ''; setTimeout(() => { a.textContent = t; }, 30); }
+function avecDelai(promesse, ms){
+  let t;
+  return Promise.race([
+    promesse,
+    new Promise((_, rej) => { t = setTimeout(() => { const e = new Error('Délai dépassé : pas de réponse du serveur.'); e.code = 'delai'; rej(e); }, ms); })
+  ]).finally(() => clearTimeout(t));
+}
+function typeErreur(e){
+  const t = `${(e && e.code) || ''} ${(e && e.message) || ''}`;
+  if (/permission|PERMISSION_DENIED|insufficient/i.test(t)) return 'refus';
+  if (navigator.onLine === false || /unavailable|offline|network|delai|fetch|dynamically imported/i.test(t)) return 'horsligne';
+  return 'autre';
+}
+const lsLit = (k, def) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v ?? def; } catch(e){ return def; } };
+const lsEcrit = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } };
+
+/* ═══════════════ état ═══════════════ */
+const S = {
+  ecran:'accueil',
+  refEtat:'chargement', ref:null, refCache:false,
+  besoins:{}, besoinsEtat:'chargement',
+  docs:[], docsEtat:'chargement', unsub:null,
+  p:null, r:null, envoye:null, envoi:null,
+  filtre:{type:'', classe:'', statut:''},
+  focus:null, reessaiEnCours:false, messageReessai:''
+};
+let uidLigne = 0;
+
+/* ═══════════════ référentiel ═══════════════ */
+function normaliserReferentiel(d){
+  if (!d || !Array.isArray(d.classes)) return null;
+  const liste = (v, def) => Array.isArray(v) && v.length ? v.filter(x => x && typeof x.id === 'string').map(x => ({id:x.id, label:String(x.label || x.id)})) : def;
+  const classes = d.classes.filter(c => c && typeof c.nom === 'string').map(c => {
+    const creneaux = (Array.isArray(c.creneaux) ? c.creneaux : []).filter(x => x && JOURS.includes(x.jour) && RE_HEURE.test(x.debut) && RE_HEURE.test(x.fin) && typeof x.matiere === 'string')
+      .map(x => {
+        const parite = ['A','B'].includes(x.parite) ? x.parite : '';
+        return { cle: x.cle || [x.jour,x.debut,x.fin,x.matiere,parite].join('|'), jour:x.jour, debut:x.debut, fin:x.fin, matiere:x.matiere, parite,
+                 aeshPlaces: Number.isInteger(x.aeshPlaces) && x.aeshPlaces >= 0 ? x.aeshPlaces : 0 };
+      })
+      .sort((a,b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || a.debut.localeCompare(b.debut) || a.parite.localeCompare(b.parite));
+    const matieres = [...new Set([...(Array.isArray(c.matieres) ? c.matieres.filter(m => typeof m === 'string') : []), ...creneaux.map(x => x.matiere)])];
+    return { nom:c.nom, label:String(c.label || c.nom), pole:String(c.pole || ''), matieres,
+             codes:[...new Set((Array.isArray(c.codes) ? c.codes : []).filter(x => RE_CODE.test(x)))], creneaux };
+  }).sort((a,b) => (ORDRE_CLASSES.indexOf(a.nom) + 99) % 99 - (ORDRE_CLASSES.indexOf(b.nom) + 99) % 99);
+  if (!classes.length) return null;
+  return { annee:d.annee, majLe:d.majLe || '', placementsSemaine:d.placementsSemaine || '',
+           natures:liste(d.natures, NATURES_DEFAUT), besoinsExamen:liste(d.besoinsExamen, BESOINS_DEFAUT), aides:liste(d.aides, AIDES_DEFAUT), classes };
+}
+const classe = nom => (S.ref && S.ref.classes.find(c => c.nom === nom)) || null;
+const natureLabel = id => ((S.ref ? S.ref.natures : NATURES_DEFAUT).find(n => n.id === id) || {label:id || '—'}).label;
+const besoinsListe = () => S.ref ? S.ref.besoinsExamen : BESOINS_DEFAUT;
+const aidesListe = () => S.ref ? S.ref.aides : AIDES_DEFAUT;
+const besoinLabel = id => (besoinsListe().find(b => b.id === id) || {label:id}).label;
+const aideLabel = id => (aidesListe().find(b => b.id === id) || {label:id}).label;
+const toutesMatieres = () => {
+  const s = []; (S.ref ? S.ref.classes : []).forEach(c => c.matieres.forEach(m => { if (!s.includes(m)) s.push(m); }));
+  return s.sort((a,b) => a.localeCompare(b,'fr'));
+};
+const infoBesoins = code => { const b = S.besoins[code]; return b && typeof b === 'object' ? b : null; };
+
+async function chargerReference(){
+  S.refEtat = 'chargement'; S.besoinsEtat = 'chargement';
+  if (S.ecran === 'accueil') rendre();
+  const cache = lsLit(K_CACHE, null);
+  try {
+    const snap = await avecDelai(FS.getDoc(FS.doc(db, COL, `referentiel_${ANNEE}`)), DELAI_MS);
+    if (!snap.exists()){ S.ref = null; S.refEtat = 'absent'; }
+    else {
+      const r = normaliserReferentiel(snap.data());
+      S.ref = r; S.refEtat = r ? 'ok' : 'invalide'; S.refCache = false;
+      if (r) lsEcrit(K_CACHE, {...(lsLit(K_CACHE, {}) || {}), annee:ANNEE, ref:snap.data()});
+    }
+  } catch(e){
+    const t = typeErreur(e);
+    if (t !== 'refus' && cache && cache.annee === ANNEE && cache.ref && normaliserReferentiel(cache.ref)){
+      S.ref = normaliserReferentiel(cache.ref); S.refEtat = 'ok'; S.refCache = true;
+    } else { S.ref = null; S.refEtat = t === 'refus' ? 'refus' : 'horsligne'; }
+  }
+  try {
+    const snap = await avecDelai(FS.getDoc(FS.doc(db, COL, `besoins_${ANNEE}`)), DELAI_MS);
+    if (snap.exists()){
+      const d = snap.data(); S.besoins = d && d.eleves && typeof d.eleves === 'object' ? d.eleves : {}; S.besoinsEtat = 'ok';
+      lsEcrit(K_CACHE, {...(lsLit(K_CACHE, {}) || {}), annee:ANNEE, besoins:S.besoins});
+    } else { S.besoins = {}; S.besoinsEtat = 'absent'; }
+  } catch(e){
+    const c = lsLit(K_CACHE, null);
+    if (typeErreur(e) !== 'refus' && c && c.annee === ANNEE && c.besoins){ S.besoins = c.besoins; S.besoinsEtat = 'ok'; }
+    else { S.besoins = {}; S.besoinsEtat = typeErreur(e) === 'refus' ? 'refus' : 'horsligne'; }
+  }
+  rendre();
+}
+
+/* ═══════════════ demandes du pôle (en direct) ═══════════════ */
+function ecouterDemandes(){
+  if (S.unsub) return;
+  S.docsEtat = 'chargement';
+  try {
+    const q = FS.query(FS.collection(db, COL), FS.where('type', 'in', ['demande','regulier']));
+    S.unsub = FS.onSnapshot(q, snap => {
+      const l = [];
+      snap.forEach(d => { const x = d.data(); if (x && x.annee === ANNEE) l.push({...x, id: x.id || d.id}); });
+      S.docs = l; S.docsEtat = 'ok';
+      majVuesDocs();
+    }, err => {
+      S.unsub = null; S.docsEtat = typeErreur(err) === 'refus' ? 'refus' : 'horsligne';
+      majVuesDocs();
+    });
+  } catch(e){ S.unsub = null; S.docsEtat = typeErreur(e) === 'refus' ? 'refus' : 'horsligne'; }
+}
+function majVuesDocs(){
+  if (S.ecran === 'pole'){ const z = $('#zone-liste'); if (z){ z.innerHTML = htmlListePole(); return; } }
+  if (S.ecran === 'ponctuel' && S.p && S.p.etape === 5){ const z = $('#zone-pole'); if (z){ remplaceEnGardantFocus(z, htmlZonePole()); return; } }
+  if (S.ecran === 'regulier' && S.r && S.r.etape === 3 && !S.r.precedente && !S.r.modifie){
+    if (appliquerPrecedente(S.r)){ rendre(); annonce('Votre dernière déclaration a été retrouvée : le formulaire est prérempli.'); return; }
+  }
+  if (S.ecran === 'accueil'){ const z = $('#compte-pole'); if (z) z.textContent = texteComptePole(); }
+}
+function remplaceEnGardantFocus(zone, html){
+  const a = document.activeElement, id = a && zone.contains(a) ? a.id : null;
+  zone.innerHTML = html;
+  if (id){ const el = document.getElementById(id); if (el) el.focus({preventScroll:true}); }
+}
+function texteComptePole(){
+  if (S.docsEtat !== 'ok') return S.docsEtat === 'chargement' ? 'Chargement…' : 'Liste indisponible pour le moment';
+  const n = S.docs.length;
+  return n ? `${pluriel(n,'demande ou déclaration','demandes et déclarations')} cette année` : 'Aucune demande pour l’instant';
+}
+
+/* ═══════════════ brouillons (envois en attente) ═══════════════ */
+const brouillons = () => { const l = lsLit(K_BROUILLONS, []); return Array.isArray(l) ? l.filter(d => d && d.id && d.type) : []; };
+function garderBrouillon(d){ const l = brouillons().filter(x => x.id !== d.id); l.push(d); return lsEcrit(K_BROUILLONS, l); }
+function retirerBrouillon(id){ lsEcrit(K_BROUILLONS, brouillons().filter(x => x.id !== id)); }
+
+function messageErreurEnvoi(type, garde){
+  const g = garde ? ' Votre saisie est gardée sur cet appareil (brouillon) : elle n’est pas encore envoyée.' : ' Attention : l’appareil n’a pas pu garder la saisie (mémoire pleine ou navigation privée). Ne quittez pas cette page.';
+  if (type === 'refus') return 'Espace en cours d’ouverture par la coordination : l’envoi n’est pas encore autorisé.' + g + ' Réessayez plus tard.';
+  if (type === 'horsligne') return 'Pas de connexion au serveur.' + g + ' Appuyez sur « Réessayer » quand le réseau revient.';
+  return 'L’envoi n’a pas abouti.' + g + ' Réessayez dans un instant.';
+}
+
+async function envoyer(d){
+  const ancien = S.envoi && S.envoi.docId;
+  if (ancien && ancien !== d.id) retirerBrouillon(ancien);   // une nouvelle version remplace l'essai précédent
+  S.envoi = {etat:'encours', docId:d.id};
+  majEnvoiEtat();
+  if (navigator.onLine === false){
+    const g = garderBrouillon(d);
+    S.envoi = {etat:'horsligne', docId:d.id, message:messageErreurEnvoi('horsligne', g)};
+    majEnvoiEtat(true); return;
+  }
+  try {
+    await avecDelai(FS.setDoc(FS.doc(db, COL, d.id), d), DELAI_MS);
+    retirerBrouillon(d.id);
+    succes(d);
+  } catch(e){
+    const t = typeErreur(e), g = garderBrouillon(d);
+    S.envoi = {etat:t, docId:d.id, message:messageErreurEnvoi(t, g)};
+    majEnvoiEtat(true);
+  }
+}
+function succes(d){
+  S.envoye = d; S.envoi = null;
+  if (d.type === 'demande') S.p = null; else S.r = null;
+  if (!S.docs.some(x => x.id === d.id)) S.docs = [...S.docs, d];
+  S.ecran = 'envoye'; S.focus = 'titre-ecran';
+  rendre();
+  annonce(d.type === 'demande' ? 'Demande envoyée.' : 'Déclaration envoyée.');
+}
+function htmlEnvoiEtat(){
+  const e = S.envoi;
+  if (!e) return '';
+  if (e.etat === 'encours') return `<p class="message info">Envoi en cours…</p>`;
+  const n = brouillons().length;
+  return `<div class="message ${e.etat === 'refus' ? 'err' : 'warn'}" role="alert">
+    <p><strong>${e.etat === 'horsligne' ? 'Hors ligne' : e.etat === 'refus' ? 'Envoi refusé' : 'Envoi impossible'}.</strong> ${esc(e.message)}</p>
+    ${n ? `<p>${pluriel(n,'envoi en attente','envois en attente')} sur cet appareil.</p>` : ''}
+    <p><button type="button" class="btn primaire petit" data-action="reessayer" ${S.reessaiEnCours ? 'disabled' : ''}>Réessayer</button></p>
+  </div>`;
+}
+function majEnvoiEtat(focus){
+  const z = $('#envoi-etat'); if (!z) return;
+  z.innerHTML = htmlEnvoiEtat();
+  const b = $('#btn-envoyer'); if (b) b.disabled = !!(S.envoi && S.envoi.etat === 'encours');
+  if (focus){ const m = z.querySelector('[role=alert]'); if (m){ m.tabIndex = -1; m.focus(); } }
+}
+
+async function reessayer(){
+  const l = brouillons();
+  if (!l.length || S.reessaiEnCours) return;
+  S.reessaiEnCours = true; S.messageReessai = 'Nouvel essai en cours…';
+  majEnvoiEtat(); majBandeauBrouillons();
+  const envoyes = []; let derniere = null;
+  for (const d of l){
+    try {
+      const snap = await avecDelai(FS.getDoc(FS.doc(db, COL, d.id)), DELAI_MS);
+      if (!snap.exists()) await avecDelai(FS.setDoc(FS.doc(db, COL, d.id), d), DELAI_MS); // déjà arrivé : on ne réécrit pas
+      retirerBrouillon(d.id); envoyes.push(d);
+    } catch(e){ derniere = e; }
+  }
+  S.reessaiEnCours = false;
+  const courant = S.envoi && envoyes.find(d => d.id === S.envoi.docId);
+  if (courant){ S.messageReessai = ''; succes(courant); return; }
+  const reste = brouillons().length;
+  if (derniere){
+    const t = typeErreur(derniere);
+    if (S.envoi) S.envoi = {...S.envoi, etat:t, message:messageErreurEnvoi(t, true)};
+    S.messageReessai = (envoyes.length ? `${pluriel(envoyes.length,'envoi réussi','envois réussis')}. ` : '') +
+      `${pluriel(reste,'envoi reste','envois restent')} en attente : ${t === 'refus' ? 'accès pas encore ouvert' : t === 'horsligne' ? 'toujours pas de connexion' : 'erreur du serveur'}.`;
+  } else S.messageReessai = envoyes.length ? `${pluriel(envoyes.length,'envoi réussi','envois réussis')} : plus rien en attente.` : '';
+  majEnvoiEtat(true); majBandeauBrouillons();
+  annonce(S.messageReessai);
+}
+function htmlBandeauBrouillons(){
+  const l = brouillons();
+  if (!l.length && !S.messageReessai) return '';
+  if (!l.length) return `<p class="message ok" role="status">${esc(S.messageReessai)}</p>`;
+  const desc = l.map(d => d.type === 'demande'
+      ? `${esc(natureLabel(d.nature))} · ${esc(d.matiere)} (${pluriel((d.lignes || []).length,'créneau','créneaux')})`
+      : `Besoins réguliers · ${esc(d.matiere)} · ${esc(d.classe)}`);
+  return `<div class="message warn" role="region" aria-label="Envois en attente">
+    <p><strong>${pluriel(l.length,'envoi en attente','envois en attente')} sur cet appareil.</strong> ${l.length > 1 ? 'Ces saisies ne sont' : 'Cette saisie n’est'} pas encore arrivée${l.length > 1 ? 's' : ''} à la coordination.</p>
+    <ul>${desc.map(x => `<li>${x}</li>`).join('')}</ul>
+    ${S.messageReessai ? `<p role="status">${esc(S.messageReessai)}</p>` : ''}
+    <p><button type="button" class="btn primaire petit" data-action="reessayer" ${S.reessaiEnCours ? 'disabled' : ''}>Réessayer</button></p>
+  </div>`;
+}
+function majBandeauBrouillons(){ const z = $('#bandeau-brouillons'); if (z) z.innerHTML = htmlBandeauBrouillons(); }
+
+/* ═══════════════ rendu général ═══════════════ */
+const vue = $('#vue');
+function rendre(){
+  const a = document.activeElement;
+  const idActif = a && a.id && vue.contains(a) ? a.id : null;
+  let sel = null;
+  try { if (idActif && typeof a.selectionStart === 'number') sel = [a.selectionStart, a.selectionEnd]; } catch(e){}
+  let html = '';
+  if (erreurChargement) html = htmlErreurChargement();
+  else if (S.ecran === 'ponctuel' && S.p) html = htmlPonctuel();
+  else if (S.ecran === 'regulier' && S.r) html = htmlRegulier();
+  else if (S.ecran === 'pole') html = htmlPole();
+  else if (S.ecran === 'envoye' && S.envoye) html = htmlEnvoye();
+  else { S.ecran = 'accueil'; html = htmlAccueil(); }
+  vue.innerHTML = html;
+  $('#nav-accueil').toggleAttribute('aria-current', false);
+  $('#nav-pole').toggleAttribute('aria-current', false);
+  if (S.ecran === 'accueil') $('#nav-accueil').setAttribute('aria-current','page');
+  if (S.ecran === 'pole') $('#nav-pole').setAttribute('aria-current','page');
+  const titres = {accueil:'Demander des AESH', ponctuel:'Demande ponctuelle', regulier:'Mes cours de l’année', pole:'Demandes du pôle', envoye:'Envoyé'};
+  document.title = `${titres[S.ecran] || 'Demander des AESH'} — pôle PSR / MELEC`;
+  if (S.focus){
+    const el = document.getElementById(S.focus); S.focus = null;
+    if (el){ el.focus({preventScroll:true}); el.scrollIntoView({block:'start'}); return; }
+  }
+  if (idActif){
+    const el = document.getElementById(idActif);
+    if (el){ el.focus({preventScroll:true}); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch(e){} }
+  }
+}
+function htmlErreurChargement(){
+  return `<div class="pile"><h1 id="titre-ecran" tabindex="-1">Demander des AESH — pôle PSR / MELEC</h1>
+    <div class="message err" role="alert"><p><strong>Pas de connexion au serveur.</strong> La page n’a pas pu charger ses outils en ligne. Vérifiez le réseau, puis rechargez la page.</p>
+    <p><button type="button" class="btn primaire petit" data-action="recharger">Recharger la page</button></p></div></div>`;
+}
+function htmlRgpd(){
+  return `<p class="rgpd" role="note"><strong>Aucun nom.</strong> Les élèves apparaissent par un code à 5 caractères ; la correspondance vous est envoyée par mail par le coordinateur.</p>`;
+}
+function htmlEtatRef(){
+  if (S.refEtat === 'ok') return S.refCache ? `<p class="message info" role="status">Hors connexion : la liste des classes et des codes provient de la dernière visite sur cet appareil.</p>` : '';
+  if (S.refEtat === 'chargement') return `<p class="message info" role="status" id="etat-ref">Chargement des classes et des codes…</p>`;
+  const bouton = `<p><button type="button" class="btn primaire petit" data-action="recharger-ref">Réessayer</button></p>`;
+  if (S.refEtat === 'absent' || S.refEtat === 'invalide')
+    return `<div class="message warn" role="alert" id="etat-ref"><p><strong>La coordination n’a pas encore publié</strong> les classes, les codes élèves et les emplois du temps de l’année ${esc(ANNEE)}. Les demandes ne peuvent pas encore être saisies : revenez un peu plus tard.</p>${bouton}</div>`;
+  if (S.refEtat === 'refus')
+    return `<div class="message warn" role="alert" id="etat-ref"><p><strong>Espace en cours d’ouverture par la coordination.</strong> L’accès en ligne n’est pas encore autorisé : revenez un peu plus tard.</p>${bouton}</div>`;
+  return `<div class="message warn" role="alert" id="etat-ref"><p><strong>Pas de connexion au serveur.</strong> Les classes et les codes n’ont pas pu être chargés.</p>${bouton}</div>`;
+}
+const refPret = () => S.refEtat === 'ok' && !!S.ref;
+
+/* ═══════════════ accueil ═══════════════ */
+function htmlAccueil(){
+  const natures = S.ref ? S.ref.natures : NATURES_DEFAUT;
+  const dis = refPret() ? '' : 'disabled aria-describedby="etat-ref"';
+  const enCours = [];
+  if (S.p) enCours.push(`<li>Demande ponctuelle (${esc(natureLabel(S.p.nature))}) : étape ${S.p.etape} sur 6. <button type="button" class="lien" data-action="reprendre-p">Reprendre</button> <button type="button" class="lien" data-action="abandonner-p">Abandonner</button></li>`);
+  if (S.r) enCours.push(`<li>Mes cours de l’année : étape ${S.r.etape} sur 4. <button type="button" class="lien" data-action="reprendre-r">Reprendre</button> <button type="button" class="lien" data-action="abandonner-r">Abandonner</button></li>`);
+  return `<div class="pile">
+    <h1 id="titre-ecran" tabindex="-1">Demander des AESH — pôle PSR / MELEC</h1>
+    ${htmlRgpd()}
+    ${htmlEtatRef()}
+    <div id="bandeau-brouillons">${htmlBandeauBrouillons()}</div>
+    ${enCours.length ? `<div class="message info"><p><strong>Saisie en cours, non envoyée</strong></p><ul>${enCours.join('')}</ul></div>` : ''}
+    <section aria-labelledby="h-ponctuel">
+      <h2 id="h-ponctuel">Une demande ponctuelle</h2>
+      <p class="discret">Une ou plusieurs dates précises : test, CCF, évaluation, sortie…</p>
+      <ul class="cartes">
+        ${natures.map(n => `<li><button type="button" class="carte" data-action="nouvelle-ponctuelle" data-nature="${esc(n.id)}" ${dis}>
+          <span class="carte-t">${esc(n.label)}</span><span class="carte-s">${esc(NATURE_SOUS[n.id] || 'Demande ponctuelle')}</span></button></li>`).join('')}
+        <li><button type="button" class="carte large" data-action="nouveau-regulier" ${dis}>
+          <span class="carte-t">Mes cours de l’année (besoins réguliers)</span><span class="carte-s">Vos créneaux de chaque semaine, classe par classe</span></button></li>
+      </ul>
+    </section>
+    <section aria-labelledby="h-suivi">
+      <h2 id="h-suivi">Suivi</h2>
+      <p style="margin-top:8px"><button type="button" class="btn" data-action="pole">Voir les demandes du pôle</button> <span class="discret" id="compte-pole">${esc(texteComptePole())}</span></p>
+    </section>
+  </div>`;
+}
+
+/* ═══════════════ erreurs de saisie ═══════════════ */
+function htmlResumeErreurs(erreurs){
+  if (!erreurs || !erreurs.length) return '';
+  return `<div class="message err" role="alert" id="resume-erreurs" tabindex="-1">
+    <h2>${erreurs.length > 1 ? `${erreurs.length} points à corriger` : 'Un point à corriger'}</h2>
+    <ul>${erreurs.map(e => `<li><a href="#${esc(e.id)}" data-focus="${esc(e.id)}">${esc(e.msg)}</a></li>`).join('')}</ul></div>`;
+}
+const errDe = (erreurs, id) => (erreurs || []).find(e => e.id === id);
+function attrErr(erreurs, id){ const e = errDe(erreurs, id); return e ? `aria-invalid="true" aria-describedby="err-${esc(id)}"` : ''; }
+function htmlErrChamp(erreurs, id){ const e = errDe(erreurs, id); return e ? `<p class="err-champ" id="err-${esc(id)}">${esc(e.msg)}</p>` : ''; }
+
+/* ═══════════════ PONCTUEL ═══════════════ */
+const ETAPES_P = ['Nature et matière','Classes','Créneaux','Élèves','Emploi du temps du pôle','Récapitulatif'];
+function nouvellePonctuelle(nature){
+  S.p = { etape:1, nature, natureAutre:'', matiereChoix:'', matiereAutre:'', classes:[], lignes:{}, eleves:{}, commentaire:'', semaine:null, erreurs:[] };
+  S.envoi = null; S.ecran = 'ponctuel'; S.focus = 'titre-ecran'; rendre();
+}
+const matiereP = p => p.matiereChoix === '__autre' ? nettoie(p.matiereAutre, 60) : p.matiereChoix;
+function nouvelleLigne(){ return {uid:++uidLigne, date:'', debut:'', fin:'', salle:'', nbAesh:'1'}; }
+function initClasseP(p, nom){
+  if (!p.lignes[nom]) p.lignes[nom] = [nouvelleLigne()];
+  if (!p.eleves[nom]){
+    p.eleves[nom] = {};
+    (classe(nom)?.codes || []).forEach(code => {
+      const b = infoBesoins(code);
+      p.eleves[nom][code] = { concerne:false, besoins: besoinsListe().map(x => x.id).filter(id => b && b[id] === true), note:'' };
+    });
+  }
+}
+function ordreClassesP(p){ return (S.ref ? S.ref.classes.map(c => c.nom) : []).filter(n => p.classes.includes(n)); }
+
+function validerP(p, etape){
+  const e = [];
+  if (etape === 1){
+    if (!(S.ref.natures.some(n => n.id === p.nature))) e.push({id:'p-nature-0', msg:'Choisissez la nature de la demande.'});
+    if (p.nature === 'autre' && !nettoie(p.natureAutre, 80)) e.push({id:'p-nature-autre', msg:'Précisez la nature de la demande.'});
+    if (!p.matiereChoix) e.push({id:'p-matiere-0', msg:'Choisissez la matière.'});
+    else if (p.matiereChoix === '__autre' && !nettoie(p.matiereAutre, 60)) e.push({id:'p-matiere-autre', msg:'Écrivez le nom de la matière.'});
+  }
+  if (etape === 2 && !p.classes.length) e.push({id:`p-classe-${S.ref.classes[0].nom}`, msg:'Choisissez au moins une classe.'});
+  if (etape === 3){
+    const aujourdhui = isoLocal();
+    const total = ordreClassesP(p).reduce((n, nom) => n + (p.lignes[nom] || []).length, 0);
+    if (total > 40) e.push({id:`p-ajout-${ordreClassesP(p)[0]}`, msg:`Une demande compte au plus 40 créneaux (ici ${total}) : faites deux demandes.`});
+    for (const nom of ordreClassesP(p)){
+      const lignes = p.lignes[nom] || [];
+      if (!lignes.length) e.push({id:`p-ajout-${nom}`, msg:`${nom} : ajoutez au moins un créneau.`});
+      lignes.forEach((l, i) => {
+        const pre = `${nom}, créneau ${i+1} : `, id = k => `l-${l.uid}-${k}`;
+        if (!dateValide(l.date)) e.push({id:id('date'), msg:pre + 'date manquante ou invalide (format jour/mois/année).'});
+        else if (joursemaine(l.date) > 4) e.push({id:id('date'), msg:pre + 'la date tombe un samedi ou un dimanche.'});
+        else if (l.date < aujourdhui) e.push({id:id('date'), msg:pre + 'la date est déjà passée.'});
+        if (!RE_HEURE.test(l.debut)) e.push({id:id('debut'), msg:pre + 'heure de début manquante ou invalide.'});
+        if (!RE_HEURE.test(l.fin)) e.push({id:id('fin'), msg:pre + 'heure de fin manquante ou invalide.'});
+        if (RE_HEURE.test(l.debut) && RE_HEURE.test(l.fin) && minutes(l.debut) >= minutes(l.fin)) e.push({id:id('fin'), msg:pre + 'l’heure de fin doit être après l’heure de début.'});
+        const n = String(l.nbAesh).trim();
+        if (!/^\d+$/.test(n)) e.push({id:id('nbAesh'), msg:pre + 'le nombre d’AESH doit être un nombre entier (0, 1, 2…).'});
+        else if (Number(n) > 20) e.push({id:id('nbAesh'), msg:pre + 'le nombre d’AESH ne peut pas dépasser 20.'});
+        if (String(l.salle).length > 20) e.push({id:id('salle'), msg:pre + 'la salle doit tenir en 20 caractères.'});
+      });
+    }
+  }
+  if (etape === 6 && String(p.commentaire).length > 600) e.push({id:'p-commentaire', msg:'Le commentaire doit tenir en 600 caractères.'});
+  return e;
+}
+function allerEtapeP(n){
+  const p = S.p;
+  if (n > p.etape){
+    for (let k = p.etape; k < n; k++){
+      const e = validerP(p, k);
+      if (e.length){ p.etape = k; p.erreurs = e; S.focus = 'resume-erreurs'; rendre(); return; }
+    }
+  }
+  p.erreurs = []; p.etape = n;
+  if (n === 5 && !p.semaine){ const m = mesLignes(p); p.semaine = lundiDe(m.length ? m[0].date : isoLocal()); }
+  S.focus = 'titre-etape'; rendre();
+}
+function htmlEtapes(liste, courante){
+  return `<ol class="etapes" aria-label="Étapes">${liste.map((t,i) => `<li class="${i+1 < courante ? 'faite' : ''}" ${i+1 === courante ? 'aria-current="step"' : ''}>${i+1}. ${esc(t)}</li>`).join('')}</ol>`;
+}
+function htmlPonctuel(){
+  const p = S.p, E = p.erreurs;
+  const corps = [null, htmlP1, htmlP2, htmlP3, htmlP4, htmlP5, htmlP6][p.etape](p, E);
+  return `<div class="pile">
+    <p><button type="button" class="lien" data-action="accueil">← Accueil</button></p>
+    <div>
+      <h1 id="titre-ecran" tabindex="-1">Demande ponctuelle — ${esc(natureLabel(p.nature))}</h1>
+      ${htmlEtapes(ETAPES_P, p.etape)}
+    </div>
+    <h2 id="titre-etape" tabindex="-1">Étape ${p.etape} sur 6 : ${esc(ETAPES_P[p.etape-1])}</h2>
+    ${htmlResumeErreurs(E)}
+    ${corps}
+    <div class="actions">
+      ${p.etape > 1 ? `<button type="button" class="btn" id="p-precedent" data-action="p-precedent">← Précédent</button>` : '<span></span>'}
+      ${p.etape < 6 ? `<button type="button" class="btn primaire droite" id="p-suivant" data-action="p-suivant">Suivant →</button>`
+                    : `<button type="button" class="btn primaire droite" id="btn-envoyer" data-action="envoyer-ponctuelle">Envoyer la demande</button>`}
+    </div>
+    ${p.etape === 6 ? `<div id="envoi-etat">${htmlEnvoiEtat()}</div>` : ''}
+  </div>`;
+}
+function htmlP1(p, E){
+  const mats = toutesMatieres();
+  return `<fieldset>
+      <legend>Nature de la demande</legend>
+      <div class="options deux">
+        ${S.ref.natures.map((n,i) => `<label class="opt"><input type="radio" name="p-nature" id="p-nature-${i}" value="${esc(n.id)}" data-champ="p-nature" ${p.nature === n.id ? 'checked' : ''}>
+          <span>${esc(n.label)}<span class="sous">${esc(NATURE_SOUS[n.id] || '')}</span></span></label>`).join('')}
+      </div>
+      ${p.nature === 'autre' ? `<div class="champ" style="margin-top:12px">
+        <label for="p-nature-autre">Précisez la nature de la demande</label>
+        <p class="avert" id="avert-nature">${AVERT_NOM}</p>
+        <input type="text" id="p-nature-autre" maxlength="80" data-champ="p-nature-autre" value="${esc(p.natureAutre)}" ${attrErr(E,'p-nature-autre') || 'aria-describedby="avert-nature"'}>
+        ${htmlErrChamp(E,'p-nature-autre')}</div>` : ''}
+    </fieldset>
+    <fieldset>
+      <legend>Matière</legend>
+      ${htmlErrChamp(E,'p-matiere-0')}
+      <div class="options deux">
+        ${mats.map((m,i) => `<label class="opt"><input type="radio" name="p-matiere" id="p-matiere-${i}" value="${esc(m)}" data-champ="p-matiere" ${p.matiereChoix === m ? 'checked' : ''} ${i === 0 ? attrErr(E,'p-matiere-0') : ''}><span>${esc(m)}</span></label>`).join('')}
+        <label class="opt"><input type="radio" name="p-matiere" id="p-matiere-${mats.length}" value="__autre" data-champ="p-matiere" ${p.matiereChoix === '__autre' ? 'checked' : ''}><span>Autre matière</span></label>
+      </div>
+      ${p.matiereChoix === '__autre' ? `<div class="champ" style="margin-top:12px">
+        <label for="p-matiere-autre">Nom de la matière</label>
+        <input type="text" id="p-matiere-autre" maxlength="60" data-champ="p-matiere-autre" value="${esc(p.matiereAutre)}" ${attrErr(E,'p-matiere-autre')}>
+        ${htmlErrChamp(E,'p-matiere-autre')}</div>` : ''}
+    </fieldset>`;
+}
+function htmlP2(p, E){
+  const m = matiereP(p);
+  const id0 = `p-classe-${S.ref.classes[0].nom}`;
+  return `<fieldset>
+    <legend>Classe(s) concernée(s)</legend>
+    <p class="discret">Cochez toutes les classes de la demande.</p>
+    ${htmlErrChamp(E, id0)}
+    <div class="options deux" style="margin-top:8px">
+      ${S.ref.classes.map(c => `<label class="opt"><input type="checkbox" id="p-classe-${esc(c.nom)}" value="${esc(c.nom)}" data-champ="p-classe" ${p.classes.includes(c.nom) ? 'checked' : ''} ${c.nom === S.ref.classes[0].nom ? attrErr(E, id0) : ''}>
+        <span><strong>${esc(c.nom)}</strong> — ${esc(c.label)}<span class="sous">${c.matieres.includes(m) ? `${esc(m)} figure à l’emploi du temps` : `${esc(m)} ne figure pas à l’emploi du temps publié`} · ${pluriel(c.codes.length,'code élève','codes élèves')}</span></span></label>`).join('')}
+    </div>
+  </fieldset>`;
+}
+function htmlP3(p, E){
+  return ordreClassesP(p).map(nom => {
+    const c = classe(nom), lignes = p.lignes[nom];
+    return `<section class="carte-bloc" aria-labelledby="h-cr-${esc(nom)}">
+      <h3 id="h-cr-${esc(nom)}">${esc(nom)} — ${esc(c.label)}</h3>
+      <div style="margin-top:10px">
+      ${lignes.map((l, i) => {
+        const id = k => `l-${l.uid}-${k}`;
+        const attr = k => `id="${id(k)}" data-champ="l-champ" data-classe="${esc(nom)}" data-uid="${l.uid}" data-k="${k}" ${attrErr(E, id(k))}`;
+        return `<fieldset class="ligne"><legend>Créneau ${i+1}</legend>
+          <div class="grille-ligne">
+            <div class="champ large2"><label for="${id('date')}">Date</label><input type="date" ${attr('date')} value="${esc(l.date)}" min="${isoLocal()}" placeholder="AAAA-MM-JJ">${htmlErrChamp(E,id('date'))}</div>
+            <div class="champ"><label for="${id('debut')}">Début</label><input type="time" ${attr('debut')} value="${esc(l.debut)}" step="300">${htmlErrChamp(E,id('debut'))}</div>
+            <div class="champ"><label for="${id('fin')}">Fin</label><input type="time" ${attr('fin')} value="${esc(l.fin)}" step="300">${htmlErrChamp(E,id('fin'))}</div>
+            <div class="champ"><label for="${id('salle')}">Salle <span class="discret">(facultatif)</span></label><input type="text" ${attr('salle')} value="${esc(l.salle)}" maxlength="20" autocomplete="off">${htmlErrChamp(E,id('salle'))}</div>
+            <div class="champ"><label for="${id('nbAesh')}">Nombre d’AESH</label><input type="number" inputmode="numeric" min="0" max="20" step="1" ${attr('nbAesh')} value="${esc(l.nbAesh)}">${htmlErrChamp(E,id('nbAesh'))}</div>
+          </div>
+          ${lignes.length > 1 ? `<p style="margin-top:8px"><button type="button" class="lien" data-action="p-retire-ligne" data-classe="${esc(nom)}" data-uid="${l.uid}">Retirer le créneau ${i+1} de ${esc(nom)}</button></p>` : ''}
+        </fieldset>`;
+      }).join('')}
+      </div>
+      <p style="margin-top:12px"><button type="button" class="btn petit" id="p-ajout-${esc(nom)}" data-action="p-ajout-ligne" data-classe="${esc(nom)}">+ Ajouter un créneau pour ${esc(nom)}</button></p>
+    </section>`;
+  }).join('');
+}
+function htmlBadges(code){
+  const b = infoBesoins(code);
+  if (!b) return '';
+  const out = [];
+  if (b.notifie === true) out.push(`<span class="badge notif">Notifié</span>`);
+  if (b.plan === 'PPS' || b.plan === 'PAP') out.push(`<span class="badge plan">${b.plan}</span>`);
+  return out.join(' ');
+}
+function htmlP4(p){
+  const sansBesoins = S.besoinsEtat !== 'ok'
+    ? `<p class="message info">Les besoins d’examen ne sont pas encore publiés par la coordination : aucune case n’est précochée. Cochez vous-même ce qui convient.</p>` : '';
+  return `${sansBesoins}<p class="discret">Cochez « concerné » pour chaque élève qui a besoin d’une aide. Les besoins d’examen connus de la coordination sont précochés : ajustez-les si besoin. Les mêmes élèves valent pour tous les créneaux de la classe.</p>` +
+  ordreClassesP(p).map(nom => {
+    const c = classe(nom), el = p.eleves[nom];
+    const codes = [...c.codes].sort((a,b) => (infoBesoins(b) ? 1 : 0) - (infoBesoins(a) ? 1 : 0));
+    const nb = c.codes.filter(x => el[x] && el[x].concerne).length;
+    return `<section class="carte-bloc" aria-labelledby="h-el-${esc(nom)}">
+      <h3 id="h-el-${esc(nom)}">${esc(nom)} — ${esc(c.label)}</h3>
+      <p class="discret">${pluriel(c.codes.length,'code','codes')} · ${pluriel(nb,'élève concerné','élèves concernés')}</p>
+      ${c.codes.length ? '' : '<p class="message info">Aucun code publié pour cette classe.</p>'}
+      <ul class="eleves">
+      ${codes.map(code => {
+        const s = el[code], idc = `e-${nom}-${code}`;
+        const connus = besoinsListe().filter(x => infoBesoins(code) && infoBesoins(code)[x.id] === true).map(x => x.label);
+        return `<li class="eleve ${s.concerne ? 'coche' : ''}">
+          <div class="eleve-tete"><label for="${esc(idc)}"><input type="checkbox" id="${esc(idc)}" data-champ="e-concerne" data-classe="${esc(nom)}" data-code="${esc(code)}" ${s.concerne ? 'checked' : ''}>
+            <span>Élève <span class="code">${esc(code)}</span> concerné</span></label> ${htmlBadges(code)}</div>
+          ${s.concerne ? `<fieldset class="sous-bloc"><legend>Besoins de <span class="code">${esc(code)}</span></legend>
+              <div class="puces">${besoinsListe().map(b => `<label class="puce"><input type="checkbox" id="${esc(idc)}-${esc(b.id)}" data-champ="e-besoin" data-classe="${esc(nom)}" data-code="${esc(code)}" data-b="${esc(b.id)}" ${s.besoins.includes(b.id) ? 'checked' : ''}>${esc(b.label)}</label>`).join('')}</div>
+              <div class="champ" style="margin-top:10px"><label for="${esc(idc)}-note">Précision <span class="discret">(facultatif, sans nom)</span></label>
+              <input type="text" id="${esc(idc)}-note" maxlength="120" data-champ="e-note" data-classe="${esc(nom)}" data-code="${esc(code)}" value="${esc(s.note)}"></div>
+            </fieldset>`
+          : connus.length ? `<p class="indice">Besoins connus : ${esc(connus.join(', '))}</p>` : ''}
+        </li>`;
+      }).join('')}
+      </ul>
+    </section>`;
+  }).join('');
+}
+function mesLignes(p){
+  const out = [];
+  for (const nom of ordreClassesP(p)){
+    const nbEl = Object.values(p.eleves[nom] || {}).filter(x => x.concerne).length;
+    for (const l of p.lignes[nom] || []){
+      if (dateValide(l.date) && RE_HEURE.test(l.debut) && RE_HEURE.test(l.fin) && minutes(l.debut) < minutes(l.fin))
+        out.push({classe:nom, date:l.date, debut:l.debut, fin:l.fin, salle:l.salle, nbAesh:l.nbAesh, nbEleves:nbEl, uid:l.uid});
+    }
+  }
+  return out.sort((a,b) => a.date.localeCompare(b.date) || a.debut.localeCompare(b.debut));
+}
+function lignesExistantes(){
+  const out = [];
+  for (const d of S.docs){
+    if (d.type !== 'demande' || !Array.isArray(d.lignes)) continue;
+    d.lignes.forEach((l, i) => {
+      if (l && dateValide(l.date) && RE_HEURE.test(l.debut) && RE_HEURE.test(l.fin)) out.push({doc:d, l, i});
+    });
+  }
+  return out;
+}
+const chevauche = (a, b) => a.date === b.date && minutes(a.debut) < minutes(b.fin) && minutes(b.debut) < minutes(a.fin);
+function htmlStatut(s){
+  const st = STATUTS[s] || {label:s ? `Statut « ${s} »` : 'Statut inconnu', icone:'?'};
+  return `<span class="statut" data-icone="${esc(st.icone)}">${esc(st.label)}</span>`;
+}
+function htmlSemaine(lundi, existantes, miennes){
+  return `<div class="semaine">${JOURS.map((j, k) => {
+    const date = ajouteJours(lundi, k);
+    const items = [
+      ...existantes.filter(x => x.l.date === date).map(x => ({t:'ex', debut:x.l.debut, x})),
+      ...miennes.filter(m => m.date === date).map(m => ({t:'mien', debut:m.debut, m}))
+    ].sort((a,b) => a.debut.localeCompare(b.debut) || (a.t === 'mien' ? -1 : 1));
+    return `<section class="jour-col" aria-labelledby="j-${date}"><h4 id="j-${date}">${esc(dateSansAn(date))}</h4>
+      ${items.length ? `<ul>${items.map(it => {
+        if (it.t === 'mien'){
+          const m = it.m;
+          return `<li class="cren mien" data-mien="1"><span class="etiq">Votre créneau</span><br>
+            <span class="h">${m.debut}–${m.fin}</span> · <strong>${esc(m.classe)}</strong><br>
+            AESH demandés : ${esc(String(m.nbAesh).trim() || '—')}${m.salle ? ` · salle ${esc(m.salle)}` : ''}<br>${pluriel(m.nbEleves,'élève concerné','élèves concernés')}</li>`;
+        }
+        const {doc:d, l, i} = it.x;
+        const conflits = miennes.filter(m => chevauche(m, l));
+        return `<li class="cren ${conflits.length ? 'chev' : ''}" data-demande-id="${esc(d.id)}" data-ligne="${i}" ${conflits.length ? 'data-chevauche="1"' : ''}>
+          <span class="h">${esc(l.debut)}–${esc(l.fin)}</span> · <strong>${esc(l.classe)}</strong> · ${esc(d.matiere)}<br>
+          ${esc(natureLabel(d.nature))} · AESH demandés : ${Number.isInteger(l.nbAesh) ? l.nbAesh : '—'}<br>${htmlStatut(d.statut)}
+          ${conflits.length ? `<span class="alerte-chev">⚠ Chevauche votre créneau ${conflits.map(m => `${esc(m.classe)} ${m.debut}–${m.fin}`).join(', ')}</span>` : ''}</li>`;
+      }).join('')}</ul>` : `<p class="jour-vide">Aucun créneau</p>`}
+    </section>`;
+  }).join('')}</div>`;
+}
+function htmlZonePole(){
+  const p = S.p, miennes = mesLignes(p);
+  if (S.docsEtat === 'chargement') return `<p class="message info" role="status">Chargement des demandes du pôle…</p>`;
+  if (S.docsEtat !== 'ok') return `<div class="message warn" role="alert"><p>${S.docsEtat === 'refus' ? '<strong>Espace en cours d’ouverture par la coordination :</strong> les demandes du pôle ne sont pas encore lisibles.' : '<strong>Pas de connexion :</strong> les demandes du pôle ne peuvent pas être affichées.'} Vous pouvez tout de même continuer.</p>
+    <p><button type="button" class="btn petit" data-action="reecouter">Réessayer</button></p></div>`;
+  const ex = lignesExistantes();
+  const conflits = [];
+  for (const m of miennes) for (const x of ex) if (chevauche(m, x.l)) conflits.push({m, x});
+  const semaines = [...new Set(miennes.map(m => lundiDe(m.date)))];
+  const lundi = p.semaine;
+  const nbSem = ex.filter(x => lundiDe(x.l.date) === lundi).length;
+  return `
+    ${conflits.length
+      ? `<div class="message warn" id="resume-chev"><p><strong>⚠ ${pluriel(conflits.length,'chevauchement','chevauchements')} avec des demandes déjà déposées.</strong> Les AESH sont partagés entre les classes : la coordination arbitrera.</p>
+         <ul>${conflits.map(({m, x}) => `<li>${esc(dateLongue(m.date))} : votre créneau ${esc(m.classe)} ${m.debut}–${m.fin} et ${esc(x.l.classe)} · ${esc(x.doc.matiere)} ${esc(x.l.debut)}–${esc(x.l.fin)} (${esc((STATUTS[x.doc.statut] || {label:x.doc.statut}).label)}). <button type="button" class="lien" data-action="p-semaine" data-lundi="${lundiDe(m.date)}">Voir cette semaine</button></li>`).join('')}</ul></div>`
+      : `<p class="message ok" id="resume-chev">✓ Aucune demande déjà déposée ne chevauche vos créneaux.</p>`}
+    ${semaines.length > 1 ? `<p style="margin-top:12px">Vos semaines : ${semaines.map(s => `<button type="button" class="btn petit" data-action="p-semaine" data-lundi="${s}" ${s === lundi ? 'aria-pressed="true"' : 'aria-pressed="false"'}>${esc(dateSansAn(s))}</button>`).join(' ')}</p>` : ''}
+    <div class="semaine-nav">
+      <button type="button" class="btn petit" id="sem-prec" data-action="p-semaine" data-lundi="${ajouteJours(lundi,-7)}">← Semaine précédente</button>
+      <h3 id="titre-semaine" aria-live="polite">${esc(titreSemaine(lundi))}</h3>
+      <button type="button" class="btn petit" id="sem-suiv" data-action="p-semaine" data-lundi="${ajouteJours(lundi,7)}">Semaine suivante →</button>
+    </div>
+    <p class="discret" style="margin-bottom:10px">${pluriel(nbSem,'créneau déjà demandé','créneaux déjà demandés')} cette semaine · ${pluriel(miennes.filter(m => lundiDe(m.date) === lundi).length,'créneau','créneaux')} de votre demande.</p>
+    ${htmlSemaine(lundi, ex, miennes)}`;
+}
+function htmlP5(){
+  return `<p>Les demandes déjà déposées par les collègues, en direct. Vos créneaux sont encadrés en trait plein avec la mention « Votre créneau » ; les demandes qui les chevauchent sont encadrées en pointillés avec la mention « ⚠ Chevauche ».</p>
+    <div id="zone-pole" style="margin-top:12px">${htmlZonePole()}</div>`;
+}
+function htmlP6(p, E){
+  const miennes = mesLignes(p);
+  const semaines = [...new Set(miennes.map(m => lundiDe(m.date)))];
+  const nbConflits = S.docsEtat === 'ok' ? miennes.filter(m => lignesExistantes().some(x => chevauche(m, x.l))).length : 0;
+  return `<section class="carte-bloc" aria-labelledby="h-recap">
+      <h3 id="h-recap">Votre demande</h3>
+      <dl class="recap" style="margin-top:10px">
+        <dt>Nature</dt><dd>${esc(natureLabel(p.nature))}${p.nature === 'autre' ? ` : ${esc(nettoie(p.natureAutre,80))}` : ''}</dd>
+        <dt>Matière</dt><dd>${esc(matiereP(p))}</dd>
+        <dt>Classes</dt><dd>${esc(ordreClassesP(p).join(', '))}</dd>
+        <dt>Créneaux</dt><dd>${pluriel(miennes.length,'créneau','créneaux')}${nbConflits ? ` · ⚠ ${pluriel(nbConflits,'chevauche','chevauchent')} une autre demande` : ''}</dd>
+      </dl>
+    </section>
+    <section aria-labelledby="h-recap-edt">
+      <h3 id="h-recap-edt">Vos créneaux dans l’emploi du temps</h3>
+      ${semaines.map(s => `<h4 style="margin:14px 0 8px">${esc(titreSemaine(s))}</h4>${htmlSemaine(s, [], miennes)}`).join('')}
+    </section>
+    <section class="carte-bloc" aria-labelledby="h-recap-el">
+      <h3 id="h-recap-el">Élèves concernés</h3>
+      ${ordreClassesP(p).map(nom => {
+        const l = classe(nom).codes.filter(c => p.eleves[nom][c].concerne);
+        return `<h4 style="margin-top:10px">${esc(nom)}</h4>${l.length ? `<ul>${l.map(code => {
+          const s = p.eleves[nom][code];
+          const bs = besoinsListe().filter(b => s.besoins.includes(b.id)).map(b => b.label);
+          return `<li><span class="code">${esc(code)}</span> ${htmlBadges(code)} — ${bs.length ? esc(bs.join(', ')) : 'aucun besoin coché'}${nettoie(s.note,120) ? ` · ${esc(nettoie(s.note,120))}` : ''}</li>`;
+        }).join('')}</ul>` : `<p class="discret">Aucun élève coché.</p>`}`;
+      }).join('')}
+    </section>
+    <div class="champ">
+      <label for="p-commentaire">Commentaire pour la coordination <span class="discret">(facultatif)</span></label>
+      <p class="avert" id="avert-com">${AVERT_NOM}</p>
+      <textarea id="p-commentaire" maxlength="600" data-champ="p-commentaire" ${attrErr(E,'p-commentaire') || 'aria-describedby="avert-com"'}>${esc(p.commentaire)}</textarea>
+      ${htmlErrChamp(E,'p-commentaire')}
+    </div>`;
+}
+function construireDemande(p){
+  const now = new Date().toISOString();
+  const lignes = [];
+  for (const nom of ordreClassesP(p)){
+    const eleves = classe(nom).codes.filter(c => p.eleves[nom][c] && p.eleves[nom][c].concerne).map(code => {
+      const s = p.eleves[nom][code];
+      return {code, besoins: besoinsListe().map(b => b.id).filter(id => s.besoins.includes(id)), note: nettoie(s.note, 120)};
+    });
+    for (const l of p.lignes[nom]){
+      lignes.push({classe:nom, date:l.date, debut:l.debut, fin:l.fin, salle:nettoie(l.salle, 20), nbAesh:parseInt(String(l.nbAesh).trim(), 10),
+                   eleves: eleves.map(x => ({code:x.code, besoins:[...x.besoins], note:x.note}))});
+    }
+  }
+  lignes.sort((a,b) => a.date.localeCompare(b.date) || a.debut.localeCompare(b.debut) || ORDRE_CLASSES.indexOf(a.classe) - ORDRE_CLASSES.indexOf(b.classe));
+  return {
+    id:nouvelId('demande'), type:'demande', annee:ANNEE,
+    nature:p.nature, natureAutre: p.nature === 'autre' ? nettoie(p.natureAutre, 80) : '',
+    matiere:matiereP(p), commentaire:nettoie(p.commentaire, 600), lignes,
+    statut:'nouvelle', reponse:{statut:'', texte:'', aeshConfirmes:null, majLe:''},
+    creeLe:now, majLe:now, source:SOURCE
+  };
+}
+
+/* ═══════════════ RÉGULIER ═══════════════ */
+const ETAPES_R = ['Matière','Classe','Créneaux de la semaine','Envoi'];
+function nouveauRegulier(){
+  S.r = { etape:1, matiere:'', classe:'', grille:'', creneaux:{}, aPartirDu:isoLocal(), commentaire:'', precedente:null, ignores:0, modifie:false, erreurs:[] };
+  S.envoi = null; S.ecran = 'regulier'; S.focus = 'titre-ecran'; rendre();
+}
+const creneauxDe = (nom, matiere) => (classe(nom)?.creneaux || []).filter(c => c.matiere === matiere);
+const classesAvec = matiere => (S.ref ? S.ref.classes : []).filter(c => c.creneaux.some(x => x.matiere === matiere));
+function derniereDeclaration(nom, matiere){
+  return S.docs.filter(d => d.type === 'regulier' && d.classe === nom && d.matiere === matiere)
+    .sort((a,b) => String(b.creeLe || '').localeCompare(String(a.creeLe || '')))[0] || null;
+}
+function initGrille(r){
+  r.grille = `${r.classe}|${r.matiere}`; r.creneaux = {}; r.precedente = null; r.ignores = 0; r.modifie = false; r.commentaire = ''; r.aPartirDu = isoLocal();
+  creneauxDe(r.classe, r.matiere).forEach(c => { r.creneaux[c.cle] = {besoin:0, eleves:{}, note:''}; });
+  appliquerPrecedente(r);
+}
+function appliquerPrecedente(r){
+  const d = derniereDeclaration(r.classe, r.matiere);
+  if (!d) return false;
+  const codes = classe(r.classe).codes, aides = aidesListe().map(a => a.id);
+  let ignores = 0;
+  for (const c of Array.isArray(d.creneaux) ? d.creneaux : []){
+    const s = c && r.creneaux[c.cle];
+    if (!s){ ignores++; continue; }
+    s.besoin = Number.isInteger(c.besoin) ? Math.max(0, Math.min(3, c.besoin)) : 0;
+    s.eleves = {};
+    (Array.isArray(c.eleves) ? c.eleves : []).forEach(e => { if (e && codes.includes(e.code)) s.eleves[e.code] = (Array.isArray(e.aides) ? e.aides : []).filter(a => aides.includes(a)); });
+    s.note = nettoie(c.note, 120);
+  }
+  r.precedente = {id:d.id, creeLe:d.creeLe, statut:d.statut, aPartirDu:d.aPartirDu};
+  r.ignores = ignores;
+  r.commentaire = nettoie(d.commentaire, 600);
+  r.aPartirDu = dateValide(d.aPartirDu) && d.aPartirDu > isoLocal() ? d.aPartirDu : isoLocal();
+  return true;
+}
+function validerR(r, etape){
+  const e = [];
+  if (etape === 1 && !r.matiere) e.push({id:'r-matiere-0', msg:'Choisissez la matière.'});
+  if (etape === 2 && !r.classe) e.push({id:'r-classe-0', msg:'Choisissez la classe.'});
+  if (etape === 3){
+    const l = creneauxDe(r.classe, r.matiere);
+    if (!l.length) e.push({id:'titre-etape', msg:'Aucun créneau de cette matière dans l’emploi du temps publié pour cette classe.'});
+    if (l.length > 60) e.push({id:'titre-etape', msg:'Plus de 60 créneaux : la déclaration ne peut pas être envoyée. Prévenez la coordination.'});
+    l.forEach((c, i) => { const s = r.creneaux[c.cle]; if (!s || ![0,1,2,3].includes(s.besoin)) e.push({id:`r-${i}-b0`, msg:`${JOURS_LONG[c.jour]} ${c.debut} : choisissez le besoin.`}); });
+  }
+  if (etape === 4){
+    if (!dateValide(r.aPartirDu)) e.push({id:'r-apartir', msg:'Date « à partir du » manquante ou invalide.'});
+    if (String(r.commentaire).length > 600) e.push({id:'r-commentaire', msg:'Le commentaire doit tenir en 600 caractères.'});
+  }
+  return e;
+}
+function allerEtapeR(n){
+  const r = S.r;
+  if (n > r.etape){
+    for (let k = r.etape; k < n; k++){
+      const e = validerR(r, k);
+      if (e.length){ r.etape = k; r.erreurs = e; S.focus = 'resume-erreurs'; rendre(); return; }
+    }
+  }
+  r.erreurs = []; r.etape = n;
+  if (n === 3 && r.grille !== `${r.classe}|${r.matiere}`) initGrille(r);
+  S.focus = 'titre-etape'; rendre();
+}
+function htmlRegulier(){
+  const r = S.r, E = r.erreurs;
+  const corps = [null, htmlR1, htmlR2, htmlR3, htmlR4][r.etape](r, E);
+  return `<div class="pile">
+    <p><button type="button" class="lien" data-action="accueil">← Accueil</button></p>
+    <div><h1 id="titre-ecran" tabindex="-1">Mes cours de l’année — besoins réguliers</h1>${htmlEtapes(ETAPES_R, r.etape)}</div>
+    <h2 id="titre-etape" tabindex="-1">Étape ${r.etape} sur 4 : ${esc(ETAPES_R[r.etape-1])}</h2>
+    ${htmlResumeErreurs(E)}
+    ${corps}
+    <div class="actions">
+      ${r.etape > 1 ? `<button type="button" class="btn" id="r-precedent" data-action="r-precedent">← Précédent</button>` : '<span></span>'}
+      ${r.etape < 4 ? `<button type="button" class="btn primaire droite" id="r-suivant" data-action="r-suivant">Suivant →</button>`
+                    : `<button type="button" class="btn primaire droite" id="btn-envoyer" data-action="envoyer-regulier">Envoyer la déclaration</button>`}
+    </div>
+    ${r.etape === 4 ? `<div id="envoi-etat">${htmlEnvoiEtat()}</div>` : ''}
+  </div>`;
+}
+function htmlR1(r, E){
+  const mats = toutesMatieres();
+  return `<fieldset><legend>Matière que vous enseignez</legend>
+    ${htmlErrChamp(E,'r-matiere-0')}
+    <div class="options deux">${mats.map((m,i) => `<label class="opt"><input type="radio" name="r-matiere" id="r-matiere-${i}" value="${esc(m)}" data-champ="r-matiere" ${r.matiere === m ? 'checked' : ''} ${i === 0 ? attrErr(E,'r-matiere-0') : ''}>
+      <span>${esc(m)}<span class="sous">${esc(classesAvec(m).map(c => c.nom).join(', '))}</span></span></label>`).join('')}</div>
+  </fieldset>`;
+}
+function htmlR2(r, E){
+  const cl = classesAvec(r.matiere);
+  return `<fieldset><legend>Classe (${esc(r.matiere)})</legend>
+    <p class="discret">Une déclaration par classe. Seules les classes où ${esc(r.matiere)} figure à l’emploi du temps publié sont proposées.</p>
+    ${htmlErrChamp(E,'r-classe-0')}
+    <div class="options deux" style="margin-top:8px">${cl.map((c,i) => {
+      const d = derniereDeclaration(c.nom, r.matiere);
+      return `<label class="opt"><input type="radio" name="r-classe" id="r-classe-${i}" value="${esc(c.nom)}" data-champ="r-classe" ${r.classe === c.nom ? 'checked' : ''} ${i === 0 ? attrErr(E,'r-classe-0') : ''}>
+        <span><strong>${esc(c.nom)}</strong> — ${esc(c.label)}<span class="sous">${pluriel(creneauxDe(c.nom, r.matiere).length,'créneau','créneaux')} par semaine${d ? ` · déjà déclaré le ${esc(dateHeure(d.creeLe))}` : ''}</span></span></label>`;
+    }).join('')}</div>
+  </fieldset>`;
+}
+function htmlR3(r){
+  const c = classe(r.classe), liste = creneauxDe(r.classe, r.matiere), aides = aidesListe();
+  const codes = [...c.codes].sort((a,b) => (infoBesoins(b) ? 1 : 0) - (infoBesoins(a) ? 1 : 0));
+  const pre = r.precedente;
+  return `
+    ${pre ? `<div class="message info" id="bandeau-precedente"><p><strong>Formulaire prérempli</strong> avec votre dernière déclaration pour ${esc(r.matiere)} en ${esc(r.classe)}, envoyée le ${esc(dateHeure(pre.creeLe))} (statut : ${esc((STATUTS[pre.statut] || {label:pre.statut || '—'}).label)}). Ce que vous enverrez la remplacera.</p>
+      ${r.ignores ? `<p>${pluriel(r.ignores,'créneau de l’ancienne déclaration n’existe','créneaux de l’ancienne déclaration n’existent')} plus dans l’emploi du temps : ${r.ignores > 1 ? 'ils sont ignorés' : 'il est ignoré'}.</p>` : ''}</div>`
+          : S.docsEtat === 'chargement' ? `<p class="message info" role="status">Recherche d’une déclaration précédente…</p>` : ''}
+    <p>${pluriel(liste.length,'créneau hebdomadaire','créneaux hebdomadaires')} de ${esc(r.matiere)} en ${esc(r.classe)}, d’après l’emploi du temps publié par la coordination${S.ref.placementsSemaine && dateValide(S.ref.placementsSemaine) ? ` (AESH placés : ${esc(titreSemaine(S.ref.placementsSemaine).toLowerCase())})` : ''}.
+      Pour chaque créneau, indiquez combien d’AESH seraient nécessaires, puis les élèves concernés.</p>
+    ${JOURS.map(j => {
+      const duJour = liste.map((cr, i) => ({cr, i})).filter(x => x.cr.jour === j);
+      if (!duJour.length) return '';
+      return `<section aria-labelledby="h-jour-${j}" style="margin-top:16px"><h3 id="h-jour-${j}" style="text-transform:capitalize;margin-bottom:8px">${JOURS_LONG[j]}</h3><div class="grille-cr">
+      ${duJour.map(({cr, i}) => {
+        const s = r.creneaux[cr.cle];
+        const nbEl = Object.keys(s.eleves).length;
+        return `<fieldset class="cr ${s.besoin > 0 ? 'besoin-pos' : ''}" id="cr-${i}" data-cle="${esc(cr.cle)}">
+          <legend>${esc(JOURS_LONG[cr.jour])} ${cr.debut}–${cr.fin} · ${esc(PARITE[cr.parite])}</legend>
+          <p class="places" data-places="${cr.aeshPlaces}">AESH placés : ${cr.aeshPlaces}</p>
+          <fieldset class="sous-bloc" style="border:0;padding:0;margin-top:0"><legend class="label" style="padding:0">Besoin d’AESH sur ce créneau</legend>
+            <div class="radios-besoin">${[0,1,2,3].map(v => `<label for="r-${i}-b${v}"><input type="radio" name="r-besoin-${i}" id="r-${i}-b${v}" value="${v}" data-champ="r-besoin" data-i="${i}" ${s.besoin === v ? 'checked' : ''}>${v === 3 ? '3 ou +' : v}</label>`).join('')}</div>
+          </fieldset>
+          ${s.besoin > 0 ? `<fieldset class="sous-bloc"><legend>Élèves concernés (${nbEl})</legend>
+            <ul class="eleves" style="grid-template-columns:1fr">${codes.map(code => {
+              const on = !!s.eleves[code], idc = `re-${i}-${code}`;
+              return `<li class="eleve ${on ? 'coche' : ''}"><div class="eleve-tete"><label for="${idc}"><input type="checkbox" id="${idc}" data-champ="r-eleve" data-i="${i}" data-code="${esc(code)}" ${on ? 'checked' : ''}><span>Élève <span class="code">${esc(code)}</span></span></label> ${htmlBadges(code)}</div>
+                ${on ? `<fieldset class="sous-bloc" style="border:0;padding:0"><legend class="label" style="padding:0">Aides pour <span class="code">${esc(code)}</span></legend><div class="puces">${aides.map(a => `<label class="puce"><input type="checkbox" id="${idc}-${esc(a.id)}" data-champ="r-aide" data-i="${i}" data-code="${esc(code)}" data-a="${esc(a.id)}" ${s.eleves[code].includes(a.id) ? 'checked' : ''}>${esc(a.label)}</label>`).join('')}</div></fieldset>` : ''}
+              </li>`;
+            }).join('')}</ul>
+            ${nbEl && liste.length > 1 ? `<p style="margin-top:8px"><button type="button" class="lien" data-action="r-reporter" data-i="${i}">Copier ces élèves et leurs aides sur les autres créneaux</button></p>` : ''}
+            <div class="champ" style="margin-top:10px"><label for="rn-${i}">Précision <span class="discret">(facultatif, sans nom)</span></label>
+              <input type="text" id="rn-${i}" maxlength="120" data-champ="r-note" data-i="${i}" value="${esc(s.note)}"></div>
+          </fieldset>` : `<p class="discret">Aucun besoin : pas d’élève à indiquer.</p>`}
+        </fieldset>`;
+      }).join('')}</div></section>`;
+    }).join('')}`;
+}
+function htmlR4(r, E){
+  const liste = creneauxDe(r.classe, r.matiere);
+  const total = liste.filter(c => r.creneaux[c.cle].besoin > 0).length;
+  return `<section class="carte-bloc" aria-labelledby="h-rrecap">
+      <h3 id="h-rrecap">Votre déclaration : ${esc(r.matiere)} · ${esc(r.classe)}</h3>
+      <p style="margin-top:6px">${pluriel(total,'créneau','créneaux')} avec un besoin sur ${liste.length}.</p>
+      <div class="tableau-wrap" style="margin-top:10px"><table>
+        <caption class="sr">Besoin déclaré et AESH placés, par créneau</caption>
+        <thead><tr><th scope="col">Créneau</th><th scope="col">Besoin</th><th scope="col">AESH placés</th><th scope="col">Élèves</th></tr></thead>
+        <tbody>${liste.map(c => {
+          const s = r.creneaux[c.cle], els = s.besoin > 0 ? Object.keys(s.eleves) : [];
+          return `<tr><th scope="row">${esc(JOURS_LONG[c.jour])} ${c.debut}–${c.fin}<br><span class="discret">${esc(PARITE[c.parite])}</span></th>
+            <td>${s.besoin === 3 ? '3 ou +' : s.besoin}</td><td>${c.aeshPlaces}</td>
+            <td>${els.length ? els.map(code => `<span class="code">${esc(code)}</span>${s.eleves[code].length ? ` (${esc(s.eleves[code].map(aideLabel).join(', '))})` : ''}`).join('<br>') : '—'}</td></tr>`;
+        }).join('')}</tbody></table></div>
+    </section>
+    <div class="champ">
+      <label for="r-apartir">À partir du</label>
+      <input type="date" id="r-apartir" data-champ="r-apartir" value="${esc(r.aPartirDu)}" ${attrErr(E,'r-apartir')}>
+      ${htmlErrChamp(E,'r-apartir')}
+    </div>
+    <div class="champ">
+      <label for="r-commentaire">Commentaire pour la coordination <span class="discret">(facultatif)</span></label>
+      <p class="avert" id="avert-rcom">${AVERT_NOM}</p>
+      <textarea id="r-commentaire" maxlength="600" data-champ="r-commentaire" ${attrErr(E,'r-commentaire') || 'aria-describedby="avert-rcom"'}>${esc(r.commentaire)}</textarea>
+      ${htmlErrChamp(E,'r-commentaire')}
+    </div>`;
+}
+function construireRegulier(r){
+  const now = new Date().toISOString(), codes = classe(r.classe).codes, aides = aidesListe().map(a => a.id);
+  return {
+    id:nouvelId('regulier'), type:'regulier', annee:ANNEE,
+    matiere:r.matiere, classe:r.classe, aPartirDu:r.aPartirDu, commentaire:nettoie(r.commentaire, 600),
+    creneaux: creneauxDe(r.classe, r.matiere).map(c => {
+      const s = r.creneaux[c.cle];
+      return { cle:c.cle, jour:c.jour, debut:c.debut, fin:c.fin, parite:c.parite, besoin:s.besoin,
+               eleves: s.besoin > 0 ? codes.filter(code => s.eleves[code]).map(code => ({code, aides: aides.filter(a => s.eleves[code].includes(a))})) : [],
+               note: s.besoin > 0 ? nettoie(s.note, 120) : '' };
+    }),
+    statut:'nouvelle', reponse:{statut:'', texte:'', aeshConfirmes:null, majLe:''},
+    creeLe:now, majLe:now, source:SOURCE
+  };
+}
+
+/* ═══════════════ DEMANDES DU PÔLE ═══════════════ */
+function htmlPole(){
+  const f = S.filtre;
+  return `<div class="pile">
+    <h1 id="titre-ecran" tabindex="-1">Demandes du pôle</h1>
+    <p>Toutes les demandes ponctuelles et les déclarations de besoins réguliers de l’année ${esc(ANNEE)}, avec leur statut. Mise à jour en direct. Lecture seule.</p>
+    ${htmlRgpd()}
+    <div id="bandeau-brouillons">${htmlBandeauBrouillons()}</div>
+    <div class="filtres" role="group" aria-label="Filtrer la liste">
+      <div class="champ"><label for="f-type">Type</label><select id="f-type" data-champ="f-type">
+        <option value="" ${f.type === '' ? 'selected' : ''}>Toutes</option><option value="demande" ${f.type === 'demande' ? 'selected' : ''}>Demandes ponctuelles</option><option value="regulier" ${f.type === 'regulier' ? 'selected' : ''}>Besoins réguliers</option></select></div>
+      <div class="champ"><label for="f-classe">Classe</label><select id="f-classe" data-champ="f-classe">
+        <option value="">Toutes</option>${ORDRE_CLASSES.map(c => `<option value="${c}" ${f.classe === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="champ"><label for="f-statut">Statut</label><select id="f-statut" data-champ="f-statut">
+        <option value="">Tous</option>${Object.entries(STATUTS).map(([k,v]) => `<option value="${k}" ${f.statut === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select></div>
+    </div>
+    <div id="zone-liste">${htmlListePole()}</div>
+  </div>`;
+}
+function htmlListePole(){
+  if (S.docsEtat === 'chargement') return `<p class="message info" role="status">Chargement des demandes…</p>`;
+  if (S.docsEtat !== 'ok') return `<div class="message warn" role="alert"><p>${S.docsEtat === 'refus' ? '<strong>Espace en cours d’ouverture par la coordination.</strong> La liste n’est pas encore lisible.' : '<strong>Pas de connexion au serveur.</strong> La liste ne peut pas être affichée.'}</p><p><button type="button" class="btn petit" data-action="reecouter">Réessayer</button></p></div>`;
+  const f = S.filtre;
+  const enVigueur = new Map();
+  S.docs.filter(d => d.type === 'regulier').forEach(d => { const k = `${d.classe}|${d.matiere}`, a = enVigueur.get(k); if (!a || String(d.creeLe) > String(a.creeLe)) enVigueur.set(k, d); });
+  const liste = S.docs.filter(d => (!f.type || d.type === f.type) && (!f.statut || d.statut === f.statut) &&
+      (!f.classe || (d.type === 'regulier' ? d.classe === f.classe : (d.lignes || []).some(l => l.classe === f.classe))))
+    .sort((a,b) => String(b.creeLe || '').localeCompare(String(a.creeLe || '')));
+  const compte = `<p role="status" id="pole-compte">${pluriel(liste.length,'élément affiché','éléments affichés')} sur ${S.docs.length}.</p>`;
+  if (!liste.length) return compte + `<p class="discret" style="margin-top:8px">Aucune demande ne correspond.</p>`;
+  return compte + `<ul class="liste-pole">${liste.map(d => {
+    const st = STATUTS[d.statut] || {label:d.statut || 'Statut inconnu', icone:'?'};
+    const pastille = `<span class="pastille-statut" data-statut="${esc(d.statut)}">${esc(st.icone)} ${esc(st.label)}</span>`;
+    const rep = d.reponse && (d.reponse.texte || Number.isInteger(d.reponse.aeshConfirmes))
+      ? `<p class="rep"><strong>Réponse de la coordination :</strong> ${esc(d.reponse.texte || '')}${Number.isInteger(d.reponse.aeshConfirmes) ? ` · AESH confirmés : ${d.reponse.aeshConfirmes}` : ''}</p>` : '';
+    if (d.type === 'demande'){
+      const lignes = Array.isArray(d.lignes) ? [...d.lignes].sort((a,b) => String(a.date).localeCompare(String(b.date)) || String(a.debut).localeCompare(String(b.debut))) : [];
+      return `<li class="dem" data-id="${esc(d.id)}"><div class="dem-tete"><h2 style="font-size:1.15rem">${esc(natureLabel(d.nature))}${d.natureAutre ? ` (${esc(d.natureAutre)})` : ''} · ${esc(d.matiere)}</h2>${pastille}</div>
+        <p class="discret">Demande ponctuelle · déposée le ${esc(dateHeure(d.creeLe))}</p>
+        <ul>${lignes.map(l => `<li><strong>${esc(l.classe)}</strong> — ${esc(dateLongue(l.date))}, ${esc(l.debut)}–${esc(l.fin)}${l.salle ? `, salle ${esc(l.salle)}` : ''} · AESH demandés : ${Number.isInteger(l.nbAesh) ? l.nbAesh : '—'} · ${pluriel(Array.isArray(l.eleves) ? l.eleves.length : 0,'élève','élèves')}</li>`).join('')}</ul>${rep}</li>`;
+    }
+    const cr = Array.isArray(d.creneaux) ? d.creneaux : [];
+    const avec = cr.filter(c => c.besoin > 0);
+    const vigueur = enVigueur.get(`${d.classe}|${d.matiere}`) === d;
+    return `<li class="dem" data-id="${esc(d.id)}"><div class="dem-tete"><h2 style="font-size:1.15rem">Besoins réguliers · ${esc(d.matiere)} · ${esc(d.classe)}</h2>${pastille}</div>
+      <p class="discret">Déclaration ${vigueur ? '<strong>en vigueur</strong>' : 'remplacée par une déclaration plus récente'} · déposée le ${esc(dateHeure(d.creeLe))}${dateValide(d.aPartirDu) ? ` · à partir du ${esc(dateLongue(d.aPartirDu))}` : ''}</p>
+      <p style="margin-top:6px">${pluriel(avec.length,'créneau','créneaux')} avec un besoin sur ${cr.length}${avec.length ? ` : ${avec.map(c => `${esc(JOURS_LONG[c.jour] || c.jour)} ${esc(c.debut)}${c.parite ? ` (sem. ${esc(c.parite)})` : ''} → ${c.besoin === 3 ? '3 ou +' : c.besoin}`).join(' ; ')}` : ''}.</p>${rep}</li>`;
+  }).join('')}</ul>`;
+}
+
+/* ═══════════════ CONFIRMATION ═══════════════ */
+function htmlEnvoye(){
+  const d = S.envoye;
+  const quoi = d.type === 'demande'
+    ? `<p>${esc(natureLabel(d.nature))} · ${esc(d.matiere)} · ${pluriel(d.lignes.length,'créneau','créneaux')} (${esc([...new Set(d.lignes.map(l => l.classe))].join(', '))}).</p>`
+    : `<p>Besoins réguliers · ${esc(d.matiere)} · ${esc(d.classe)} · à partir du ${esc(dateLongue(d.aPartirDu))}.</p>`;
+  return `<div class="pile">
+    <div class="message ok" data-envoye-id="${esc(d.id)}">
+      <h1 id="titre-ecran" tabindex="-1">✓ ${d.type === 'demande' ? 'Demande envoyée' : 'Déclaration envoyée'}</h1>
+      ${quoi}
+      <p>La coordination la reçoit maintenant. Son statut s’affiche dans « Demandes du pôle » : Nouvelle, puis Vue par la coordination, puis la réponse.</p>
+      <p>Référence : <code>${esc(d.id)}</code></p>
+    </div>
+    <p class="actions" style="justify-content:flex-start"><button type="button" class="btn primaire" data-action="pole">Voir les demandes du pôle</button> <button type="button" class="btn" data-action="accueil">Retour à l’accueil</button></p>
+  </div>`;
+}
+
+/* ═══════════════ événements ═══════════════ */
+const actions = {
+  'accueil': () => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; S.messageReessai = brouillons().length ? S.messageReessai : ''; rendre(); },
+  'pole': () => { S.ecran = 'pole'; S.focus = 'titre-ecran'; ecouterDemandes(); rendre(); },
+  'recharger': () => location.reload(),
+  'recharger-ref': () => { chargerReference(); ecouterDemandes(); },
+  'reecouter': () => { ecouterDemandes(); majVuesDocs(); },
+  'reessayer': () => reessayer(),
+  'nouvelle-ponctuelle': b => { if (refPret()) nouvellePonctuelle(b.dataset.nature); },
+  'nouveau-regulier': () => { if (refPret()) nouveauRegulier(); },
+  'reprendre-p': () => { S.ecran = 'ponctuel'; S.focus = 'titre-etape'; rendre(); },
+  'reprendre-r': () => { S.ecran = 'regulier'; S.focus = 'titre-etape'; rendre(); },
+  'abandonner-p': () => { S.p = null; rendre(); annonce('Demande abandonnée.'); $('#titre-ecran')?.focus(); },
+  'abandonner-r': () => { S.r = null; rendre(); annonce('Saisie abandonnée.'); $('#titre-ecran')?.focus(); },
+  'p-suivant': () => allerEtapeP(S.p.etape + 1),
+  'p-precedent': () => allerEtapeP(S.p.etape - 1),
+  'p-ajout-ligne': b => {
+    const nom = b.dataset.classe, l = nouvelleLigne(), prec = S.p.lignes[nom].at(-1);
+    if (prec){ l.date = prec.date; l.salle = prec.salle; l.nbAesh = prec.nbAesh; }
+    S.p.lignes[nom].push(l); S.focus = `l-${l.uid}-date`; rendre(); annonce(`Créneau ajouté pour ${nom}.`);
+  },
+  'p-retire-ligne': b => {
+    const nom = b.dataset.classe, uid = Number(b.dataset.uid);
+    S.p.lignes[nom] = S.p.lignes[nom].filter(l => l.uid !== uid);
+    S.p.erreurs = S.p.erreurs.filter(e => !e.id.startsWith(`l-${uid}-`));
+    S.focus = `p-ajout-${nom}`; rendre(); annonce(`Créneau retiré pour ${nom}.`);
+  },
+  'p-semaine': b => { S.p.semaine = b.dataset.lundi; const z = $('#zone-pole'); if (z){ remplaceEnGardantFocus(z, htmlZonePole()); const t = $('#titre-semaine'); if (t && !z.contains(document.activeElement)){ t.tabIndex = -1; t.focus(); } } },
+  'envoyer-ponctuelle': () => {
+    const e = validerP(S.p, 6); if (e.length){ S.p.erreurs = e; S.focus = 'resume-erreurs'; rendre(); return; }
+    for (let k = 1; k <= 5; k++){ const ek = validerP(S.p, k); if (ek.length){ S.p.etape = k; S.p.erreurs = ek; S.focus = 'resume-erreurs'; rendre(); return; } }
+    envoyer(construireDemande(S.p));
+  },
+  'r-suivant': () => allerEtapeR(S.r.etape + 1),
+  'r-precedent': () => allerEtapeR(S.r.etape - 1),
+  'r-reporter': b => {
+    const r = S.r, liste = creneauxDe(r.classe, r.matiere), src = r.creneaux[liste[+b.dataset.i].cle];
+    let n = 0;
+    liste.forEach((c, i) => { if (i === +b.dataset.i) return; const s = r.creneaux[c.cle]; s.eleves = JSON.parse(JSON.stringify(src.eleves)); n++; });
+    r.modifie = true; rendre(); annonce(`Élèves et aides copiés sur ${pluriel(n,'autre créneau','autres créneaux')}. Ils ne sont envoyés que pour les créneaux avec un besoin.`);
+  },
+  'envoyer-regulier': () => {
+    for (let k = 1; k <= 4; k++){ const ek = validerR(S.r, k); if (ek.length){ S.r.etape = k; S.r.erreurs = ek; S.focus = 'resume-erreurs'; rendre(); return; } }
+    envoyer(construireRegulier(S.r));
+  }
+};
+document.addEventListener('click', ev => {
+  const lienErr = ev.target.closest('a[data-focus]');
+  if (lienErr){ ev.preventDefault(); const el = document.getElementById(lienErr.dataset.focus); if (el){ el.focus(); el.scrollIntoView({block:'center'}); } return; }
+  const b = ev.target.closest('button[data-action]');
+  if (!b || b.disabled) return;
+  const f = actions[b.dataset.action];
+  if (f) f(b, ev);
+});
+function champ(t, type){
+  const c = t.dataset && t.dataset.champ; if (!c) return;
+  const p = S.p, r = S.r;
+  switch (c){
+    case 'p-nature': if (type === 'change' && t.checked){ p.nature = t.value; rendre(); } break;
+    case 'p-nature-autre': p.natureAutre = t.value; break;
+    case 'p-matiere': if (type === 'change' && t.checked){ p.matiereChoix = t.value; if (t.value === '__autre') S.focus = 'p-matiere-autre'; rendre(); } break;
+    case 'p-matiere-autre': p.matiereAutre = t.value; break;
+    case 'p-classe': if (type === 'change'){
+      if (t.checked){ if (!p.classes.includes(t.value)) p.classes.push(t.value); initClasseP(p, t.value); }
+      else p.classes = p.classes.filter(x => x !== t.value);
+      rendre(); } break;
+    case 'l-champ': { const l = (p.lignes[t.dataset.classe] || []).find(x => x.uid === Number(t.dataset.uid)); if (l) l[t.dataset.k] = t.value; break; }
+    case 'e-concerne': if (type === 'change'){ p.eleves[t.dataset.classe][t.dataset.code].concerne = t.checked; rendre(); } break;
+    case 'e-besoin': if (type === 'change'){
+      const s = p.eleves[t.dataset.classe][t.dataset.code];
+      s.besoins = t.checked ? [...new Set([...s.besoins, t.dataset.b])] : s.besoins.filter(x => x !== t.dataset.b); } break;
+    case 'e-note': p.eleves[t.dataset.classe][t.dataset.code].note = t.value; break;
+    case 'p-commentaire': p.commentaire = t.value; break;
+    case 'r-matiere': if (type === 'change' && t.checked){ r.matiere = t.value; if (r.classe && !classesAvec(r.matiere).some(c => c.nom === r.classe)) r.classe = ''; if (classesAvec(r.matiere).length === 1) r.classe = classesAvec(r.matiere)[0].nom; rendre(); } break;
+    case 'r-classe': if (type === 'change' && t.checked){ r.classe = t.value; rendre(); } break;
+    case 'r-besoin': if (type === 'change' && t.checked){ const cr = creneauxDe(r.classe, r.matiere)[+t.dataset.i]; r.creneaux[cr.cle].besoin = Number(t.value); r.modifie = true; rendre(); } break;
+    case 'r-eleve': if (type === 'change'){
+      const s = r.creneaux[creneauxDe(r.classe, r.matiere)[+t.dataset.i].cle];
+      if (t.checked) s.eleves[t.dataset.code] = s.eleves[t.dataset.code] || []; else delete s.eleves[t.dataset.code];
+      r.modifie = true; rendre(); } break;
+    case 'r-aide': if (type === 'change'){
+      const s = r.creneaux[creneauxDe(r.classe, r.matiere)[+t.dataset.i].cle], code = t.dataset.code;
+      s.eleves[code] = t.checked ? [...new Set([...(s.eleves[code] || []), t.dataset.a])] : (s.eleves[code] || []).filter(x => x !== t.dataset.a);
+      r.modifie = true; } break;
+    case 'r-note': { r.creneaux[creneauxDe(r.classe, r.matiere)[+t.dataset.i].cle].note = t.value; r.modifie = true; break; }
+    case 'r-apartir': r.aPartirDu = t.value; break;
+    case 'r-commentaire': r.commentaire = t.value; break;
+    case 'f-type': case 'f-classe': case 'f-statut':
+      if (type === 'change'){ S.filtre[c.slice(2)] = t.value; const z = $('#zone-liste'); if (z) z.innerHTML = htmlListePole(); } break;
+  }
+}
+vue.addEventListener('input', ev => champ(ev.target, 'input'));
+vue.addEventListener('change', ev => champ(ev.target, 'change'));
+window.addEventListener('online', () => { if (brouillons().length) reessayer(); if (!S.unsub) { ecouterDemandes(); majVuesDocs(); } if (S.refEtat === 'horsligne') chargerReference(); });
+
+/* ═══════════════ démarrage ═══════════════ */
+if (erreurChargement) rendre();
+else {
+  rendre();
+  ecouterDemandes();
+  await chargerReference();
+}
+window.__DEMANDES_AESH_PRET__ = true;
+</script>
+</body>
+</html>
