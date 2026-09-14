@@ -29,7 +29,7 @@
   --brand:#5546c8; --brand-d:#4437ad; --brand-l:#7a6ce0; --brand-soft:#edeafb;
   --A:#17804b; --B:#6c8f26; --C:#c07414; --D:#b93f33; --SO:#8b8aa0;
   --A-s:#e3f4ea; --B-s:#eef4e0; --C-s:#fbefdd; --D-s:#fae8e6; --SO-s:#eeedf3;
-  --r:20px; --r-m:15px; --r-s:11px; --pill:999px;
+  --r:20px; --r-m:15px; --r-s:11px; --pill:999px; --on-brand:#ffffff;
   --sh-1:0 1px 2px rgba(25,21,51,.05);
   --sh-2:0 4px 14px rgba(25,21,51,.07),0 1px 3px rgba(25,21,51,.05);
   --sh-3:0 18px 48px rgba(25,21,51,.16);
@@ -43,6 +43,7 @@
   --brand:#8c7bf0; --brand-d:#a394ff; --brand-l:#a394ff; --brand-soft:#231d46;
   --A:#3cc07c; --B:#9dc44a; --C:#e0a13f; --D:#e8695c; --SO:#8b8aa0;
   --A-s:#122c1f; --B-s:#212a12; --C-s:#2e2413; --D-s:#2f1a18; --SO-s:#221f33;
+  --on-brand:#120f24;
   --sh-1:0 1px 2px rgba(0,0,0,.4);
   --sh-2:0 4px 14px rgba(0,0,0,.45);
   --sh-3:0 18px 48px rgba(0,0,0,.6);
@@ -55,6 +56,7 @@
   --brand:#8c7bf0; --brand-d:#a394ff; --brand-l:#a394ff; --brand-soft:#231d46;
   --A:#3cc07c; --B:#9dc44a; --C:#e0a13f; --D:#e8695c; --SO:#8b8aa0;
   --A-s:#122c1f; --B-s:#212a12; --C-s:#2e2413; --D-s:#2f1a18; --SO-s:#221f33;
+  --on-brand:#120f24;
   --sh-1:0 1px 2px rgba(0,0,0,.4);
   --sh-2:0 4px 14px rgba(0,0,0,.45);
   --sh-3:0 18px 48px rgba(0,0,0,.6);
@@ -113,10 +115,10 @@ main{max-width:960px;margin:0 auto;padding:16px 14px calc(env(safe-area-inset-bo
 
 /* ───────── blocs ───────── */
 .hero{background:linear-gradient(140deg,var(--brand-d),var(--brand) 55%,var(--brand-l));
-  color:#fff;border-radius:var(--r);padding:22px 20px;box-shadow:var(--sh-2);position:relative;overflow:hidden}
+  color:var(--on-brand);border-radius:var(--r);padding:22px 20px;box-shadow:var(--sh-2);position:relative;overflow:hidden}
 .hero::after{content:"";position:absolute;right:-40px;top:-56px;width:180px;height:180px;border-radius:50%;
   background:rgba(255,255,255,.09)}
-.hero h2{font-size:1.28rem;color:#fff;position:relative}
+.hero h2{font-size:1.28rem;color:var(--on-brand);position:relative}
 .hero p{margin:8px 0 0;font-size:.89rem;opacity:.9;position:relative;max-width:34rem}
 .kicker{display:inline-block;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;font-weight:700;
   background:rgba(255,255,255,.2);padding:5px 11px;border-radius:var(--pill);position:relative}
@@ -151,7 +153,7 @@ main{max-width:960px;margin:0 auto;padding:16px 14px calc(env(safe-area-inset-bo
 .el.gris{opacity:.5;filter:saturate(0);box-shadow:none;background:var(--card-3)}
 .el.gris:hover{opacity:.8}
 .nf-tag{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:.58rem;font-weight:800;letter-spacing:.07em;
-  text-transform:uppercase;color:#fff;background:var(--brand);padding:2px 7px;border-radius:99px;white-space:nowrap}
+  text-transform:uppercase;color:var(--on-brand);background:var(--brand);padding:2px 7px;border-radius:99px;white-space:nowrap}
 .nf-aide{font-size:.8rem;color:var(--faint);margin:-4px 0 14px}
 .nf-aide b{color:var(--brand)}
 .autre-mat{margin-top:14px}
@@ -190,9 +192,9 @@ main{max-width:960px;margin:0 auto;padding:16px 14px calc(env(safe-area-inset-bo
   background:var(--brand-soft)}
 .act b{display:block;font-size:.95rem;font-weight:700}
 .act span{display:block;font-size:.78rem;color:var(--faint);line-height:1.4}
-.act.primary{background:linear-gradient(135deg,var(--brand-d),var(--brand));border-color:transparent;color:#fff;grid-column:1/-1}
+.act.primary{background:linear-gradient(135deg,var(--brand-d),var(--brand));border-color:transparent;color:var(--on-brand);grid-column:1/-1}
 .act.primary .em{background:rgba(255,255,255,.18)}
-.act.primary span{color:rgba(255,255,255,.85)}
+.act.primary span{color:var(--on-brand);opacity:.88}
 
 .rub{width:100%;display:flex;align-items:center;gap:13px;background:var(--card);border:1px solid var(--line);
   border-radius:var(--r-m);padding:14px 15px;text-align:left;margin-bottom:9px;box-shadow:var(--sh-1);
@@ -266,7 +268,7 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
   padding:2px 7px;border-radius:var(--pill);margin-left:6px;vertical-align:middle}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:14px;
-  background:var(--brand);color:#fff;font-weight:700;font-size:.94rem;box-shadow:0 4px 14px rgba(85,70,200,.3);
+  background:var(--brand);color:var(--on-brand);font-weight:700;font-size:.94rem;box-shadow:0 4px 14px rgba(85,70,200,.3);
   transition:transform .12s,background .15s}
 .btn:active{transform:scale(.97)}
 .btn:disabled{opacity:.42;box-shadow:none;cursor:not-allowed}
@@ -341,10 +343,10 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
 .fi-tt{flex:1;min-width:0}
 .fi-tt b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:.01em}
 .fi-tt span{display:block;font-size:.88rem;color:var(--faint)}
-.fi-tag{flex:none;font-size:.76rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:var(--brand);padding:7px 12px;border-radius:var(--pill)}
+.fi-tag{flex:none;font-size:.76rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--on-brand);background:var(--brand);padding:7px 12px;border-radius:var(--pill)}
 .fi-tag.cours{color:var(--C);background:var(--C-s)}
 .fi-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:8px 16px 12px}
-.fi-step{display:grid;gap:7px;text-align:left;padding:2px 0}
+.fi-step{display:grid;gap:7px;text-align:left;padding:2px 0;min-height:44px;align-content:end}
 .fi-step i{display:block;height:7px;border-radius:99px;background:var(--line-2);transition:background .25s}
 .fi-step span{font-size:.8rem;font-weight:600;color:var(--faint);white-space:nowrap}
 .fi-step.fait i{background:color-mix(in srgb,var(--brand) 45%,var(--line-2))}
@@ -357,7 +359,7 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
 .fi-page.avant{transform:translateX(-104%)}
 .fi-eyebrow{font-size:.82rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--brand-d)}
 .fi-page h2{font-size:1.7rem;margin-top:3px}
-.fi-id{background:linear-gradient(150deg,var(--brand-d),var(--brand) 60%,var(--brand-l));color:#fff;border-radius:26px;padding:20px 22px;position:relative;overflow:hidden}
+.fi-id{background:linear-gradient(150deg,var(--brand-d),var(--brand) 60%,var(--brand-l));color:var(--on-brand);border-radius:26px;padding:20px 22px;position:relative;overflow:hidden}
 .fi-id::after{content:"";position:absolute;right:-60px;top:-70px;width:210px;height:210px;border-radius:50%;background:rgba(255,255,255,.08)}
 .fi-kick{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
 .fi-code{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:3.8rem;line-height:1;letter-spacing:.02em;margin:10px 0 6px}
@@ -365,23 +367,23 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
 .fi-acc{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
 .fi-h{text-align:center;padding-right:16px;border-right:1px solid var(--line);min-width:92px}
 .fi-h b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:2.4rem;font-weight:800;line-height:1;color:var(--brand-d);font-variant-numeric:tabular-nums}
-.fi-h span{font-size:.85rem;color:var(--faint);font-weight:600}
+.fi-h span{font-size:.9em;color:var(--faint);font-weight:600}
 .fi-t{display:grid;gap:8px;justify-items:start}
-.fi-t strong{font-size:1.08rem;line-height:1.25}
+.fi-t strong{font-size:1.1em;line-height:1.25}
 .fi-pill{display:inline-flex;align-items:center;gap:7px;font-size:.88rem;font-weight:700;padding:6px 12px;border-radius:var(--pill);color:var(--C);background:var(--C-s)}
 .fi-lab{font-size:.8rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
 .fi-lab.w{color:var(--C)} .fi-lab.g{color:var(--A)}
 .fi-glance{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 .fi-glance div{background:var(--card-2);border:1px solid var(--line);border-radius:18px;padding:14px 8px 12px;display:grid;justify-items:center;gap:8px;text-align:center;color:var(--brand)}
 .fi-glance div.alerte{background:var(--C-s);border-color:color-mix(in srgb,var(--C) 35%,transparent);color:var(--C)}
-.fi-glance span{font-size:.88rem;font-weight:700;line-height:1.2;color:var(--ink)}
+.fi-glance span{font-size:1em;font-weight:700;line-height:1.2;color:var(--ink)}
 .fi-list{display:grid;gap:10px}
 .fi-row{display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 15px 12px 12px}
 .fi-tile{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-d)}
-.fi-row b{display:block;font-size:1.02rem;line-height:1.25}
-.fi-row p{margin:3px 0 0;font-size:.92rem;color:var(--ink-2);line-height:1.35}
+.fi-row b{display:block;font-size:1.05em;line-height:1.25}
+.fi-row p{margin:3px 0 0;font-size:1em;color:var(--ink-2);line-height:1.35}
 .fi-row.now{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 55%,transparent)}
-.fi-row.now .fi-tile{background:var(--brand);color:#fff}
+.fi-row.now .fi-tile{background:var(--brand);color:var(--on-brand)}
 .fi-now{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-d);margin-bottom:3px}
 .fi-row.w .fi-tile{background:var(--C-s);color:var(--C)}
 .fi-row.g .fi-tile{background:var(--A-s);color:var(--A)}
@@ -389,20 +391,20 @@ textarea:focus,input:focus{border-color:var(--brand);outline:none;background:var
 .fi-row.fort .fi-tile{background:var(--C);color:#fff}
 .fi-row.slim{padding:9px 13px 9px 9px;grid-template-columns:44px 1fr}
 .fi-row.slim .fi-tile{width:44px;height:44px;border-radius:13px}
-.fi-row.slim b{font-size:.98rem;font-weight:600}
-.fi-vide{display:flex;gap:10px;align-items:center;font-size:.93rem;color:var(--ink-2);background:var(--card-2);border:1px dashed var(--line-2);border-radius:16px;padding:12px 14px}
+.fi-row.slim b{font-size:1em;font-weight:600}
+.fi-vide{display:flex;gap:10px;align-items:center;font-size:1em;color:var(--ink-2);background:var(--card-2);border:1px dashed var(--line-2);border-radius:16px;padding:12px 14px}
 .fi-nav{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;padding:12px 16px calc(env(safe-area-inset-bottom) + 18px);border-top:1px solid var(--line);background:var(--bg)}
 .fi-btn{min-height:58px;border-radius:18px;font-size:1.02rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;transition:transform .12s,opacity .2s}
 .fi-btn:active{transform:scale(.97)}
 .fi-btn.sec{background:var(--card);border:1px solid var(--line)}
-.fi-btn.pri{background:var(--brand);color:#fff}
+.fi-btn.pri{background:var(--brand);color:var(--on-brand)}
 .fi-btn[disabled]{opacity:.38}
 svg.fi-i{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .fi-row.slim svg.fi-i{width:22px;height:22px}
 .fi-pill svg.fi-i{width:16px;height:16px}
 .fi-btn svg.fi-i{width:21px;height:21px}
 @media (prefers-reduced-motion:reduce){.fi-page,.fi-step i{transition:none}}
-.fi-passer{flex:none;min-height:40px;padding:0 14px;border-radius:var(--pill);background:var(--card);border:1px solid var(--line);font-size:.86rem;font-weight:700;color:var(--ink-2)}
+.fi-passer{flex:none;min-height:44px;padding:0 14px;border-radius:var(--pill);background:var(--card);border:1px solid var(--line);font-size:.86rem;font-weight:700;color:var(--ink-2)}
 .fi-passer:active{transform:scale(.96)}
 /* ───────── choix du cours : tuiles par famille ───────── */
 .mfam{margin-top:18px}
@@ -417,11 +419,16 @@ svg.fi-i{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;str
 .mt:active{transform:scale(.975)}
 .mt.on{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand),var(--sh-1)}
 .mt.on span{color:var(--brand-d);font-weight:700}
-.mt.maint{background:linear-gradient(140deg,var(--brand-d),var(--brand) 60%,var(--brand-l));color:#fff;border:0;padding:16px 18px;margin-top:4px}
+.mt.maint{background:linear-gradient(140deg,var(--brand-d),var(--brand) 60%,var(--brand-l));color:var(--on-brand);border:0;padding:16px 18px;margin-top:4px}
 .mt.maint b{font-family:"Bricolage Grotesque",sans-serif;font-size:1.25rem;font-weight:800}
-.mt.maint .mt-k{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#fff;opacity:.9}
+.mt.maint .mt-k{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--on-brand);opacity:.9}
 .mt.autre{margin-top:18px;border-style:dashed;background:var(--card-2)}
 .idee{margin-top:18px}
+#feuille .chip{min-height:44px;display:inline-flex;align-items:center}
+#feuille .chip.sm{font-size:.84rem;padding:8px 13px}
+.note-rgpd.mini{margin-top:8px;padding:8px 11px;font-size:.74rem}
+.brouillon-tag{display:inline-block;margin-top:8px;font-size:.74rem;font-weight:700;color:var(--brand-d);background:var(--brand-soft);padding:3px 9px;border-radius:var(--pill)}
+.moi.attente{background:var(--C-s);color:var(--C);border-color:transparent}
 </style>
 </head>
 <body>
@@ -443,6 +450,7 @@ svg.fi-i{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;str
       <svg viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg>
     </button>
     <div class="topttl"><b id="t-titre">Les classes</b><span id="t-sous">Choisissez la classe où vous intervenez</span></div>
+    <span class="moi attente hidden" id="attente" role="status"></span>
     <span class="moi" id="moi-code" title="Votre code">····</span>
   </div>
   <main id="vue"></main>
@@ -603,14 +611,14 @@ const RUBRIQUES = [
     {id:'a8', t:"Maîtriser son comportement dans ses relations avec autrui", a:"Gérer la frustration, le conflit, l'emportement"}]},
  { id:'R2', em:'🚶', titre:'Mobilité, manipulation',
    court:'Mobilité & gestes', sous:'Déplacements, transferts, motricité fine', items:[
-    {id:'b1', t:"Faire ses transferts", a:"Passer du fauteuil à la chaise, s'installer"},
-    {id:'b2', t:"Se déplacer à l'intérieur, à l'extérieur", a:"Couloirs, atelier, cour, sortie"},
+    {id:'b1', t:"Faire ses transferts (ex. : du fauteuil roulant à la chaise dans la classe)", a:"S'installer, changer de position"},
+    {id:'b2', t:"Se déplacer à l'intérieur, à l'extérieur (dans le cadre des activités scolaires)", a:"Couloirs, atelier, cour, sortie"},
     {id:'b3', t:"Utiliser les transports en commun", a:"Trajet, bus, autonomie sur le chemin"},
     {id:'b4', t:"Avoir des activités de motricité fine", a:"Écrire, visser, découper, manipuler un outil"}]},
  { id:'R3', em:'🫖', titre:'Entretien personnel',
    court:'Vie quotidienne', sous:'Toilettes, habillage, repas, santé', items:[
     {id:'c1', t:"Assurer l'élimination et utiliser les toilettes", a:"Avec ou sans aide, autonomie aux sanitaires"},
-    {id:'c2', t:"S'habiller / se déshabiller", a:"Tenue d'atelier, blouse, EPI, manteau"},
+    {id:'c2', t:"S'habiller/se déshabiller", a:"Tenue d'atelier, blouse, EPI, manteau"},
     {id:'c3', t:"Prendre ses repas (manger, boire)", a:"Au self, couper, porter, s'installer"},
     {id:'c4', t:"Prendre soin de sa santé", a:"Traitement, fatigue, signaler une douleur"}]},
  { id:'R4', em:'💬', titre:'Communication',
@@ -632,20 +640,20 @@ const RUBRIQUES = [
     {id:'e9', t:"Utiliser des supports pédagogiques", a:"Manuel, fiche, écran, machine, documentation"},
     {id:'e10', t:"Utiliser du matériel adapté à son handicap", a:"Ordinateur, loupe, casque, logiciel dédié"},
     {id:'e11', t:"Prendre des notes (quel que soit le support)", a:"Copier, noter à la main ou au clavier"},
-    {id:'e12', t:"Participer à des sorties scolaires", a:"Visite, PFMP, déplacement en groupe"}]}
+    {id:'e12', t:"Participer à des sorties scolaires", a:"Visite, sortie, déplacement en groupe"}]}
 ];
 const ACT={}, ACT_RUB={};
 RUBRIQUES.forEach(r=>r.items.forEach(it=>{ ACT[it.id]=it; ACT_RUB[it.id]=r; }));
 const NB_ACT=Object.keys(ACT).length;
 
 const COT=[
-  {v:'A', mot:'Seul',            sens:"Activité réalisée sans difficulté et seul."},
-  {v:'B', mot:'Aide ponctuelle', sens:"Réalisée avec des difficultés ponctuelles et/ou une aide ponctuelle."},
-  {v:'C', mot:'Aide régulière',  sens:"Réalisée avec des difficultés régulières et/ou une aide régulière. La grille exige alors les deux commentaires."},
-  {v:'D', mot:'Non réalisée',    sens:"Activité non réalisée. La grille exige alors les deux commentaires."}
+  {v:'A', mot:'Sans difficulté, seul',              sens:"Activité réalisée sans difficulté et seul, au regard de l'autonomie d'un élève du même âge."},
+  {v:'B', mot:'Difficultés et/ou aide ponctuelles', sens:"Activité réalisée avec des difficultés ponctuelles et/ou une aide ponctuelle, au regard d'un élève du même âge."},
+  {v:'C', mot:'Difficultés et/ou aide régulières',  sens:"Activité réalisée avec des difficultés régulières et/ou une aide régulière, au regard d'un élève du même âge. La grille exige alors les deux commentaires."},
+  {v:'D', mot:'Non réalisée',                       sens:"Activité non réalisée. La grille exige alors les deux commentaires."}
 ];
 const COTMAP=Object.fromEntries(COT.map(c=>[c.v,c]));
-COTMAP.SO={v:'SO',mot:'Sans objet',sens:"Sans objet dans votre accompagnement."};
+COTMAP.SO={v:'SO',mot:'Sans objet',sens:"Sans objet : cette activité ne concerne pas l'élève. Vous ne l'avez pas encore observée ? Ne notez rien."};
 const RANG={A:0,B:1,C:2,D:3};
 
 const OBS_COMMUNS=["Ne comprend pas ce qui est attendu","Ne sait pas par où commencer","Décroche en cours de route",
@@ -692,7 +700,7 @@ function jaiDe(rub,actuel){ const l=(JAI_RUB[rub]||JAI).slice(); if(actuel&&l.in
 /* Ce que la fiche de l'élève annonce déjà comme aménagement. */
 function prevusFiche(code){
   const f=ficheEnCache(code), p=new Set(); if(!f) return p;
-  const txt=[].concat(f.coup||[],f.enClasse||[]).map(x=>(x.t||'')+' '+(x.d||'')).join(' | ').toLowerCase();
+  const txt=[].concat(f.coup||[],f.enClasse||[]).map(x=>((x&&x.t)||'')+' '+((x&&x.d)||'')).filter(t=>!/\bsans\b/i.test(t)).join(' | ').toLowerCase();
   [[/ordinateur|tablette/,"Matériel informatique"],[/place|fond|tableau|côté|axe/,"Place aménagée"],[/visuel|timer|image|emploi du temps/,"Supports visuels"],
    [/consigne/,"Répétition des consignes"],[/tiers temps|temps majoré|plus de temps/,"Temps supplémentaire"],
    [/usb|photocopie|agrandi|aéré|supports adaptés/,"Traces écrites adaptées"],[/différenci/,"Différenciation pédagogique"],
@@ -832,23 +840,54 @@ async function sondeRegles(){
 /* ═══ Revenir en arrière, toujours ═══
    Le geste « retour » du téléphone ferme d'abord ce qui est ouvert (présentation, feuille),
    puis remonte d'un écran : on ne quitte jamais l'application par erreur. */
-let viaHistorique=false, retourFeuille=null;
-function marque(){ if(viaHistorique) return; try{ history.pushState({obs:Date.now()},''); }catch(e){} }
-window.addEventListener('popstate',()=>{
-  viaHistorique=true;
-  try{
-    if(!$('#fiche').classList.contains('hidden')) fermeFiche(false);
-    else if($('#feuille').classList.contains('on')) (retourFeuille||ferme)();
-    else if(!$('#app').classList.contains('hidden')&&vue!=='classes') $('#btn-retour').click();
-  } finally { viaHistorique=false; }
-});
-$('#btn-retour').onclick=()=>{
+let viaHistorique=false, retourFeuille=null, cleCourante='classes', entreesVue=0, entreeCouche=false, ignorerPop=0,
+    feuilleDeclencheur=null, ficheDeclencheur=null;
+/* Une entrée d'historique par écran réellement nouveau (pas à chaque rafraîchissement),
+   et une seule pour ce qui s'ouvre par-dessus (présentation, feuille). */
+function marque(cle){
+  if(cle===cleCourante) return;
+  cleCourante=cle;
+  if(viaHistorique) return;
+  try{ history.pushState({obs:cle},''); entreesVue++; }catch(e){}
+}
+const horsCouche=el=>(el&&el!==document.body&&!el.closest('#feuille,#fiche'))?el:null;
+function coucheOuverte(){ return !$('#fiche').classList.contains('hidden')||$('#feuille').classList.contains('on'); }
+function marqueCouche(){ if(entreeCouche||viaHistorique) return; try{ history.pushState({couche:1},''); entreeCouche=true; }catch(e){} }
+function quitteCouche(){
+  if(!entreeCouche) return;
+  entreeCouche=false;
+  if(!viaHistorique){ ignorerPop++; try{ history.back(); }catch(e){ ignorerPop--; } }
+}
+function remonte(){
   if(vue==='bilan') allerEleve(eleveCour);
   else if(vue==='bilan-classe') allerEleves(classeCour);
   else if(vue==='eleve') allerMatiere(eleveCour);
   else if(vue==='matiere') allerEleves(classeCour);
   else if(vue==='eleves') allerClasses();
-  else quitte();
+}
+window.addEventListener('popstate',()=>{
+  if(ignorerPop>0){ ignorerPop--; return; }
+  viaHistorique=true;
+  try{
+    if(coucheOuverte()){
+      entreeCouche=false;
+      if(!$('#fiche').classList.contains('hidden')) fermeFiche(false);
+      else (retourFeuille||ferme)();
+      if(coucheOuverte()){ viaHistorique=false; marqueCouche(); }
+    } else if(!$('#app').classList.contains('hidden')&&vue!=='classes'){
+      if(entreesVue>0) entreesVue--;
+      remonte();
+    }
+  } finally { viaHistorique=false; }
+});
+$('#btn-retour').onclick=()=>{
+  if(vue==='classes'){ quitte(); return; }
+  if(entreesVue>0){
+    const avant=vue+'|'+eleveCour;
+    history.back();
+    // filet : si l'historique ne répond pas, on remonte quand même
+    setTimeout(()=>{ if(vue+'|'+eleveCour===avant&&!coucheOuverte()){ entreesVue=0; remonte(); } },450);
+  } else remonte();
 };
 function quitte(){
   if(dansCadre){ dis('Pour changer de code : « Quitter cet espace » dans l\'emploi du temps.'); return; }
@@ -865,6 +904,7 @@ function teinte(c){
 
 /* ─── 1 · la classe ─── */
 function allerClasses(){
+  cleCourante='classes';
   vue='classes'; classeCour=null; eleveCour=''; matiereCour=''; stopFlux();
   tete('Les classes','Choisissez la classe où vous intervenez');
   const rec=recentsClasses(), cls=mesClasses(), toutes=cls.length>=ROSTER.classes.length;
@@ -895,7 +935,7 @@ function allerClasses(){
 }
 
 /* ─── 2 · l'élève ─── */
-function allerEleves(c){ marque();
+function allerEleves(c){ marque('eleves:'+c.nom);
   vue='eleves'; classeCour=c; eleveCour=''; stopFlux(); memoriseClasse(c.nom);
   tete(c.affiche, c.label+' · '+c.codes.length+' élèves');
   const actifs=c.codes.filter(estActif), avecNotif=actifs.length>0, choisis=!!mesEleves();
@@ -929,7 +969,8 @@ async function chargeClasse(c){
     obsClasse=snap.docs.map(d=>({...(d.data()||{}),_id:d.id}));
   }catch(e){ obsClasse=[]; }
   const ids=new Set(obsClasse.map(o=>o.id));
-  obsClasse=obsClasse.concat(fileLocale().filter(o=>o.classeNom===c.nom&&!ids.has(o.id)));
+  const suppr=suppressionsEnAttente();
+  obsClasse=obsClasse.filter(o=>!suppr.has(o.id)).concat(fileLocale().filter(o=>o&&!o._suppr&&o.classeNom===c.nom&&!ids.has(o.id)));
   if(vue!=='eleves'||!classeCour||classeCour.nom!==c.nom) return;
   const par={};
   obsClasse.forEach(o=>{ const k=(o.eleveCode||'').toUpperCase(); if(k)(par[k]=par[k]||[]).push(o); });
@@ -963,26 +1004,36 @@ async function chargeFiche(code){
     return toutes[code]||null;
   }catch(e){ return ficheEnCache(code); }
 }
+let ouvertureEnCours='';
 async function ouvreEleve(code){
+  if(ouvertureEnCours===code) return;                      // double appui
   if(FICHES_VUES.has(code)){ allerMatiere(code); chargeFiche(code); return; }
-  const f=await Promise.race([chargeFiche(code), new Promise(r=>setTimeout(()=>r(ficheEnCache(code)),1500))]);
-  if(f) montreFiche(f,()=>allerMatiere(code),code); else allerMatiere(code);
+  const cls=classeCour; ouvertureEnCours=code;
+  let f=null;
+  try{ f=await Promise.race([chargeFiche(code), new Promise(r=>setTimeout(()=>r(ficheEnCache(code)),1500))]); }
+  finally{ ouvertureEnCours=''; }
+  if(vue!=='eleves'||classeCour!==cls) return;             // l'AESH a changé d'écran pendant la lecture
+  if(f) montreFiche(f,()=>{ if(classeCour===cls) allerMatiere(code); },code); else allerMatiere(code);
 }
-const FI=n=>'<svg class="fi-i" aria-hidden="true"><use href="#fi-'+n+'"/></svg>';
+/* Liste fermée : un nom d'icône inconnu (ou piégé) devient « info », jamais du balisage. */
+const FI_OK=new Set(['back','next','info','renouv','laptop','casque','fond','chaise','oeil','elan','son','energie','parole','debout',
+  'langue','horloge','loupe','pause','usb','calc','tableau','crayon','alerte','coeur','valise','calendrier','cible','etapes','sortie','image','groupe','notes']);
+const FI=n=>'<svg class="fi-i" aria-hidden="true"><use href="#fi-'+(FI_OK.has(n)?n:'info')+'"/></svg>';
 let fichePage=0, ficheApres=null;
 function montreFiche(f,apres,code){
-  if(!f) return;
+  if(!f||typeof f!=='object') return;
+  if($('#fiche').classList.contains('hidden')) ficheDeclencheur=horsCouche(document.activeElement);
   ficheApres=apres; FICHES_VUES.add(code||f.code);
-  const L=v=>Array.isArray(v)?v:[];
+  const L=v=>Array.isArray(v)?v.filter(x=>x&&typeof x==='object'):[];
   const aff=classeCour?classeCour.affiche:'';
   const enCours=f.etat==='en_cours';
-  const grand=f.heures?[f.heures,'par semaine']:/^ULIS/.test(f.dispositif||'')?['ULIS','dispositif']:f.aide==='individualisée'?['IND','heures à venir']:['…','en cours'];
-  const titre=enCours?'Notification en cours':(f.dispositif||'')+(f.aide?' '+f.aide:'');
+  const grand=f.heures?[f.heures,'par semaine']:/^ULIS/.test(String(f.dispositif||''))?['ULIS','dispositif']:f.aide==='individualisée'?['IND','heures à venir']:['…','en cours'];
+  const titre=enCours?'Notification en cours':String(f.dispositif||'')+(f.aide?' '+f.aide:'');
   const pill=f.etat==='renouvellement'?'<span class="fi-pill">'+FI('renouv')+'Renouvellement en cours</span>'
             :enCours?'<span class="fi-pill">'+FI('renouv')+'Notification attendue</span>':'';
   const vide=t=>'<div class="fi-vide">'+FI('info')+'<span>'+esc(t)+'</span></div>';
-  const lignes=(l,cls,now)=>l.map((r,k)=>'<div class="fi-row '+(cls||'')+(now&&k===0?' now':'')+'"><div class="fi-tile">'+FI(r.i)+'</div><div>'
-      +(now&&k===0?'<span class="fi-now">En ce moment</span>':'')+'<b>'+esc(r.t)+'</b>'+(r.d?'<p>'+esc(r.d)+'</p>':'')+'</div></div>').join('');
+  const lignes=(l,cls,prio)=>l.map((r,k)=>'<div class="fi-row '+(cls||'')+(prio&&k===0?' now':'')+'"><div class="fi-tile">'+FI(r.i)+'</div><div>'
+      +(prio&&k===0?'<span class="fi-now">Priorité</span>':'')+'<b>'+esc(r.t)+'</b>'+(r.d?'<p>'+esc(r.d)+'</p>':'')+'</div></div>').join('');
   const fines=(l,cls)=>l.map(r=>'<div class="fi-row slim '+cls+'"><div class="fi-tile">'+FI(r.i)+'</div><b>'+esc(r.t)+'</b></div>').join('');
   const tete=(sur,titre)=>'<div tabindex="-1" class="fi-head"><div class="fi-eyebrow">'+sur+'</div><h2>'+titre+'</h2></div>';
   const p1='<section class="fi-page"><div class="fi-id"><div class="fi-kick">'+(enCours?'Notification en cours · ':'Élève notifié · ')+esc(f.annee||ANNEE)+'</div>'
@@ -1001,15 +1052,17 @@ function montreFiche(f,apres,code){
     +(L(f.obstacles).length?'<div class="fi-lab w">À prendre en compte</div><div class="fi-list">'+fines(L(f.obstacles),'w')+'</div>':'')
     +(L(f.appuis).length?'<div class="fi-lab g">Points d’appui</div><div class="fi-list">'+fines(L(f.appuis),'g')+'</div>':'')
     +(rien?vide('À découvrir en observant.'):'')+'</section>';
-  $('#fi-code').textContent=f.code;
+  $('#fi-code').textContent=String(f.code||'');
   $('#fi-sous').textContent=(aff?aff+' · ':'')+'présentation';
   $('#fi-tag').textContent=enCours?'En cours':'Notifié';
   $('#fi-tag').classList.toggle('cours',enCours);
   $('#fi-pages').innerHTML=p1+p2+p3+p4;
   $('#fiche').classList.remove('hidden');
   document.body.style.overflow='hidden';
+  $('#app').inert=true;
   ficheAller(0,false);
-  marque();
+  marqueCouche();
+  setTimeout(()=>{ if(!$('#fiche').classList.contains('hidden')) $('#fi-x').focus({preventScroll:true}); },60);
 }
 function ficheAller(i,focus){
   const P=[...$('#fi-pages').children]; if(!P.length) return;
@@ -1021,10 +1074,21 @@ function ficheAller(i,focus){
   if(focus){ const h=P[fichePage].querySelector('.fi-head'); if(h) h.focus({preventScroll:true}); }
 }
 function fermeFiche(lancer){
+  if($('#fiche').classList.contains('hidden')) return;
   $('#fiche').classList.add('hidden');
   document.body.style.overflow='';
+  $('#app').inert=false;
   const suite=ficheApres; ficheApres=null;
+  const d=ficheDeclencheur; ficheDeclencheur=null;
+  if(lancer&&suite&&entreeCouche&&!viaHistorique){
+    // l'entrée d'historique de la présentation devient celle de l'écran suivant
+    entreeCouche=false; entreesVue++; viaHistorique=true;
+    try{ suite(); } finally { viaHistorique=false; }
+    return;
+  }
+  quitteCouche();
   if(lancer&&suite) suite();
+  else if(d&&document.contains(d)) try{ d.focus({preventScroll:true}); }catch(e){}
 }
 $('#fi-suiv').onclick=()=>{ if(fichePage>=$('#fi-pages').children.length-1) fermeFiche(true); else ficheAller(fichePage+1,true); };
 $('#fi-prec').onclick=()=>ficheAller(fichePage-1,true);
@@ -1061,7 +1125,7 @@ const normMat=v=>String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCa
   .filter(w=>w&&['et','de','d','la','le','l','du','des','cap'].indexOf(w)<0);
 function memeMatiere(a,b){
   const A=new Set(normMat(a)), B=new Set(normMat(b)); if(!A.size||!B.size) return 0;
-  let n=0; A.forEach(w=>{ if(B.has(w)) n++; }); return n/Math.min(A.size,B.size);
+  let n=0; A.forEach(w=>{ if(B.has(w)) n++; }); return n/Math.max(A.size,B.size);
 }
 let GRILLE=null;
 async function coursMaintenant(nomClasse){
@@ -1076,7 +1140,7 @@ async function coursMaintenant(nomClasse){
 }
 const matieresDe=nom=>(MATIERES&&MATIERES[nom])?MATIERES[nom]:[];
 function allerMatiere(code){
-  marque();
+  marque('matiere:'+code);
   vue='matiere'; eleveCour=code;
   tete(code, classeCour.affiche+' · choisissez le cours');
   const l=matieresDe(classeCour.nom);
@@ -1116,7 +1180,7 @@ function allerMatiere(code){
 }
 
 /* ─── La fiche élève ─── */
-function allerEleve(code){ marque();
+function allerEleve(code){ marque('eleve:'+code);
   vue='eleve'; eleveCour=code; obsEleve=[];
   tete(code, classeCour.affiche+(matiereCour?' · '+matiereCour:''));
   memoriseRecent(code);
@@ -1151,6 +1215,13 @@ function allerEleve(code){ marque();
   $('#a-bilan').onclick=allerBilan;
   $('#a-idee2').onclick=feuilleSuggestion;
   { const af=$('#a-fiche'); if(af) af.onclick=()=>montreFiche(ficheEnCache(code),null,code); }
+  if(!ficheEnCache(code)) chargeFiche(code).then(f=>{
+    if(!f||vue!=='eleve'||eleveCour!==code||$('#a-fiche')) return;
+    const b=document.createElement('button'); b.className='act'; b.id='a-fiche';
+    b.innerHTML='<span class="em">📇</span><span><b>Sa présentation</b><span>Ce qu’il faut savoir avant d’observer</span></span>';
+    b.onclick=()=>montreFiche(ficheEnCache(code),null,code);
+    const ref=$('#a-bilan'); if(ref) ref.parentNode.insertBefore(b,ref);
+  });
   ecouteEleve(code);
   rendFiche();
 }
@@ -1168,9 +1239,11 @@ function ecouteEleve(code){
   }catch(e){}
 }
 function fileLocale(){ try{ const l=JSON.parse(localStorage.getItem(K_FILE)||'[]'); return Array.isArray(l)?l:[]; }catch(e){ return []; } }
+const suppressionsEnAttente=()=>new Set(fileLocale().filter(x=>x&&x._suppr).map(x=>x.id));
 function toutesObs(){
-  const ids=new Set(obsEleve.map(o=>o.id));
-  return obsEleve.concat(fileLocale().filter(o=>o.eleveCode===eleveCour&&!ids.has(o.id)));
+  const suppr=suppressionsEnAttente(), ids=new Set(obsEleve.map(o=>o.id));
+  return obsEleve.filter(o=>!suppr.has(o.id))
+    .concat(fileLocale().filter(o=>o&&!o._suppr&&o.eleveCode===eleveCour&&!ids.has(o.id)));
 }
 function rendFiche(){
   const tout=toutesObs(), act=tout.filter(o=>o.type==='activite');
@@ -1229,20 +1302,45 @@ function rendJournal(tout){
 
 /* ═══ Feuille ═══ */
 function ouvre(o){
-  retourFeuille=o.retour||ferme; marque();
+  retourFeuille=o.retour||ferme;
+  const dejaOuverte=$('#feuille').classList.contains('on');
+  if(!dejaOuverte){ feuilleDeclencheur=horsCouche(document.activeElement); marqueCouche(); }
   $('#f-titre').innerHTML=o.titre; $('#f-sous').textContent=o.sous||'';
   $('#f-corps').innerHTML=o.corps; $('#f-pied').innerHTML=o.pied||'';
   $('#f-corps').scrollTop=0;
   $('#voile').classList.add('on'); $('#feuille').classList.add('on');
   document.body.style.overflow='hidden';
+  $('#app').inert=true;
   $('#f-fermer').onclick=o.retour||ferme;
+  if(!dejaOuverte) setTimeout(()=>{
+    const x=$('#f-fermer');
+    if(x&&$('#feuille').classList.contains('on')&&!$('#feuille').contains(document.activeElement)) x.focus({preventScroll:true});
+  },80);
 }
 function ferme(){
+  const etaitOuverte=$('#feuille').classList.contains('on');
   $('#voile').classList.remove('on'); $('#feuille').classList.remove('on');
   document.body.style.overflow=''; brouillon=null; retourFeuille=null;
+  $('#app').inert=false;
+  if(etaitOuverte) quitteCouche();
+  const d=feuilleDeclencheur; feuilleDeclencheur=null;
+  if(etaitOuverte&&d&&document.contains(d)) try{ d.focus({preventScroll:true}); }catch(e){}
 }
 $('#voile').onclick=ferme;
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('#feuille').classList.contains('on')) ferme(); });
+
+/* Brouillons : ce qui est commencé est gardé sur le téléphone jusqu'à l'enregistrement,
+   même après un retour en arrière ou une fermeture. « Annuler » l'efface. */
+const K_BROUILLONS='obs-besoins-brouillons';
+function brouillons(){ try{ const o=JSON.parse(localStorage.getItem(K_BROUILLONS)||'{}'); return (o&&typeof o==='object')?o:{}; }catch(e){ return {}; } }
+function litBrouillon(cle){ return brouillons()[cle]||null; }
+function ecritBrouillon(cle,val){
+  try{ const o=brouillons(); if(val==null) delete o[cle]; else o[cle]=Object.assign({le:new Date().toISOString()},val);
+       localStorage.setItem(K_BROUILLONS,JSON.stringify(o)); }catch(e){}
+}
+const cleB=(type,extra)=>moi+':'+eleveCour+':'+type+(extra?':'+extra:'');
+const TAG_BROUILLON='<span class="brouillon-tag">Brouillon repris</span>';
+const NOTE_NOMS='<p class="note-rgpd mini">Ne nommez ni l\'élève, ni un collègue, ni la famille, ni un établissement.</p>';
 
 function feuilleRubriques(){
   const act=toutesObs().filter(o=>o.type==='activite'), parRub={};
@@ -1285,11 +1383,14 @@ function feuilleActivites(rubId){
 /* ─── La saisie : les trois axes ─── */
 function feuilleSaisie(actId, existante){
   const it=ACT[actId], r=ACT_RUB[actId];
+  const cleS=cleB('act',actId), repris=existante?null:litBrouillon(cleS);
   const b = brouillon = existante ? {
       id:existante.id, cotation:existante.cotation||null,
       obstacles:new Set(existante.obstacles||[]), appuis:new Set(existante.appuis||[]),
       jai:existante.jai||'', ilA:existante.ilA||'', ensuite:existante.ensuite||''
-    } : { id:null, cotation:null, obstacles:new Set(), appuis:new Set(), jai:'', ilA:'', ensuite:'' };
+    } : (repris ? { id:null, cotation:repris.cotation||null, obstacles:new Set(repris.obstacles||[]), appuis:new Set(repris.appuis||[]),
+          jai:repris.jai||'', ilA:repris.ilA||'', ensuite:repris.ensuite||'' }
+        : { id:null, cotation:null, obstacles:new Set(), appuis:new Set(), jai:'', ilA:'', ensuite:'' });
   const chipsOb=(OBS_RUB[r.id]||[]).concat(OBS_COMMUNS);
   const chipsAp=(APP_RUB[r.id]||[]).concat(APP_COMMUNS);
   const cd = b.cotation==='C'||b.cotation==='D';
@@ -1299,7 +1400,7 @@ function feuilleSaisie(actId, existante){
       +'<div class="echelle" id="ech">'
       +COT.map(c=>'<button class="ech" data-v="'+c.v+'" aria-pressed="'+(b.cotation===c.v)+'"><b>'+c.v+'</b><span>'+esc(c.mot)+'</span></button>').join('')
       +'</div>'
-      +'<button class="ech-so" id="ech-so" aria-pressed="'+(b.cotation==='SO')+'">Sans objet dans mon accompagnement</button>'
+      +'<button class="ech-so" id="ech-so" aria-pressed="'+(b.cotation==='SO')+'">Sans objet (ne concerne pas l\'élève)</button>'
       +'<p class="sens" id="sens">'+(b.cotation?esc(COTMAP[b.cotation].sens):'Touchez une réponse — son sens officiel s\'affiche ici.')+'</p>'
       +'<label class="lab">Votre aide, et sa réaction <em>Facultatif — mais c\'est ce qui dira le besoin réel.</em></label>'
       +'<div class="boucle">'
@@ -1316,7 +1417,8 @@ function feuilleSaisie(actId, existante){
       +'<div class="chips">'+chipsAp.map(t=>'<button class="chip ap" data-ap="'+esc(t)+'" aria-pressed="'+b.appuis.has(t)+'">'+esc(t)+'</button>').join('')+'</div>'
       +'</div>'
       +'<label class="lab" for="s-note">Vous voulez préciser ? <em>Facultatif — mais c\'est souvent le plus utile.</em></label>'
-      +'<textarea id="s-note" rows="3" placeholder="Ce qui s\'est passé, dans vos mots…">'+(existante?esc(existante.note||''):'')+'</textarea>'
+      +'<textarea id="s-note" rows="3" placeholder="Ce qui s\'est passé, dans vos mots…">'+(existante?esc(existante.note||''):esc((repris&&repris.note)||''))+'</textarea>'
+      +(repris?TAG_BROUILLON:'')+NOTE_NOMS
       +'<div style="height:6px"></div>',
     pied: existante
       ? '<button class="btn danger" id="s-del">Supprimer</button><button class="btn" id="s-ok">Enregistrer</button>'
@@ -1332,7 +1434,14 @@ function feuilleSaisie(actId, existante){
     if(b.ensuite&&ENSMAP[b.ensuite]) p.push("<b>"+esc(ENSMAP[b.ensuite].t.toLowerCase())+"</b>");
     $('#phrase').innerHTML = p.length? p.join(' → ')+'.' : '';
   }
+  function sauveS(){
+    if(existante) return;
+    const note=($('#s-note')&&$('#s-note').value)||'';
+    const vide=!b.cotation&&!b.obstacles.size&&!b.appuis.size&&!b.jai&&!b.ilA&&!b.ensuite&&!note.trim();
+    ecritBrouillon(cleS, vide?null:{cotation:b.cotation,obstacles:[...b.obstacles],appuis:[...b.appuis],jai:b.jai,ilA:b.ilA,ensuite:b.ensuite,note:note});
+  }
   function majOk(){
+    sauveS();
     if(!b.cotation){ ok.disabled=true; return; }
     if(b.cotation==='C'||b.cotation==='D'){
       const n=$('#s-note'), txt=n?n.value.trim():'';
@@ -1379,6 +1488,7 @@ function feuilleSaisie(actId, existante){
   if($('#s-del')) $('#s-del').onclick=()=>supprime(existante);
   phrase(); majOk();
   ok.onclick=async()=>{
+    ok.disabled=true;
     await envoie({
       type:'activite', rubrique:r.id, rubriqueTitre:r.titre,
       activiteId:actId, activite:it.t, cotation:b.cotation,
@@ -1386,6 +1496,7 @@ function feuilleSaisie(actId, existante){
       jai:b.jai, ilA:b.ilA, ensuite:b.ensuite,
       note:($('#s-note').value||'').trim()
     }, b.id, existante);
+    if(!existante) ecritBrouillon(cleS,null);
     if(existante) ferme(); else feuilleActivites(r.id);
   };
 }
@@ -1400,11 +1511,12 @@ function ouvreEdition(id){
     titre:esc(v.ttl), sous:joli(o.date)+(o.matiere?' · '+o.matiere:''),
     corps:(v.sub?'<p class="sens">'+esc(v.sub)+'</p>':'')
       +'<label class="lab" for="e-txt">Votre texte</label>'
-      +'<textarea id="e-txt" rows="5">'+esc(o.note||'')+'</textarea>',
+      +'<textarea id="e-txt" rows="5">'+esc(o.note||'')+'</textarea>'+NOTE_NOMS,
     pied:'<button class="btn danger" id="e-del">Supprimer</button><button class="btn" id="e-ok">Enregistrer</button>'
   });
   $('#e-del').onclick=()=>supprime(o);
   $('#e-ok').onclick=async()=>{
+    $('#e-ok').disabled=true;
     const maj=Object.assign({},o); delete maj._id;
     maj.note=($('#e-txt').value||'').trim(); maj.majLe=new Date().toISOString();
     await envoieBrut(maj,true); ferme();
@@ -1413,54 +1525,71 @@ function ouvreEdition(id){
 async function supprime(o){
   if(!o) return;
   if(!confirm('Supprimer cette entrée ? Elle ne sera plus visible par la coordination.')) return;
-  if(reglesOk!==false){ try{ await deleteDoc(doc(db,COL,o.id)); }catch(e){} }
-  try{ localStorage.setItem(K_FILE,JSON.stringify(fileLocale().filter(x=>x.id!==o.id))); }catch(e){}
+  let fait=false;
+  if(reglesOk!==false){ try{ await deleteDoc(doc(db,COL,o.id)); fait=true; }catch(e){ reglesOk=false; } }
+  const sans=fileLocale().filter(x=>x.id!==o.id);
+  // Sans réseau : la suppression attend dans la file, et l'entrée n'est plus affichée.
+  const ok=ecritFile(fait?sans:sans.concat([{id:o.id,_suppr:true,creeLe:new Date().toISOString()}]));
+  if(!fait&&!ok){ dis('⚠ Suppression impossible pour l\'instant : réessayez quand vous aurez du réseau.'); return; }
   obsEleve=obsEleve.filter(x=>x.id!==o.id);
-  ferme(); rendFiche(); majHors(); dis('Entrée supprimée');
+  ferme(); rendFiche(); majHors();
+  dis(fait?'Entrée supprimée':'Suppression enregistrée : elle sera faite dès le retour du réseau.');
 }
 
 /* ─── Feuilles annexes ─── */
 function feuilleTexte(type,titre,sous,ph){
+  const cle=cleB(type), repris=litBrouillon(cle), deja=(repris&&repris.texte)||'';
   ouvre({
     titre:esc(titre), sous:sous,
     corps:'<label class="lab" style="margin-top:0" for="t-txt">Votre texte</label>'
-      +'<textarea id="t-txt" rows="6" placeholder="'+esc(ph)+'"></textarea>'
-      +'<p class="note-rgpd">N\'écrivez pas le nom de l\'élève : il est déjà identifié par son code '+esc(eleveCour)+'.</p>',
-    pied:'<button class="btn ghost" id="t-annule">Annuler</button><button class="btn" id="t-ok" disabled>Enregistrer</button>'
+      +'<textarea id="t-txt" rows="6" placeholder="'+esc(ph)+'">'+esc(deja)+'</textarea>'
+      +(deja?TAG_BROUILLON:'')
+      +'<p class="note-rgpd">Ne nommez ni l\'élève, ni un collègue, ni la famille, ni un établissement : le code '+esc(eleveCour)+' suffit.</p>',
+    pied:'<button class="btn ghost" id="t-annule">Annuler</button><button class="btn" id="t-ok"'+(deja.trim()?'':' disabled')+'>Enregistrer</button>'
   });
-  const ok=$('#t-ok');
-  $('#t-txt').oninput=()=>{ ok.disabled=!$('#t-txt').value.trim(); };
-  $('#t-annule').onclick=ferme;
-  ok.onclick=async()=>{ await envoie({type:type,note:$('#t-txt').value.trim()}); ferme(); };
-  setTimeout(()=>$('#t-txt').focus(),330);
+  const ok=$('#t-ok'), t=$('#t-txt');
+  t.oninput=()=>{ ok.disabled=!t.value.trim(); ecritBrouillon(cle, t.value.trim()?{texte:t.value}:null); };
+  $('#t-annule').onclick=()=>{ ecritBrouillon(cle,null); ferme(); };
+  ok.onclick=async()=>{ ok.disabled=true; await envoie({type:type,note:t.value.trim()}); ecritBrouillon(cle,null); ferme(); };
+  setTimeout(()=>{ const x=$('#t-txt'); if(x&&$('#feuille').classList.contains('on')) x.focus(); },330);
 }
 function feuilleMissions(){
-  const sel=new Set();
+  const cle=cleB('mission'), repris=litBrouillon(cle);
+  const sel=new Set((repris&&repris.missions)||[]);
   ouvre({
     titre:"🤝 Ce que j'ai fait avec lui",
     sous:"Vos missions d'aide humaine — rubrique « Missions réalisées par la personne chargée de l'aide humaine » de la grille.",
     corps: MISSIONS.map(m=>'<label class="lab">'+esc(m.d)+'</label><div class="chips">'
-      +m.l.map(t=>'<button class="chip sm" data-mi="'+esc(t)+'" aria-pressed="false">'+esc(t)+'</button>').join('')
+      +m.l.map(t=>'<button class="chip sm" data-mi="'+esc(t)+'" aria-pressed="'+sel.has(t)+'">'+esc(t)+'</button>').join('')
       +'</div>').join('')
       +'<label class="lab" for="m-note">Autre chose ? <em>Facultatif.</em></label>'
-      +'<textarea id="m-note" rows="3" placeholder="Une mission qui n\'est pas dans la liste…"></textarea><div style="height:6px"></div>',
+      +'<textarea id="m-note" rows="3" placeholder="Une mission qui n\'est pas dans la liste…">'+esc((repris&&repris.note)||'')+'</textarea>'
+      +(repris?TAG_BROUILLON:'')+NOTE_NOMS+'<div style="height:6px"></div>',
     pied:'<button class="btn ghost" id="m-annule">Annuler</button><button class="btn" id="m-ok" disabled>Enregistrer</button>'
   });
   const ok=$('#m-ok');
-  const maj=()=>{ ok.disabled=!(sel.size||($('#m-note').value||'').trim()); };
+  const maj=()=>{
+    const note=($('#m-note').value||'');
+    ok.disabled=!(sel.size||note.trim());
+    ecritBrouillon(cle,(sel.size||note.trim())?{missions:[...sel],note:note}:null);
+  };
   document.querySelectorAll('[data-mi]').forEach(b=>b.onclick=()=>{
     const t=b.dataset.mi, on=sel.has(t);
     if(on) sel.delete(t); else sel.add(t);
     b.setAttribute('aria-pressed',String(!on)); maj();
   });
-  $('#m-note').oninput=maj; $('#m-annule').onclick=ferme;
-  ok.onclick=async()=>{ await envoie({type:'mission',missions:Array.from(sel),note:($('#m-note').value||'').trim()}); ferme(); };
+  $('#m-note').oninput=maj; $('#m-annule').onclick=()=>{ ecritBrouillon(cle,null); ferme(); };
+  ok.disabled=!(sel.size||($('#m-note').value||'').trim());
+  ok.onclick=async()=>{ ok.disabled=true; await envoie({type:'mission',missions:Array.from(sel),note:($('#m-note').value||'').trim()}); ecritBrouillon(cle,null); ferme(); };
 }
 function feuilleAdaptations(){
+  const cle=cleB('adapt'), repris=litBrouillon(cle);
   const etat={}, prevus=prevusFiche(eleveCour);
   const prec=toutesObs().filter(o=>o.type==='adaptations')
     .sort((a,b)=>String(b.creeLe||'').localeCompare(String(a.creeLe||'')))[0];
-  if(prec)(prec.enPlace||[]).forEach(x=>{ etat[x.nom]=x.effet; });
+  if(repris) Object.assign(etat, repris.etat||{});
+  else if(prec)(prec.enPlace||[]).forEach(x=>{ etat[x.nom]=x.effet; });
+  const noteInit=repris?(repris.note||''):(prec?(prec.note||''):'');
   ouvre({
     titre:'🧩 Ses aménagements : est-ce que ça l\'aide ?',
     sous:"Les adaptations déjà mises en œuvre, et ce qu'elles donnent. À remplir à froid, une fois — pas à chaque séance.",
@@ -1471,51 +1600,59 @@ function feuilleAdaptations(){
         +EFFETS.map(e=>'<button class="chip sm" data-ad="'+esc(t)+'" data-ef="'+e.v+'" aria-pressed="'+(etat[t]===e.v)+'">'+esc(e.t)+'</button>').join('')
         +'</span></div>').join('')).join('')
       +'<label class="lab" for="ad-note">Autre chose ? <em>Facultatif.</em></label>'
-      +'<textarea id="ad-note" rows="3" placeholder="Une adaptation qui n\'est pas dans la liste, ou une précision…">'+(prec?esc(prec.note||''):'')+'</textarea>'
+      +'<textarea id="ad-note" rows="3" placeholder="Une adaptation qui n\'est pas dans la liste, ou une précision…">'+esc(noteInit)+'</textarea>'
+      +(repris?TAG_BROUILLON:'')+NOTE_NOMS
       +'<p class="note-rgpd">Cette page alimente deux rubriques de la grille : « conditions actuelles de scolarisation » (page 2) et « en quoi les aménagements ont-ils facilité la scolarisation » (page 6).</p>',
     pied:'<button class="btn ghost" id="ad-annule">Annuler</button><button class="btn" id="ad-ok">Enregistrer</button>'
   });
+  const sauve=()=>ecritBrouillon(cle,{etat:Object.assign({},etat),note:($('#ad-note').value||'')});
   document.querySelectorAll('[data-ad]').forEach(b=>b.onclick=()=>{
     const nom=b.dataset.ad, ef=b.dataset.ef;
     etat[nom] = (etat[nom]===ef) ? '' : ef;
     document.querySelectorAll('[data-ad]').forEach(y=>{
       if(y.dataset.ad===nom) y.setAttribute('aria-pressed',String(etat[nom]===y.dataset.ef));
     });
+    sauve();
   });
-  $('#ad-annule').onclick=ferme;
+  $('#ad-note').oninput=sauve;
+  $('#ad-annule').onclick=()=>{ ecritBrouillon(cle,null); ferme(); };
   $('#ad-ok').onclick=async()=>{
+    $('#ad-ok').disabled=true;
     const enPlace=Object.keys(etat).filter(k=>etat[k]).map(nom=>({nom:nom,effet:etat[nom]}));
     await envoie({type:'adaptations',enPlace:enPlace,note:($('#ad-note').value||'').trim()});
-    ferme();
+    ecritBrouillon(cle,null); ferme();
   };
 }
 /* ═══ Suggestions pour améliorer l'application ═══
    Un document « suggestion_<code>_<horodatage> » : le texte et le code de l'AESH, rien d'autre.
    Sans réseau, la suggestion attend sur le téléphone et part toute seule. */
 function feuilleSuggestion(){
+  const cle=moi+':suggestion', repris=litBrouillon(cle), deja=(repris&&repris.texte)||'';
   ouvre({
     titre:'💡 Une idée, une suggestion',
     sous:"Ce qui vous aiderait, ce qui manque, ce qui gêne dans l'application. La coordination lit tout.",
     corps:'<label class="lab" style="margin-top:0" for="sg-txt">Votre idée</label>'
-      +'<textarea id="sg-txt" rows="6" placeholder="Ex. : pouvoir noter la même chose pour deux élèves…"></textarea>'
-      +'<p class="note-rgpd">N\'écrivez ni le nom d\'un élève, ni celui d\'un collègue. Votre code accompagne la suggestion.</p>',
-    pied:'<button class="btn ghost" id="sg-annule">Annuler</button><button class="btn" id="sg-ok" disabled>Envoyer</button>'
+      +'<textarea id="sg-txt" rows="6" placeholder="Ex. : pouvoir noter la même chose pour deux élèves…">'+esc(deja)+'</textarea>'
+      +(deja?TAG_BROUILLON:'')
+      +'<p class="note-rgpd">Ne nommez ni un élève, ni un collègue, ni une famille, ni un établissement. Votre code accompagne la suggestion.</p>',
+    pied:'<button class="btn ghost" id="sg-annule">Annuler</button><button class="btn" id="sg-ok"'+(deja.trim()?'':' disabled')+'>Envoyer</button>'
   });
-  const ok=$('#sg-ok');
-  $('#sg-txt').oninput=()=>{ ok.disabled=!$('#sg-txt').value.trim(); };
-  $('#sg-annule').onclick=ferme;
-  ok.onclick=async()=>{ ok.disabled=true; await envoieSuggestion($('#sg-txt').value.trim()); ferme(); };
-  setTimeout(()=>{ const t=$('#sg-txt'); if(t) t.focus(); },330);
+  const ok=$('#sg-ok'), t=$('#sg-txt');
+  t.oninput=()=>{ ok.disabled=!t.value.trim(); ecritBrouillon(cle,t.value.trim()?{texte:t.value}:null); };
+  $('#sg-annule').onclick=()=>{ ecritBrouillon(cle,null); ferme(); };
+  ok.onclick=async()=>{ ok.disabled=true; const parti=await envoieSuggestion(t.value.trim()); if(parti) ecritBrouillon(cle,null); ferme(); };
+  setTimeout(()=>{ const x=$('#sg-txt'); if(x&&$('#feuille').classList.contains('on')) x.focus(); },330);
 }
 async function envoieSuggestion(texte){
   const now=new Date();
-  const d={id:'suggestion_'+moi+'_'+now.getTime().toString(36), type:'suggestion', annee:ANNEE, aeshCode:moi,
+  const d={id:'suggestion_'+moi+'_'+now.getTime().toString(36)+Math.random().toString(36).slice(2,6), type:'suggestion', annee:ANNEE, aeshCode:moi,
            texte:texte, date:iso(now), creeLe:now.toISOString(), source:'observation-besoins'};
   if(reglesOk!==false){
-    try{ await setDoc(doc(db,COL,d.id),d); dis('✓ Merci ! Votre idée est transmise à la coordination.'); return; }
+    try{ await setDoc(doc(db,COL,d.id),d); dis('✓ Merci ! Votre idée est transmise à la coordination.'); return true; }
     catch(e){ reglesOk=false; }
   }
-  empile(d); dis('✓ Merci ! Elle partira dès que vous aurez du réseau.');
+  if(empile(d)){ dis('✓ Merci ! Elle partira dès que vous aurez du réseau.'); return true; }
+  return false;
 }
 
 /* ═══ Les bilans ═══ */
@@ -1548,7 +1685,7 @@ function courbe(pts){
     +'<text class="ax" x="'+(R-32)+'" y="90">'+esc(pts[pts.length-1][0])+'</text>'
     +'</svg></div>';
 }
-function allerBilan(){ marque();
+function allerBilan(){ marque('bilan:'+eleveCour);
   vue='bilan';
   const tout=toutesObs(), act=tout.filter(o=>o.type==='activite');
   tete(eleveCour+' · son bilan', classeCour.affiche+' · '+tout.length+' observation'+(tout.length>1?'s':''));
@@ -1612,7 +1749,7 @@ function allerBilan(){ marque();
       +'</div>':'')
    +'<p class="note-rgpd">L\'indice d\'autonomie se calcule à partir de la cotation et de ce qui se passe quand l\'adulte s\'éloigne. Il vaut pour <b>comparer l\'élève à lui-même dans le temps</b>, jamais pour comparer deux élèves.</p>';
 }
-function allerBilanClasse(){ marque();
+function allerBilanClasse(){ marque('bilanc:'+(classeCour?classeCour.nom:''));
   vue='bilan-classe';
   tete(classeCour.affiche+' · bilan', classeCour.label);
   const par={};
@@ -1648,16 +1785,26 @@ function allerBilanClasse(){ marque();
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>allerMatiere(b.dataset.open));
 }
 
-/* ═══ Envoi ═══ */
+/* ═══ Envoi ═══
+   Une entrée ne quitte la file d'attente qu'une fois transmise, et seulement la version
+   qui a été envoyée : ce qui est ajouté ou modifié pendant un envoi reste en attente. */
 async function envoie(extra, idExistant, existante){
   const now=new Date();
-  const id = idExistant || (moi+'_'+eleveCour+'_'+now.getTime().toString(36));
+  const id = idExistant || (moi+'_'+eleveCour+'_'+now.getTime().toString(36)+Math.random().toString(36).slice(2,6));
+  // Modifier une entrée garde son contexte d'origine (classe, matière, date) : on ne corrige que le texte.
+  const ctx = existante ? {
+      classe:existante.classe||classeCour.affiche, classeNom:existante.classeNom||classeCour.nom, classeLabel:existante.classeLabel||classeCour.label,
+      section:existante.section||classeCour.section, diplome:existante.diplome||classeCour.diplome,
+      matiere:existante.matiere||'', matiereHorsListe:!!existante.matiereHorsListe
+    } : {
+      classe:classeCour.affiche, classeNom:classeCour.nom, classeLabel:classeCour.label,
+      section:classeCour.section, diplome:classeCour.diplome,
+      matiere:matiereCour||'', matiereHorsListe: !!matiereCour && !matieresDe(classeCour.nom).includes(matiereCour)
+    };
   const donnee=Object.assign({
-    id:id, annee:ANNEE, eleveCode:eleveCour,
-    classe:classeCour.affiche, classeNom:classeCour.nom, classeLabel:classeCour.label,
-    section:classeCour.section, diplome:classeCour.diplome,
-    matiere:matiereCour||'', aeshCode:moi,
-    matiereHorsListe: !!matiereCour && !matieresDe(classeCour.nom).includes(matiereCour),
+    id:id, annee:existante?(existante.annee||ANNEE):ANNEE, eleveCode:existante?(existante.eleveCode||eleveCour):eleveCour
+  }, ctx, {
+    aeshCode:moi,
     date: existante?(existante.date||iso(now)):iso(now),
     creeLe: existante?(existante.creeLe||now.toISOString()):now.toISOString(),
     majLe: now.toISOString(), source:'observation-besoins'
@@ -1666,45 +1813,66 @@ async function envoie(extra, idExistant, existante){
 }
 async function envoieBrut(donnee, estMaj){
   const local=()=>{
-    empile(donnee);
+    if(!empile(donnee)) return false;
     obsEleve=obsEleve.filter(o=>o.id!==donnee.id).concat([donnee]);
     if(vue==='eleve') rendFiche();
+    return true;
   };
-  if(reglesOk===false){ local(); dis('✓ '+(estMaj?'Modifié':bravo())); return; }
+  if(reglesOk===false){ if(local()) dis('✓ '+(estMaj?'Modifié':bravo())+' (gardé sur le téléphone)'); return; }
   try{
     await setDoc(doc(db,COL,donnee.id), donnee);
+    // une ancienne version encore en attente ne doit pas écraser celle-ci plus tard
+    const f=fileLocale(); if(f.some(x=>x.id===donnee.id)) ecritFile(f.filter(x=>x.id!==donnee.id));
     dis('✓ '+(estMaj?'Modifié':bravo()));
   }catch(e){
-    reglesOk=false; local(); dis('✓ '+bravo()+' (gardé sur le téléphone)');
+    reglesOk=false; if(local()) dis('✓ '+bravo()+' (gardé sur le téléphone)');
   }
 }
+function ecritFile(l){ try{ localStorage.setItem(K_FILE,JSON.stringify(l)); return true; }catch(e){ return false; } }
 function empile(d){
-  try{
-    const l=fileLocale().filter(x=>x.id!==d.id);
-    l.push(d); localStorage.setItem(K_FILE,JSON.stringify(l.slice(-300)));
-  }catch(e){}
-  majHors();
+  const l=fileLocale().filter(x=>x.id!==d.id); l.push(d);
+  const ok=ecritFile(l);
+  if(!ok) dis('⚠ Le téléphone n\'a pas pu garder cette entrée (mémoire pleine). Rien n\'est enregistré : réessayez avec du réseau.');
+  majHors(); return ok;
 }
-async function videFile(){
+let vidageEnCours=null;
+function videFile(){
+  if(!vidageEnCours) vidageEnCours=videFileMaintenant().finally(()=>{ vidageEnCours=null; });
+  return vidageEnCours;
+}
+async function videFileMaintenant(){
   if(reglesOk===false){ majHors(); return; }
-  const l=fileLocale(); if(!l.length){ majHors(); return; }
-  const reste=[];
-  for(const d of l){ try{ await setDoc(doc(db,COL,d.id),d); }catch(e){ reste.push(d); } }
-  try{ localStorage.setItem(K_FILE,JSON.stringify(reste)); }catch(e){}
-  if(l.length&&!reste.length) dis(l.length+' observation'+(l.length>1?'s':'')+' en attente envoyée'+(l.length>1?'s':'')+'.');
+  const lot=fileLocale(); if(!lot.length){ majHors(); return; }
+  let envoyes=0;
+  for(const d of lot){
+    try{
+      if(d._suppr) await deleteDoc(doc(db,COL,d.id)); else await setDoc(doc(db,COL,d.id),d);
+      const signature=JSON.stringify(d);
+      ecritFile(fileLocale().filter(x=>!(x.id===d.id&&JSON.stringify(x)===signature)));
+      envoyes++;
+    }catch(e){ /* reste en attente */ }
+  }
+  if(envoyes) dis('✓ '+envoyes+' entrée'+(envoyes>1?'s':'')+' en attente transmise'+(envoyes>1?'s':'')+'.');
   majHors();
 }
 function majHors(){
-  const n=fileLocale().length, z=$('#hors'); if(!z) return;
+  const n=fileLocale().length, z=$('#hors'), a=$('#attente');
+  const pl=n>1;
+  if(a){ a.classList.toggle('hidden',!n); a.textContent='⏳ '+n; a.title=n+' entrée'+(pl?'s':'')+' en attente d\'envoi'; }
+  if(!z) return;
   const diag=new URLSearchParams(location.search).get('diag')==='1';
   let txt='';
   if(reglesOk===false){
-    txt='Vos observations sont enregistrées sur ce téléphone et partiront toutes seules dès que la coordination aura ouvert l\'espace en ligne.'+(n?' ('+n+' en attente)':'');
-    if(diag) txt+=' — diagnostic : la collection « '+COL+' » est refusée par les règles Firestore ; publier la règle indiquée dans LISEZMOI.md.';
-  } else if(n){ txt=n+' observation'+(n>1?'s':'')+' en attente d\'envoi. Elles partiront dès que vous aurez du réseau.'; }
+    txt='Pas de connexion à l\'espace en ligne pour l\'instant.'+(n?' '+n+' entrée'+(pl?'s':'')+' gardée'+(pl?'s':'')+' sur ce téléphone : elle'+(pl?'s partiront':' partira')+' toute'+(pl?'s':'')+' seule'+(pl?'s':'')+' dès le retour du réseau.':'');
+    if(diag) txt+=' — diagnostic : la collection « '+COL+' » est refusée ou injoignable.';
+  } else if(n){ txt=n+' entrée'+(pl?'s':'')+' en attente d\'envoi : elle'+(pl?'s partiront':' partira')+' dès que vous aurez du réseau.'; }
   z.classList.toggle('on',!!txt); z.textContent=txt;
 }
-window.addEventListener('online',videFile);
+/* Au retour du réseau, et toutes les minutes tant que quelque chose attend : on revérifie
+   l'accès en ligne, puis on renvoie. */
+function relance(){ if(!moi) return; sondeRegles().then(()=>videFile()); }
+window.addEventListener('online',relance);
+setInterval(()=>{ if(fileLocale().length&&navigator.onLine!==false) relance(); },60000);
 
 /* ═══ Mémoire locale ═══ */
 function recents(){ try{ const l=JSON.parse(localStorage.getItem(K_VUS)||'[]'); return Array.isArray(l)?l:[]; }catch(e){ return []; } }
@@ -1727,13 +1895,19 @@ function memoriseClasse(nom){
 (async function boot(){
   construitPave(); majPoints();
   try{
-    const r=await fetch('./roster.json',{cache:'no-store'}).then(x=>x.json());
-    ROSTER=r;
+    const r=await fetch('./roster.json',{cache:'no-store'}).then(x=>{ if(!x.ok) throw new Error(x.status); return x.json(); });
+    ROSTER=r; try{ localStorage.setItem('obs-besoins-roster',JSON.stringify(r)); }catch(e){}
   }catch(e){
-    $('#msg-code').textContent="Annuaire des classes introuvable. Vérifiez votre connexion.";
-    return;
+    try{ ROSTER=JSON.parse(localStorage.getItem('obs-besoins-roster')||'null'); }catch(e2){ ROSTER=null; }
+    if(!ROSTER||!Array.isArray(ROSTER.classes)){
+      $('#msg-code').textContent="Annuaire des classes introuvable. Vérifiez votre connexion.";
+      return;
+    }
   }
-  try{ MATIERES=await fetch('./matieres.json',{cache:'no-store'}).then(x=>x.json()); }catch(e){ MATIERES={}; }
+  try{
+    MATIERES=await fetch('./matieres.json',{cache:'no-store'}).then(x=>{ if(!x.ok) throw new Error(x.status); return x.json(); });
+    try{ localStorage.setItem('obs-besoins-matieres',JSON.stringify(MATIERES)); }catch(e){}
+  }catch(e){ try{ MATIERES=JSON.parse(localStorage.getItem('obs-besoins-matieres')||'{}')||{}; }catch(e2){ MATIERES={}; } }
   ACCES=codesEnCache();
   NOTIF=notifsEnCache();
   /* Le code déjà connu sur ce téléphone : celui de l'emploi du temps d'abord quand l'application
