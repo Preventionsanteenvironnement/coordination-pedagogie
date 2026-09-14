@@ -543,9 +543,14 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <div id="obs-host" style="width:100%;height:calc(100dvh - 64px)"></div>
   </main>
 
+  <main id="vue-epreuves" class="hide">
+    <div id="epr-host"></div>
+  </main>
+
   <nav class="onglets">
     <button class="ong on" data-vue="semaine"><b>🗓️</b><span>Semaine</span></button>
     <button class="ong" data-vue="equipe"><b>👥</b><span>L'équipe</span></button>
+    <button class="ong" data-vue="epreuves"><b>🧪</b><span>Épreuves</span></button>
     <button class="ong" data-vue="services"><b>☕</b><span>Services</span></button>
     <button class="ong" data-vue="observation"><b>👁️</b><span>Observation</span></button>
     <button class="ong" data-vue="retour"><b>✉</b><span>Retour</span></button>
@@ -1087,6 +1092,29 @@ function rendu(){
   if (vue === 'retour') rendRetour();
   if (vue === 'recap') rendRecap();
   if (vue === 'observation') rendObservation();
+  if (vue === 'epreuves') rendEpreuves();
+}
+
+/* Onglet Épreuves : calendrier des épreuves (tests de positionnement…) mis en ligne
+   par la coordination ; le référent et le coordinateur y placent les AESH.
+   Module séparé (epreuves.js), chargé à la première ouverture : s'il manque,
+   seul cet onglet est indisponible, le reste de l'espace fonctionne. */
+let epreuves = null, epreuvesChargement = null;
+function rendEpreuves(){
+  const host = $('#epr-host'); if (!host) return;
+  if (epreuves){ epreuves.rendre(host); return; }
+  if (epreuvesChargement) return;
+  host.innerHTML = '<div class="vide-j"><span class="em">🧪</span>Chargement…</div>';
+  epreuvesChargement = import('./epreuves.js?v=2026r1').then(m => {
+    epreuves = m.creerEpreuves({
+      db, fs: { collection, doc, setDoc, onSnapshot },
+      moi: () => moi, estCoordinateur: () => estCoordinateur(), estReferentPsr: () => estReferentPsr(), esc, dis
+    });
+    if (vue === 'epreuves') epreuves.rendre(host);
+  }).catch(() => {
+    epreuvesChargement = null;
+    host.innerHTML = '<div class="vide-j"><span class="em">🧪</span>Onglet indisponible pour le moment.</div>';
+  });
 }
 
 /* Onglet Observation : la même application que toutes les AESH de l'établissement,
@@ -1851,6 +1879,8 @@ document.querySelectorAll('.ong').forEach(b => {
     $('#vue-retour').classList.toggle('hide', vue !== 'retour');
     $('#vue-recap').classList.toggle('hide', vue !== 'recap');
     $('#vue-observation').classList.toggle('hide', vue !== 'observation');
+    $('#vue-epreuves').classList.toggle('hide', vue !== 'epreuves');
+    $('#appli').classList.toggle('sans-semaine', vue === 'epreuves');   // l'onglet Épreuves a ses propres semaines
     rendu();
   };
 });
