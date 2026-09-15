@@ -201,8 +201,8 @@ const THEMATIQUES = [
         badge: "Nouveau",
       },
       {
-        titre: "Demander des AESH",
-        desc: "Pour les enseignants des classes PSR et MELEC : estimez vos besoins en AESH cours par cours sur l'emploi du temps (0 à 6 AESH, compteur d'heures du pôle), ou faites une demande ponctuelle (CCF, évaluation, sortie). Aucun nom d'élève.",
+        titre: "Besoins d'accompagnement",
+        desc: "Pour les enseignants des classes PSR et MELEC : estimez les besoins d'accompagnement des élèves, cours par cours, directement sur l'emploi du temps (0 à 6 AESH), ou signalez un besoin ponctuel (CCF, bac blanc, évaluation, sortie).",
         lien: "demandes-aesh/",
         type: "Formulaire",
         icon: "users",

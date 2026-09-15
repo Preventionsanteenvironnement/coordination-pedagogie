@@ -219,6 +219,27 @@ python3 -m http.server 8790 --bind 127.0.0.1
 - **Reprise** : la saisie est gardée sur l'appareil. Après l'envoi, un **code de reprise** permet de la retrouver sur un autre appareil. Une estimation peut être **mise à jour** ou **retirée** à tout moment.
 - **Compteur par pôle, en direct** : heures d'AESH demandées face au volume disponible (publié par la coordination), avec la couleur de chaque discipline et la part de l'enseignant. Les disciplines « pas encore estimé » sont listées.
 - **Règle de calcul** : sur un même cours, on retient le **plus grand** nombre déclaré, pas la somme (co-enseignement). Un cours en semaine A ou B seulement compte pour moitié.
+
+### v2 « période » (15/09/2026)
+
+- **Une période au lieu d'une semaine type** : le cadre publié par la coordination porte une période nommée (ex. « Semestre 1 » du 14/09 au 18/12). Un bandeau le rappelle ; à la fin de la période, une nouvelle estimation est ouverte.
+- **Calendrier réel** : semaines A et B de la période, vacances et jours fériés, PFMP de chaque classe. Ils sont affichés (vues « Semaine A », « Semaine B », « Calendrier de la période ») et retirés des calculs.
+- **Au clic sur un cours** : nombre d'AESH ; période (« Jusqu'aux vacances de Toussaint (16/10) », « Jusqu'à la fin du semestre 1 (18/12) » ou dates précises) ; semaines A et B, A seulement ou B seulement ; horaire modifiable au quart d'heure, dans les bornes du cours ; aides et commentaire.
+- **Calcul** : nombre × durée × semaines de cours réelles = heures sur la période ; le compteur affiche la moyenne par semaine face au volume hebdomadaire disponible, et le total sur la période. Sur un même cours, pour **chaque semaine**, on retient le plus grand besoin déclaré. La règle « semaine A = moitié » ne s'applique plus : les semaines sont comptées une à une.
+- **Lignes envoyées** : en plus des champs v1, `du`, `au`, `semaines` (`toutes`, `A`, `B`), `hDebut`, `hFin`. Aucune nouvelle règle Firestore.
+- Un cadre v1 (semaine type) reste lisible : il est traité comme une période d'une semaine.
+
+### v3 « Besoins d'accompagnement des élèves » (15/09/2026)
+
+Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moyen humain pour y répondre.
+- **Tuile du portail** (`data.js`) : « Besoins d'accompagnement ».
+- **Accueil refait** :
+  - titre « Besoins d'accompagnement des élèves », phrase d'introduction, public concerné, cadre RGPD ;
+  - **1. Estimation des besoins d'accompagnement** : période lue dans le cadre publié (`coordination_estimation_aesh/cadre_<année>`, champ `periode`). Selon l'appareil : « Commencer l'estimation », « Reprendre mon estimation » (commencée, non envoyée) ou « Votre estimation est enregistrée — envoyée le jj/mm · N cours » avec « Voir ou modifier mon estimation ». L'état vient du stockage local de `estimation.js` (`estimation-aesh-v1`).
+  - **2. Besoin ponctuel** : 5 cases (CCF, **Bac blanc**, Évaluation, Sortie, Autre) + case non cliquable « Test de positionnement : via le calendrier RESANA » ; lien « Voir les besoins ponctuels déjà signalés dans le pôle ». Tant que le référentiel n'est pas publié : une ligne discrète avec « Actualiser », plus d'encadré orange.
+- **Bac blanc** (`bacblanc`) : ajouté aux natures de l'Atelier. La page l'ajoute aussi quand le référentiel publié plus tôt ne le contient pas (`naturesProposees`). La règle Firestore ne contrôle pas la nature : rien à changer.
+- **Libellés** : onglet « Besoins ponctuels » ; dans l'estimation, « Moyens humains : nombre d'AESH estimé » et « moyens humains estimés (heures d'AESH par semaine) ».
+- **Tests** : ancien banc 11/11 (test d'accueil réécrit : titre, 5 cartes + RESANA, lien vers le pôle, état « estimation enregistrée ») ; ordinateur 1280 px et téléphone 375 px, aucun débordement, aucun texte < 16 px.
 - **Données en ligne** : collection `coordination_estimation_aesh`.
   - `cadre_<année>` : publié depuis l'Atelier.
   - `declaration_<id>` : une par enseignant, mise à jour sur place, jamais supprimée.
