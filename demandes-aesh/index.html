@@ -707,8 +707,9 @@ function monterEstimation(){
   const hote = $('#estimation-hote'); if (!hote) return;
   if (EST){ EST.monter(hote); return; }
   if (EST_CHARGEMENT) return;
-  EST_CHARGEMENT = import('./estimation.js?v=2026r2').then(m => {
-    EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, retourAccueil: () => actions.accueil() });
+  EST_CHARGEMENT = import('./estimation.js?v=2026r3').then(m => {
+    EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, retourAccueil: () => actions.accueil(),
+      pousser: est => histo('estimation', est), remplacer: est => histo('estimation', est, true) });
     const h = $('#estimation-hote'); if (h) EST.monter(h);
   }).catch(() => {
     EST_CHARGEMENT = null;
@@ -781,8 +782,12 @@ function etatEstimationLocale(){
 }
 function htmlEtatEstimation(){
   const e = etatEstimationLocale(), nb = e && Array.isArray(e.lignes) ? e.lignes.length : 0;
+  const quand = iso => { const d = new Date(iso); return isNaN(d) ? '' : `le ${jjmm(iso)} à ${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`; };
+  if (e && e.docId && e.envoyeLe && e.nonEnvoye && nb)
+    return `<p class="etat"><strong>Modifications pas encore validées</strong><br>${nb} cours · dernière validation ${esc(quand(e.envoyeLe))}</p>
+      <button type="button" class="btn primaire" data-action="estimation">Reprendre et valider →</button>`;
   if (e && e.docId && e.envoyeLe)
-    return `<p class="etat"><strong>Votre estimation est enregistrée</strong><br>Envoyée le ${esc(jjmm(e.envoyeLe))} · ${nb} cours</p>
+    return `<p class="etat"><strong>Votre estimation est enregistrée</strong><br>Dernière modification ${esc(quand(e.envoyeLe))} · ${nb} cours</p>
       <button type="button" class="btn primaire" data-action="estimation">Voir ou modifier mon estimation →</button>`;
   if (nb)
     return `<p class="etat"><strong>Estimation commencée, pas encore envoyée</strong><br>${nb} cours renseigné${nb > 1 ? 's' : ''} sur cet appareil</p>
@@ -807,8 +812,25 @@ function htmlErrChamp(erreurs, id){ const e = errDe(erreurs, id); return e ? `<p
 const ETAPES_P = ['Nature et matière','Classes','Créneaux','Élèves','Emploi du temps du pôle','Récapitulatif'];
 function nouvellePonctuelle(nature){
   S.p = { etape:1, nature, natureAutre:'', matiereChoix:'', matiereAutre:'', classes:[], lignes:{}, eleves:{}, commentaire:'', semaine:null, erreurs:[] };
-  S.envoi = null; S.ecran = 'ponctuel'; S.focus = 'titre-ecran'; rendre();
+  S.envoi = null; S.ecran = 'ponctuel'; S.focus = 'titre-ecran'; histo('ponctuel'); rendre();
 }
+/* ═══════════════ bouton « précédent » du navigateur (15/09/2026) ═══════════════
+   Chaque écran (accueil, estimation et ses étapes, besoins ponctuels du pôle, besoin ponctuel) a son entrée d'historique. */
+function histo(ecran, est, remplacer){
+  try {
+    const etat = { ecran, est: est || null };
+    if (remplacer) history.replaceState(etat, '');
+    else if (!(history.state && history.state.ecran === ecran && !est && !history.state.est)) history.pushState(etat, '');
+  } catch(e){}
+}
+window.addEventListener('popstate', ev => {
+  if (EST && EST.consommerPop()) return;
+  const st = ev.state;
+  if (st && st.ecran === 'estimation'){ S.ecran = 'estimation'; rendre(); if (EST) EST.restaurerNav(st.est); return; }
+  if (st && st.ecran === 'pole'){ S.ecran = 'pole'; S.focus = 'titre-ecran'; ecouterDemandes(); rendre(); return; }
+  if (st && st.ecran === 'ponctuel' && S.p){ S.ecran = 'ponctuel'; S.focus = 'titre-ecran'; rendre(); return; }
+  S.ecran = 'accueil'; S.focus = 'titre-ecran'; rendre();
+});
 const matiereP = p => p.matiereChoix === '__autre' ? nettoie(p.matiereAutre, 60) : p.matiereChoix;
 function nouvelleLigne(){ return {uid:++uidLigne, date:'', debut:'', fin:'', salle:'', nbAesh:'1'}; }
 function initClasseP(p, nom){
@@ -1386,9 +1408,9 @@ function htmlEnvoye(){
 
 /* ═══════════════ événements ═══════════════ */
 const actions = {
-  'accueil': () => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; S.messageReessai = brouillons().length ? S.messageReessai : ''; rendre(); },
-  'pole': () => { S.ecran = 'pole'; S.focus = 'titre-ecran'; ecouterDemandes(); rendre(); },
-  'estimation': () => { S.ecran = 'estimation'; rendre(); window.scrollTo(0, 0); },
+  'accueil': () => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; S.messageReessai = brouillons().length ? S.messageReessai : ''; histo('accueil'); rendre(); },
+  'pole': () => { S.ecran = 'pole'; S.focus = 'titre-ecran'; histo('pole'); ecouterDemandes(); rendre(); },
+  'estimation': () => { S.ecran = 'estimation'; histo('estimation'); rendre(); window.scrollTo(0, 0); },
   'recharger': () => location.reload(),
   'recharger-ref': () => { chargerReference(); ecouterDemandes(); },
   'reecouter': () => { ecouterDemandes(); majVuesDocs(); },
@@ -1487,6 +1509,7 @@ else {
   ecouterDemandes();
   await chargerReference();
 }
+try { if (!history.state) history.replaceState({ ecran:'accueil', est:null }, ''); } catch(e){}
 window.__DEMANDES_AESH_PRET__ = true;
 </script>
 </body>

@@ -240,6 +240,31 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
 - **Bac blanc** (`bacblanc`) : ajouté aux natures de l'Atelier. La page l'ajoute aussi quand le référentiel publié plus tôt ne le contient pas (`naturesProposees`). La règle Firestore ne contrôle pas la nature : rien à changer.
 - **Libellés** : onglet « Besoins ponctuels » ; dans l'estimation, « Moyens humains : nombre d'AESH estimé » et « moyens humains estimés (heures d'AESH par semaine) ».
 - **Tests** : ancien banc 11/11 (test d'accueil réécrit : titre, 5 cartes + RESANA, lien vers le pôle, état « estimation enregistrée ») ; ordinateur 1280 px et téléphone 375 px, aucun débordement, aucun texte < 16 px.
+
+### v4 « à la place de l'enseignant » (15/09/2026)
+
+- **Consulter les estimations des classes** (collègues), en lecture seule : classes regroupées « CAP PSR » (1re, 2e année) et « Bac Pro MELEC » (2de, 1re, Tle). Chaque cours affiche le plus grand besoin estimé, en couleur, sans nom ni commentaire. Accès depuis le choix des matières (« Voir les estimations des classes »), depuis l'emploi du temps (« Voir les estimations de la classe ») et après la validation.
+- **Enseignant dans plusieurs classes** : chaque onglet de classe indique « N cours pour vous ».
+- **Bouton « précédent » du navigateur** : il revient d'étape en étape (fenêtre d'un cours → emploi du temps → matières → accueil) grâce à `history.pushState` (`histo()` dans `index.html`, `pousser` / `remplacer` / `restaurerNav` / `consommerPop` dans `estimation.js`).
+- **Ne pas oublier de valider** : une barre reste visible en bas de l'écran.
+  - « N cours renseignés · estimation pas encore validée » ou « modifications pas encore validées », avec le bouton « Valider mon estimation » ;
+  - après chaque ajout : « ✓ … ajouté à votre estimation. Pensez à valider » ;
+  - une fois validée : « ✓ Estimation enregistrée · dernière modification le … ».
+  - Quitter avec « ← Accueil » : « Valider maintenant » ou « Quitter sans valider ». Fermer la page : confirmation du navigateur.
+  - L'état validé est repéré par une signature de la saisie (`envoyeSig`, `nonEnvoye` dans le stockage local).
+- **Retour de l'enseignant** : « Bonjour. Votre estimation (matières) est enregistrée. Dernière modification le mardi 15 septembre 2026 à 14 h 32. Vous pouvez la modifier à tout moment. » L'accueil affiche aussi la date et l'heure, ou « Modifications pas encore validées · Reprendre et valider ».
+- **Message après validation** : « Merci pour votre contribution. Votre estimation est enregistrée et transmise à la coordination. Elle permettra d'organiser l'accompagnement humain au plus près des besoins des élèves. Vous pouvez la consulter et la modifier à tout moment. »
+- **Discipline** « Maths-Sciences » renommée « Mathématiques, sciences, physique-chimie » (Atelier et page, même pour un cadre déjà publié).
+- **Test « à la place de l'enseignant »** (`work/estimation-aesh-v1/banc/reel/`), avec un cadre construit à partir des vrais emplois du temps publiés (`edt-aesh/grille.json`, sans nom). Pour chacune des 11 disciplines, sur ordinateur et sur téléphone, il vérifie :
+  - les cours cliquables classe par classe et le libellé des onglets ;
+  - la fenêtre, la confirmation, la barre de validation, l'alerte de fermeture ;
+  - « précédent » et « suivant » ;
+  - la validation, le message et l'écriture ;
+  - l'accueil et le « Bonjour » au retour, la consultation, l'avertissement « Quitter sans valider » ;
+  - la mise en page.
+
+  Plus la consultation seule par un collègue. Résultat : **556 vérifications, 0 échec**. « Précédent » a aussi été vérifié avec de vrais clics.
+- **Limite connue** : Chrome ignore, au retour arrière, les étapes créées sans clic réel (protection anti-piège). Avec de vrais clics d'enseignant, le retour se fait étape par étape (vérifié).
 - **Données en ligne** : collection `coordination_estimation_aesh`.
   - `cadre_<année>` : publié depuis l'Atelier.
   - `declaration_<id>` : une par enseignant, mise à jour sur place, jamais supprimée.

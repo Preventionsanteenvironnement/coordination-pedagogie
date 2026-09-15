@@ -26,6 +26,9 @@ const AIDES = [
 ];
 const COULEURS = ['#0f6e56', '#5048b0', '#a4431f', '#1d5fa3', '#9b2f5e', '#3d6b12', '#8a5a0b', '#0e7490', '#6b21a8', '#57534e', '#b45309', '#155e75'];
 const MAX_NB = 6;
+/* Libellés imposés côté page, même si le cadre a été publié avec un ancien libellé (15/09/2026). */
+const LIBELLES_DISC = { maths: 'Mathématiques, sciences, physique-chimie' };
+const GROUPES = [['PSR', 'CAP PSR'], ['MELEC', 'Bac Pro MELEC']];
 const z2 = n => String(n).padStart(2, '0');
 const min = h => { const [a, b] = String(h).split(':').map(Number); return a * 60 + b; };
 const hDe = m => `${z2(Math.floor(m / 60))}:${z2(m % 60)}`;
@@ -102,7 +105,7 @@ export function agreger(cadre, declarations, options = {}) {
 /* ═════════ normalisation du cadre publié ═════════ */
 function normaliserCadre(d) {
   if (!d || !Array.isArray(d.classes)) return null;
-  const disciplines = (Array.isArray(d.disciplines) ? d.disciplines : []).filter(x => x && typeof x.id === 'string').map(x => ({ id: x.id, label: String(x.label || x.id) }));
+  const disciplines = (Array.isArray(d.disciplines) ? d.disciplines : []).filter(x => x && typeof x.id === 'string').map(x => ({ id: x.id, label: LIBELLES_DISC[x.id] || String(x.label || x.id) }));
   const pe = d.periode && RE_DATE.test(d.periode.debut || '') && RE_DATE.test(d.periode.fin || '') ? d.periode : null;
   let semaines = (Array.isArray(d.semaines) ? d.semaines : []).filter(s => s && RE_DATE.test(s.lundi || ''))
     .map(s => ({ lundi: s.lundi, parite: ['A', 'B'].includes(s.parite) ? s.parite : '', feries: s.feries && typeof s.feries === 'object' ? s.feries : {} }));
@@ -233,24 +236,43 @@ const CSS = `
 .est-champ small{color:var(--warn-ink);font-size:1rem}
 .est-ok{background:var(--ok-bg);border:1.5px solid var(--ok-line);color:var(--ok-ink);border-radius:var(--est-r);padding:18px}
 .est-code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:1.2rem;font-weight:760;letter-spacing:.08em;background:var(--card);color:var(--ink);border:1.5px dashed var(--ok-line);border-radius:10px;padding:4px 10px;display:inline-block}
+.est-groupes{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:18px}
+.est-groupe{display:flex;flex-direction:column;gap:6px;min-width:0;max-width:100%}
+.est-groupe>span{font-size:1rem;font-weight:720;color:var(--muted)}
+.est-groupe .est-onglets{margin-top:0}
+.est-mode{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.est-bonjour{margin-top:14px;border-radius:14px;padding:14px 16px;background:var(--ok-bg);border:1px solid var(--ok-line);color:var(--ok-ink)}
+.est-bonjour p+p{margin-top:8px}
+.est-valid{position:sticky;bottom:0;z-index:20;margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-radius:14px;background:var(--card);border:1.5px solid var(--line-2);box-shadow:0 -10px 26px -14px rgba(15,23,42,.45)}
+.est-valid.sale{border-color:var(--warn-line);background:var(--warn-bg);color:var(--warn-ink)}
+.est-valid.ok{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
+.est-valid .btn{min-height:48px}
+@media(max-width:520px){.est-valid .btn{width:100%}}
+.est-lecture{margin-top:10px;color:var(--muted)}
 `;
 
 export function creerEstimation(ctx) {
-  const { FS, db, esc, annee, annonce, retourAccueil } = ctx;
+  const { FS, db, esc, annee, annonce, retourAccueil, pousser: pousserNav, remplacer: remplacerNav } = ctx;
   const S = {
     etat: 'chargement', cadre: null, decls: [], unsub: null, ecoute: false,
-    etape: 'matieres', mats: new Set(), classe: null, vue: 'A', lignes: new Map(), commentaire: '',
-    sel: null, f: null, conf: null, histo: [],
-    docId: null, version: 0, creeLe: null, envoyeLe: null, envoi: '', message: '', hote: null, focus: null, retrouvee: false, retire: false
+    etape: 'matieres', mode: 'estimer', mats: new Set(), classe: null, vue: 'A', lignes: new Map(), commentaire: '',
+    sel: null, f: null, conf: null, histo: [], navFeuille: false, ignorerPop: 0, flash: '', bonjour: false,
+    docId: null, version: 0, creeLe: null, envoyeLe: null, envoyeSig: null, envoi: '', message: '', hote: null, focus: null, retrouvee: false, retire: false
   };
   if (!document.getElementById('est-styles')) { const st = document.createElement('style'); st.id = 'est-styles'; st.textContent = CSS; document.head.appendChild(st); }
+
+  /* ── ce qui a été validé (envoyé) : signature, pour savoir s'il reste des modifications à valider ── */
+  const signature = () => JSON.stringify({ m: [...S.mats].sort(), c: String(S.commentaire || ''),
+    l: [...S.lignes.values()].map(l => [l.classe, l.cle, l.nb, l.du || '', l.au || '', l.semaines || 'toutes', l.hDebut || '', l.hFin || '', [...(l.aides || [])].sort().join(','), l.note || ''])
+      .sort((a, b) => (a[0] + '|' + a[1]).localeCompare(b[0] + '|' + b[1])) });
+  const sale = () => (S.lignes.size > 0 || !!S.docId) && signature() !== S.envoyeSig;
 
   /* ── stockage local ── */
   const lsLit = () => { try { const v = JSON.parse(localStorage.getItem(K_LOCAL) || 'null'); return v && v.annee === annee ? v : null; } catch (e) { return null; } };
   const lsEcrit = () => {
     try {
-      localStorage.setItem(K_LOCAL, JSON.stringify({ annee, docId: S.docId, version: S.version, creeLe: S.creeLe, envoyeLe: S.envoyeLe,
-        mats: [...S.mats], lignes: [...S.lignes.values()], commentaire: S.commentaire }));
+      localStorage.setItem(K_LOCAL, JSON.stringify({ annee, docId: S.docId, version: S.version, creeLe: S.creeLe, envoyeLe: S.envoyeLe, envoyeSig: S.envoyeSig,
+        nonEnvoye: sale(), mats: [...S.mats], lignes: [...S.lignes.values()], commentaire: S.commentaire }));
     } catch (e) { }
   };
   (function restaurer() {
@@ -258,7 +280,18 @@ export function creerEstimation(ctx) {
     S.docId = v.docId || null; S.version = v.version || 0; S.creeLe = v.creeLe || null; S.envoyeLe = v.envoyeLe || null;
     S.mats = new Set(Array.isArray(v.mats) ? v.mats : []); S.commentaire = String(v.commentaire || '');
     (Array.isArray(v.lignes) ? v.lignes : []).forEach(l => { if (l && l.classe && l.cle) S.lignes.set(l.classe + '|' + l.cle, l); });
+    /* Saisie enregistrée avant cette version : si elle avait été envoyée, on la considère validée. */
+    S.envoyeSig = typeof v.envoyeSig === 'string' ? v.envoyeSig : (v.envoyeLe && v.docId ? signature() : null);
+    S.bonjour = !!(S.docId && S.envoyeLe);
   })();
+  /* Quitter la page avec des modifications non validées : le navigateur demande confirmation. */
+  window.addEventListener('beforeunload', ev => { if (S.lignes.size && sale()) { ev.preventDefault(); ev.returnValue = ''; } });
+  const pousser = () => { try { pousserNav && pousserNav({ etape: S.etape, mode: S.mode, sel: S.sel || null }); } catch (e) { } };
+  const fermerFeuille = () => {
+    S.sel = null; S.f = null;
+    if (S.navFeuille) { S.navFeuille = false; S.ignorerPop++; try { history.back(); } catch (e) { S.ignorerPop--; } }
+  };
+  const dateHeureLongue = iso => { const d = new Date(iso); if (isNaN(d)) return ''; return `le ${dateLongue(`${d.getFullYear()}-${z2(d.getMonth() + 1)}-${z2(d.getDate())}`)} à ${d.getHours()} h ${z2(d.getMinutes())}`; };
 
   /* ── données ── */
   function ecouter() {
@@ -272,7 +305,7 @@ export function creerEstimation(ctx) {
         S.cadre = c; S.etat = c ? 'ok' : 'absent';
         if (c && !S.classe) S.classe = c.classes[0].nom;
         if (c && !c.avecParite && S.vue !== 'cal') S.vue = 'A';
-        if (c && S.mats.size && S.etape === 'matieres' && S.retrouvee) S.etape = 'edt';
+        if (c && S.mats.size && S.etape === 'matieres' && S.retrouvee) { S.etape = 'edt'; try { remplacerNav && remplacerNav({ etape: 'edt', mode: S.mode, sel: null }); } catch (e) { } }
         S.retrouvee = false;
         dessiner(true);
       }, err => { S.ecoute = false; S.unsub = null; S.etat = /permission|insufficient/i.test(String(err && (err.code || err.message))) ? 'refus' : 'horsligne'; dessiner(); });
@@ -314,7 +347,7 @@ export function creerEstimation(ctx) {
     }
     if (S.etat !== 'ok') html += blocEtat();
     else if (S.etape === 'envoye') html += blocEnvoye();
-    else if (S.etape === 'matieres' || !S.mats.size) html += blocMatieres();
+    else if (S.etape === 'matieres' || (!S.mats.size && S.mode !== 'voir')) html += blocMatieres();
     else html += blocEdt();
     html += `</div>`;
     if (S.sel && S.f) html += feuilleCreneau();
@@ -334,14 +367,17 @@ export function creerEstimation(ctx) {
   }
   function blocMatieres() {
     const dispo = disciplinesDispo(), deja = S.docId && S.envoyeLe;
-    return `${deja ? `<div class="message info" style="margin-top:16px"><p><strong>Vous avez déjà envoyé une estimation</strong> (${esc(dateCourte(S.envoyeLe))}). Vous pouvez la reprendre et la modifier.</p>
-        <p style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primaire petit" data-e="reprendre">Modifier mon estimation</button>
+    return `${deja ? `<div class="est-bonjour" role="status"><p>${htmlBonjour()}</p>
+        <p style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primaire petit" data-e="reprendre">Voir ou modifier mon estimation</button>
         <button type="button" class="btn petit" data-e="retirer">Retirer mon estimation</button></p></div>` : ''}
       <section class="est-bloc" aria-labelledby="h-mats"><h2 id="h-mats" tabindex="-1">1. Quelle(s) matière(s) enseignez-vous dans ces classes ?</h2>
       <p class="est-sous">Seuls vos cours seront cliquables ; ceux des collègues restent visibles en pointillés. Vous pouvez en choisir plusieurs.</p>
       <div class="est-chips" role="group" aria-label="Vos matières">${dispo.map(d => `<button type="button" class="est-chip" id="mat-${esc(d.id)}" data-e="mat" data-v="${esc(d.id)}" aria-pressed="${S.mats.has(d.id)}">${esc(d.label)}</button>`).join('')}</div>
       <div class="est-actions"><span class="discret">${S.mats.size ? `${S.mats.size} matière${S.mats.size > 1 ? 's' : ''} choisie${S.mats.size > 1 ? 's' : ''}` : 'Choisissez au moins une matière.'}</span>
         <span class="droite"><button type="button" class="btn primaire" id="est-continuer" data-e="continuer" ${S.mats.size ? '' : 'disabled'}>Continuer →</button></span></div></section>
+      <section class="est-bloc" aria-labelledby="h-consulter"><h2 id="h-consulter">Consulter les estimations des classes</h2>
+      <p class="est-sous">Sans rien modifier : les besoins déjà estimés par l’équipe, cours par cours, pour le CAP PSR (1re et 2e année) et le Bac Pro MELEC (2de, 1re, Tle).</p>
+      <p style="margin-top:10px"><button type="button" class="btn" id="est-consulter" data-e="consulter">Voir les estimations des classes →</button></p></section>
       <section class="est-bloc" aria-labelledby="h-code"><h2 id="h-code">Reprendre sur un autre appareil</h2>
       <p class="est-sous">Après l’envoi, un code de reprise vous est donné. Saisissez-le ici pour retrouver et modifier votre estimation.</p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><label class="sr" for="est-code">Code de reprise</label>
@@ -353,30 +389,54 @@ export function creerEstimation(ctx) {
     const c = cadre(), cl = classeDe(S.classe) || c.classes[0];
     S.classe = cl.nom;
     const autres = agreger(c, S.decls, { exclure: S.docId }), tous = agreger(c, S.decls, { exclure: S.docId, brouillon: brouillon() });
-    let h = `<div class="est-bloc" style="padding:12px 16px"><div class="est-bar">
+    const lecture = S.mode === 'voir' || !S.mats.size;
+    let h = S.mats.size ? `<div class="est-bloc" style="padding:12px 16px"><div class="est-bar">
       <span class="est-mats">Vos matières : <b>${[...S.mats].map(disciplineLabel).map(esc).join(', ')}</b> · <button type="button" class="lien" data-e="changer">changer</button></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn petit" data-e="annuler-action" ${S.histo.length ? '' : 'disabled'}>↶ Annuler la dernière action</button></span></div></div>`;
+      <span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn petit" data-e="annuler-action" ${S.histo.length ? '' : 'disabled'}>↶ Annuler la dernière action</button></span></div></div>`
+      : `<div class="est-bloc" style="padding:12px 16px"><div class="est-bar"><span class="est-mats"><b>Consultation des estimations</b> · rien n’est modifiable ici</span>
+      <button type="button" class="btn primaire petit" data-e="changer">Choisir mes matières pour estimer →</button></div></div>`;
+    if (S.bonjour && S.docId && S.envoyeLe && !sale()) h += `<div class="est-bonjour" role="status"><p>${htmlBonjour()}</p></div>`;
     h += `<div class="est-jauges">${['PSR', 'MELEC'].map(p => jauge(p, autres, tous, p === cl.pole)).join('')}</div>`;
-    h += `<div class="est-onglets" role="tablist" aria-label="Classes">${c.classes.map(k => `<button type="button" role="tab" class="est-onglet" id="cl-${esc(k.nom)}" data-e="classe" data-v="${esc(k.nom)}" aria-selected="${k.nom === cl.nom}">
-      <b>${esc(k.court)}</b><span>${k.effectif != null ? `${k.effectif} élèves` : esc(k.pole)}</span></button>`).join('')}</div>`;
+    const nMiens = k => k.creneaux.filter(mien).length;
+    h += `<div class="est-groupes">${GROUPES.map(([pole, titre]) => { const ks = c.classes.filter(k => k.pole === pole); if (!ks.length) return '';
+      return `<div class="est-groupe"><span>${esc(titre)}</span><div class="est-onglets" role="tablist" aria-label="Classes de ${esc(titre)}">${ks.map(k => `<button type="button" role="tab" class="est-onglet" id="cl-${esc(k.nom)}" data-e="classe" data-v="${esc(k.nom)}" aria-selected="${k.nom === cl.nom}">
+      <b>${esc(k.court)}</b><span>${k.effectif != null ? `${k.effectif} élèves` : esc(titre)}${S.mats.size ? ` · ${nMiens(k) ? `${nMiens(k)} cours pour vous` : 'aucun cours pour vous'}` : ''}</span></button>`).join('')}</div></div>`; }).join('')}</div>`;
+    if (S.mats.size) h += `<div class="est-mode" role="group" aria-label="Affichage"><button type="button" class="est-vue" id="mode-estimer" data-e="mode" data-v="estimer" aria-pressed="${!lecture}">Estimer mes cours</button>
+      <button type="button" class="est-vue" id="mode-voir" data-e="mode" data-v="voir" aria-pressed="${lecture}">Voir les estimations de la classe</button></div>`;
     const pf = (cl.pfmp || []).filter(p => p.fin >= c.periode.debut && p.debut <= c.periode.fin);
-    const miens = cl.creneaux.filter(mien).length;
+    const miens = nMiens(cl), estimes = cl.creneaux.filter(cr => tous.slots.has(cl.nom + '|' + cr.cle)).length;
     h += `<div class="est-info"><span>${esc(cl.label)}</span><span>Effectif : <b>${cl.effectif != null ? `${cl.effectif} élèves` : '—'}</b></span>
       ${pf.length ? pf.map(p => `<span class="est-pfmp">PFMP du ${esc(dFr(p.debut))} au ${esc(dFr(p.fin))} : pas de cours</span>`).join('') : '<span><b>Pas de PFMP pendant la période</b></span>'}
-      <span>${miens ? `<b>${miens}</b> cours pour vous dans cette classe` : 'Aucun cours de vos matières dans cette classe'}</span></div>`;
+      <span>${lecture ? `<b>${estimes}</b> cours sur ${cl.creneaux.length} déjà estimé${estimes > 1 ? 's' : ''}` : miens ? `<b>${miens}</b> cours pour vous dans cette classe` : 'Aucun cours de vos matières dans cette classe'}</span></div>`;
     const vues = (c.avecParite ? [['A', 'Semaine A'], ['B', 'Semaine B']] : [['A', 'Semaine type']]).concat([['cal', 'Calendrier de la période']]);
     h += `<div class="est-vues" role="group" aria-label="Vue">${vues.map(([k, t]) => `<button type="button" class="est-vue" id="vue-${k}" data-e="vue" data-v="${k}" aria-pressed="${S.vue === k}">${t}</button>`).join('')}</div>`;
     if (S.vue === 'cal') h += calendrier(cl);
     else {
       const crs = cl.creneaux.filter(cr => !c.avecParite || !cr.parite || cr.parite === S.vue);
-      h += grille(cl, crs, autres) + liste(cl, crs, autres);
-      h += `<div class="est-leg2"><span><i style="background:var(--info-bg);border-color:var(--info-line)"></i>votre cours, à renseigner</span><span><i style="background:var(--card-2);border-color:var(--ink-2)"></i>0 AESH</span>
+      h += grille(cl, crs, autres, tous, lecture) + liste(cl, crs, autres, tous, lecture);
+      h += `<div class="est-leg2">${lecture ? '' : '<span><i style="background:var(--info-bg);border-color:var(--info-line)"></i>votre cours, à renseigner</span>'}<span><i style="background:var(--card-2);border-color:var(--ink-2)"></i>0 AESH</span>
         <span><i style="background:var(--ok-bg);border-color:var(--ok-line)"></i>1</span><span><i style="background:var(--warn-bg);border-color:var(--warn-line)"></i>2</span><span><i style="background:var(--err-bg);border-color:var(--err-line)"></i>3 ou plus</span>
-        <span><i style="border-style:dashed;border-color:var(--line)"></i>cours d’un collègue</span></div>
+        <span><i style="border-style:dashed;border-color:var(--line)"></i>${lecture ? 'pas encore estimé' : 'cours d’un collègue'}</span></div>
+        ${lecture ? '<p class="est-lecture">Le nombre affiché est le plus grand besoin estimé sur le cours, toutes estimations confondues. Aucun nom, aucun commentaire n’est montré.</p>' : ''}
         ${c.avecParite ? `<p class="est-sous">Semaine ${S.vue} : un cours qui n’a lieu qu’une semaine sur deux n’apparaît que dans sa semaine.</p>` : ''}`;
     }
-    h += recap(autres, tous);
+    if (S.mats.size && !lecture) h += recap(autres, tous);
+    if (S.mats.size) h += barreValidation();
     return h;
+  }
+  function htmlBonjour() {
+    const m = [...S.mats].map(disciplineLabel);
+    return `<strong>Bonjour.</strong> Votre estimation${m.length ? ` (${esc(m.join(', '))})` : ''} est enregistrée. Dernière modification ${esc(dateHeureLongue(S.envoyeLe))}. Vous pouvez la modifier à tout moment.`;
+  }
+  /* Barre toujours visible en bas : rappelle de valider, ou confirme que tout est enregistré. */
+  function barreValidation() {
+    const n = S.lignes.size, maj = S.docId && S.envoyeLe;
+    if (sale() && n) return `<div class="est-valid sale" role="status" id="est-barre"><span><b>${n} cours renseigné${n > 1 ? 's' : ''} · ${maj ? 'modifications pas encore validées' : 'estimation pas encore validée'}</b>
+      ${S.flash ? `<br>${esc(S.flash)}` : '<br>Pensez à valider pour transmettre votre estimation à la coordination.'}</span>
+      <button type="button" class="btn primaire" id="est-valider-barre" data-e="envoyer" ${S.envoi === 'encours' ? 'disabled' : ''}>Valider mon estimation</button></div>`;
+    if (maj && !sale()) return `<div class="est-valid ok" role="status" id="est-barre"><span><b>✓ Estimation enregistrée</b> · dernière modification ${esc(dateHeureLongue(S.envoyeLe))}<br>Vous pouvez la modifier à tout moment.</span></div>`;
+    if (sale() && !n && maj) return `<div class="est-valid sale" role="status" id="est-barre"><span><b>Aucun cours dans votre estimation.</b><br>Pour ne plus être compté, utilisez « Retirer mon estimation ».</span></div>`;
+    return '';
   }
   function jauge(pole, autres, tous, actifPole) {
     const c = cadre(), vol = c.volumes[pole], nbS = tous.nbSemaines;
@@ -402,7 +462,13 @@ export function creerEstimation(ctx) {
     const l = S.lignes.get(cl.nom + '|' + cr.cle), s = autres.slots.get(cl.nom + '|' + cr.cle);
     return { l, s, nb: l ? l.nb : null };
   }
-  function grille(cl, crs, autres) {
+  /* Mode consultation : couleur = plus grand besoin estimé sur le cours (toutes estimations), rien de cliquable. */
+  function etatLecture(cl, cr, tous) {
+    const s = tous.slots.get(cl.nom + '|' + cr.cle);
+    return { s, nb: s ? s.nb : null, cls: s ? nbClasse(s.nb) : 'off',
+      txt: s ? `${s.nb} AESH estimé${s.nb > 1 ? 's' : ''}` : 'pas encore estimé', det: s ? `${s.n} estimation${s.n > 1 ? 's' : ''}` : '' };
+  }
+  function grille(cl, crs, autres, tous, lecture) {
     const h0 = Math.max(7, Math.min(8, ...crs.map(x => Math.floor(min(x.debut) / 60)))), h1 = Math.min(19, Math.max(13, ...crs.map(x => Math.ceil(min(x.fin) / 60))));
     const PX = 44, H = (h1 - h0) * PX;
     let g = `<div class="est-gh"></div>` + JOURS.map(j => `<div class="est-gh">${JOURS_L[j].slice(0, 3)}</div>`).join('');
@@ -410,8 +476,15 @@ export function creerEstimation(ctx) {
     JOURS.forEach(j => {
       g += `<div class="est-col" style="height:${H}px">${Array.from({ length: h1 - h0 - 1 }, (_, k) => `<div class="est-hr" style="top:${(k + 1) * PX}px"></div>`).join('')}`;
       crs.filter(x => x.jour === j).forEach(cr => {
-        const m = mien(cr), { nb, s } = etatCreneau(cl, cr, autres);
         const top = (min(cr.debut) / 60 - h0) * PX, ht = Math.max(22, (min(cr.fin) - min(cr.debut)) / 60 * PX - 3);
+        if (lecture) {
+          const e = etatLecture(cl, cr, tous);
+          g += `<div class="est-cr lu ${e.cls}" role="img" style="top:${top}px;height:${ht}px" aria-label="${esc(`${JOURS_L[cr.jour]} ${hFr(cr.debut)}–${hFr(cr.fin)}, ${cr.matiere}${cr.parite ? ', semaine ' + cr.parite : ''}, ${e.txt}`)}">
+            <b>${esc(cr.matiere)}</b>${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))}${cr.parite ? ` · sem. ${esc(cr.parite)}` : ''}
+            ${e.s ? `<span class="est-pastille">${esc(e.txt)}</span><span class="est-coll">${esc(e.det)}</span>` : ''}</div>`;
+          return;
+        }
+        const m = mien(cr), { nb, s } = etatCreneau(cl, cr, autres);
         g += `<button type="button" class="est-cr ${m ? nbClasse(nb) : 'off'}" ${m ? `id="cr-${esc(cl.nom)}-${esc(slug(cr.cle))}" data-e="creneau" data-v="${esc(cr.cle)}"` : 'disabled tabindex="-1"'} style="top:${top}px;height:${ht}px"
           aria-label="${esc(`${JOURS_L[cr.jour]} ${hFr(cr.debut)}–${hFr(cr.fin)}, ${cr.matiere}${cr.parite ? ', semaine ' + cr.parite : ''}${m ? (nb != null ? `, ${nb} AESH indiqué${nb > 1 ? 's' : ''}` : ', à renseigner') : ', cours d’un collègue'}`)}">
           <b>${esc(cr.matiere)}</b>${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))}${cr.parite ? ` · sem. ${esc(cr.parite)}` : ''}
@@ -421,12 +494,18 @@ export function creerEstimation(ctx) {
     });
     return `<div class="est-grille" aria-label="Emploi du temps de la classe">${g}</div>`;
   }
-  function liste(cl, crs, autres) {
+  function liste(cl, crs, autres, tous, lecture) {
     let h = `<div class="est-liste">`;
     JOURS.forEach(j => {
       const cj = crs.filter(x => x.jour === j); if (!cj.length) return;
       h += `<div class="est-jour">${JOURS_L[j]}</div>`;
       cj.forEach(cr => {
+        if (lecture) {
+          const e = etatLecture(cl, cr, tous);
+          h += `<div class="est-carte lu ${e.cls}"><b>${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))} · ${esc(cr.matiere)}</b>${cr.parite ? ` · semaine ${esc(cr.parite)}` : ''}<br>
+            <span>${esc(e.txt)}${e.det ? ` · ${esc(e.det)}` : ''}</span></div>`;
+          return;
+        }
         const m = mien(cr), { nb, s } = etatCreneau(cl, cr, autres);
         h += `<button type="button" class="est-carte ${m ? nbClasse(nb) : 'off'}" ${m ? `id="cc-${esc(cl.nom)}-${esc(slug(cr.cle))}" data-e="creneau" data-v="${esc(cr.cle)}"` : 'disabled tabindex="-1"'}>
           <b>${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))} · ${esc(cr.matiere)}</b>${cr.parite ? ` · semaine ${esc(cr.parite)}` : ''}<br>
@@ -469,7 +548,7 @@ export function creerEstimation(ctx) {
         <small>Sans nom ni prénom d’élève.</small>
         <textarea id="est-commentaire" maxlength="600" data-e-input="commentaire" rows="3" placeholder="Ex. : besoin surtout pendant les TP, groupe à effectif chargé…">${esc(S.commentaire)}</textarea></div>
       <div class="est-actions">${S.docId && S.envoyeLe ? `<button type="button" class="btn petit" data-e="retirer">Retirer mon estimation</button>` : '<span></span>'}
-        <span class="droite"><button type="button" class="btn primaire" id="est-envoyer" data-e="envoyer" ${l.length && S.envoi !== 'encours' ? '' : 'disabled'}>${S.docId && S.envoyeLe ? 'Mettre à jour mon estimation' : 'Envoyer mon estimation'}</button></span></div>
+        <span class="droite"><button type="button" class="btn primaire" id="est-envoyer" data-e="envoyer" ${l.length && S.envoi !== 'encours' ? '' : 'disabled'}>Valider mon estimation</button></span></div>
       ${S.envoi === 'encours' ? `<p class="message info" role="status">Envoi en cours…</p>` : ''}
       ${S.envoi && S.envoi !== 'encours' ? `<div class="message warn" role="alert"><p>${esc(S.envoi)}</p><p>Votre saisie reste gardée sur cet appareil.</p></div>` : ''}
     </section>`;
@@ -516,22 +595,25 @@ export function creerEstimation(ctx) {
   function feuilleConfirmation() {
     return `<div class="est-ov"><div class="est-feuille" role="alertdialog" aria-modal="true" aria-labelledby="c-titre" aria-describedby="c-texte">
       <h2 id="c-titre" tabindex="-1">Êtes-vous sûr ?</h2><p id="c-texte" style="margin-top:10px">${esc(S.conf.texte)}</p>
-      <div class="est-actions"><span></span><span class="droite"><button type="button" class="btn" data-e="conf-non">Annuler</button>
+      <div class="est-actions"><span></span><span class="droite"><button type="button" class="btn" id="c-non" data-e="conf-non">${esc(S.conf.non || 'Annuler')}</button>
       <button type="button" class="btn primaire" id="c-oui" data-e="conf-oui">${esc(S.conf.bouton)}</button></span></div></div></div>`;
   }
   function blocEnvoye() {
     const code = S.docId ? S.docId.replace(/^declaration_/, '') : '';
-    return `<div class="est-ok" style="margin-top:16px" role="status"><h2 tabindex="-1" id="titre-envoye">✓ ${S.retire ? 'Estimation retirée' : 'Merci, votre estimation est enregistrée'}</h2>
-      <p style="margin-top:8px">${S.retire ? 'Vos besoins ne sont plus comptés. Vous pouvez en indiquer de nouveaux à tout moment.' : 'La coordination la voit dès maintenant. Vous pouvez revenir la modifier quand vous voulez, sur cet appareil.'}</p>
-      ${code && !S.retire ? `<p style="margin-top:10px">Code de reprise (autre appareil) : <span class="est-code">${esc(code)}</span></p>` : ''}
+    return `<div class="est-ok" style="margin-top:16px" role="status"><h2 tabindex="-1" id="titre-envoye">✓ ${S.retire ? 'Estimation retirée' : 'Merci pour votre contribution'}</h2>
+      <p style="margin-top:8px">${S.retire ? 'Vos besoins ne sont plus comptés. Vous pouvez en indiquer de nouveaux à tout moment.'
+        : 'Votre estimation est enregistrée et transmise à la coordination. Elle permettra d’organiser l’accompagnement humain au plus près des besoins des élèves. Vous pouvez la consulter et la modifier à tout moment.'}</p>
+      ${S.envoyeLe ? `<p style="margin-top:8px">Dernière modification ${esc(dateHeureLongue(S.envoyeLe))}.</p>` : ''}
+      ${code && !S.retire ? `<p style="margin-top:10px">Code de reprise, pour la retrouver sur un autre appareil : <span class="est-code">${esc(code)}</span></p>` : ''}
       <p style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn primaire petit" data-e="reprendre">${S.retire ? 'Indiquer de nouveaux besoins' : 'Modifier mon estimation'}</button>
+      <button type="button" class="btn petit" data-e="consulter">Voir les estimations des classes</button>
       <button type="button" class="btn petit" data-e="accueil">Retour à l’accueil</button></p></div>`;
   }
   const slug = s => String(s).replace(/[^A-Za-z0-9]+/g, '-');
   const dateCourte = iso => { const d = new Date(iso); return isNaN(d) ? '' : `le ${d.getDate()}/${z2(d.getMonth() + 1)} à ${z2(d.getHours())}h${z2(d.getMinutes())}`; };
 
   /* ── actions ── */
-  function confirmer(texte, bouton, faire) { S.conf = { texte, bouton, faire }; S.focus = 'c-oui'; dessiner(); }
+  function confirmer(texte, bouton, faire, opts) { S.conf = { texte, bouton, faire, ...(opts || {}) }; S.bonjour = false; S.focus = 'c-oui'; dessiner(); }
   function ouvrirCreneau(k) {
     const c = cadre(), [nom, ...r] = k.split('|'), cl = classeDe(nom), cr = cl && cl.creneaux.find(x => x.cle === r.join('|')); if (!cr) return;
     const l = S.lignes.get(k), hl = horaireLigne(cr, l);
@@ -543,6 +625,7 @@ export function creerEstimation(ctx) {
     S.sel = k;
     S.f = { nb: l ? l.nb : null, per, du: l && l.du ? l.du : c.periode.debut, au: l && l.au ? l.au : c.periode.fin,
       semaines: l && ['A', 'B'].includes(l.semaines) ? l.semaines : 'toutes', hDebut: hl.debut, hFin: hl.fin, aides: new Set(l ? l.aides || [] : []), note: l ? l.note || '' : '' };
+    if (!S.navFeuille) { S.navFeuille = true; pousser(); }   /* « précédent » du navigateur ferme la fenêtre */
     S.focus = S.f.nb != null ? 'nb-' + S.f.nb : 'f-titre'; dessiner();
   }
   async function envoyer(retirer) {
@@ -562,9 +645,10 @@ export function creerEstimation(ctx) {
     S.envoi = 'encours'; dessiner();
     try {
       await Promise.race([FS.setDoc(FS.doc(db, COL, doc.id), doc), new Promise((_, rej) => setTimeout(() => rej(new Error('délai dépassé')), 15000))]);
-      S.version = doc.version; S.creeLe = doc.creeLe; S.envoyeLe = maintenant; S.envoi = ''; S.retire = !!retirer;
+      S.version = doc.version; S.creeLe = doc.creeLe; S.envoyeLe = maintenant; S.envoi = ''; S.retire = !!retirer; S.flash = ''; S.bonjour = false;
       if (retirer) { S.lignes = new Map(); S.histo = []; }
-      lsEcrit(); S.etape = 'envoye'; S.focus = 'titre-envoye'; dessiner();
+      S.envoyeSig = signature();
+      lsEcrit(); S.etape = 'envoye'; S.focus = 'titre-envoye'; pousser(); dessiner();
       annonce && annonce(retirer ? 'Estimation retirée.' : 'Estimation envoyée.');
     } catch (e) {
       const t = String((e && (e.code || e.message)) || e);
@@ -582,7 +666,7 @@ export function creerEstimation(ctx) {
       S.docId = d.id; S.version = d.version || 0; S.creeLe = d.creeLe || null; S.envoyeLe = d.majLe || null; S.message = '';
       S.mats = new Set(Array.isArray(d.disciplines) ? d.disciplines : []); S.commentaire = String(d.commentaire || '');
       S.lignes = new Map(); (d.lignes || []).forEach(l => { if (l && l.classe && l.cle) S.lignes.set(l.classe + '|' + l.cle, { classe: l.classe, cle: l.cle, nb: l.nb, du: l.du, au: l.au, semaines: l.semaines, hDebut: l.hDebut, hFin: l.hFin, aides: l.aides || [], note: l.note || '' }); });
-      S.histo = []; lsEcrit(); S.etape = 'edt'; S.focus = 'titre-ecran'; dessiner(); annonce && annonce('Estimation retrouvée.');
+      S.histo = []; S.envoyeSig = signature(); S.bonjour = true; S.mode = 'estimer'; lsEcrit(); S.etape = 'edt'; S.focus = 'titre-ecran'; pousser(); dessiner(); annonce && annonce('Estimation retrouvée.');
     } catch (e) { S.message = 'Recherche impossible pour le moment (connexion).'; dessiner(); }
   }
   function lier() {
@@ -590,13 +674,22 @@ export function creerEstimation(ctx) {
     h.onclick = ev => {
       const b = ev.target.closest('[data-e]'); if (!b || b.disabled) return;
       const a = b.dataset.e, v = b.dataset.v;
-      if (a === 'fond') { if (ev.target === b) { S.sel = null; S.f = null; dessiner(); } return; }
-      if (a === 'accueil') { retourAccueil && retourAccueil(); return; }
+      if (a === 'fond') { if (ev.target === b) { fermerFeuille(); dessiner(); } return; }
+      if (a === 'accueil') {
+        if (S.lignes.size && sale()) {
+          confirmer('Votre estimation n’est pas encore validée : la coordination ne la voit pas. Voulez-vous la valider maintenant ?', 'Valider maintenant',
+            () => envoyer(false), { non: 'Quitter sans valider', faireNon: () => { retourAccueil && retourAccueil(); } });
+          return;
+        }
+        retourAccueil && retourAccueil(); return;
+      }
+      if (a === 'consulter') { S.mode = 'voir'; S.etape = 'edt'; S.retire = false; S.focus = 'titre-ecran'; pousser(); dessiner(); window.scrollTo(0, 0); return; }
+      if (a === 'mode') { S.mode = v; S.focus = b.id; dessiner(); return; }
       if (a === 'reessayer') { S.etat = 'chargement'; S.ecoute = false; if (S.unsub) try { S.unsub(); } catch (e) { } S.unsub = null; ecouter(); dessiner(); return; }
       if (a === 'mat') { S.mats.has(v) ? S.mats.delete(v) : S.mats.add(v); lsEcrit(); S.focus = b.id; dessiner(); return; }
-      if (a === 'continuer') { if (!S.mats.size) return; S.etape = 'edt'; const k = cadre().classes.find(x => x.creneaux.some(mien)); if (k) S.classe = k.nom; S.focus = 'titre-ecran'; dessiner(); return; }
-      if (a === 'changer') { S.etape = 'matieres'; S.focus = 'h-mats'; dessiner(); return; }
-      if (a === 'reprendre') { S.etape = S.mats.size ? 'edt' : 'matieres'; S.retire = false; S.focus = 'titre-ecran'; dessiner(); return; }
+      if (a === 'continuer') { if (!S.mats.size) return; S.etape = 'edt'; S.mode = 'estimer'; const k = cadre().classes.find(x => x.creneaux.some(mien)); if (k) S.classe = k.nom; S.focus = 'titre-ecran'; pousser(); dessiner(); return; }
+      if (a === 'changer') { S.etape = 'matieres'; S.mode = 'estimer'; S.focus = 'h-mats'; pousser(); dessiner(); return; }
+      if (a === 'reprendre') { S.etape = S.mats.size ? 'edt' : 'matieres'; S.mode = 'estimer'; S.retire = false; S.focus = 'titre-ecran'; pousser(); dessiner(); return; }
       if (a === 'code') { retrouverParCode((h.querySelector('#est-code') || {}).value); return; }
       if (a === 'classe') { S.classe = v; S.focus = b.id; dessiner(); return; }
       if (a === 'vue') { S.vue = v; S.focus = b.id; dessiner(); return; }
@@ -606,26 +699,26 @@ export function creerEstimation(ctx) {
       if (a === 'per') { S.f.per = v; S.focus = b.id; dessiner(); return; }
       if (a === 'semaines') { S.f.semaines = v; S.focus = b.id; dessiner(); return; }
       if (a === 'aide') { S.f.aides.has(v) ? S.f.aides.delete(v) : S.f.aides.add(v); b.setAttribute('aria-pressed', S.f.aides.has(v)); return; }
-      if (a === 'fermer') { S.sel = null; S.f = null; dessiner(); return; }
+      if (a === 'fermer') { fermerFeuille(); dessiner(); return; }
       if (a === 'valider') {
         const k = S.sel, [nom, ...r] = k.split('|'), cle = r.join('|'), cl = classeDe(nom), cr = cl.creneaux.find(x => x.cle === cle);
         const ligne = ligneDeFeuille(cl, cr), c = cadre(), hl = horaireLigne(cr, ligne), n = semainesLigne(c, cl, cr, ligne).length, tot = heuresLigne(c, cl, cr, ligne);
-        S.sel = null; S.f = null;
+        fermerFeuille();
         confirmer(`${ligne.nb} AESH le ${JOURS_L[cr.jour].toLowerCase()} ${hFr(hl.debut)}–${hFr(hl.fin)}, ${cr.matiere}, ${cl.court}, ${libellePeriode(ligne)}, ${libelleSemaines(cr, ligne)} : ${n} semaine${n > 1 ? 's' : ''} de cours, soit ${fmtH(tot)} sur la période.`, 'Confirmer',
-          () => { memoriser(); S.lignes.set(k, ligne); lsEcrit(); annonce && annonce('Besoin enregistré dans votre estimation.'); });
+          () => { memoriser(); S.lignes.set(k, ligne); lsEcrit(); S.flash = `✓ ${cl.court}, ${JOURS_L[cr.jour].toLowerCase()} ${hFr(hl.debut)} : ajouté à votre estimation. Pensez à valider.`; annonce && annonce('Besoin ajouté à votre estimation. Pensez à valider.'); });
         return;
       }
-      if (a === 'supprimer') { const k = v; S.sel = null; S.f = null; confirmer('Retirer ce cours de votre estimation ?', 'Retirer', () => { memoriser(); S.lignes.delete(k); lsEcrit(); annonce && annonce('Cours retiré.'); }); return; }
-      if (a === 'tout-effacer') { confirmer('Effacer tous les cours indiqués et recommencer ?', 'Tout effacer', () => { memoriser(); S.lignes = new Map(); lsEcrit(); }); return; }
-      if (a === 'annuler-action') { const p = S.histo.pop(); if (p) { const o = JSON.parse(p); S.lignes = new Map(o.lignes); S.commentaire = o.commentaire; lsEcrit(); annonce && annonce('Dernière action annulée.'); } dessiner(); return; }
-      if (a === 'envoyer') { const n = S.lignes.size, maj = S.docId && S.envoyeLe; confirmer(`${maj ? 'Mettre à jour' : 'Envoyer'} votre estimation (${n} cours) à la coordination ?`, maj ? 'Mettre à jour' : 'Envoyer', () => envoyer(false)); return; }
+      if (a === 'supprimer') { const k = v; fermerFeuille(); confirmer('Retirer ce cours de votre estimation ?', 'Retirer', () => { memoriser(); S.lignes.delete(k); lsEcrit(); S.flash = 'Cours retiré de votre estimation. Pensez à valider.'; annonce && annonce('Cours retiré. Pensez à valider.'); }); return; }
+      if (a === 'tout-effacer') { confirmer('Effacer tous les cours indiqués et recommencer ?', 'Tout effacer', () => { memoriser(); S.lignes = new Map(); lsEcrit(); S.flash = ''; }); return; }
+      if (a === 'annuler-action') { const p = S.histo.pop(); if (p) { const o = JSON.parse(p); S.lignes = new Map(o.lignes); S.commentaire = o.commentaire; lsEcrit(); S.flash = 'Dernière action annulée.'; annonce && annonce('Dernière action annulée.'); } dessiner(); return; }
+      if (a === 'envoyer') { const n = S.lignes.size; if (!n) return; confirmer(`Valider votre estimation (${n} cours) et la transmettre à la coordination ?`, 'Valider', () => envoyer(false)); return; }
       if (a === 'retirer') { confirmer('Retirer votre estimation ? Vos besoins ne seront plus comptés.', 'Retirer mon estimation', () => envoyer(true)); return; }
-      if (a === 'conf-non') { S.conf = null; dessiner(); return; }
+      if (a === 'conf-non') { const f = S.conf && S.conf.faireNon; S.conf = null; dessiner(); if (f) f(); return; }
       if (a === 'conf-oui') { const f = S.conf.faire; S.conf = null; dessiner(); f(); dessiner(); return; }
     };
     h.oninput = ev => {
       const t = ev.target, k = t.dataset && t.dataset.eInput; if (!k) return;
-      if (k === 'commentaire') { S.commentaire = t.value; lsEcrit(); return; }
+      if (k === 'commentaire') { S.commentaire = t.value; lsEcrit(); const bar = S.hote.querySelector('#est-barre'); if (bar && !bar.classList.contains('sale') && sale()) { S.focus = t.id; dessiner(); } return; }
       if (!S.f) return;
       if (k === 'note') S.f.note = t.value;
     };
@@ -638,12 +731,28 @@ export function creerEstimation(ctx) {
         S.focus = t.id; dessiner();
       }
     };
-    h.onkeydown = ev => { if (ev.key === 'Escape' && (S.sel || S.conf)) { S.sel = null; S.f = null; S.conf = null; dessiner(); } };
+    h.onkeydown = ev => { if (ev.key === 'Escape' && (S.sel || S.conf)) { if (S.sel) fermerFeuille(); S.conf = null; dessiner(); } };
   }
 
   return {
-    monter(hote) { S.hote = hote; if (S.docId && S.mats.size) S.retrouvee = true; ecouter(); dessiner(); },
+    monter(hote) {
+      S.hote = hote; S.conf = null; S.sel = null; S.f = null; S.navFeuille = false;
+      /* L'enseignant revient sur l'estimation (nouvelle visite ou même visite) : emploi du temps et « Bonjour ». */
+      if (S.docId && S.mats.size) { S.retrouvee = true; if (S.cadre) { S.etape = 'edt'; S.mode = 'estimer'; try { remplacerNav && remplacerNav({ etape: 'edt', mode: 'estimer', sel: null }); } catch (e) { } } }
+      else if (S.etape === 'envoye') S.etape = 'matieres';
+      S.retire = false; S.bonjour = !!(S.docId && S.envoyeLe && !sale());
+      ecouter(); dessiner();
+    },
     fermer() { S.hote = null; },
+    /* Navigation « précédent / suivant » du navigateur (appelée par la page). */
+    consommerPop() { if (S.ignorerPop > 0) { S.ignorerPop--; return true; } return false; },
+    restaurerNav(e) {
+      S.conf = null; S.sel = null; S.f = null; S.navFeuille = false;
+      const etape = e && ['matieres', 'edt', 'envoye'].includes(e.etape) ? e.etape : 'matieres';
+      S.etape = etape === 'envoye' && !S.envoyeLe ? 'edt' : etape;
+      S.mode = e && e.mode === 'voir' ? 'voir' : 'estimer';
+      S.focus = 'titre-ecran'; dessiner();
+    },
     _etat: () => S, _agreger: agreger
   };
 }
