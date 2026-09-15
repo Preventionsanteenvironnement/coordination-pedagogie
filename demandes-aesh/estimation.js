@@ -228,10 +228,21 @@ const CSS = `
 .e6-fin p{font-size:1.1rem;color:var(--ink-2);max-width:32ch;margin:10px auto}
 .e6-toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);z-index:70;background:#10232a;color:#fff;border-radius:999px;padding:10px 18px;font-weight:650;max-width:92vw}
 .e6-toast.err{background:#8a1c1c}
+.e6-rc{text-align:center;padding-top:24px}
+.e6-rc h2{font-size:1.3rem}
+.e6-rc-nb{font-size:2.6rem;font-weight:800;line-height:1.1;margin:14px 0 6px;color:var(--accent-d);font-variant-numeric:tabular-nums}
+.e6-rc-m{font-weight:700;font-size:1.15rem;margin:6px 0 4px}
+.e6-rc-l{margin:2px 0;color:var(--ink-2)}
+.e6-rc .e6-actions{margin-top:22px}
+.e6-rc.fait{background:var(--ok-bg);box-shadow:inset 0 0 0 2px var(--ok-line),0 -10px 40px rgba(0,0,0,.25);padding-bottom:calc(30px + env(safe-area-inset-bottom,0px));animation:e6pop .35s ease}
+.e6-rc.fait h2,.e6-rc.fait .e6-rc-nb{color:var(--ok-ink)}
+.e6-cours.flash{animation:e6flash .7s ease 3}
+@keyframes e6flash{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 4px var(--accent)}}
+@media(prefers-reduced-motion:reduce){.e6-rc.fait{animation:none}.e6-cours.flash{animation:none;box-shadow:0 0 0 4px var(--accent)}}
 `;
 const COURT = { C1PSR: 'CAP 1 PSR', C2PSR: 'CAP 2 PSR', B2MELEC: '2de MELEC', B1MELEC: '1re MELEC', BTMELEC: 'Tle MELEC' };
 const FILIERES = [['PSR', 'CAP PSR', '1re et 2e année'], ['MELEC', 'Bac Pro MELEC', '2de, 1re et Terminale']];
-const K_APPAREIL = 'estimation-aesh-v7';
+const K_APPAREIL = 'estimation-aesh-v8';   /* v8 (15/09) : repart à zéro sur les appareils qui ont servi aux tests */
 const PALETTE = [['#3b6fd8', '#e8effd'], ['#d0782a', '#fdf0e4'], ['#2f9a6a', '#e6f5ee'], ['#9b4fc4', '#f3eafa'], ['#c9444f', '#fbe9ea'], ['#1f8fa3', '#e4f4f7'], ['#b8931c', '#faf4de'], ['#5d6b76', '#eef1f3'], ['#d14f93', '#fbe8f2'], ['#4f8f2a', '#edf6e6']];
 const empreinte = s => { let h = 5381; for (const ch of String(s)) h = (Math.imul(h, 33) ^ ch.codePointAt(0)) >>> 0; return h.toString(36).padStart(4, '0'); };
 /* Même matière → même couleur, dans toutes les classes. */
@@ -257,7 +268,7 @@ export function coursOublies(classe, estimesIci, estimeDe) {
 export function creerEstimation(ctx) {
   const { FS, db, esc, annee, annonce, retourAccueil, pousser: pousserNav } = ctx;
   const S = { etat: 'chargement', cadre: null, docs: new Map(), ecran: 'filiere', fil: null, classe: null, sem: 'A', sel: null, f: null,
-    conf: null, valid: null, toast: '', toastErr: false, hote: null, focus: null, envoi: false, ignorerPop: 0, navFeuille: false, unsub: null, ecoute: false };
+    recap: null, flash: null, valid: null, toast: '', toastErr: false, hote: null, focus: null, envoi: false, ignorerPop: 0, navFeuille: false, unsub: null, ecoute: false };
   if (!document.getElementById('e6-styles')) { const st = document.createElement('style'); st.id = 'e6-styles'; st.textContent = CSS; document.head.appendChild(st); }
 
   /* Mémoire de l'appareil, par période : cours enregistrés ici (pour la vérification) et classes validées. */
@@ -314,9 +325,9 @@ export function creerEstimation(ctx) {
     else if (S.ecran === 'edt' && classeDe(S.classe)) html += ecranEdt();
     else { S.ecran = 'filiere'; html += ecranFilieres(); }
     html += `</div>`;
-    if (S.sel && S.f) html += feuille();
+    if (S.sel && S.f && !S.recap) html += feuille();
     if (S.valid) html += feuilleValidation();
-    if (S.conf) html += confirmation();
+    if (S.recap) html += fenetreRecap();
     if (S.toast) html += `<div class="e6-toast ${S.toastErr ? 'err' : ''}" role="status">${esc(S.toast)}</div>`;
     h.innerHTML = html;
     lier();
@@ -348,8 +359,8 @@ export function creerEstimation(ctx) {
     const puces = faites.sort((a, b) => hDe.get(b).h - hDe.get(a).h).map(f => `<span class="fait" style="--c:${hDe.get(f).c}"><i></i>✓ ${esc(toutes.get(f))}<em>${esc(fmtH(hDe.get(f).h))}</em></span>`).join('')
       + reste.map(f => `<span class="pas">${esc(toutes.get(f))}</span>`).join('');
     return `<section class="e6-moyens" aria-label="Moyens humains, ${esc(fil ? fil[1] : pole)}">
-      <div class="haut"><b>Moyens humains · ${esc(fil ? fil[1] : pole)}</b><span class="e6-info" style="margin:0">Heures AESH du pôle : <b style="color:var(--ink)">${vol != null ? esc(fmtH(vol)) : '—'}</b> / sem.</span></div>
-      <div class="corps">${vol ? `<div class="e6-anneau" style="background:conic-gradient(${seg ? seg + ',' : ''}var(--card-2) ${acc}% 100%)"><i>${pct} %</i></div>` : ''}
+      <div class="haut"><b>Moyens humains · ${esc(fil ? fil[1] : pole)}</b><span class="e6-info" style="margin:0">Heures AESH du pôle : <b style="color:var(--ink)">${vol != null ? esc(fmtH(vol)) : '—'}</b> / sem. · estimation, variable</span></div>
+      <div class="corps">${vol ? `<div class="e6-anneau" style="background:conic-gradient(${seg ? seg + ',' : ''}var(--card-2) ${acc}% 100%)"><i${pct > 100 ? ' style="color:var(--err-ink)"' : ''}>${pct} %</i></div>` : ''}
         <div style="flex:1;min-width:0"><div>Estimation en cours : <b>${esc(fmtH(total))}</b> / sem.</div>
           <div class="e6-info" style="margin:2px 0 0"><b style="color:var(--ink)">${faites.length}</b> matière${faites.length > 1 ? 's' : ''} sur ${toutes.size} déjà estimée${faites.length > 1 ? 's' : ''}</div></div></div>
       <div class="e6-leg e6-mats">${puces}</div></section>`;
@@ -371,19 +382,21 @@ export function creerEstimation(ctx) {
     if (c.avecParite) h += `<div class="e6-onglets" role="group" aria-label="Semaine">${['A', 'B'].map(s => `<button type="button" id="sem-${s}" data-e="sem" data-v="${s}" aria-pressed="${S.sem === s}">Semaine ${s}</button>`).join('')}</div>`;
     if (pf.length) h += `<p class="e6-info">${pf.map(p => `PFMP du ${esc(jjmm(p.debut))} au ${esc(jjmm(p.fin))}`).join(' · ')}</p>`;
     const miens = new Set(app().miens);
-    h += `<p class="e6-legende"><span><span class="e6-qui vous">vous</span> : estimé par vous</span><span><span class="e6-qui coll">collègue</span> : par un collègue</span><span>+ : à estimer</span></p>`;
+    h += `<p class="e6-legende"><span><span class="e6-qui vous">vous</span> : estimé par vous</span><span><span class="e6-qui coll">collègue</span> ✓ : par un collègue</span><span>+ : à estimer</span></p>`;
     JOURS.forEach(j => {
       const cj = k.creneaux.filter(cr => cr.jour === j && semaineVisible(cr)); if (!cj.length) return;
       h += `<h2 class="e6-jour">${JOURS_L[j]}</h2>`;
       cj.forEach(cr => {
-        const d = docDe(k, cr), cls = !d ? '' : d.nb === 0 ? 'n0' : d.nb === 1 ? 'n1' : d.nb === 2 ? 'n2' : 'n3', [mc, mt] = couleurMatiere(cr.matiere);
+        /* Le nombre d'AESH demandé par un collègue n'est jamais montré (consigne de Brahim, 15/09) : seulement « ✓ ». */
+        const d = docDe(k, cr), mien = !!d && miens.has(idDe(k, cr)), [mc, mt] = couleurMatiere(cr.matiere);
+        const cls = !d ? '' : !mien ? 'coll' : d.nb === 0 ? 'n0' : d.nb === 1 ? 'n1' : d.nb === 2 ? 'n2' : 'n3';
         const hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
         const sem = d ? (cr.parite ? `sem. ${cr.parite}` : ['A', 'B'].includes(d.semaines) ? `sem. ${d.semaines}` : (c.avecParite ? 'sem. A et B' : '')) : '';
-        h += `<button type="button" class="e6-cours" style="--mc:${mc};--mt:${mt}" id="cr-${esc(slug(cr.cle))}" data-e="cours" data-v="${esc(cr.cle)}"
-          aria-label="${esc(`${JOURS_L[cr.jour]} ${hFr(cr.debut)}–${hFr(cr.fin)}, ${cr.matiere}${cr.parite ? ', semaine ' + cr.parite : ''}, ${d ? d.nb + ' AESH' : 'pas encore estimé'}`)}">
+        h += `<button type="button" class="e6-cours${S.flash === cr.cle ? ' flash' : ''}" style="--mc:${mc};--mt:${mt}" id="cr-${esc(slug(cr.cle))}" data-e="cours" data-v="${esc(cr.cle)}"
+          aria-label="${esc(`${JOURS_L[cr.jour]} ${hFr(cr.debut)}–${hFr(cr.fin)}, ${cr.matiere}${cr.parite ? ', semaine ' + cr.parite : ''}, ${!d ? 'pas encore estimé' : mien ? d.nb + ' AESH' : 'estimé par un collègue'}`)}">
           <span class="h">${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))}</span>
-          <span class="m"><b>${esc(cr.matiere)}</b>${d ? `<small>${miens.has(idDe(k, cr)) ? '<span class="e6-qui vous">vous</span>' : '<span class="e6-qui coll">collègue</span>'}${esc([`jusqu’au ${jjmm(d.au)}`, sem, (hl.debut !== cr.debut || hl.fin !== cr.fin) ? `${hFr(hl.debut)}–${hFr(hl.fin)}` : ''].filter(Boolean).join(' · '))}</small>` : ''}</span>
-          <span class="p ${cls} ${d && !miens.has(idDe(k, cr)) ? 'coll' : ''}">${d ? `${d.nb} AESH` : '+'}</span></button>`;
+          <span class="m"><b>${esc(cr.matiere)}</b>${d ? `<small>${mien ? '<span class="e6-qui vous">vous</span>' : '<span class="e6-qui coll">collègue</span>'}${esc([`jusqu’au ${jjmm(d.au)}`, sem, (hl.debut !== cr.debut || hl.fin !== cr.fin) ? `${hFr(hl.debut)}–${hFr(hl.fin)}` : ''].filter(Boolean).join(' · '))}</small>` : ''}</span>
+          <span class="p ${cls}">${!d ? '+' : mien ? `${d.nb} AESH` : '✓'}</span></button>`;
       });
     });
     return h + `<div class="e6-bas"><button type="button" class="e6-btn" id="e6-valider-classe" data-e="valider-classe">Valider ${esc(courtDe(k))}</button></div>`;
@@ -408,12 +421,13 @@ export function creerEstimation(ctx) {
   }
   function feuille() {
     const c = cadre(), k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel); if (!cr) { S.sel = null; return ''; }
-    const f = S.f, existe = !!docDe(k, cr);
+    const f = S.f, existe = !!docDe(k, cr), mien = existe && app().miens.includes(idDe(k, cr));
     const pas = []; for (let m = min(cr.debut); m <= min(cr.fin); m += 15) pas.push(hDe(m)); if (pas[pas.length - 1] !== cr.fin) pas.push(cr.fin);
     const peutValider = f.nb != null && (f.A || f.B) && RE_DATE.test(f.au || '');
     return `<div class="e6-ov" data-e="fond"><div class="e6-feuille" role="dialog" aria-modal="true" aria-labelledby="f-titre"><div class="e6-poignee" aria-hidden="true"></div>
       <h2 id="f-titre" tabindex="-1">${esc(JOURS_L[cr.jour])} ${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))}</h2>
       <p class="e6-info">${esc(cr.matiere)} · ${esc(courtDe(k))}${cr.parite ? ` · semaine ${esc(cr.parite)}` : ''}</p>
+      ${existe && !mien ? `<p class="e6-info" id="f-coll">Déjà estimé par un collègue. Votre réponse remplacera la sienne.</p>` : ''}
       <p class="e6-q" id="f-q">Combien d’AESH ?</p>
       <div class="e6-nbs" role="group" aria-labelledby="f-q">${[0, 1, 2, 3, 4, 5, 6].map(v => `<button type="button" id="nb-${v}" data-e="nb" data-v="${v}" aria-pressed="${f.nb === v}">${v}</button>`).join('')}</div>
       <div class="e6-ligne"><span class="lib">Période</span><span class="val">${f.modPer
@@ -423,20 +437,38 @@ export function creerEstimation(ctx) {
       <div class="e6-ligne"><span class="lib">Horaire</span><span class="val">${f.modH
         ? `<label class="sr" for="f-hd">De</label><select id="f-hd" data-i="hDebut">${pas.slice(0, -1).map(x => `<option value="${x}" ${x === f.hDebut ? 'selected' : ''}>${hFr(x)}</option>`).join('')}</select>–<label class="sr" for="f-hf">à</label><select id="f-hf" data-i="hFin">${pas.slice(1).map(x => `<option value="${x}" ${x === f.hFin ? 'selected' : ''}>${hFr(x)}</option>`).join('')}</select>`
         : `${esc(hFr(f.hDebut))}–${esc(hFr(f.hFin))}<button type="button" class="e6-mod" id="mod-h" data-e="mod-h">modifier</button>`}</span></div>
-      <div class="e6-actions">${existe ? `<button type="button" class="e6-btn sec" id="f-retirer" data-e="retirer">Retirer</button>` : ''}
+      <div class="e6-actions">${mien ? `<button type="button" class="e6-btn sec" id="f-retirer" data-e="retirer">Retirer</button>` : ''}
         <button type="button" class="e6-btn" id="f-enregistrer" data-e="enregistrer" ${peutValider && !S.envoi ? '' : 'disabled'}>${S.envoi ? 'Enregistrement…' : 'Enregistrer'}</button></div>
     </div></div>`;
   }
-  function confirmation() {
-    return `<div class="e6-ov"><div class="e6-feuille" role="alertdialog" aria-modal="true" aria-labelledby="c-titre"><h2 id="c-titre" tabindex="-1">Êtes-vous sûr ?</h2>
-      <p style="margin-top:10px">${esc(S.conf.texte)}</p>
-      <div class="e6-actions"><button type="button" class="e6-btn sec" id="c-non" data-e="conf-non">Annuler</button><button type="button" class="e6-btn" id="c-oui" data-e="conf-oui">${esc(S.conf.bouton)}</button></div></div></div>`;
+  /* Récapitulatif avant d'enregistrer ou de retirer, puis « ✓ Enregistré » (consigne de Brahim, 15/09 : éviter la mauvaise matière ou la mauvaise semaine). */
+  function recapDe(mode) {
+    const c = cadre(), k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel), f = S.f; if (!cr || !f) return null;
+    const hl = horaireLigne(cr, { hDebut: f.hDebut, hFin: f.hFin });
+    const sem = !c.avecParite ? '' : cr.parite ? `Semaine ${cr.parite}` : f.A && f.B ? 'Semaines A et B' : f.A ? 'Semaine A seulement' : 'Semaine B seulement';
+    return { mode, cle: cr.cle, nb: f.nb, matiere: cr.matiere, classe: courtDe(k), moment: `${JOURS_L[cr.jour]} ${hFr(hl.debut)}–${hFr(hl.fin)}`, sem, au: RE_DATE.test(f.au || '') ? `Jusqu’au ${jjmm(f.au)}` : '' };
+  }
+  let recapTimer = null;
+  function fermerRecap() {
+    clearTimeout(recapTimer); const r = S.recap; S.recap = null;
+    if (r && r.mode === 'fait') { S.flash = r.cle; S.focus = 'cr-' + slug(r.cle); setTimeout(() => { if (S.flash === r.cle) S.flash = null; }, 2200); }
+    dessiner();
+  }
+  function fenetreRecap() {
+    const r = S.recap, fait = r.mode === 'fait', retirer = r.mode === 'retirer';
+    return `<div class="e6-ov" data-e="fond-recap"><div class="e6-feuille e6-rc${fait ? ' fait' : ''}" role="${fait ? 'status' : 'alertdialog'}" aria-modal="${fait ? 'false' : 'true'}" aria-labelledby="r-titre"${fait ? ' data-e="fond-recap"' : ''}>
+      <h2 id="r-titre" tabindex="-1">${fait ? '✓ Enregistré' : retirer ? 'Vous retirez l’estimation de :' : 'Vous confirmez ?'}</h2>
+      ${retirer ? '' : `<p class="e6-rc-nb">${esc(r.nb)} AESH</p>`}
+      <p class="e6-rc-m">${esc(r.matiere)} · ${esc(r.classe)}</p>
+      <p class="e6-rc-l">${esc(r.moment)}</p>${r.sem ? `<p class="e6-rc-l">${esc(r.sem)}</p>` : ''}${r.au ? `<p class="e6-rc-l">${esc(r.au)}</p>` : ''}
+      ${fait ? '' : `<div class="e6-actions"><button type="button" class="e6-btn sec" id="r-non" data-e="recap-non" ${S.envoi ? 'disabled' : ''}>${retirer ? 'Annuler' : 'Modifier'}</button><button type="button" class="e6-btn" id="r-oui" data-e="recap-oui" ${S.envoi ? 'disabled' : ''}>${S.envoi ? 'Enregistrement…' : retirer ? 'Retirer' : 'Confirmer'}</button></div>`}
+    </div></div>`;
   }
   function ouvrir(cle) {
     const c = cadre(), k = classeDe(S.classe), cr = k.creneaux.find(x => x.cle === cle); if (!cr) return;
     const d = docDe(k, cr), hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
     S.sel = cle;
-    S.f = { nb: d ? d.nb : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
+    S.f = { nb: d && app().miens.includes(idDe(k, cr)) ? d.nb : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
       A: cr.parite ? cr.parite === 'A' : (d ? d.semaines !== 'B' : true), B: cr.parite ? cr.parite === 'B' : (d ? d.semaines !== 'A' : true) };
     if (!S.navFeuille) { S.navFeuille = true; pousser(); }
     S.focus = S.f.nb != null ? 'nb-' + S.f.nb : 'f-titre'; dessiner();
@@ -456,9 +488,10 @@ export function creerEstimation(ctx) {
       S.docs.set(id, doc); S.envoi = false;
       const a = app(); if (statut === 'active' && !a.miens.includes(id)) a.miens.push(id); if (statut === 'retire') a.miens = a.miens.filter(x => x !== id); delete a.valides[k.nom]; appEcrit(a);
       fermerFeuille();
-      toast(statut === 'retire' ? 'Estimation retirée' : '✓ Enregistré');
+      if (statut === 'retire') { S.recap = null; toast('Estimation retirée'); }
+      else { S.recap = Object.assign({}, S.recap, { mode: 'fait' }); S.focus = 'r-titre'; dessiner(); annonce && annonce('Enregistré'); clearTimeout(recapTimer); recapTimer = setTimeout(fermerRecap, 2000); }
     } catch (e) {
-      S.envoi = false;
+      S.envoi = false; S.recap = null;
       const t = String((e && (e.code || e.message)) || e);
       toast(/permission|insufficient/i.test(t) ? 'Non enregistré : espace pas encore ouvert par la coordination.' : 'Non enregistré : pas de connexion. Réessayez.', true);
     }
@@ -468,6 +501,7 @@ export function creerEstimation(ctx) {
     h.onclick = ev => {
       const b = ev.target.closest('[data-e]'); if (!b || b.disabled) return;
       const a = b.dataset.e, v = b.dataset.v;
+      if (a === 'fond-recap') { if (S.recap && S.recap.mode === 'fait') fermerRecap(); else if (S.recap && ev.target === b && !S.envoi) { S.focus = S.recap.mode === 'retirer' ? 'f-retirer' : 'f-enregistrer'; S.recap = null; dessiner(); } return; }
       if (a === 'fond') { if (ev.target === b && !S.envoi) { fermerFeuille(); dessiner(); } return; }
       if (a === 'fond-valid') { if (ev.target === b) { S.valid = null; dessiner(); } return; }
       if (a === 'retour') { if (S.ecran === 'edt') aller('classe'); else if (S.ecran === 'classe') aller('filiere'); else retourAccueil && retourAccueil(); return; }
@@ -482,10 +516,10 @@ export function creerEstimation(ctx) {
       if (a === 'ab') { S.f[v] = !S.f[v]; S.focus = b.id; dessiner(); return; }
       if (a === 'mod-per') { S.f.modPer = true; S.focus = 'f-au'; dessiner(); return; }
       if (a === 'mod-h') { S.f.modH = true; S.focus = 'f-hd'; dessiner(); return; }
-      if (a === 'enregistrer') { const k = classeDe(S.classe), cr = k.creneaux.find(x => x.cle === S.sel); if (cr) ecrire(k, cr, 'active'); return; }
-      if (a === 'retirer') { S.conf = { texte: 'Retirer l’estimation de ce cours ?', bouton: 'Retirer' }; S.focus = 'c-oui'; dessiner(); return; }
-      if (a === 'conf-non') { S.conf = null; S.focus = 'f-retirer'; dessiner(); return; }
-      if (a === 'conf-oui') { S.conf = null; const k = classeDe(S.classe), cr = k.creneaux.find(x => x.cle === S.sel); if (cr) ecrire(k, cr, 'retire'); return; }
+      if (a === 'enregistrer') { S.recap = recapDe('confirmer'); S.focus = 'r-oui'; dessiner(); return; }
+      if (a === 'retirer') { S.recap = recapDe('retirer'); S.focus = 'r-oui'; dessiner(); return; }
+      if (a === 'recap-non') { const m = S.recap && S.recap.mode; S.recap = null; S.focus = m === 'retirer' ? 'f-retirer' : 'f-enregistrer'; dessiner(); return; }
+      if (a === 'recap-oui') { const m = S.recap && S.recap.mode, k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel); if (cr && (m === 'confirmer' || m === 'retirer')) ecrire(k, cr, m === 'retirer' ? 'retire' : 'active'); return; }
       if (a === 'valider-classe') { S.valid = S.classe; S.focus = 'v-oui'; dessiner(); return; }
       if (a === 'valid-non') { S.valid = null; S.focus = 'e6-valider-classe'; dessiner(); return; }
       if (a === 'valid-oui') { const nom = S.valid, k = classeDe(nom), ap = app(); ap.valides[nom] = true; appEcrit(ap); S.valid = null; aller('classe'); toast(`✓ ${courtDe(k)} validée`); return; }
@@ -496,16 +530,20 @@ export function creerEstimation(ctx) {
       if ((k === 'hDebut' || k === 'hFin') && min(S.f.hFin) <= min(S.f.hDebut)) { if (k === 'hDebut') S.f.hFin = hDe(min(S.f.hDebut) + 15); else S.f.hDebut = hDe(min(S.f.hFin) - 15); }
       S.focus = t.id; dessiner();
     };
-    h.onkeydown = ev => { if (ev.key === 'Escape' && (S.sel || S.conf || S.valid) && !S.envoi) { if (S.conf) S.conf = null; else if (S.valid) S.valid = null; else fermerFeuille(); dessiner(); } };
+    h.onkeydown = ev => {
+      if (ev.key !== 'Escape' || S.envoi) return;
+      if (S.recap) { if (S.recap.mode === 'fait') fermerRecap(); else { S.focus = S.recap.mode === 'retirer' ? 'f-retirer' : 'f-enregistrer'; S.recap = null; dessiner(); } return; }
+      if (S.sel || S.valid) { if (S.valid) S.valid = null; else fermerFeuille(); dessiner(); }
+    };
   }
   const slug = s => String(s).replace(/[^A-Za-z0-9]+/g, '-');
 
   return {
-    monter(hote) { S.hote = hote; S.ecran = 'filiere'; S.sel = null; S.f = null; S.conf = null; S.valid = null; S.navFeuille = false; ecouter(); dessiner(); },
+    monter(hote) { S.hote = hote; S.ecran = 'filiere'; S.sel = null; S.f = null; S.recap = null; S.valid = null; S.navFeuille = false; ecouter(); dessiner(); },
     fermer() { S.hote = null; },
     consommerPop() { if (S.ignorerPop > 0) { S.ignorerPop--; return true; } return false; },
     restaurerNav(e) {
-      S.conf = null; S.sel = null; S.f = null; S.valid = null; S.navFeuille = false;
+      S.recap = null; S.sel = null; S.f = null; S.valid = null; S.navFeuille = false;
       S.ecran = e && ['filiere', 'classe', 'edt', 'fin'].includes(e.ecran) ? e.ecran : 'filiere';
       if (e) { S.fil = e.fil || S.fil; S.classe = e.classe || S.classe; S.sem = e.sem || 'A'; }
       S.focus = 'titre-ecran'; dessiner();

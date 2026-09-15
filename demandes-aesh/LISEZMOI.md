@@ -266,6 +266,16 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
   Plus la consultation seule par un collègue. Résultat : **556 vérifications, 0 échec**. « Précédent » a aussi été vérifié avec de vrais clics.
 - **Limite connue** : Chrome ignore, au retour arrière, les étapes créées sans clic réel (protection anti-piège). Avec de vrais clics d'enseignant, le retour se fait étape par étape (vérifié).
 
+### v8 « chacun son besoin, confirmation » (15/09/2026, validée par Brahim)
+
+- **Cours d'un collègue** : il affiche « collègue ✓ », sans le nombre d'AESH, à l'écran comme dans le libellé lu à voix haute. Si l'enseignant le touche : « Déjà estimé par un collègue. Votre réponse remplacera la sienne. », aucun nombre présélectionné, pas de « Retirer ». Chaque enseignant indique le besoin brut de son propre cours, sans voir ce qui est demandé ailleurs ni au même moment.
+- **Carte « Moyens humains »** : « Heures AESH du pôle : 100 h / sem. · estimation, variable ». Le pourcentage passe en rouge au-delà de 100 %.
+- **Confirmation** : « Enregistrer » ouvre « Vous confirmez ? » (nombre d'AESH en gros, matière · classe, jour et heure, semaine en clair, date de fin), avec « Modifier » ou « Confirmer ». Rien n'est écrit avant « Confirmer ». La fenêtre passe ensuite au vert « ✓ Enregistré » et se ferme seule au bout de 2 s (ou d'une touche) ; le cours clignote dans l'emploi du temps. « Retirer » passe par la même fenêtre (« Vous retirez l'estimation de : … », Annuler / Retirer).
+- **Appareil** : clé `estimation-aesh-v8`. Les appareils qui ont servi aux tests repartent à zéro. Import `estimation.js?v=2026r7`.
+- **Atelier** (visible seulement par la coordination, jamais publié) : carte « Créneaux en conflit ». Pour la semaine type A et B, par pôle : moments où les AESH demandés par les cours qui se chevauchent dépassent le nombre d'AESH de l'équipe (demandes par classe et matière, total / équipe, manque), heures demandées et heures possibles avec l'équipe.
+- **Données en ligne** : collection vidée le 15/09 (tests), puis cadre republié. L'emploi du temps publié est identique aux PDF des 5 classes.
+- **Tests** : banc `banc/reel/` 300/0 (5 classes, ordinateur et téléphone) ; Atelier 43/43 (conflits, carte, rien dans le cadre publié) ; calcul OK ; conflits recalculés minute par minute sur le vrai emploi du temps : identiques.
+
 ### v7 (15/09/2026, maquette validée par Brahim)
 
 - **Entrée** : « Aujourd’hui, comment vous sentez-vous ? » (5 émoticônes ou « Passer »), une fois par visite, rien n’est enregistré.
