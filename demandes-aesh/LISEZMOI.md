@@ -266,6 +266,28 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
   Plus la consultation seule par un collègue. Résultat : **556 vérifications, 0 échec**. « Précédent » a aussi été vérifié avec de vrais clics.
 - **Limite connue** : Chrome ignore, au retour arrière, les étapes créées sans clic réel (protection anti-piège). Avec de vrais clics d'enseignant, le retour se fait étape par étape (vérifié).
 
+### v7 (15/09/2026, maquette validée par Brahim)
+
+- **Entrée** : « Aujourd’hui, comment vous sentez-vous ? » (5 émoticônes ou « Passer »), une fois par visite, rien n’est enregistré.
+- **Accueil** : grande carte « Estimer les besoins d’accompagnement » (semestre), carte « Besoins ponctuels · Bientôt » non cliquable.
+  - Plus d’onglet « Besoins ponctuels », de test de positionnement ni de lien vers les demandes du pôle.
+  - Le parcours ponctuel reste dans le code, activable par `?ponctuel=1` ou `window.__PONCTUEL_ACTIF__` (bancs).
+- **Chargement** : bulle qui respire, « Respirez… Prenez le temps, les emplois du temps arrivent. »
+- **Classes** : carte « Moyens humains » avec l’anneau.
+  - « Heures AESH du pôle : 100 h / sem. » : volume annoncé, réglable dans l’Atelier, sans prénom ;
+  - « Estimation en cours » : heures par semaine par matière, aux couleurs de l’emploi du temps ;
+  - « ✓ validée » et « N cours estimés » sur chaque classe, bouton « J’ai terminé ».
+- **Emploi du temps** : une couleur par matière. Fenêtre « Combien d’AESH ? ». En bas, « Valider <classe> » :
+  - récapitulatif semaine A / semaine B ;
+  - vérification automatique : pour les matières estimées depuis cet appareil, les cours d’une seule semaine pas encore estimés sont signalés (« Pas encore confirmé : Maths-Sciences, mercredi 11h30 (semaine B) »), avec « Compléter » ou « Valider ».
+- **Fin** : 🌿 « Merci ! Vos estimations sont enregistrées. Grâce à vous, l’accompagnement pourra être organisé au plus près des besoins des élèves. »
+- **Appareil** : `estimation-aesh-v7` (cours enregistrés ici et classes validées, par période).
+- **Retouches après test de Brahim** :
+  - écran d'entrée : émoticônes seules ;
+  - carte « Moyens humains » : toutes les matières du pôle, « ✓ » devant celles déjà estimées (avec leurs heures), les autres sans mention, et « N matières sur N déjà estimées » ;
+  - emploi du temps : mention discrète « vous » ou « collègue » sur chaque cours estimé (d'après les cours enregistrés depuis cet appareil), pastille en pointillés pour un collègue.
+- **Tests** : banc enseignant v7 (5 classes × ordinateur et téléphone, tous les parcours ci-dessus), ancien banc (parcours ponctuel activé), Atelier 40/40.
+
 ### v6 « par l'emploi du temps des élèves » (15/09/2026) — remplace le parcours par matière
 
 - **Accueil épuré** : titre, une phrase, « Estimer les besoins → », puis « Besoin ponctuel » (cartes, case RESANA, lien vers les besoins du pôle). Plus de bloc RGPD ni de texte d'explication.

@@ -256,6 +256,25 @@ h2{font-size:1.2rem;font-weight:720;letter-spacing:-.012em}
 .hero p.chapo{color:var(--ink-2);font-size:1.1rem;max-width:64ch;margin-top:12px}
 .hero p.public{color:var(--muted);font-size:1rem;margin-top:8px}
 .hero p.public strong{color:var(--ink-2)}
+/* ── accueil v7 : deux cartes, « Bientôt », écran d'humeur (15/09/2026) ── */
+.acc7-h1{font-size:clamp(1.6rem,7vw,2.6rem)!important;hyphens:auto;overflow-wrap:break-word}
+.acc7-main{margin-top:18px;border-radius:22px;padding:22px;color:#fff;background:linear-gradient(135deg,#0f5e66,#16807b);box-shadow:0 14px 30px -18px rgba(15,94,102,.8)}
+.acc7-main h2{color:#fff;font-size:1.45rem;margin:12px 0 6px}
+.acc7-main p{margin:0;color:rgba(255,255,255,.92)}
+.acc7-et{display:inline-block;white-space:nowrap;background:rgba(255,255,255,.18);border-radius:999px;padding:3px 10px;font-weight:650}
+.acc7-btn{margin-top:18px;width:100%;min-height:56px;border:0;border-radius:16px;background:#fff;color:#0f5e66;font:inherit;font-weight:750;font-size:1.1rem;cursor:pointer}
+@media(min-width:640px){.acc7-btn{width:auto;padding:0 30px}}
+.acc7-bientot{margin-top:22px;border:1.5px dashed var(--line);border-radius:22px;padding:20px;background:var(--card);color:var(--ink-2)}
+.acc7-titre{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.acc7-titre h2{margin:0;font-size:1.3rem;color:var(--ink-2)}
+.acc7-badge{flex:none;background:#fff3d6;color:#8a5a0b;border-radius:999px;padding:3px 10px;font-weight:700}
+.acc7-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.acc7-chips span{background:var(--card-2);color:var(--muted);border-radius:999px;padding:6px 12px}
+.humeur{min-height:70vh;display:flex;flex-direction:column;justify-content:center;text-align:center;max-width:520px;margin:0 auto;padding-block:20px}
+.humeur h1{font-size:clamp(1.6rem,6vw,2.1rem)}
+.humeur-emos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:26px 0 12px}
+.humeur-emos button{border:0;background:var(--card);border-radius:18px;padding:12px 0 8px;font:inherit;cursor:pointer;box-shadow:0 2px 10px rgba(16,35,42,.08);color:var(--ink)}
+.humeur-emos .e{display:block;font-size:2rem;line-height:1.2}.humeur-emos .l{display:block;font-size:1rem;color:var(--muted);margin-top:4px}
+.humeur-mot{min-height:1.6em;color:var(--accent-d);font-weight:650;font-size:1.1rem}
 /* ── accueil v6 épuré (15/09/2026) ── */
 .acc6{padding-block:26px 6px}
 .acc6 h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1.1;letter-spacing:-.02em;max-width:18ch}
@@ -455,8 +474,13 @@ const lsLit = (k, def) => { try { const v = JSON.parse(localStorage.getItem(k) |
 const lsEcrit = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } };
 
 /* ═══════════════ état ═══════════════ */
+/* Besoins ponctuels : « Bientôt » (15/09/2026). Le parcours reste dans le code, activable pour les bancs de test. */
+const PONCTUEL_ACTIF = !!window.__PONCTUEL_ACTIF__ || new URLSearchParams(location.search).has('ponctuel');
+/* « Aujourd'hui, comment vous sentez-vous ? » : une fois par visite (onglet), rien n'est enregistré. */
+const K_HUMEUR = 'besoins-accompagnement-humeur-vue';
+const humeurAVoir = () => { if (window.__SANS_HUMEUR__) return false; try { return !sessionStorage.getItem(K_HUMEUR); } catch(e){ return false; } };
 const S = {
-  ecran:'accueil',
+  ecran: humeurAVoir() ? 'humeur' : 'accueil',
   refEtat:'chargement', ref:null, refCache:false,
   besoins:{}, besoinsEtat:'chargement',
   docs:[], docsEtat:'chargement', unsub:null,
@@ -689,10 +713,12 @@ function rendre(){
   else if (S.ecran === 'pole') html = htmlPole();
   else if (S.ecran === 'envoye' && S.envoye) html = htmlEnvoye();
   else if (S.ecran === 'estimation') html = '<div id="estimation-hote"><p class="message info" role="status">Chargement de l’estimation…</p></div>';
+  else if (S.ecran === 'humeur') html = htmlHumeur();
   else { S.ecran = 'accueil'; html = htmlAccueil(); }
   vue.innerHTML = html;
   $('#nav-accueil').toggleAttribute('aria-current', false);
   $('#nav-pole').toggleAttribute('aria-current', false);
+  $('#nav-pole').hidden = !PONCTUEL_ACTIF;
   $('#nav-estimation').toggleAttribute('aria-current', false);
   if (S.ecran === 'estimation'){ $('#nav-estimation').setAttribute('aria-current','page'); monterEstimation(); }
   if (S.ecran === 'accueil') $('#nav-accueil').setAttribute('aria-current','page');
@@ -715,7 +741,7 @@ function monterEstimation(){
   const hote = $('#estimation-hote'); if (!hote) return;
   if (EST){ EST.monter(hote); return; }
   if (EST_CHARGEMENT) return;
-  EST_CHARGEMENT = import('./estimation.js?v=2026r5').then(m => {
+  EST_CHARGEMENT = import('./estimation.js?v=2026r6').then(m => {
     EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, retourAccueil: () => actions.accueil(),
       pousser: est => histo('estimation', est), remplacer: est => histo('estimation', est, true) });
     const h = $('#estimation-hote'); if (h) EST.monter(h);
@@ -754,13 +780,18 @@ function htmlAccueil(){
   const enCours = [];
   if (S.p) enCours.push(`<li>Besoin ponctuel (${esc(natureLabel(S.p.nature))}) : étape ${S.p.etape} sur 6. <button type="button" class="lien" data-action="reprendre-p">Reprendre</button> <button type="button" class="lien" data-action="abandonner-p">Abandonner</button></li>`);
   if (S.r) enCours.push(`<li>Mes cours de l’année : étape ${S.r.etape} sur 4. <button type="button" class="lien" data-action="reprendre-r">Reprendre</button> <button type="button" class="lien" data-action="abandonner-r">Abandonner</button></li>`);
+  const per = S.cadreEst ? `${esc(S.cadreEst.label)} · ${esc(jjmm(S.cadreEst.debut))} → ${esc(jjmm(S.cadreEst.fin))}` : 'Semestre en cours';
+  const bientot = `<section class="acc7-bientot" aria-labelledby="h-ponctuel"><div class="acc7-titre"><h2 id="h-ponctuel">Besoins ponctuels</h2><span class="acc7-badge">Bientôt</span></div>
+      <p class="acc6-sous" style="margin-top:4px">Pour une date précise.</p>
+      <div class="acc7-chips" aria-label="Bientôt disponible"><span>CCF</span><span>Bac blanc</span><span>Évaluation</span><span>Sortie</span><span>Autre</span></div></section>`;
   return `<div class="pile">
     <section class="acc6" aria-labelledby="titre-ecran">
-      <h1 id="titre-ecran" tabindex="-1">Besoins d’accompagnement des élèves</h1>
-      <p class="acc6-sous">Estimez, cours par cours, l’accompagnement humain nécessaire.</p>
-      <button type="button" class="btn primaire acc6-btn" id="acc-estimer" data-action="estimation">Estimer les besoins →</button>
+      <h1 id="titre-ecran" tabindex="-1" lang="fr" class="acc7-h1">Besoins d’accompagnement des élèves</h1>
+      <div class="acc7-main"><span class="acc7-et">${per}</span><h2>Estimer les besoins d’accompagnement</h2>
+        <p>Pour organiser le temps des AESH, cours par cours.</p>
+        <button type="button" class="acc7-btn" id="acc-estimer" data-action="estimation">Estimer les besoins →</button></div>
     </section>
-    <div id="bandeau-brouillons">${htmlBandeauBrouillons()}</div>
+    ${PONCTUEL_ACTIF ? `<div id="bandeau-brouillons">${htmlBandeauBrouillons()}</div>
     ${enCours.length ? `<div class="message info"><p><strong>Saisie en cours, non envoyée</strong></p><ul>${enCours.join('')}</ul></div>` : ''}
     <section class="acc6-ponct" aria-labelledby="h-ponctuel">
       <h2 id="h-ponctuel">Besoin ponctuel</h2><p class="acc6-sous" style="margin-top:4px">Pour une ou plusieurs dates précises.</p>
@@ -771,7 +802,19 @@ function htmlAccueil(){
         <li><div class="carte-info note-resana" role="note"><span class="ic" aria-hidden="true">📅</span><span class="txt"><span class="carte-t">Test de positionnement</span><span class="carte-s">La demande passe par le calendrier RESANA</span></span></div></li>
       </ul>
       <p class="suite"><button type="button" class="lien" data-action="pole">Voir les besoins ponctuels déjà signalés dans le pôle →</button></p>
-    </section>
+    </section>` : bientot}
+  </div>`;
+}
+/* Écran d'entrée : un instant pour soi. Rien n'est enregistré ni envoyé. */
+function htmlHumeur(){
+  const emos = [['😄','Très bien'],['🙂','Bien'],['😐','Bof'],['😕','Fatigué'],['😣','Difficile']];
+  return `<div class="humeur">
+    <p class="acc6-sous" style="margin:0;font-weight:650">Besoins d’accompagnement des élèves</p>
+    <h1 id="titre-ecran" tabindex="-1">Aujourd’hui, comment vous sentez-vous ?</h1>
+    <p class="acc6-sous">Un instant pour soi, avant de commencer.</p>
+    <div class="humeur-emos" role="group" aria-label="Comment vous sentez-vous ?">${emos.map(([e, l], i) => `<button type="button" id="humeur-${i}" data-action="humeur" data-humeur="${l}" aria-label="${l}"><span class="e" aria-hidden="true">${e}</span></button>`).join('')}</div>
+    <p class="humeur-mot" id="humeur-mot" role="status"></p>
+    <p><button type="button" class="lien" id="humeur-passer" data-action="humeur">Passer</button></p>
   </div>`;
 }
 const jjmm = iso => RE_DATE.test(String(iso || '').slice(0, 10)) ? `${String(iso).slice(8, 10)}/${String(iso).slice(5, 7)}` : '';
@@ -1410,6 +1453,12 @@ function htmlEnvoye(){
 
 /* ═══════════════ événements ═══════════════ */
 const actions = {
+  'humeur': el => {
+    try { sessionStorage.setItem(K_HUMEUR, '1'); } catch(e){}
+    const mot = $('#humeur-mot'), v = el && el.dataset ? el.dataset.humeur : '';
+    if (mot && v) mot.textContent = 'Merci.';
+    setTimeout(() => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; rendre(); }, v ? 900 : 0);
+  },
   'accueil': () => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; S.messageReessai = brouillons().length ? S.messageReessai : ''; histo('accueil'); rendre(); },
   'pole': () => { S.ecran = 'pole'; S.focus = 'titre-ecran'; histo('pole'); ecouterDemandes(); rendre(); },
   'estimation': () => { S.ecran = 'estimation'; histo('estimation'); rendre(); window.scrollTo(0, 0); },
