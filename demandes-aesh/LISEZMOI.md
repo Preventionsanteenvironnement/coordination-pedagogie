@@ -266,6 +266,28 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
   Plus la consultation seule par un collègue. Résultat : **556 vérifications, 0 échec**. « Précédent » a aussi été vérifié avec de vrais clics.
 - **Limite connue** : Chrome ignore, au retour arrière, les étapes créées sans clic réel (protection anti-piège). Avec de vrais clics d'enseignant, le retour se fait étape par étape (vérifié).
 
+### v6 « par l'emploi du temps des élèves » (15/09/2026) — remplace le parcours par matière
+
+- **Accueil épuré** : titre, une phrase, « Estimer les besoins → », puis « Besoin ponctuel » (cartes, case RESANA, lien vers les besoins du pôle). Plus de bloc RGPD ni de texte d'explication.
+- **Parcours** :
+  1. Filière : CAP PSR ou Bac Pro MELEC, avec la période.
+  2. Classe : compteur du pôle et « N cours estimés ».
+  3. Emploi du temps de la classe, semaine A / semaine B.
+  4. Le prof touche **n'importe quel cours tel qu'il est écrit** (co-enseignement, chef-d'œuvre… compris).
+  5. Fenêtre : 0 à 6 AESH, « jusqu'au 18/12 (modifier) », semaines A / B, horaire (modifier), puis **Enregistrer**. « Retirer » demande « Êtes-vous sûr ? ».
+- **Enregistrement immédiat, partagé** :
+  - un document par cours et par période, `cours_<début>_<classe>_<empreinte du cours>` (type `cours`), plus une copie figée `archive_…_v<n>` à chaque enregistrement ;
+  - toute l'équipe voit ce qui est enregistré sur chaque cours, en direct ;
+  - pas de code de reprise, pas de bouton final ;
+  - l'appareil ne garde que la dernière modification faite ici (« Bonjour. Dernière modification depuis cet appareil… »).
+- **Retour en arrière** : flèche ← sur chaque écran et bouton « précédent » du navigateur (fenêtre → emploi du temps → classes → filière → accueil).
+- **Emplois du temps** : ceux de la Coordination, corrigés le 15/09 selon les PDF des 5 classes (0 écart).
+- **Atelier** : les documents `cours` sont comptés comme des déclarations d'une ligne (même agrégation, mêmes jauges, même historique). Les anciennes `declaration_` restent lisibles.
+- **Règle Firestore** : bloc `cours_…` ajouté (`nb` entier de 0 à 6, clés limitées).
+- **Tests** :
+  - banc `work/estimation-aesh-v1/banc/reel/` (emplois du temps corrigés, sans nom) : 190 vérifications, 0 échec. Pour les 5 classes, sur ordinateur et téléphone : tous les cours présents et cliquables en semaine A et B, enregistrement et archive, modification (version 2), cours d'un collègue en direct, retrait confirmé, « précédent » et « suivant », flèche ←, « Bonjour », aucun débordement, aucun texte < 16 px ;
+  - Atelier 40/40 (document `cours` compté) ; ancien banc 11/11 ; calcul OK.
+
 ### v5 « ne rien perdre » (15/09/2026)
 
 - **Historique des versions** : chaque validation écrit, en plus de la déclaration, une copie figée `archive_<id>_v<version>` (type `archive`, champ `declaration`). La règle Firestore n'autorise que la création : une version archivée ne peut être ni modifiée ni supprimée. Si la copie échoue, l'enregistrement n'est pas bloqué.

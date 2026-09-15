@@ -256,6 +256,14 @@ h2{font-size:1.2rem;font-weight:720;letter-spacing:-.012em}
 .hero p.chapo{color:var(--ink-2);font-size:1.1rem;max-width:64ch;margin-top:12px}
 .hero p.public{color:var(--muted);font-size:1rem;margin-top:8px}
 .hero p.public strong{color:var(--ink-2)}
+/* ── accueil v6 épuré (15/09/2026) ── */
+.acc6{padding-block:26px 6px}
+.acc6 h1{font-size:clamp(2rem,6vw,2.8rem);line-height:1.1;letter-spacing:-.02em;max-width:18ch}
+.acc6-sous{color:var(--muted);font-size:1.1rem;margin-top:10px}
+.acc6-btn{margin-top:24px;min-height:56px;padding:0 28px;font-size:1.1rem;border-radius:16px}
+@media(max-width:520px){.acc6-btn{width:100%}}
+.acc6-ponct{margin-top:34px;border-top:1px solid var(--line-2);padding-top:22px}
+.acc6-ponct h2{font-size:1.3rem;margin:0}
 section[aria-labelledby="h-estimation"],section[aria-labelledby="h-ponctuel"]{margin-top:18px}
 .bloc-t{display:flex;justify-content:space-between;align-items:baseline;gap:4px 12px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:8px}
 .bloc-t h2{font-size:1.3rem;margin:0}
@@ -707,7 +715,7 @@ function monterEstimation(){
   const hote = $('#estimation-hote'); if (!hote) return;
   if (EST){ EST.monter(hote); return; }
   if (EST_CHARGEMENT) return;
-  EST_CHARGEMENT = import('./estimation.js?v=2026r4').then(m => {
+  EST_CHARGEMENT = import('./estimation.js?v=2026r5').then(m => {
     EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, retourAccueil: () => actions.accueil(),
       pousser: est => histo('estimation', est), remplacer: est => histo('estimation', est, true) });
     const h = $('#estimation-hote'); if (h) EST.monter(h);
@@ -746,25 +754,16 @@ function htmlAccueil(){
   const enCours = [];
   if (S.p) enCours.push(`<li>Besoin ponctuel (${esc(natureLabel(S.p.nature))}) : étape ${S.p.etape} sur 6. <button type="button" class="lien" data-action="reprendre-p">Reprendre</button> <button type="button" class="lien" data-action="abandonner-p">Abandonner</button></li>`);
   if (S.r) enCours.push(`<li>Mes cours de l’année : étape ${S.r.etape} sur 4. <button type="button" class="lien" data-action="reprendre-r">Reprendre</button> <button type="button" class="lien" data-action="abandonner-r">Abandonner</button></li>`);
-  const periode = S.cadreEst ? `${esc(S.cadreEst.label)} · du ${esc(jjmm(S.cadreEst.debut))} au ${esc(jjmm(S.cadreEst.fin))}` : 'Sur la période en cours';
   return `<div class="pile">
-    <div class="hero"><p class="sur">Coordination &amp; Pédagogie · pôle PSR / MELEC · ${esc(ANNEE)}</p>
+    <section class="acc6" aria-labelledby="titre-ecran">
       <h1 id="titre-ecran" tabindex="-1">Besoins d’accompagnement des élèves</h1>
-      <p class="chapo">Pour répondre aux besoins des élèves, la coordination répartit le temps des AESH là où il est le plus utile. Vos estimations, cours par cours, et vos besoins ponctuels nous permettent de faire ces choix avec vous.</p>
-      <p class="public">Pour les enseignants des classes de <strong>CAP PSR</strong> (1re et 2e année) et de <strong>Bac Pro MELEC</strong> (2de, 1re, Tle).</p></div>
-    <p class="rgpd" role="note"><span aria-hidden="true">🔒</span><span><strong>RGPD : aucun nom d’élève.</strong> Aucune information de santé. Dans un besoin ponctuel, les élèves apparaissent par un code à 5 caractères ; la coordination vous en donne la correspondance.</span></p>
+      <p class="acc6-sous">Estimez, cours par cours, l’accompagnement humain nécessaire.</p>
+      <button type="button" class="btn primaire acc6-btn" id="acc-estimer" data-action="estimation">Estimer les besoins →</button>
+    </section>
     <div id="bandeau-brouillons">${htmlBandeauBrouillons()}</div>
     ${enCours.length ? `<div class="message info"><p><strong>Saisie en cours, non envoyée</strong></p><ul>${enCours.join('')}</ul></div>` : ''}
-    <section aria-labelledby="h-estimation">
-      <div class="bloc-t"><h2 id="h-estimation">1. Estimation des besoins d’accompagnement</h2><span class="n">${periode}</span></div>
-      <div class="est-acc">
-        <div class="g"><h3>De quel accompagnement humain vos élèves ont-ils besoin, cours par cours ?</h3>
-          <ul class="puces"><li>2 minutes</li><li>Modifiable à tout moment</li><li>Sans nom d’élève</li></ul></div>
-        <div class="d" id="etat-estimation">${htmlEtatEstimation()}</div>
-      </div>
-    </section>
-    <section aria-labelledby="h-ponctuel">
-      <div class="bloc-t"><h2 id="h-ponctuel">2. Besoin ponctuel</h2><span class="n">Pour une ou plusieurs dates précises</span></div>
+    <section class="acc6-ponct" aria-labelledby="h-ponctuel">
+      <h2 id="h-ponctuel">Besoin ponctuel</h2><p class="acc6-sous" style="margin-top:4px">Pour une ou plusieurs dates précises.</p>
       ${htmlEtatRef(true)}
       <ul class="cartes">
         ${natures.map(n => `<li><button type="button" class="carte" data-action="nouvelle-ponctuelle" data-nature="${esc(n.id)}" ${dis}>
