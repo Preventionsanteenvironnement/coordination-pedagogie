@@ -265,6 +265,21 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
 
   Plus la consultation seule par un collègue. Résultat : **556 vérifications, 0 échec**. « Précédent » a aussi été vérifié avec de vrais clics.
 - **Limite connue** : Chrome ignore, au retour arrière, les étapes créées sans clic réel (protection anti-piège). Avec de vrais clics d'enseignant, le retour se fait étape par étape (vérifié).
+
+### v5 « ne rien perdre » (15/09/2026)
+
+- **Historique des versions** : chaque validation écrit, en plus de la déclaration, une copie figée `archive_<id>_v<version>` (type `archive`, champ `declaration`). La règle Firestore n'autorise que la création : une version archivée ne peut être ni modifiée ni supprimée. Si la copie échoue, l'enregistrement n'est pas bloqué.
+- **Une estimation par période** : chaque déclaration porte `periode {debut, fin, label}`.
+  - Page et Atelier ne comptent que les déclarations de la période du cadre (`dansPeriode`). Une déclaration sans `periode` (saisie avant cette version) compte pour la période si elle a été créée entre 60 jours avant son début et sa fin.
+  - Quand une nouvelle période est publiée, l'enseignant commence une nouvelle estimation (nouveau document, matières gardées). Accueil et bandeau : « Nouvelle période : … Votre estimation précédente reste enregistrée ».
+  - Un code de reprise d'une autre période est refusé, avec explication.
+- **Atelier** :
+  - à la publication, copie figée du cadre `cadre_<année>_<début>` ;
+  - carte « Périodes, historique et sauvegarde » : choix de la période affichée, nombre d'estimations et de versions archivées, bouton « Enregistrer une sauvegarde (fichier) » (JSON : cadres, déclarations, versions) ;
+  - colonne « Versions archivées » ;
+  - carte « Estimations sur des cours absents de l'emploi du temps publié » : lignes gardées, signalées, non comptées.
+- **Règles Firestore** : `regles-firestore-completes.rules`, bloc `coordination_estimation_aesh` (clé `periode`, cadres de période, archives en création seule).
+- **Tests** : banc « à la place de l'enseignant » 581/0 (période et archive vérifiées à chaque validation, scénario « nouvelle période ») ; Atelier 39/39 (copie du cadre, 6 estimations dont une du semestre 2 non comptée, versions, sauvegarde, cours absent) ; ancien banc 11/11 ; calcul et `dansPeriode` OK.
 - **Données en ligne** : collection `coordination_estimation_aesh`.
   - `cadre_<année>` : publié depuis l'Atelier.
   - `declaration_<id>` : une par enseignant, mise à jour sur place, jamais supprimée.

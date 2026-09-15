@@ -707,7 +707,7 @@ function monterEstimation(){
   const hote = $('#estimation-hote'); if (!hote) return;
   if (EST){ EST.monter(hote); return; }
   if (EST_CHARGEMENT) return;
-  EST_CHARGEMENT = import('./estimation.js?v=2026r3').then(m => {
+  EST_CHARGEMENT = import('./estimation.js?v=2026r4').then(m => {
     EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, retourAccueil: () => actions.accueil(),
       pousser: est => histo('estimation', est), remplacer: est => histo('estimation', est, true) });
     const h = $('#estimation-hote'); if (h) EST.monter(h);
@@ -783,6 +783,9 @@ function etatEstimationLocale(){
 function htmlEtatEstimation(){
   const e = etatEstimationLocale(), nb = e && Array.isArray(e.lignes) ? e.lignes.length : 0;
   const quand = iso => { const d = new Date(iso); return isNaN(d) ? '' : `le ${jjmm(iso)} à ${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`; };
+  if (e && e.periodeDebut && S.cadreEst && e.periodeDebut !== S.cadreEst.debut)
+    return `<p class="etat"><strong>Nouvelle période : « ${esc(S.cadreEst.label)} »</strong><br>Votre estimation précédente reste enregistrée à la coordination.</p>
+      <button type="button" class="btn primaire" data-action="estimation">Commencer l’estimation →</button>`;
   if (e && e.docId && e.envoyeLe && e.nonEnvoye && nb)
     return `<p class="etat"><strong>Modifications pas encore validées</strong><br>${nb} cours · dernière validation ${esc(quand(e.envoyeLe))}</p>
       <button type="button" class="btn primaire" data-action="estimation">Reprendre et valider →</button>`;

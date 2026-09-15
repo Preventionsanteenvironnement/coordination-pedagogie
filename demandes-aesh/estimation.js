@@ -64,6 +64,14 @@ function disciplinesLigne(cr, declarees) {
   const d = (cr.disciplines || []).filter(x => (declarees || []).includes(x));
   return d.length ? d : (cr.disciplines || []).slice(0, 1);
 }
+/* Une déclaration appartient-elle à la période du cadre ? Avec le champ « periode » : même début.
+   Sans (estimations enregistrées avant le 15/09/2026) : créée entre 60 jours avant le début et la fin de la période. */
+export function dansPeriode(d, cadre) {
+  const P = cadre.periode;
+  if (d && d.periode && RE_DATE.test(d.periode.debut || '')) return d.periode.debut === P.debut;
+  const cree = String((d && (d.creeLe || d.majLe)) || '').slice(0, 10);
+  return RE_DATE.test(cree) && cree >= ajoute(P.debut, -60) && cree <= P.fin;
+}
 /* Heures d'une ligne seule, sur la période. */
 export function heuresLigne(cadre, classe, cr, l) {
   const h = horaireLigne(cr, l);
@@ -256,7 +264,7 @@ export function creerEstimation(ctx) {
   const S = {
     etat: 'chargement', cadre: null, decls: [], unsub: null, ecoute: false,
     etape: 'matieres', mode: 'estimer', mats: new Set(), classe: null, vue: 'A', lignes: new Map(), commentaire: '',
-    sel: null, f: null, conf: null, histo: [], navFeuille: false, ignorerPop: 0, flash: '', bonjour: false,
+    sel: null, f: null, conf: null, histo: [], navFeuille: false, ignorerPop: 0, flash: '', bonjour: false, periodeDebut: null, nouvellePeriode: '',
     docId: null, version: 0, creeLe: null, envoyeLe: null, envoyeSig: null, envoi: '', message: '', hote: null, focus: null, retrouvee: false, retire: false
   };
   if (!document.getElementById('est-styles')) { const st = document.createElement('style'); st.id = 'est-styles'; st.textContent = CSS; document.head.appendChild(st); }
@@ -271,13 +279,13 @@ export function creerEstimation(ctx) {
   const lsLit = () => { try { const v = JSON.parse(localStorage.getItem(K_LOCAL) || 'null'); return v && v.annee === annee ? v : null; } catch (e) { return null; } };
   const lsEcrit = () => {
     try {
-      localStorage.setItem(K_LOCAL, JSON.stringify({ annee, docId: S.docId, version: S.version, creeLe: S.creeLe, envoyeLe: S.envoyeLe, envoyeSig: S.envoyeSig,
+      localStorage.setItem(K_LOCAL, JSON.stringify({ annee, periodeDebut: S.periodeDebut, docId: S.docId, version: S.version, creeLe: S.creeLe, envoyeLe: S.envoyeLe, envoyeSig: S.envoyeSig,
         nonEnvoye: sale(), mats: [...S.mats], lignes: [...S.lignes.values()], commentaire: S.commentaire }));
     } catch (e) { }
   };
   (function restaurer() {
     const v = lsLit(); if (!v) return;
-    S.docId = v.docId || null; S.version = v.version || 0; S.creeLe = v.creeLe || null; S.envoyeLe = v.envoyeLe || null;
+    S.docId = v.docId || null; S.version = v.version || 0; S.creeLe = v.creeLe || null; S.envoyeLe = v.envoyeLe || null; S.periodeDebut = v.periodeDebut || null;
     S.mats = new Set(Array.isArray(v.mats) ? v.mats : []); S.commentaire = String(v.commentaire || '');
     (Array.isArray(v.lignes) ? v.lignes : []).forEach(l => { if (l && l.classe && l.cle) S.lignes.set(l.classe + '|' + l.cle, l); });
     /* Saisie enregistrée avant cette version : si elle avait été envoyée, on la considère validée. */
@@ -299,10 +307,11 @@ export function creerEstimation(ctx) {
     try {
       S.unsub = FS.onSnapshot(FS.query(FS.collection(db, COL), FS.where('annee', '==', annee)), snap => {
         const decls = []; let cadre = null;
-        snap.forEach(d => { const x = d.data() || {}; if (x.type === 'cadre') cadre = x; else if (x.type === 'declaration') decls.push({ ...x, id: x.id || d.id }); });
-        S.decls = decls;
+        snap.forEach(d => { const x = d.data() || {}, id = x.id || d.id; if (x.type === 'cadre' && id === 'cadre_' + annee) cadre = x; else if (x.type === 'declaration') decls.push({ ...x, id }); });
         const c = normaliserCadre(cadre);
+        S.decls = c ? decls.filter(d => dansPeriode(d, c)) : decls;
         S.cadre = c; S.etat = c ? 'ok' : 'absent';
+        if (c) verifierPeriode(c);
         if (c && !S.classe) S.classe = c.classes[0].nom;
         if (c && !c.avecParite && S.vue !== 'cal') S.vue = 'A';
         if (c && S.mats.size && S.etape === 'matieres' && S.retrouvee) { S.etape = 'edt'; try { remplacerNav && remplacerNav({ etape: 'edt', mode: S.mode, sel: null }); } catch (e) { } }
@@ -310,6 +319,20 @@ export function creerEstimation(ctx) {
         dessiner(true);
       }, err => { S.ecoute = false; S.unsub = null; S.etat = /permission|insufficient/i.test(String(err && (err.code || err.message))) ? 'refus' : 'horsligne'; dessiner(); });
     } catch (e) { S.ecoute = false; S.etat = 'horsligne'; }
+  }
+
+  /* Nouvelle période publiée : l'estimation de la période précédente reste enregistrée en ligne ;
+     on en commence une nouvelle (nouveau document), en gardant les matières. */
+  function verifierPeriode(c) {
+    if (!S.periodeDebut) {
+      const ancienne = S.docId && !dansPeriode({ creeLe: S.creeLe || S.envoyeLe }, c);
+      if (!ancienne) { S.periodeDebut = c.periode.debut; lsEcrit(); return; }
+    } else if (S.periodeDebut === c.periode.debut) return;
+    S.nouvellePeriode = c.periode.label;
+    S.docId = null; S.version = 0; S.creeLe = null; S.envoyeLe = null; S.envoyeSig = null;
+    S.lignes = new Map(); S.commentaire = ''; S.histo = []; S.bonjour = false; S.retrouvee = false;
+    S.periodeDebut = c.periode.debut; if (S.etape === 'envoye') S.etape = 'matieres';
+    lsEcrit();
   }
 
   /* ── outils ── */
@@ -344,6 +367,7 @@ export function creerEstimation(ctx) {
       const c = cadre();
       html += `<p class="est-periode"><b>Estimation « ${esc(c.periode.label)} » : du ${esc(dateLongue(c.periode.debut))} au ${esc(dateLongue(c.periode.fin))}.</b><br>
         Indiquez vos besoins pour cette période. Les vacances, les jours fériés et les PFMP sont déjà retirés. À la fin de la période, une nouvelle estimation sera ouverte.</p>`;
+      if (S.nouvellePeriode) html += `<p class="est-bonjour" role="status"><strong>Nouvelle période : « ${esc(S.nouvellePeriode)} ».</strong> Votre estimation de la période précédente reste enregistrée à la coordination. Indiquez vos besoins pour cette nouvelle période.</p>`;
     }
     if (S.etat !== 'ok') html += blocEtat();
     else if (S.etape === 'envoye') html += blocEnvoye();
@@ -640,11 +664,15 @@ export function creerEstimation(ctx) {
     }).filter(Boolean);
     if (!S.docId) S.docId = 'declaration_' + Date.now().toString(36) + [...crypto.getRandomValues(new Uint8Array(6))].map(x => 'abcdefghijklmnopqrstuvwxyz0123456789'[x % 36]).join('');
     const maintenant = new Date().toISOString();
-    const doc = { id: S.docId, type: 'declaration', annee, disciplines: [...S.mats].slice(0, 12), statut: retirer ? 'retiree' : 'active', version: (S.version || 0) + 1,
+    const doc = { id: S.docId, type: 'declaration', annee, periode: { debut: c.periode.debut, fin: c.periode.fin, label: String(c.periode.label || '').slice(0, 40) },
+      disciplines: [...S.mats].slice(0, 12), statut: retirer ? 'retiree' : 'active', version: (S.version || 0) + 1,
       lignes, commentaire: String(S.commentaire || '').slice(0, 600), creeLe: S.creeLe || maintenant, majLe: maintenant, source: 'estimation-aesh' };
     S.envoi = 'encours'; dessiner();
     try {
       await Promise.race([FS.setDoc(FS.doc(db, COL, doc.id), doc), new Promise((_, rej) => setTimeout(() => rej(new Error('délai dépassé')), 15000))]);
+      /* Historique : copie figée de cette version (jamais modifiée). Un échec n'empêche pas l'enregistrement. */
+      try { const aid = 'archive_' + doc.id.replace(/^declaration_/, '') + '_v' + doc.version; Promise.resolve(FS.setDoc(FS.doc(db, COL, aid), { ...doc, id: aid, type: 'archive', declaration: doc.id })).catch(() => { }); } catch (e) { }
+      S.periodeDebut = c.periode.debut; S.nouvellePeriode = '';
       S.version = doc.version; S.creeLe = doc.creeLe; S.envoyeLe = maintenant; S.envoi = ''; S.retire = !!retirer; S.flash = ''; S.bonjour = false;
       if (retirer) { S.lignes = new Map(); S.histo = []; }
       S.envoyeSig = signature();
@@ -663,6 +691,8 @@ export function creerEstimation(ctx) {
       const snap = await FS.getDoc(FS.doc(db, COL, 'declaration_' + c));
       const d = snap && (typeof snap.exists === 'function' ? snap.exists() : snap.exists) ? snap.data() : null;
       if (!d || d.type !== 'declaration') { S.message = 'Aucune estimation ne correspond à ce code.'; dessiner(); return; }
+      if (cadre() && !dansPeriode(d, cadre())) { S.message = `Ce code correspond à une estimation d’une autre période${d.periode && d.periode.label ? ` (« ${d.periode.label} »)` : ''}. Elle reste enregistrée à la coordination ; pour la période en cours, faites une nouvelle estimation.`; dessiner(); return; }
+      if (cadre()) { S.periodeDebut = cadre().periode.debut; S.nouvellePeriode = ''; }
       S.docId = d.id; S.version = d.version || 0; S.creeLe = d.creeLe || null; S.envoyeLe = d.majLe || null; S.message = '';
       S.mats = new Set(Array.isArray(d.disciplines) ? d.disciplines : []); S.commentaire = String(d.commentaire || '');
       S.lignes = new Map(); (d.lignes || []).forEach(l => { if (l && l.classe && l.cle) S.lignes.set(l.classe + '|' + l.cle, { classe: l.classe, cle: l.cle, nb: l.nb, du: l.du, au: l.au, semaines: l.semaines, hDebut: l.hDebut, hFin: l.hFin, aides: l.aides || [], note: l.note || '' }); });
