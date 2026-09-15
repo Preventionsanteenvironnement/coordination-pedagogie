@@ -5,15 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0f766e">
-<title>Demander des AESH — pôle PSR / MELEC</title>
+<title>Besoins en AESH — pôle PSR / MELEC</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════════
    Demandes AESH — pôle PSR / MELEC (page en ligne, enseignants)
 
    Lit   : referentiel_<année>, besoins_<année>, et toutes les demandes
            et déclarations de l'année (en direct).
-   Écrit : demande_<id> (ponctuelle) et regulier_<id> (« Mes cours de l'année »).
+   Écrit : demande_<id> (ponctuelle). Les anciennes déclarations regulier_<id> restent lues.
    Collection Firestore : coordination_demandes_aesh.
+   Écran « Estimation des besoins en AESH » : module estimation.js,
+   collection coordination_estimation_aesh (voir ce fichier).
 
    Aucun nom, nulle part : les élèves n'existent ici que par un code
    à 5 caractères. Voir LISEZMOI.md.
@@ -214,22 +216,86 @@ dl.recap dd{margin:0}
 table{border-collapse:collapse;width:100%;min-width:520px}
 th,td{border-bottom:1px solid var(--line-2);padding:8px 10px;text-align:left;vertical-align:top}
 th{font-weight:750}
+
+/* ═══════════ Habillage 2026-09 : plus sobre, plus lisible ═══════════ */
+:root{
+  --bg:#f2f4f7; --card:#ffffff; --card-2:#f7f9fb;
+  --ink:#0f172a; --ink-2:#334155; --muted:#5b6878;
+  --line:#d3dae3; --line-2:#e5eaf0;
+  --accent:#0d5c61; --accent-d:#09474b; --accent-l:#e6f1f0; --on-accent:#ffffff;
+  --r:16px; --r-s:12px;
+  --sh:0 1px 2px rgba(15,23,42,.05),0 10px 28px -16px rgba(15,23,42,.18);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0b1016; --card:#131a22; --card-2:#18212b;
+  --ink:#f1f5f9; --ink-2:#d3dbe5; --muted:#a8b4c2;
+  --line:#344150; --line-2:#222c37;
+  --accent:#5ec8c1; --accent-d:#8ad9d3; --accent-l:#10302e; --on-accent:#04201e;
+  --sh:0 1px 2px rgba(0,0,0,.45);
+}}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:-.003em}
+h1{font-size:clamp(1.55rem,3.4vw,2.15rem);font-weight:760;letter-spacing:-.022em}
+h2{font-size:1.2rem;font-weight:720;letter-spacing:-.012em}
+.barre{background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line-2);box-shadow:none}
+@media (prefers-color-scheme:dark){.barre{background:rgba(19,26,34,.92)}}
+.barre-in{padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:6px}
+.marque{display:flex;flex-direction:column;line-height:1.15}
+.marque b{font-size:.98rem;font-weight:760;letter-spacing:-.01em;color:var(--ink)}
+.marque .retour{padding:2px 0;min-height:0;font-size:.85rem;font-weight:600;text-decoration:none;color:var(--muted)}
+.marque .retour:hover{color:var(--accent-d);text-decoration:underline}
+.lien-nav{border:1px solid transparent;background:transparent;font-weight:650;color:var(--ink-2)}
+.lien-nav:hover{background:var(--card-2)}
+.lien-nav[aria-current="page"]{background:var(--accent-l);border-color:transparent;color:var(--accent-d)}
+.carte-bloc{border-radius:var(--r)}
+.rgpd{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line-2);border-left:4px solid var(--accent);border-radius:12px;box-shadow:var(--sh)}
+.btn{border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 1px rgba(15,23,42,.04);font-weight:650}
+.btn.primaire{box-shadow:0 6px 16px -8px rgba(13,92,97,.55)}
+.hero{display:grid;gap:18px;grid-template-columns:1fr;align-items:end}
+.hero .sur{font-size:1rem;font-weight:720;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-d)}
+.hero p.chapo{color:var(--muted);font-size:1.05rem;max-width:62ch;margin-top:8px}
+.vedette{position:relative;overflow:hidden;border-radius:20px;padding:22px 22px 20px;color:#fff;
+  background:radial-gradient(120% 140% at 100% 0%,#1f8a84 0%,#0d5c61 45%,#0a3d44 100%);box-shadow:0 18px 40px -22px rgba(13,92,97,.75)}
+.vedette::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07)}
+.vedette .etiq{display:inline-block;font-size:1rem;font-weight:720;letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.16);padding:3px 10px;border-radius:999px}
+.vedette h2{font-size:clamp(1.3rem,2.6vw,1.65rem);margin-top:10px;color:#fff}
+.vedette p{margin-top:8px;max-width:58ch;color:rgba(255,255,255,.88)}
+.vedette ul{margin:12px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px 16px;color:rgba(255,255,255,.92);font-size:1rem}
+.vedette ul li::before{content:"✓ ";font-weight:800}
+.vedette .btn{margin-top:16px;background:#fff;color:#0a3d44;border-color:#fff;box-shadow:0 8px 20px -10px rgba(0,0,0,.5);position:relative;z-index:1}
+.vedette .btn:hover:not(:disabled){background:#eafaf8;border-color:#eafaf8}
+.section-t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.cartes{gap:12px}
+@media(min-width:640px){.cartes{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:980px){.cartes{grid-template-columns:repeat(4,1fr)}}
+.carte{min-height:118px;border:1px solid var(--line-2);border-radius:16px;padding:16px;gap:6px;transition:transform .15s,box-shadow .15s,border-color .15s}
+.carte:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px);box-shadow:0 14px 28px -18px rgba(15,23,42,.35)}
+.carte .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--accent-l);color:var(--accent-d);font-size:1.1rem;margin-bottom:4px}
+.carte-t{font-size:1.05rem;font-weight:730}
+.carte-s{font-size:1rem}
+.note-resana{display:flex;gap:10px;align-items:center;border:1px dashed var(--line);border-radius:12px;padding:10px 14px;color:var(--ink-2);background:var(--card-2);margin-top:12px}
+.suivi{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line-2);border-radius:16px;padding:14px 16px;box-shadow:var(--sh)}
+@media(max-width:700px){
+  .barre-in{flex-wrap:nowrap;flex-direction:column;align-items:stretch;gap:4px}
+  .barre nav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:4px;margin:0 -4px}
+  .barre nav::-webkit-scrollbar{display:none}
+  .lien-nav{white-space:nowrap;min-height:40px;padding:6px 12px;font-size:.92rem}
+}
 </style>
 </head>
 <body>
 <a class="evitement" href="#vue">Aller au contenu</a>
 <header class="barre">
   <div class="barre-in">
-    <a class="retour" href="../">← Portail coordination</a>
-    <nav aria-label="Espace des demandes AESH">
+    <div class="marque"><b>Besoins en AESH · pôle PSR / MELEC</b><a class="retour" href="../">← Portail coordination</a></div>
+    <nav aria-label="Espace des besoins en AESH">
       <button type="button" class="lien-nav" data-action="accueil" id="nav-accueil">Accueil</button>
+      <button type="button" class="lien-nav" data-action="estimation" id="nav-estimation">Estimation des besoins</button>
       <button type="button" class="lien-nav" data-action="pole" id="nav-pole">Demandes du pôle</button>
     </nav>
   </div>
 </header>
 <main id="vue" tabindex="-1">
-  <h1>Demander des AESH — pôle PSR / MELEC</h1>
-  <p class="rgpd" style="margin-top:12px"><strong>Aucun nom.</strong> Les élèves apparaissent par un code à 5 caractères ; la correspondance vous est envoyée par mail par le coordinateur.</p>
+  <h1>Besoins en AESH — pôle PSR / MELEC</h1>
   <p style="margin-top:12px" id="chargement">Chargement…</p>
   <noscript><p class="message err" style="margin-top:12px">Cette page a besoin de JavaScript pour fonctionner.</p></noscript>
 </main>
@@ -288,6 +354,10 @@ const NATURES_DEFAUT = [
   {id:'positionnement',label:'Test de positionnement'},{id:'ccf',label:'CCF'},
   {id:'evaluation',label:'Évaluation'},{id:'sortie',label:'Sortie'},{id:'autre',label:'Autre'}
 ];
+/* Les tests de positionnement passent par RESANA (décision du 14/09/2026) : plus proposés ici. */
+const NATURES_RETIREES = ['positionnement'];
+const naturesProposees = liste => (liste || []).filter(n => !NATURES_RETIREES.includes(n.id));
+const NATURE_ICONES = {ccf:'📝', evaluation:'✏️', sortie:'🧭', autre:'➕'};
 const NATURE_SOUS = {
   positionnement:'Tests de début d’année ou de formation',
   ccf:'Contrôle en cours de formation',
@@ -578,14 +648,18 @@ function rendre(){
   else if (S.ecran === 'regulier' && S.r) html = htmlRegulier();
   else if (S.ecran === 'pole') html = htmlPole();
   else if (S.ecran === 'envoye' && S.envoye) html = htmlEnvoye();
+  else if (S.ecran === 'estimation') html = '<div id="estimation-hote"><p class="message info" role="status">Chargement de l’estimation…</p></div>';
   else { S.ecran = 'accueil'; html = htmlAccueil(); }
   vue.innerHTML = html;
   $('#nav-accueil').toggleAttribute('aria-current', false);
   $('#nav-pole').toggleAttribute('aria-current', false);
+  $('#nav-estimation').toggleAttribute('aria-current', false);
+  if (S.ecran === 'estimation'){ $('#nav-estimation').setAttribute('aria-current','page'); monterEstimation(); }
   if (S.ecran === 'accueil') $('#nav-accueil').setAttribute('aria-current','page');
   if (S.ecran === 'pole') $('#nav-pole').setAttribute('aria-current','page');
-  const titres = {accueil:'Demander des AESH', ponctuel:'Demande ponctuelle', regulier:'Mes cours de l’année', pole:'Demandes du pôle', envoye:'Envoyé'};
-  document.title = `${titres[S.ecran] || 'Demander des AESH'} — pôle PSR / MELEC`;
+  const titres = {accueil:'Besoins en AESH', estimation:'Estimation des besoins en AESH', ponctuel:'Demande ponctuelle', regulier:'Mes cours de l’année', pole:'Demandes du pôle', envoye:'Envoyé'};
+  document.title = `${titres[S.ecran] || 'Besoins en AESH'} — pôle PSR / MELEC`;
+  if (S.ecran === 'estimation') return;
   if (S.focus){
     const el = document.getElementById(S.focus); S.focus = null;
     if (el){ el.focus({preventScroll:true}); el.scrollIntoView({block:'start'}); return; }
@@ -594,6 +668,20 @@ function rendre(){
     const el = document.getElementById(idActif);
     if (el){ el.focus({preventScroll:true}); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch(e){} }
   }
+}
+/* ═══════════════ estimation des besoins (module séparé, chargé à la demande) ═══════════════ */
+let EST = null, EST_CHARGEMENT = null;
+function monterEstimation(){
+  const hote = $('#estimation-hote'); if (!hote) return;
+  if (EST){ EST.monter(hote); return; }
+  if (EST_CHARGEMENT) return;
+  EST_CHARGEMENT = import('./estimation.js?v=2026r1').then(m => {
+    EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, retourAccueil: () => actions.accueil() });
+    const h = $('#estimation-hote'); if (h) EST.monter(h);
+  }).catch(() => {
+    EST_CHARGEMENT = null;
+    const h = $('#estimation-hote'); if (h) h.innerHTML = '<div class="message warn" role="alert"><p><strong>L’estimation n’a pas pu se charger.</strong> Vérifiez la connexion, puis réessayez.</p><p><button type="button" class="btn primaire petit" data-action="estimation">Réessayer</button></p></div>';
+  });
 }
 function htmlErreurChargement(){
   return `<div class="pile"><h1 id="titre-ecran" tabindex="-1">Demander des AESH — pôle PSR / MELEC</h1>
@@ -617,30 +705,37 @@ const refPret = () => S.refEtat === 'ok' && !!S.ref;
 
 /* ═══════════════ accueil ═══════════════ */
 function htmlAccueil(){
-  const natures = S.ref ? S.ref.natures : NATURES_DEFAUT;
+  const natures = naturesProposees(S.ref ? S.ref.natures : NATURES_DEFAUT);
   const dis = refPret() ? '' : 'disabled aria-describedby="etat-ref"';
   const enCours = [];
   if (S.p) enCours.push(`<li>Demande ponctuelle (${esc(natureLabel(S.p.nature))}) : étape ${S.p.etape} sur 6. <button type="button" class="lien" data-action="reprendre-p">Reprendre</button> <button type="button" class="lien" data-action="abandonner-p">Abandonner</button></li>`);
   if (S.r) enCours.push(`<li>Mes cours de l’année : étape ${S.r.etape} sur 4. <button type="button" class="lien" data-action="reprendre-r">Reprendre</button> <button type="button" class="lien" data-action="abandonner-r">Abandonner</button></li>`);
   return `<div class="pile">
-    <h1 id="titre-ecran" tabindex="-1">Demander des AESH — pôle PSR / MELEC</h1>
-    ${htmlRgpd()}
-    ${htmlEtatRef()}
+    <div class="hero"><div><p class="sur">Coordination &amp; Pédagogie · pôle PSR / MELEC · ${esc(ANNEE)}</p>
+      <h1 id="titre-ecran" tabindex="-1">Besoins en AESH</h1>
+      <p class="chapo">Pour les enseignants des classes de CAP PSR (1re et 2e année) et de Bac Pro MELEC (2de, 1re, Tle) : estimez vos besoins cours par cours, ou faites une demande pour une date précise.</p></div></div>
+    <p class="rgpd" role="note"><span aria-hidden="true">🔒</span><span><strong>RGPD : aucun nom.</strong> Ni nom ni prénom d’élève, aucune information de santé. Pour une demande ponctuelle, les élèves apparaissent par un code à 5 caractères ; la correspondance vous est envoyée par la coordination.</span></p>
     <div id="bandeau-brouillons">${htmlBandeauBrouillons()}</div>
     ${enCours.length ? `<div class="message info"><p><strong>Saisie en cours, non envoyée</strong></p><ul>${enCours.join('')}</ul></div>` : ''}
+    <section class="vedette" aria-labelledby="h-estimation">
+      <span class="etiq">Estimation des besoins AESH</span>
+      <h2 id="h-estimation">Combien d’AESH vous faudrait-il, cours par cours ?</h2>
+      <p>Choisissez votre matière : les emplois du temps des cinq classes s’affichent, vous cliquez sur vos cours et vous indiquez de 0 à 6 AESH. Un compteur montre les heures d’AESH demandées face au volume disponible du pôle.</p>
+      <ul><li>2 minutes</li><li>Modifiable à tout moment</li><li>Sans nom d’élève</li></ul>
+      <button type="button" class="btn" data-action="estimation">Commencer l’estimation →</button>
+    </section>
     <section aria-labelledby="h-ponctuel">
-      <h2 id="h-ponctuel">Une demande ponctuelle</h2>
-      <p class="discret">Une ou plusieurs dates précises : test, CCF, évaluation, sortie…</p>
+      <div class="section-t"><h2 id="h-ponctuel">Une demande ponctuelle</h2><span class="discret">Une ou plusieurs dates précises</span></div>
+      ${htmlEtatRef()}
       <ul class="cartes">
         ${natures.map(n => `<li><button type="button" class="carte" data-action="nouvelle-ponctuelle" data-nature="${esc(n.id)}" ${dis}>
-          <span class="carte-t">${esc(n.label)}</span><span class="carte-s">${esc(NATURE_SOUS[n.id] || 'Demande ponctuelle')}</span></button></li>`).join('')}
-        <li><button type="button" class="carte large" data-action="nouveau-regulier" ${dis}>
-          <span class="carte-t">Mes cours de l’année (besoins réguliers)</span><span class="carte-s">Vos créneaux de chaque semaine, classe par classe</span></button></li>
+          <span class="ic" aria-hidden="true">${NATURE_ICONES[n.id] || '•'}</span><span class="carte-t">${esc(n.label)}</span><span class="carte-s">${esc(NATURE_SOUS[n.id] || 'Demande ponctuelle')}</span></button></li>`).join('')}
       </ul>
+      <p class="note-resana"><span aria-hidden="true">ℹ️</span><span><strong>Tests de positionnement :</strong> les demandes passent par le calendrier RESANA, pas par cette page.</span></p>
     </section>
-    <section aria-labelledby="h-suivi">
-      <h2 id="h-suivi">Suivi</h2>
-      <p style="margin-top:8px"><button type="button" class="btn" data-action="pole">Voir les demandes du pôle</button> <span class="discret" id="compte-pole">${esc(texteComptePole())}</span></p>
+    <section class="suivi" aria-labelledby="h-suivi">
+      <div><h2 id="h-suivi">Suivi</h2><p class="discret" id="compte-pole">${esc(texteComptePole())}</p></div>
+      <button type="button" class="btn" data-action="pole">Voir les demandes du pôle</button>
     </section>
   </div>`;
 }
@@ -750,7 +845,7 @@ function htmlP1(p, E){
   return `<fieldset>
       <legend>Nature de la demande</legend>
       <div class="options deux">
-        ${S.ref.natures.map((n,i) => `<label class="opt"><input type="radio" name="p-nature" id="p-nature-${i}" value="${esc(n.id)}" data-champ="p-nature" ${p.nature === n.id ? 'checked' : ''}>
+        ${naturesProposees(S.ref.natures).map((n,i) => `<label class="opt"><input type="radio" name="p-nature" id="p-nature-${i}" value="${esc(n.id)}" data-champ="p-nature" ${p.nature === n.id ? 'checked' : ''}>
           <span>${esc(n.label)}<span class="sous">${esc(NATURE_SOUS[n.id] || '')}</span></span></label>`).join('')}
       </div>
       ${p.nature === 'autre' ? `<div class="champ" style="margin-top:12px">
@@ -1241,6 +1336,7 @@ function htmlEnvoye(){
 const actions = {
   'accueil': () => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; S.messageReessai = brouillons().length ? S.messageReessai : ''; rendre(); },
   'pole': () => { S.ecran = 'pole'; S.focus = 'titre-ecran'; ecouterDemandes(); rendre(); },
+  'estimation': () => { S.ecran = 'estimation'; rendre(); window.scrollTo(0, 0); },
   'recharger': () => location.reload(),
   'recharger-ref': () => { chargerReference(); ecouterDemandes(); },
   'reecouter': () => { ecouterDemandes(); majVuesDocs(); },

@@ -205,3 +205,23 @@ python3 -m http.server 8790 --bind 127.0.0.1
 ⚠ **N'ouvrez pas `index.html` directement** pour tester : sans shim, la page se connecte au vrai projet Firebase et lit la collection réelle.
 
 **Dates de test.** Les demandes fictives tombent 4 semaines après la semaine courante, et l'année est calculée à partir de la date du jour. Si le banc est lancé entre juin et juillet, ces dates peuvent tomber dans l'année scolaire suivante. Les tests restent cohérents entre eux, mais les données affichées changent d'année.
+
+---
+
+## Estimation des besoins en AESH (15/09/2026)
+
+**Nouvelle entrée principale** de la page, écran « Estimation des besoins » (module `estimation.js`, chargé à la demande).
+
+- L'enseignant choisit **sa ou ses matières**. Les emplois du temps des 5 classes du pôle (C1 PSR, C2 PSR, 2de, 1re et Tle MELEC) s'affichent avec l'effectif de chaque classe.
+- **Seuls ses cours sont cliquables** ; ceux des collègues restent en pointillés. Pour chaque cours, il choisit **0 à 6 AESH**. En option : le type d'aide et une précision courte, sans nom.
+- **Confirmation « Êtes-vous sûr ? »** à chaque ajout, suppression, retrait ou envoi.
+- **Retour en arrière** : « Annuler la dernière action », « Modifier », « Supprimer », « Tout recommencer ».
+- **Reprise** : la saisie est gardée sur l'appareil. Après l'envoi, un **code de reprise** permet de la retrouver sur un autre appareil. Une estimation peut être **mise à jour** ou **retirée** à tout moment.
+- **Compteur par pôle, en direct** : heures d'AESH demandées face au volume disponible (publié par la coordination), avec la couleur de chaque discipline et la part de l'enseignant. Les disciplines « pas encore estimé » sont listées.
+- **Règle de calcul** : sur un même cours, on retient le **plus grand** nombre déclaré, pas la somme (co-enseignement). Un cours en semaine A ou B seulement compte pour moitié.
+- **Données en ligne** : collection `coordination_estimation_aesh`.
+  - `cadre_<année>` : publié depuis l'Atelier.
+  - `declaration_<id>` : une par enseignant, mise à jour sur place, jamais supprimée.
+  - Aucun nom d'élève, d'enseignant ni d'AESH. Volumes AESH : totaux par pôle seulement.
+- **Tests de positionnement** : la carte a été retirée (ils passent par RESANA). « Mes cours de l'année » est remplacé par l'estimation ; les anciennes déclarations restent lisibles dans « Demandes du pôle ».
+- **Accessibilité** : texte ≥ 16 px partout, sauf dans les blocs de la grille horaire sur ordinateur. La liste par jour (téléphone) et les libellés ARIA donnent le texte complet.

@@ -84,6 +84,19 @@ const CSS = `
 .ep-ail{display:flex;gap:8px;align-items:center;margin-top:7px;font-size:.84rem}
 .ep-note{color:var(--muted);font-size:.74rem;margin-top:8px;line-height:1.45}
 .ep-moi{background:var(--accent-l);border:1.5px solid var(--accent-b);border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:.88rem}
+.ep-ens{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.ep-ens-pole{grid-column:1/-1;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:4px}
+.ep-ens-cl{grid-column:1/-1;font-weight:800;font-size:.92rem;margin-top:2px}
+.ep-ens-cell{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ep-ens-m{font-size:.7rem;font-weight:700;color:var(--muted)}
+.ep-ens-b{display:block;width:100%;text-align:left;border-radius:12px;padding:8px 10px;border:1.5px solid transparent;font-size:.8rem;line-height:1.3}
+.ep-ens-b b{font-weight:800}.ep-ens-b.passee{opacity:.6}
+.ep-av{border:2px dashed #ecc97d;color:#8a5300;border-radius:12px;padding:8px 10px;font-size:.8rem;font-weight:800;line-height:1.3}
+.ep-av span{font-weight:600}
+@media (prefers-color-scheme:dark){.ep-av{border-color:#6b4f12;color:#fcd34d}}
+.ep-cours{position:absolute;left:3px;right:3px;border-radius:7px;background:var(--line-2);border:1px solid var(--line);color:var(--muted);font-size:.64rem;line-height:1.2;padding:2px 4px;overflow:hidden}
+.ep-ev{z-index:1}
+.ep-cl{font-size:.74rem;color:var(--muted);margin:-2px 0 8px;line-height:1.45}
 `;
 
 export function creerEpreuves(ctx) {
@@ -133,7 +146,7 @@ export function creerEpreuves(ctx) {
     if (!pole || !pv.includes(pole)) pole = pv.includes(section()) ? section() : pv[0];
     const auj = isoLocal(new Date()), lun = lundiDe(auj), moiId = moi() && moi().id;
     const liste = c.epreuves.filter(e => e.pole === pole && (!e.retireeLe || placesDe(e.id).length));
-    const sems = [...new Set(liste.map(e => lundiDe(e.date)))].sort();
+    const sems = [...new Set([...(c.semaines || []), ...liste.map(e => lundiDe(e.date))])].sort();
     if (!semaine || !sems.includes(semaine)) semaine = sems.includes(lun) ? lun : (sems.find(s => s >= lun) || sems[sems.length - 1] || null);
     const maj = c.majLe ? new Date(c.majLe) : null;
     let h = `<div class="ep"><div class="ep-carte">
@@ -148,6 +161,7 @@ export function creerEpreuves(ctx) {
       const miennes = c.epreuves.filter(e => !e.retireeLe && e.date >= auj && placesDe(e.id).includes(moiId));
       if (miennes.length) h += `<div class="ep-moi"><b>Vous êtes placé(e) sur :</b><br>${miennes.map(e => `${esc(JOURS[jourIdx(e.date)])} ${esc(dFr(e.date))} · ${esc(hFr(e.debut))}–${esc(hFr(e.fin))} · ${esc(e.classeLabel)} ${esc(e.matiere)}${e.salle ? ' · ' + esc(e.salle) : ''}`).join('<br>')}</div>`;
     }
+    h += ensemble(c, pv, auj);
     if (!semaine) { host.innerHTML = h + `<div class="vide-j"><span class="em">🗓️</span>Aucune épreuve pour le pôle ${esc(pole)}.</div></div>`; lier(); return; }
     h += `<div class="ep-seg" style="margin:0 0 10px">${sems.map(s => `<button data-ep="sem" data-v="${s}" class="${s === semaine ? 'on' : ''}">Semaine du ${esc(dFr(s))}</button>`).join('')}</div>`;
     const sem = liste.filter(e => lundiDe(e.date) === semaine);
@@ -155,12 +169,21 @@ export function creerEpreuves(ctx) {
     const large = window.matchMedia('(min-width: 720px)').matches;
     const texteBloc = e => { const pl = placesDe(e.id); return `<b>${esc(e.classeLabel)}</b> ${esc(e.matiere)}${badge(c, e)}<br>${esc(hFr(e.debut))}–${esc(hFr(e.fin))} · ${e.demandes == null ? pl.length + ' AESH' : pl.length + ' / ' + e.demandes + ' AESH'}`; };
     const classes = e => { const pl = placesDe(e.id); return `st-${etatDe(e, pl)}${e.date < auj ? ' passee' : ''}${sel === e.id ? ' sel' : ''}${moiId && pl.includes(moiId) ? ' moi' : ''}`; };
+    const edt = c.emploisDuTemps || {};
+    const coursSem = (c.classesTest || []).filter(x => x.pole === pole).flatMap(x => edt[x.classe] || []).filter(k => lundiDe(k.date) === semaine);
+    if (!sem.length) h += '<div class="ep-note" style="margin:0 0 8px">Aucune épreuve datée cette semaine. En gris : les cours habituels de la classe.</div>';
     if (large) {
-      const h0 = Math.min(8, ...sem.map(e => Math.floor(min(e.debut) / 60))), h1 = Math.max(13, ...sem.map(e => Math.ceil(min(e.fin) / 60))), PX = 46, H = (h1 - h0) * PX;
+      const h0 = Math.max(7, Math.min(8, ...sem.map(e => Math.floor(min(e.debut) / 60)), ...coursSem.map(k => Math.floor(min(k.debut) / 60))));
+      const h1 = Math.min(19, Math.max(13, ...sem.map(e => Math.ceil(min(e.fin) / 60)), ...coursSem.map(k => Math.ceil(min(k.fin) / 60))));
+      const PX = 46, H = (h1 - h0) * PX;
       let g = '<div class="ep-h"></div>' + JOURS.map((j, i) => { const d = new Date(semaine + 'T12:00:00'); d.setDate(d.getDate() + i); return `<div class="ep-h">${j} ${d.getDate()}</div>`; }).join('');
       g += `<div class="ep-t" style="height:${H}px">${Array.from({ length: h1 - h0 + 1 }, (_, k) => `<span style="top:${k * PX}px">${h0 + k}h</span>`).join('')}</div>`;
       for (let i = 0; i < 5; i++) {
         g += `<div class="ep-col" style="height:${H}px">${Array.from({ length: h1 - h0 - 1 }, (_, k) => `<div class="ep-hr" style="top:${(k + 1) * PX}px"></div>`).join('')}`;
+        coursSem.filter(k => jourIdx(k.date) === i).forEach(k => {
+          const top = (min(k.debut) / 60 - h0) * PX, ht = Math.max(16, (min(k.fin) - min(k.debut)) / 60 * PX - 2);
+          g += `<div class="ep-cours" style="top:${top}px;height:${ht}px">${esc(k.matiere)}<br>${esc(hFr(k.debut))}–${esc(hFr(k.fin))}</div>`;
+        });
         sem.filter(e => jourIdx(e.date) === i).forEach(e => {
           const top = (min(e.debut) / 60 - h0) * PX, ht = Math.max(30, (min(e.fin) - min(e.debut)) / 60 * PX - 3);
           g += `<button class="ep-ev ${classes(e)}" data-ep="sel" data-v="${esc(e.id)}" style="top:${top}px;height:${ht}px" aria-pressed="${sel === e.id}">${texteBloc(e)}</button>`;
@@ -173,15 +196,45 @@ export function creerEpreuves(ctx) {
     } else {
       for (let i = 0; i < 5; i++) {
         const dj = sem.filter(e => jourIdx(e.date) === i).sort((a, b) => a.debut.localeCompare(b.debut));
-        if (!dj.length) continue;
+        const dc = coursSem.filter(k => jourIdx(k.date) === i);
+        if (!dj.length && !dc.length) continue;
         const d = new Date(semaine + 'T12:00:00'); d.setDate(d.getDate() + i);
         h += `<div class="ep-jour">${JOURS[i]} ${d.getDate()}/${z2(d.getMonth() + 1)}</div>`;
         dj.forEach(e => { h += `<button class="ep-jc ${classes(e)}" data-ep="sel" data-v="${esc(e.id)}" aria-pressed="${sel === e.id}">${texteBloc(e)}</button>`; if (sel === e.id) h += panneau(c, e); });
+        if (dc.length) h += `<div class="ep-cl">Cours habituels : ${dc.map(k => esc(hFr(k.debut)) + ' ' + esc(k.matiere)).join(' · ')}</div>`;
       }
       if (!sel) h += '<div class="ep-note">Touchez une épreuve pour voir les AESH et les cours en parallèle.</div>';
     }
     host.innerHTML = h + '</div>';
     lier();
+  }
+
+  /* Vue d'ensemble : pour chaque classe du pôle et chaque matière, l'épreuve datée (en couleur)
+     ou une case en pointillés si elle n'est pas encore datée dans RESANA. */
+  function ensemble(c, pv, auj) {
+    const classes = (c.classesTest || []).filter(x => pv.includes(x.pole));
+    if (!classes.length) return '';
+    const mats = Array.isArray(c.matieres) && c.matieres.length ? c.matieres : ['Mathématiques', 'Français'];
+    let h = '<div class="ep-carte"><div class="ep-titre" style="font-size:.95rem">Vue d’ensemble</div><div class="ep-ens">';
+    pv.forEach(p => {
+      const cp = classes.filter(x => x.pole === p);
+      if (!cp.length) return;
+      if (pv.length > 1) h += `<div class="ep-ens-pole">Pôle ${esc(p)}</div>`;
+      cp.forEach(x => {
+        h += `<div class="ep-ens-cl">${esc(x.classeLabel)}</div>`;
+        mats.forEach(m => {
+          const l = c.epreuves.filter(e => e.classe === x.classe && e.matiere === m && !e.retireeLe);
+          h += `<div class="ep-ens-cell"><div class="ep-ens-m">${esc(m)}</div>`;
+          h += l.length ? l.map(e => {
+            const pl = placesDe(e.id), mq = e.demandes == null ? null : e.demandes - pl.length;
+            return `<button class="ep-ens-b st-${etatDe(e, pl)}${e.date < auj ? ' passee' : ''}" data-ep="ens" data-v="${esc(e.id)}" data-pole="${esc(e.pole)}" data-sem="${esc(lundiDe(e.date))}">
+              <b>${esc(JOURS[jourIdx(e.date)])} ${esc(dFr(e.date))} · ${esc(hFr(e.debut))}–${esc(hFr(e.fin))}</b><br>${mq == null ? pl.length + ' AESH' : pl.length + ' / ' + e.demandes + ' AESH' + (mq > 0 ? ' · il en manque ' + mq : ' · couverte')}</button>`;
+          }).join('') : '<div class="ep-av">Pas encore daté<br><span>en attente sur RESANA</span></div>';
+          h += '</div>';
+        });
+      });
+    });
+    return h + '</div></div>';
   }
 
   function panneau(c, e) {
@@ -242,6 +295,10 @@ export function creerEpreuves(ctx) {
       else if (a === 'pole') { pole = v; semaine = null; sel = null; dessiner(); }
       else if (a === 'sem') { semaine = v; sel = null; dessiner(); }
       else if (a === 'sel') { sel = sel === v ? null : v; dessiner(); }
+      else if (a === 'ens') {
+        pole = b.dataset.pole; semaine = b.dataset.sem; sel = v; dessiner();
+        const p = host.querySelector('.ep-panneau'); if (p) p.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
       else if (a === 'aesh') basculer(v);
     });
   }
