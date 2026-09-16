@@ -14,6 +14,13 @@
    Contrat : work/estimation-aesh-v1/CONTRAT.md
    ═══════════════════════════════════════════════════════════════════ */
 const COL = 'coordination_estimation_aesh';
+/* 17/09/2026 : trois filières de plus. Leurs emplois du temps viennent des captures PRONOTE vérifiées
+   (referents-aesh/edt-lycee.json) ; période, semaines A/B et vacances viennent du cadre publié par l'Atelier.
+   Heures AESH de ces pôles : somme des heures déclarées par les référents (coordination_referents_aesh). */
+const COL_REFERENTS = 'coordination_referents_aesh';
+const POLES_LYCEE = { AGORA: 'AGORA', CAPA: 'CAPA', MDA: 'MDA' };
+const PAR_LIEN = { 'psr-melec': ['PSR', 'MELEC'], psr: ['PSR'], melec: ['MELEC'], agora: ['AGORA'], capa: ['CAPA'], mda: ['MDA'] };
+const JOURS_EDT = ['lun', 'mar', 'mer', 'jeu', 'ven'];
 const K_LOCAL = 'estimation-aesh-v1';
 const JOURS = ['lun', 'mar', 'mer', 'jeu', 'ven'];
 const JOURS_L = { lun: 'Lundi', mar: 'Mardi', mer: 'Mercredi', jeu: 'Jeudi', ven: 'Vendredi' };
@@ -112,7 +119,7 @@ export function agreger(cadre, declarations, options = {}) {
 }
 
 /* ═════════ normalisation du cadre publié ═════════ */
-function normaliserCadre(d) {
+function normaliserCadre(d, edt, volumesRef) {
   if (!d || !Array.isArray(d.classes)) return null;
   const disciplines = (Array.isArray(d.disciplines) ? d.disciplines : []).filter(x => x && typeof x.id === 'string').map(x => ({ id: x.id, label: LIBELLES_DISC[x.id] || String(x.label || x.id) }));
   const pe = d.periode && RE_DATE.test(d.periode.debut || '') && RE_DATE.test(d.periode.fin || '') ? d.periode : null;
@@ -130,6 +137,22 @@ function normaliserCadre(d) {
         matiere: x.matiere, parite: ['A', 'B'].includes(x.parite) ? x.parite : '', disciplines: Array.isArray(x.disciplines) ? x.disciplines.filter(y => typeof y === 'string') : [] }))
       .sort((a, b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || a.debut.localeCompare(b.debut))
   }));
+  /* Salle : lue dans les emplois du temps PRONOTE (même jour, mêmes heures, même semaine). */
+  if (edt && edt.classes && edt.cours) classes.forEach(c => { const k = edt.classes[c.nom]; if (!k) return; c.creneaux.forEach(cr => {
+    const x = k.cours.map(id => edt.cours[id]).find(y => y && JOURS_EDT[y.j] === cr.jour && y.d === cr.debut && y.f === cr.fin && (!cr.parite || y.sem === 'S' + cr.parite || y.sem === 'TOUTES'));
+    if (x && x.salle && x.salle.length) cr.salle = x.salle.join(' · '); }); });
+  if (edt && edt.classes && edt.cours && pe) {
+    Object.keys(POLES_LYCEE).forEach(pole => (edt.poles && edt.poles[pole] || []).forEach(nom => {
+      const k = edt.classes[nom]; if (!k || classes.some(c => c.nom === nom)) return;
+      const creneaux = (k.cours || []).map(id => edt.cours[id]).filter(x => x && JOURS_EDT[x.j] && RE_HEURE.test(x.d) && RE_HEURE.test(x.f))
+        .filter(x => x.sem !== 'S2' || pe.fin >= (edt.s2Debut || '9999')).filter(x => x.sem !== 'S1' || pe.debut <= (edt.s1Fin || '0000'))
+        .map(x => { const parite = x.sem === 'SA' ? 'A' : x.sem === 'SB' ? 'B' : '', matiere = String(x.lib || x.mat);
+          return { cle: [JOURS_EDT[x.j], x.d, x.f, matiere, parite].join('|'), jour: JOURS_EDT[x.j], debut: x.d, fin: x.f, matiere, parite, disciplines: [], salle: (x.salle || []).join(' · ') }; })
+        .sort((a, b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || a.debut.localeCompare(b.debut));
+      classes.push({ nom, label: k.court || nom, court: k.court || nom, pole, effectif: null,
+        pfmp: (k.pfmp || []).filter(p => RE_DATE.test(p.debut || '') && RE_DATE.test(p.fin || '')).map(p => ({ debut: p.debut, fin: p.fin })), creneaux });
+    }));
+  }
   if (!classes.length) return null;
   const raccourcis = (Array.isArray(d.raccourcis) ? d.raccourcis : []).filter(r => r && RE_DATE.test(r.fin || '') && r.fin >= periode.debut && r.fin <= periode.fin)
     .map(r => ({ id: String(r.id || r.fin), label: String(r.label || ''), fin: r.fin }));
@@ -138,7 +161,8 @@ function normaliserCadre(d) {
   const v = d.volumes && typeof d.volumes === 'object' ? d.volumes : {};
   const avecParite = semaines.some(s => s.parite);
   return { annee: d.annee, majLe: d.majLe || '', disciplines, classes, periode, semaines, raccourcis, avecParite,
-    volumes: { PSR: Number.isFinite(v.PSR) ? v.PSR : null, MELEC: Number.isFinite(v.MELEC) ? v.MELEC : null } };
+    volumes: { PSR: Number.isFinite(v.PSR) ? v.PSR : null, MELEC: Number.isFinite(v.MELEC) ? v.MELEC : null,
+      ...Object.fromEntries(Object.keys(POLES_LYCEE).map(p => [p, volumesRef && volumesRef[p] > 0 ? volumesRef[p] : null])) } };
 }
 
 /* ═════════ v6 « par l'emploi du temps des élèves » (15/09/2026) ═════════
@@ -252,7 +276,8 @@ const CSS = `
 @media(prefers-reduced-motion:reduce){.e6-rc.fait{animation:none}.e6-cours.flash{animation:none;box-shadow:0 0 0 4px var(--accent)}}
 `;
 const COURT = { C1PSR: 'CAP 1 PSR', C2PSR: 'CAP 2 PSR', B2MELEC: '2de MELEC', B1MELEC: '1re MELEC', BTMELEC: 'Tle MELEC' };
-const FILIERES = [['PSR', 'CAP PSR', '1re et 2e année'], ['MELEC', 'Bac Pro MELEC', '2de, 1re et Terminale']];
+const FILIERES = [['PSR', 'CAP PSR', '1re et 2e année'], ['MELEC', 'Bac Pro MELEC', '2de, 1re et Terminale'],
+  ['AGORA', 'AGOrA', '2de GATL, 1re et Terminale AGOrA'], ['CAPA', 'CAPa', 'Horticulture, jardinier paysagiste'], ['MDA', 'Métiers d’Art', 'Cannage-paillage, vannerie']];
 const K_APPAREIL = 'estimation-aesh-v8';   /* v8 (15/09) : repart à zéro sur les appareils qui ont servi aux tests */
 const PALETTE = [['#3b6fd8', '#e8effd'], ['#d0782a', '#fdf0e4'], ['#2f9a6a', '#e6f5ee'], ['#9b4fc4', '#f3eafa'], ['#c9444f', '#fbe9ea'], ['#1f8fa3', '#e4f4f7'], ['#b8931c', '#faf4de'], ['#5d6b76', '#eef1f3'], ['#d14f93', '#fbe8f2'], ['#4f8f2a', '#edf6e6']];
 const empreinte = s => { let h = 5381; for (const ch of String(s)) h = (Math.imul(h, 33) ^ ch.codePointAt(0)) >>> 0; return h.toString(36).padStart(4, '0'); };
@@ -278,7 +303,8 @@ export function coursOublies(classe, estimesIci, estimeDe) {
 
 export function creerEstimation(ctx) {
   const { FS, db, esc, annee, annonce, retourAccueil, pousser: pousserNav } = ctx;
-  const S = { etat: 'chargement', cadre: null, docs: new Map(), ecran: 'filiere', fil: null, classe: null, sem: 'A', sel: null, f: null,
+  const FORCEES = PAR_LIEN[String(ctx.filiere || '')] || null;
+  const S = { brut: null, edt: null, volumesRef: null, etat: 'chargement', cadre: null, docs: new Map(), ecran: 'filiere', fil: null, classe: null, sem: 'A', sel: null, f: null,
     recap: null, flash: null, valid: null, mot: null, motEdit: null, toast: '', toastErr: false, hote: null, focus: null, envoi: false, ignorerPop: 0, navFeuille: false, unsub: null, ecoute: false };
   if (!document.getElementById('e6-styles')) { const st = document.createElement('style'); st.id = 'e6-styles'; st.textContent = CSS; document.head.appendChild(st); }
 
@@ -291,13 +317,26 @@ export function creerEstimation(ctx) {
   };
   const appEcrit = v => { try { localStorage.setItem(K_APPAREIL, JSON.stringify(v)); } catch (e) { } };
 
+  const recalculer = () => { if (!S.brut) return; S.cadre = normaliserCadre(S.brut, S.edt, S.volumesRef); S.etat = S.cadre ? 'ok' : 'absent'; };
+  function chargerLycee() {
+    if (S.edtCharge) return; S.edtCharge = true;
+    try { fetch('../referents-aesh/edt-lycee.json?v=2026-09-17a').then(r => r.ok ? r.json() : null).then(j => { if (!j) return; S.edt = j; recalculer(); dessiner(true); }).catch(() => { }); } catch (e) { }
+    try {
+      FS.onSnapshot(FS.query(FS.collection(db, COL_REFERENTS), FS.where('annee', '==', annee)), snap => {
+        const v = {}; snap.forEach(d => { const x = d.data() || {}; if (x.type === 'aesh' && x.actif !== false && x.heures) Object.keys(POLES_LYCEE).forEach(p => { const h = Number(x.heures[p]); if (Number.isFinite(h) && h > 0) v[p] = (v[p] || 0) + h; }); });
+        S.volumesRef = v; recalculer(); dessiner(true);
+      }, () => { });
+    } catch (e) { }
+  }
   function ecouter() {
+    chargerLycee();
     if (S.ecoute) return; S.ecoute = true;
     try {
       S.unsub = FS.onSnapshot(FS.query(FS.collection(db, COL), FS.where('annee', '==', annee)), snap => {
         let brut = null; const docs = [], mots = [];
         snap.forEach(d => { const x = d.data() || {}, id = x.id || d.id; if (x.type === 'cadre' && id === 'cadre_' + annee) brut = x; else if (x.type === 'cours') docs.push({ ...x, id }); else if (x.type === 'mot') mots.push({ id, texte: x.texte, periode: x.periode, majLe: x.majLe }); });
-        const c = normaliserCadre(brut);
+        S.brut = brut;
+        const c = normaliserCadre(brut, S.edt, S.volumesRef);
         S.cadre = c; S.etat = c ? 'ok' : 'absent';
         /* Un seul mot est retenu : celui écrit depuis cet appareil. Ceux des collègues ne sont ni gardés ni affichés. */
         const mid = c ? app().motId : '';
@@ -345,6 +384,7 @@ export function creerEstimation(ctx) {
     else if (S.ecran === 'fin') html += ecranFin();
     else if (S.ecran === 'classe' && S.fil) html += ecranClasses();
     else if (S.ecran === 'edt' && classeDe(S.classe)) html += ecranEdt();
+    else if (FORCEES && FORCEES.length === 1 && S.etat === 'ok' && cadre().classes.some(k => k.pole === FORCEES[0])) { S.ecran = 'classe'; S.fil = FORCEES[0]; html += ecranClasses(); }
     else { S.ecran = 'filiere'; html += ecranFilieres(); }
     html += `</div>`;
     if (S.sel && S.f && !S.recap) html += feuille();
@@ -368,7 +408,7 @@ export function creerEstimation(ctx) {
     const c = cadre();
     return `${barre('Estimation')}<span class="e6-per">${esc(c.periode.label)} · ${esc(jjmm(c.periode.debut))} → ${esc(jjmm(c.periode.fin))}</span>
       <h1 id="titre-ecran" tabindex="-1">Votre filière</h1>
-      ${FILIERES.filter(([p]) => c.classes.some(k => k.pole === p)).map(([p, t, s]) => `<button type="button" class="e6-gros" id="fil-${p}" data-e="fil" data-v="${p}"><span class="x"><b>${t}</b><span class="s">${s}</span></span><span class="fl" aria-hidden="true">›</span></button>`).join('')}`;
+      ${FILIERES.filter(([p]) => (!FORCEES || FORCEES.includes(p)) && c.classes.some(k => k.pole === p)).map(([p, t, s]) => `<button type="button" class="e6-gros" id="fil-${p}" data-e="fil" data-v="${p}"><span class="x"><b>${t}</b><span class="s">${s}</span></span><span class="fl" aria-hidden="true">›</span></button>`).join('')}`;
   }
   function carteMoyens(pole) {
     const c = cadre(), vol = c.volumes[pole], fil = FILIERES.find(f => f[0] === pole), { total, faites } = moyensPole(pole);
@@ -421,7 +461,7 @@ export function creerEstimation(ctx) {
         h += `<button type="button" class="e6-cours${S.flash === cr.cle ? ' flash' : ''}" style="--mc:${mc};--mt:${mt}" id="cr-${esc(slug(cr.cle))}" data-e="cours" data-v="${esc(cr.cle)}"
           aria-label="${esc(`${JOURS_L[cr.jour]} ${hFr(cr.debut)}–${hFr(cr.fin)}, ${cr.matiere}${cr.parite ? ', semaine ' + cr.parite : ''}, ${!d ? 'pas encore estimé' : mien ? d.nb + ' AESH' : 'estimé par un collègue'}`)}">
           <span class="h">${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))}</span>
-          <span class="m"><b>${esc(cr.matiere)}</b>${d ? `<small>${mien ? '<span class="e6-qui vous">vous</span>' : '<span class="e6-qui coll">collègue</span>'}${esc([`jusqu’au ${jjmm(d.au)}`, sem, (hl.debut !== cr.debut || hl.fin !== cr.fin) ? `${hFr(hl.debut)}–${hFr(hl.fin)}` : ''].filter(Boolean).join(' · '))}</small>` : ''}</span>
+          <span class="m"><b>${esc(cr.matiere)}</b>${cr.salle ? `<small class="e6-salle">${esc(cr.salle)}</small>` : ''}${d ? `<small>${mien ? '<span class="e6-qui vous">vous</span>' : '<span class="e6-qui coll">collègue</span>'}${esc([`jusqu’au ${jjmm(d.au)}`, sem, (hl.debut !== cr.debut || hl.fin !== cr.fin) ? `${hFr(hl.debut)}–${hFr(hl.fin)}` : ''].filter(Boolean).join(' · '))}</small>` : ''}</span>
           <span class="p ${cls}">${!d ? '+' : mien ? `${d.nb} AESH` : '✓'}</span></button>`;
       });
     });
@@ -456,6 +496,7 @@ export function creerEstimation(ctx) {
       ${existe && !mien ? `<p class="e6-info" id="f-coll">Déjà estimé par un collègue. Votre réponse remplacera la sienne.</p>` : ''}
       <p class="e6-q" id="f-q">Combien d’AESH ?</p>
       <div class="e6-nbs" role="group" aria-labelledby="f-q">${[0, 1, 2, 3, 4, 5, 6].map(v => `<button type="button" id="nb-${v}" data-e="nb" data-v="${v}" aria-pressed="${f.nb === v}">${v}</button>`).join('')}</div>
+      <div class="e6-ligne"><span class="lib">Élèves dans ce cours <small style="display:block;font-size:.85rem">facultatif</small></span><span class="e6-ab" style="align-items:center"><button type="button" id="el-moins" data-e="eleves" data-v="-1" aria-label="Un élève de moins">−</button><b id="el-val" style="min-width:2.4em;text-align:center;font-size:1.15rem">${f.eleves == null ? '—' : esc(f.eleves)}</b><button type="button" id="el-plus" data-e="eleves" data-v="1" aria-label="Un élève de plus">+</button></span></div>
       <div class="e6-ligne"><span class="lib">Période</span><span class="val">${f.modPer
         ? `<label class="sr" for="f-au">Jusqu’au</label><input type="date" id="f-au" data-i="au" value="${esc(f.au)}" min="${esc(c.periode.debut)}" max="${esc(c.periode.fin)}">`
         : `jusqu’au ${esc(jjmm(f.au))}<button type="button" class="e6-mod" id="mod-per" data-e="mod-per">modifier</button>`}</span></div>
@@ -473,7 +514,7 @@ export function creerEstimation(ctx) {
     const c = cadre(), k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel), f = S.f; if (!cr || !f) return null;
     const hl = horaireLigne(cr, { hDebut: f.hDebut, hFin: f.hFin });
     const sem = !c.avecParite ? '' : cr.parite ? `Semaine ${cr.parite}` : f.A && f.B ? 'Semaines A et B' : f.A ? 'Semaine A seulement' : 'Semaine B seulement';
-    return { mode, cle: cr.cle, nb: f.nb, matiere: cr.matiere, classe: courtDe(k), moment: `${JOURS_L[cr.jour]} ${hFr(hl.debut)}–${hFr(hl.fin)}`, sem, au: RE_DATE.test(f.au || '') ? `Jusqu’au ${jjmm(f.au)}` : '' };
+    return { mode, cle: cr.cle, nb: f.nb, eleves: f.eleves, matiere: cr.matiere, classe: courtDe(k), moment: `${JOURS_L[cr.jour]} ${hFr(hl.debut)}–${hFr(hl.fin)}`, sem, au: RE_DATE.test(f.au || '') ? `Jusqu’au ${jjmm(f.au)}` : '' };
   }
   let recapTimer = null;
   function fermerRecap() {
@@ -485,7 +526,7 @@ export function creerEstimation(ctx) {
     const r = S.recap, fait = r.mode === 'fait', retirer = r.mode === 'retirer';
     return `<div class="e6-ov" data-e="fond-recap"><div class="e6-feuille e6-rc${fait ? ' fait' : ''}" role="${fait ? 'status' : 'alertdialog'}" aria-modal="${fait ? 'false' : 'true'}" aria-labelledby="r-titre"${fait ? ' data-e="fond-recap"' : ''}>
       <h2 id="r-titre" tabindex="-1">${fait ? '✓ Enregistré' : retirer ? 'Vous retirez l’estimation de :' : 'Vous confirmez ?'}</h2>
-      ${retirer ? '' : `<p class="e6-rc-nb">${esc(r.nb)} AESH</p>`}
+      ${retirer ? '' : `<p class="e6-rc-nb">${esc(r.nb)} AESH</p>${r.eleves != null ? `<p class="e6-rc-l">${esc(r.eleves)} élève${r.eleves > 1 ? 's' : ''}</p>` : ''}`}
       <p class="e6-rc-m">${esc(r.matiere)} · ${esc(r.classe)}</p>
       <p class="e6-rc-l">${esc(r.moment)}</p>${r.sem ? `<p class="e6-rc-l">${esc(r.sem)}</p>` : ''}${r.au ? `<p class="e6-rc-l">${esc(r.au)}</p>` : ''}
       ${fait ? '' : `<div class="e6-actions"><button type="button" class="e6-btn sec" id="r-non" data-e="recap-non" ${S.envoi ? 'disabled' : ''}>${retirer ? 'Annuler' : 'Modifier'}</button><button type="button" class="e6-btn" id="r-oui" data-e="recap-oui" ${S.envoi ? 'disabled' : ''}>${S.envoi ? 'Enregistrement…' : retirer ? 'Retirer' : 'Confirmer'}</button></div>`}
@@ -523,7 +564,7 @@ export function creerEstimation(ctx) {
     /* Cours d'un collègue : rien de sa réponse n'est repris (ni nombre, ni période, ni semaines, ni horaire). */
     const d = estMien(k, cr) ? docDe(k, cr) : null, hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
     S.sel = cle;
-    S.f = { nb: d ? d.nb : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
+    S.f = { nb: d ? d.nb : null, eleves: d && Number.isInteger(d.eleves) ? d.eleves : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
       A: cr.parite ? cr.parite === 'A' : (d ? d.semaines !== 'B' : true), B: cr.parite ? cr.parite === 'B' : (d ? d.semaines !== 'A' : true) };
     if (!S.navFeuille) { S.navFeuille = true; pousser(); }
     S.focus = S.f.nb != null ? 'nb-' + S.f.nb : 'f-titre'; dessiner();
@@ -544,9 +585,14 @@ export function creerEstimation(ctx) {
       nb: statut === 'retire' ? (prec ? prec.nb : 0) : f.nb, au: RE_DATE.test(f.au || '') && f.au >= c.periode.debut && f.au <= c.periode.fin ? f.au : c.periode.fin,
       semaines: cr.parite || !c.avecParite || (f.A && f.B) ? 'toutes' : (f.A ? 'A' : 'B'), hDebut: hl.debut, hFin: hl.fin,
       statut, version: ((prec && prec.version) || 0) + 1, majLe: maintenant, source: 'estimation-aesh' };
+    if (statut !== 'retire' && Number.isInteger(f.eleves) && f.eleves > 0) doc.eleves = f.eleves;
     S.envoi = true; dessiner();
     /* L'écriture peut aboutir après le délai d'attente : elle est alors retenue sur l'appareil quand elle arrive. */
-    const envoi = Promise.resolve().then(() => FS.setDoc(FS.doc(db, COL, id), doc)).then(() => enregistreIci(k, id, doc));
+    const envoi = Promise.resolve().then(() => FS.setDoc(FS.doc(db, COL, id), doc)).catch(e => {
+      /* Règle Firestore pas encore mise à jour pour « eleves » : on enregistre l'essentiel sans ce champ. */
+      if ('eleves' in doc && /permission|insufficient/i.test(String(e && (e.code || e.message)))) { delete doc.eleves; return FS.setDoc(FS.doc(db, COL, id), doc); }
+      throw e;
+    }).then(() => enregistreIci(k, id, doc));
     envoi.catch(() => { });
     try {
       await Promise.race([envoi, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), { code: 'delai' })), 15000))]);
@@ -571,7 +617,7 @@ export function creerEstimation(ctx) {
       if (a === 'fond') { if (ev.target === b && !S.envoi) { S.focus = 'cr-' + slug(S.sel); fermerFeuille(); dessiner(); } return; }
       if (a === 'fond-mot') { if (ev.target === b && !S.envoi) { S.motEdit = null; S.focus = 'e6-mot'; dessiner(); } return; }
       if (a === 'fond-valid') { if (ev.target === b) { S.valid = null; dessiner(); } return; }
-      if (a === 'retour') { if (S.ecran === 'edt') aller('classe'); else if (S.ecran === 'classe') aller('filiere'); else retourAccueil && retourAccueil(); return; }
+      if (a === 'retour') { if (S.ecran === 'edt') aller('classe'); else if (S.ecran === 'classe' && !(FORCEES && FORCEES.length === 1)) aller('filiere'); else retourAccueil && retourAccueil(); return; }
       if (a === 'accueil') { retourAccueil && retourAccueil(); return; }
       if (a === 'reessayer') { S.etat = 'chargement'; S.ecoute = false; if (S.unsub) try { S.unsub(); } catch (e) { } S.unsub = null; ecouter(); dessiner(); return; }
       if (a === 'fil') return aller('classe', { fil: v });
@@ -583,6 +629,7 @@ export function creerEstimation(ctx) {
       if (a === 'sem') { S.sem = v; S.focus = b.id; dessiner(); return; }
       if (a === 'cours') return ouvrir(v);
       if (a === 'nb') { S.f.nb = Number(v); S.focus = b.id; dessiner(); return; }
+      if (a === 'eleves') { const n = S.f.eleves == null ? (Number(v) > 0 ? 1 : null) : S.f.eleves + Number(v); S.f.eleves = n == null || n < 1 ? null : Math.min(40, n); S.focus = b.id; dessiner(); return; }
       if (a === 'ab') { S.f[v] = !S.f[v]; S.focus = b.id; dessiner(); return; }
       if (a === 'mod-per') { S.f.modPer = true; S.focus = 'f-au'; dessiner(); return; }
       if (a === 'mod-h') { S.f.modH = true; S.focus = 'f-hd'; dessiner(); return; }

@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0f766e">
-<title>Besoins d’accompagnement des élèves — pôle PSR / MELEC</title>
+<title>Besoins d’accompagnement des élèves</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════════
-   Demandes AESH — pôle PSR / MELEC (page en ligne, enseignants)
+   Besoins d’accompagnement des élèves — toutes filières du lycée (page en ligne, enseignants)
+   ?filiere=psr-melec | agora | capa | mda : l'enseignant arrive directement dans sa filière et ne voit qu'elle.
 
    Lit   : referentiel_<année>, besoins_<année>, et toutes les demandes
            et déclarations de l'année (en direct).
@@ -326,7 +327,7 @@ section[aria-labelledby="h-estimation"],section[aria-labelledby="h-ponctuel"]{ma
 <a class="evitement" href="#vue">Aller au contenu</a>
 <header class="barre">
   <div class="barre-in">
-    <div class="marque"><b>Besoins d’accompagnement · pôle PSR / MELEC</b><a class="retour" href="../">← Portail coordination</a></div>
+    <div class="marque"><b id="marque-titre">Besoins d’accompagnement</b><a class="retour" href="../">← Portail coordination</a></div>
     <nav aria-label="Besoins d’accompagnement des élèves">
       <button type="button" class="lien-nav" data-action="accueil" id="nav-accueil">Accueil</button>
       <button type="button" class="lien-nav" data-action="estimation" id="nav-estimation">Estimation des besoins</button>
@@ -335,7 +336,7 @@ section[aria-labelledby="h-estimation"],section[aria-labelledby="h-ponctuel"]{ma
   </div>
 </header>
 <main id="vue" tabindex="-1">
-  <h1>Besoins d’accompagnement des élèves — pôle PSR / MELEC</h1>
+  <h1>Besoins d’accompagnement des élèves</h1>
   <p style="margin-top:12px" id="chargement">Chargement…</p>
   <noscript><p class="message err" style="margin-top:12px">Cette page a besoin de JavaScript pour fonctionner.</p></noscript>
 </main>
@@ -359,6 +360,9 @@ function anneeScolaire(d = new Date()){
   return d.getMonth() >= 7 ? `${y}-${y+1}` : `${y-1}-${y}`;
 }
 const ANNEE = anneeScolaire();
+/* Lien envoyé par un référent de pôle : ?filiere=… (17/09/2026). */
+const FILIERE = (new URLSearchParams(location.search).get('filiere') || '').toLowerCase().replace(/[^a-z-]/g, '');
+const NOM_FILIERE = ({ 'psr-melec': 'PSR · MELEC', agora: 'AGOrA', capa: 'CAPa', mda: 'Métiers d’Art' })[FILIERE] || '';
 
 let FS = null, db = null, erreurChargement = null;
 try {
@@ -480,7 +484,7 @@ const PONCTUEL_ACTIF = !!window.__PONCTUEL_ACTIF__ || new URLSearchParams(locati
 const K_HUMEUR = 'besoins-accompagnement-humeur-vue';
 const humeurAVoir = () => { if (window.__SANS_HUMEUR__) return false; try { return !sessionStorage.getItem(K_HUMEUR); } catch(e){ return false; } };
 const S = {
-  ecran: humeurAVoir() ? 'humeur' : 'accueil',
+  ecran: humeurAVoir() ? 'humeur' : NOM_FILIERE ? 'estimation' : 'accueil',
   refEtat:'chargement', ref:null, refCache:false,
   besoins:{}, besoinsEtat:'chargement',
   docs:[], docsEtat:'chargement', unsub:null,
@@ -724,7 +728,7 @@ function rendre(){
   if (S.ecran === 'accueil') $('#nav-accueil').setAttribute('aria-current','page');
   if (S.ecran === 'pole') $('#nav-pole').setAttribute('aria-current','page');
   const titres = {accueil:'Besoins d’accompagnement des élèves', estimation:'Estimation des besoins d’accompagnement', ponctuel:'Besoin ponctuel', regulier:'Mes cours de l’année', pole:'Besoins ponctuels du pôle', envoye:'Envoyé'};
-  document.title = `${titres[S.ecran] || 'Besoins d’accompagnement des élèves'} — pôle PSR / MELEC`;
+  document.title = `${titres[S.ecran] || 'Besoins d’accompagnement des élèves'}${NOM_FILIERE ? ' — ' + NOM_FILIERE : ''}`;
   if (S.ecran === 'estimation') return;
   if (S.focus){
     const el = document.getElementById(S.focus); S.focus = null;
@@ -741,8 +745,8 @@ function monterEstimation(){
   const hote = $('#estimation-hote'); if (!hote) return;
   if (EST){ EST.monter(hote); return; }
   if (EST_CHARGEMENT) return;
-  EST_CHARGEMENT = import('./estimation.js?v=2026r8').then(m => {
-    EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, retourAccueil: () => actions.accueil(),
+  EST_CHARGEMENT = import('./estimation.js?v=2026r9').then(m => {
+    EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, filiere:FILIERE, retourAccueil: () => actions.accueil(),
       pousser: est => histo('estimation', est), remplacer: est => histo('estimation', est, true) });
     const h = $('#estimation-hote'); if (h) EST.monter(h);
   }).catch(() => {
@@ -751,7 +755,7 @@ function monterEstimation(){
   });
 }
 function htmlErreurChargement(){
-  return `<div class="pile"><h1 id="titre-ecran" tabindex="-1">Besoins d’accompagnement des élèves — pôle PSR / MELEC</h1>
+  return `<div class="pile"><h1 id="titre-ecran" tabindex="-1">Besoins d’accompagnement des élèves</h1>
     <div class="message err" role="alert"><p><strong>Pas de connexion au serveur.</strong> La page n’a pas pu charger ses outils en ligne. Vérifiez le réseau, puis rechargez la page.</p>
     <p><button type="button" class="btn primaire petit" data-action="recharger">Recharger la page</button></p></div></div>`;
 }
@@ -1457,7 +1461,7 @@ const actions = {
     try { sessionStorage.setItem(K_HUMEUR, '1'); } catch(e){}
     const mot = $('#humeur-mot'), v = el && el.dataset ? el.dataset.humeur : '';
     if (mot && v) mot.textContent = 'Merci.';
-    setTimeout(() => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; rendre(); }, v ? 900 : 0);
+    setTimeout(() => { if (NOM_FILIERE) { S.ecran = 'estimation'; histo('estimation', null, true); rendre(); return; } S.ecran = 'accueil'; S.focus = 'titre-ecran'; rendre(); }, v ? 900 : 0);
   },
   'accueil': () => { S.ecran = 'accueil'; S.focus = 'titre-ecran'; S.messageReessai = brouillons().length ? S.messageReessai : ''; histo('accueil'); rendre(); },
   'pole': () => { S.ecran = 'pole'; S.focus = 'titre-ecran'; histo('pole'); ecouterDemandes(); rendre(); },
@@ -1564,7 +1568,8 @@ else {
     await chargerPeriodeEstimation(); rendre();
   }
 }
-try { if (!history.state) history.replaceState({ ecran:'accueil', est:null }, ''); } catch(e){}
+try { if (!history.state) history.replaceState({ ecran: S.ecran === 'estimation' ? 'estimation' : 'accueil', est:null }, ''); } catch(e){}
+if (NOM_FILIERE) { const m = document.getElementById('marque-titre'); if (m) m.textContent = `Besoins d’accompagnement · ${NOM_FILIERE}`; }
 window.__DEMANDES_AESH_PRET__ = true;
 </script>
 </body>
