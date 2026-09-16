@@ -3,7 +3,7 @@
 Page en ligne destinée aux enseignants du pôle. Elle permet de demander des AESH pour une date précise (test de positionnement, CCF, évaluation, sortie, autre) ou de déclarer les besoins réguliers de ses cours de l'année. La coordination répond depuis l'Atelier (onglet « Aide humaine »).
 
 - Destination prévue : `coordination-pedagogie/demandes-aesh/`.
-- Version actuelle : **staging**. Rien n'est publié, rien n'est écrit dans Firebase.
+- État : **publiée** (GitHub Pages). L'estimation des besoins est en service ; les « Besoins ponctuels » sont désactivés (« Bientôt ») et ne chargent aucune donnée.
 - Contrat de référence : `work/aide-humaine-v1/CONTRAT.md`, §1 et §3.
 
 ## Fichiers
@@ -15,7 +15,7 @@ Page en ligne destinée aux enseignants du pôle. Elle permet de demander des AE
 | `banc.html` | Banc de test : exploration manuelle avec options et tests automatiques. |
 | `LISEZMOI.md` | Ce document. |
 
-**En production, seul `index.html` est utile.** `shim-firestore.js` et `banc.html` n'ont pas besoin d'être déployés.
+**En production : `index.html` et `estimation.js`.** `shim-firestore.js` et `banc.html` ne servent qu'aux tests.
 
 ## Parcours
 
@@ -100,7 +100,7 @@ Tous les champs texte sont débarrassés des caractères de contrôle et tronqu�
 
 ## Règle Firestore
 
-Brahim publie lui-même cette règle. Voici la version définitive, reprise de `work/aide-humaine-v1/regle-ajout-demandes-aesh.rules` (contrat §1.6) :
+La coordination publie elle-même cette règle. Voici la version définitive, reprise de `work/aide-humaine-v1/regle-ajout-demandes-aesh.rules` (contrat §1.6) :
 
 ```
 match /coordination_demandes_aesh/{docId} {
@@ -231,7 +231,7 @@ python3 -m http.server 8790 --bind 127.0.0.1
 
 ### v3 « Besoins d'accompagnement des élèves » (15/09/2026)
 
-Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moyen humain pour y répondre.
+Choix de la coordination : partir des **besoins des élèves**, les AESH étant le moyen humain pour y répondre.
 - **Tuile du portail** (`data.js`) : « Besoins d'accompagnement ».
 - **Accueil refait** :
   - titre « Besoins d'accompagnement des élèves », phrase d'introduction, public concerné, cadre RGPD ;
@@ -266,7 +266,24 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
   Plus la consultation seule par un collègue. Résultat : **556 vérifications, 0 échec**. « Précédent » a aussi été vérifié avec de vrais clics.
 - **Limite connue** : Chrome ignore, au retour arrière, les étapes créées sans clic réel (protection anti-piège). Avec de vrais clics d'enseignant, le retour se fait étape par étape (vérifié).
 
-### v8 « chacun son besoin, confirmation » (15/09/2026, validée par Brahim)
+### v9 « après audit » (16/09/2026)
+
+Corrections issues d'un audit indépendant (hors sécurité Firebase, traitée à part).
+- **Aucun nom** dans les fichiers publiés (commentaires et documentation compris).
+- **Carte « Moyens humains »** : anneau d'une seule couleur (pourcentage, heures estimées et heures du pôle au centre), matières cochées « ✓ » sans heures par matière : on ne peut plus déduire la réponse d'un collègue. Une matière estimée à 0 AESH compte comme estimée.
+- **« vous »** : cours enregistré depuis cet appareil **et** pas modifié depuis (même version). Si un collègue le modifie, il repasse en « collègue ✓ ».
+- **Cours d'un collègue** : la fiche repart des valeurs par défaut (ni nombre, ni période, ni semaines, ni horaire du collègue).
+- **Validation de la classe** : sans cours estimé depuis l'appareil, « Aucun cours estimé depuis cet appareil » et « Valider » inactif ; sinon « ✓ Semaines A et B vérifiées pour les matières que vous avez estimées ».
+- **Fenêtres** : fond inerte, la touche Tab reste dans la fenêtre, le focus revient au cours à la fermeture.
+- **Enregistrement** : le récapitulatif « ✓ Enregistré » reste complet même après un retour navigateur ; délai dépassé = « Pas de réponse du serveur. Vérifiez dans un instant… » (plus de « Non enregistré » trompeur) et l'enregistrement arrivé en retard est retenu sur l'appareil.
+- **Date** : une date hors période bloque « Enregistrer » avec un message.
+- **Besoins ponctuels désactivés** : la page ne charge plus les demandes du pôle, le référentiel ni les besoins par code élève, et vide l'ancien cache de l'appareil.
+- **Texte ≥ 16 px** sur toute la page (en-tête compris) ; import `estimation.js?v=2026r8`.
+- **Atelier** : conflits calculés sur les vraies semaines (dates de fin, jours fériés, PFMP), regroupés avec leurs dates ; « plafond si toute l'équipe est présente » ; colonne « Estimations » par discipline qui compte les documents `cours` ; le cadre publié ne contient plus le nombre d'AESH placés par cours.
+- **« Un mot pour la coordination »** : sous la liste des classes, une ligne discrète ouvre une petite fenêtre (texte libre, 600 caractères, « sans nom d'élève »). Un mot par appareil et par période, modifiable. Les collègues ne le voient pas : la page ne garde que le mot écrit sur cet appareil. Document `mot_<début de période>_<identifiant d'appareil>` (`type`, `annee`, `periode`, `pole`, `texte`, `majLe`, `source`) ; **la règle Firestore doit être mise à jour** avant la mise en ligne. Côté Atelier : carte « Mots des enseignants » (date, pôle, texte, alerte « nom possible »).
+- **Tests** : banc réel 390/0 (5 classes, ordinateur et téléphone) ; Atelier de test 47/47 ; calcul OK.
+
+### v8 « chacun son besoin, confirmation » (15/09/2026)
 
 - **Cours d'un collègue** : il affiche « collègue ✓ », sans le nombre d'AESH, à l'écran comme dans le libellé lu à voix haute. Si l'enseignant le touche : « Déjà estimé par un collègue. Votre réponse remplacera la sienne. », aucun nombre présélectionné, pas de « Retirer ». Chaque enseignant indique le besoin brut de son propre cours, sans voir ce qui est demandé ailleurs ni au même moment.
 - **Carte « Moyens humains »** : « Heures AESH du pôle : 100 h / sem. · estimation, variable ». Le pourcentage passe en rouge au-delà de 100 %.
@@ -276,7 +293,7 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
 - **Données en ligne** : collection vidée le 15/09 (tests), puis cadre republié. L'emploi du temps publié est identique aux PDF des 5 classes.
 - **Tests** : banc `banc/reel/` 300/0 (5 classes, ordinateur et téléphone) ; Atelier 43/43 (conflits, carte, rien dans le cadre publié) ; calcul OK ; conflits recalculés minute par minute sur le vrai emploi du temps : identiques.
 
-### v7 (15/09/2026, maquette validée par Brahim)
+### v7 (15/09/2026, maquette validée)
 
 - **Entrée** : « Aujourd’hui, comment vous sentez-vous ? » (5 émoticônes ou « Passer »), une fois par visite, rien n’est enregistré.
 - **Accueil** : grande carte « Estimer les besoins d’accompagnement » (semestre), carte « Besoins ponctuels · Bientôt » non cliquable.
@@ -292,7 +309,7 @@ Demande de Brahim : partir des **besoins des élèves**, les AESH étant le moye
   - vérification automatique : pour les matières estimées depuis cet appareil, les cours d’une seule semaine pas encore estimés sont signalés (« Pas encore confirmé : Maths-Sciences, mercredi 11h30 (semaine B) »), avec « Compléter » ou « Valider ».
 - **Fin** : 🌿 « Merci ! Vos estimations sont enregistrées. Grâce à vous, l’accompagnement pourra être organisé au plus près des besoins des élèves. »
 - **Appareil** : `estimation-aesh-v7` (cours enregistrés ici et classes validées, par période).
-- **Retouches après test de Brahim** :
+- **Retouches après test de la coordination** :
   - écran d'entrée : émoticônes seules ;
   - carte « Moyens humains » : toutes les matières du pôle, « ✓ » devant celles déjà estimées (avec leurs heures), les autres sans mention, et « N matières sur N déjà estimées » ;
   - emploi du temps : mention discrète « vous » ou « collègue » sur chaque cours estimé (d'après les cours enregistrés depuis cet appareil), pastille en pointillés pour un collègue.

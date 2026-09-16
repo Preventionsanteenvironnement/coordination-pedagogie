@@ -141,12 +141,12 @@ function normaliserCadre(d) {
     volumes: { PSR: Number.isFinite(v.PSR) ? v.PSR : null, MELEC: Number.isFinite(v.MELEC) ? v.MELEC : null } };
 }
 
-/* ═════════ v6 « par l'emploi du temps des élèves » (15/09/2026, validée par Brahim) ═════════
+/* ═════════ v6 « par l'emploi du temps des élèves » (15/09/2026) ═════════
    Filière → classe → emploi du temps de la classe → le cours touché → nombre d'AESH → Enregistrer.
    On estime le COURS tel qu'il est écrit dans l'emploi du temps, pas l'enseignant : un document par cours
    et par période (cours_<début>_<classe>_<empreinte>), partagé par toute l'équipe, enregistré tout de suite.
    Chaque enregistrement laisse une copie figée (archive_…_v<n>). Aucun nom. */
-/* ═════════ v7 « par l'emploi du temps des élèves » (15/09/2026, maquette validée par Brahim) ═════════
+/* ═════════ v7 « par l'emploi du temps des élèves » (15/09/2026, maquette validée) ═════════
    Filière → classe (anneau des moyens humains) → emploi du temps coloré par matière → cours → « Combien d'AESH ? »
    → Enregistrer (tout de suite, partagé) → Valider la classe (vérification des semaines A/B) → J'ai terminé.
    Un document par cours et par période (cours_<début>_<classe>_<empreinte>) + archive_…_v<n>. Aucun nom. */
@@ -169,15 +169,23 @@ const CSS = `
 .e6-respire b{font-size:1.4rem}.e6-respire p{color:var(--muted);margin:6px 0 0}
 .e6-moyens{background:var(--card);border:1px solid var(--line-2);border-radius:20px;padding:16px 18px;margin:0 0 18px}
 .e6-moyens .haut{display:flex;justify-content:space-between;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
-.e6-moyens .corps{display:flex;gap:16px;align-items:center;margin-top:10px}
-.e6-anneau{flex:none;width:104px;height:104px;border-radius:50%;display:grid;place-items:center}
-.e6-anneau i{width:70px;height:70px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:1.1rem;color:var(--ink)}
-.e6-leg{display:flex;flex-direction:column;gap:3px;margin-top:6px}
-.e6-leg span{display:flex;align-items:center;gap:6px}.e6-leg i{flex:none;width:10px;height:10px;border-radius:3px;background:var(--c)}
-.e6-leg em{font-style:normal;color:var(--muted);margin-left:auto;padding-left:8px;font-variant-numeric:tabular-nums}
-.e6-mats{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-2)}
-.e6-mats .pas{color:var(--muted)}
-.e6-mats .pas{padding-left:16px}
+.e6-moyens .corps{display:flex;gap:14px 20px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.e6-anneau{position:relative;flex:none;width:156px;height:156px;margin:0 auto}
+.e6-anneau svg{display:block;width:100%;height:100%}
+.e6-anneau circle{fill:none;stroke-width:11}
+.e6-anneau .fond{stroke:var(--line-2)}
+.e6-anneau .val{stroke:var(--accent);stroke-linecap:round;transition:stroke-dasharray .7s ease}
+.e6-anneau.plus .val{stroke:var(--err-ink)}
+.e6-anneau .dedans{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.2}
+.e6-anneau .dedans b{font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.e6-anneau.plus .dedans b{color:var(--err-ink)}
+.e6-anneau .dedans span{font-size:1rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.e6-moyens .txt{flex:1;min-width:150px}.e6-moyens .txt .est{font-size:1.1rem}
+.e6-mats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-2)}
+.e6-mats span{display:inline-flex;align-items:center;border-radius:999px;padding:5px 12px;font-size:1rem;line-height:1.3}
+.e6-mats .fait{background:var(--ok-bg);color:var(--ok-ink);font-weight:650}
+.e6-mats .pas{border:1.5px dashed var(--line);color:var(--muted)}
+@media(prefers-reduced-motion:reduce){.e6-anneau .val{transition:none}}
 .e6-qui{display:inline;font-weight:650;font-size:1rem;background:none;border:0;padding:0}
 .e6-qui::after{content:" · ";color:var(--muted);font-weight:400}
 .e6-qui.vous{color:var(--accent-d)}
@@ -226,6 +234,9 @@ const CSS = `
 .e6-fin .grand{font-size:64px;line-height:1.1;animation:e6pop .6s ease}
 @keyframes e6pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
 .e6-fin p{font-size:1.1rem;color:var(--ink-2);max-width:32ch;margin:10px auto}
+.e6-mot{display:block;width:100%;text-align:left;margin:16px 0 0;padding:12px 2px;min-height:44px;border:0;border-top:1px solid var(--line-2);background:none;font:inherit;font-size:1rem;color:var(--muted);cursor:pointer}
+.e6-mot:hover{color:var(--accent-d)}
+.e6-feuille textarea{width:100%;font:inherit;font-size:1rem;min-height:120px;padding:10px 12px;margin-top:10px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink)}
 .e6-toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);z-index:70;background:#10232a;color:#fff;border-radius:999px;padding:10px 18px;font-weight:650;max-width:92vw}
 .e6-toast.err{background:#8a1c1c}
 .e6-rc{text-align:center;padding-top:24px}
@@ -268,21 +279,29 @@ export function coursOublies(classe, estimesIci, estimeDe) {
 export function creerEstimation(ctx) {
   const { FS, db, esc, annee, annonce, retourAccueil, pousser: pousserNav } = ctx;
   const S = { etat: 'chargement', cadre: null, docs: new Map(), ecran: 'filiere', fil: null, classe: null, sem: 'A', sel: null, f: null,
-    recap: null, flash: null, valid: null, toast: '', toastErr: false, hote: null, focus: null, envoi: false, ignorerPop: 0, navFeuille: false, unsub: null, ecoute: false };
+    recap: null, flash: null, valid: null, mot: null, motEdit: null, toast: '', toastErr: false, hote: null, focus: null, envoi: false, ignorerPop: 0, navFeuille: false, unsub: null, ecoute: false };
   if (!document.getElementById('e6-styles')) { const st = document.createElement('style'); st.id = 'e6-styles'; st.textContent = CSS; document.head.appendChild(st); }
 
   /* Mémoire de l'appareil, par période : cours enregistrés ici (pour la vérification) et classes validées. */
-  const app = () => { try { const v = JSON.parse(localStorage.getItem(K_APPAREIL) || 'null'); if (v && v.annee === annee && cadre() && v.periode === cadre().periode.debut) return v; } catch (e) { } return { annee, periode: cadre() ? cadre().periode.debut : '', miens: [], valides: {} }; };
+  const app = () => {
+    let v = null; try { v = JSON.parse(localStorage.getItem(K_APPAREIL) || 'null'); } catch (e) { }
+    if (!(v && v.annee === annee && cadre() && v.periode === cadre().periode.debut)) v = { annee, periode: cadre() ? cadre().periode.debut : '', miens: [], valides: {} };
+    if (!Array.isArray(v.miens)) v.miens = []; if (!v.valides || typeof v.valides !== 'object') v.valides = {}; if (!v.versions || typeof v.versions !== 'object') v.versions = {};
+    return v;
+  };
   const appEcrit = v => { try { localStorage.setItem(K_APPAREIL, JSON.stringify(v)); } catch (e) { } };
 
   function ecouter() {
     if (S.ecoute) return; S.ecoute = true;
     try {
       S.unsub = FS.onSnapshot(FS.query(FS.collection(db, COL), FS.where('annee', '==', annee)), snap => {
-        let brut = null; const docs = [];
-        snap.forEach(d => { const x = d.data() || {}, id = x.id || d.id; if (x.type === 'cadre' && id === 'cadre_' + annee) brut = x; else if (x.type === 'cours') docs.push({ ...x, id }); });
+        let brut = null; const docs = [], mots = [];
+        snap.forEach(d => { const x = d.data() || {}, id = x.id || d.id; if (x.type === 'cadre' && id === 'cadre_' + annee) brut = x; else if (x.type === 'cours') docs.push({ ...x, id }); else if (x.type === 'mot') mots.push({ id, texte: x.texte, periode: x.periode, majLe: x.majLe }); });
         const c = normaliserCadre(brut);
         S.cadre = c; S.etat = c ? 'ok' : 'absent';
+        /* Un seul mot est retenu : celui écrit depuis cet appareil. Ceux des collègues ne sont ni gardés ni affichés. */
+        const mid = c ? app().motId : '';
+        S.mot = mid ? (mots.find(m => m.id === mid && m.periode && m.periode.debut === c.periode.debut) || null) : null;
         S.docs = new Map(c ? docs.filter(d => d.periode && d.periode.debut === c.periode.debut).map(d => [d.id, d]) : []);
         dessiner(true);
       }, err => { S.ecoute = false; S.unsub = null; S.etat = /permission|insufficient/i.test(String(err && (err.code || err.message))) ? 'refus' : 'horsligne'; dessiner(); });
@@ -294,6 +313,8 @@ export function creerEstimation(ctx) {
   const courtDe = k => COURT[k.nom] || k.court || k.nom;
   const idDe = (k, cr) => idCours(cadre().periode.debut, k.nom, cr.cle);
   const docDe = (k, cr) => { const d = S.docs.get(idDe(k, cr)); return d && d.statut === 'active' ? d : null; };
+  /* « vous » : cours enregistré depuis cet appareil et que personne n'a modifié depuis (même version). */
+  const estMien = (k, cr, a) => { const d = docDe(k, cr); if (!d) return false; const ap = a || app(), id = idDe(k, cr), v = ap.versions[id]; return v != null ? v === d.version : ap.miens.includes(id); };
   const semaineVisible = cr => !cadre().avecParite || !cr.parite || cr.parite === S.sem;
   const jjmm = iso => RE_DATE.test(String(iso || '').slice(0, 10)) ? `${String(iso).slice(8, 10)}/${String(iso).slice(5, 7)}` : '';
   const pousser = () => { try { pousserNav && pousserNav({ ecran: S.ecran, fil: S.fil, classe: S.classe, sem: S.sem }); } catch (e) { } };
@@ -304,21 +325,22 @@ export function creerEstimation(ctx) {
   };
   let toastTimer = null;
   const toast = (t, err) => { S.toast = t; S.toastErr = !!err; dessiner(); clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = ''; dessiner(); }, err ? 4000 : 1800); annonce && annonce(t); };
-  /* Heures par semaine (moyenne sur la période) estimées pour un pôle, par matière. */
+  /* Heures par semaine (moyenne sur la période) estimées pour un pôle, et matières déjà estimées (0 AESH compris). */
   function moyensPole(pole) {
-    const c = cadre(), nbS = Math.max(1, semainesDeCours(c)), m = new Map(); let total = 0;
+    const c = cadre(), nbS = Math.max(1, semainesDeCours(c)), faites = new Set(); let total = 0;
     c.classes.filter(k => k.pole === pole).forEach(k => k.creneaux.forEach(cr => {
       const d = docDe(k, cr); if (!d) return;
-      const h = heuresLigne(c, k, cr, d) / nbS; if (!(h > 0)) return; total += h;
-      const f = familleMatiere(cr.matiere), o = m.get(f) || { nom: cr.matiere, h: 0, c: couleurMatiere(cr.matiere)[0] }; o.h += h; m.set(f, o);
+      faites.add(familleMatiere(cr.matiere));
+      const h = heuresLigne(c, k, cr, d) / nbS; if (h > 0) total += h;
     }));
-    return { total, mats: [...m.values()].sort((a, b) => b.h - a.h) };
+    return { total, faites };
   }
 
   function dessiner(depuisDonnees) {
     const h = S.hote; if (!h || !h.isConnected) return;
     const actif = document.activeElement, idActif = actif && h.contains(actif) ? actif.id : null, y = window.scrollY;
-    let html = `<div class="e6">`;
+    const modale = !!((S.sel && S.f) || S.valid || S.recap || S.motEdit != null);
+    let html = `<div class="e6"${modale ? ' inert' : ''}>`;
     if (S.etat !== 'ok') html += blocEtat();
     else if (S.ecran === 'fin') html += ecranFin();
     else if (S.ecran === 'classe' && S.fil) html += ecranClasses();
@@ -328,6 +350,7 @@ export function creerEstimation(ctx) {
     if (S.sel && S.f && !S.recap) html += feuille();
     if (S.valid) html += feuilleValidation();
     if (S.recap) html += fenetreRecap();
+    if (S.motEdit != null) html += feuilleMot();
     if (S.toast) html += `<div class="e6-toast ${S.toastErr ? 'err' : ''}" role="status">${esc(S.toast)}</div>`;
     h.innerHTML = html;
     lier();
@@ -348,21 +371,23 @@ export function creerEstimation(ctx) {
       ${FILIERES.filter(([p]) => c.classes.some(k => k.pole === p)).map(([p, t, s]) => `<button type="button" class="e6-gros" id="fil-${p}" data-e="fil" data-v="${p}"><span class="x"><b>${t}</b><span class="s">${s}</span></span><span class="fl" aria-hidden="true">›</span></button>`).join('')}`;
   }
   function carteMoyens(pole) {
-    const c = cadre(), vol = c.volumes[pole], fil = FILIERES.find(f => f[0] === pole), { total, mats } = moyensPole(pole);
+    const c = cadre(), vol = c.volumes[pole], fil = FILIERES.find(f => f[0] === pole), { total, faites } = moyensPole(pole);
     const pct = vol ? Math.round(total / vol * 100) : null;
-    let acc = 0; const seg = vol ? mats.map(x => { const a = acc, b = Math.min(100, acc + x.h / vol * 100); acc = b; return `${x.c} ${a}% ${b}%`; }).join(',') : '';
-    /* Toutes les matières du pôle : déjà estimées (✓, heures) ou pas encore — pour voir que d'autres n'ont pas encore rempli. */
+    /* Anneau d'une seule couleur, sans heures par matière : on ne peut pas en déduire la réponse d'un collègue. */
     const toutes = new Map();
     c.classes.filter(k => k.pole === pole).forEach(k => k.creneaux.forEach(cr => { const f = familleMatiere(cr.matiere); if (!toutes.has(f)) toutes.set(f, cr.matiere); }));
-    const hDe = new Map(mats.map(x => [familleMatiere(x.nom), x]));
-    const faites = [...toutes.keys()].filter(f => hDe.has(f)), reste = [...toutes.keys()].filter(f => !hDe.has(f));
-    const puces = faites.sort((a, b) => hDe.get(b).h - hDe.get(a).h).map(f => `<span class="fait" style="--c:${hDe.get(f).c}"><i></i>✓ ${esc(toutes.get(f))}<em>${esc(fmtH(hDe.get(f).h))}</em></span>`).join('')
-      + reste.map(f => `<span class="pas">${esc(toutes.get(f))}</span>`).join('');
+    const fait = [...toutes.keys()].filter(f => faites.has(f)), reste = [...toutes.keys()].filter(f => !faites.has(f));
+    const puces = fait.map(f => `<span class="fait">✓ ${esc(toutes.get(f))}</span>`).join('') + reste.map(f => `<span class="pas">${esc(toutes.get(f))}</span>`).join('');
+    const L = 2 * Math.PI * 52, part = vol ? Math.min(1, total / vol) : 0;
+    const anneau = vol ? `<div class="e6-anneau${pct > 100 ? ' plus' : ''}" role="img" aria-label="${esc(`${pct} % des heures AESH du pôle : ${fmtH(total)} estimées sur ${fmtH(vol)} par semaine`)}">
+        <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="fond" cx="60" cy="60" r="52"/>${part > 0 ? `<circle class="val" cx="60" cy="60" r="52" transform="rotate(-90 60 60)" stroke-dasharray="${(part * L).toFixed(1)} ${L.toFixed(1)}"/>` : ''}</svg>
+        <span class="dedans" aria-hidden="true"><b>${pct} %</b><span>${esc(fmtH(total))}</span><span>sur ${esc(fmtH(vol))}</span></span></div>` : '';
     return `<section class="e6-moyens" aria-label="Moyens humains, ${esc(fil ? fil[1] : pole)}">
       <div class="haut"><b>Moyens humains · ${esc(fil ? fil[1] : pole)}</b><span class="e6-info" style="margin:0">Heures AESH du pôle : <b style="color:var(--ink)">${vol != null ? esc(fmtH(vol)) : '—'}</b> / sem. · estimation, variable</span></div>
-      <div class="corps">${vol ? `<div class="e6-anneau" style="background:conic-gradient(${seg ? seg + ',' : ''}var(--card-2) ${acc}% 100%)"><i${pct > 100 ? ' style="color:var(--err-ink)"' : ''}>${pct} %</i></div>` : ''}
-        <div style="flex:1;min-width:0"><div>Estimation en cours : <b>${esc(fmtH(total))}</b> / sem.</div>
-          <div class="e6-info" style="margin:2px 0 0"><b style="color:var(--ink)">${faites.length}</b> matière${faites.length > 1 ? 's' : ''} sur ${toutes.size} déjà estimée${faites.length > 1 ? 's' : ''}</div></div></div>
+      <div class="corps">${anneau}
+        <div class="txt"><div class="est">Estimation en cours : <b>${esc(fmtH(total))}</b> / sem.</div>
+          <div class="e6-info" style="margin:4px 0 0"><b style="color:var(--ink)">${fait.length}</b> matière${fait.length > 1 ? 's' : ''} sur ${toutes.size} déjà estimée${fait.length > 1 ? 's' : ''}</div>
+          ${pct > 100 ? `<div class="e6-info" style="margin:4px 0 0;color:var(--err-ink);font-weight:650">Au-delà des heures du pôle</div>` : ''}</div></div>
       <div class="e6-leg e6-mats">${puces}</div></section>`;
   }
   function ecranClasses() {
@@ -373,7 +398,8 @@ export function creerEstimation(ctx) {
       h += `<button type="button" class="e6-gros" id="cl-${esc(k.nom)}" data-e="classe" data-v="${esc(k.nom)}"><span class="x"><b>${esc(courtDe(k))}${a.valides[k.nom] ? '<span class="e6-okb">✓ validée</span>' : ''}</b>
         <span class="s">${k.effectif != null ? `${k.effectif} élèves · ` : ''}${n ? `${n} cours estimé${n > 1 ? 's' : ''}` : 'aucun cours estimé'}</span></span><span class="fl" aria-hidden="true">›</span></button>`;
     });
-    return h + `<div style="margin-top:22px"><button type="button" class="e6-btn sec" id="e6-terminer" data-e="terminer">J’ai terminé</button></div>`;
+    h += `<button type="button" class="e6-mot" id="e6-mot" data-e="mot">${S.mot && S.mot.texte ? '✓ Votre mot pour la coordination est enregistré · Modifier' : '✎ Un mot pour la coordination (facultatif)'}</button>`;
+    return h + `<div style="margin-top:18px"><button type="button" class="e6-btn sec" id="e6-terminer" data-e="terminer">J’ai terminé</button></div>`;
   }
   function ecranEdt() {
     const c = cadre(), k = classeDe(S.classe);
@@ -381,14 +407,14 @@ export function creerEstimation(ctx) {
     let h = barre(`${courtDe(k)}${k.effectif != null ? ` · ${k.effectif} élèves` : ''}`) + `<h1 id="titre-ecran" tabindex="-1">Emploi du temps</h1>`;
     if (c.avecParite) h += `<div class="e6-onglets" role="group" aria-label="Semaine">${['A', 'B'].map(s => `<button type="button" id="sem-${s}" data-e="sem" data-v="${s}" aria-pressed="${S.sem === s}">Semaine ${s}</button>`).join('')}</div>`;
     if (pf.length) h += `<p class="e6-info">${pf.map(p => `PFMP du ${esc(jjmm(p.debut))} au ${esc(jjmm(p.fin))}`).join(' · ')}</p>`;
-    const miens = new Set(app().miens);
+    const ap = app();
     h += `<p class="e6-legende"><span><span class="e6-qui vous">vous</span> : estimé par vous</span><span><span class="e6-qui coll">collègue</span> ✓ : par un collègue</span><span>+ : à estimer</span></p>`;
     JOURS.forEach(j => {
       const cj = k.creneaux.filter(cr => cr.jour === j && semaineVisible(cr)); if (!cj.length) return;
       h += `<h2 class="e6-jour">${JOURS_L[j]}</h2>`;
       cj.forEach(cr => {
-        /* Le nombre d'AESH demandé par un collègue n'est jamais montré (consigne de Brahim, 15/09) : seulement « ✓ ». */
-        const d = docDe(k, cr), mien = !!d && miens.has(idDe(k, cr)), [mc, mt] = couleurMatiere(cr.matiere);
+        /* Le nombre d'AESH demandé par un collègue n'est jamais montré (choix de la coordination, 15/09) : seulement « ✓ ». */
+        const d = docDe(k, cr), mien = estMien(k, cr, ap), [mc, mt] = couleurMatiere(cr.matiere);
         const cls = !d ? '' : !mien ? 'coll' : d.nb === 0 ? 'n0' : d.nb === 1 ? 'n1' : d.nb === 2 ? 'n2' : 'n3';
         const hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
         const sem = d ? (cr.parite ? `sem. ${cr.parite}` : ['A', 'B'].includes(d.semaines) ? `sem. ${d.semaines}` : (c.avecParite ? 'sem. A et B' : '')) : '';
@@ -403,15 +429,15 @@ export function creerEstimation(ctx) {
   }
   function feuilleValidation() {
     const k = classeDe(S.valid); if (!k) { S.valid = null; return ''; }
-    const a = app(), miens = new Set(a.miens);
+    const a = app(), mes = k.creneaux.filter(cr => estMien(k, cr, a));
     const nSem = s => k.creneaux.filter(cr => (!cr.parite || cr.parite === s) && docDe(k, cr)).length;
-    const oublis = coursOublies(k, cr => miens.has(idDe(k, cr)) && docDe(k, cr), cr => docDe(k, cr));
+    const oublis = mes.length ? coursOublies(k, cr => estMien(k, cr, a), cr => docDe(k, cr)) : [];
     return `<div class="e6-ov" data-e="fond-valid"><div class="e6-feuille" role="dialog" aria-modal="true" aria-labelledby="v-titre"><div class="e6-poignee" aria-hidden="true"></div>
       <h2 id="v-titre" tabindex="-1">Valider ${esc(courtDe(k))}</h2>
       <ul class="e6-recap">${cadre().avecParite ? `<li><span>Semaine A</span><b>${nSem('A')} cours</b></li><li><span>Semaine B</span><b>${nSem('B')} cours</b></li>` : `<li><span>Cours estimés</span><b>${nSem('A')}</b></li>`}</ul>
-      ${oublis.length ? `<div class="e6-verif" id="v-verif">Pas encore confirmé : ${oublis.map(cr => `<b>${esc(cr.matiere)}</b>, ${esc(JOURS_L[cr.jour].toLowerCase())} ${esc(hFr(cr.debut))} (semaine ${esc(cr.parite)})`).join(' ; ')}.</div>`
-        : `<div class="e6-verif ok" id="v-verif">✓ Semaines A et B complètes pour vos matières.</div>`}
-      <div class="e6-actions"><button type="button" class="e6-btn sec" id="v-non" data-e="valid-non">${oublis.length ? 'Compléter' : 'Retour'}</button><button type="button" class="e6-btn" id="v-oui" data-e="valid-oui">Valider</button></div></div></div>`;
+      ${!mes.length ? `<div class="e6-verif" id="v-verif">Aucun cours estimé depuis cet appareil pour cette classe.</div>` : oublis.length ? `<div class="e6-verif" id="v-verif">Pas encore confirmé : ${oublis.map(cr => `<b>${esc(cr.matiere)}</b>, ${esc(JOURS_L[cr.jour].toLowerCase())} ${esc(hFr(cr.debut))} (semaine ${esc(cr.parite)})`).join(' ; ')}.</div>`
+        : `<div class="e6-verif ok" id="v-verif">✓ Semaines A et B vérifiées pour les matières que vous avez estimées.</div>`}
+      <div class="e6-actions"><button type="button" class="e6-btn sec" id="v-non" data-e="valid-non">${oublis.length ? 'Compléter' : 'Retour'}</button><button type="button" class="e6-btn" id="v-oui" data-e="valid-oui" ${mes.length ? '' : 'disabled'}>Valider</button></div></div></div>`;
   }
   function ecranFin() {
     return `<div class="e6-fin"><div class="grand" aria-hidden="true">🌿</div><h1 id="titre-ecran" tabindex="-1">Merci !</h1>
@@ -421,9 +447,9 @@ export function creerEstimation(ctx) {
   }
   function feuille() {
     const c = cadre(), k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel); if (!cr) { S.sel = null; return ''; }
-    const f = S.f, existe = !!docDe(k, cr), mien = existe && app().miens.includes(idDe(k, cr));
+    const f = S.f, existe = !!docDe(k, cr), mien = estMien(k, cr);
     const pas = []; for (let m = min(cr.debut); m <= min(cr.fin); m += 15) pas.push(hDe(m)); if (pas[pas.length - 1] !== cr.fin) pas.push(cr.fin);
-    const peutValider = f.nb != null && (f.A || f.B) && RE_DATE.test(f.au || '');
+    const dateOk = RE_DATE.test(f.au || '') && f.au >= c.periode.debut && f.au <= c.periode.fin, peutValider = f.nb != null && (f.A || f.B) && dateOk;
     return `<div class="e6-ov" data-e="fond"><div class="e6-feuille" role="dialog" aria-modal="true" aria-labelledby="f-titre"><div class="e6-poignee" aria-hidden="true"></div>
       <h2 id="f-titre" tabindex="-1">${esc(JOURS_L[cr.jour])} ${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))}</h2>
       <p class="e6-info">${esc(cr.matiere)} · ${esc(courtDe(k))}${cr.parite ? ` · semaine ${esc(cr.parite)}` : ''}</p>
@@ -433,6 +459,7 @@ export function creerEstimation(ctx) {
       <div class="e6-ligne"><span class="lib">Période</span><span class="val">${f.modPer
         ? `<label class="sr" for="f-au">Jusqu’au</label><input type="date" id="f-au" data-i="au" value="${esc(f.au)}" min="${esc(c.periode.debut)}" max="${esc(c.periode.fin)}">`
         : `jusqu’au ${esc(jjmm(f.au))}<button type="button" class="e6-mod" id="mod-per" data-e="mod-per">modifier</button>`}</span></div>
+      ${dateOk ? '' : `<p class="e6-info" id="f-date" role="alert" style="color:var(--err-ink)">Date à choisir entre le ${esc(jjmm(c.periode.debut))} et le ${esc(jjmm(c.periode.fin))}.</p>`}
       ${c.avecParite ? `<div class="e6-ligne"><span class="lib">Semaines</span><span class="e6-ab">${['A', 'B'].map(s => `<button type="button" id="ab-${s}" data-e="ab" data-v="${s}" aria-pressed="${!!f[s]}" ${cr.parite ? 'disabled' : ''}>${s}</button>`).join('')}</span></div>` : ''}
       <div class="e6-ligne"><span class="lib">Horaire</span><span class="val">${f.modH
         ? `<label class="sr" for="f-hd">De</label><select id="f-hd" data-i="hDebut">${pas.slice(0, -1).map(x => `<option value="${x}" ${x === f.hDebut ? 'selected' : ''}>${hFr(x)}</option>`).join('')}</select>–<label class="sr" for="f-hf">à</label><select id="f-hf" data-i="hFin">${pas.slice(1).map(x => `<option value="${x}" ${x === f.hFin ? 'selected' : ''}>${hFr(x)}</option>`).join('')}</select>`
@@ -441,7 +468,7 @@ export function creerEstimation(ctx) {
         <button type="button" class="e6-btn" id="f-enregistrer" data-e="enregistrer" ${peutValider && !S.envoi ? '' : 'disabled'}>${S.envoi ? 'Enregistrement…' : 'Enregistrer'}</button></div>
     </div></div>`;
   }
-  /* Récapitulatif avant d'enregistrer ou de retirer, puis « ✓ Enregistré » (consigne de Brahim, 15/09 : éviter la mauvaise matière ou la mauvaise semaine). */
+  /* Récapitulatif avant d'enregistrer ou de retirer, puis « ✓ Enregistré » (15/09 : éviter la mauvaise matière ou la mauvaise semaine). */
   function recapDe(mode) {
     const c = cadre(), k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel), f = S.f; if (!cr || !f) return null;
     const hl = horaireLigne(cr, { hDebut: f.hDebut, hFin: f.hFin });
@@ -464,17 +491,53 @@ export function creerEstimation(ctx) {
       ${fait ? '' : `<div class="e6-actions"><button type="button" class="e6-btn sec" id="r-non" data-e="recap-non" ${S.envoi ? 'disabled' : ''}>${retirer ? 'Annuler' : 'Modifier'}</button><button type="button" class="e6-btn" id="r-oui" data-e="recap-oui" ${S.envoi ? 'disabled' : ''}>${S.envoi ? 'Enregistrement…' : retirer ? 'Retirer' : 'Confirmer'}</button></div>`}
     </div></div>`;
   }
+  /* Un mot pour la coordination : un par appareil et par période, modifiable. Jamais montré aux collègues. */
+  function feuilleMot() {
+    return `<div class="e6-ov" data-e="fond-mot"><div class="e6-feuille" role="dialog" aria-modal="true" aria-labelledby="m-titre"><div class="e6-poignee" aria-hidden="true"></div>
+      <h2 id="m-titre" tabindex="-1">Un mot pour la coordination</h2>
+      <p class="e6-info">Facultatif. Sans nom d’élève. Vos collègues ne le voient pas.</p>
+      <label class="sr" for="m-txt">Votre mot</label>
+      <textarea id="m-txt" maxlength="600" placeholder="Ce que vous voulez signaler…">${esc(S.motEdit || '')}</textarea>
+      <div class="e6-actions"><button type="button" class="e6-btn sec" id="m-non" data-e="mot-non" ${S.envoi ? 'disabled' : ''}>Annuler</button>
+        <button type="button" class="e6-btn" id="m-oui" data-e="mot-oui" ${S.envoi ? 'disabled' : ''}>${S.envoi ? 'Enregistrement…' : 'Enregistrer'}</button></div>
+    </div></div>`;
+  }
+  async function ecrireMot() {
+    const c = cadre(), a = app();
+    if (!a.motId) { a.motId = `mot_${c.periode.debut}_${(Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).replace(/[^a-z0-9]/g, '').slice(0, 10)}`; appEcrit(a); }
+    const doc = { id: a.motId, type: 'mot', annee, periode: { debut: c.periode.debut, fin: c.periode.fin, label: String(c.periode.label || '').slice(0, 40) },
+      pole: S.fil || '', texte: String(S.motEdit || '').replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, 600), majLe: new Date().toISOString(), source: 'estimation-aesh' };
+    S.envoi = true; dessiner();
+    try {
+      await Promise.race([FS.setDoc(FS.doc(db, COL, doc.id), doc), new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), { code: 'delai' })), 15000))]);
+      S.mot = doc; S.envoi = false; S.motEdit = null; S.focus = 'e6-mot';
+      toast(doc.texte ? '✓ Mot enregistré' : 'Mot effacé');
+    } catch (e) {
+      S.envoi = false;
+      const t = String((e && (e.code || e.message)) || e);
+      toast(t === 'delai' ? 'Pas de réponse du serveur. Vérifiez dans un instant.' : /permission|insufficient/i.test(t) ? 'Non enregistré : espace pas encore ouvert par la coordination.' : 'Non enregistré : pas de connexion. Réessayez.', true);
+    }
+  }
   function ouvrir(cle) {
     const c = cadre(), k = classeDe(S.classe), cr = k.creneaux.find(x => x.cle === cle); if (!cr) return;
-    const d = docDe(k, cr), hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
+    /* Cours d'un collègue : rien de sa réponse n'est repris (ni nombre, ni période, ni semaines, ni horaire). */
+    const d = estMien(k, cr) ? docDe(k, cr) : null, hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
     S.sel = cle;
-    S.f = { nb: d && app().miens.includes(idDe(k, cr)) ? d.nb : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
+    S.f = { nb: d ? d.nb : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
       A: cr.parite ? cr.parite === 'A' : (d ? d.semaines !== 'B' : true), B: cr.parite ? cr.parite === 'B' : (d ? d.semaines !== 'A' : true) };
     if (!S.navFeuille) { S.navFeuille = true; pousser(); }
     S.focus = S.f.nb != null ? 'nb-' + S.f.nb : 'f-titre'; dessiner();
   }
+  /* Confirmé par le serveur : l'appareil retient la version enregistrée (« vous » tant que personne ne la modifie), puis copie archivée. */
+  function enregistreIci(k, id, doc) {
+    const a = app();
+    if (doc.statut === 'active') { if (!a.miens.includes(id)) a.miens.push(id); a.versions[id] = doc.version; }
+    else { a.miens = a.miens.filter(x => x !== id); delete a.versions[id]; }
+    delete a.valides[k.nom]; appEcrit(a);
+    try { const aid = idArchiveCours(id, doc.version); Promise.resolve(FS.setDoc(FS.doc(db, COL, aid), { ...doc, id: aid, type: 'archive', declaration: id, lignes: declarationsDeCours([doc])[0].lignes, commentaire: '' })).catch(() => { }); } catch (e) { }
+  }
   async function ecrire(k, cr, statut) {
-    const c = cadre(), id = idDe(k, cr), prec = S.docs.get(id), f = S.f, maintenant = new Date().toISOString();
+    const c = cadre(), id = idDe(k, cr), prec = S.docs.get(id), f = S.f, maintenant = new Date().toISOString(), rc = S.recap;
     const hl = horaireLigne(cr, { hDebut: f.hDebut, hFin: f.hFin });
     const doc = { id, type: 'cours', annee, periode: { debut: c.periode.debut, fin: c.periode.fin, label: String(c.periode.label || '').slice(0, 40) },
       classe: k.nom, cle: cr.cle, jour: cr.jour, debut: cr.debut, fin: cr.fin, matiere: cr.matiere, parite: cr.parite,
@@ -482,18 +545,21 @@ export function creerEstimation(ctx) {
       semaines: cr.parite || !c.avecParite || (f.A && f.B) ? 'toutes' : (f.A ? 'A' : 'B'), hDebut: hl.debut, hFin: hl.fin,
       statut, version: ((prec && prec.version) || 0) + 1, majLe: maintenant, source: 'estimation-aesh' };
     S.envoi = true; dessiner();
+    /* L'écriture peut aboutir après le délai d'attente : elle est alors retenue sur l'appareil quand elle arrive. */
+    const envoi = Promise.resolve().then(() => FS.setDoc(FS.doc(db, COL, id), doc)).then(() => enregistreIci(k, id, doc));
+    envoi.catch(() => { });
     try {
-      await Promise.race([FS.setDoc(FS.doc(db, COL, id), doc), new Promise((_, rej) => setTimeout(() => rej(new Error('délai dépassé')), 15000))]);
-      try { const aid = idArchiveCours(id, doc.version); Promise.resolve(FS.setDoc(FS.doc(db, COL, aid), { ...doc, id: aid, type: 'archive', declaration: id, lignes: declarationsDeCours([doc])[0].lignes, commentaire: '' })).catch(() => { }); } catch (e) { }
+      await Promise.race([envoi, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), { code: 'delai' })), 15000))]);
       S.docs.set(id, doc); S.envoi = false;
-      const a = app(); if (statut === 'active' && !a.miens.includes(id)) a.miens.push(id); if (statut === 'retire') a.miens = a.miens.filter(x => x !== id); delete a.valides[k.nom]; appEcrit(a);
       fermerFeuille();
       if (statut === 'retire') { S.recap = null; toast('Estimation retirée'); }
-      else { S.recap = Object.assign({}, S.recap, { mode: 'fait' }); S.focus = 'r-titre'; dessiner(); annonce && annonce('Enregistré'); clearTimeout(recapTimer); recapTimer = setTimeout(fermerRecap, 2000); }
+      else if (rc) { S.recap = { ...rc, mode: 'fait' }; S.focus = 'r-titre'; dessiner(); annonce && annonce('Enregistré'); clearTimeout(recapTimer); recapTimer = setTimeout(fermerRecap, 2000); }
+      else { S.recap = null; toast('✓ Enregistré'); }
     } catch (e) {
       S.envoi = false; S.recap = null;
       const t = String((e && (e.code || e.message)) || e);
-      toast(/permission|insufficient/i.test(t) ? 'Non enregistré : espace pas encore ouvert par la coordination.' : 'Non enregistré : pas de connexion. Réessayez.', true);
+      toast(t === 'delai' ? 'Pas de réponse du serveur. Vérifiez dans un instant : le cours se mettra à jour s’il est bien arrivé.'
+        : /permission|insufficient/i.test(t) ? 'Non enregistré : espace pas encore ouvert par la coordination.' : 'Non enregistré : pas de connexion. Réessayez.', true);
     }
   }
   function lier() {
@@ -502,7 +568,8 @@ export function creerEstimation(ctx) {
       const b = ev.target.closest('[data-e]'); if (!b || b.disabled) return;
       const a = b.dataset.e, v = b.dataset.v;
       if (a === 'fond-recap') { if (S.recap && S.recap.mode === 'fait') fermerRecap(); else if (S.recap && ev.target === b && !S.envoi) { S.focus = S.recap.mode === 'retirer' ? 'f-retirer' : 'f-enregistrer'; S.recap = null; dessiner(); } return; }
-      if (a === 'fond') { if (ev.target === b && !S.envoi) { fermerFeuille(); dessiner(); } return; }
+      if (a === 'fond') { if (ev.target === b && !S.envoi) { S.focus = 'cr-' + slug(S.sel); fermerFeuille(); dessiner(); } return; }
+      if (a === 'fond-mot') { if (ev.target === b && !S.envoi) { S.motEdit = null; S.focus = 'e6-mot'; dessiner(); } return; }
       if (a === 'fond-valid') { if (ev.target === b) { S.valid = null; dessiner(); } return; }
       if (a === 'retour') { if (S.ecran === 'edt') aller('classe'); else if (S.ecran === 'classe') aller('filiere'); else retourAccueil && retourAccueil(); return; }
       if (a === 'accueil') { retourAccueil && retourAccueil(); return; }
@@ -510,6 +577,9 @@ export function creerEstimation(ctx) {
       if (a === 'fil') return aller('classe', { fil: v });
       if (a === 'classe') return aller('edt', { classe: v, sem: 'A' });
       if (a === 'terminer') return aller('fin');
+      if (a === 'mot') { S.motEdit = (S.mot && S.mot.texte) || ''; S.focus = 'm-txt'; dessiner(); return; }
+      if (a === 'mot-non') { S.motEdit = null; S.focus = 'e6-mot'; dessiner(); return; }
+      if (a === 'mot-oui') { ecrireMot(); return; }
       if (a === 'sem') { S.sem = v; S.focus = b.id; dessiner(); return; }
       if (a === 'cours') return ouvrir(v);
       if (a === 'nb') { S.f.nb = Number(v); S.focus = b.id; dessiner(); return; }
@@ -520,30 +590,43 @@ export function creerEstimation(ctx) {
       if (a === 'retirer') { S.recap = recapDe('retirer'); S.focus = 'r-oui'; dessiner(); return; }
       if (a === 'recap-non') { const m = S.recap && S.recap.mode; S.recap = null; S.focus = m === 'retirer' ? 'f-retirer' : 'f-enregistrer'; dessiner(); return; }
       if (a === 'recap-oui') { const m = S.recap && S.recap.mode, k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel); if (cr && (m === 'confirmer' || m === 'retirer')) ecrire(k, cr, m === 'retirer' ? 'retire' : 'active'); return; }
-      if (a === 'valider-classe') { S.valid = S.classe; S.focus = 'v-oui'; dessiner(); return; }
+      if (a === 'valider-classe') { S.valid = S.classe; S.focus = 'v-titre'; dessiner(); return; }
       if (a === 'valid-non') { S.valid = null; S.focus = 'e6-valider-classe'; dessiner(); return; }
       if (a === 'valid-oui') { const nom = S.valid, k = classeDe(nom), ap = app(); ap.valides[nom] = true; appEcrit(ap); S.valid = null; aller('classe'); toast(`✓ ${courtDe(k)} validée`); return; }
     };
+    h.oninput = ev => { if (ev.target.id === 'm-txt') S.motEdit = ev.target.value; };
     h.onchange = ev => {
-      const t = ev.target, k = t.dataset && t.dataset.i; if (!k || !S.f) return;
+      const t = ev.target; if (t.id === 'm-txt') { S.motEdit = t.value; return; }
+      const k = t.dataset && t.dataset.i; if (!k || !S.f) return;
       S.f[k] = t.value;
       if ((k === 'hDebut' || k === 'hFin') && min(S.f.hFin) <= min(S.f.hDebut)) { if (k === 'hDebut') S.f.hFin = hDe(min(S.f.hDebut) + 15); else S.f.hDebut = hDe(min(S.f.hFin) - 15); }
       S.focus = t.id; dessiner();
     };
     h.onkeydown = ev => {
+      if (ev.key === 'Tab') {
+        const fe = [...h.querySelectorAll('.e6-feuille')].pop(); if (!fe) return;
+        const el = [...fe.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea')];
+        if (!el.length) { ev.preventDefault(); return; }
+        const i = el.indexOf(document.activeElement);
+        if (ev.shiftKey && i <= 0) { ev.preventDefault(); el[el.length - 1].focus(); }
+        else if (!ev.shiftKey && (i === -1 || i === el.length - 1)) { ev.preventDefault(); el[0].focus(); }
+        return;
+      }
       if (ev.key !== 'Escape' || S.envoi) return;
+      if (S.motEdit != null) { S.motEdit = null; S.focus = 'e6-mot'; dessiner(); return; }
       if (S.recap) { if (S.recap.mode === 'fait') fermerRecap(); else { S.focus = S.recap.mode === 'retirer' ? 'f-retirer' : 'f-enregistrer'; S.recap = null; dessiner(); } return; }
-      if (S.sel || S.valid) { if (S.valid) S.valid = null; else fermerFeuille(); dessiner(); }
+      if (S.valid) { S.valid = null; S.focus = 'e6-valider-classe'; dessiner(); return; }
+      if (S.sel) { S.focus = 'cr-' + slug(S.sel); fermerFeuille(); dessiner(); }
     };
   }
   const slug = s => String(s).replace(/[^A-Za-z0-9]+/g, '-');
 
   return {
-    monter(hote) { S.hote = hote; S.ecran = 'filiere'; S.sel = null; S.f = null; S.recap = null; S.valid = null; S.navFeuille = false; ecouter(); dessiner(); },
+    monter(hote) { S.hote = hote; S.ecran = 'filiere'; S.sel = null; S.f = null; S.recap = null; S.valid = null; S.motEdit = null; S.navFeuille = false; ecouter(); dessiner(); },
     fermer() { S.hote = null; },
     consommerPop() { if (S.ignorerPop > 0) { S.ignorerPop--; return true; } return false; },
     restaurerNav(e) {
-      S.recap = null; S.sel = null; S.f = null; S.valid = null; S.navFeuille = false;
+      S.recap = null; S.sel = null; S.f = null; S.valid = null; S.motEdit = null; S.navFeuille = false;
       S.ecran = e && ['filiere', 'classe', 'edt', 'fin'].includes(e.ecran) ? e.ecran : 'filiere';
       if (e) { S.fil = e.fil || S.fil; S.classe = e.classe || S.classe; S.sem = e.sem || 'A'; }
       S.focus = 'titre-ecran'; dessiner();
