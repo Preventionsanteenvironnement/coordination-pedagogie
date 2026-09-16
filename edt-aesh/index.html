@@ -198,13 +198,14 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
 
 /* ---------- onglets ---------- */
 .onglets{
-  position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;
-  background:var(--card);border-top:1px solid var(--line);
+  position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:2px;
+  background:var(--card);border-top:1px solid var(--line);overflow-x:auto;scrollbar-width:none;
   padding:7px 8px calc(7px + var(--safe-b));box-shadow:0 -2px 12px rgba(16,24,40,.05);
 }
-.ong{flex:1;padding:6px 2px;border-radius:12px;text-align:center;color:var(--muted);transition:.14s}
+.onglets::-webkit-scrollbar{display:none}
+.ong{flex:0 0 auto;min-width:72px;padding:6px 6px;border-radius:12px;text-align:center;color:var(--muted);transition:.14s}
 .ong b{display:block;font-size:1.15rem;line-height:1.25}
-.ong span{font-size:.7rem;font-weight:700;letter-spacing:.01em}
+.ong span{font-size:.78rem;font-weight:700;letter-spacing:.01em;white-space:nowrap}
 .ong.on{color:var(--accent);background:var(--accent-l)}
 
 /* ---------- feuille ---------- */
@@ -302,25 +303,31 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
 .edt .jour-col:last-child{border-right:0}
 .edt .tete{height:42px;display:flex;flex-direction:column;align-items:center;justify-content:center;
   border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:2;line-height:1.1}
-.edt .tete b{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.edt .tete b{font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .edt .tete i{font-style:normal;font-size:1rem;font-weight:800;letter-spacing:-.02em}
 .edt .corps{position:relative}
 .edt .hr{position:absolute;left:0;right:0;border-top:1px solid var(--line-2)}
 .edt .hr.pleine{border-top-color:var(--line)}
-.edt .hlab{position:absolute;right:5px;font-size:.68rem;font-weight:700;color:var(--muted);
+.edt .hlab{position:absolute;right:5px;font-size:.72rem;font-weight:700;color:var(--muted);
   font-variant-numeric:tabular-nums;transform:translateY(-6px)}
 .bloc-c{position:absolute;left:3px;right:3px;border-radius:9px;padding:4px 6px;overflow:hidden;
   color:#fff;box-shadow:0 1px 3px rgba(16,24,40,.16);display:flex;flex-direction:column}
-.bloc-c .m{font-size:.68rem;font-weight:800;line-height:1.2;flex:0 1 auto;
+.bloc-c .m{font-size:.74rem;font-weight:800;line-height:1.2;flex:0 1 auto;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.bloc-c .s{font-size:.62rem;opacity:.78;font-weight:600;margin-top:1px;flex:none}
+.bloc-c .s{font-size:.68rem;opacity:.78;font-weight:600;margin-top:1px;flex:none}
 /* les codes restent collés au bas du bloc : ils ne doivent jamais être rognés */
 .bloc-c .p{display:flex;flex-wrap:wrap;gap:2px;margin-top:auto;padding-top:3px;flex:none}
-.bloc-c .p em{font-style:normal;font-size:.6rem;font-weight:800;padding:1px 4px;border-radius:4px;
+.bloc-c .p em{font-style:normal;font-size:.66rem;font-weight:800;padding:1px 4px;border-radius:4px;
   background:rgba(255,255,255,.92);color:#0f172a;font-variant-numeric:tabular-nums}
 .bloc-c .p em.moi{background:#111827;color:#fff}
 .bloc-c.vide{opacity:.45}
 .edt-vide{padding:40px 20px;text-align:center;color:var(--muted);width:100%}
+.edt-glisse{margin:6px 2px 0;font-size:.8rem;font-weight:700;color:var(--muted);text-align:center}
+/* ---------- absences ---------- */
+.abs-tag{flex:none;padding:3px 9px;border-radius:999px;font-size:.74rem;font-weight:800;color:#fff}
+.abs-jour{margin-top:10px;padding:10px 12px;border-radius:13px;background:#fef2f2;border:1px solid #fecaca;
+  color:#991b1b;font-size:.88rem;font-weight:700;line-height:1.45}
+@media (prefers-color-scheme:dark){.abs-jour{background:#3b1a1a;border-color:#7f1d1d;color:#fca5a5}}
 
 .bascule{display:flex;gap:4px;padding:4px;border-radius:13px;background:var(--line-2);
   margin-bottom:12px}
@@ -501,6 +508,13 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <p style="color:var(--muted);font-size:.82rem;line-height:1.6;margin-top:16px">
       Cantine, internat, PIAL, coordination… tout ce qui n'est pas un cours et qui compte dans vos heures.
     </p>
+    <div class="sect-t" id="titre-absences" style="margin-top:26px">Mes absences</div>
+    <div id="liste-absences"></div>
+    <button class="ajout" id="ajout-absence">+ Je serai absent·e</button>
+    <p style="color:var(--muted);font-size:.82rem;line-height:1.6;margin-top:16px">
+      Congé, formation, convocation, arrêt… Ces heures ne sont pas comptées comme du travail,
+      et la coordination sait quels accompagnements sont à reprendre.
+    </p>
   </main>
 
   <main id="vue-equipe" class="hide">
@@ -511,6 +525,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
     <div class="bande" id="bande-equipe"></div>
     <div class="filtres" id="filtres-edt"></div>
     <div class="edt" id="edt"></div>
+    <div class="edt-glisse" id="edt-glisse"></div>
     <div id="mois" class="hide"></div>
   </main>
 
@@ -540,7 +555,7 @@ main{flex:1;overflow-y:auto;padding:14px 14px calc(84px + var(--safe-b));-webkit
   </main>
 
   <main id="vue-observation" class="hide" style="padding:0">
-    <div id="obs-host" style="width:100%;height:calc(100dvh - 64px)"></div>
+    <div id="obs-host" style="width:100%;height:calc(100dvh - 150px)"></div>
   </main>
 
   <main id="vue-epreuves" class="hide">
@@ -617,6 +632,21 @@ const RETOUR_CHOIX = [
   'Je propose un ajustement'
 ];
 const K_RETOURS_ATTENTE = 'edt-aesh-retours-attente-v2';
+/* Absences : mêmes identifiants que le suivi administratif de l'Atelier, pour que l'import tombe juste. */
+const ABS_TYPES = [
+  {id:'conge',label:'Congé',c:'#2563EB'},
+  {id:'formation',label:'Formation',c:'#0891B2'},
+  {id:'convocation',label:'Convocation',c:'#9333EA'},
+  {id:'arret_maladie',label:'Arrêt maladie',c:'#E11D48'},
+  {id:'enfant_malade',label:'Enfant malade',c:'#DB2777'},
+  {id:'autorisation',label:'Autorisation d’absence',c:'#0D9488'},
+  {id:'mission',label:'Ordre de mission',c:'#B45309'},
+  {id:'greve',label:'Grève',c:'#57534E'},
+  {id:'absence',label:'Absence',c:'#DC2626'},
+  {id:'autre',label:'Autre',c:'#64748B'}
+];
+const absType = id => ABS_TYPES.find(t => t.id === id) || ABS_TYPES[0];
+const MOMENTS = [['journee','Journée entière'],['matin','Matinée'],['aprem','Après-midi'],['precis','Horaire précis']];
 let retourType = 'planning';
 let retourChoix = new Set();
 let retourMessage = '';
@@ -752,11 +782,30 @@ function surCeCours(c, d){
     s.type === 'cours' && s.classeId === c.classe.id && couvre(s, d) &&
     minutes(s.debut) < minutes(c.fin) && minutes(s.fin) > minutes(c.debut));
 }
+/* ─────────── absences ─────────── */
+function estAbsence(s){ return !!s && s.type === 'absence'; }
+function absencesDe(aeshId){ return saisies.filter(s => estAbsence(s) && s.aeshId === aeshId); }
+/* Une absence couvre une date, et éventuellement un créneau horaire précis. */
+function absCouvre(a, d, debut, fin){
+  if (!a || !a.du) return false;
+  if (d < a.du || d > (a.au || a.du)) return false;
+  if (a.journee || !a.debut || !a.fin) return true;
+  if (!debut || !fin) return true;
+  return a.debut < fin && debut < a.fin;
+}
+function absencesLe(aeshId, d, debut, fin){
+  return absencesDe(aeshId).filter(a => absCouvre(a, d, debut, fin));
+}
+/* Les heures d'un jour d'absence ne sont pas comptées comme du travail. */
 function heuresSemaine(aeshId, lundi){
   let t = 0;
   for (let i = 0; i < 5; i++){
     const d = ajouteJours(lundi, i);
-    saisies.forEach(s => { if (s.aeshId === aeshId && couvre(s, d)) t += duree(s.debut, s.fin); });
+    saisies.forEach(s => {
+      if (s.aeshId !== aeshId || estAbsence(s) || !couvre(s, d)) return;
+      if (absencesLe(aeshId, d, s.debut, s.fin).length) return;
+      t += duree(s.debut, s.fin);
+    });
   }
   return t;
 }
@@ -1088,7 +1137,7 @@ function rendu(){
   $('#total-sem').textContent = fmtH(heuresSemaine(cible.id, lundiCourant));
   if (vue === 'semaine') rendCours();
   if (vue === 'equipe') rendEquipe();
-  if (vue === 'services') rendServices();
+  if (vue === 'services'){ rendServices(); rendAbsences(); }
   if (vue === 'retour') rendRetour();
   if (vue === 'recap') rendRecap();
   if (vue === 'observation') rendObservation();
@@ -1350,6 +1399,16 @@ async function supprime(){
   try { await deleteDoc(doc(db, COL_SAISIES, id)); dis('Créneau retiré'); }
   catch(e){ dis('Échec de la suppression'); }
 }
+/* Rien ne se supprime sans confirmation : au pouce, la croix était trop facile à toucher. */
+function demandeConfirmation(titre, detail, libelleOk, action){
+  $('#f-corps').innerHTML = '<div class="f-t">' + esc(titre) + '</div>' +
+    '<div class="f-st">' + esc(detail) + '</div><div style="height:10px"></div>';
+  $('#f-pied').innerHTML = '<button class="btn btn-s" id="c-non">Annuler</button>' +
+    '<button class="btn btn-d" id="c-oui" style="flex:1">' + esc(libelleOk) + '</button>';
+  $('#c-non').onclick = fermeFeuille;
+  $('#c-oui').onclick = async () => { fermeFeuille(); await action(); };
+  ouvreFeuille();
+}
 function ouvreFeuille(){ $('#voile').classList.add('on'); $('#feuille').classList.add('on'); }
 function fermeFeuille(){ $('#voile').classList.remove('on'); $('#feuille').classList.remove('on'); }
 $('#voile').onclick = fermeFeuille;
@@ -1378,9 +1437,9 @@ function rendServices(){
       '<div class="s">' + JOURS_LONG[s.jour] + ' · ' + s.debut + '–' + s.fin + ' · ' +
       fmtH(duree(s.debut,s.fin)) + ' · ' + libFrequence(s) + '</div></div>' +
       '<button class="x">✕</button>';
-    el.querySelector('.x').onclick = async () => {
-      try { await deleteDoc(doc(db, COL_SAISIES, s.id)); dis('Service retiré'); } catch(e){}
-    };
+    el.querySelector('.x').onclick = () => demandeConfirmation(
+      'Retirer ce service ?', s.label + ' · ' + JOURS_LONG[s.jour] + ' ' + s.debut + '–' + s.fin, 'Retirer',
+      async () => { try { await deleteDoc(doc(db, COL_SAISIES, s.id)); dis('Service retiré'); } catch(e){ dis('Échec du retrait'); } });
     z.appendChild(el);
   });
 }
@@ -1526,6 +1585,148 @@ async function enregistreService(){
   } catch(e){ dis('Échec de l\'enregistrement'); }
 }
 
+/* ─────────── absences : liste, feuille, enregistrement ─────────── */
+function libAbsence(a){
+  const d = joliDate(a.du), f = a.au && a.au !== a.du ? ' → ' + joliDate(a.au) : '';
+  const m = a.journee || !a.debut ? 'journée entière' : a.debut + '–' + a.fin;
+  return d + f + ' · ' + m;
+}
+function rendAbsences(){
+  const cible = cibleSaisie() || moi;
+  const titre = $('#titre-absences');
+  if (titre) titre.textContent = cible.id === moi.id ? 'Mes absences' : 'Absences de ' + codeDe(cible.id);
+  const z = $('#liste-absences'); if (!z) return;
+  z.innerHTML = '';
+  const miennes = absencesDe(cible.id).sort((a,b) => (a.du||'') < (b.du||'') ? 1 : -1);
+  if (!miennes.length){
+    z.innerHTML = '<div class="vide-j"><span class="em">🗓️</span>Aucune absence déclarée.</div>';
+    return;
+  }
+  miennes.forEach(a => {
+    const t = absType(a.motifType);
+    const el = document.createElement('div');
+    el.className = 'ligne';
+    el.innerHTML = '<div class="g"><div class="t"><span class="abs-tag" style="background:' + t.c + '">' + esc(t.label) + '</span> ' +
+      esc(a.intitule || '') + '</div><div class="s">' + esc(libAbsence(a)) + '</div></div><button class="x">✕</button>';
+    el.querySelector('.x').onclick = () => demandeConfirmation(
+      'Retirer cette absence ?', t.label + ' · ' + libAbsence(a), 'Retirer',
+      async () => { try { await deleteDoc(doc(db, COL_SAISIES, a.id)); dis('Absence retirée'); } catch(e){ dis('Échec du retrait'); } });
+    z.appendChild(el);
+  });
+}
+$('#ajout-absence').onclick = () => {
+  const cible = cibleSaisie() || moi;
+  const auj = iso(new Date());
+  brouillon = { type:'absence', motifType:'conge', intitule:'', du:auj, au:auj, moment:'journee',
+    debut:'08:00', fin:'12:00', aeshId:cible.id };
+  dessineFeuilleAbsence();
+  ouvreFeuille();
+};
+function dessineFeuilleAbsence(){
+  const b = brouillon;
+  const cible = intervenants.find(p => p.id === b.aeshId) || moi;
+  const heures = [];
+  for (let m = 7*60; m <= 22*60; m += 30) heures.push(versH(m));
+  const sel = (id, liste, val) => '<select id="' + id + '">' + liste.map(v =>
+    '<option value="' + v + '"' + (v === val ? ' selected' : '') + '>' + v + '</option>').join('') + '</select>';
+  $('#f-corps').innerHTML =
+    '<div class="f-t">Je serai absent·e</div>' +
+    '<div class="f-st">Congé, formation, convocation… Ces heures ne comptent pas comme du travail' +
+      (cible && cible.id !== moi.id ? ' · pour ' + codeDe(cible.id) : '') + '.</div>' +
+    '<div class="bloc"><h4>Motif</h4><div class="opts" id="o-motif">' +
+      ABS_TYPES.map(t => '<button class="opt' + (b.motifType === t.id ? ' on' : '') + '" data-v="' + t.id + '">' + t.label + '</button>').join('') +
+    '</div></div>' +
+    '<div class="bloc"><h4>Quand ?</h4>' +
+      '<div class="champ"><label>Du</label><input type="date" id="ab-du" value="' + b.du + '"></div>' +
+      '<div class="champ"><label>Au</label><input type="date" id="ab-au" value="' + b.au + '"></div>' +
+    '</div>' +
+    '<div class="bloc"><h4>Combien de temps ?</h4><div class="opts" id="o-moment">' +
+      MOMENTS.map(([v,t]) => '<button class="opt' + (b.moment === v ? ' on' : '') + '" data-v="' + v + '">' + t + '</button>').join('') +
+    '</div>' +
+      (b.moment === 'precis' ? '<div class="champ" style="margin-top:12px"><label>Horaire</label><div class="horaires">' +
+        sel('ab-h1', heures.slice(0,-1), b.debut) + '<span style="color:var(--muted);font-weight:700">→</span>' +
+        sel('ab-h2', heures.slice(1), b.fin) + '</div></div>' : '') +
+    '</div>' +
+    '<div class="bloc"><h4>Précision — facultatif</h4>' +
+      '<div class="champ"><input id="ab-int" maxlength="120" value="' + (b.intitule || '').replace(/"/g,'&quot;') +
+      '" placeholder="Stage MIN, convocation…"></div></div>' +
+    '<div class="bloc"><h4>Ce que ça donne</h4><div class="info-p" id="recap-abs"></div></div>' +
+    '<div style="height:8px"></div>';
+  $('#f-pied').innerHTML = '<button class="btn btn-s" id="f-annul">Annuler</button>' +
+    '<button class="btn btn-p" id="f-ok">Enregistrer</button>';
+  $('#f-corps').querySelectorAll('#o-motif .opt').forEach(el => {
+    el.onclick = () => { brouillon.motifType = el.dataset.v; dessineFeuilleAbsence(); };
+  });
+  $('#f-corps').querySelectorAll('#o-moment .opt').forEach(el => {
+    el.onclick = () => {
+      brouillon.moment = el.dataset.v;
+      if (el.dataset.v === 'matin'){ brouillon.debut = '08:00'; brouillon.fin = '12:00'; }
+      if (el.dataset.v === 'aprem'){ brouillon.debut = '13:00'; brouillon.fin = '18:00'; }
+      dessineFeuilleAbsence();
+    };
+  });
+  const lire = () => {
+    brouillon.du = $('#ab-du').value || brouillon.du;
+    brouillon.au = $('#ab-au').value || brouillon.du;
+    if (brouillon.au < brouillon.du) brouillon.au = brouillon.du;
+    brouillon.intitule = $('#ab-int').value;
+    if ($('#ab-h1')) brouillon.debut = $('#ab-h1').value;
+    if ($('#ab-h2')) brouillon.fin = $('#ab-h2').value;
+  };
+  ['ab-du','ab-au','ab-int','ab-h1','ab-h2'].forEach(id => {
+    const e = $('#' + id); if (e) e.oninput = e.onchange = () => { lire(); resumeAbsence(); };
+  });
+  $('#f-annul').onclick = fermeFeuille;
+  $('#f-ok').onclick = enregistreAbsence;
+  resumeAbsence();
+}
+function joursOuvres(du, au){
+  let n = 0;
+  for (let d = du; d <= au && n < 400; d = ajouteJours(d, 1))
+    if (jourDe(d) && !enVacances(d)) n++;
+  return n;
+}
+function resumeAbsence(){
+  const z = $('#recap-abs'); if (!z) return;
+  const b = brouillon;
+  if (!b.du){ z.innerHTML = '<b>Indiquez au moins une date.</b>'; return; }
+  if (b.moment === 'precis' && minutes(b.fin) <= minutes(b.debut)){
+    z.innerHTML = '<b>L\'heure de fin doit suivre le début.</b>'; return;
+  }
+  const n = joursOuvres(b.du, b.au || b.du);
+  const cible = cibleSaisie() || moi;
+  let touches = 0;
+  for (let d = b.du; d <= (b.au || b.du); d = ajouteJours(d, 1))
+    saisies.forEach(s => {
+      if (s.aeshId !== cible.id || estAbsence(s) || !couvre(s, d)) return;
+      if (b.moment === 'journee' || (b.debut < s.fin && s.debut < b.fin)) touches++;
+    });
+  z.innerHTML = '<b>' + absType(b.motifType).label + '</b> · ' + libAbsence({du:b.du, au:b.au, journee:b.moment === 'journee', debut:b.debut, fin:b.fin}) +
+    '<br>' + n + ' jour' + (n > 1 ? 's' : '') + ' d\'école' +
+    (touches ? ' · <b>' + touches + ' créneau' + (touches > 1 ? 'x' : '') + '</b> que vous aviez posé' + (touches > 1 ? 's' : '') + ' : la coordination le' + (touches > 1 ? 's' : '') + ' verra' : ' · aucun créneau posé sur cette période');
+}
+async function enregistreAbsence(){
+  const b = brouillon;
+  const aid = b.aeshId || (cibleSaisie() || moi).id;
+  if (!b.du){ dis('Indiquez au moins une date'); return; }
+  if (b.moment === 'precis' && minutes(b.fin) <= minutes(b.debut)){ dis('L\'heure de fin doit suivre le début'); return; }
+  const journee = b.moment === 'journee';
+  const id = aid + '_ab_' + Date.now().toString(36);
+  fermeFeuille();
+  try {
+    await setDoc(doc(db, COL_SAISIES, id), {
+      id, annee: G.annee || '2026-2027', aeshId: aid, type:'absence',
+      motifType: b.motifType, motifLabel: absType(b.motifType).label,
+      intitule: (b.intitule || '').trim().slice(0,120),
+      du: b.du, au: b.au || b.du, journee,
+      debut: journee ? '' : b.debut, fin: journee ? '' : b.fin,
+      auteurId: moi.id, delegue: aid !== moi.id,
+      majLe: new Date().toISOString()
+    });
+    dis('✓ Absence enregistrée');
+  } catch(e){ dis('Échec de l\'enregistrement'); }
+}
+
 /* ─────────── l'emploi du temps de la semaine, en direct ─────────── */
 /* Une vraie grille : les cours de la classe choisie, placés à leur heure,
    et dans chaque cours les codes de ceux qui l'ont pris. Défilement
@@ -1553,6 +1754,10 @@ function rendEquipe(){
     };
     bz.appendChild(el);
   });
+
+  // repère : la grille se fait glisser latéralement (l'ascenseur est masqué)
+  const gl = $('#edt-glisse');
+  if (gl) gl.textContent = '← faites glisser pour voir les cinq jours →';
 
   // choix de la classe
   const fz = $('#filtres-edt'); fz.innerHTML = '';
@@ -1743,9 +1948,9 @@ function rendRecap(){
         : (s.portee === 'choix' ? (s.semaines || '?') + ' semaines' : (LIB[s.portee] || '')) +
         (s.parite !== 'toutes' ? ' · sem. ' + s.parite : '')) + '</div></div>' +
       '<button class="x">✕</button>';
-    el.querySelector('.x').onclick = async () => {
-      try { await deleteDoc(doc(db, COL_SAISIES, s.id)); dis('Retiré'); } catch(e){}
-    };
+    el.querySelector('.x').onclick = () => demandeConfirmation(
+      'Retirer ce créneau ?', (s.type === 'service' ? s.label : s.matiere) + ' · ' + JOURS_LONG[s.jour] + ' ' + s.debut + '–' + s.fin, 'Retirer',
+      async () => { try { await deleteDoc(doc(db, COL_SAISIES, s.id)); dis('Retiré'); } catch(e){ dis('Échec du retrait'); } });
     z.appendChild(el);
   });
 }
