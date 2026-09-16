@@ -695,7 +695,7 @@ function veilleDesVacances(d){
    aucun prénom ne doit figurer dans ce dépôt, qui est public.
    Faute de secteur renseigné, on n'ampute rien : tout reste visible. */
 function mesClasses(){
-  if (estCoordinateur()) return G.classes;
+  if (estCoordinateur() || estReferentPsr()) return G.classes;   // le référent tient les emplois du temps des deux pôles
   const sect = moi && moi.section;
   return sect ? G.classes.filter(c => c.section === sect) : G.classes;
 }
@@ -710,7 +710,7 @@ function estReferentPsr(){ return !!moi && (moi.id === REFERENT_PSR_ID || moi.ro
 function ciblesPossibles(){
   if (!moi) return [];
   if (estCoordinateur()) return intervenants.filter(p => !estCoordinateur(p));
-  return estReferentPsr() ? intervenants.filter(estPsrIntervenant) : [moi];
+  return estReferentPsr() ? intervenants.filter(p => !estCoordinateur(p)) : [moi];
 }
 function cibleSaisie(){
   const l = ciblesPossibles();
@@ -1075,7 +1075,7 @@ function entre(){
   $('#ma-pastille').style.background = moi.couleur || '#0f766e';
   $('#mon-nom').textContent = moi.code;
   $('#mon-code').textContent = (estCoordinateur() ? 'accès coordinateur' : 'c\'est vous') +
-    (estReferentPsr() ? ' · référent PSR' : '') +
+    (estReferentPsr() ? ' · référent AESH' : '') +
     (moi.contrat ? ' · contrat ' + fmtH(moi.contrat) : '');
   const auj = iso(new Date());
   lundiCourant = lundiDe(auj) < PREMIER_LUNDI ? PREMIER_LUNDI : lundiDe(auj);
@@ -1743,13 +1743,13 @@ function rendEquipe(){
   const bz = $('#bande-equipe'); bz.innerHTML = '';
   intervenants.forEach(p => {
     if (estCoordinateur(p)) return;
-    if (!estCoordinateur() && moi.section && p.section && p.section !== moi.section) return;
+    if (!estCoordinateur() && !estReferentPsr() && moi.section && p.section && p.section !== moi.section) return;
     const el = document.createElement('div');
     el.className = 'qn' + (p.id === actif.id ? ' est-moi' : '');
     el.innerHTML = '<i style="background:' + (p.couleur||'#0f766e') + '"></i>' +
       '<b>' + codeCible(p.id) + '</b>' +
       '<span>' + fmtH(heuresSemaine(p.id, lundiCourant)) + '</span>';
-    if ((estCoordinateur() || estReferentPsr()) && (estCoordinateur() || estPsrIntervenant(p))) el.onclick = () => {
+    if (estCoordinateur() || estReferentPsr()) el.onclick = () => {
       cibleAeshId = p.id; dessineDelegation(); rendu();
     };
     bz.appendChild(el);
@@ -1795,7 +1795,7 @@ function rendMois(){
     '<button id="mois-suiv">›</button></div>' +
     '<div class="mois-e">' + JOURS.map(j => '<span>' + j + '</span>').join('') + '</div>';
 
-  const miens = intervenants.filter(p => !estCoordinateur(p) && (estCoordinateur() || !moi.section || !p.section || p.section === moi.section));
+  const miens = intervenants.filter(p => !estCoordinateur(p) && (estCoordinateur() || estReferentPsr() || !moi.section || !p.section || p.section === moi.section));
 
   for (let sem = 0; sem < 6; sem++){
     const lundiSem = ajouteJours(d, sem * 7);
