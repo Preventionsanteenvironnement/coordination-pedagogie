@@ -15,6 +15,25 @@ export const POLES = [
 ];
 export const pole = id => POLES.find(p => p.id === id) || null;
 
+/* ─── Filières (17/09/2026, demande de Brahim) ───
+   Un pôle est l'équipe d'un référent ; une filière est un métier. PSR et MELEC sont deux filières
+   dans le même pôle. Un AESH peut intervenir dans plusieurs filières, et dans une filière soit
+   partout (« tous les niveaux »), soit dans certaines classes seulement.
+   L'ordre des classes suit celui de l'emploi du temps. */
+export const FILIERES = [
+  { id: 'PSR', nom: 'PSR', pole: 'PSR_MELEC', classes: ['C1PSR', 'C2PSR'] },
+  { id: 'MELEC', nom: 'MELEC', pole: 'PSR_MELEC', classes: ['B2MELEC', 'B1MELEC', 'BTMELEC'] },
+  { id: 'AGORA', nom: 'AGOrA', pole: 'AGORA', classes: ['B2GATL1', 'B2GATL2', 'B1AGO1', 'B1AGO2', 'BTAGO1', 'BTAGO2'] },
+  { id: 'JP', nom: 'Jardinier paysagiste', pole: 'CAPA', classes: ['C1JP', 'C2JP'] },
+  { id: 'HORT', nom: 'Horticulture', pole: 'CAPA', classes: ['C1HORT', 'C2HORT'] },
+  { id: 'CAN', nom: 'Cannage-paillage', pole: 'MDA', classes: ['C1CAN', 'C2CAN'] },
+  { id: 'VAN', nom: 'Vannerie', pole: 'MDA', classes: ['C1VAN', 'C2VAN'] }
+];
+export const filiere = id => FILIERES.find(f => f.id === id) || null;
+export const filieresDuPole = pid => FILIERES.filter(f => f.pole === pid);
+/* La filière d'une classe (une classe n'appartient qu'à une filière). */
+export const filiereDeClasse = nom => FILIERES.find(f => f.classes.includes(nom)) || null;
+
 /* Équipes du 16/09/2026 (tableau transmis par la coordination). Contrat et heures : à compléter par les référents. */
 const A = (id, sigle, equipes) => ({ id, type: 'aesh', sigle, equipes, contrat: null, heures: {}, cantine: 0, internat: 0, service: 0, serviceLib: '', reunion: null, actif: true });
 export const EQUIPES_DEPART = [

@@ -82,7 +82,7 @@ export function coursALieu(C, edt, cours, iso) {
 /* docs : liste brute de documents Firestore de la collection. Retourne l'état exploitable. */
 const nombreOk = (v, max = 45) => { const n = Number(v); return v === null || v === undefined || v === '' ? null : Number.isFinite(n) && n >= 0 && n <= max ? n : null; };
 /* Une fiche AESH venue du réseau est vérifiée champ par champ : un document abîmé ne fait pas tomber l'écran. */
-export function normaliserAesh(d, polesAutorises) {
+export function normaliserAesh(d, polesAutorises, cat) {
   const ok = q => !polesAutorises || polesAutorises.includes(q);
   const equipes = {}, heures = {};
   Object.entries(d.equipes && typeof d.equipes === 'object' ? d.equipes : {}).forEach(([q, v]) => { if (ok(q)) equipes[q] = Number.isFinite(+v) ? +v : 1; });
@@ -93,14 +93,62 @@ export function normaliserAesh(d, polesAutorises) {
     jours: Array.isArray(d.jours) ? d.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4) : undefined };
   if (out.services === undefined) delete out.services; if (out.jours === undefined) delete out.jours;
   ['cantine', 'internat', 'service'].forEach(k => { if (k in out) out[k] = nombreOk(out[k]) || 0; });
+  if (d.filieres !== undefined) out.filieres = normaliserFilieres(d.filieres, cat);
+  if (d.rattachement !== undefined) out.rattachement = ok(d.rattachement) ? d.rattachement : undefined;
+  if (out.rattachement === undefined) delete out.rattachement;
   return out;
 }
-export function indexer(docs, depart, polesAutorises) {
+
+/* ─── filières d'intervention (17/09/2026, demande de Brahim) ───
+   PSR et MELEC sont deux filières d'un même pôle ; un AESH peut intervenir dans plusieurs filières,
+   et dans chacune soit partout (« tous les niveaux »), soit dans certaines classes seulement.
+       a.filieres = { MELEC: { classes: ['B1MELEC','BTMELEC'] ou null }, VAN: { classes: null } }
+       a.rattachement = pôle de l'équipe qui le gère (réunion d'équipe).
+   Le volume d'heures reste porté par le pôle (a.heures), comme avant : la page Besoins, les exports
+   et la vue de l'Atelier le lisent. Les filières disent OÙ il intervient, pas combien d'heures.
+   « cat » est le catalogue des filières : [{ id, pole, classes: [...] }]. */
+export function normaliserFilieres(d, cat) {
+  const out = {};
+  Object.entries(d && typeof d === 'object' ? d : {}).forEach(([id, v]) => {
+    const f = cat ? cat.find(x => x.id === id) : null;
+    if ((cat && !f) || !v || typeof v !== 'object') return;
+    let cl = Array.isArray(v.classes) ? v.classes.filter(n => typeof n === 'string' && (!f || f.classes.includes(n))) : null;
+    if (cl && (!cl.length || (f && cl.length === f.classes.length))) cl = null;   /* toutes les classes = tous les niveaux */
+    out[id] = { classes: cl };
+  });
+  return out;
+}
+export const filieresDe = a => a && a.filieres && typeof a.filieres === 'object' && Object.keys(a.filieres).length ? a.filieres : null;
+/* Pôles où l'AESH intervient, déduits de ses filières. Le pôle de rattachement en fait toujours partie. */
+export function polesDesFilieres(a, cat, rattachement) {
+  const fl = filieresDe(a) || {}, equipes = {};
+  Object.keys(fl).forEach(id => { const f = cat.find(x => x.id === id); if (f) equipes[f.pole] = 1; });
+  if (rattachement) equipes[rattachement] = 1;
+  return equipes;
+}
+/* Les filières déclarées dans un pôle donné. */
+export const filieresDuPoleDe = (a, cat, pid) => Object.keys(filieresDe(a) || {}).map(id => cat.find(x => x.id === id)).filter(f => f && f.pole === pid);
+/* Cet AESH est-il prévu pour cette classe ? Une fiche sans filières déclarées ne dit rien (connu: false). */
+export function prevuPourClasse(a, cat, classe) {
+  const f = cat.find(x => x.classes.includes(classe)), fl = filieresDe(a);
+  if (!f || !fl) return { connu: false, prevu: false, filiere: f || null, classes: null };
+  const v = fl[f.id];
+  if (!v) return { connu: true, prevu: false, filiere: f, classes: null, filiereAbsente: true };
+  const cl = Array.isArray(v.classes) && v.classes.length ? v.classes : null;
+  return { connu: true, prevu: !cl || cl.includes(classe), filiere: f, classes: cl, filiereAbsente: false };
+}
+/* Présence élève : le contrat moins les services et l'heure de réunion — les heures en classe. */
+export function presenceEleve(a) {
+  const c = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
+  return c == null ? null : Math.round((c - totalServices(a) - 1) * 100) / 100;
+}
+
+export function indexer(docs, depart, polesAutorises, cat) {
   const aesh = new Map(), places = [], absences = [], messages = [], reunions = [], poles = new Map();
   (depart || []).forEach(a => aesh.set(a.id, { ...a, depart: true }));
   (docs || []).forEach(d => {
     if (!d || !d.type) return;
-    if (d.type === 'aesh') { if (typeof d.id !== 'string') return; aesh.set(d.id, normaliserAesh({ ...(aesh.get(d.id) || {}), ...d, depart: false }, polesAutorises)); }
+    if (d.type === 'aesh') { if (typeof d.id !== 'string') return; aesh.set(d.id, normaliserAesh({ ...(aesh.get(d.id) || {}), ...d, depart: false }, polesAutorises, cat)); }
     else if (d.type === 'place' && d.statut === 'active' && typeof d.aeshId === 'string' && typeof d.coursId === 'string' && RE_DATE.test(d.du || '') && RE_DATE.test(d.au || '') && d.au >= d.du && Number.isInteger(+d.jour)) places.push({ ...d, jour: +d.jour });
     else if (d.type === 'absence' && d.statut === 'active' && typeof d.aeshId === 'string' && RE_DATE.test(d.du || '') && RE_DATE.test(d.au || '') && d.au >= d.du) absences.push(d.journee === false && !(RE_HEURE.test(d.debut || '') && RE_HEURE.test(d.fin || '')) ? { ...d, journee: true } : d);
     else if (d.type === 'message') messages.push(d);
@@ -235,7 +283,7 @@ export function lundisEntre(C, du, au) {
 export function disponibilite(ctx, aeshId, coursId, du, au, pole) {
   const { C, edt, I } = ctx, c = edt.cours[coursId], a = I.aesh.get(aeshId);
   if (!c || !a) return { etat: 'pris', texte: '—' };
-  if (!joursDe(a).includes(c.j)) return { etat: 'pris', texte: `ne travaille pas le ${JOURS[c.j].toLowerCase()}`, deja: false };
+  if (!joursDe(a).includes(c.j)) return { etat: 'pris', repos: true, texte: `ne travaille pas le ${JOURS[c.j].toLowerCase()}`, deja: false };
   const deja = I.places.some(p => p.aeshId === aeshId && p.coursId === coursId && p.au >= du && p.du <= au);
   let premierPris = null, premierAbs = null, premiereReu = null, nbSem = 0, nbAbs = 0, premierTrop = null;
   const h = duree(c.d, c.f), prevu = +((a.heures || {})[pole]);
