@@ -311,7 +311,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .voile{position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center;animation:apparait .15s ease}
 @keyframes apparait{from{opacity:0}}
 @media (min-width:700px){.voile{align-items:center;padding:20px}}
-.feuille{background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:24px 24px 0 0;padding:14px 20px calc(20px + var(--safe-b));box-shadow:var(--sh-l);display:grid;gap:14px}
+.feuille{background:var(--card);color:var(--ink);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;border-radius:24px 24px 0 0;padding:14px 20px calc(20px + var(--safe-b));box-shadow:var(--sh-l);display:grid;gap:14px}
+@supports (max-height:92dvh){.feuille{max-height:92dvh}}
+.tete-f{position:sticky;top:-14px;z-index:3;background:var(--card);padding:6px 0 8px;margin-top:-6px;border-bottom:1px solid var(--line-2)}
+.tete-f .rond{width:38px;height:38px;font-size:16px}
 .feuille.large{max-width:760px}
 @media (min-width:700px){.feuille{border-radius:24px}}
 .poignee{width:42px;height:5px;border-radius:3px;background:var(--line);margin:0 auto}
@@ -337,6 +340,22 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 /* ── explications ⓘ et filières (17/09/2026) ── */
 .pt-aide{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:var(--card-2);color:var(--muted);font-size:.78rem;font-weight:800;line-height:1;padding:0;vertical-align:2px}
 .pt-aide[aria-expanded="true"]{background:var(--pole);border-color:var(--pole);color:#fff}
+.services-bande{display:grid;gap:10px;margin-top:-6px}
+.serv-grille{display:grid;grid-template-columns:auto repeat(5,minmax(0,1fr));gap:6px;align-items:stretch}
+.serv-nom{display:flex;align-items:center;font-weight:700;font-size:.9rem;padding-right:6px}
+.serv-case{min-height:46px;border:1.5px dashed var(--line);border-radius:12px;background:var(--card);display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;padding:5px}
+.serv-case.on{border-style:solid;border-color:var(--pole-b);background:var(--pole-l)}
+.serv-case:hover{border-color:var(--pole)}
+.serv-case .plus{color:var(--muted);font-weight:800}
+.demis{display:grid;grid-template-columns:auto repeat(5,minmax(0,1fr));gap:6px;align-items:center;width:100%}
+.dj-t{font-size:.78rem;font-weight:700;color:var(--muted);text-align:center}
+.dj{min-height:44px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);font-size:1.05rem;font-weight:800;color:var(--muted)}
+.dj-x{border-color:var(--err);background:var(--err-l);color:var(--err)}
+.dj-s{border-color:var(--warn);background:var(--warn-l);color:var(--warn)}
+.choix-aesh button.indispo{border-color:color-mix(in srgb,var(--err) 55%,var(--line))}
+.choix-aesh button.souhait{border-color:color-mix(in srgb,var(--warn) 55%,var(--line))}
+.choix-aesh .ct-x{color:var(--err);font-weight:800}
+.choix-aesh .ct-s{color:var(--warn);font-weight:800}
 .jourc{border:1.5px solid var(--line);background:var(--card);border-radius:11px;padding:6px 11px;font-weight:650;min-height:40px;color:var(--ink)}
 .jourc[aria-pressed="true"]{border-color:var(--pole);background:var(--pole-l);color:var(--pole)}
 .champ .bandeau{width:100%}

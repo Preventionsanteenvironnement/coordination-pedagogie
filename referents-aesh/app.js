@@ -302,7 +302,7 @@ export async function demarrer({ FS, db, erreur }) {
   const AIDES = {
     contrat: 'Le total d’heures dues par semaine : présence élève, services (cantine, internat…), réunion, etc.',
     presence: 'Les heures en classe avec les élèves, que vous notez vous-même : le contrat moins la réunion et les services. C’est ce qu’on place dans l’emploi du temps.',
-    jours: 'Les jours où il travaille. On n’y touche que s’il ne travaille pas certains jours : ceux-là ne seront plus proposés dans l’emploi du temps.',
+    jours: 'Par défaut, il travaille toute la semaine : on ne touche à rien. ✕ indisponible : c’est écrit dans son contrat, il ne travaille pas ce moment-là. ◐ souhait : il aimerait ne pas travailler ce moment-là. Dans les deux cas, on peut quand même le placer : c’est vous qui décidez.',
     reunion: 'La réunion d’équipe : son nombre d’heures par semaine, puis son jour et son heure. Elle est comptée dans le contrat, pas dans la présence élève.',
     intervient: 'Les filières et les classes où il intervient. Votre filière est mise par défaut. « Tous les niveaux » : toutes les classes de la filière.'
   };
@@ -382,10 +382,10 @@ export async function demarrer({ FS, db, erreur }) {
   const filieresParDefaut = a => Object.fromEntries(Object.keys(a.equipes || {}).flatMap(q => filieresDuPole(q).map(f => [f.id, { classes: null }])));
   function initForm(id) {
     const I = idx(), p = P();
-    if (id === 'nouveau') return { id: 'nouveau', recherche: '', choisi: null, a: { id: '', type: 'aesh', sigle: '', equipes: { [p.id]: 1 }, contrat: null, heures: { [p.id]: null }, filieres: Object.fromEntries(filieresDuPole(p.id).map(f => [f.id, { classes: null }])), rattachement: p.id, services: [], jours: [0, 1, 2, 3, 4], reunion: null, actif: true }, orig: null };
+    if (id === 'nouveau') return { id: 'nouveau', recherche: '', choisi: null, a: { id: '', type: 'aesh', sigle: '', equipes: { [p.id]: 1 }, contrat: null, heures: { [p.id]: null }, filieres: Object.fromEntries(filieresDuPole(p.id).map(f => [f.id, { classes: null }])), rattachement: p.id, services: [], dispos: {}, reunion: null, actif: true }, orig: null };
     const a = I.aesh.get(id); if (!a) return null;
     const copie = JSON.parse(JSON.stringify(a)); delete copie.depart;
-    copie.services = K.servicesDe(a); copie.jours = K.joursDe(a); delete copie.cantine; delete copie.internat; delete copie.service; delete copie.serviceLib;
+    copie.services = K.servicesDe(a); copie.dispos = K.disposDe(a); delete copie.jours; delete copie.cantine; delete copie.internat; delete copie.service; delete copie.serviceLib;
     if (!K.filieresDe(copie)) copie.filieres = filieresParDefaut(copie);
     copie.rattachement = rattachementDe(copie);
     return { id, a: copie, orig: JSON.parse(JSON.stringify(copie)) };
@@ -406,10 +406,10 @@ export async function demarrer({ FS, db, erreur }) {
     if ((o.rattachement || '') !== (a.rattachement || '')) l.push(['Équipe', o.rattachement ? nomPole(o.rattachement) : '—', a.rattachement ? nomPole(a.rattachement) : '—']);
     const tousPoles = [...new Set([...Object.keys(o.equipes || {}), ...Object.keys(a.equipes || {})])];
     tousPoles.forEach(q => { const av = (o.equipes || {})[q] != null ? v((o.heures || {})[q]) : 'pas dans le pôle', ap = (a.equipes || {})[q] != null ? v((a.heures || {})[q]) : 'retiré du pôle'; if (av !== ap) l.push([`Heures ${nomPole(q)}`, av, ap]); });
-    const sv = x => (x || []).map(y => `${y.nom} ${v(y.h)}`).join(', ') || 'aucun';
+    const sv = x => (x || []).map(y => `${y.nom} ${v(y.h)}${(y.jours || []).length ? ' (' + y.jours.map(j => K.JOURS_C[j]).join(' ') + ')' : ''}`).join(', ') || 'aucun';
     if (sv(o.services) !== sv(a.services)) l.push(['Services', sv(o.services), sv(a.services)]);
-    const jv = x => (x || [0, 1, 2, 3, 4]).map(j => K.JOURS_C[j]).join(' ');
-    if (jv(o.jours) !== jv(a.jours)) l.push(['Jours de présence', jv(o.jours), jv(a.jours)]);
+    const dv = x => { const d = K.disposDe(x), l2 = Object.keys(d).sort().map(k => `${K.JOURS_C[+k[0]]} ${k[1] === 'M' ? 'matin' : 'ap.-midi'} ${d[k] === 'x' ? '✕' : '◐'}`); return l2.join(', ') || 'toute la semaine'; };
+    if (dv(o) !== dv(a)) l.push(['Quand il travaille', dv(o), dv(a)]);
     const r = x => x && K.RE_HEURE.test(x.debut || '') ? `${K.JOURS[x.jour]} ${K.hFr(x.debut)}–${K.hFr(x.fin)}` : '—';
     if (r(o.reunion) !== r(a.reunion)) l.push(['Jour de la réunion', r(o.reunion), r(a.reunion)]);
     if (nombre(o.reunionH) !== nombre(a.reunionH)) l.push(['Réunion', K.fmtH(K.heuresReunion(o)), K.fmtH(K.heuresReunion(a))]);
@@ -429,7 +429,7 @@ export async function demarrer({ FS, db, erreur }) {
     const absences = I.absences.filter(x => x.aeshId === a.id && x.au >= K.isoLocal()).sort((x, y) => x.du.localeCompare(y.du));
     const reu = a.reunion || {};
     const prochaineReunion = reu.debut != null && reu.jour != null ? (() => { let d = K.ajoute(S.lundi, reu.jour); for (let k = 0; k < 8 && (d < K.isoLocal() || S.C.off(d)); k++) d = K.ajoute(d, 7); return d; })() : '';
-    const jours = K.joursDe(a), ecart = K.ecartContrat(a);
+    const ecart = K.ecartContrat(a);
     return `<div class="fiche">
       <div class="ligne"><span class="sigle grand">${esc(a.sigle || '?')}</span><div style="flex:1;min-width:0"><h1 id="titre" tabindex="-1">${esc(a.sigle || 'Nouvel AESH')}</h1>
         <p class="sous">${[p.nom, ...autres.map(nomPole)].map(esc).join(' + ')}</p></div>${!nouveau ? selecteurSemaine() : ''}</div>
@@ -449,9 +449,16 @@ export async function demarrer({ FS, db, erreur }) {
         ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
         <div class="champ ${estModif(libFilieres(o) !== libFilieres(a))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Intervient en ${aide('intervient')}</b><small>${esc(libFilieres(a))}</small>${aideTexte('intervient')}</span><button type="button" class="btn petit" id="f-filieres" data-a="filieres">Modifier</button></div>
         ${Object.keys(a.equipes || {}).map(q => `<div class="champ ${estModif(nombre((o.heures || {})[q]) !== nombre((a.heures || {})[q]) || (o.equipes || {})[q] == null)}"><span class="lib"><b>Heures dans ${esc(nomPole(q))}</b><small>heures par semaine</small></span>${pas('pole:' + q, (a.heures || {})[q], 0.5, 'Heures dans ' + nomPole(q))}</div>`).join('')}
-        ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${t}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}</div>`).join('')}
+        ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${t}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
+          <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div></div>`).join('')}
         <div class="champ" style="grid-template-columns:1fr"><div class="ligne"><span class="muted" style="font-weight:700">Services :</span><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ Cantine, internat, autre service</button></div></div>
-        <div class="champ ${estModif(JSON.stringify(o.jours || [0, 1, 2, 3, 4]) !== JSON.stringify(jours))}" style="grid-template-columns:1fr"><span class="lib"><b>Jours de présence ${aide('jours')}</b>${aideTexte('jours')}</span><div class="choix" role="group" aria-label="Jours de présence">${K.JOURS_C.map((j, i) => `<button type="button" id="jp-${i}" data-a="jour-presence" data-v="${i}" aria-pressed="${jours.includes(i)}">${j}</button>`).join('')}</div></div>
+        <div class="champ ${estModif(JSON.stringify(K.disposDe(o)) !== JSON.stringify(K.disposDe(a)))}" style="grid-template-columns:1fr"><span class="lib"><b>Quand il travaille ${aide('jours')}</b><small>touchez une case pour la changer</small>${aideTexte('jours')}</span>
+          <div class="demis" role="group" aria-label="Disponibilités par demi-journée">
+            <span></span>${K.JOURS_C.map(j => `<span class="dj-t">${j}</span>`).join('')}
+            ${K.DEMIS.map(([code, lib]) => `<span class="dj-t">${lib === 'matin' ? 'Matin' : 'Ap.-midi'}</span>${K.JOURS_C.map((_, i) => { const e = K.etatDemi(a, i, code);
+              return `<button type="button" class="dj ${e === 'x' ? 'dj-x' : e === 's' ? 'dj-s' : ''}" id="dj-${i}${code}" data-a="demi" data-v="${i}${code}" aria-label="${esc(K.JOURS[i])} ${esc(lib)} : ${e === 'x' ? 'indisponible' : e === 's' ? 'souhait' : 'il travaille'}">${e === 'x' ? '✕' : e === 's' ? '◐' : '·'}</button>`; }).join('')}`).join('')}
+          </div>
+          <div class="leg" style="margin-top:6px"><span><b>·</b> il travaille</span><span><b style="color:var(--err)">✕</b> indisponible (contrat)</span><span><b style="color:var(--warn)">◐</b> souhait</span></div></div>
       </div>
       ${!nouveau ? `<div class="carte pad" style="display:grid;gap:10px"><div class="ligne ecarte"><h2>Absences et formations</h2><button type="button" class="btn petit" id="f-abs" data-a="aller" data-v="absence" data-id="${esc(a.id)}">＋ Poser</button></div>
         ${absences.length ? absences.map(x => `<div class="ligne ecarte"><span><span class="puce err">${esc(K.MOTIFS[x.motif] || 'Absence')}</span> ${x.du === x.au ? esc(K.dateLongue(x.du)) : `du ${esc(K.dateCourte(x.du))} au ${esc(K.dateCourte(x.au))}`}${x.journee === false ? ` · ${K.hFr(x.debut)}–${K.hFr(x.fin)}` : ''}</span></div>`).join('') : '<span class="muted">Aucune à venir.</span>'}</div>` : ''}
@@ -597,7 +604,67 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="ligne" style="gap:8px"><span class="muted" style="font-size:.9rem">PFMP ${esc(k.court)} : ${(k.pfmp || []).length ? esc((k.pfmp || []).map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')) : 'aucune renseignée'}${k.pfmpSaisies ? ' <span class="puce">saisies par le référent</span>' : ''}</span><button type="button" class="btn petit" id="pfmp-modifier" data-a="pfmp">Modifier les PFMP</button></div>
       ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>${carteLiberes(nom)}` : ''}
       <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> présents / besoin estimé</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
-      ${grilleClasse(nom, false)}`;
+      ${grilleClasse(nom, false)}
+      ${bandeauServices()}`;
+  }
+
+  /* ─── Cantine et internat, sous la grille (17/09/2026, demande de Brahim) ───
+     À part de la grille, pour ne pas l'embrouiller. Tous pôles confondus : un AESH de CAPa peut être
+     à la cantine le même jour qu'un des vôtres, et chaque référent le voit. */
+  const SERVICES_BANDE = ['Cantine', 'Internat'];
+  function nomsServices() {
+    const l = [...SERVICES_BANDE];
+    [...idx().aesh.values()].forEach(a => K.servicesDe(a).forEach(x => { if (!l.includes(x.nom)) l.push(x.nom); }));
+    return l;
+  }
+  function bandeauServices() {
+    const I = idx(), sem = S.C.semaine(S.lundi), p = P();
+    return `<div class="carte pad services-bande"><div class="ligne ecarte"><h2>Cantine, internat</h2><span class="muted" style="font-size:.9rem">Hors classe, tous pôles confondus. Touchez un jour.</span></div>
+      <div class="serv-grille">
+        <span></span>${K.JOURS_C.map((j, i) => `<span class="dj-t">${j}<small class="muted" style="display:block;font-weight:600">${K.jjmm(sem.jours[i].date)}</small></span>`).join('')}
+        ${nomsServices().map(nom => `<span class="serv-nom">${esc(nom)}</span>${[0, 1, 2, 3, 4].map(j => {
+          const l = K.auService(I, nom, j);
+          return `<button type="button" class="serv-case ${l.length ? 'on' : ''}" id="sv-${esc(nom)}-${j}" data-a="service" data-v="${esc(nom)}|${j}" aria-label="${esc(nom)} ${esc(K.JOURS[j])} : ${l.length ? l.map(a => a.sigle).join(', ') : 'personne'}">${l.length ? l.map(a => `<span class="pill" style="border-color:${(pole(rattachementDe(a)) || p).couleur}">${esc(a.sigle)}</span>`).join('') : '<span class="plus">＋</span>'}</button>`;
+        }).join('')}`).join('')}
+      </div></div>`;
+  }
+  function feuilleService(f) {
+    const I = idx(), l = K.aeshActifs(I), dedans = new Set(f.choisis);
+    const ordre = [...l].sort((x, y) => (dedans.has(y.id) ? 1 : 0) - (dedans.has(x.id) ? 1 : 0));
+    return `<div class="tete-f"><div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">${esc(f.nom)} · ${esc(K.JOURS[f.j].toLowerCase())}</h2>
+        <button type="button" class="rond" id="sv-croix" data-a="fermer" aria-label="Fermer sans rien changer" title="Fermer sans rien changer">✕</button></div>
+      <p class="sous" style="margin:2px 0 0">Qui assure ce service ce jour-là ? Tous les pôles sont proposés.</p></div>
+      <div class="choix-aesh" role="group" aria-label="AESH">${ordre.map(a => {
+        const on = f.choisis.includes(a.id), q = pole(rattachementDe(a)) || P(), b = K.bilan(ctx(), a.id, S.lundi);
+        return `<button type="button" id="sa-${esc(a.id)}" data-a="serv-choix" data-v="${esc(a.id)}" aria-pressed="${on}" style="${on ? '' : `border-color:${q.couleur}30`}"><b>${esc(a.sigle)}</b><small style="color:${q.couleur}">${esc(q.nom)}</small><small>${on ? '✓ ' + esc(f.nom.toLowerCase()) : b && b.reste != null ? `reste ${K.fmtH(b.reste)}` : ''}</small></button>`;
+      }).join('')}</div>
+      <div class="actions"><button type="button" class="btn" id="sv-fermer" data-a="fermer">Annuler</button>
+        <button type="button" class="btn valider" id="sv-valider" data-a="serv-valider" ${JSON.stringify([...f.choisis].sort()) === JSON.stringify([...f.avant].sort()) ? 'disabled' : ''}>✓ Enregistrer</button></div>`;
+  }
+  function validerService() {
+    const f = S.feuille, I = idx(), sig = id => (I.aesh.get(id) || {}).sigle || '?';
+    const ajout = f.choisis.filter(x => !f.avant.includes(x)), retrait = f.avant.filter(x => !f.choisis.includes(x));
+    const lignes = [['Service', `${f.nom} · ${K.JOURS[f.j].toLowerCase()}`]];
+    if (ajout.length) lignes.push(['Ajout', ajout.map(sig).join(', ')]);
+    if (retrait.length) lignes.push(['Retrait', retrait.map(sig).join(', ')]);
+    const avert = ajout.map(id => { const a = I.aesh.get(id); if (!a) return ''; const h = K.servicesDe(a).find(x => x.nom === f.nom);
+      return h ? '' : `${a.sigle} : ${f.nom.toLowerCase()} n’était pas dans sa fiche, il y est ajouté (heures à compléter).`; }).filter(Boolean);
+    const garde = { ...f };
+    S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: `${f.nom} · ${K.JOURS_C[f.j]}`, lignes, bouton: 'Confirmer', retourService: garde, avert: avert.join('\n'),
+      travail: async () => {
+        for (const id of [...ajout, ...retrait]) {
+          const a = idx().aesh.get(id); if (!a) continue;
+          const doc = JSON.parse(JSON.stringify(a)); delete doc.depart;
+          const serv = K.servicesDe(doc).map(x => ({ ...x, jours: [...x.jours] }));
+          let x = serv.find(y => y.nom === f.nom);
+          if (ajout.includes(id)) { if (!x) { x = { nom: f.nom, h: 1, jours: [] }; serv.push(x); } if (!x.jours.includes(f.j)) x.jours.push(f.j); x.jours.sort(); }
+          else if (x) x.jours = x.jours.filter(j => j !== f.j);
+          doc.services = serv; doc.dispos = K.disposDe(doc); delete doc.jours; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
+          await ecrire(doc);
+        }
+        return {};
+      } };
+    rendre({ focus: 'cf-oui' });
   }
 
   /* ─── PFMP : AESH libérés et redéploiement (17/09/2026) ───
@@ -671,7 +738,8 @@ export async function demarrer({ FS, db, erreur }) {
       const b = K.bilan(cx, a.id, S.lundi), x = dispoDe[a.id];
       const pv = K.prevuPourClasse(a, FILIERES, nom);
       const ligne3 = ailleurs ? (x ? `${K.fmtH(x.dispo)} dispo · ${x.complets.map(q => nomPole(q.p) + (q.complet ? ' complet' : ' en cours')).join(', ')}` : `${Object.keys(a.equipes || {}).map(nomPole).join(', ')} · rien de disponible`) : (b && b.reste != null ? `reste ${K.fmtH(b.reste)}` : '');
-      return `<button type="button" class="${cl}" id="pa-${esc(a.id)}" data-a="choix-aesh" data-v="${esc(a.id)}" aria-pressed="${on}" title="${esc(d.detail || '')}"><b>${esc(a.sigle)}</b><small>${on ? '✓ choisi' : esc(dejaIci.has(a.id) ? 'placé' : d.texte)}</small>${ligne3 ? `<small>${esc(ligne3)}</small>` : ''}${pv.connu && !pv.prevu && !dejaIci.has(a.id) ? `<small class="horspr">pas prévu ici</small>` : ''}</button>`;
+      const ct = d.contrainte;
+      return `<button type="button" class="${cl} ${ct ? (ct.etat === 'x' ? 'indispo' : 'souhait') : ''}" id="pa-${esc(a.id)}" data-a="choix-aesh" data-v="${esc(a.id)}" aria-pressed="${on}" title="${esc(d.detail || '')}"><b>${esc(a.sigle)}</b><small>${on ? '✓ choisi' : esc(dejaIci.has(a.id) ? 'placé' : d.texte)}</small>${ligne3 ? `<small>${esc(ligne3)}</small>` : ''}${ct && !on ? `<small class="${ct.etat === 'x' ? 'ct-x' : 'ct-s'}">${ct.etat === 'x' ? '✕ contrat' : '◐ souhait'}</small>` : ''}${pv.connu && !pv.prevu && !dejaIci.has(a.id) ? `<small class="horspr">pas prévu ici</small>` : ''}</button>`;
     };
     const avant = [...dejaIci], ajout = f.choisis.filter(x => !dejaIci.has(x)), retrait = avant.filter(x => !f.choisis.includes(x));
     const rac = raccourcis();
@@ -935,6 +1003,7 @@ export async function demarrer({ FS, db, erreur }) {
     else if (f.type === 'partager') h = feuillePartager(f);
     else if (f.type === 'pfmp') h = feuillePfmp(f);
     else if (f.type === 'filieres') h = feuilleFilieres(f);
+    else if (f.type === 'service') { h = feuilleService(f); large = true; }
     else if (f.type === 'deplacer') { h = feuilleDeplacer(f); large = true; }
     return `<div class="voile" data-a="voile"><div class="feuille ${large ? 'large' : ''} ${f.fait ? 'fait' : ''}" role="dialog" aria-modal="true" aria-labelledby="f-titre"><div class="poignee" aria-hidden="true"></div>${h}</div></div>`;
   }
@@ -955,8 +1024,9 @@ export async function demarrer({ FS, db, erreur }) {
     const a = S.form && S.form.a;
     if (!a) return `<h2 id="f-titre" tabindex="-1">Fiche fermée</h2><div class="actions"><button type="button" class="btn" data-a="fermer">Fermer</button></div>`;
     const fl = a.filieres || {}, rat = rattachementDe(a);
-    return `<h2 id="f-titre" tabindex="-1">Où intervient ${esc(a.sigle || 'cet AESH')} ?</h2>
-      <p class="sous" style="margin-top:-8px">Cochez ses filières. Une filière cochée, c’est tous ses niveaux.</p>
+    return `<div class="tete-f"><div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">Où intervient ${esc(a.sigle || 'cet AESH')} ?</h2>
+        <button type="button" class="rond" id="fil-croix" data-a="fil-annuler" aria-label="Fermer sans rien changer" title="Fermer sans rien changer">✕</button></div>
+      <p class="sous" style="margin:2px 0 0">Cochez ses filières. Une filière cochée, c’est tous ses niveaux.</p></div>
       ${POLES.map(q => `<div style="display:grid;gap:6px"><b style="color:${q.couleur}">${esc(q.nom)}</b>
         ${filieresDuPole(q.id).map(x => {
           const on = !!fl[x.id], cl = on && Array.isArray(fl[x.id].classes) && fl[x.id].classes.length ? fl[x.id].classes : null, ouvert = f.ouvert === x.id;
@@ -968,7 +1038,8 @@ export async function demarrer({ FS, db, erreur }) {
       <div style="display:grid;gap:6px"><b>Équipe qui le gère</b><span class="muted" style="font-size:.9rem">Son référent, et sa réunion d’équipe.</span>
         <div class="choix" role="group" aria-label="Équipe de rattachement">${Object.keys(a.equipes || {}).map(pid => `<button type="button" id="fr-${pid}" data-a="fil-rattach" data-v="${pid}" aria-pressed="${rat === pid}">${esc(nomPole(pid))}</button>`).join('')}</div></div>
       <div class="bandeau info">Rien n’est enregistré tant que vous n’avez pas touché « ✓ Enregistrer » sur sa fiche.</div>
-      <div class="actions"><button type="button" class="btn valider" id="fil-ok" data-a="fermer">✓ Terminé</button></div>`;
+      <div class="actions"><button type="button" class="btn" id="fil-annuler" data-a="fil-annuler">Annuler</button>
+        <button type="button" class="btn valider" id="fil-ok" data-a="fermer">✓ Terminé</button></div>`;
   }
   function feuillePfmp(f) {
     const k = S.edt.classes[f.classe], ok = f.lignes.every(x => K.RE_DATE.test(x.debut || '') && K.RE_DATE.test(x.fin || '') && x.fin >= x.debut);
@@ -1027,7 +1098,7 @@ export async function demarrer({ FS, db, erreur }) {
       avert: entreTemps ? `Cette fiche a été modifiée entre-temps par ${nomPole(recent0.par) || 'un autre référent'} : seuls vos changements ci-dessus seront appliqués, le reste est conservé.` : '' }, async () => {
       /* B01 (audit) : on repart de la fiche la plus récente et on n'y applique que ce qui a été changé ici. */
       const orig = f.orig || {}, recent = a.id ? idx().aesh.get(a.id) : null;
-      const doc = recent ? { ...JSON.parse(JSON.stringify(recent)), services: K.servicesDe(recent), jours: K.joursDe(recent) } : { ...a };
+      const doc = recent ? { ...JSON.parse(JSON.stringify(recent)), services: K.servicesDe(recent), dispos: K.disposDe(recent) } : { ...a };
       delete doc.depart; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
       if (recent) {
         const diff = (x, y) => JSON.stringify(x ?? null) !== JSON.stringify(y ?? null);
@@ -1041,7 +1112,7 @@ export async function demarrer({ FS, db, erreur }) {
           if (diff(nombre((orig.heures || {})[q]), nombre((a.heures || {})[q]))) { if (nombre((a.heures || {})[q]) == null) delete doc.heures[q]; else doc.heures[q] = a.heures[q]; }
         });
         if (diff(orig.services, a.services)) doc.services = a.services;
-        if (diff(orig.jours, a.jours)) doc.jours = a.jours;
+        if (JSON.stringify(K.disposDe(orig)) !== JSON.stringify(K.disposDe(a))) doc.dispos = K.disposDe(a);
         if (diff(orig.reunion, a.reunion)) doc.reunion = a.reunion;
         /* B01 : les filières se fusionnent une par une, comme les pôles — un autre référent a pu en ajouter entre-temps. */
         doc.filieres = { ...(K.filieresDe(recent) || filieresParDefaut(recent)) };
@@ -1067,8 +1138,8 @@ export async function demarrer({ FS, db, erreur }) {
       doc.reunionH = borne(doc.reunionH);
       if (doc.reunionH == null) delete doc.reunionH;
       doc.heures = Object.fromEntries(Object.entries(doc.heures).map(([k, v]) => [k, borne(v)]).filter(([, v]) => v != null));
-      doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h) }));
-      doc.jours = K.joursDe(doc); delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
+      doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h), jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => j >= 0 && j <= 4))].sort() : [] }));
+      doc.dispos = K.disposDe(doc); delete doc.jours; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
       doc.actif = true;
       const d = await ecrire(doc);
       S.form = null;
@@ -1147,8 +1218,8 @@ export async function demarrer({ FS, db, erreur }) {
         avert.push(`${a.sigle} est prévu${ou ? ` en ${ou}` : ''} : ${S.edt.classes[nom].court} sera ajouté à sa fiche.`);
         aRegler.push(id);
       }
-      if (d.repos) avert.push(`${a.sigle} ${d.texte}.`);
-      else if (d.etat === 'reunion') avert.push(`${a.sigle} : ${d.texte} au même moment${d.detail ? ` (${d.detail})` : ''}.`);
+      if (d.contrainte) avert.push(`${a.sigle} : ${d.contrainte.texte}${d.contrainte.etat === 'x' ? '' : ' (souhait)'}.`);
+      if (d.etat === 'reunion') avert.push(`${a.sigle} : ${d.texte} au même moment${d.detail ? ` (${d.detail})` : ''}.`);
       if (d.etat === 'trop') avert.push(`${a.sigle} : ${d.texte}${d.detail ? ` — ${d.detail}` : ''}.`);
       const hp = f.horaires[id] || { debut: c.d, fin: c.f };
       I.places.forEach(x => {
@@ -1217,7 +1288,12 @@ export async function demarrer({ FS, db, erreur }) {
       case 'reu-jour': { const f = S.form, r = f.a.reunion || {}; f.a.reunion = { jour: +v, debut: r.debut || '13:00', fin: r.fin || '14:00' }; rendre({ focus: b.id }); return; }
       case 'reu-aucune': S.form.a.reunion = null; rendre(); return;
       case 'info': S.info = S.info === v ? null : v; rendre({ focus: b.id }); return;
-      case 'filieres': ouvrir({ type: 'filieres', ouvert: null }); return;
+      case 'filieres': { const a = S.form && S.form.a; if (!a) return;
+        ouvrir({ type: 'filieres', ouvert: null, avant: JSON.parse(JSON.stringify({ filieres: a.filieres || null, rattachement: a.rattachement || null, equipes: a.equipes || {}, heures: a.heures || {} })) }); return; }
+      case 'fil-annuler': { const f = S.feuille, a = S.form && S.form.a;
+        if (a && f && f.avant) { a.filieres = f.avant.filieres ? JSON.parse(JSON.stringify(f.avant.filieres)) : undefined; a.rattachement = f.avant.rattachement || undefined;
+          a.equipes = JSON.parse(JSON.stringify(f.avant.equipes)); a.heures = JSON.parse(JSON.stringify(f.avant.heures)); }
+        fermer(); return; }
       case 'fil-toggle': {
         const f = S.form, a = f && f.a, x = filiere(v); if (!a || !x) return;
         a.filieres = { ...(a.filieres || {}) };
@@ -1237,6 +1313,10 @@ export async function demarrer({ FS, db, erreur }) {
         }
         rendre({ focus: b.id }); return;
       }
+      case 'service': { const [nom, j] = String(v).split('|'), dedans = K.auService(idx(), nom, +j).map(a => a.id);
+        ouvrir({ type: 'service', nom, j: +j, choisis: [...dedans], avant: [...dedans] }); return; }
+      case 'serv-choix': { const f = S.feuille, i = f.choisis.indexOf(v); if (i < 0) f.choisis.push(v); else f.choisis.splice(i, 1); rendre({ focus: b.id }); return; }
+      case 'serv-valider': validerService(); return;
       case 'fil-deplier': if (S.feuille) S.feuille.ouvert = S.feuille.ouvert === v ? null : v; rendre({ focus: b.id }); return;
       case 'fil-classe': {
         const [fid, n] = String(v).split('|'), a = S.form && S.form.a, x = filiere(fid); if (!a || !x || !a.filieres || !a.filieres[fid]) return;
@@ -1248,13 +1328,17 @@ export async function demarrer({ FS, db, erreur }) {
         rendre({ focus: b.id }); return;
       }
       case 'fil-rattach': { const a = S.form && S.form.a; if (a) a.rattachement = v; rendre({ focus: b.id }); return; }
-      case 'serv-ajouter': { const f = S.form; f.a.services = f.a.services || []; f.a.services.push({ nom: f.a.services.some(x => x.nom === 'Cantine') ? (f.a.services.some(x => x.nom === 'Internat') ? '' : 'Internat') : 'Cantine', h: 1 }); rendre(); return; }
+      case 'serv-ajouter': { const f = S.form; f.a.services = f.a.services || []; f.a.services.push({ nom: f.a.services.some(x => x.nom === 'Cantine') ? (f.a.services.some(x => x.nom === 'Internat') ? '' : 'Internat') : 'Cantine', h: 1, jours: [] }); rendre(); return; }
+      case 'serv-jour': { const f = S.form, [i, j] = String(v).split('|').map(Number), x = f.a.services[i]; if (!x) return;
+        const l = Array.isArray(x.jours) ? [...x.jours] : []; x.jours = l.includes(j) ? l.filter(y => y !== j) : [...l, j].sort(); rendre({ focus: b.id }); return; }
       case 'serv-retirer': { const f = S.form; f.a.services.splice(+v, 1); rendre(); return; }
-      case 'jour-presence': { const f = S.form, j = +v, l = K.joursDe(f.a); f.a.jours = l.includes(j) ? l.filter(x => x !== j) : [...l, j].sort(); if (!f.a.jours.length) f.a.jours = [j]; rendre({ focus: b.id }); return; }
+      case 'demi': { const f = S.form, d = { ...K.disposDe(f.a) }, e = d[v];
+        if (!e) d[v] = 'x'; else if (e === 'x') d[v] = 's'; else delete d[v];
+        f.a.dispos = d; delete f.a.jours; rendre({ focus: b.id }); return; }
       case 'annuler-fiche': S.form = null; rendre(); return;
       case 'valider-fiche': validerFiche(); return;
       case 'retirer-aesh': retirerAesh(); return;
-      case 'choisir-existant': { const I = idx(), x = JSON.parse(JSON.stringify(I.aesh.get(v))); delete x.depart; const p = P(); const orig = JSON.parse(JSON.stringify(x)); x.equipes = { ...(x.equipes || {}), [p.id]: 1 }; x.heures = { ...(x.heures || {}), [p.id]: null }; x.services = K.servicesDe(x); x.jours = K.joursDe(x); delete x.cantine; delete x.internat; delete x.service; delete x.serviceLib;
+      case 'choisir-existant': { const I = idx(), x = JSON.parse(JSON.stringify(I.aesh.get(v))); delete x.depart; const p = P(); const orig = JSON.parse(JSON.stringify(x)); x.equipes = { ...(x.equipes || {}), [p.id]: 1 }; x.heures = { ...(x.heures || {}), [p.id]: null }; x.services = K.servicesDe(x); x.dispos = K.disposDe(x); delete x.jours; delete x.cantine; delete x.internat; delete x.service; delete x.serviceLib;
         x.filieres = { ...(K.filieresDe(x) || filieresParDefaut(orig)), ...Object.fromEntries(filieresDuPole(p.id).map(g => [g.id, { classes: null }])) }; x.rattachement = rattachementDe(x); S.form = { kind: 'fiche', cle: 'nouveau', id: 'nouveau', existant: true, choisi: true, a: x, orig }; rendre({ haut: true, focus: 'pv-pole-' + p.id }); return; }
       case 'choisir-nouveau': { const f = S.form; f.a.sigle = K.normSigle(f.recherche); f.choisi = true; rendre({ haut: true, focus: 'pv-contrat' }); return; }
       case 'abs-aesh': formAbsence().aeshId = v; rendre({ focus: b.id }); return;
@@ -1357,7 +1441,7 @@ export async function demarrer({ FS, db, erreur }) {
         else { const ta = document.getElementById('pt-texte'); ta.select(); try { document.execCommand('copy'); fin(); } catch (e) { toast('Sélectionnez le texte puis copiez-le.', true); } }
         return; }
       case 'fermer': fermer(); return;
-      case 'confirmer-non': { const f = S.feuille; if (f.retourPlacer) { S.feuille = f.retourPlacer; rendre({ focus: 'pl-valider' }); } else if (f.retourDeplacer) { S.feuille = f.retourDeplacer; rendre({ focus: 'dep-valider' }); } else fermer(); return; }
+      case 'confirmer-non': { const f = S.feuille; if (f.retourPlacer) { S.feuille = f.retourPlacer; rendre({ focus: 'pl-valider' }); } else if (f.retourDeplacer) { S.feuille = f.retourDeplacer; rendre({ focus: 'dep-valider' }); } else if (f.retourService) { S.feuille = f.retourService; rendre({ focus: 'sv-valider' }); } else fermer(); return; }
       case 'confirmer-oui': executerConfirmation(); return;
     }
   }

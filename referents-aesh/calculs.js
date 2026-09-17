@@ -89,11 +89,13 @@ export function normaliserAesh(d, polesAutorises, cat) {
   Object.entries(d.heures && typeof d.heures === 'object' ? d.heures : {}).forEach(([q, v]) => { if (ok(q) && nombreOk(v) != null) heures[q] = nombreOk(v); });
   const r = d.reunion && typeof d.reunion === 'object' && Number.isInteger(+d.reunion.jour) && +d.reunion.jour >= 0 && +d.reunion.jour <= 4 && RE_HEURE.test(d.reunion.debut || '') && RE_HEURE.test(d.reunion.fin || '') ? { jour: +d.reunion.jour, debut: d.reunion.debut, fin: d.reunion.fin } : null;
   const out = { ...d, sigle: String(d.sigle || '?').slice(0, 6), equipes, heures, contrat: nombreOk(d.contrat), reunion: r, actif: d.actif !== false,
-    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) > 0).map(x => ({ nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h) })) : undefined,
+    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) > 0).map(x => ({ nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
+      jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [] })) : undefined,
     jours: Array.isArray(d.jours) ? d.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4) : undefined };
   if (out.services === undefined) delete out.services; if (out.jours === undefined) delete out.jours;
   ['cantine', 'internat', 'service'].forEach(k => { if (k in out) out[k] = nombreOk(out[k]) || 0; });
   if (d.filieres !== undefined) out.filieres = normaliserFilieres(d.filieres, cat);
+  if (d.dispos !== undefined) out.dispos = disposDe({ dispos: d.dispos });
   if (d.presence !== undefined) out.presence = nombreOk(d.presence);
   if (d.reunionH !== undefined) out.reunionH = nombreOk(d.reunionH, 20);
   if (d.rattachement !== undefined) out.rattachement = ok(d.rattachement) ? d.rattachement : undefined;
@@ -191,7 +193,8 @@ export function occupations(ctx, aeshId, lundi) {
   sem.jours.forEach((jr, j) => {
     const iso = jr.date;
     if (jr.off) { out.push({ j, date: iso, type: 'vacances', debut: '08:00', fin: '18:00', label: jr.off }); return; }
-    if (a && !joursDe(a).includes(j)) { out.push({ j, date: iso, type: 'repos', debut: '08:00', fin: '18:00', label: 'Ne travaille pas' }); return; }
+    if (a && !joursDe(a).includes(j) && !I.places.some(p => p.aeshId === aeshId && p.jour === j && iso >= p.du && iso <= p.au))
+      { out.push({ j, date: iso, type: 'repos', debut: '08:00', fin: '18:00', label: 'Ne travaille pas' }); return; }
     const vus = new Set();
     I.places.forEach(p => {
       if (p.aeshId !== aeshId || p.jour !== j || iso < p.du || iso > p.au) return;
@@ -217,12 +220,52 @@ export const institutionCetteSemaine = (I, lundi) => I.reunions.some(r => lundiD
 
 /* Services d'un AESH : liste {nom, h}. Les anciennes fiches (cantine / internat / service) sont lues telles quelles. */
 export function servicesDe(a) {
-  if (Array.isArray(a.services)) return a.services.filter(x => x && Number.isFinite(+x.h) && +x.h > 0).map(x => ({ nom: String(x.nom || 'Service'), h: +x.h }));
-  return [['Cantine', a.cantine], ['Internat', a.internat], [a.serviceLib || 'Autre service', a.service]].filter(([, h]) => +h > 0).map(([nom, h]) => ({ nom, h: +h }));
+  const jours = x => Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [];
+  if (Array.isArray(a.services)) return a.services.filter(x => x && Number.isFinite(+x.h) && +x.h > 0).map(x => ({ nom: String(x.nom || 'Service'), h: +x.h, jours: jours(x) }));
+  return [['Cantine', a.cantine], ['Internat', a.internat], [a.serviceLib || 'Autre service', a.service]].filter(([, h]) => +h > 0).map(([nom, h]) => ({ nom, h: +h, jours: [] }));
 }
+/* Cet AESH assure-t-il ce service ce jour-là ? (les jours sont saisis dans le bandeau sous la grille ou sur sa fiche) */
+export const faitService = (a, nom, j) => servicesDe(a).some(x => x.nom === nom && x.jours.includes(j));
+/* Qui assure ce service ce jour-là, tous pôles confondus. */
+export const auService = (I, nom, j) => [...I.aesh.values()].filter(a => a.actif !== false && faitService(a, nom, j))
+  .sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'));
 export const totalServices = a => servicesDe(a).reduce((s, x) => s + x.h, 0);
-/* Jours de présence (0 = lundi … 4 = vendredi) ; par défaut, toute la semaine. */
-export const joursDe = a => Array.isArray(a.jours) && a.jours.length ? a.jours.map(Number).filter(j => j >= 0 && j <= 4) : [0, 1, 2, 3, 4];
+/* ─── disponibilités par demi-journée (17/09/2026, demande de Brahim) ───
+   a.dispos = { '3M': 'x', '3A': 'x', '2A': 's' }   (jour 0–4 + M/A)
+     'x' = indisponible, fixé au contrat : avertissement ROUGE, mais le placement reste possible ;
+     's' = souhait de l'AESH : avertissement ORANGE.
+   Rien n'interdit : c'est le référent qui tranche. Une fiche d'avant, où des jours étaient décochés,
+   se lit « indisponible toute la journée » — sans rien deviner de plus. */
+export const DEMIS = [['M', 'matin', '08:30', '12:30'], ['A', 'après-midi', '14:00', '18:00']];
+export function disposDe(a) {
+  const out = {};
+  const d = a && a.dispos && typeof a.dispos === 'object' ? a.dispos : null;
+  if (d) {
+    Object.entries(d).forEach(([k, v]) => { if (/^[0-4][MA]$/.test(k) && (v === 'x' || v === 's')) out[k] = v; });
+    return out;
+  }
+  if (Array.isArray(a.jours) && a.jours.length) {
+    const ok = a.jours.map(Number);
+    [0, 1, 2, 3, 4].forEach(j => { if (!ok.includes(j)) DEMIS.forEach(([c]) => { out[j + c] = 'x'; }); });
+  }
+  return out;
+}
+export const etatDemi = (a, j, code) => disposDe(a)[j + code] || '';
+/* Ce que dit la fiche pour un créneau : rien, un souhait, ou une indisponibilité (la plus forte l'emporte). */
+export function contrainteCreneau(a, j, debut, fin) {
+  const dp = disposDe(a); let etat = '', plages = [];
+  DEMIS.forEach(([code, lib, d, f]) => {
+    const e = dp[j + code]; if (!e) return;
+    if (!debut || chevauche(d, f, debut, fin)) { plages.push(lib); if (e === 'x' || etat !== 'x') etat = e === 'x' ? 'x' : (etat || 's'); }
+  });
+  if (!etat) return null;
+  const quand = plages.length === 2 ? JOURS[j].toLowerCase() : `${JOURS[j].toLowerCase()} ${plages[0]}`;
+  return etat === 'x'
+    ? { etat: 'x', texte: `indisponible ${quand} (contrat)` }
+    : { etat: 's', texte: `souhaite ne pas travailler ${quand}` };
+}
+/* Jours de présence (0 = lundi … 4 = vendredi) : ceux où il n'est pas indisponible toute la journée. */
+export const joursDe = a => [0, 1, 2, 3, 4].filter(j => { const dp = disposDe(a); return !(dp[j + 'M'] === 'x' && dp[j + 'A'] === 'x'); });
 
 /* Répartition d'un AESH entre les pôles (indépendante de la semaine) : contrat − heures déclarées par pôle − services − réunion. */
 export function repartition(a, nomPole) {
@@ -297,7 +340,7 @@ export function lundisEntre(C, du, au) {
 export function disponibilite(ctx, aeshId, coursId, du, au, pole) {
   const { C, edt, I } = ctx, c = edt.cours[coursId], a = I.aesh.get(aeshId);
   if (!c || !a) return { etat: 'pris', texte: '—' };
-  if (!joursDe(a).includes(c.j)) return { etat: 'pris', repos: true, texte: `ne travaille pas le ${JOURS[c.j].toLowerCase()}`, deja: false };
+  const contrainte = contrainteCreneau(a, c.j, c.d, c.f);
   const deja = I.places.some(p => p.aeshId === aeshId && p.coursId === coursId && p.au >= du && p.du <= au);
   let premierPris = null, premierAbs = null, premiereReu = null, nbSem = 0, nbAbs = 0, premierTrop = null;
   const h = duree(c.d, c.f), prevu = +((a.heures || {})[pole]);
@@ -322,14 +365,14 @@ export function disponibilite(ctx, aeshId, coursId, du, au, pole) {
   if (premierPris) {
     const oc = edt.cours[premierPris.p.coursId];
     const lieu = premierPris.p.pole !== pole ? (ctx.nomPole ? ctx.nomPole(premierPris.p.pole) : premierPris.p.pole) : (oc.cls || []).map(n => n.replace(/^(C[12]|B[12T])/, '$1 ')).join(' / ');
-    return { etat: 'pris', texte: `pris · ${lieu}`, detail: `${dateCourte(premierPris.iso)} : ${oc.lib || oc.mat}`, deja };
+    return { etat: 'pris', contrainte, texte: `pris · ${lieu}`, detail: `${dateCourte(premierPris.iso)} : ${oc.lib || oc.mat}`, deja };
   }
-  if (nbSem === 0) return { etat: 'aucun', texte: 'pas de cours sur cette période', deja };
-  if (nbAbs === nbSem) return { etat: 'absent', texte: MOTIFS[premierAbs.ab.motif] || 'absent', deja };
-  if (premiereReu) return { etat: 'reunion', texte: premiereReu.inst ? 'réunion instit.' : 'réunion', detail: dateCourte(premiereReu.iso), deja };
-  if (premierTrop) return { etat: 'trop', texte: premierTrop.texte, detail: premierTrop.detail, deja };
-  if (!deja && premierAbs) return { etat: 'libre', texte: `libre · absent ${nbAbs} fois (${jjmm(premierAbs.iso)}…)`, deja };
-  return { etat: 'libre', texte: deja ? 'placé' : 'libre', deja };
+  if (nbSem === 0) return { etat: 'aucun', contrainte, texte: 'pas de cours sur cette période', deja };
+  if (nbAbs === nbSem) return { etat: 'absent', contrainte, texte: MOTIFS[premierAbs.ab.motif] || 'absent', deja };
+  if (premiereReu) return { etat: 'reunion', contrainte, texte: premiereReu.inst ? 'réunion instit.' : 'réunion', detail: dateCourte(premiereReu.iso), deja };
+  if (premierTrop) return { etat: 'trop', contrainte, texte: premierTrop.texte, detail: premierTrop.detail, deja };
+  if (!deja && premierAbs) return { etat: 'libre', contrainte, texte: `libre · absent ${nbAbs} fois (${jjmm(premierAbs.iso)}…)`, deja };
+  return { etat: 'libre', contrainte, texte: contrainte ? contrainte.texte : (deja ? 'placé' : 'libre'), deja };
 }
 
 /* ─────────────── besoins estimés ─────────────── */
