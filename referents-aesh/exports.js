@@ -140,7 +140,7 @@ function syntheseDans(pdf, ctx, poleId, lundi) {
     const b = K.bilan(ctx, a.id, lundi), autres = Object.keys(a.equipes || {}).filter(q => q !== poleId);
     if (i % 2) pdf.rect(28, y - 2, pdf.W - 56, 22, { fill: '#fafbfc', r: 4 });
     const val = [a.sigle, b.contrat != null ? K.fmtH(b.contrat) : '—', (a.heures || {})[poleId] != null ? K.fmtH(a.heures[poleId]) : '—',
-      autres.map(q => `${nomPole(q)} ${(a.heures || {})[q] != null ? K.fmtH(a.heures[q]) : '—'}`).join(' · ') || '—', K.fmtH((+a.cantine || 0) + (+a.internat || 0) + (+a.service || 0)),
+      autres.map(q => `${nomPole(q)} ${(a.heures || {})[q] != null ? K.fmtH(a.heures[q]) : '—'}`).join(' · ') || '—', K.fmtH(K.totalServices(a)),
       K.fmtH(b.total), b.reste != null ? K.fmtH(b.reste) : '—', b.alertes.map(x => x.texte).join(' · ') || '—'];
     x = 28;
     cols.forEach(([, w], k) => { pdf.text(x + 8, y + 13, val[k], { size: k === 0 ? 10 : 9, bold: k === 0, color: k === 7 && b.alertes.length ? '#b42318' : ENCRE, max: w - 12 }); x += w; });
@@ -199,16 +199,16 @@ export function excelClasses(ctx, noms, lundi) {
 function feuilleSynthese(ctx, poleId, lundi) {
   const p = pole(poleId), E = { gras: true, fond: p.clair, couleur: p.couleur, bord: true };
   const l = [[{ v: `Équipe AESH · ${p.nom}`, s: { gras: true, taille: 16 } }], [{ v: titreSemaine(ctx.C, lundi), s: { couleur: '#4b5563' } }], [],
-    ['AESH', 'Contrat (h)', 'Dans le pôle (h)', 'Autres pôles', 'Cantine (h)', 'Internat (h)', 'Service (h)', 'Réunion d’équipe', 'Cette semaine (h)', 'Reste (h)', 'Alertes'].map(v => ({ v, s: E }))];
+    ['AESH', 'Contrat (h)', 'Dans le pôle (h)', 'Autres pôles', 'Services', 'Jours', 'Réunion d’équipe', 'Cette semaine (h)', 'Reste (h)', 'Alertes'].map(v => ({ v, s: E }))];
   K.aeshActifs(ctx.I, poleId).forEach(a => {
     const b = K.bilan(ctx, a.id, lundi), num = v => (v === null || v === undefined || v === '' ? { v: '', s: { bord: true } } : { v: +v, s: { bord: true } });
     l.push([{ v: a.sigle, s: { gras: true, bord: true } }, num(b.contrat), num((a.heures || {})[poleId]),
       { v: Object.keys(a.equipes || {}).filter(q => q !== poleId).map(q => `${nomPole(q)} ${(a.heures || {})[q] ?? '—'} h`).join(' · '), s: { bord: true } },
-      num(a.cantine), num(a.internat), num(a.service), { v: a.reunion ? `${K.JOURS[a.reunion.jour]} ${K.hFr(a.reunion.debut)}–${K.hFr(a.reunion.fin)}` : '', s: { bord: true } },
+      { v: K.servicesDe(a).map(x => `${x.nom} ${x.h} h`).join(' · '), s: { bord: true } }, { v: K.joursDe(a).map(j => K.JOURS_C[j]).join(' '), s: { bord: true } }, { v: a.reunion ? `${K.JOURS[a.reunion.jour]} ${K.hFr(a.reunion.debut)}–${K.hFr(a.reunion.fin)}` : '', s: { bord: true } },
       num(Math.round(b.total * 100) / 100), b.reste == null ? { v: '', s: { bord: true } } : { v: Math.round(b.reste * 100) / 100, s: { bord: true, couleur: b.reste < 0 ? '#b42318' : '#15803d', gras: true } },
       { v: b.alertes.map(x => x.texte).join(' · '), s: { bord: true, couleur: '#b42318', retour: true } }]);
   });
-  return { nom: `Synthèse ${p.nom}`, largeurs: [10, 11, 14, 30, 11, 11, 11, 20, 16, 10, 50], lignes: l, hauteurs: { 1: 24 }, figer: [1, 4] };
+  return { nom: `Synthèse ${p.nom}`, largeurs: [10, 11, 14, 30, 26, 18, 20, 16, 10, 50], lignes: l, hauteurs: { 1: 24 }, figer: [1, 4] };
 }
 
 /* ─────────────── JSON (sauvegarde complète) ─────────────── */

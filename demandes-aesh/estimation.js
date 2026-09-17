@@ -147,7 +147,9 @@ function normaliserCadre(d, edt, volumesRef) {
       const creneaux = (k.cours || []).map(id => edt.cours[id]).filter(x => x && JOURS_EDT[x.j] && RE_HEURE.test(x.d) && RE_HEURE.test(x.f))
         .filter(x => x.sem !== 'S2' || pe.fin >= (edt.s2Debut || '9999')).filter(x => x.sem !== 'S1' || pe.debut <= (edt.s1Fin || '0000'))
         .map(x => { const parite = x.sem === 'SA' ? 'A' : x.sem === 'SB' ? 'B' : '', matiere = String(x.lib || x.mat);
-          return { cle: [JOURS_EDT[x.j], x.d, x.f, matiere, parite].join('|'), jour: JOURS_EDT[x.j], debut: x.d, fin: x.f, matiere, parite, disciplines: [], salle: (x.salle || []).join(' · ') }; })
+          /* Cours commun à plusieurs classes (co-enseignement, chef-d'œuvre…) : une seule estimation, portée par la première classe. */
+          return { cle: [JOURS_EDT[x.j], x.d, x.f, matiere, parite].join('|'), jour: JOURS_EDT[x.j], debut: x.d, fin: x.f, matiere, parite, disciplines: [], salle: (x.salle || []).join(' · '),
+            classeRef: (x.cls || []).length > 1 ? x.cls[0] : '', avec: (x.cls || []).filter(n => n !== nom).map(n => (edt.classes[n] || {}).court || n) }; })
         .sort((a, b) => JOURS.indexOf(a.jour) - JOURS.indexOf(b.jour) || a.debut.localeCompare(b.debut));
       classes.push({ nom, label: k.court || nom, court: k.court || nom, pole, effectif: null,
         pfmp: (k.pfmp || []).filter(p => RE_DATE.test(p.debut || '') && RE_DATE.test(p.fin || '')).map(p => ({ debut: p.debut, fin: p.fin })), creneaux });
@@ -350,7 +352,7 @@ export function creerEstimation(ctx) {
   const cadre = () => S.cadre;
   const classeDe = nom => cadre() && cadre().classes.find(k => k.nom === nom);
   const courtDe = k => COURT[k.nom] || k.court || k.nom;
-  const idDe = (k, cr) => idCours(cadre().periode.debut, k.nom, cr.cle);
+  const idDe = (k, cr) => idCours(cadre().periode.debut, cr.classeRef || k.nom, cr.cle);
   const docDe = (k, cr) => { const d = S.docs.get(idDe(k, cr)); return d && d.statut === 'active' ? d : null; };
   /* « vous » : cours enregistré depuis cet appareil et que personne n'a modifié depuis (même version). */
   const estMien = (k, cr, a) => { const d = docDe(k, cr); if (!d) return false; const ap = a || app(), id = idDe(k, cr), v = ap.versions[id]; return v != null ? v === d.version : ap.miens.includes(id); };
@@ -461,7 +463,7 @@ export function creerEstimation(ctx) {
         h += `<button type="button" class="e6-cours${S.flash === cr.cle ? ' flash' : ''}" style="--mc:${mc};--mt:${mt}" id="cr-${esc(slug(cr.cle))}" data-e="cours" data-v="${esc(cr.cle)}"
           aria-label="${esc(`${JOURS_L[cr.jour]} ${hFr(cr.debut)}–${hFr(cr.fin)}, ${cr.matiere}${cr.parite ? ', semaine ' + cr.parite : ''}, ${!d ? 'pas encore estimé' : mien ? d.nb + ' AESH' : 'estimé par un collègue'}`)}">
           <span class="h">${esc(hFr(cr.debut))}–${esc(hFr(cr.fin))}</span>
-          <span class="m"><b>${esc(cr.matiere)}</b>${cr.salle ? `<small class="e6-salle">${esc(cr.salle)}</small>` : ''}${d ? `<small>${mien ? '<span class="e6-qui vous">vous</span>' : '<span class="e6-qui coll">collègue</span>'}${esc([`jusqu’au ${jjmm(d.au)}`, sem, (hl.debut !== cr.debut || hl.fin !== cr.fin) ? `${hFr(hl.debut)}–${hFr(hl.fin)}` : ''].filter(Boolean).join(' · '))}</small>` : ''}</span>
+          <span class="m"><b>${esc(cr.matiere)}</b>${cr.salle || (cr.avec && cr.avec.length) ? `<small class="e6-salle">${esc([cr.salle, cr.avec && cr.avec.length ? 'avec ' + cr.avec.join(', ') : ''].filter(Boolean).join(' · '))}</small>` : ''}${d ? `<small>${mien ? '<span class="e6-qui vous">vous</span>' : '<span class="e6-qui coll">collègue</span>'}${esc([`jusqu’au ${jjmm(d.au)}`, sem, (hl.debut !== cr.debut || hl.fin !== cr.fin) ? `${hFr(hl.debut)}–${hFr(hl.fin)}` : ''].filter(Boolean).join(' · '))}</small>` : ''}</span>
           <span class="p ${cls}">${!d ? '+' : mien ? `${d.nb} AESH` : '✓'}</span></button>`;
       });
     });
@@ -581,7 +583,7 @@ export function creerEstimation(ctx) {
     const c = cadre(), id = idDe(k, cr), prec = S.docs.get(id), f = S.f, maintenant = new Date().toISOString(), rc = S.recap;
     const hl = horaireLigne(cr, { hDebut: f.hDebut, hFin: f.hFin });
     const doc = { id, type: 'cours', annee, periode: { debut: c.periode.debut, fin: c.periode.fin, label: String(c.periode.label || '').slice(0, 40) },
-      classe: k.nom, cle: cr.cle, jour: cr.jour, debut: cr.debut, fin: cr.fin, matiere: cr.matiere, parite: cr.parite,
+      classe: cr.classeRef || k.nom, cle: cr.cle, jour: cr.jour, debut: cr.debut, fin: cr.fin, matiere: cr.matiere, parite: cr.parite,
       nb: statut === 'retire' ? (prec ? prec.nb : 0) : f.nb, au: RE_DATE.test(f.au || '') && f.au >= c.periode.debut && f.au <= c.periode.fin ? f.au : c.periode.fin,
       semaines: cr.parite || !c.avecParite || (f.A && f.B) ? 'toutes' : (f.A ? 'A' : 'B'), hDebut: hl.debut, hFin: hl.fin,
       statut, version: ((prec && prec.version) || 0) + 1, majLe: maintenant, source: 'estimation-aesh' };
