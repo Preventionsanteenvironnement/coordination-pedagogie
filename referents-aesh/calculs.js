@@ -475,6 +475,24 @@ export function liberesParPfmp(ctx, nomClasse, lundi) {
     .sort((x, y) => String(x.a.sigle).localeCompare(String(y.a.sigle), 'fr'));
 }
 
+/* Cet AESH est-il libéré par une PFMP sur ce créneau ? Renvoie la classe en stage, ou ''.
+   Sert aux AUTRES référents : pendant le stage d'une classe, son AESH est disponible ailleurs. */
+export function liberePfmpCreneau(ctx, aeshId, lundi, j, debut, fin) {
+  const { C, edt, I } = ctx, iso = ajoute(lundi, j);
+  if (C.off(iso)) return '';
+  let libere = '';
+  I.places.forEach(p => {
+    if (libere || p.aeshId !== aeshId || p.jour !== j || iso < p.du || iso > p.au) return;
+    const c = edt.cours[p.coursId]; if (!c || !C.coursSemaine(c, lundi)) return;
+    const hp = horairePlace(p, c);
+    if (!chevauche(hp.debut, hp.fin, debut, fin)) return;
+    if (coursALieu(C, edt, c, iso)) return;                     /* le cours a lieu : il n'est pas libéré */
+    const enStage = (c.cls || []).find(n => edt.classes[n] && enPfmp(edt.classes[n], iso));
+    if (enStage) libere = enStage;
+  });
+  return libere;
+}
+
 /* Les cours des classes données qui ont lieu au moins une fois entre du et au, avec l'état de l'AESH pour chacun
    (libre, pris, réunion, absent, plus d'heures) — le même verdict que « Qui accompagne ? ». Un cours commun à
    plusieurs classes n'apparaît qu'une fois. */
