@@ -6,9 +6,9 @@
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-17a';
-import { POLES, pole, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-17a';
-import * as AV from './avatars.js?v=2026-09-17a';
+import * as K from './calculs.js?v=2026-09-17b';
+import { POLES, pole, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-17b';
+import * as AV from './avatars.js?v=2026-09-17b';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -37,7 +37,7 @@ export async function demarrer({ FS, db, erreur }) {
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-17a')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-17b')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -551,7 +551,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: 11 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => {
       grille += `<div class="g-jour" style="height:${(H1 - H0) * PX}px">${Array.from({ length: 10 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}
-        ${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : cours.filter(c => c.j === j).map(c => blocHtml(c, true)).join('')}</div>`;
+        ${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : K.enPfmp(k, jr.date) ? `<div class="g-vac g-pfmp">PFMP<small>classe en stage · AESH libres</small></div>` : cours.filter(c => c.j === j).map(c => blocHtml(c, true)).join('')}</div>`;
     });
     grille += `</div></div>`;
     return grille;
@@ -562,9 +562,63 @@ export async function demarrer({ FS, db, erreur }) {
     return `<div class="salut"><div><h1 id="titre" tabindex="-1">Emploi du temps</h1><p class="sous">${esc(k.court)} · ${sem.parite ? 'semaine ' + sem.parite : 'pas de cours'}</p></div>${selecteurSemaine()}</div>
       <div class="classes" role="group" aria-label="Classe">${classesDu(p.id).map(n => `<button type="button" id="cls-${n}" data-a="classe" data-v="${n}" aria-pressed="${n === nom}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>
       <div class="ligne" style="gap:8px"><span class="muted" style="font-size:.9rem">PFMP ${esc(k.court)} : ${(k.pfmp || []).length ? esc((k.pfmp || []).map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')) : 'aucune renseignée'}${k.pfmpSaisies ? ' <span class="puce">saisies par le référent</span>' : ''}</span><button type="button" class="btn petit" id="pfmp-modifier" data-a="pfmp">Modifier les PFMP</button></div>
-      ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>` : ''}
-      <div class="legende"><span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> présents / besoin estimé</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
+      ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>${carteLiberes(nom)}` : ''}
+      <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> présents / besoin estimé</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
       ${grilleClasse(nom, false)}`;
+  }
+
+  /* ─── PFMP : AESH libérés et redéploiement (17/09/2026) ───
+     Pendant la PFMP d'une classe, ses cours n'ont pas lieu. Les AESH qui y étaient placés sont libres sur ces
+     créneaux : on les montre, et le référent peut les envoyer ailleurs — n'importe quelle classe, n'importe quel
+     pôle — pour la semaine ou toute la PFMP. Les heures restent comptées dans SON pôle, comme ses autres placements.
+     À la fin de la période, l'AESH retrouve de lui-même son cours habituel : rien n'est retiré. */
+  const poleDeClasse = nom => (POLES.find(q => (S.edt.poles[q.id] || []).includes(nom)) || {}).id;
+  const creneauxTxt = l => l.map(c => `${K.JOURS_C[c.j]} ${K.hFr(c.debut)}–${K.hFr(c.fin)}`).join(', ');
+  function carteLiberes(nom) {
+    const k = S.edt.classes[nom], l = K.liberesParPfmp(ctx(), nom, S.lundi);
+    return `<div class="carte pad" style="display:grid;gap:8px"><div><h2>AESH libérés par la PFMP</h2><span class="muted" style="font-size:.9rem">${esc(k.court)} est en stage : ces AESH sont libres sur leurs créneaux habituels. Touchez-en un pour le placer ailleurs, dans n’importe quelle classe.</span></div>
+      ${l.length ? `<div class="choix" role="group" aria-label="AESH libérés">${l.map(x => `<button type="button" id="lib-${esc(x.a.id)}" data-a="pfmp-deplacer" data-v="${esc(x.a.id)}"><b>${esc(x.a.sigle)}</b> <span class="muted">· ${K.fmtH(x.heures)} · ${esc(creneauxTxt(x.creneaux))}</span></button>`).join('')}</div>` : `<span class="muted">Aucun AESH n’était placé sur les cours de ${esc(k.court)} cette semaine.</span>`}</div>`;
+  }
+  function bornesDeplacer(f) {
+    const pf = K.pfmpDeLaSemaine(S.edt.classes[f.source], S.lundi), ven = K.ajoute(S.lundi, 4);
+    return { du: S.lundi, au: f.periode === 'pfmp' && pf && pf.fin > ven ? pf.fin : ven, pf, ven };
+  }
+  function feuilleDeplacer(f) {
+    const I = idx(), a = I.aesh.get(f.aeshId) || { sigle: '?' }, src = S.edt.classes[f.source], { du, au, pf, ven } = bornesDeplacer(f);
+    const lib = K.liberesParPfmp(ctx(), f.source, S.lundi).find(x => x.a.id === f.aeshId);
+    const classes = f.pole ? classesDu(f.pole).filter(n => n !== f.source) : [];
+    const poss = f.classe ? K.coursPossibles(ctx(), f.aeshId, [f.classe], du, au, P().id) : [];
+    const libres = poss.filter(x => x.d.etat === 'libre' && !x.d.deja), autres = poss.length - libres.length;
+    /* D'abord les cours qui tombent PENDANT les créneaux libérés par la PFMP : c'est le temps que l'AESH vient de
+       récupérer. Les autres cours où il est libre suivent, pour laisser le choix au référent. */
+    const pendant = x => !!lib && lib.creneaux.some(k => k.j === x.c.j && K.chevauche(k.debut, k.fin, x.c.d, x.c.f));
+    const boutonCours = x => `<button type="button" id="dep-k-${esc(x.c.id)}" data-a="dep-cours" data-v="${esc(x.c.id)}" aria-pressed="${f.choisis.includes(x.c.id)}">${K.JOURS_C[x.c.j]} ${K.hFr(x.c.d)}–${K.hFr(x.c.f)} · ${esc(x.c.lib)}${x.d.texte && x.d.texte !== 'libre' ? ` <span class="muted">· ${esc(x.d.texte)}</span>` : ''}</button>`;
+    const libPendant = libres.filter(pendant), libAutres = libres.filter(x => !pendant(x));
+    return `<h2 id="f-titre" tabindex="-1">Où placer ${esc(a.sigle)} ?</h2>
+      <p class="sous" style="margin-top:-8px">${esc(src.court)} en PFMP${lib ? ` · libre ${esc(creneauxTxt(lib.creneaux))}` : ''}</p>
+      <div style="display:grid;gap:6px"><b>Pour</b><div class="choix" role="group" aria-label="Période">
+        <button type="button" id="dep-sem" data-a="dep-periode" data-v="semaine" aria-pressed="${f.periode === 'semaine'}">Cette semaine <span class="muted">(${K.jjmm(S.lundi)} → ${K.jjmm(ven)})</span></button>
+        ${pf && pf.fin > ven ? `<button type="button" id="dep-pfmp" data-a="dep-periode" data-v="pfmp" aria-pressed="${f.periode === 'pfmp'}">Toute la PFMP <span class="muted">(jusqu’au ${K.jjmm(pf.fin)})</span></button>` : ''}</div></div>
+      <div style="display:grid;gap:6px"><b>Pôle</b><div class="choix" role="group" aria-label="Pôle">${POLES.map(q => `<button type="button" id="dep-p-${q.id}" data-a="dep-pole" data-v="${q.id}" aria-pressed="${f.pole === q.id}">${esc(q.nom)}</button>`).join('')}</div></div>
+      ${f.pole ? `<div style="display:grid;gap:6px"><b>Classe</b><div class="choix" role="group" aria-label="Classe">${classes.map(n => `<button type="button" id="dep-c-${n}" data-a="dep-classe" data-v="${n}" aria-pressed="${f.classe === n}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div></div>` : ''}
+      ${f.classe ? `<div style="display:grid;gap:6px">${libres.length ? `${libPendant.length ? `<b>Pendant son temps libéré</b><div class="choix" role="group" aria-label="Cours pendant le temps libéré" id="dep-pendant">${libPendant.map(boutonCours).join('')}</div>` : `<span class="muted">Aucun cours de cette classe pendant son temps libéré.</span>`}${libAutres.length ? `<b style="margin-top:6px">Autres cours où ${esc(a.sigle)} est libre</b><div class="choix" role="group" aria-label="Autres cours" id="dep-autres">${libAutres.map(boutonCours).join('')}</div>` : ''}` : `<span class="muted">Aucun cours libre pour ${esc(a.sigle)} dans cette classe sur la période.</span>`}${autres ? `<span class="muted" style="font-size:.85rem">${autres} autre${autres > 1 ? 's' : ''} cours : déjà pris, réunion, absence ou contrat atteint.</span>` : ''}</div>` : ''}
+      <div class="actions"><button type="button" class="btn" id="dep-fermer" data-a="fermer">Fermer</button><button type="button" class="btn valider" id="dep-valider" data-a="dep-valider" ${f.choisis.length ? '' : 'disabled'}>✓ Placer</button></div>`;
+  }
+  function validerDeplacer() {
+    const f = S.feuille, I = idx(), a = I.aesh.get(f.aeshId), p = P(), { du, au } = bornesDeplacer(f);
+    const cours = f.choisis.map(id => S.edt.cours[id]).filter(Boolean);
+    if (!a || !cours.length) return;
+    const chevauchent = cours.some((x, i) => cours.some((y, k) => k > i && x.j === y.j && K.chevauche(x.d, x.f, y.d, y.f)));
+    if (chevauchent) { toast('Deux cours choisis se chevauchent : gardez-en un seul par créneau.', true); return; }
+    const garde = { ...f }, src = S.edt.classes[f.source], dest = S.edt.classes[f.classe];
+    S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: a.sigle, bouton: 'Confirmer', retourDeplacer: garde,
+      lignes: [['Libéré par', `PFMP ${src.court}`], ['Placé en', `${dest.court} · ${nomPole(poleDeClasse(f.classe))}`], ['Cours', cours.map(c => `${K.JOURS_C[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} ${c.lib}`).join(' · ')], ['Période', `du ${K.dateCourte(du)} au ${K.dateCourte(au)}`], ['Heures comptées dans', p.nom]],
+      avert: `Après le ${K.dateCourte(au)}, ${a.sigle} retrouve ses cours habituels en ${src.court}.`,
+      travail: async () => {
+        for (const c of cours) await ecrire({ id: 'place_' + alea(), type: 'place', aeshId: a.id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: c.d, fin: c.f, sem: c.sem, matiere: c.lib, du, au, statut: 'active' });
+        return { sous: `En ${dest.court} pendant la PFMP de ${src.court}` };
+      } };
+    rendre({ focus: 'cf-oui' });
   }
 
   /* feuille « placer des AESH » */
@@ -760,7 +814,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-17a'), F = await import('./fichiers.js?v=2026-09-17a');
+    const X = await import('./exports.js?v=2026-09-17b'), F = await import('./fichiers.js?v=2026-09-17b');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -843,6 +897,7 @@ export async function demarrer({ FS, db, erreur }) {
     else if (f.type === 'confirmer') h = feuilleConfirmer(f);
     else if (f.type === 'partager') h = feuillePartager(f);
     else if (f.type === 'pfmp') h = feuillePfmp(f);
+    else if (f.type === 'deplacer') { h = feuilleDeplacer(f); large = true; }
     return `<div class="voile" data-a="voile"><div class="feuille ${large ? 'large' : ''} ${f.fait ? 'fait' : ''}" role="dialog" aria-modal="true" aria-labelledby="f-titre"><div class="poignee" aria-hidden="true"></div>${h}</div></div>`;
   }
   function feuilleConfirmer(f) {
@@ -1048,6 +1103,12 @@ export async function demarrer({ FS, db, erreur }) {
         S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: k.court, lignes: lignes.length ? lignes.map(x => [x.label, `du ${K.dateLongue(x.debut)} au ${K.dateLongue(x.fin)}`]) : [['PFMP', 'aucune']], bouton: 'Confirmer',
           travail: async () => { const d = S.docs.get('pole_' + p.id) || {}; await ecrirePole(p.id, { pfmp: { ...(d.pfmp || {}), [f.classe]: lignes } }); appliquerPfmp(); return {}; } };
         rendre({ focus: 'cf-oui' }); return; }
+      case 'pfmp-deplacer': ouvrir({ type: 'deplacer', aeshId: v, source: classeCourante(), periode: 'semaine', pole: P().id, classe: null, choisis: [] }); return;
+      case 'dep-periode': S.feuille.periode = v; S.feuille.choisis = []; rendre({ focus: b.id }); return;
+      case 'dep-pole': S.feuille.pole = v; S.feuille.classe = null; S.feuille.choisis = []; rendre({ focus: b.id }); return;
+      case 'dep-classe': S.feuille.classe = v; S.feuille.choisis = []; rendre({ focus: b.id }); return;
+      case 'dep-cours': { const l = S.feuille.choisis; S.feuille.choisis = l.includes(v) ? l.filter(x => x !== v) : [...l, v]; rendre({ focus: b.id }); return; }
+      case 'dep-valider': validerDeplacer(); return;
       case 'placer': { const c = S.edt.cours[v], nom = classeCourante(), I = idx(), iso = K.ajoute(S.lundi, c.j);
         if (S.C.semaine(S.lundi).toute) return;
         const choisis = [...new Set(I.places.filter(x => x.coursId === v && x.au >= S.lundi).map(x => x.aeshId))];
@@ -1115,7 +1176,7 @@ export async function demarrer({ FS, db, erreur }) {
         else { const ta = document.getElementById('pt-texte'); ta.select(); try { document.execCommand('copy'); fin(); } catch (e) { toast('Sélectionnez le texte puis copiez-le.', true); } }
         return; }
       case 'fermer': fermer(); return;
-      case 'confirmer-non': { const f = S.feuille; if (f.retourPlacer) { S.feuille = f.retourPlacer; rendre({ focus: 'pl-valider' }); } else fermer(); return; }
+      case 'confirmer-non': { const f = S.feuille; if (f.retourPlacer) { S.feuille = f.retourPlacer; rendre({ focus: 'pl-valider' }); } else if (f.retourDeplacer) { S.feuille = f.retourDeplacer; rendre({ focus: 'dep-valider' }); } else fermer(); return; }
       case 'confirmer-oui': executerConfirmation(); return;
     }
   }

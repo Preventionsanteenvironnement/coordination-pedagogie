@@ -311,3 +311,64 @@ export function disponiblesAilleurs(ctx, pole, lundi, poleComplet) {
     return { a, rep, b, dispo, soldeRep: rep.solde, nonPlace, fiable, complets, libres: plagesLibres(ctx, a.id, lundi) };
   }).filter(x => x.dispo > 1e-9).sort((x, y) => y.dispo - x.dispo);
 }
+
+/* ─────────────── PFMP : AESH libérés, et où les redéployer ─────────────── */
+/* Demande du référent de pôle, portée par Brahim le 17/09/2026. Pendant la PFMP d'une classe, ses cours n'ont
+   pas lieu : les AESH qui y étaient placés sont libres sur ces créneaux. Le référent doit les VOIR, et pouvoir
+   les envoyer ailleurs — n'importe quelle classe, n'importe quel pôle — pour la semaine ou toute la PFMP.
+   Le moteur savait déjà les libérer (occupations et disponibilite ignorent un cours qui n'a pas lieu) ;
+   ces deux fonctions servent l'écran qui les montre et le geste qui les déplace. */
+
+/* La période de PFMP de la classe qui touche la semaine du lundi donné (la première, s'il y en a plusieurs). */
+export function pfmpDeLaSemaine(classe, lundi) {
+  const ven = ajoute(lundi, 4);
+  return (classe && classe.pfmp || []).find(p => p.debut <= ven && p.fin >= lundi) || null;
+}
+
+/* AESH placés sur des cours de la classe qui n'ont pas lieu cette semaine À CAUSE de sa PFMP.
+   Un cours commun avec une classe qui n'est pas en stage a toujours lieu : l'AESH y reste pris, il n'est pas libéré. */
+export function liberesParPfmp(ctx, nomClasse, lundi) {
+  const { C, edt, I } = ctx, k = edt.classes[nomClasse];
+  if (!k) return [];
+  const sem = C.semaine(lundi), parAesh = new Map();
+  sem.jours.forEach((jr, j) => {
+    const iso = jr.date;
+    if (jr.off || !enPfmp(k, iso)) return;
+    I.places.forEach(p => {
+      if (p.jour !== j || iso < p.du || iso > p.au) return;
+      const c = edt.cours[p.coursId];
+      if (!c || !(c.cls || []).includes(nomClasse) || !C.coursSemaine(c, lundi)) return;
+      if (coursALieu(C, edt, c, iso)) return;
+      const a = I.aesh.get(p.aeshId);
+      if (!a || a.actif === false) return;
+      const hp = horairePlace(p, c), e = parAesh.get(a.id) || { a, creneaux: [], heures: 0 };
+      if (!e.creneaux.some(x => x.j === j && x.cours.id === c.id)) {
+        e.creneaux.push({ j, date: iso, debut: hp.debut, fin: hp.fin, cours: c });
+        e.heures += duree(hp.debut, hp.fin);
+      }
+      parAesh.set(a.id, e);
+    });
+  });
+  return [...parAesh.values()]
+    .map(e => ({ ...e, creneaux: e.creneaux.sort((x, y) => x.j - y.j || min(x.debut) - min(y.debut)) }))
+    .sort((x, y) => String(x.a.sigle).localeCompare(String(y.a.sigle), 'fr'));
+}
+
+/* Les cours des classes données qui ont lieu au moins une fois entre du et au, avec l'état de l'AESH pour chacun
+   (libre, pris, réunion, absent, plus d'heures) — le même verdict que « Qui accompagne ? ». Un cours commun à
+   plusieurs classes n'apparaît qu'une fois. */
+export function coursPossibles(ctx, aeshId, classes, du, au, pole) {
+  const { C, edt } = ctx, vus = new Set(), out = [];
+  (classes || []).forEach(nom => {
+    const k = edt.classes[nom];
+    (k && k.cours || []).forEach(id => {
+      const c = edt.cours[id];
+      if (!c || vus.has(c.id)) return;
+      vus.add(c.id);
+      const aLieu = lundisEntre(C, du, au).some(l => { const iso = ajoute(l, c.j); return iso >= du && iso <= au && C.coursSemaine(c, l) && coursALieu(C, edt, c, iso); });
+      if (!aLieu) return;
+      out.push({ c, classe: nom, d: disponibilite(ctx, aeshId, c.id, du, au, pole) });
+    });
+  });
+  return out.sort((x, y) => x.c.j - y.c.j || min(x.c.d) - min(y.c.d));
+}
