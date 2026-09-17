@@ -97,6 +97,7 @@ export function normaliserAesh(d, polesAutorises, cat) {
   if (d.filieres !== undefined) out.filieres = normaliserFilieres(d.filieres, cat);
   if (d.dispos !== undefined) out.dispos = disposDe({ dispos: d.dispos });
   if (d.auteurs && typeof d.auteurs === 'object') { const au = {}; ['contrat', 'presence', 'reunion'].forEach(k => { if (ok(d.auteurs[k])) au[k] = d.auteurs[k]; }); out.auteurs = au; }
+  if (d.finContrat !== undefined) out.finContrat = RE_DATE.test(d.finContrat || '') ? d.finContrat : '';
   if (d.presence !== undefined) out.presence = nombreOk(d.presence);
   if (d.reunionH !== undefined) out.reunionH = nombreOk(d.reunionH, 20);
   if (d.rattachement !== undefined) out.rattachement = ok(d.rattachement) ? d.rattachement : undefined;
@@ -155,6 +156,9 @@ export function prevuPourClasse(a, cat, classe) {
 }
 /* Heures de réunion par semaine : saisies par le référent (1 h tant qu'il n'a rien changé). */
 export const heuresReunion = a => Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1;
+/* Fin de contrat d'un AESH : après cette date, il n'est plus là. Vide = toute l'année. */
+export const finContratDe = a => a && RE_DATE.test(a.finContrat || '') ? a.finContrat : '';
+export const contratFini = (a, iso) => { const f = finContratDe(a); return !!f && f < iso; };
 /* Présence élève : les heures en classe. Saisie par le référent ; pour une fiche d'avant, on la déduit du contrat. */
 export function presenceEleve(a) {
   if (Number.isFinite(+a.presence) && a.presence !== null && a.presence !== '') return +a.presence;

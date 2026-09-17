@@ -129,6 +129,34 @@ export async function demarrer({ FS, db, erreur }) {
   }
   const classesDu = pid => S.edt.poles[pid] || [];
 
+  /* ─── Période de l'emploi du temps (17/09/2026, décision de Brahim) ───
+     Une seule période pour les quatre pôles : c'est ce qui permet aux emplois du temps de se croiser.
+     Par défaut jusqu'aux vacances de Noël ; si un référent l'étend, elle est étendue pour tout le monde. */
+  function periodesPossibles() {
+    const avant = debut => { let f = K.ajoute(debut, -1); while (K.jourSemaine(f) > 4 || S.C.off(f)) f = K.ajoute(f, -1); return f; };
+    const out = S.C.vacances.filter(v => /^Vacances/.test(v.label) && !/été/i.test(v.label))
+      .map(v => ({ id: 'v-' + v.debut, label: `Jusqu’aux ${v.label.charAt(0).toLowerCase()}${v.label.slice(1)}`, fin: avant(v.debut) }));
+    const ete = S.C.vacances.find(v => /été/i.test(v.label));
+    out.push({ id: 'annee', label: 'Toute l’année', fin: ete ? avant(ete.debut) : '2027-07-02' });
+    return out;
+  }
+  const periodeDefaut = () => { const l = periodesPossibles(), noel = l.find(x => /noël/i.test(x.label)); return (noel || l[l.length - 1]).fin; };
+  const periodeEdt = () => { const d = S.docs.get('periode_' + S.annee); return d && K.RE_DATE.test(d.jusquau || '') ? d.jusquau : periodeDefaut(); };
+  const periodePar = () => { const d = S.docs.get('periode_' + S.annee); return d && d.par ? d.par : ''; };
+  function lignePeriode() {
+    const fin = periodeEdt(), qui = periodePar();
+    return `<div class="ligne ecarte" style="gap:8px"><span class="muted" style="font-size:.9rem">Période de l’emploi du temps : <b style="color:var(--ink)">jusqu’au ${esc(K.dateLongue(fin))}</b>${qui && qui !== P().id ? ` · fixée par ${esc(nomPole(qui))}` : ''}</span>
+      <button type="button" class="btn petit" id="per-edt" data-a="periode-edt">Modifier</button></div>`;
+  }
+  function feuillePeriode(f) {
+    const l = periodesPossibles(), fin = f.fin;
+    return teteFeuille('Période de l’emploi du temps', 'Jusqu’où on place les AESH. Elle vaut pour les quatre pôles : c’est ce qui permet aux emplois du temps de se croiser.') + `
+      <div class="choix" role="group" aria-label="Jusqu’à">${l.map(r => `<button type="button" id="pe-${r.id}" data-a="per-choix" data-v="${esc(r.fin)}" aria-pressed="${fin === r.fin}">${esc(r.label)} <span class="muted">(${K.jjmm(r.fin)})</span></button>`).join('')}</div>
+      <div class="ligne"><label for="pe-date" class="muted">Ou une date :</label><input type="date" id="pe-date" data-i="per-edt-date" value="${esc(fin)}"></div>
+      <div class="actions"><button type="button" class="btn" id="pe-fermer" data-a="fermer">Annuler</button>
+        <button type="button" class="btn valider" id="pe-valider" data-a="per-valider" ${K.RE_DATE.test(fin) && fin !== periodeEdt() ? '' : 'disabled'}>✓ Enregistrer</button></div>`;
+  }
+
   /* ─────────── écritures ─────────── */
   async function ecrire(doc) {
     const prec = S.docs.get(doc.id), maintenant = new Date().toISOString();
@@ -302,6 +330,7 @@ export async function demarrer({ FS, db, erreur }) {
   const AIDES = {
     contrat: 'Le total d’heures dues par semaine : présence élève, services (cantine, internat…), réunion, etc. Il est commun à tous les pôles où l’AESH travaille : on ne le compte qu’une fois.',
     presence: 'Les heures en classe avec les élèves, que vous notez vous-même : le contrat moins la réunion et les services. C’est ce qu’on place dans l’emploi du temps.',
+    duree: 'Vide : son contrat couvre toute l’année, on n’y touche pas. Sinon, la date de fin : après elle, il n’est plus proposé dans l’emploi du temps, et ses placements s’arrêtent là.',
     jours: 'Par défaut, il travaille toute la semaine : on ne touche à rien. ✕ indisponible : c’est écrit dans son contrat, il ne travaille pas ce moment-là. ◐ souhait : il aimerait ne pas travailler ce moment-là. Dans les deux cas, on peut quand même le placer : c’est vous qui décidez.',
     reunion: 'La réunion d’équipe : son nombre d’heures par semaine, puis son jour et son heure. Elle ne se compte qu’une fois pour la semaine, même si l’AESH travaille dans deux pôles. Si un autre référent l’a déjà fixée, vous pouvez la changer : il le verra aussi.',
     intervient: 'Les filières et les classes où il intervient, et ses heures dans chacune. Votre filière est mise par défaut. « Tous les niveaux » : toutes les classes de la filière. Ce qu’il reste sur son contrat peut être pris par un autre pôle.'
@@ -355,6 +384,7 @@ export async function demarrer({ FS, db, erreur }) {
         <button type="button" class="tuile" id="tu-msg" data-a="aller" data-v="messages"><span class="ic">💬</span><span><b>Messages</b><br><small>${nonLus ? `<span style="color:var(--err);font-weight:700">${nonLus} nouveau${nonLus > 1 ? 'x' : ''}</span>` : 'Entre référents'}</small></span></button>
         <button type="button" class="tuile" id="tu-exp" data-a="aller" data-v="exporter"><span class="ic">⬇️</span><span><b>Exporter</b><br><small>PDF · Excel</small></span></button>
       </div>
+      ${lignePeriode()}
       ${carteReferents()}
       ${carteComplet()}
       ${carteDisponibles()}
@@ -371,6 +401,7 @@ export async function demarrer({ FS, db, erreur }) {
           <span class="det"><b>${nombre(a.contrat) != null ? `Contrat ${K.fmtH(a.contrat)}` : 'Contrat à compléter'}${Object.keys(a.equipes || {}).length > 1 ? ` · partagé ${Object.keys(a.equipes).map(nomPole).join(' + ')}` : ''}</b>${jaugeAesh(a)}</span>
           <span class="droite"><span class="heures" title="Placées dans l’emploi du temps cette semaine / prévues dans le pôle">${K.fmtH(pl)} <small>/ ${hOu(hp)}</small></span>
             ${b.reste != null ? `<span class="puce ${b.reste < 0 ? 'err' : 'ok'}" title="Contrat moins tout ce qui est placé, services et réunion">reste ${K.fmtH(b.reste)}</span>` : ''}
+            ${K.contratFini(a, K.isoLocal()) ? `<span class="puce err" title="Son contrat s’est arrêté le ${esc(K.dateLongue(a.finContrat))}">contrat terminé</span>` : ''}
             ${aCompleter(a) ? '<span class="puce warn">à compléter</span>' : ''}
             ${b.alertes.filter(x => x.type !== 'repartition' || true).slice(0, 2).map(x => `<span class="puce ${x.type === 'couvrir' ? 'warn' : 'err'}" title="${esc(x.texte)}">${x.type === 'conflit' ? 'conflit' : x.type === 'couvrir' ? 'à couvrir' : x.type === 'pole' ? 'pôle dépassé' : x.type === 'repartition' ? `${K.fmtH(-x.solde)} de trop` : 'dépassement'}</span>`).join('')}</span>
         </button>`;
@@ -424,6 +455,7 @@ export async function demarrer({ FS, db, erreur }) {
     if ((o.sigle || '') !== a.sigle) l.push(['Sigle', o.sigle || '—', a.sigle]);
     if (nombre(o.contrat) !== nombre(a.contrat)) l.push(['Contrat', v(o.contrat), v(a.contrat)]);
     if (nombre(o.presence) !== nombre(a.presence)) l.push(['Présence élève', v(o.presence), v(a.presence)]);
+    if ((o.finContrat || '') !== (a.finContrat || '')) l.push(['Durée du contrat', o.finContrat ? K.dateCourte(o.finContrat) : 'toute l’année', a.finContrat ? K.dateCourte(a.finContrat) : 'toute l’année']);
     if (libFilieres(o) !== libFilieres(a)) l.push(['Intervient en', libFilieres(o), libFilieres(a)]);
     if ((o.rattachement || '') !== (a.rattachement || '')) l.push(['Équipe', o.rattachement ? nomPole(o.rattachement) : '—', a.rattachement ? nomPole(a.rattachement) : '—']);
     const tousPoles = [...new Set([...Object.keys(o.equipes || {}), ...Object.keys(a.equipes || {})])];
@@ -462,6 +494,8 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="champs">
         <div class="champ ${estModif((o.sigle || '') !== a.sigle)}"><span class="lib"><b>Sigle</b><small>initiales, jamais le prénom</small></span><input type="text" id="f-sigle" data-i="sigle" value="${esc(a.sigle)}" maxlength="6" style="width:110px;font-weight:800;text-transform:uppercase;text-align:center"></div>
         <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${parQui(a, 'contrat')}${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
+        <div class="champ ${estModif((o.finContrat || '') !== (a.finContrat || ''))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Durée du contrat ${aide('duree')}</b><small>${a.finContrat ? `jusqu’au ${esc(K.dateLongue(a.finContrat))}` : 'toute l’année'}</small>${aideTexte('duree')}</span>
+          <span class="ligne" style="gap:6px"><input type="date" id="f-fin" data-i="fin-contrat" value="${esc(a.finContrat || '')}" style="min-height:40px">${a.finContrat ? `<button type="button" class="lien" id="f-fin-non" data-a="fin-aucune">toute l’année</button>` : ''}</span></div>
         <div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine</small>${parQui(a, 'presence')}${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}</div>
         <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
           <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, i) => `<button type="button" class="jourc" id="rj-${i}" data-a="reu-jour" data-v="${i}" aria-pressed="${reu.jour === i && !!reu.debut}">${j}</button>`).join('')}
@@ -622,6 +656,7 @@ export async function demarrer({ FS, db, erreur }) {
     const pf = (k.pfmp || []).filter(x => x.debut <= K.ajoute(S.lundi, 4) && x.fin >= S.lundi);
     return `<div class="salut"><div><h1 id="titre" tabindex="-1">Emploi du temps</h1><p class="sous">${esc(k.court)} · ${sem.parite ? 'semaine ' + sem.parite : 'pas de cours'}</p></div>${selecteurSemaine()}</div>
       <div class="classes" role="group" aria-label="Classe">${classesDu(p.id).map(n => `<button type="button" id="cls-${n}" data-a="classe" data-v="${n}" aria-pressed="${n === nom}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>
+      ${lignePeriode()}
       <div class="ligne" style="gap:8px"><span class="muted" style="font-size:.9rem">PFMP ${esc(k.court)} : ${(k.pfmp || []).length ? esc((k.pfmp || []).map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')) : 'aucune renseignée'}${k.pfmpSaisies ? ' <span class="puce">saisies par le référent</span>' : ''}</span><button type="button" class="btn petit" id="pfmp-modifier" data-a="pfmp">Modifier les PFMP</button></div>
       ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>${carteLiberes(nom)}` : ''}
       <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> présents / besoin estimé</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
@@ -746,8 +781,9 @@ export async function demarrer({ FS, db, erreur }) {
     const bes = K.besoinDuCours(S.est, nom, c);
     const dejaIci = new Set(I.places.filter(x => x.coursId === c.id && x.au >= du).map(x => x.aeshId));
     const prevuIci = a => K.prevuPourClasse(a, FILIERES, nom).prevu || !K.prevuPourClasse(a, FILIERES, nom).connu;
-    const candidats = K.aeshActifs(I, p.id).slice().sort((x, y) => (prevuIci(y) ? 1 : 0) - (prevuIci(x) ? 1 : 0)), dispo = K.disponiblesAilleurs(cx, p.id, S.lundi, poleComplet), dispoDe = Object.fromEntries(dispo.map(x => [x.a.id, x]));
-    const autres = K.aeshActifs(I).filter(a => !(a.equipes || {})[p.id]).sort((x, y) => ((dispoDe[y.id] || {}).dispo || 0) - ((dispoDe[x.id] || {}).dispo || 0));
+    const enContrat = a => !K.contratFini(a, du);
+    const candidats = K.aeshActifs(I, p.id).filter(enContrat).slice().sort((x, y) => (prevuIci(y) ? 1 : 0) - (prevuIci(x) ? 1 : 0)), dispo = K.disponiblesAilleurs(cx, p.id, S.lundi, poleComplet), dispoDe = Object.fromEntries(dispo.map(x => [x.a.id, x]));
+    const autres = K.aeshActifs(I).filter(a => !(a.equipes || {})[p.id] && enContrat(a)).sort((x, y) => ((dispoDe[y.id] || {}).dispo || 0) - ((dispoDe[x.id] || {}).dispo || 0));
     /* Rien n'est interdit : un AESH pris, en réunion ou au bout de ses heures reste choisissable.
        Ce qui pose problème est écrit sur son bouton, puis rappelé dans « Vous confirmez ? ». */
     const bouton = (a, ailleurs) => {
@@ -779,7 +815,7 @@ export async function demarrer({ FS, db, erreur }) {
         <button type="button" class="btn valider" id="pl-valider" data-a="valider-placer" ${(ajout.length || retrait.length || modifHoraire) && K.RE_DATE.test(au) && au >= du ? '' : 'disabled'}>✓ Enregistrer</button></div>`;
   }
   function raccourcis() {
-    const l = S.lundi, out = [{ id: 'semaine', label: 'Cette semaine', fin: K.ajoute(l, 4) }];
+    const l = S.lundi, out = [{ id: 'semaine', label: 'Cette semaine', fin: K.ajoute(l, 4) }, { id: 'edt', label: 'Période de l’emploi du temps', fin: periodeEdt() }];
     const avant = debut => { let f = K.ajoute(debut, -1); while (K.jourSemaine(f) > 4 || S.C.off(f)) f = K.ajoute(f, -1); return f; };
     S.C.vacances.filter(v => /^Vacances/.test(v.label) && !/été/.test(v.label) && v.debut > l).slice(0, 2)
       .forEach(v => out.push({ id: 'v-' + v.debut, label: `Jusqu’aux ${v.label.charAt(0).toLowerCase()}${v.label.slice(1)}`, fin: avant(v.debut) }));
@@ -788,6 +824,8 @@ export async function demarrer({ FS, db, erreur }) {
     return out;
   }
   const finPeriode = f => f.periode === 'date' ? (f.au || '') : ((raccourcis().find(r => r.id === f.periode) || {}).fin || '');
+  /* La fin de contrat l'emporte sur la période : après, l'AESH n'est plus là. */
+  const finPourAesh = (a, au) => { const f = K.finContratDe(a); return f && f < au ? f : au; };
 
   /* ─────────── vue d'ensemble ─────────── */
   function ecranEnsemble() {
@@ -1025,6 +1063,7 @@ export async function demarrer({ FS, db, erreur }) {
     else if (f.type === 'partager') h = feuillePartager(f);
     else if (f.type === 'pfmp') h = feuillePfmp(f);
     else if (f.type === 'filieres') h = feuilleFilieres(f);
+    else if (f.type === 'periode') h = feuillePeriode(f);
     else if (f.type === 'service') { h = feuilleService(f); large = true; }
     else if (f.type === 'deplacer') { h = feuilleDeplacer(f); large = true; }
     return `<div class="voile" data-a="voile"><div class="feuille ${large ? 'large' : ''} ${f.fait ? 'fait' : ''}" role="dialog" aria-modal="true" aria-labelledby="f-titre"><div class="poignee" aria-hidden="true"></div>${h}</div></div>`;
@@ -1135,6 +1174,7 @@ export async function demarrer({ FS, db, erreur }) {
         if (diff(orig.sigle, a.sigle)) doc.sigle = a.sigle;
         if (diff(nombre(orig.contrat), nombre(a.contrat))) doc.contrat = a.contrat;
         if (diff(nombre(orig.presence), nombre(a.presence))) doc.presence = a.presence;
+        if (diff(orig.finContrat || '', a.finContrat || '')) doc.finContrat = a.finContrat || '';
         if (diff(nombre(orig.reunionH), nombre(a.reunionH))) doc.reunionH = a.reunionH;
         doc.equipes = { ...(doc.equipes || {}) }; doc.heures = { ...(doc.heures || {}) };
         [...new Set([...Object.keys(orig.equipes || {}), ...Object.keys(a.equipes || {})])].forEach(q => {
@@ -1172,6 +1212,8 @@ export async function demarrer({ FS, db, erreur }) {
       const borne = x => { const n = nombre(x); return n == null ? null : Math.max(0, Math.min(45, Math.round(n * 2) / 2)); };
       doc.contrat = borne(doc.contrat);
       doc.presence = borne(doc.presence);
+      doc.finContrat = K.RE_DATE.test(doc.finContrat || '') ? doc.finContrat : '';
+      if (!doc.finContrat) delete doc.finContrat;
       if (doc.presence == null) delete doc.presence;
       doc.reunionH = borne(doc.reunionH);
       if (doc.reunionH == null) delete doc.reunionH;
@@ -1268,6 +1310,8 @@ export async function demarrer({ FS, db, erreur }) {
         aLiberer.push({ id, place: x, cours: oc });
       });
     });
+    ajout.forEach(id => { const a = I.aesh.get(id), fin = a && K.finContratDe(a);
+      if (fin && fin < au) avert.push(`${sig(id)} : son contrat s’arrête le ${K.dateLongue(fin)} — son placement s’arrêtera là.`); });
     aLiberer.forEach(({ id, cours }) => avert.push(`${sig(id)} est déjà en ${cours.cls.map(n => S.edt.classes[n].court).join('/')} (${cours.lib}) à cette heure.`));
     const garde = { ...f };
     S.feuille = { type: 'confirmer', titre: retrait.length && !ajout.length && !modifH.length ? `Retirer ${retrait.map(sig).join(', ')} de ce cours ?` : 'Vous confirmez ?', danger: retrait.length && !ajout.length && !modifH.length, grand: f.choisis.length ? f.choisis.map(sig).join(' · ') : 'Aucun AESH', lignes, bouton: retrait.length && !ajout.length && !modifH.length ? 'Retirer' : 'Confirmer', retourPlacer: garde,
@@ -1280,7 +1324,8 @@ export async function demarrer({ FS, db, erreur }) {
         for (const id of aRegler) { const t = await ajouterClasseAFiche(id, nom); if (t) infos.push(t); }
         for (const id of ajout) {
           const h = f.horaires[id] || { debut: c.d, fin: c.f };
-          const d = { id: 'place_' + alea(), type: 'place', aeshId: id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: h.debut, fin: h.fin, sem: c.sem, matiere: c.lib, du, au, statut: 'active' };
+          const auA = finPourAesh(I.aesh.get(id) || {}, au);
+          const d = { id: 'place_' + alea(), type: 'place', aeshId: id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: h.debut, fin: h.fin, sem: c.sem, matiere: c.lib, du, au: auA, statut: 'active' };
           await ecrire(d);
         }
         for (const id of modifH) { const h = f.horaires[id] || { debut: c.d, fin: c.f }; for (const x of I.places.filter(x => x.aeshId === id && x.coursId === c.id && x.au >= du)) await ecrire({ ...x, debut: h.debut, fin: h.fin }); }
@@ -1325,7 +1370,18 @@ export async function demarrer({ FS, db, erreur }) {
       }
       case 'reu-jour': { const f = S.form, r = f.a.reunion || {}; f.a.reunion = { jour: +v, debut: r.debut || '13:00', fin: r.fin || '14:00' }; rendre({ focus: b.id }); return; }
       case 'reu-aucune': S.form.a.reunion = null; rendre(); return;
+      case 'fin-aucune': S.form.a.finContrat = ''; rendre(); return;
       case 'info': S.info = S.info === v ? null : v; rendre({ focus: b.id }); return;
+      case 'periode-edt': ouvrir({ type: 'periode', fin: periodeEdt() }); return;
+      case 'per-choix': S.feuille.fin = v; rendre({ focus: b.id }); return;
+      case 'per-valider': { const f = S.feuille, fin = f.fin, avant = periodeEdt();
+        S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: `Jusqu’au ${K.dateCourte(fin)}`,
+          lignes: [['Avant', `jusqu’au ${K.dateLongue(avant)}`], ['Après', `jusqu’au ${K.dateLongue(fin)}`]],
+          avert: 'Cette période vaut pour les quatre pôles : PSR · MELEC, AGOrA, CAPa et Métiers d’Art. Les autres référents la verront aussitôt.',
+          bouton: 'Confirmer',
+          travail: async () => { const d = S.docs.get('periode_' + S.annee) || {};
+            await ecrire({ id: 'periode_' + S.annee, type: 'periode', jusquau: fin, ...(d.creeLe ? { creeLe: d.creeLe } : {}) }); return {}; } };
+        rendre({ focus: 'cf-oui' }); return; }
       case 'filieres': { const a = S.form && S.form.a; if (!a) return;
         ouvrir({ type: 'filieres', ouvert: null, avant: JSON.parse(JSON.stringify({ filieres: a.filieres || null, rattachement: a.rattachement || null, equipes: a.equipes || {}, heures: a.heures || {} })) }); return; }
       case 'fil-annuler': { const f = S.feuille, a = S.form && S.form.a;
@@ -1421,7 +1477,7 @@ export async function demarrer({ FS, db, erreur }) {
         if (S.C.semaine(S.lundi).toute) return;
         const choisis = [...new Set(I.places.filter(x => x.coursId === v && x.au >= S.lundi).map(x => x.aeshId))];
         const horaires = {}; choisis.forEach(id => { const x = I.places.find(y => y.aeshId === id && y.coursId === v && y.au >= S.lundi), hp = K.horairePlace(x, c); if (hp.partiel) horaires[id] = { debut: hp.debut, fin: hp.fin }; });
-        ouvrir({ type: 'placer', coursId: v, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
+        ouvrir({ type: 'placer', coursId: v, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'edt', au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
         void iso; return; }
       case 'choix-aesh': { const f = S.feuille, i = f.choisis.indexOf(v); if (i < 0) f.choisis.push(v); else f.choisis.splice(i, 1); rendre({ focus: b.id }); return; }
       case 'autres-aesh': S.feuille.autres = true; rendre(); return;
@@ -1517,6 +1573,7 @@ export async function demarrer({ FS, db, erreur }) {
       clearTimeout(gererSaisie.t); gererSaisie.t = setTimeout(() => { if (S.route.e === 'fiche' && S.form === f && !S.feuille) rendre({ focus: document.activeElement && document.activeElement.id }); }, 700);
       return;
     }
+    if (k === 'fin-contrat') { f.a.finContrat = t.value || ''; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'reu-h') { f.a.reunion = { ...(f.a.reunion || { jour: 0 }), debut: t.value, fin: K.hDe(K.min(t.value) + 60) }; rendre({ focus: t.id }); return; }
     if (k === 'abs-du') { f.du = t.value; if (f.au < f.du) f.au = f.du; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'abs-au') { f.au = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
@@ -1528,6 +1585,7 @@ export async function demarrer({ FS, db, erreur }) {
     if (k === 'r-fin') { f.fin = t.value; rendre({ focus: t.id }); return; }
     if (k === 'pf-du' || k === 'pf-au') { const x = S.feuille && S.feuille.lignes[+t.dataset.v]; if (!x) return; if (k === 'pf-du') { x.debut = t.value; if (x.fin && x.fin < x.debut) x.fin = x.debut; } else x.fin = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'ph-debut' || k === 'ph-fin') { const h = S.feuille && S.feuille.horaires[t.dataset.v]; if (!h) return; if (k === 'ph-debut') { h.debut = t.value; if (K.min(h.fin) <= K.min(h.debut)) h.fin = K.hDe(K.min(h.debut) + 30); } else { h.fin = t.value; if (K.min(h.fin) <= K.min(h.debut)) h.debut = K.hDe(K.min(h.fin) - 30); } rendre({ focus: t.id }); return; }
+    if (k === 'per-edt-date') { if (S.feuille) S.feuille.fin = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'per-au') { S.feuille.au = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'msg') { const avant = !!S.msgBrouillon.trim(); S.msgBrouillon = t.value; if (avant !== !!t.value.trim()) { const btn = document.getElementById('msg-envoyer'); if (btn) btn.disabled = !t.value.trim() || S.envoi; } return; }
     if (k === 'n1' || k === 'n2') { f[k] = t.value.replace(/\D/g, '').slice(0, 4); rendre({ focus: t.id }); return; }
