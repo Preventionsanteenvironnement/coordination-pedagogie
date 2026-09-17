@@ -94,6 +94,8 @@ export function normaliserAesh(d, polesAutorises, cat) {
   if (out.services === undefined) delete out.services; if (out.jours === undefined) delete out.jours;
   ['cantine', 'internat', 'service'].forEach(k => { if (k in out) out[k] = nombreOk(out[k]) || 0; });
   if (d.filieres !== undefined) out.filieres = normaliserFilieres(d.filieres, cat);
+  if (d.presence !== undefined) out.presence = nombreOk(d.presence);
+  if (d.reunionH !== undefined) out.reunionH = nombreOk(d.reunionH, 20);
   if (d.rattachement !== undefined) out.rattachement = ok(d.rattachement) ? d.rattachement : undefined;
   if (out.rattachement === undefined) delete out.rattachement;
   return out;
@@ -137,10 +139,22 @@ export function prevuPourClasse(a, cat, classe) {
   const cl = Array.isArray(v.classes) && v.classes.length ? v.classes : null;
   return { connu: true, prevu: !cl || cl.includes(classe), filiere: f, classes: cl, filiereAbsente: false };
 }
-/* Présence élève : le contrat moins les services et l'heure de réunion — les heures en classe. */
+/* Heures de réunion par semaine : saisies par le référent (1 h tant qu'il n'a rien changé). */
+export const heuresReunion = a => Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1;
+/* Présence élève : les heures en classe. Saisie par le référent ; pour une fiche d'avant, on la déduit du contrat. */
 export function presenceEleve(a) {
+  if (Number.isFinite(+a.presence) && a.presence !== null && a.presence !== '') return +a.presence;
   const c = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
-  return c == null ? null : Math.round((c - totalServices(a) - 1) * 100) / 100;
+  return c == null ? null : Math.round((c - totalServices(a) - heuresReunion(a)) * 100) / 100;
+}
+/* Contrat = présence élève + réunion + services ? Sinon, on le signale (on ne corrige rien tout seul). */
+export function ecartContrat(a) {
+  const c = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
+  const p = presenceEleve(a);
+  if (c == null || p == null) return null;
+  const services = totalServices(a), reunion = heuresReunion(a);
+  const somme = Math.round((p + reunion + services) * 100) / 100;
+  return { contrat: c, presence: p, reunion, services, somme, ecart: Math.round((somme - c) * 100) / 100 };
 }
 
 export function indexer(docs, depart, polesAutorises, cat) {
@@ -214,12 +228,12 @@ export const joursDe = a => Array.isArray(a.jours) && a.jours.length ? a.jours.m
 export function repartition(a, nomPole) {
   const contrat = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
   const parPole = {}; Object.keys(a.equipes || {}).forEach(p => { const h = +((a.heures || {})[p]); if (Number.isFinite(h)) parPole[p] = h; });
-  const services = totalServices(a), reunion = 1;
+  const services = totalServices(a), reunion = heuresReunion(a);
   const declare = Object.values(parPole).reduce((s, v) => s + v, 0), somme = declare + services + reunion;
   const solde = contrat == null ? null : contrat - somme;
   const nom = p => nomPole ? nomPole(p) : p;
   const parts = Object.entries(parPole).map(([p, h]) => `${nom(p)} ${fmtH(h)}`);
-  servicesDe(a).forEach(x => parts.push(`${x.nom.toLowerCase()} ${fmtH(x.h)}`)); parts.push('réunion 1 h');
+  servicesDe(a).forEach(x => parts.push(`${x.nom.toLowerCase()} ${fmtH(x.h)}`)); if (reunion) parts.push(`réunion ${fmtH(reunion)}`);
   const texte = contrat == null ? 'contrat à compléter' : solde < -1e-9 ? `${parts.join(' + ')} = ${fmtH(somme)}, pour un contrat de ${fmtH(contrat)} : ${fmtH(-solde)} de trop` : solde > 1e-9 ? `${fmtH(solde)} disponibles sur un contrat de ${fmtH(contrat)}` : `contrat de ${fmtH(contrat)} entièrement réparti`;
   return { contrat, parPole, services, reunion, declare, somme, solde, texte, poles: Object.keys(parPole).filter(p => parPole[p] > 0) };
 }
@@ -240,8 +254,8 @@ export function bilan(ctx, aeshId, lundi) {
   });
   const ratio = joursTravail / 5;
   const services = totalServices(a) * ratio;
-  /* Une heure de réunion par semaine de cours : la réunion institutionnelle la remplace cette semaine-là. */
-  const reunion = joursTravail ? 1 : 0;
+  /* La réunion d'équipe, telle que le référent l'a saisie : la réunion institutionnelle la remplace cette semaine-là. */
+  const reunion = joursTravail ? heuresReunion(a) : 0;
   const total = cours + services + reunion;
   const contrat = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
   const prevuPoles = a.heures || {};

@@ -26,10 +26,12 @@ Les besoins sont lus dans `coordination_estimation_aesh` (page `demandes-aesh/?f
 ## Si PRONOTE change
 Remplacer les captures, refaire `edt-lycee.json` (chantier `work/referents-aesh-v1/edt/`), garder les identifiants des cours existants.
 
-## Contrat, présence élève, filières (17/09/2026)
-- **Contrat** : le total d’heures dues par semaine, réunion et services compris. **Présence élève** : ce qui reste
-  pour les cours (contrat − services − 1 h de réunion) ; elle se calcule, on ne la saisit jamais.
+## Contrat, présence élève, réunion, filières (17/09/2026)
+- Trois nombres **saisis à la main**, jamais déduits : **Contrat** (total dû par semaine),
+  **Présence élève** (heures en classe) et **Réunion** (heures par semaine, 1 h par défaut, libre),
+  avec le jour et l’heure de la réunion juste en dessous.
   Chaque mot a une pastille **?** qui l’explique en une phrase.
+- Si **présence élève + réunion + services ≠ contrat**, la fiche le **signale** — elle ne corrige rien toute seule.
 - **« Intervient en »** (champ `filieres` de la fiche) : les 7 filières du lycée — PSR, MELEC, AGOrA, Jardinier
   paysagiste, Horticulture, Cannage-paillage, Vannerie — rangées par pôle. Une filière cochée vaut tous ses
   niveaux ; on déplie pour n’en garder que certaines classes (`filieres.MELEC.classes = ['B1MELEC','BTMELEC']`,

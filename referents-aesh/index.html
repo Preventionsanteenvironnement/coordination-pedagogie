@@ -335,8 +335,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .choix-aesh .horspr{color:var(--warn);font-weight:700}
 
 /* ── explications ⓘ et filières (17/09/2026) ── */
-.info{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:var(--card-2);color:var(--muted);font-size:.78rem;font-weight:800;line-height:1;padding:0;vertical-align:2px}
-.info[aria-expanded="true"]{background:var(--pole);border-color:var(--pole);color:#fff}
+.pt-aide{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:var(--card-2);color:var(--muted);font-size:.78rem;font-weight:800;line-height:1;padding:0;vertical-align:2px}
+.pt-aide[aria-expanded="true"]{background:var(--pole);border-color:var(--pole);color:#fff}
+.jourc{border:1.5px solid var(--line);background:var(--card);border-radius:11px;padding:6px 11px;font-weight:650;min-height:40px;color:var(--ink)}
+.jourc[aria-pressed="true"]{border-color:var(--pole);background:var(--pole-l);color:var(--pole)}
+.champ .bandeau{width:100%}
+/* fiche sur téléphone : le titre, le pôle et la semaine ne se chevauchent plus */
+@media (max-width:560px){.fiche > .ligne > .semaine{flex:1 0 100%;justify-content:space-between}.fiche > .ligne > div{min-width:9em}}
 .aide{display:block;margin-top:6px;color:var(--ink-2);background:var(--card-2);border-radius:10px;padding:8px 10px;line-height:1.35}
 .fil{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;border:1.5px solid var(--line);border-radius:14px;padding:8px 12px;background:var(--card)}
 .fil.on{border-color:var(--pole);background:var(--pole-l)}

@@ -291,7 +291,7 @@ export async function demarrer({ FS, db, erreur }) {
     const contrat = nombre(a.contrat), parts = [];
     Object.keys(a.equipes || {}).forEach(q => { const h = nombre((a.heures || {})[q]); if (h) parts.push([`${nomPole(q)} ${K.fmtH(h)}`, h, (pole(q) || P()).couleur]); });
     K.servicesDe(a).forEach(x => parts.push([`${x.nom.toLowerCase()} ${K.fmtH(x.h)}`, x.h, '#94a3b8']));
-    parts.push(['réunion 1 h', 1, '#cbd5e1']);
+    if (K.heuresReunion(a)) parts.push([`réunion ${K.fmtH(K.heuresReunion(a))}`, K.heuresReunion(a), '#cbd5e1']);
     const tot = Math.max(contrat || 0, parts.reduce((s, p) => s + p[1], 0)) || 1;
     return `<div class="jauge" aria-hidden="true">${parts.map(p => `<i style="width:${p[1] / tot * 100}%;background:${p[2]}"></i>`).join('')}</div>
       <div class="leg">${parts.map(p => `<span><em style="background:${p[2]}"></em>${esc(p[0])}</span>`).join('')}</div>`;
@@ -301,10 +301,12 @@ export async function demarrer({ FS, db, erreur }) {
   /* ─── explications ⓘ (17/09/2026) : un mot simple, affiché seulement quand on le demande ─── */
   const AIDES = {
     contrat: 'Le total d’heures dues par semaine : présence élève, services (cantine, internat…), réunion, etc.',
-    presence: 'Les heures en classe avec les élèves : le contrat moins les services et la réunion. C’est ce qu’on place dans l’emploi du temps.',
+    presence: 'Les heures en classe avec les élèves, que vous notez vous-même : le contrat moins la réunion et les services. C’est ce qu’on place dans l’emploi du temps.',
+    jours: 'Les jours où il travaille. On n’y touche que s’il ne travaille pas certains jours : ceux-là ne seront plus proposés dans l’emploi du temps.',
+    reunion: 'La réunion d’équipe : son nombre d’heures par semaine, puis son jour et son heure. Elle est comptée dans le contrat, pas dans la présence élève.',
     intervient: 'Les filières et les classes où il intervient. Votre filière est mise par défaut. « Tous les niveaux » : toutes les classes de la filière.'
   };
-  const aide = cle => `<button type="button" class="info" id="i-${cle}" data-a="info" data-v="${cle}" aria-expanded="${S.info === cle}" aria-label="Qu’est-ce que c’est ?">?</button>`;
+  const aide = cle => `<button type="button" class="pt-aide" id="i-${cle}" data-a="info" data-v="${cle}" aria-expanded="${S.info === cle}" aria-label="Qu’est-ce que c’est ?">?</button>`;
   const aideTexte = cle => S.info === cle ? `<small class="aide">${esc(AIDES[cle] || '')}</small>` : '';
   /* « MELEC · Vannerie (CAP 1 Vannerie) » — une fiche ancienne, sans filières, affiche ses pôles. */
   function libFilieres(a) {
@@ -399,6 +401,7 @@ export async function demarrer({ FS, db, erreur }) {
     const v = x => nombre(x) == null ? '—' : K.fmtH(x);
     if ((o.sigle || '') !== a.sigle) l.push(['Sigle', o.sigle || '—', a.sigle]);
     if (nombre(o.contrat) !== nombre(a.contrat)) l.push(['Contrat', v(o.contrat), v(a.contrat)]);
+    if (nombre(o.presence) !== nombre(a.presence)) l.push(['Présence élève', v(o.presence), v(a.presence)]);
     if (libFilieres(o) !== libFilieres(a)) l.push(['Intervient en', libFilieres(o), libFilieres(a)]);
     if ((o.rattachement || '') !== (a.rattachement || '')) l.push(['Équipe', o.rattachement ? nomPole(o.rattachement) : '—', a.rattachement ? nomPole(a.rattachement) : '—']);
     const tousPoles = [...new Set([...Object.keys(o.equipes || {}), ...Object.keys(a.equipes || {})])];
@@ -408,7 +411,8 @@ export async function demarrer({ FS, db, erreur }) {
     const jv = x => (x || [0, 1, 2, 3, 4]).map(j => K.JOURS_C[j]).join(' ');
     if (jv(o.jours) !== jv(a.jours)) l.push(['Jours de présence', jv(o.jours), jv(a.jours)]);
     const r = x => x && K.RE_HEURE.test(x.debut || '') ? `${K.JOURS[x.jour]} ${K.hFr(x.debut)}–${K.hFr(x.fin)}` : '—';
-    if (r(o.reunion) !== r(a.reunion)) l.push(['Réunion d’équipe', r(o.reunion), r(a.reunion)]);
+    if (r(o.reunion) !== r(a.reunion)) l.push(['Jour de la réunion', r(o.reunion), r(a.reunion)]);
+    if (nombre(o.reunionH) !== nombre(a.reunionH)) l.push(['Réunion', K.fmtH(K.heuresReunion(o)), K.fmtH(K.heuresReunion(a))]);
     return l;
   }
   function ecranFiche() {
@@ -425,7 +429,7 @@ export async function demarrer({ FS, db, erreur }) {
     const absences = I.absences.filter(x => x.aeshId === a.id && x.au >= K.isoLocal()).sort((x, y) => x.du.localeCompare(y.du));
     const reu = a.reunion || {};
     const prochaineReunion = reu.debut != null && reu.jour != null ? (() => { let d = K.ajoute(S.lundi, reu.jour); for (let k = 0; k < 8 && (d < K.isoLocal() || S.C.off(d)); k++) d = K.ajoute(d, 7); return d; })() : '';
-    const jours = K.joursDe(a);
+    const jours = K.joursDe(a), ecart = K.ecartContrat(a);
     return `<div class="fiche">
       <div class="ligne"><span class="sigle grand">${esc(a.sigle || '?')}</span><div style="flex:1;min-width:0"><h1 id="titre" tabindex="-1">${esc(a.sigle || 'Nouvel AESH')}</h1>
         <p class="sous">${[p.nom, ...autres.map(nomPole)].map(esc).join(' + ')}</p></div>${!nouveau ? selecteurSemaine() : ''}</div>
@@ -436,16 +440,18 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="champs">
         <div class="champ ${estModif((o.sigle || '') !== a.sigle)}"><span class="lib"><b>Sigle</b><small>initiales, jamais le prénom</small></span><input type="text" id="f-sigle" data-i="sigle" value="${esc(a.sigle)}" maxlength="6" style="width:110px;font-weight:800;text-transform:uppercase;text-align:center"></div>
         <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
-        <div class="champ"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>calculée</small>${aideTexte('presence')}</span><span class="heures">${K.presenceEleve(a) == null ? '—' : K.fmtH(K.presenceEleve(a))}</span></div>
+        <div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine</small>${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}</div>
+        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
+          <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, i) => `<button type="button" class="jourc" id="rj-${i}" data-a="reu-jour" data-v="${i}" aria-pressed="${reu.jour === i && !!reu.debut}">${j}</button>`).join('')}
+            <label class="sr" for="f-reu-h">Heure</label><select id="f-reu-h" data-i="reu-h" ${reu.debut ? '' : 'disabled'}>${reu.debut ? '' : '<option value="">heure</option>'}${CRENEAUX_H.slice(0, -2).map(h => `<option value="${h}" ${reu.debut === h ? 'selected' : ''}>${K.hFr(h)} – ${K.hFr(K.hDe(K.min(h) + 60))}</option>`).join('')}</select>
+            ${reu.debut ? `<button type="button" class="lien" id="f-reu-non" data-a="reu-aucune">aucune</button>` : ''}</div>
+          ${prochaineReunion ? `<small class="muted" style="grid-column:1/-1">Prochaine : ${esc(K.dateLongue(prochaineReunion))}, ${K.hFr(reu.debut)}–${K.hFr(reu.fin)}</small>` : ''}</div>
+        ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
         <div class="champ ${estModif(libFilieres(o) !== libFilieres(a))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Intervient en ${aide('intervient')}</b><small>${esc(libFilieres(a))}</small>${aideTexte('intervient')}</span><button type="button" class="btn petit" id="f-filieres" data-a="filieres">Modifier</button></div>
         ${Object.keys(a.equipes || {}).map(q => `<div class="champ ${estModif(nombre((o.heures || {})[q]) !== nombre((a.heures || {})[q]) || (o.equipes || {})[q] == null)}"><span class="lib"><b>Heures dans ${esc(nomPole(q))}</b><small>heures par semaine</small></span>${pas('pole:' + q, (a.heures || {})[q], 0.5, 'Heures dans ' + nomPole(q))}</div>`).join('')}
         ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${t}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}</div>`).join('')}
         <div class="champ" style="grid-template-columns:1fr"><div class="ligne"><span class="muted" style="font-weight:700">Services :</span><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ Cantine, internat, autre service</button></div></div>
-        <div class="champ ${estModif(JSON.stringify(o.jours || [0, 1, 2, 3, 4]) !== JSON.stringify(jours))}" style="grid-template-columns:1fr"><span class="lib"><b>Jours de présence</b></span><div class="choix" role="group" aria-label="Jours de présence">${K.JOURS_C.map((j, i) => `<button type="button" id="jp-${i}" data-a="jour-presence" data-v="${i}" aria-pressed="${jours.includes(i)}">${j}</button>`).join('')}</div></div>
-        <div class="champ ${estModif(JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:1fr"><span class="lib"><b>Réunion d’équipe</b><small>1 h par semaine</small></span>
-          <div class="ligne"><div class="choix" role="group" aria-label="Jour de la réunion">${K.JOURS_C.map((j, i) => `<button type="button" id="rj-${i}" data-a="reu-jour" data-v="${i}" aria-pressed="${reu.jour === i && !!reu.debut}">${j}</button>`).join('')}</div>
-          <label class="sr" for="f-reu-h">Heure</label><select id="f-reu-h" data-i="reu-h" ${reu.debut ? '' : 'disabled'}>${reu.debut ? '' : '<option value="">heure</option>'}${CRENEAUX_H.slice(0, -2).map(h => `<option value="${h}" ${reu.debut === h ? 'selected' : ''}>${K.hFr(h)} – ${K.hFr(K.hDe(K.min(h) + 60))}</option>`).join('')}</select>
-          ${reu.debut ? `<button type="button" class="lien" id="f-reu-non" data-a="reu-aucune">aucune</button>` : ''}</div>${prochaineReunion ? `<small class="muted">Prochaine : ${esc(K.dateLongue(prochaineReunion))}, ${K.hFr(reu.debut)}–${K.hFr(reu.fin)}</small>` : ''}</div>
+        <div class="champ ${estModif(JSON.stringify(o.jours || [0, 1, 2, 3, 4]) !== JSON.stringify(jours))}" style="grid-template-columns:1fr"><span class="lib"><b>Jours de présence ${aide('jours')}</b>${aideTexte('jours')}</span><div class="choix" role="group" aria-label="Jours de présence">${K.JOURS_C.map((j, i) => `<button type="button" id="jp-${i}" data-a="jour-presence" data-v="${i}" aria-pressed="${jours.includes(i)}">${j}</button>`).join('')}</div></div>
       </div>
       ${!nouveau ? `<div class="carte pad" style="display:grid;gap:10px"><div class="ligne ecarte"><h2>Absences et formations</h2><button type="button" class="btn petit" id="f-abs" data-a="aller" data-v="absence" data-id="${esc(a.id)}">＋ Poser</button></div>
         ${absences.length ? absences.map(x => `<div class="ligne ecarte"><span><span class="puce err">${esc(K.MOTIFS[x.motif] || 'Absence')}</span> ${x.du === x.au ? esc(K.dateLongue(x.du)) : `du ${esc(K.dateCourte(x.du))} au ${esc(K.dateCourte(x.au))}`}${x.journee === false ? ` · ${K.hFr(x.debut)}–${K.hFr(x.fin)}` : ''}</span></div>`).join('') : '<span class="muted">Aucune à venir.</span>'}</div>` : ''}
@@ -1027,6 +1033,8 @@ export async function demarrer({ FS, db, erreur }) {
         const diff = (x, y) => JSON.stringify(x ?? null) !== JSON.stringify(y ?? null);
         if (diff(orig.sigle, a.sigle)) doc.sigle = a.sigle;
         if (diff(nombre(orig.contrat), nombre(a.contrat))) doc.contrat = a.contrat;
+        if (diff(nombre(orig.presence), nombre(a.presence))) doc.presence = a.presence;
+        if (diff(nombre(orig.reunionH), nombre(a.reunionH))) doc.reunionH = a.reunionH;
         doc.equipes = { ...(doc.equipes || {}) }; doc.heures = { ...(doc.heures || {}) };
         [...new Set([...Object.keys(orig.equipes || {}), ...Object.keys(a.equipes || {})])].forEach(q => {
           if (diff((orig.equipes || {})[q], (a.equipes || {})[q])) { if ((a.equipes || {})[q] == null) delete doc.equipes[q]; else doc.equipes[q] = a.equipes[q]; }
@@ -1054,6 +1062,10 @@ export async function demarrer({ FS, db, erreur }) {
       doc.heures = Object.fromEntries(Object.entries(doc.heures || {}).filter(([, v]) => nombre(v) != null).map(([k, v]) => [k, +v]));
       const borne = x => { const n = nombre(x); return n == null ? null : Math.max(0, Math.min(45, Math.round(n * 2) / 2)); };
       doc.contrat = borne(doc.contrat);
+      doc.presence = borne(doc.presence);
+      if (doc.presence == null) delete doc.presence;
+      doc.reunionH = borne(doc.reunionH);
+      if (doc.reunionH == null) delete doc.reunionH;
       doc.heures = Object.fromEntries(Object.entries(doc.heures).map(([k, v]) => [k, borne(v)]).filter(([, v]) => v != null));
       doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h) }));
       doc.jours = K.joursDe(doc); delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
@@ -1365,6 +1377,9 @@ export async function demarrer({ FS, db, erreur }) {
       { const [genre, cle] = String(t.dataset.v).includes(':') ? t.dataset.v.split(':') : [t.dataset.v, '']; if (genre === 'pole') f.a.heures[cle] = n; else if (genre === 'serv') f.a.services[+cle].h = n; else f.a[t.dataset.v] = n; }
       const champ = t.closest('.champ'); if (champ) champ.classList.add('modif');
       const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false;
+      /* Un instant après la frappe, on réaffiche : le contrôle « contrat = présence + réunion + services »
+         se met à jour. Jamais tout de suite, pour ne pas avaler le clic sur « Enregistrer ». */
+      clearTimeout(gererSaisie.t); gererSaisie.t = setTimeout(() => { if (S.route.e === 'fiche' && S.form === f && !S.feuille) rendre({ focus: document.activeElement && document.activeElement.id }); }, 700);
       return;
     }
     if (k === 'reu-h') { f.a.reunion = { ...(f.a.reunion || { jour: 0 }), debut: t.value, fin: K.hDe(K.min(t.value) + 60) }; rendre({ focus: t.id }); return; }
