@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
 <meta name="theme-color" content="#0f766e">
 <meta name="robots" content="noindex">
 <title>Référents de pôle AESH</title>
@@ -253,6 +253,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .cours-l .pills{justify-content:flex-end;display:flex;flex-wrap:wrap;gap:4px;max-width:9em}
 @media (max-width:760px){.seul-large{display:none!important}}
 @media (min-width:761px){.seul-etroit{display:none!important}}
+/* téléphone : mode panoramique — la grille entière, comme sur ordinateur ; on la déplace avec le doigt dans tous les sens, les heures restent à gauche */
+@media (max-width:760px){
+  .defile{-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom}
+  .grille-edt{overflow:visible}
+  .g-tete:first-child,.g-heures{position:sticky;left:0;z-index:3;background:var(--card)}
+  .g-tete:first-child{z-index:4;background:var(--card-2)}
+}
 .legende{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:.85rem}
 .legende span{display:inline-flex;align-items:center;gap:6px}
 

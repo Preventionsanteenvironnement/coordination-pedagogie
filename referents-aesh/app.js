@@ -546,15 +546,15 @@ export async function demarrer({ FS, db, erreur }) {
       l.forEach(c => { let i = cols.findIndex(col => col.every(x => !K.chevauche(x.d, x.f, c.d, c.f))); if (i < 0) { cols.push([]); i = cols.length - 1; } cols[i].push(c); c._col = i; });
       l.forEach(c => { const g = l.filter(x => K.chevauche(x.d, x.f, c.d, c.f)); c._cols = Math.max(1, ...g.map(x => x._col + 1)); });
     });
-    let grille = `<div class="defile seul-large"><div class="grille-edt"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete">${K.JOURS[j]}<small>${K.jjmm(jr.date)}</small></div>`).join('')}
+    /* même grille sur téléphone et ordinateur (les référents travaillent sur ce visuel) : sur téléphone, mode panoramique, on la déplace avec le doigt */
+    let grille = `<div class="defile"><div class="grille-edt"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete">${K.JOURS[j]}<small>${K.jjmm(jr.date)}</small></div>`).join('')}
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: 11 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => {
       grille += `<div class="g-jour" style="height:${(H1 - H0) * PX}px">${Array.from({ length: 10 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}
         ${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : cours.filter(c => c.j === j).map(c => blocHtml(c, true)).join('')}</div>`;
     });
     grille += `</div></div>`;
-    const liste = `<div class="jours-liste seul-etroit">${sem.jours.map((jr, j) => { const l = cours.filter(c => c.j === j).sort((a, b) => K.min(a.d) - K.min(b.d)); return `<section><h2 class="jour-titre">${K.JOURS[j]} ${K.jjmm(jr.date)}</h2>${jr.off ? `<div class="bandeau info">${esc(jr.off)}</div>` : l.map(c => blocHtml(c, false)).join('') || '<span class="muted">Pas de cours</span>'}</section>`; }).join('')}</div>`;
-    return grille + liste;
+    return grille;
   }
   function ecranEdt() {
     const p = P(), nom = classeCourante(), k = S.edt.classes[nom], sem = S.C.semaine(S.lundi);
