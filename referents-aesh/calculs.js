@@ -96,6 +96,7 @@ export function normaliserAesh(d, polesAutorises, cat) {
   ['cantine', 'internat', 'service'].forEach(k => { if (k in out) out[k] = nombreOk(out[k]) || 0; });
   if (d.filieres !== undefined) out.filieres = normaliserFilieres(d.filieres, cat);
   if (d.dispos !== undefined) out.dispos = disposDe({ dispos: d.dispos });
+  if (d.auteurs && typeof d.auteurs === 'object') { const au = {}; ['contrat', 'presence', 'reunion'].forEach(k => { if (ok(d.auteurs[k])) au[k] = d.auteurs[k]; }); out.auteurs = au; }
   if (d.presence !== undefined) out.presence = nombreOk(d.presence);
   if (d.reunionH !== undefined) out.reunionH = nombreOk(d.reunionH, 20);
   if (d.rattachement !== undefined) out.rattachement = ok(d.rattachement) ? d.rattachement : undefined;
@@ -118,7 +119,7 @@ export function normaliserFilieres(d, cat) {
     if ((cat && !f) || !v || typeof v !== 'object') return;
     let cl = Array.isArray(v.classes) ? v.classes.filter(n => typeof n === 'string' && (!f || f.classes.includes(n))) : null;
     if (cl && (!cl.length || (f && cl.length === f.classes.length))) cl = null;   /* toutes les classes = tous les niveaux */
-    out[id] = { classes: cl };
+    out[id] = { classes: cl, h: nombreOk(v.h) };
   });
   return out;
 }
@@ -129,6 +130,17 @@ export function polesDesFilieres(a, cat, rattachement) {
   Object.keys(fl).forEach(id => { const f = cat.find(x => x.id === id); if (f) equipes[f.pole] = 1; });
   if (rattachement) equipes[rattachement] = 1;
   return equipes;
+}
+/* Heures d'un pôle, calculées à partir de ses filières. null si aucune filière de ce pôle n'a d'heures :
+   dans ce cas, le total déjà saisi pour le pôle reste en place (on ne perd rien d'une fiche d'avant). */
+export function heuresDuPole(a, cat, pid) {
+  const fl = filieresDe(a) || {}; let somme = null;
+  Object.entries(fl).forEach(([id, v]) => {
+    const f = cat.find(x => x.id === id); if (!f || f.pole !== pid) return;
+    const brut = v && v.h; if (brut === null || brut === undefined || brut === '') return;   /* pas saisi ≠ zéro */
+    const h = Number(brut); if (Number.isFinite(h)) somme = Math.round(((somme || 0) + h) * 100) / 100;
+  });
+  return somme;
 }
 /* Les filières déclarées dans un pôle donné. */
 export const filieresDuPoleDe = (a, cat, pid) => Object.keys(filieresDe(a) || {}).map(id => cat.find(x => x.id === id)).filter(f => f && f.pole === pid);

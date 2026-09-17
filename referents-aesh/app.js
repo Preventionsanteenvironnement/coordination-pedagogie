@@ -300,12 +300,14 @@ export async function demarrer({ FS, db, erreur }) {
 
   /* ─── explications ⓘ (17/09/2026) : un mot simple, affiché seulement quand on le demande ─── */
   const AIDES = {
-    contrat: 'Le total d’heures dues par semaine : présence élève, services (cantine, internat…), réunion, etc.',
+    contrat: 'Le total d’heures dues par semaine : présence élève, services (cantine, internat…), réunion, etc. Il est commun à tous les pôles où l’AESH travaille : on ne le compte qu’une fois.',
     presence: 'Les heures en classe avec les élèves, que vous notez vous-même : le contrat moins la réunion et les services. C’est ce qu’on place dans l’emploi du temps.',
     jours: 'Par défaut, il travaille toute la semaine : on ne touche à rien. ✕ indisponible : c’est écrit dans son contrat, il ne travaille pas ce moment-là. ◐ souhait : il aimerait ne pas travailler ce moment-là. Dans les deux cas, on peut quand même le placer : c’est vous qui décidez.',
-    reunion: 'La réunion d’équipe : son nombre d’heures par semaine, puis son jour et son heure. Elle est comptée dans le contrat, pas dans la présence élève.',
-    intervient: 'Les filières et les classes où il intervient. Votre filière est mise par défaut. « Tous les niveaux » : toutes les classes de la filière.'
+    reunion: 'La réunion d’équipe : son nombre d’heures par semaine, puis son jour et son heure. Elle ne se compte qu’une fois pour la semaine, même si l’AESH travaille dans deux pôles. Si un autre référent l’a déjà fixée, vous pouvez la changer : il le verra aussi.',
+    intervient: 'Les filières et les classes où il intervient, et ses heures dans chacune. Votre filière est mise par défaut. « Tous les niveaux » : toutes les classes de la filière. Ce qu’il reste sur son contrat peut être pris par un autre pôle.'
   };
+  /* Contrat, présence élève et réunion sont communs aux pôles : on dit d'où ils viennent, pour qu'on ne les compte pas deux fois. */
+  const parQui = (a, champ) => { const q = (a.auteurs || {})[champ]; return q && q !== P().id ? `<small class="par-qui">${champ === 'reunion' ? 'Fixée' : 'Renseigné'} par le référent ${esc(nomPole(q))}</small>` : ''; };
   const aide = cle => `<button type="button" class="pt-aide" id="i-${cle}" data-a="info" data-v="${cle}" aria-expanded="${S.info === cle}" aria-label="Qu’est-ce que c’est ?">?</button>`;
   const aideTexte = cle => S.info === cle ? `<small class="aide">${esc(AIDES[cle] || '')}</small>` : '';
   /* « MELEC · Vannerie (CAP 1 Vannerie) » — une fiche ancienne, sans filières, affiche ses pôles. */
@@ -313,9 +315,23 @@ export async function demarrer({ FS, db, erreur }) {
     if (!a) return '—';
     const fl = K.filieresDe(a);
     if (!fl) return Object.keys(a.equipes || {}).map(nomPole).join(' · ') || '—';
-    const l = Object.keys(fl).map(id => { const f = filiere(id); if (!f) return null; const cl = fl[id].classes;
-      return `${f.nom}${cl && cl.length ? ` (${cl.map(n => S.edt.classes[n].court).join(', ')})` : ''}`; }).filter(Boolean);
+    const l = Object.keys(fl).map(id => { const f = filiere(id); if (!f) return null; const cl = fl[id].classes, h = nombre(fl[id].h);
+      return `${f.nom}${h != null ? ' ' + K.fmtH(h) : ''}${cl && cl.length ? ` (${cl.map(n => S.edt.classes[n].court).join(', ')})` : ''}`; }).filter(Boolean);
     return l.join(' · ') || '—';
+  }
+  /* Heures encore à répartir sur sa présence élève : ce que les autres référents peuvent encore prendre. */
+  function resteAPartir(a) {
+    const presence = K.presenceEleve(a); if (presence == null) return null;
+    const fl = K.filieresDe(a) || {};
+    let somme = 0, saisi = false;
+    Object.values(fl).forEach(v => { const h = nombre(v.h); if (h != null) { somme += h; saisi = true; } });
+    Object.entries(a.heures || {}).forEach(([q, h]) => { if (K.heuresDuPole(a, FILIERES, q) == null && nombre(h) != null) { somme += nombre(h); saisi = true; } });
+    const reste = Math.round((presence - somme) * 100) / 100;
+    if (!saisi && !reste) return null;
+    return { reste, somme, presence,
+      texte: reste > 1e-9 ? `${K.fmtH(somme)} réparties sur ${K.fmtH(presence)} de présence élève : <b>${K.fmtH(reste)} encore libres</b>, pour vous ou pour un autre pôle.`
+        : reste < -1e-9 ? `${K.fmtH(somme)} réparties pour ${K.fmtH(presence)} de présence élève : <b>${K.fmtH(-reste)} de trop</b>.`
+        : `${K.fmtH(presence)} entièrement réparties.` };
   }
   /* Pôle de l'équipe qui gère l'AESH : ce qu'il déclare, sinon le premier pôle où il intervient. */
   const rattachementDe = a => a.rattachement && (a.equipes || {})[a.rattachement] != null ? a.rattachement : Object.keys(a.equipes || {})[0] || P().id;
@@ -388,6 +404,12 @@ export async function demarrer({ FS, db, erreur }) {
     copie.services = K.servicesDe(a); copie.dispos = K.disposDe(a); delete copie.jours; delete copie.cantine; delete copie.internat; delete copie.service; delete copie.serviceLib;
     if (!K.filieresDe(copie)) copie.filieres = filieresParDefaut(copie);
     copie.rattachement = rattachementDe(copie);
+    /* Une fiche d'avant les heures par filière : si le pôle n'a qu'une filière déclarée, ses heures lui reviennent.
+       S'il en a plusieurs, on ne devine pas : le total du pôle reste compté tant que rien n'est saisi. */
+    POLES.forEach(q => { const h = nombre((copie.heures || {})[q.id]); if (h == null) return;
+      const siennes = filieresDuPole(q.id).filter(g => copie.filieres[g.id]);
+      if (siennes.length === 1 && nombre(copie.filieres[siennes[0].id].h) == null) copie.filieres[siennes[0].id] = { ...copie.filieres[siennes[0].id], h };
+    });
     return { id, a: copie, orig: JSON.parse(JSON.stringify(copie)) };
   }
   function formFiche() {
@@ -439,16 +461,15 @@ export async function demarrer({ FS, db, erreur }) {
         ${b.alertes.length ? `<div class="alertes">${b.alertes.map((x, i) => carteAlerte(a, x, i, 'fa')).join('')}</div>` : ''}` : ''}
       <div class="champs">
         <div class="champ ${estModif((o.sigle || '') !== a.sigle)}"><span class="lib"><b>Sigle</b><small>initiales, jamais le prénom</small></span><input type="text" id="f-sigle" data-i="sigle" value="${esc(a.sigle)}" maxlength="6" style="width:110px;font-weight:800;text-transform:uppercase;text-align:center"></div>
-        <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
-        <div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine</small>${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}</div>
-        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
+        <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${parQui(a, 'contrat')}${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
+        <div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine</small>${parQui(a, 'presence')}${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}</div>
+        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
           <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, i) => `<button type="button" class="jourc" id="rj-${i}" data-a="reu-jour" data-v="${i}" aria-pressed="${reu.jour === i && !!reu.debut}">${j}</button>`).join('')}
             <label class="sr" for="f-reu-h">Heure</label><select id="f-reu-h" data-i="reu-h" ${reu.debut ? '' : 'disabled'}>${reu.debut ? '' : '<option value="">heure</option>'}${CRENEAUX_H.slice(0, -2).map(h => `<option value="${h}" ${reu.debut === h ? 'selected' : ''}>${K.hFr(h)} – ${K.hFr(K.hDe(K.min(h) + 60))}</option>`).join('')}</select>
             ${reu.debut ? `<button type="button" class="lien" id="f-reu-non" data-a="reu-aucune">aucune</button>` : ''}</div>
           ${prochaineReunion ? `<small class="muted" style="grid-column:1/-1">Prochaine : ${esc(K.dateLongue(prochaineReunion))}, ${K.hFr(reu.debut)}–${K.hFr(reu.fin)}</small>` : ''}</div>
         ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
         <div class="champ ${estModif(libFilieres(o) !== libFilieres(a))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Intervient en ${aide('intervient')}</b><small>${esc(libFilieres(a))}</small>${aideTexte('intervient')}</span><button type="button" class="btn petit" id="f-filieres" data-a="filieres">Modifier</button></div>
-        ${Object.keys(a.equipes || {}).map(q => `<div class="champ ${estModif(nombre((o.heures || {})[q]) !== nombre((a.heures || {})[q]) || (o.equipes || {})[q] == null)}"><span class="lib"><b>Heures dans ${esc(nomPole(q))}</b><small>heures par semaine</small></span>${pas('pole:' + q, (a.heures || {})[q], 0.5, 'Heures dans ' + nomPole(q))}</div>`).join('')}
         ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${t}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
           <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div></div>`).join('')}
         <div class="champ" style="grid-template-columns:1fr"><div class="ligne"><span class="muted" style="font-weight:700">Services :</span><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ Cantine, internat, autre service</button></div></div>
@@ -631,9 +652,7 @@ export async function demarrer({ FS, db, erreur }) {
   function feuilleService(f) {
     const I = idx(), l = K.aeshActifs(I), dedans = new Set(f.choisis);
     const ordre = [...l].sort((x, y) => (dedans.has(y.id) ? 1 : 0) - (dedans.has(x.id) ? 1 : 0));
-    return `<div class="tete-f"><div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">${esc(f.nom)} · ${esc(K.JOURS[f.j].toLowerCase())}</h2>
-        <button type="button" class="rond" id="sv-croix" data-a="fermer" aria-label="Fermer sans rien changer" title="Fermer sans rien changer">✕</button></div>
-      <p class="sous" style="margin:2px 0 0">Qui assure ce service ce jour-là ? Tous les pôles sont proposés.</p></div>
+    return teteFeuille(`${esc(f.nom)} · ${esc(K.JOURS[f.j].toLowerCase())}`, 'Qui assure ce service ce jour-là ? Tous les pôles sont proposés.') + `
       <div class="choix-aesh" role="group" aria-label="AESH">${ordre.map(a => {
         const on = f.choisis.includes(a.id), q = pole(rattachementDe(a)) || P(), b = K.bilan(ctx(), a.id, S.lundi);
         return `<button type="button" id="sa-${esc(a.id)}" data-a="serv-choix" data-v="${esc(a.id)}" aria-pressed="${on}" style="${on ? '' : `border-color:${q.couleur}30`}"><b>${esc(a.sigle)}</b><small style="color:${q.couleur}">${esc(q.nom)}</small><small>${on ? '✓ ' + esc(f.nom.toLowerCase()) : b && b.reste != null ? `reste ${K.fmtH(b.reste)}` : ''}</small></button>`;
@@ -694,8 +713,7 @@ export async function demarrer({ FS, db, erreur }) {
     const pendant = x => !!lib && lib.creneaux.some(k => k.j === x.c.j && K.chevauche(k.debut, k.fin, x.c.d, x.c.f));
     const boutonCours = x => `<button type="button" id="dep-k-${esc(x.c.id)}" data-a="dep-cours" data-v="${esc(x.c.id)}" aria-pressed="${f.choisis.includes(x.c.id)}">${K.JOURS_C[x.c.j]} ${K.hFr(x.c.d)}–${K.hFr(x.c.f)} · ${esc(x.c.lib)}${x.d.texte && x.d.texte !== 'libre' ? ` <span class="muted">· ${esc(x.d.texte)}</span>` : ''}</button>`;
     const libPendant = libres.filter(pendant), libAutres = libres.filter(x => !pendant(x));
-    return `<h2 id="f-titre" tabindex="-1">Où placer ${esc(a.sigle)} ?</h2>
-      <p class="sous" style="margin-top:-8px">${esc(src.court)} en PFMP${lib ? ` · libre ${esc(creneauxTxt(lib.creneaux))}` : ''}</p>
+    return teteFeuille(`Où placer ${esc(a.sigle)} ?`, `${esc(src.court)} en PFMP${lib ? ` · libre ${esc(creneauxTxt(lib.creneaux))}` : ''}`) + `
       <div style="display:grid;gap:6px"><b>Pour</b><div class="choix" role="group" aria-label="Période">
         <button type="button" id="dep-sem" data-a="dep-periode" data-v="semaine" aria-pressed="${f.periode === 'semaine'}">Cette semaine <span class="muted">(${K.jjmm(S.lundi)} → ${K.jjmm(ven)})</span></button>
         ${pf && pf.fin > ven ? `<button type="button" id="dep-pfmp" data-a="dep-periode" data-v="pfmp" aria-pressed="${f.periode === 'pfmp'}">Toute la PFMP <span class="muted">(jusqu’au ${K.jjmm(pf.fin)})</span></button>` : ''}</div></div>
@@ -748,8 +766,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="choix" style="gap:6px"><button type="button" id="ph-tout-${esc(id)}" data-a="horaire-tout" data-v="${esc(id)}" aria-pressed="${!h}">Tout le cours</button><button type="button" id="ph-part-${esc(id)}" data-a="horaire-partie" data-v="${esc(id)}" aria-pressed="${!!h}">Une partie</button></div>
       ${h ? `<select data-i="ph-debut" data-v="${esc(id)}" aria-label="De">${pasH.slice(0, -1).map(x => `<option value="${x}" ${x === h.debut ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted">à</span><select data-i="ph-fin" data-v="${esc(id)}" aria-label="À">${pasH.slice(1).map(x => `<option value="${x}" ${x === h.fin ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted" style="font-size:.85rem">le reste de son temps reste libre</span>` : ''}</div>`; }).join('')}</div>` : '';
     const modifHoraire = f.choisis.some(id => dejaIci.has(id) && JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
-    return `<h2 id="f-titre" tabindex="-1">${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}</h2>
-      <p class="sous" style="margin-top:-8px">${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}</p>
+    return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}`) + `
       ${bes ? `<div class="bandeau info">Besoin estimé par les enseignants : <b>${bes.nb} AESH</b>${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.au ? ` · jusqu’au ${K.jjmm(bes.au)}` : ''}</div>` : ''}
       <div><b>Qui accompagne ?</b></div>
       <div class="choix-aesh" role="group" aria-label="AESH du pôle">${candidats.map(a => bouton(a)).join('')}</div>
@@ -995,6 +1012,11 @@ export async function demarrer({ FS, db, erreur }) {
   }
 
   /* ─────────── feuilles ─────────── */
+  /* Toutes les fenêtres ont la même croix en haut à droite : on ouvre pour regarder, on referme d'un geste,
+     sans rien valider (demande de Brahim, 17/09). Le titre et la croix restent visibles au défilement. */
+  const teteFeuille = (titre, sous) => `<div class="tete-f"><div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">${titre}</h2>
+      <button type="button" class="rond" id="f-croix" data-a="fermer" aria-label="Fermer sans rien valider" title="Fermer sans rien valider">✕</button></div>
+    ${sous ? `<p class="sous" style="margin:2px 0 0">${sous}</p>` : ''}</div>`;
   function feuille() {
     const f = S.feuille;
     let h = '', large = false;
@@ -1008,8 +1030,10 @@ export async function demarrer({ FS, db, erreur }) {
     return `<div class="voile" data-a="voile"><div class="feuille ${large ? 'large' : ''} ${f.fait ? 'fait' : ''}" role="dialog" aria-modal="true" aria-labelledby="f-titre"><div class="poignee" aria-hidden="true"></div>${h}</div></div>`;
   }
   function feuilleConfirmer(f) {
-    if (f.fait) return `<div class="recap"><h2 id="f-titre" tabindex="-1">✓ Enregistré</h2>${f.grand ? `<p class="grand">${esc(f.grand)}</p>` : ''}<p>${esc(f.sous || '')}</p></div>`;
-    return `<div class="recap"><h2 id="f-titre" tabindex="-1">${esc(f.titre || 'Vous confirmez ?')}</h2>${f.apercu ? `<div style="display:grid;justify-items:center"><span class="av-cadre" style="width:120px;height:120px">${f.apercu}</span></div>` : ''}${f.grand ? `<p class="grand">${esc(f.grand)}</p>` : ''}${f.sous ? `<p>${esc(f.sous)}</p>` : ''}
+    if (f.fait) return `<div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">✓ Enregistré</h2><button type="button" class="rond" id="cf-croix" data-a="fermer" aria-label="Fermer">✕</button></div><div class="recap">${f.grand ? `<p class="grand">${esc(f.grand)}</p>` : ''}<p>${esc(f.sous || '')}</p></div>`;
+    return `<div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">${esc(f.titre || 'Vous confirmez ?')}</h2>
+      <button type="button" class="rond" id="cf-croix" data-a="fermer" aria-label="Fermer sans valider" title="Fermer sans valider" ${S.envoi ? 'disabled' : ''}>✕</button></div>
+      <div class="recap">${f.apercu ? `<div style="display:grid;justify-items:center"><span class="av-cadre" style="width:120px;height:120px">${f.apercu}</span></div>` : ''}${f.grand ? `<p class="grand">${esc(f.grand)}</p>` : ''}${f.sous ? `<p>${esc(f.sous)}</p>` : ''}
       ${f.lignes && f.lignes.length ? `<ul>${f.lignes.map(l => `<li><span>${esc(l[0])}</span><b>${l.length > 2 ? `${esc(l[1])} → ${esc(l[2])}` : esc(l[1])}</b></li>`).join('')}</ul>` : ''}
       ${f.choixPeriode ? `<div class="choix" role="group" aria-label="Jusqu’à" style="justify-content:center;margin-top:8px">${f.choixPeriode.map(r => `<button type="button" id="cp-${r.id}" data-a="choix-periode-c" data-v="${r.id}" aria-pressed="${f.periode === r.id}">${esc(r.label)} <span class="muted">(${K.jjmm(r.fin)})</span></button>`).join('')}</div>` : ''}
       ${f.bascule ? `<div class="choix" style="justify-content:center"><button type="button" id="cf-bascule" data-a="bascule" aria-pressed="${f.bascule.on}"><span class="coche" aria-hidden="true">${f.bascule.on ? '✓' : ''}</span>${esc(f.bascule.label)}</button></div>` : ''}
@@ -1026,24 +1050,30 @@ export async function demarrer({ FS, db, erreur }) {
     const fl = a.filieres || {}, rat = rattachementDe(a);
     return `<div class="tete-f"><div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">Où intervient ${esc(a.sigle || 'cet AESH')} ?</h2>
         <button type="button" class="rond" id="fil-croix" data-a="fil-annuler" aria-label="Fermer sans rien changer" title="Fermer sans rien changer">✕</button></div>
-      <p class="sous" style="margin:2px 0 0">Cochez ses filières. Une filière cochée, c’est tous ses niveaux.</p></div>
+      <p class="sous" style="margin:2px 0 0">Cochez ses filières, avec leurs heures. Une filière cochée, c’est tous ses niveaux.</p></div>
       ${POLES.map(q => `<div style="display:grid;gap:6px"><b style="color:${q.couleur}">${esc(q.nom)}</b>
         ${filieresDuPole(q.id).map(x => {
           const on = !!fl[x.id], cl = on && Array.isArray(fl[x.id].classes) && fl[x.id].classes.length ? fl[x.id].classes : null, ouvert = f.ouvert === x.id;
+          const pasF = (id, val) => `<span class="pas petit"><button type="button" id="pmf-${id}" data-a="fil-pas" data-v="${id}" data-d="-0.5" aria-label="Moins">−</button><input id="pvf-${id}" data-i="fil-h" data-v="${id}" inputmode="decimal" value="${nombre(val) == null ? '' : String(val).replace('.', ',')}" placeholder="—" aria-label="Heures en ${esc(x.nom)}"><button type="button" id="ppf-${id}" data-a="fil-pas" data-v="${id}" data-d="0.5" aria-label="Plus">+</button></span>`;
           return `<div class="fil ${on ? 'on' : ''}">
             <button type="button" class="fil-case" id="fil-${x.id}" data-a="fil-toggle" data-v="${x.id}" aria-pressed="${on}"><span class="coche" aria-hidden="true">${on ? '✓' : ''}</span>${esc(x.nom)}</button>
+            ${on ? pasF(x.id, fl[x.id].h) : ''}
             ${on ? `<button type="button" class="lien" id="fild-${x.id}" data-a="fil-deplier" data-v="${x.id}" aria-expanded="${ouvert}">${cl ? esc(cl.map(n => S.edt.classes[n].court).join(', ')) : 'Tous les niveaux'} ${ouvert ? '⌄' : '›'}</button>` : ''}
             ${on && ouvert ? `<div class="choix" style="grid-column:1/-1">${x.classes.map(n => `<button type="button" id="filc-${n}" data-a="fil-classe" data-v="${x.id}|${n}" aria-pressed="${!cl || cl.includes(n)}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>` : ''}
           </div>`; }).join('')}</div>`).join('')}
       <div style="display:grid;gap:6px"><b>Équipe qui le gère</b><span class="muted" style="font-size:.9rem">Son référent, et sa réunion d’équipe.</span>
         <div class="choix" role="group" aria-label="Équipe de rattachement">${Object.keys(a.equipes || {}).map(pid => `<button type="button" id="fr-${pid}" data-a="fil-rattach" data-v="${pid}" aria-pressed="${rat === pid}">${esc(nomPole(pid))}</button>`).join('')}</div></div>
+      ${(() => { const rep = resteAPartir(a); if (!rep) return '';
+        const mien = filieresDuPole(P().id).filter(g => (a.filieres || {})[g.id]);
+        return `<div class="bandeau ${rep.reste > 0 ? 'info' : 'warn'}" style="display:grid;gap:8px">${rep.texte}
+          ${rep.reste > 0 && mien.length === 1 ? `<button type="button" class="btn petit" id="fil-prendre" data-a="fil-prendre" data-v="${mien[0].id}" style="justify-self:start">＋ Prendre les ${K.fmtH(rep.reste)} en ${esc(mien[0].nom)}</button>` : ''}</div>`; })()}
       <div class="bandeau info">Rien n’est enregistré tant que vous n’avez pas touché « ✓ Enregistrer » sur sa fiche.</div>
       <div class="actions"><button type="button" class="btn" id="fil-annuler" data-a="fil-annuler">Annuler</button>
         <button type="button" class="btn valider" id="fil-ok" data-a="fermer">✓ Terminé</button></div>`;
   }
   function feuillePfmp(f) {
     const k = S.edt.classes[f.classe], ok = f.lignes.every(x => K.RE_DATE.test(x.debut || '') && K.RE_DATE.test(x.fin || '') && x.fin >= x.debut);
-    return `<h2 id="f-titre" tabindex="-1">PFMP · ${esc(k.court)}</h2><p class="sous" style="margin-top:-8px">Pendant une PFMP, les cours de la classe n’ont pas lieu : rien n’est compté pour les AESH.</p>
+    return teteFeuille(`PFMP · ${esc(k.court)}`, 'Pendant une PFMP, les cours de la classe n’ont pas lieu : rien n’est compté pour les AESH.') + `
       <div style="display:grid;gap:8px">${f.lignes.map((x, i) => `<div class="ligne" style="gap:8px"><label class="sr" for="pf-du-${i}">Du</label><input type="date" id="pf-du-${i}" data-i="pf-du" data-v="${i}" value="${esc(x.debut)}"><span class="muted">au</span><label class="sr" for="pf-au-${i}">Au</label><input type="date" id="pf-au-${i}" data-i="pf-au" data-v="${i}" value="${esc(x.fin)}" min="${esc(x.debut)}"><button type="button" class="lien" data-a="pfmp-retirer" data-v="${i}">retirer</button></div>`).join('') || '<span class="muted">Aucune période.</span>'}
         <div><button type="button" class="btn petit" id="pf-ajouter" data-a="pfmp-ajouter">＋ Ajouter une période</button></div></div>
       <div class="actions"><button type="button" class="btn" id="pf-fermer" data-a="fermer">Fermer</button><button type="button" class="btn valider" id="pf-valider" data-a="pfmp-valider" ${ok ? '' : 'disabled'}>✓ Enregistrer</button></div>`;
@@ -1054,7 +1084,7 @@ export async function demarrer({ FS, db, erreur }) {
   }
   function feuillePartager(f) {
     const p = P();
-    return `<h2 id="f-titre" tabindex="-1">Envoyer le lien à mes collègues</h2>
+    return teteFeuille('Envoyer le lien à mes collègues', '') + `
       <label class="sr" for="pt-sign">Signature</label>
       <div class="ligne"><span class="muted">Signature</span><input type="text" id="pt-sign" data-i="signature" value="${esc(f.signature)}" maxlength="80" style="flex:1"></div>
       <label class="sr" for="pt-texte">Message</label>
@@ -1131,6 +1161,14 @@ export async function demarrer({ FS, db, erreur }) {
       if (doc.equipes[p.id] == null) doc.equipes[p.id] = 1;
       if (doc.equipes[doc.rattachement] == null) doc.rattachement = p.id;
       doc.heures = Object.fromEntries(Object.entries(doc.heures || {}).filter(([, v]) => nombre(v) != null).map(([k, v]) => [k, +v]));
+      /* Les heures des filières font foi ; un pôle dont aucune filière n'a d'heures garde son total d'avant. */
+      POLES.forEach(q => { const h = K.heuresDuPole(doc, FILIERES, q.id); if (h != null) doc.heures[q.id] = h; else if (doc.equipes[q.id] == null) delete doc.heures[q.id]; });
+      /* Qui a rempli les trois champs partagés : l'autre référent doit savoir qu'ils sont déjà posés. */
+      { const au = { ...(doc.auteurs || {}) }, ref = f.orig || {};
+        if (nombre(ref.contrat) !== nombre(a.contrat)) au.contrat = p.id;
+        if (nombre(ref.presence) !== nombre(a.presence)) au.presence = p.id;
+        if (nombre(ref.reunionH) !== nombre(a.reunionH) || JSON.stringify(ref.reunion || null) !== JSON.stringify(a.reunion || null)) au.reunion = p.id;
+        doc.auteurs = au; }
       const borne = x => { const n = nombre(x); return n == null ? null : Math.max(0, Math.min(45, Math.round(n * 2) / 2)); };
       doc.contrat = borne(doc.contrat);
       doc.presence = borne(doc.presence);
@@ -1317,6 +1355,12 @@ export async function demarrer({ FS, db, erreur }) {
         ouvrir({ type: 'service', nom, j: +j, choisis: [...dedans], avant: [...dedans] }); return; }
       case 'serv-choix': { const f = S.feuille, i = f.choisis.indexOf(v); if (i < 0) f.choisis.push(v); else f.choisis.splice(i, 1); rendre({ focus: b.id }); return; }
       case 'serv-valider': validerService(); return;
+      case 'fil-pas': { const a = S.form && S.form.a; if (!a || !a.filieres || !a.filieres[v]) return;
+        const cur = nombre(a.filieres[v].h), n = Math.max(0, Math.min(45, Math.round(((cur || 0) + (+b.dataset.d)) * 2) / 2));
+        a.filieres = { ...a.filieres, [v]: { ...a.filieres[v], h: n } }; rendre({ focus: b.id }); return; }
+      case 'fil-prendre': { const a = S.form && S.form.a, rep = a && resteAPartir(a); if (!a || !rep || !a.filieres[v]) return;
+        const cur = nombre(a.filieres[v].h) || 0;
+        a.filieres = { ...a.filieres, [v]: { ...a.filieres[v], h: Math.round((cur + rep.reste) * 2) / 2 } }; rendre({ focus: 'pvf-' + v }); return; }
       case 'fil-deplier': if (S.feuille) S.feuille.ouvert = S.feuille.ouvert === v ? null : v; rendre({ focus: b.id }); return;
       case 'fil-classe': {
         const [fid, n] = String(v).split('|'), a = S.form && S.form.a, x = filiere(fid); if (!a || !x || !a.filieres || !a.filieres[fid]) return;
@@ -1454,6 +1498,13 @@ export async function demarrer({ FS, db, erreur }) {
     if (k === 'sigle') { f.a.sigle = t.value; const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false; const ch = t.closest('.champ'); if (ch) ch.classList.add('modif'); return; }
     if (k === 'serv-nom') { const i = +t.dataset.v, x = f.a.services[i]; if (x) { x.nom = t.value === 'Autre' ? '' : t.value; rendre({ focus: t.value === 'Autre' ? undefined : t.id }); if (t.value === 'Autre') { const inp = document.querySelector(`[data-i="serv-lib"][data-v="${i}"]`); if (inp) inp.focus(); } } return; }
     if (k === 'serv-lib') { const x = f.a.services[+t.dataset.v]; if (x) x.nom = t.value.slice(0, 40); const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false; return; }
+    if (k === 'fil-h') { const a = S.form && S.form.a, id = t.dataset.v; if (!a || !a.filieres || !a.filieres[id]) return;
+      const raw = t.value.trim().replace(',', '.'); let n = raw === '' ? null : Number(raw); if (raw !== '' && !Number.isFinite(n)) return;
+      if (n != null) n = Math.max(0, Math.min(45, Math.round(n * 2) / 2));
+      a.filieres = { ...a.filieres, [id]: { ...a.filieres[id], h: n } };
+      clearTimeout(gererSaisie.t); gererSaisie.t = setTimeout(() => { if (S.feuille && S.feuille.type === 'filieres') rendre({ focus: t.id }); }, 700);
+      return;
+    }
     if (k === 'nb') {
       /* Aucun nouveau rendu ici : la perte du focus (clic sur « Enregistrer ») ne doit pas avaler le clic. */
       const v = t.value.trim().replace(',', '.'); let n = v === '' ? null : Number(v); if (v !== '' && !Number.isFinite(n)) return;
