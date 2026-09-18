@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0f766e">
 <title>Besoins d’accompagnement des élèves</title>
@@ -35,19 +36,6 @@
   --sh:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.05);
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0d1217; --card:#161d25; --card-2:#1b242e;
-  --ink:#f1f5f9; --ink-2:#d6dee8; --muted:#b9c4d0;
-  --line:#3a4757; --line-2:#26313d;
-  --accent:#2dd4bf; --accent-d:#5eead4; --accent-l:#0f2e2b; --on-accent:#04211e;
-  --focus:#93c5fd;
-  --warn-bg:#3a2a08; --warn-ink:#fde68a; --warn-line:#f59e0b;
-  --err-bg:#3b1414; --err-ink:#fecaca; --err-line:#f87171;
-  --ok-bg:#0f2e1c; --ok-ink:#bbf7d0; --ok-line:#4ade80;
-  --info-bg:#132341; --info-ink:#c7d8fe; --info-line:#60a5fa;
-  --sh:0 1px 2px rgba(0,0,0,.4);
-  color-scheme:dark;
-}}
 *{box-sizing:border-box}
 html{font-size:100%;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);
@@ -227,18 +215,10 @@ th{font-weight:750}
   --r:16px; --r-s:12px;
   --sh:0 1px 2px rgba(15,23,42,.05),0 10px 28px -16px rgba(15,23,42,.18);
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#0b1016; --card:#131a22; --card-2:#18212b;
-  --ink:#f1f5f9; --ink-2:#d3dbe5; --muted:#a8b4c2;
-  --line:#344150; --line-2:#222c37;
-  --accent:#5ec8c1; --accent-d:#8ad9d3; --accent-l:#10302e; --on-accent:#04201e;
-  --sh:0 1px 2px rgba(0,0,0,.45);
-}}
 body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;letter-spacing:-.003em}
 h1{font-size:clamp(1.55rem,3.4vw,2.15rem);font-weight:760;letter-spacing:-.022em}
 h2{font-size:1.2rem;font-weight:720;letter-spacing:-.012em}
 .barre{background:rgba(255,255,255,.92);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line-2);box-shadow:none}
-@media (prefers-color-scheme:dark){.barre{background:rgba(19,26,34,.92)}}
 .barre-in{padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:6px}
 .marque{display:flex;flex-direction:column;line-height:1.15}
 .marque b{font-size:1rem;font-weight:760;letter-spacing:-.01em;color:var(--ink)}
@@ -745,7 +725,7 @@ function monterEstimation(){
   const hote = $('#estimation-hote'); if (!hote) return;
   if (EST){ EST.monter(hote); return; }
   if (EST_CHARGEMENT) return;
-  EST_CHARGEMENT = import('./estimation.js?v=2026r9').then(m => {
+  EST_CHARGEMENT = import('./estimation.js?v=2026r11').then(m => {
     EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, filiere:FILIERE, retourAccueil: () => actions.accueil(),
       pousser: est => histo('estimation', est), remplacer: est => histo('estimation', est, true) });
     const h = $('#estimation-hote'); if (h) EST.monter(h);
