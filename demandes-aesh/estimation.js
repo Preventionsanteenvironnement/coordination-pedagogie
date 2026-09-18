@@ -207,10 +207,13 @@ const CSS = `
 .e6-anneau.plus .dedans b{color:var(--err-ink)}
 .e6-anneau .dedans span{font-size:1rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .e6-moyens .txt{flex:1;min-width:150px}.e6-moyens .txt .est{font-size:1.1rem}
-.e6-mats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line-2)}
-.e6-mats span{display:inline-flex;align-items:center;border-radius:999px;padding:5px 12px;font-size:1rem;line-height:1.3}
-.e6-mats .fait{background:var(--ok-bg);color:var(--ok-ink);font-weight:650}
-.e6-mats .pas{border:1.5px dashed var(--line);color:var(--muted)}
+.e6-mats{margin-top:12px;padding-top:12px;border-top:1px solid var(--line-2);display:grid;gap:6px;font-size:1rem;line-height:1.45;color:var(--ink-2)}
+.e6-mats p{margin:0}.e6-mats .t{font-weight:700;color:var(--ink)}.e6-mats .ok{color:var(--ok-ink);font-weight:700}
+.e6-etape{display:block;font-weight:700;color:var(--accent-d);letter-spacing:.02em;margin:4px 0 0}
+.e6-guide{color:var(--ink-2);margin:4px 0 14px;font-size:1.05rem}
+.e6-moyens.info{margin:22px 0 0;background:var(--card-2);border-style:dashed}
+.e6-moyens.info .haut b{color:var(--ink-2)}
+.e6-charge{padding:40px 0;text-align:center;color:var(--muted)}
 @media(prefers-reduced-motion:reduce){.e6-anneau .val{transition:none}}
 .e6-qui{display:inline;font-weight:650;font-size:1rem;background:none;border:0;padding:0}
 .e6-qui::after{content:" · ";color:var(--muted);font-weight:400}
@@ -357,6 +360,7 @@ export function creerEstimation(ctx) {
   /* « vous » : cours enregistré depuis cet appareil et que personne n'a modifié depuis (même version). */
   const estMien = (k, cr, a) => { const d = docDe(k, cr); if (!d) return false; const ap = a || app(), id = idDe(k, cr), v = ap.versions[id]; return v != null ? v === d.version : ap.miens.includes(id); };
   const semaineVisible = cr => !cadre().avecParite || !cr.parite || cr.parite === S.sem;
+  const dateLongue = iso => RE_DATE.test(String(iso || '')) ? `${+String(iso).slice(8, 10)} ${MOIS[+String(iso).slice(5, 7) - 1]} ${String(iso).slice(0, 4)}` : '';
   const jjmm = iso => RE_DATE.test(String(iso || '').slice(0, 10)) ? `${String(iso).slice(8, 10)}/${String(iso).slice(5, 7)}` : '';
   const pousser = () => { try { pousserNav && pousserNav({ ecran: S.ecran, fil: S.fil, classe: S.classe, sem: S.sem }); } catch (e) { } };
   const aller = (ecran, maj) => { Object.assign(S, maj || {}); S.ecran = ecran; S.focus = 'titre-ecran'; pousser(); dessiner(); window.scrollTo(0, 0); };
@@ -402,14 +406,19 @@ export function creerEstimation(ctx) {
   }
   const barre = titre => `<div class="e6-barre"><button type="button" class="e6-retour" id="e6-retour" data-e="retour" aria-label="Retour">←</button><span class="t">${esc(titre || '')}</span></div>`;
   function blocEtat() {
-    if (S.etat === 'chargement') return `<div class="e6-respire" role="status"><div class="e6-bulle" aria-hidden="true"></div><b id="titre-ecran" tabindex="-1">Respirez…</b><p>Prenez le temps, les emplois du temps arrivent.</p></div>`;
+    /* 18/09 (Brahim) : plus de bulle « Respirez » après les émoticônes — un simple « Chargement… » le temps de lire les données. */
+    if (S.etat === 'chargement') return `<div class="e6-charge" role="status"><b id="titre-ecran" tabindex="-1">Chargement…</b></div>`;
     const t = S.etat === 'absent' ? 'La coordination n’a pas encore publié les emplois du temps de l’estimation.' : S.etat === 'refus' ? 'Espace en cours d’ouverture par la coordination.' : 'Pas de connexion au serveur.';
     return `${barre('')}<div class="message warn" role="alert"><p>${t}</p><p><button type="button" class="btn primaire petit" data-e="reessayer">Réessayer</button></p></div>`;
   }
+  /* Guidage en étapes (18/09, demande de Brahim) : filière → niveau → cours de votre matière.
+     Quand le lien ne propose qu'une filière, l'étape « filière » n'existe pas : 2 étapes. */
+  const filieresProposees = () => { const c = cadre(); return FILIERES.filter(([p]) => (!FORCEES || FORCEES.includes(p)) && c.classes.some(k => k.pole === p)); };
+  const etape = n => { const avecFil = filieresProposees().length > 1, tot = avecFil ? 3 : 2, k = avecFil ? n : n - 1; return `<span class="e6-etape">Étape ${k} sur ${tot}</span>`; };
   function ecranFilieres() {
     const c = cadre();
     return `${barre('Estimation')}<span class="e6-per">${esc(c.periode.label)} · ${esc(jjmm(c.periode.debut))} → ${esc(jjmm(c.periode.fin))}</span>
-      <h1 id="titre-ecran" tabindex="-1">Votre filière</h1>
+      ${etape(1)}<h1 id="titre-ecran" tabindex="-1">Sélectionnez votre filière</h1>
       ${FILIERES.filter(([p]) => (!FORCEES || FORCEES.includes(p)) && c.classes.some(k => k.pole === p)).map(([p, t, s]) => `<button type="button" class="e6-gros" id="fil-${p}" data-e="fil" data-v="${p}"><span class="x"><b>${t}</b><span class="s">${s}</span></span><span class="fl" aria-hidden="true">›</span></button>`).join('')}`;
   }
   function carteMoyens(pole) {
@@ -419,34 +428,37 @@ export function creerEstimation(ctx) {
     const toutes = new Map();
     c.classes.filter(k => k.pole === pole).forEach(k => k.creneaux.forEach(cr => { const f = familleMatiere(cr.matiere); if (!toutes.has(f)) toutes.set(f, cr.matiere); }));
     const fait = [...toutes.keys()].filter(f => faites.has(f)), reste = [...toutes.keys()].filter(f => !faites.has(f));
-    const puces = fait.map(f => `<span class="fait">✓ ${esc(toutes.get(f))}</span>`).join('') + reste.map(f => `<span class="pas">${esc(toutes.get(f))}</span>`).join('');
+    /* Du texte, pas des pastilles : une enseignante croyait devoir toucher « PSE » (18/09). */
+    const liste = l => l.map(f => esc(toutes.get(f))).join(', ');
+    const puces = `${fait.length ? `<p><span class="ok">✓ Déjà estimé :</span> ${liste(fait)}</p>` : ''}${reste.length ? `<p><span class="t">Pas encore :</span> ${liste(reste)}</p>` : '<p class="ok">✓ Toutes les matières sont estimées</p>'}`;
     const L = 2 * Math.PI * 52, part = vol ? Math.min(1, total / vol) : 0;
     const anneau = vol ? `<div class="e6-anneau${pct > 100 ? ' plus' : ''}" role="img" aria-label="${esc(`${pct} % des heures AESH du pôle : ${fmtH(total)} estimées sur ${fmtH(vol)} par semaine`)}">
         <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="fond" cx="60" cy="60" r="52"/>${part > 0 ? `<circle class="val" cx="60" cy="60" r="52" transform="rotate(-90 60 60)" stroke-dasharray="${(part * L).toFixed(1)} ${L.toFixed(1)}"/>` : ''}</svg>
         <span class="dedans" aria-hidden="true"><b>${pct} %</b><span>${esc(fmtH(total))}</span><span>sur ${esc(fmtH(vol))}</span></span></div>` : '';
-    return `<section class="e6-moyens" aria-label="Moyens humains, ${esc(fil ? fil[1] : pole)}">
-      <div class="haut"><b>Moyens humains · ${esc(fil ? fil[1] : pole)}</b><span class="e6-info" style="margin:0">Heures AESH du pôle : <b style="color:var(--ink)">${vol != null ? esc(fmtH(vol)) : '—'}</b> / sem. · estimation, variable</span></div>
+    return `<section class="e6-moyens info" aria-label="Pour information : où en est l’équipe, ${esc(fil ? fil[1] : pole)}">
+      <div class="haut"><b>Pour information · où en est l’équipe · ${esc(fil ? fil[1] : pole)}</b><span class="e6-info" style="margin:0">Heures AESH du pôle : <b style="color:var(--ink)">${vol != null ? esc(fmtH(vol)) : '—'}</b> / sem. · estimation, variable</span></div>
       <div class="corps">${anneau}
         <div class="txt"><div class="est">Estimation en cours : <b>${esc(fmtH(total))}</b> / sem.</div>
           <div class="e6-info" style="margin:4px 0 0"><b style="color:var(--ink)">${fait.length}</b> matière${fait.length > 1 ? 's' : ''} sur ${toutes.size} déjà estimée${fait.length > 1 ? 's' : ''}</div>
           ${pct > 100 ? `<div class="e6-info" style="margin:4px 0 0;color:var(--err-ink);font-weight:650">Au-delà des heures du pôle</div>` : ''}</div></div>
-      <div class="e6-leg e6-mats">${puces}</div></section>`;
+      <div class="e6-mats">${puces}</div></section>`;
   }
   function ecranClasses() {
     const c = cadre(), fil = FILIERES.find(f => f[0] === S.fil), ks = c.classes.filter(k => k.pole === S.fil), a = app();
-    let h = barre(fil ? fil[1] : '') + carteMoyens(S.fil) + `<h1 id="titre-ecran" tabindex="-1">Votre classe</h1>`;
+    let h = barre(fil ? fil[1] : '') + `${etape(2)}<h1 id="titre-ecran" tabindex="-1">Sélectionnez le niveau</h1><p class="e6-guide">Touchez votre classe pour estimer vos cours.</p>`;
     ks.forEach(k => {
       const n = k.creneaux.filter(cr => docDe(k, cr)).length;
       h += `<button type="button" class="e6-gros" id="cl-${esc(k.nom)}" data-e="classe" data-v="${esc(k.nom)}"><span class="x"><b>${esc(courtDe(k))}${a.valides[k.nom] ? '<span class="e6-okb">✓ validée</span>' : ''}</b>
         <span class="s">${k.effectif != null ? `${k.effectif} élèves · ` : ''}${n ? `${n} cours estimé${n > 1 ? 's' : ''}` : 'aucun cours estimé'}</span></span><span class="fl" aria-hidden="true">›</span></button>`;
     });
+    h += carteMoyens(S.fil);
     h += `<button type="button" class="e6-mot" id="e6-mot" data-e="mot">${S.mot && S.mot.texte ? '✓ Votre mot pour la coordination est enregistré · Modifier' : '✎ Un mot pour la coordination (facultatif)'}</button>`;
     return h + `<div style="margin-top:18px"><button type="button" class="e6-btn sec" id="e6-terminer" data-e="terminer">J’ai terminé</button></div>`;
   }
   function ecranEdt() {
     const c = cadre(), k = classeDe(S.classe);
     const pf = (k.pfmp || []).filter(p => p.fin >= c.periode.debut && p.debut <= c.periode.fin);
-    let h = barre(`${courtDe(k)}${k.effectif != null ? ` · ${k.effectif} élèves` : ''}`) + `<h1 id="titre-ecran" tabindex="-1">Emploi du temps</h1>`;
+    let h = barre(`${courtDe(k)}${k.effectif != null ? ` · ${k.effectif} élèves` : ''}`) + `${etape(3)}<h1 id="titre-ecran" tabindex="-1">Sélectionnez les cours de votre matière</h1><p class="e6-guide">Touchez chacun de vos cours et indiquez le nombre d’AESH.</p>`;
     if (c.avecParite) h += `<div class="e6-onglets" role="group" aria-label="Semaine">${['A', 'B'].map(s => `<button type="button" id="sem-${s}" data-e="sem" data-v="${s}" aria-pressed="${S.sem === s}">Semaine ${s}</button>`).join('')}</div>`;
     if (pf.length) h += `<p class="e6-info">${pf.map(p => `PFMP du ${esc(jjmm(p.debut))} au ${esc(jjmm(p.fin))}`).join(' · ')}</p>`;
     const ap = app();
@@ -501,7 +513,7 @@ export function creerEstimation(ctx) {
       <div class="e6-ligne"><span class="lib">Élèves dans ce cours <small style="display:block;font-size:.85rem">facultatif</small></span><span class="e6-ab" style="align-items:center"><button type="button" id="el-moins" data-e="eleves" data-v="-1" aria-label="Un élève de moins">−</button><b id="el-val" style="min-width:2.4em;text-align:center;font-size:1.15rem">${f.eleves == null ? '—' : esc(f.eleves)}</b><button type="button" id="el-plus" data-e="eleves" data-v="1" aria-label="Un élève de plus">+</button></span></div>
       <div class="e6-ligne"><span class="lib">Période</span><span class="val">${f.modPer
         ? `<label class="sr" for="f-au">Jusqu’au</label><input type="date" id="f-au" data-i="au" value="${esc(f.au)}" min="${esc(c.periode.debut)}" max="${esc(c.periode.fin)}">`
-        : `jusqu’au ${esc(jjmm(f.au))}<button type="button" class="e6-mod" id="mod-per" data-e="mod-per">modifier</button>`}</span></div>
+        : `jusqu’au ${esc(dateLongue(f.au))}${f.au === c.periode.fin ? ' <small style="color:var(--muted)">(par défaut)</small>' : ''}<button type="button" class="e6-mod" id="mod-per" data-e="mod-per">modifier</button>`}</span></div>
       ${dateOk ? '' : `<p class="e6-info" id="f-date" role="alert" style="color:var(--err-ink)">Date à choisir entre le ${esc(jjmm(c.periode.debut))} et le ${esc(jjmm(c.periode.fin))}.</p>`}
       ${c.avecParite ? `<div class="e6-ligne"><span class="lib">Semaines</span><span class="e6-ab">${['A', 'B'].map(s => `<button type="button" id="ab-${s}" data-e="ab" data-v="${s}" aria-pressed="${!!f[s]}" ${cr.parite ? 'disabled' : ''}>${s}</button>`).join('')}</span></div>` : ''}
       <div class="e6-ligne"><span class="lib">Horaire</span><span class="val">${f.modH
