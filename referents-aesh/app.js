@@ -6,9 +6,9 @@
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-18d';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18d';
-import * as AV from './avatars.js?v=2026-09-18d';
+import * as K from './calculs.js?v=2026-09-18e';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18e';
+import * as AV from './avatars.js?v=2026-09-18e';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -37,7 +37,7 @@ export async function demarrer({ FS, db, erreur }) {
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18d')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18e')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -1001,18 +1001,27 @@ export async function demarrer({ FS, db, erreur }) {
     return { estimes, manque };
   }
   function ecranBesoins() {
-    const p = P(), I = idx(), filtre = S.route.p.classe || '';
+    const p = P(), I = idx(), filtre = S.route.p.classe || '', fMat = S.route.p.mat || '';
     let lignes = '', demandees = 0, total = 0, estimes = 0, manque = 0; const comptes = new Set();
+    /* « Pas encore estimé » (18/09, demande de Brahim) : les cours sans aucune estimation sur la période,
+       regroupés par matière — la matière suffit au référent pour savoir quel collègue aller voir (aucun nom en ligne). */
+    const manquants = new Map();
     classesDu(p.id).filter(n => !filtre || n === filtre).forEach(nom => {
       const k = S.edt.classes[nom];
       const cours = k.cours.map(id => S.edt.cours[id]).sort((a, b) => a.j - b.j || K.min(a.d) - K.min(b.d));
-      lignes += `<tr class="grp"><td colspan="6">${esc(k.court)}</td></tr>`;
+      let entete = `<tr class="grp"><td colspan="6">${esc(k.court)}</td></tr>`;
       cours.forEach(c => {
         const premiere = !comptes.has(c.id); comptes.add(c.id); if (premiere) total++;
+        /* estimé = un enseignant a répondu pour ce cours sur la période (quelle que soit la semaine affichée) */
+        const estime = K.besoinDuCours(S.est, nom, c);
+        if (premiere && estime) estimes++;
+        if (premiere && !estime) { const m = manquants.get(c.lib) || { lib: c.lib, mat: c.mat, n: 0, classes: new Set() }; m.n++; (c.cls || [nom]).filter(x => S.edt.classes[x]).forEach(x => m.classes.add(x)); manquants.set(c.lib, m); }
+        if (fMat && c.lib !== fMat) return;
+        if (entete) { lignes += entete; entete = ''; }
         const iso = K.ajoute(S.lundi, c.j), bes = K.besoinDuCours(S.est, nom, c, quand(iso)), lieu = K.coursALieu(S.C, S.edt, c, iso);
         const pl = [...new Set(placesCours(c.id, iso).map(x => x.aeshId))].map(id => I.aesh.get(id)).filter(Boolean);
         const nPres = presents(c, iso, bes);
-        if (bes && premiere) { estimes++; if (lieu) demandees += bes.nb * K.duree(bes.plageDebut, bes.plageFin); }
+        if (bes && premiere && lieu) demandees += bes.nb * K.duree(bes.plageDebut, bes.plageFin);
         let etat = '<span class="muted">—</span>';
         if (bes && !lieu) etat = '<span class="puce">pas cette semaine</span>';
         else if (bes && bes.nb === 0) etat = '<span class="puce">pas besoin</span>';
@@ -1021,13 +1030,18 @@ export async function demarrer({ FS, db, erreur }) {
         lignes += `<tr id="b-${esc(nom)}-${esc(c.id)}" data-a="edt-cours" data-v="${esc(nom)}|${esc(c.id)}" tabindex="0">
           <td class="num" style="white-space:nowrap"><b>${K.JOURS_C[c.j]}</b> ${K.hFr(c.d)}–${K.hFr(c.f)}${c.sem === 'SA' ? ' <span class="puce">A</span>' : c.sem === 'SB' ? ' <span class="puce">B</span>' : ''}</td>
           <td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${couleurMatiere(c.mat)[0]};margin-right:6px"></span>${esc(c.lib)}</td>
-          <td>${bes ? `<span class="gros-nb">${bes.nb}</span>` : '<span class="muted">—</span>'}</td>
+          <td>${bes ? `<span class="gros-nb">${bes.nb}</span>` : estime ? '<span class="muted">—</span>' : '<span class="puce warn">pas estimé</span>'}</td>
           <td>${bes && bes.eleves != null ? `${bes.eleves}` : '<span class="muted">—</span>'}</td>
           <td>${pl.map(a => `<span class="pill ${K.absentLe(I, a.id, iso, c.d, c.f) ? 'abs' : ''}">${esc(a.sigle)}</span>`).join(' ') || '<span class="muted">—</span>'}</td>
           <td>${etat}</td></tr>`;
       });
     });
     const prevu = K.aeshActifs(I, p.id).reduce((s, a) => s + (nombre((a.heures || {})[p.id]) || 0), 0);
+    const ordre = [...manquants.values()].sort((a, b) => b.n - a.n || a.lib.localeCompare(b.lib, 'fr'));
+    const nManq = ordre.reduce((t, m) => t + m.n, 0), ordreCl = classesDu(p.id);
+    const blocManquants = S.estEtat !== 'ok' ? '' : !nManq ? `<div class="manq ok" id="bes-manq"><b>✓ Tous les cours sont estimés</b>${filtre ? ` <span>en ${esc(S.edt.classes[filtre].court)}</span>` : ''}</div>`
+      : `<div class="manq" id="bes-manq"><div class="manq-t">⚠️ Pas encore estimé : ${nManq} cours${filtre ? ` <span>en ${esc(S.edt.classes[filtre].court)}</span>` : ''}</div>
+        <div class="manq-l">${ordre.map((m, i) => `<button type="button" id="bm-${i}" data-a="bes-mat" data-v="${esc(m.lib)}" aria-pressed="${fMat === m.lib}"><i style="background:${couleurMatiere(m.mat)[0]}"></i><b>${esc(m.lib)}</b><span>${esc([...m.classes].sort((x, y) => ordreCl.indexOf(x) - ordreCl.indexOf(y)).map(x => S.edt.classes[x].court).join(', '))} · ${m.n} cours</span></button>`).join('')}</div></div>`;
     return `<div class="salut"><div><h1 id="titre" tabindex="-1">Besoins</h1><p class="sous">Estimés par les enseignants${S.cadreEst ? ` · ${esc(S.cadreEst.label || '')} ${K.jjmm(S.cadreEst.debut)} → ${K.jjmm(S.cadreEst.fin)}` : ''}</p></div>${selecteurSemaine()}</div>
       <div class="ligne"><button type="button" class="btn pri" id="bes-partager" data-a="partager">✉️ Envoyer le lien à mes collègues</button></div>
       ${S.estEtat === 'horsligne' ? `<div class="bandeau warn">Les estimations n’ont pas pu être lues.</div>` : ''}
@@ -1037,8 +1051,10 @@ export async function demarrer({ FS, db, erreur }) {
         <div class="carte stat"><b>${K.fmtH(prevu)}</b><small>heures AESH du pôle</small></div>
         <div class="carte stat"><b style="color:${manque ? 'var(--warn)' : 'var(--ok)'}">${manque}</b><small>cours à couvrir</small></div>
       </div>
+      ${blocManquants}
       <div><h2>Résultat des estimations</h2><p class="sous">Ce que les enseignants ont demandé, cours par cours, face aux AESH placés.</p></div>
       <div class="classes" role="group" aria-label="Filtrer"><button type="button" id="bf-tout" data-a="bes-classe" data-v="" aria-pressed="${!filtre}">Toutes</button>${classesDu(p.id).map(n => `<button type="button" id="bf-${n}" data-a="bes-classe" data-v="${n}" aria-pressed="${filtre === n}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>
+      ${fMat ? `<div class="ligne"><button type="button" class="btn petit" id="bes-mat-x" data-a="bes-mat" data-v="">✕ ${esc(fMat)} seulement</button></div>` : ''}
       <div class="defile"><table class="table" style="min-width:680px"><thead><tr><th>Créneau</th><th>Matière</th><th>Besoin</th><th>Élèves</th><th>Placés</th><th>État</th></tr></thead><tbody>${lignes}</tbody></table></div>
       ${manque ? carteDisponibles('Pour couvrir : disponibles ailleurs') : ''}`;
   }
@@ -1078,7 +1094,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-18d'), F = await import('./fichiers.js?v=2026-09-18d');
+    const X = await import('./exports.js?v=2026-09-18e'), F = await import('./fichiers.js?v=2026-09-18e');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1653,7 +1669,8 @@ export async function demarrer({ FS, db, erreur }) {
       case 'ens-pole': aller('ensemble', { ...S.route.p, pole: v, classe: '' }, { remplacer: true }); return;
       case 'ens-classe': aller('ensemble', { ...S.route.p, classe: v }, { remplacer: true }); return;
       case 'ens-aesh': aller('ensemble', { ...S.route.p, aesh: v }, { remplacer: true }); return;
-      case 'bes-classe': aller('besoins', v ? { classe: v } : {}, { remplacer: true }); return;
+      case 'bes-classe': aller('besoins', { ...(v ? { classe: v } : {}), ...(S.route.p.mat ? { mat: S.route.p.mat } : {}) }, { remplacer: true }); return;
+      case 'bes-mat': { const m = v && v !== S.route.p.mat ? v : ''; aller('besoins', { ...(S.route.p.classe ? { classe: S.route.p.classe } : {}), ...(m ? { mat: m } : {}) }, { remplacer: true }); return; }
       case 'envoyer-message': {
         const t = S.msgBrouillon.trim().slice(0, 1000); if (!t || S.envoi) return;
         confirmerPuis({ titre: 'Envoyer ce message ?', sous: t.length > 300 ? t.slice(0, 300) + '…' : t, avert: 'Tous les référents le liront. Sans nom d’élève.', bouton: 'Envoyer', faitSous: 'Message envoyé' }, async () => {

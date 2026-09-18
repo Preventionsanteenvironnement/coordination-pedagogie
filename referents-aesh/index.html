@@ -222,6 +222,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .bandeau.warn{background:var(--warn-l);color:var(--warn)}
 .bandeau.info{background:var(--card-2);color:var(--ink-2);border:1px solid var(--line)}
 .bandeau.err{background:var(--err-l);color:var(--err)}
+/* « Pas encore estimé » (18/09) : très visible, sous les chiffres de l'écran Besoins */
+.manq{border:2px solid var(--warn);background:var(--warn-l);border-radius:16px;padding:12px 14px;display:grid;gap:10px}
+.manq.ok{border-color:var(--ok);background:var(--ok-l,#e8f6ec);color:var(--ok)}
+.manq-t{font-weight:800;font-size:1.12rem;color:var(--warn)}
+.manq-t span,.manq.ok span{font-weight:600;font-size:.95rem}
+.manq-l{display:grid;gap:6px}
+.manq-l button{display:flex;align-items:center;gap:10px;flex-wrap:wrap;text-align:left;font:inherit;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-height:44px;cursor:pointer;color:var(--ink)}
+.manq-l button[aria-pressed="true"]{border-color:var(--warn);box-shadow:0 0 0 2px var(--warn) inset}
+.manq-l i{width:12px;height:12px;border-radius:3px;flex:none}
+.manq-l span{color:var(--ink-2);font-size:.92rem}
 .grille-edt{position:relative;display:grid;grid-template-columns:54px repeat(5,minmax(120px,1fr));min-width:760px;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .defile{overflow-x:auto;border-radius:18px}
 .g-tete{position:sticky;top:0;z-index:2;background:var(--card-2);border-bottom:1px solid var(--line);padding:9px 6px;text-align:center;font-weight:750;font-size:.9rem}
@@ -409,7 +419,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-18d');
+  const m = await import('./app.js?v=2026-09-18e');
   m.demarrer({ FS, db, erreur });
 } catch (e) {
   document.getElementById('app').innerHTML = '<p style="padding:30px;text-align:center">La page n’a pas pu se charger. Vérifiez la connexion puis rechargez.</p>';
