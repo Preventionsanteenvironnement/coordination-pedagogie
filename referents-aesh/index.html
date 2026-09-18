@@ -409,7 +409,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-18b');
+  const m = await import('./app.js?v=2026-09-18c');
   m.demarrer({ FS, db, erreur });
 } catch (e) {
   document.getElementById('app').innerHTML = '<p style="padding:30px;text-align:center">La page n’a pas pu se charger. Vérifiez la connexion puis rechargez.</p>';

@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
-import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-18b';
-import * as K from './calculs.js?v=2026-09-18b';
-import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-18b';
+import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-18c';
+import * as K from './calculs.js?v=2026-09-18c';
+import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-18c';
 
 const H0 = 8 * 60, H1 = 18 * 60;
 const GRIS = '#6b7280', LIGNE = '#e3e8ef', ENCRE = '#111827';
@@ -104,6 +104,32 @@ function aeshDans(pdf, ctx, ids, lundi) {
   });
 }
 
+/* Les AESH d'un cours de classe, tels qu'ils sont VRAIMENT là ce jour-là (audit D13) : même calcul que l'écran —
+   contrat fini exclu, horaire partiel, absence entière ou partielle, et besoin comparé au moment le moins couvert. */
+function aeshDuCours(ctx, nom, c, iso) {
+  const I = ctx.I, parAesh = new Map();
+  I.places.forEach(x => {
+    if (x.coursId !== c.id || iso < x.du || iso > x.au) return;
+    const a = I.aesh.get(x.aeshId); if (!a || K.contratFini(a, iso)) return;
+    const hp = K.horairePlace(x, c);
+    if (!parAesh.has(a.id)) parAesh.set(a.id, { a, iv: [] });
+    parAesh.get(a.id).iv.push([K.min(hp.debut), K.min(hp.fin)]);
+  });
+  const txt = [...parAesh.values()].sort((x, y) => String(x.a.sigle).localeCompare(String(y.a.sigle), 'fr')).map(({ a, iv }) => {
+    const u = K.unionIntervalles(iv), tout = u.length === 1 && u[0][0] === K.min(c.d) && u[0][1] === K.min(c.f);
+    const h = u.reduce((t, [x, y]) => t + y - x, 0), abs = K.absencesDuJour(I, a.id, iso), manque = u.reduce((t, [x, y]) => t + K.recouvrement(abs, x, y), 0);
+    const plage = tout ? '' : ' ' + u.map(([x, y]) => `${K.hFr(K.hDe(x))}–${K.hFr(K.hDe(y))}`).join(', ');
+    const etat = !manque ? '' : manque >= h ? ' ABSENT, à couvrir' : ` absent ${K.unionIntervalles(abs).map(([x, y]) => `${K.hFr(K.hDe(Math.max(x, K.min(c.d))))}–${K.hFr(K.hDe(Math.min(y, K.min(c.f))))}`).join(', ')}`;
+    return `${a.sigle}${plage}${etat}`;
+  });
+  const bes = K.besoinDuCours(ctx.estimations, nom, c, { iso, parite: ctx.C.semaine(K.lundiDe(iso)).parite });
+  const n = bes ? K.presentsMin(ctx, c, iso, bes.plageDebut, bes.plageFin) : 0;
+  return {
+    l2: [txt.length ? 'AESH : ' + txt.join(', ') : '', bes ? `besoin ${bes.nb}${bes.nb ? (n >= bes.nb ? ' · couvert' : ` · manque ${bes.nb - n}`) : ''}` : ''].filter(Boolean).join(' · '),
+    alerte: txt.some(t => /absent/i.test(t)) || (bes && bes.nb > n)
+  };
+}
+
 export function pdfClasses(ctx, noms, lundi) {
   const pdf = new PDF();
   noms.forEach((nom, i) => {
@@ -113,11 +139,8 @@ export function pdfClasses(ctx, noms, lundi) {
     const blocs = [];
     k.cours.map(id => ctx.edt.cours[id]).forEach(c => {
       const iso = K.ajoute(lundi, c.j); if (!K.coursALieu(ctx.C, ctx.edt, c, iso)) return;
-      const places = ctx.I.places.filter(x => x.coursId === c.id && iso >= x.du && iso <= x.au).map(x => ctx.I.aesh.get(x.aeshId)).filter(Boolean);
-      const [coul, clair] = couleurMatiere(c.mat);
-      const bes = K.besoinDuCours(ctx.estimations, nom, c);
-      blocs.push({ j: c.j, debut: c.d, fin: c.f, fond: clair, trait: coul, l1: c.lib || c.mat,
-        l2: [places.length ? 'AESH : ' + [...new Set(places.map(a => a.sigle))].join(', ') : '', bes ? `besoin ${bes.nb}` : ''].filter(Boolean).join(' · '), l3: (c.salle || []).join(' · ') });
+      const [coul, clair] = couleurMatiere(c.mat), ae = aeshDuCours(ctx, nom, c, iso);
+      blocs.push({ j: c.j, debut: c.d, fin: c.f, fond: clair, trait: ae.alerte ? '#b42318' : coul, l1: c.lib || c.mat, l2: ae.l2, l3: (c.salle || []).join(' · ') });
     });
     const enP = (k.pfmp || []).find(x => x.debut <= K.ajoute(lundi, 4) && x.fin >= lundi);
     if (enP) pdf.text(28, 112, `PFMP du ${K.jjmm(enP.debut)} au ${K.jjmm(enP.fin)}`, { size: 10, bold: true, color: '#b45309' });
@@ -163,14 +186,16 @@ function feuilleGrille(nom, titre, sous, C, lundi, blocs) {
     const col = colonne(j + 1); fusions.push(`${col}${base + 1}:${col}${base + nbL}`);
     lignesX[base][j + 1] = { v: jr.off, s: { fond: '#eceff3', couleur: '#6b7280', centre: true, bord: true } };
   });
-  const occupe = new Set();
+  /* Chaque case occupée pointe vers la PREMIÈRE ligne de son bloc : un cours qui en chevauche un autre s'écrit
+     dans cette case visible, jamais dans une case intérieure d'une fusion, que le tableur masquerait (audit D14). */
+  const occupe = new Map();
   blocs.sort((a, b) => a.j - b.j || K.min(a.debut) - K.min(b.debut)).forEach(b => {
     if (sem.jours[b.j].off) return;
     const r1 = Math.max(0, Math.floor((K.min(b.debut) - H0) / PAS)), r2 = Math.min(nbL - 1, Math.ceil((K.min(b.fin) - H0) / PAS) - 1); if (r2 < r1) return;
-    let libre = true; for (let r = r1; r <= r2; r++) if (occupe.has(b.j + ':' + r)) libre = false;
+    let hote = null; for (let r = r1; r <= r2 && hote == null; r++) if (occupe.has(b.j + ':' + r)) hote = occupe.get(b.j + ':' + r);
     const texte = [b.l1, b.l2, b.l3].filter(Boolean).join('\n');
-    if (!libre) { const c = lignesX[base + r1][b.j + 1]; c.v = (c.v ? c.v + '\n— ' : '') + texte; return; }
-    for (let r = r1; r <= r2; r++) occupe.add(b.j + ':' + r);
+    if (hote != null) { const c = lignesX[base + hote][b.j + 1]; c.v = (c.v ? c.v + '\n\n' : '') + `En même temps, ${K.hFr(b.debut)}–${K.hFr(b.fin)} :\n` + texte; return; }
+    for (let r = r1; r <= r2; r++) occupe.set(b.j + ':' + r, r1);
     lignesX[base + r1][b.j + 1] = { v: texte, s: { fond: b.fond, couleur: b.encre || '#111827', retour: true, haut: true, bord: true, gras: false } };
     for (let r = r1 + 1; r <= r2; r++) lignesX[base + r][b.j + 1] = { v: '', s: { fond: b.fond, bord: true } };
     if (r2 > r1) fusions.push(`${colonne(b.j + 1)}${base + r1 + 1}:${colonne(b.j + 1)}${base + r2 + 1}`);
@@ -189,9 +214,8 @@ export function excelClasses(ctx, noms, lundi) {
     const k = ctx.edt.classes[nom], blocs = [];
     k.cours.map(id => ctx.edt.cours[id]).forEach(c => {
       const iso = K.ajoute(lundi, c.j); if (!K.coursALieu(ctx.C, ctx.edt, c, iso)) return;
-      const places = ctx.I.places.filter(x => x.coursId === c.id && iso >= x.du && iso <= x.au).map(x => ctx.I.aesh.get(x.aeshId)).filter(Boolean);
-      const bes = K.besoinDuCours(ctx.estimations, nom, c);
-      blocs.push({ j: c.j, debut: c.d, fin: c.f, fond: couleurMatiere(c.mat)[1], l1: c.lib || c.mat, l2: [places.length ? 'AESH : ' + [...new Set(places.map(a => a.sigle))].join(', ') : '', bes ? `besoin ${bes.nb}` : ''].filter(Boolean).join(' · '), l3: (c.salle || []).join(' · ') });
+      const ae = aeshDuCours(ctx, nom, c, iso);
+      blocs.push({ j: c.j, debut: c.d, fin: c.f, fond: couleurMatiere(c.mat)[1], encre: ae.alerte ? '#b42318' : undefined, l1: c.lib || c.mat, l2: ae.l2, l3: (c.salle || []).join(' · ') });
     });
     return feuilleGrille(nom, k.court, `${pole(k.pole).nom} · ${titreSemaine(ctx.C, lundi)}`, ctx.C, lundi, blocs);
   }));

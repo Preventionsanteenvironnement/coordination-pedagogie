@@ -239,17 +239,26 @@ export function occupations(ctx, aeshId, lundi) {
     if (jr.off) { out.push({ j, date: iso, type: 'vacances', debut: '08:00', fin: '18:00', label: jr.off }); return; }
     if (a && !joursDe(a).includes(j) && !I.places.some(p => p.aeshId === aeshId && p.jour === j && iso >= p.du && iso <= p.au))
       { out.push({ j, date: iso, type: 'repos', debut: '08:00', fin: '18:00', label: 'Ne travaille pas' }); return; }
-    const vus = new Set();
+    /* Après la fin de son contrat, un AESH n'est plus là : ses placements ne comptent plus (audit D01). */
+    if (a && finContratDe(a) && iso > finContratDe(a)) return;
+    /* Plusieurs placements du même AESH sur le même cours (fragments disjoints) : on garde leur réunion, pas le
+       premier seulement (audit D07). Plusieurs absences le même jour : on retire leur union (audit D06). */
+    const parCours = new Map();
     I.places.forEach(p => {
       if (p.aeshId !== aeshId || p.jour !== j || iso < p.du || iso > p.au) return;
-      const c = edt.cours[p.coursId]; if (!c || vus.has(p.coursId)) return;
-      if (!coursALieu(C, edt, c, iso)) return;
-      vus.add(p.coursId);
-      const hp = horairePlace(p, c), ab = absentLe(I, aeshId, iso, hp.debut, hp.fin);
-      /* Absence sur une partie du cours : les heures faites restent comptées, seule la partie manquante est « à couvrir ». */
-      let manque = 0;
-      if (ab) manque = ab.journee === false ? Math.max(0, (Math.min(min(ab.fin), min(hp.fin)) - Math.max(min(ab.debut), min(hp.debut))) / 60) : duree(hp.debut, hp.fin);
-      out.push({ j, date: iso, type: 'cours', debut: hp.debut, fin: hp.fin, horairePartiel: hp.partiel, cours: c, place: p, pole: p.pole, absent: !!ab && manque >= duree(hp.debut, hp.fin) - 1e-9, partiel: !!ab && manque < duree(hp.debut, hp.fin) - 1e-9 ? manque : 0, absence: ab });
+      const c = edt.cours[p.coursId]; if (!c || !coursALieu(C, edt, c, iso)) return;
+      const hp = horairePlace(p, c);
+      if (!parCours.has(p.coursId)) parCours.set(p.coursId, { c, p, iv: [] });
+      parCours.get(p.coursId).iv.push([min(hp.debut), min(hp.fin)]);
+    });
+    const abs = absencesDuJour(I, aeshId, iso);
+    parCours.forEach(({ c, p, iv }) => {
+      unionIntervalles(iv).forEach(([dm, fm]) => {
+        const debut = hDe(dm), fin = hDe(fm), manque = recouvrement(abs, dm, fm) / 60, h = (fm - dm) / 60;
+        const ab = manque > 0 ? absentLe(I, aeshId, iso, debut, fin) : null;
+        out.push({ j, date: iso, type: 'cours', debut, fin, horairePartiel: debut !== c.d || fin !== c.f, cours: c, place: p, pole: p.pole,
+          absent: manque >= h - 1e-9, partiel: manque > 1e-9 && manque < h - 1e-9 ? manque : 0, absence: ab });
+      });
     });
     if (a && a.reunion && RE_HEURE.test(a.reunion.debut || '') && a.reunion.jour === j && !institutionCetteSemaine(I, lundi) && !absentLe(I, aeshId, iso, a.reunion.debut, a.reunion.fin))
       out.push({ j, date: iso, type: 'reunion', debut: a.reunion.debut, fin: a.reunion.fin, label: 'Réunion d’équipe' });
@@ -259,6 +268,17 @@ export function occupations(ctx, aeshId, lundi) {
   return out.sort((x, y) => x.j - y.j || min(x.debut) - min(y.debut));
 }
 export const MOTIFS = { conge: 'Congé', formation: 'Formation', arret: 'Arrêt', autre: 'Absence' };
+/* ─── intervalles (en minutes) ─── */
+export function unionIntervalles(l) {
+  const t = (l || []).filter(x => x[1] > x[0]).sort((x, y) => x[0] - y[0]), out = [];
+  t.forEach(x => { const d = out[out.length - 1]; if (d && x[0] <= d[1]) d[1] = Math.max(d[1], x[1]); else out.push([x[0], x[1]]); });
+  return out;
+}
+/* Minutes d'une union d'intervalles comprises dans [a, b]. */
+export const recouvrement = (l, a, b) => unionIntervalles(l).reduce((s, [x, y]) => s + Math.max(0, Math.min(y, b) - Math.max(x, a)), 0);
+/* Les absences d'un AESH ce jour-là, en intervalles (journée entière = toute la journée). */
+export const absencesDuJour = (I, aeshId, iso) => I.absences.filter(x => x.aeshId === aeshId && iso >= x.du && iso <= x.au)
+  .map(x => x.journee === false ? [min(x.debut), min(x.fin)] : [0, 24 * 60]);
 /* Une réunion institutionnelle cette semaine-là remplace la réunion d'équipe de chacun. */
 export const institutionCetteSemaine = (I, lundi) => I.reunions.some(r => lundiDe(r.date) === lundi);
 
@@ -339,10 +359,18 @@ export function bilan(ctx, aeshId, lundi) {
     const fait = h - (o.partiel || 0);
     cours += fait; parPole[o.pole] = (parPole[o.pole] || 0) + fait;
   });
-  const ratio = joursTravail / 5;
-  const services = totalServices(a) * ratio;
-  /* La réunion d'équipe, telle que le référent l'a saisie : la réunion institutionnelle la remplace cette semaine-là. */
-  const reunion = joursTravail ? heuresReunion(a) : 0;
+  /* Services : chaque service compte ses heures sur SES jours ; un jour férié ou de vacances les réduit d'autant.
+     Une semaine normale compte les heures saisies, entières (audit D08). Sans jours précisés : ses jours de travail. */
+  const services = servicesDe(a).reduce((t, x) => {
+    const jrs = x.jours && x.jours.length ? x.jours : joursDe(a);
+    if (!jrs.length) return t;
+    const ouverts = jrs.filter(i => sem.jours[i] && !sem.jours[i].off).length;
+    return t + x.h * ouverts / jrs.length;
+  }, 0);
+  /* La réunion d'équipe, telle que le référent l'a saisie. Une semaine de réunion institutionnelle, c'est elle qui
+     compte, à sa vraie durée (audit D09). */
+  const inst = I.reunions.filter(r => lundiDe(r.date) === lundi && !C.off(r.date) && joursDe(a).includes(jourSemaine(r.date)));
+  const reunion = !joursTravail ? 0 : inst.length ? inst.reduce((t, r) => t + duree(r.debut, r.fin), 0) : heuresReunion(a);
   const total = cours + services + reunion;
   const contrat = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
   const prevuPoles = a.heures || {};
@@ -388,8 +416,11 @@ export function disponibilite(ctx, aeshId, coursId, du, au, pole) {
   const deja = I.places.some(p => p.aeshId === aeshId && p.coursId === coursId && p.au >= du && p.du <= au);
   let premierPris = null, premierAbs = null, premiereReu = null, nbSem = 0, nbAbs = 0, premierTrop = null;
   const h = duree(c.d, c.f), prevu = +((a.heures || {})[pole]);
+  /* Après la fin de son contrat, il n'est plus proposé (audit D01). */
+  const fin = finContratDe(a);
+  if (fin && fin < du) return { etat: 'aucun', contrainte, texte: 'contrat terminé', detail: `depuis le ${dateCourte(fin)}`, deja };
   for (const l of lundisEntre(C, du, au)) {
-    const iso = ajoute(l, c.j); if (iso < du || iso > au || !coursALieu(C, edt, c, iso)) continue;
+    const iso = ajoute(l, c.j); if (iso < du || iso > au || (fin && iso > fin) || !coursALieu(C, edt, c, iso)) continue;
     nbSem++;
     const ab = absentLe(I, aeshId, iso, c.d, c.f);
     if (ab) { nbAbs++; if (!premierAbs) premierAbs = { iso, ab }; }
@@ -422,15 +453,53 @@ export function disponibilite(ctx, aeshId, coursId, du, au, pole) {
 /* ─────────────── besoins estimés ─────────────── */
 /* Associe une estimation (document « cours » de coordination_estimation_aesh) à un cours de l'emploi du temps. */
 const JOURS_EST = ['lun', 'mar', 'mer', 'jeu', 'ven'];
-export function besoinDuCours(estimations, classe, cours) {
+/* quand = { iso, parite } : la date réellement affichée. Une estimation limitée dans le temps (« au »), à une semaine
+   (A ou B) ou à une partie du cours (hDebut–hFin) n'est prise que là où elle s'applique (audit D03). */
+export function besoinDuCours(estimations, classe, cours, quand) {
   const par = cours.sem === 'SA' ? 'A' : cours.sem === 'SB' ? 'B' : '';
+  const iso = quand && RE_DATE.test(quand.iso || '') ? quand.iso : '', semaine = quand && quand.parite ? quand.parite : '';
   const l = (estimations || []).filter(e => (e.classe === classe || (cours.cls || []).includes(e.classe)) && e.statut === 'active' && JOURS_EST.indexOf(e.jour) === cours.j
-    && RE_HEURE.test(e.debut || '') && chevauche(e.debut, e.fin, cours.d, cours.f) && (!e.parite || !par || e.parite === par));
+    && RE_HEURE.test(e.debut || '') && chevauche(e.debut, e.fin, cours.d, cours.f) && (!e.parite || !par || e.parite === par)
+    && (!iso || !RE_DATE.test(e.au || '') || iso <= e.au)
+    && (!semaine || !['A', 'B'].includes(e.semaines) || e.semaines === semaine));
   if (!l.length) return null;
   const exact = l.filter(e => e.debut === cours.d && e.fin === cours.f);
   const src = exact.length ? exact : l;
   /* Un cours = une demande : si plusieurs estimations existent (deux classes réunies), on garde la plus récente. */
-  return src.reduce((m, e) => (!m || String(e.majLe || '') > String(m.majLe || '') ? e : m), null);
+  const e = src.reduce((m, x) => (!m || String(x.majLe || '') > String(m.majLe || '') ? x : m), null);
+  /* La plage réellement concernée : l'horaire ajusté par l'enseignant, sinon le cours. */
+  const hd = RE_HEURE.test(e.hDebut || '') ? e.hDebut : cours.d, hf = RE_HEURE.test(e.hFin || '') ? e.hFin : cours.f;
+  return { ...e, plageDebut: min(hd) >= min(cours.d) && min(hd) < min(cours.f) ? hd : cours.d, plageFin: min(hf) <= min(cours.f) && min(hf) > min(cours.d) ? hf : cours.f };
+}
+/* Combien d'AESH sont VRAIMENT là, au pire moment de la plage (audit D02) : 30 minutes sur un cours de 3 h ne
+   couvrent pas le cours. On découpe la plage aux bornes des placements et des absences, et on garde le minimum. */
+export function presentsMin(ctx, cours, iso, debut, fin) {
+  const { I } = ctx, a0 = min(debut || cours.d), b0 = min(fin || cours.f), iv = [];
+  const vus = new Map();
+  I.places.forEach(p => {
+    if (p.coursId !== cours.id || iso < p.du || iso > p.au) return;
+    const a = I.aesh.get(p.aeshId); if (!a || a.actif === false || (finContratDe(a) && iso > finContratDe(a))) return;
+    const hp = horairePlace(p, cours);
+    if (!vus.has(p.aeshId)) vus.set(p.aeshId, []);
+    vus.get(p.aeshId).push([min(hp.debut), min(hp.fin)]);
+  });
+  vus.forEach((l, aeshId) => {
+    const abs = unionIntervalles(absencesDuJour(I, aeshId, iso));
+    unionIntervalles(l).forEach(([x, y]) => {
+      /* on retire les absences de sa présence */
+      let morceaux = [[x, y]];
+      abs.forEach(([u, v]) => { morceaux = morceaux.flatMap(([m, n]) => v <= m || u >= n ? [[m, n]] : [[m, Math.max(m, u)], [Math.min(n, v), n]].filter(z => z[1] > z[0])); });
+      iv.push(...morceaux);
+    });
+  });
+  if (b0 <= a0) return 0;
+  const bornes = [...new Set([a0, b0, ...iv.flat().filter(t => t > a0 && t < b0)])].sort((x, y) => x - y);
+  let mini = Infinity;
+  for (let k = 0; k < bornes.length - 1; k++) {
+    const m = (bornes[k] + bornes[k + 1]) / 2;
+    mini = Math.min(mini, iv.filter(([x, y]) => x <= m && m < y).length);
+  }
+  return mini === Infinity ? 0 : mini;
 }
 
 /* ─────────────── sigles ─────────────── */
@@ -450,7 +519,7 @@ export function plagesLibres(ctx, aeshId, lundi) {
 }
 /* AESH des autres pôles qui ont des heures disponibles : solde de répartition > 0, ou pôle « complet » et heures placées < heures déclarées. */
 export function disponiblesAilleurs(ctx, pole, lundi, poleComplet) {
-  return aeshActifs(ctx.I).filter(a => !(a.equipes || {})[pole]).map(a => {
+  return aeshActifs(ctx.I).filter(a => !(a.equipes || {})[pole] && !contratFini(a, lundi)).map(a => {
     const rep = repartition(a, ctx.nomPole), b = bilan(ctx, a.id, lundi), poles = Object.keys(a.equipes || {});
     const complets = poles.map(p => ({ p, complet: poleComplet ? poleComplet(p) : null }));
     const nonPlace = poles.reduce((s, p) => s + Math.max(0, (rep.parPole[p] || 0) - (b.parPole[p] || 0)), 0);
@@ -489,7 +558,7 @@ export function liberesParPfmp(ctx, nomClasse, lundi) {
       if (!c || !(c.cls || []).includes(nomClasse) || !C.coursSemaine(c, lundi)) return;
       if (coursALieu(C, edt, c, iso)) return;
       const a = I.aesh.get(p.aeshId);
-      if (!a || a.actif === false) return;
+      if (!a || a.actif === false || contratFini(a, iso)) return;
       const hp = horairePlace(p, c), e = parAesh.get(a.id) || { a, creneaux: [], heures: 0 };
       if (!e.creneaux.some(x => x.j === j && x.cours.id === c.id)) {
         e.creneaux.push({ j, date: iso, debut: hp.debut, fin: hp.fin, cours: c });
@@ -507,7 +576,7 @@ export function liberesParPfmp(ctx, nomClasse, lundi) {
    Sert aux AUTRES référents : pendant le stage d'une classe, son AESH est disponible ailleurs. */
 export function liberePfmpCreneau(ctx, aeshId, lundi, j, debut, fin) {
   const { C, edt, I } = ctx, iso = ajoute(lundi, j);
-  if (C.off(iso)) return '';
+  if (C.off(iso) || contratFini(I.aesh.get(aeshId), iso)) return '';
   let libere = '';
   I.places.forEach(p => {
     if (libere || p.aeshId !== aeshId || p.jour !== j || iso < p.du || iso > p.au) return;

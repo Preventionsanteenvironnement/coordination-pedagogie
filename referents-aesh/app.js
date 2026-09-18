@@ -6,9 +6,9 @@
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-18b';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18b';
-import * as AV from './avatars.js?v=2026-09-18b';
+import * as K from './calculs.js?v=2026-09-18c';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18c';
+import * as AV from './avatars.js?v=2026-09-18c';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -19,7 +19,7 @@ const lsEcrit = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } 
 const alea = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = crypto.getRandomValues(new Uint8Array(10)); return [...r].map(x => a[x % 36]).join(''); };
 const avecDelai = p => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('delai'), { code: 'delai' })), DELAI); })]).finally(() => clearTimeout(t)); };
 const typeErreur = e => { const t = `${(e && e.code) || ''} ${(e && e.message) || ''}`; return /permission|insufficient/i.test(t) ? 'refus' : /delai/.test(t) ? 'delai' : 'horsligne'; };
-const messageErreur = e => e && e.code === 'contrat' ? 'Non enregistré : son contrat est déjà terminé à cette date.' : e && e.code === 'volume' ? 'Non enregistré : fiche trop volumineuse.' : ({ refus: 'Non enregistré : espace pas encore ouvert par la coordination.', delai: 'Pas de réponse du serveur. Vérifiez dans un instant.', horsligne: 'Non enregistré : pas de connexion. Réessayez.' })[typeErreur(e)];
+const messageErreur = e => e && e.code === 'conflit' ? `Non enregistré : ${e.qui || 'un autre référent'} a modifié en même temps ${e.champs && e.champs.length ? '« ' + e.champs.join(' », « ') + ' »' : 'cette donnée'}. Regardez sa valeur ; si vous enregistrez de nouveau, la vôtre la remplacera.` : e && e.code === 'contrat' ? 'Non enregistré : son contrat est déjà terminé à cette date.' : e && e.code === 'volume' ? 'Non enregistré : fiche trop volumineuse.' : ({ refus: 'Non enregistré : espace pas encore ouvert par la coordination.', delai: 'Pas de réponse du serveur. Vérifiez dans un instant.', horsligne: 'Non enregistré : pas de connexion. Réessayez.' })[typeErreur(e)];
 const anneeScolaire = (d = new Date()) => { const y = d.getFullYear(); return d.getMonth() >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`; };
 const nomPole = id => (pole(id) || { nom: id }).nom;
 const heureFr = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const auj = K.isoLocal(), j = K.isoLocal(d); return `${j === auj ? 'aujourd’hui' : K.dateCourte(j)} · ${d.getHours()} h ${K.z2(d.getMinutes())}`; };
@@ -37,7 +37,7 @@ export async function demarrer({ FS, db, erreur }) {
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18b')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18c')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -91,7 +91,8 @@ export async function demarrer({ FS, db, erreur }) {
   /* Petit avatar (ou pastille du pôle tant qu'il n'est pas choisi). */
   const avatarHtml = (pid, taille, o = {}) => { const a = avatarDe(pid), q = pole(pid) || POLES[0]; return a ? AV.svgAvatar(a, { humeur: o.humeur === undefined ? humeurDe(pid) : o.humeur, taille, label: `référent ${q.nom}`, classe: o.classe }) : `<span class="sigle" style="--pole:${q.couleur};width:${taille}px;height:${taille}px;font-size:${Math.max(9, taille * .3)}px" aria-label="référent ${esc(q.nom)}">${esc(q.nom.replace(/[^A-Z]/g, '').slice(0, 3) || q.nom.slice(0, 2))}</span>`; };
   /* Le document du pôle regroupe code, « complet », avatar et humeur : on écrit toujours l'ensemble. */
-  const ecrirePole = (pid, patch) => { const d = S.docs.get('pole_' + pid) || {}; const doc = { id: 'pole_' + pid, type: 'pole', pole: pid, code: codeDe(pid), complet: d.complet || null, avatar: d.avatar || null, humeur: d.humeur || null, pfmp: d.pfmp || null, ...(d.creeLe ? { creeLe: d.creeLe } : {}), ...patch }; return ecrire(doc); };
+  const ecrirePole = (pid, patch) => ecrireTransaction('pole_' + pid, serveur => { const d = serveur || S.docs.get('pole_' + pid) || {};
+    return { id: 'pole_' + pid, type: 'pole', pole: pid, code: /^\d{4}$/.test(d.code || '') ? d.code : codeDe(pid), complet: d.complet || null, avatar: d.avatar || null, humeur: d.humeur || null, pfmp: d.pfmp || null, ...(d.creeLe ? { creeLe: d.creeLe } : {}), ...patch }; });
   /* PFMP saisies par les référents (document du pôle, champ pfmp) : elles remplacent celles du fichier pour la classe. */
   const PFMP_FICHIER = {};
   function appliquerPfmp() {
@@ -173,6 +174,27 @@ export async function demarrer({ FS, db, erreur }) {
     return d;
   }
   async function ecrireTout(docs) { for (const d of docs) await ecrire(d); }
+  /* Écriture en transaction (audit C01/C03/C05, 18/09) : le document est RELU sur le serveur au moment d'écrire,
+     puis « construire » décide à partir de cette version-là. Deux référents qui enregistrent à la même seconde ne
+     s'écrasent plus ; si les deux ont changé la même chose, « construire » lève un conflit et rien n'est écrit. */
+  async function ecrireTransaction(id, construire) {
+    if (typeof FS.runTransaction !== 'function') return ecrire(construire(S.docs.get(id) || null));
+    const ref = FS.doc(db, COLLECTION, id); let ecrit = null;
+    await avecDelai(FS.runTransaction(db, async tx => {
+      const snap = await tx.get(ref), serveur = snap.exists() ? snap.data() : null;
+      const doc = construire(serveur), maintenant = new Date().toISOString();
+      const d = { ...doc, id, annee: S.annee, version: ((serveur && serveur.version) || 0) + 1, majLe: maintenant, par: S.session ? S.session.pole : '' };
+      delete d.depart; if (!d.creeLe) d.creeLe = (serveur && serveur.creeLe) || maintenant;
+      Object.keys(d).forEach(k => { if (d[k] === undefined) delete d[k]; });
+      const contenu = JSON.stringify(d);
+      if (contenu.length > 20000) throw Object.assign(new Error('trop volumineux'), { code: 'volume' });
+      const hid = 'hist_' + alea();
+      tx.set(FS.doc(db, COLLECTION, hid), { id: hid, type: 'hist', annee: S.annee, de: d.id, typeDe: d.type, version: d.version, majLe: maintenant, par: d.par, contenu });
+      tx.set(ref, d); ecrit = d;
+    }));
+    S.docs.set(ecrit.id, ecrit); versionDocs++;
+    return ecrit;
+  }
   /* Écriture groupée (audit P01, 18/09) : tous les documents d'une opération — et leurs copies d'historique —
      partent dans UN seul lot. Une panne au milieu laisse tout inchangé : jamais de placement coupé à moitié. */
   async function ecrireLot(docs) {
@@ -335,9 +357,17 @@ export async function demarrer({ FS, db, erreur }) {
 
   /* ─────────── outils de calcul pour l'affichage ─────────── */
   function bilans(pid) { const c = ctx(); return K.aeshActifs(c.I, pid).map(a => ({ a, b: K.bilan(c, a.id, S.lundi) })); }
+  /* Les placements en cours à cette date — pas ceux d'un AESH dont le contrat est fini (audit D01). */
   function placesCours(coursId, iso) {
-    const I = idx(); return I.places.filter(p => p.coursId === coursId && iso >= p.du && iso <= p.au);
+    const I = idx(); return I.places.filter(p => p.coursId === coursId && iso >= p.du && iso <= p.au && !K.contratFini(I.aesh.get(p.aeshId), iso));
   }
+  /* Placé ici, cette semaine : en cours le jour du cours. Un placement qui commence plus tard est « à venir » :
+     il ne compte pas comme déjà placé et n'est jamais modifié sans le dire (audit D12). */
+  const placeIci = (x, c, du) => x.coursId === c.id && x.du <= K.ajoute(du, c.j) && x.au >= du;
+  const placeAVenir = (x, c, du) => x.coursId === c.id && x.du > K.ajoute(du, c.j);
+  /* Présents au pire moment de la plage estimée : 30 min placées sur 3 h ne font pas « couvert » (audit D02). */
+  const presents = (c, iso, bes) => K.presentsMin(ctx(), c, iso, bes && bes.plageDebut, bes && bes.plageFin);
+  const quand = (iso) => ({ iso, parite: S.C.semaine(K.lundiDe(iso)).parite });
   function jaugeAesh(a) {
     const contrat = nombre(a.contrat), parts = [];
     Object.keys(a.equipes || {}).forEach(q => { const h = nombre((a.heures || {})[q]); if (h) parts.push([`${nomPole(q)} ${K.fmtH(h)}`, h, (pole(q) || P()).couleur]); });
@@ -451,14 +481,33 @@ export async function demarrer({ FS, db, erreur }) {
   /* Une fiche d'avant les filières ne dit pas où l'AESH intervient : « dans son pôle » se lit
      « dans toutes les filières de ce pôle ». On ne devine rien de plus. */
   const filieresParDefaut = a => Object.fromEntries(Object.keys(a.equipes || {}).flatMap(q => filieresDuPole(q).map(f => [f.id, { classes: null }])));
-  function initForm(id) {
-    const I = idx(), p = P();
-    if (id === 'nouveau') return { id: 'nouveau', recherche: '', choisi: null, a: { id: '', type: 'aesh', sigle: '', equipes: { [p.id]: 1 }, contrat: null, heures: { [p.id]: null }, filieres: Object.fromEntries(filieresDuPole(p.id).map(f => [f.id, { classes: null }])), rattachement: p.id, services: [], dispos: {}, reunion: null, actif: true }, orig: null };
-    const a = I.aesh.get(id); if (!a) return null;
+  function copieFiche(a) {
     const copie = JSON.parse(JSON.stringify(a)); delete copie.depart;
     copie.services = K.servicesDe(a); copie.dispos = K.disposDe(a); delete copie.jours; delete copie.cantine; delete copie.internat; delete copie.service; delete copie.serviceLib;
     if (!K.filieresDe(copie)) copie.filieres = filieresParDefaut(copie);
     copie.rattachement = rattachementDe(copie);
+    return copie;
+  }
+  /* Ce que les deux référents ont changé, chacun de son côté, sur la même donnée (audit C01). */
+  function conflitsFiche(orig, a, recent) {
+    const n = v => (v === '' || v === undefined) ? null : v, chg = (x, y) => JSON.stringify(n(x)) !== JSON.stringify(n(y));
+    const trois = (o, m, r) => chg(o, m) && chg(o, r) && chg(m, r), out = [];
+    const num = k => x => nombre((x || {})[k]);
+    [['sigle', 'Sigle', x => x.sigle], ['contrat', 'Contrat', num('contrat')], ['presence', 'Présence élève', num('presence')], ['reunionH', 'Réunion', num('reunionH')],
+      ['finContrat', 'Durée du contrat', x => x.finContrat || null], ['rattachement', 'Équipe', x => x.rattachement || null], ['reunion', 'Jour de la réunion', x => x.reunion || null]]
+      .forEach(([, lib, v]) => { if (trois(v(orig), v(a), v(recent))) out.push(lib); });
+    const fl = x => K.filieresDe(x) || filieresParDefaut(x), dp = x => K.disposDe(x), sv = x => Object.fromEntries(K.servicesDe(x).map(y => [y.nom, y]));
+    [[fl, id => (filiere(id) || { nom: id }).nom], [dp, k => `${K.JOURS_C[+k[0]]} ${k[1] === 'M' ? 'matin' : 'ap.-midi'}`], [sv, nom => nom]].forEach(([f, lib]) => {
+      const o = f(orig), m = f(a), r = f(recent);
+      [...new Set([...Object.keys(o), ...Object.keys(m), ...Object.keys(r)])].forEach(k => { if (trois(o[k], m[k], r[k])) out.push(lib(k)); });
+    });
+    return [...new Set(out)];
+  }
+  function initForm(id) {
+    const I = idx(), p = P();
+    if (id === 'nouveau') return { id: 'nouveau', recherche: '', choisi: null, a: { id: '', type: 'aesh', sigle: '', equipes: { [p.id]: 1 }, contrat: null, heures: { [p.id]: null }, filieres: Object.fromEntries(filieresDuPole(p.id).map(f => [f.id, { classes: null }])), rattachement: p.id, services: [], dispos: {}, reunion: null, actif: true }, orig: null };
+    const a = I.aesh.get(id); if (!a) return null;
+    const copie = copieFiche(a);
     /* Une fiche d'avant les heures par filière : si le pôle n'a qu'une filière déclarée, ses heures lui reviennent.
        S'il en a plusieurs, on ne devine pas : le total du pôle reste compté tant que rien n'est saisi. */
     POLES.forEach(q => { const h = nombre((copie.heures || {})[q.id]); if (h == null) return;
@@ -515,6 +564,7 @@ export async function demarrer({ FS, db, erreur }) {
         <div class="carte pad" style="display:grid;gap:6px"><div class="ligne ecarte"><h2>Ses heures</h2><span class="puce ${b.rep.solde == null ? '' : b.rep.solde < -1e-9 ? 'err' : b.rep.solde > 1e-9 ? 'ok' : 'ok'}">${b.rep.solde == null ? 'contrat ?' : b.rep.solde < -1e-9 ? `${K.fmtH(-b.rep.solde)} de trop` : b.rep.solde > 1e-9 ? `${K.fmtH(b.rep.solde)} disponibles` : 'tout réparti'}</span></div>
           <span class="muted" style="font-size:.92rem">${esc(b.rep.texte)}</span>${jaugeAesh(a)}</div>
         ${b.alertes.length ? `<div class="alertes">${b.alertes.map((x, i) => carteAlerte(a, x, i, 'fa')).join('')}</div>` : ''}` : ''}
+      ${f.alerte ? `<div class="bandeau err" role="alert">${esc(f.alerte)}</div>` : ''}
       <div class="champs">
         <div class="champ ${estModif((o.sigle || '') !== a.sigle)}"><span class="lib"><b>Sigle</b><small>initiales, jamais le prénom</small></span><input type="text" id="f-sigle" data-i="sigle" value="${esc(a.sigle)}" maxlength="6" style="width:110px;font-weight:800;text-transform:uppercase;text-align:center"></div>
         <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${parQui(a, 'contrat')}${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
@@ -564,10 +614,10 @@ export async function demarrer({ FS, db, erreur }) {
     const p = P(), c = ctx(), out = [], vus = new Set();
     classesDu(p.id).forEach(nom => S.edt.classes[nom].cours.forEach(id => {
       const cr = S.edt.cours[id], iso = K.ajoute(S.lundi, cr.j); if (vus.has(id) || !K.coursALieu(S.C, S.edt, cr, iso)) return;
-      const bes = K.besoinDuCours(S.est, nom, cr); if (!bes || !bes.nb) return;
-      const pl = new Set(placesCours(id, iso).map(x => x.aeshId)); if (pl.size >= bes.nb || pl.has(aeshId)) return;
+      const bes = K.besoinDuCours(S.est, nom, cr, quand(iso)); if (!bes || !bes.nb) return;
+      const pl = new Set(placesCours(id, iso).map(x => x.aeshId)), n = presents(cr, iso, bes); if (n >= bes.nb || pl.has(aeshId)) return;
       const d = K.disponibilite(c, aeshId, id, iso, iso, p.id); if (d.etat !== 'libre') return;
-      vus.add(id); out.push({ classe: nom, cours: cr, besoin: bes.nb, places: pl.size });
+      vus.add(id); out.push({ classe: nom, cours: cr, besoin: bes.nb, places: n });
     }));
     return out.sort((x, y) => (y.besoin - y.places) - (x.besoin - x.places) || x.cours.j - y.cours.j);
   }
@@ -645,10 +695,10 @@ export async function demarrer({ FS, db, erreur }) {
       const iso = K.ajoute(S.lundi, c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
       const pl = placesCours(c.id, iso), parAesh = new Map(); pl.forEach(x => { if (I.aesh.get(x.aeshId)) parAesh.set(x.aeshId, x); });
       const aeshs = [...parAesh.keys()].map(id => I.aesh.get(id));
-      const bes = K.besoinDuCours(S.est, nom, c), [mc] = couleurMatiere(c.mat);
-      const nbPresents = aeshs.filter(a => !K.absentLe(I, a.id, iso, c.d, c.f)).length;
+      const bes = K.besoinDuCours(S.est, nom, c, quand(iso)), [mc] = couleurMatiere(c.mat);
+      const nbPresents = presents(c, iso, bes);
       const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');
-      const besHtml = bes ? `<span class="bes ${nbPresents >= bes.nb ? 'ok' : 'manque'}" title="Besoin estimé par les enseignants : ${bes.nb} AESH${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}">${nbPresents}/${bes.nb}</span>` : '';
+      const besHtml = bes ? `<span class="bes ${nbPresents >= bes.nb ? 'ok' : 'manque'}" title="Besoin estimé par les enseignants : ${bes.nb} AESH${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.plageDebut !== c.d || bes.plageFin !== c.f ? ` · de ${K.hFr(bes.plageDebut)} à ${K.hFr(bes.plageFin)}` : ''} · présents au moment le moins couvert : ${nbPresents}">${nbPresents}/${bes.nb}</span>` : '';
       const lib = `${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', AESH ' + aeshs.map(a => a.sigle).join(' ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
@@ -817,8 +867,9 @@ export async function demarrer({ FS, db, erreur }) {
   function feuillePlacer(f) {
     const p = P(), c = S.edt.cours[f.coursId], nom = f.classe, I = idx(), cx = ctx(), iso = K.ajoute(S.lundi, c.j);
     const au = finPeriode(f), du = S.lundi;
-    const bes = K.besoinDuCours(S.est, nom, c);
-    const dejaIci = new Set(I.places.filter(x => x.coursId === c.id && x.au >= du).map(x => x.aeshId));
+    const bes = K.besoinDuCours(S.est, nom, c, quand(iso));
+    const dejaIci = new Set(I.places.filter(x => placeIci(x, c, du)).map(x => x.aeshId));
+    const aVenir = I.places.filter(x => placeAVenir(x, c, du) && I.aesh.get(x.aeshId));
     const prevuIci = a => K.prevuPourClasse(a, FILIERES, nom).prevu || !K.prevuPourClasse(a, FILIERES, nom).connu;
     const enContrat = a => !K.contratFini(a, du);
     const candidats = K.aeshActifs(I, p.id).filter(enContrat).slice().sort((x, y) => (prevuIci(y) ? 1 : 0) - (prevuIci(x) ? 1 : 0)), dispo = K.disponiblesAilleurs(cx, p.id, S.lundi, poleComplet), dispoDe = Object.fromEntries(dispo.map(x => [x.a.id, x]));
@@ -847,6 +898,7 @@ export async function demarrer({ FS, db, erreur }) {
     return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}`) + `
       ${bes ? `<div class="bandeau info">Estimé par les enseignants : <b>${bes.nb === 0 ? 'aucun AESH' : bes.nb + ' AESH'}</b>${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.au ? ` · jusqu’au ${K.jjmm(bes.au)}` : ''}${bes.majLe ? ` <span class="muted">· mis à jour le ${esc(K.dateCourte(String(bes.majLe).slice(0, 10)))}</span>` : ''}</div>` : ''}
       <div><b>Qui accompagne ?</b></div>
+      ${aVenir.length ? `<div class="bandeau info">À venir : ${aVenir.map(x => `<b>${esc(I.aesh.get(x.aeshId).sigle)}</b> dès le ${esc(K.dateCourte(x.du))}`).join(', ')} <span class="muted">· non modifié ici</span></div>` : ''}
       <div class="choix-aesh" role="group" aria-label="AESH du pôle">${candidats.map(a => bouton(a)).join('')}</div>
       ${autres.length ? ((f.autres || liberes.length) ? `<div><b>Autres pôles</b>${liberes.length ? ` <span class="puce warn">${liberes.length} libéré${liberes.length > 1 ? 's' : ''} par une PFMP</span>` : ''} <span class="muted" style="font-weight:500;font-size:.9rem">· triés par heures disponibles</span></div><div class="choix-aesh" role="group" aria-label="AESH des autres pôles">${autres.map(a => bouton(a, true)).join('')}</div>` : `<button type="button" class="lien" id="pa-autres" data-a="autres-aesh">＋ AESH d’un autre pôle${dispo.length ? ` (${dispo.length} avec des heures disponibles)` : ''}</button>`) : ''}
       ${horaires}
@@ -931,10 +983,9 @@ export async function demarrer({ FS, db, erreur }) {
   function besoinsResume(pid) {
     let estimes = 0, manque = 0; const vus = new Set();
     classesDu(pid).forEach(nom => S.edt.classes[nom].cours.forEach(id => {
-      const c = S.edt.cours[id], bes = K.besoinDuCours(S.est, nom, c); if (!bes) return;
+      const c = S.edt.cours[id], iso = K.ajoute(S.lundi, c.j), bes = K.besoinDuCours(S.est, nom, c, quand(iso)); if (!bes) return;
       if (vus.has(id)) return; vus.add(id); estimes++;
-      const iso = K.ajoute(S.lundi, c.j);
-      if (bes.nb > 0 && K.coursALieu(S.C, S.edt, c, iso)) { const n = new Set(placesCours(id, iso).filter(x => !K.absentLe(idx(), x.aeshId, iso, c.d, c.f)).map(x => x.aeshId)).size; if (n < bes.nb) manque++; }
+      if (bes.nb > 0 && K.coursALieu(S.C, S.edt, c, iso) && presents(c, iso, bes) < bes.nb) manque++;
     }));
     return { estimes, manque };
   }
@@ -947,15 +998,15 @@ export async function demarrer({ FS, db, erreur }) {
       lignes += `<tr class="grp"><td colspan="6">${esc(k.court)}</td></tr>`;
       cours.forEach(c => {
         const premiere = !comptes.has(c.id); comptes.add(c.id); if (premiere) total++;
-        const bes = K.besoinDuCours(S.est, nom, c), iso = K.ajoute(S.lundi, c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
+        const iso = K.ajoute(S.lundi, c.j), bes = K.besoinDuCours(S.est, nom, c, quand(iso)), lieu = K.coursALieu(S.C, S.edt, c, iso);
         const pl = [...new Set(placesCours(c.id, iso).map(x => x.aeshId))].map(id => I.aesh.get(id)).filter(Boolean);
-        const presents = pl.filter(a => !K.absentLe(I, a.id, iso, c.d, c.f)).length;
-        if (bes && premiere) { estimes++; if (lieu) demandees += bes.nb * K.duree(c.d, c.f); }
+        const nPres = presents(c, iso, bes);
+        if (bes && premiere) { estimes++; if (lieu) demandees += bes.nb * K.duree(bes.plageDebut, bes.plageFin); }
         let etat = '<span class="muted">—</span>';
         if (bes && !lieu) etat = '<span class="puce">pas cette semaine</span>';
         else if (bes && bes.nb === 0) etat = '<span class="puce">pas besoin</span>';
-        else if (bes && presents >= bes.nb) etat = '<span class="puce ok">couvert</span>';
-        else if (bes) { etat = `<span class="puce warn">manque ${bes.nb - presents}</span>`; if (premiere) manque++; }
+        else if (bes && nPres >= bes.nb) etat = '<span class="puce ok">couvert</span>';
+        else if (bes) { etat = `<span class="puce warn">manque ${bes.nb - nPres}</span>`; if (premiere) manque++; }
         lignes += `<tr id="b-${esc(nom)}-${esc(c.id)}" data-a="edt-cours" data-v="${esc(nom)}|${esc(c.id)}" tabindex="0">
           <td class="num" style="white-space:nowrap"><b>${K.JOURS_C[c.j]}</b> ${K.hFr(c.d)}–${K.hFr(c.f)}${c.sem === 'SA' ? ' <span class="puce">A</span>' : c.sem === 'SB' ? ' <span class="puce">B</span>' : ''}</td>
           <td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${couleurMatiere(c.mat)[0]};margin-right:6px"></span>${esc(c.lib)}</td>
@@ -1016,7 +1067,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-18b'), F = await import('./fichiers.js?v=2026-09-18b');
+    const X = await import('./exports.js?v=2026-09-18c'), F = await import('./fichiers.js?v=2026-09-18c');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1201,7 +1252,7 @@ export async function demarrer({ FS, db, erreur }) {
       rendre({ focus: 'f-titre' }); annonce('Enregistré');
       setTimeout(() => { if (S.feuille && S.feuille.fait) { if (r && r.ensuite) S.apresPop = r.ensuite; fermer(); } }, 1400);
     } catch (e) {
-      S.envoi = false; console.error(e); toast(messageErreur(e), true); rendre();
+      S.envoi = false; if (!e || e.code !== 'conflit') console.error(e);   /* un conflit est un cas prévu, expliqué à l'écran */ toast(messageErreur(e), true); rendre();
     }
   }
 
@@ -1216,8 +1267,13 @@ export async function demarrer({ FS, db, erreur }) {
     const recent0 = a.id ? idx().aesh.get(a.id) : null, entreTemps = recent0 && f.orig && recent0.version != null && recent0.version !== f.orig.version;
     confirmerPuis({ titre: nouveau ? 'Ajouter cet AESH ?' : 'Vous confirmez ?', grand: a.sigle, lignes: ch.map(l => nouveau ? [l[0], l[2]] : l), bouton: nouveau ? 'Ajouter' : 'Confirmer', faitSous: nouveau ? `${a.sigle} est dans ${p.nom}` : '',
       avert: entreTemps ? `Cette fiche a été modifiée entre-temps par ${nomPole(recent0.par) || 'un autre référent'} : seuls vos changements ci-dessus seront appliqués, le reste est conservé.` : '' }, async () => {
-      /* B01 (audit) : on repart de la fiche la plus récente et on n'y applique que ce qui a été changé ici. */
-      const orig = f.orig || {}, recent = a.id ? idx().aesh.get(a.id) : null;
+      /* B01 : on repart de la fiche la plus récente et on n'y applique que ce qui a été changé ici.
+         Lot 2 (18/09) : « la plus récente » est relue sur le serveur au moment d'écrire (transaction). */
+      const orig = f.orig || {};
+      const construire = serveur => {
+      const depart = EQUIPES_DEPART.find(x => x.id === a.id);
+      const recent = serveur ? K.normaliserAesh({ ...(depart || {}), ...serveur, depart: false }, POLES.map(q => q.id), FILIERES) : (a.id ? idx().aesh.get(a.id) : null);
+      if (recent && f.orig) { const c = conflitsFiche(orig, a, recent); if (c.length) throw Object.assign(new Error('conflit'), { code: 'conflit', champs: c, qui: nomPole(recent.par) || '', recent }); }
       const doc = recent ? { ...JSON.parse(JSON.stringify(recent)), services: K.servicesDe(recent), dispos: K.disposDe(recent) } : { ...a };
       delete doc.depart; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
       if (recent) {
@@ -1278,7 +1334,16 @@ export async function demarrer({ FS, db, erreur }) {
       doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h), jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => j >= 0 && j <= 4))].sort() : [] }));
       doc.dispos = K.disposDe(doc); delete doc.jours; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
       doc.actif = true;
-      const d = await ecrire(doc);
+      return doc;
+      };
+      let d;
+      try { d = a.id ? await ecrireTransaction(a.id, construire) : await ecrire(construire(null)); }
+      catch (e) {
+        /* Conflit : la fiche reprend la version du collègue comme point de départ. Les changements saisis ici restent
+           à l'écran ; un nouvel enregistrement les appliquera en connaissance de cause. */
+        if (e && e.code === 'conflit' && e.recent) { f.orig = copieFiche(e.recent); f.alerte = messageErreur(e); }
+        throw e;
+      }
       S.form = null;
       return { ensuite: () => aller('fiche', { id: d.id }, { remplacer: true }) };
     });
@@ -1336,7 +1401,7 @@ export async function demarrer({ FS, db, erreur }) {
 
   function validerPlacer() {
     const f = S.feuille, p = P(), c = S.edt.cours[f.coursId], I = idx(), du = S.lundi, au = finPeriode(f);
-    const dejaIci = [...new Set(I.places.filter(x => x.coursId === c.id && x.au >= du).map(x => x.aeshId))];
+    const dejaIci = [...new Set(I.places.filter(x => placeIci(x, c, du)).map(x => x.aeshId))];
     const ajout = f.choisis.filter(x => !dejaIci.includes(x)), retrait = dejaIci.filter(x => !f.choisis.includes(x));
     const sig = id => (I.aesh.get(id) || {}).sigle || '?';
     const hOf = id => f.horaires[id] ? ` (${K.hFr(f.horaires[id].debut)}–${K.hFr(f.horaires[id].fin)})` : '';
@@ -1367,6 +1432,8 @@ export async function demarrer({ FS, db, erreur }) {
         aLiberer.push({ id, place: x, cours: oc });
       });
     });
+    ajout.forEach(id => { const x = I.places.find(y => y.aeshId === id && placeAVenir(y, c, du) && y.du <= au);
+      if (x) avert.push(`${sig(id)} est déjà prévu sur ce cours à partir du ${K.dateLongue(x.du)}.`); });
     ajout.forEach(id => { const a = I.aesh.get(id), fin = a && K.finContratDe(a);
       if (fin && fin < au) avert.push(`${sig(id)} : son contrat s’arrête le ${K.dateLongue(fin)} — son placement s’arrêtera là.`); });
     /* Un AESH d'une autre équipe : son référent doit être au courant (décision de Brahim, 17/09). */
@@ -1393,8 +1460,8 @@ export async function demarrer({ FS, db, erreur }) {
           const d = { id: 'place_' + alea(), type: 'place', aeshId: id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: h.debut, fin: h.fin, sem: c.sem, matiere: c.lib, du, au: auA, statut: 'active' };
           lot.push(d); placesFinales.push(d);
         });
-        modifH.forEach(id => { const h = f.horaires[id] || { debut: c.d, fin: c.f }; I.places.filter(x => x.aeshId === id && x.coursId === c.id && x.au >= du).forEach(x => lot.push({ ...x, debut: h.debut, fin: h.fin })); });
-        retrait.forEach(id => I.places.filter(x => x.aeshId === id && x.coursId === c.id && x.au >= du).forEach(x => lot.push(x.du >= du ? { ...x, statut: 'retire' } : { ...x, au: K.ajoute(du, -1) })));
+        modifH.forEach(id => { const h = f.horaires[id] || { debut: c.d, fin: c.f }; I.places.filter(x => x.aeshId === id && placeIci(x, c, du)).forEach(x => lot.push({ ...x, debut: h.debut, fin: h.fin })); });
+        retrait.forEach(id => I.places.filter(x => x.aeshId === id && placeIci(x, c, du)).forEach(x => lot.push(x.du >= du ? { ...x, statut: 'retire' } : { ...x, au: K.ajoute(du, -1) })));
         /* Le message reprend les placements réellement enregistrés : horaire et fin propres à chacun (audit D16). */
         aPrevenir.forEach(q => {
           const siens = placesFinales.filter(d => rattachementDe(I.aesh.get(d.aeshId) || {}) === q);
@@ -1447,15 +1514,22 @@ export async function demarrer({ FS, db, erreur }) {
       case 'reu-aucune': S.form.a.reunion = null; rendre(); return;
       case 'fin-aucune': S.form.a.finContrat = ''; rendre(); return;
       case 'info': S.info = S.info === v ? null : v; rendre({ focus: b.id }); return;
-      case 'periode-edt': ouvrir({ type: 'periode', fin: periodeEdt() }); return;
+      case 'periode-edt': ouvrir({ type: 'periode', fin: periodeEdt(), fin0: periodeEdt() }); return;
       case 'per-choix': S.feuille.fin = v; rendre({ focus: b.id }); return;
-      case 'per-valider': { const f = S.feuille, fin = f.fin, avant = periodeEdt();
+      case 'per-valider': { const f = S.feuille, fin = f.fin, avant = periodeEdt(), fin0 = f.fin0 || avant;
         S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: `Jusqu’au ${K.dateCourte(fin)}`,
           lignes: [['Avant', `jusqu’au ${K.dateLongue(avant)}`], ['Après', `jusqu’au ${K.dateLongue(fin)}`]],
           avert: 'Cette période vaut pour les quatre pôles : PSR · MELEC, AGOrA, CAPa et Métiers d’Art. Les autres référents la verront aussitôt.',
           bouton: 'Confirmer',
-          travail: async () => { const d = S.docs.get('periode_' + S.annee) || {};
-            await ecrire({ id: 'periode_' + S.annee, type: 'periode', jusquau: fin, ...(d.creeLe ? { creeLe: d.creeLe } : {}) }); return {}; } };
+          /* Transaction (audit C03) : si un collègue a changé la période depuis l'ouverture de la fenêtre, on n'écrase
+             pas sa date sans le dire — on s'arrête et on montre la sienne. */
+          travail: async () => {
+            await ecrireTransaction('periode_' + S.annee, serveur => {
+              const sur = serveur && K.RE_DATE.test(serveur.jusquau || '') ? serveur.jusquau : periodeDefaut();
+              if (sur !== fin0 && sur !== fin) throw Object.assign(new Error('conflit'), { code: 'conflit', qui: nomPole(serveur && serveur.par) || '', champs: [`la période (jusqu’au ${K.dateCourte(sur)})`] });
+              return { id: 'periode_' + S.annee, type: 'periode', jusquau: fin, ...(serveur && serveur.creeLe ? { creeLe: serveur.creeLe } : {}) };
+            });
+            return {}; } };
         rendre({ focus: 'cf-oui' }); return; }
       case 'filieres': { const a = S.form && S.form.a; if (!a) return;
         ouvrir({ type: 'filieres', ouvert: null, avant: JSON.parse(JSON.stringify({ filieres: a.filieres || null, rattachement: a.rattachement || null, equipes: a.equipes || {}, heures: a.heures || {} })) }); return; }
@@ -1547,8 +1621,8 @@ export async function demarrer({ FS, db, erreur }) {
       case 'dep-valider': validerDeplacer(); return;
       case 'placer': { const c = S.edt.cours[v], nom = classeCourante(), I = idx(), iso = K.ajoute(S.lundi, c.j);
         if (S.C.semaine(S.lundi).toute) return;
-        const choisis = [...new Set(I.places.filter(x => x.coursId === v && x.au >= S.lundi).map(x => x.aeshId))];
-        const horaires = {}; choisis.forEach(id => { const x = I.places.find(y => y.aeshId === id && y.coursId === v && y.au >= S.lundi), hp = K.horairePlace(x, c); if (hp.partiel) horaires[id] = { debut: hp.debut, fin: hp.fin }; });
+        const choisis = [...new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId))];
+        const horaires = {}; choisis.forEach(id => { const x = I.places.find(y => y.aeshId === id && placeIci(y, c, S.lundi)), hp = K.horairePlace(x, c); if (hp.partiel) horaires[id] = { debut: hp.debut, fin: hp.fin }; });
         ouvrir({ type: 'placer', coursId: v, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'edt', au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
         void iso; return; }
       case 'choix-aesh': { const f = S.feuille, i = f.choisis.indexOf(v); if (i < 0) f.choisis.push(v); else f.choisis.splice(i, 1); rendre({ focus: b.id }); return; }
