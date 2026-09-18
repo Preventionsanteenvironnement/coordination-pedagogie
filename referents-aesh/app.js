@@ -2,13 +2,13 @@
    Référents de pôle AESH — application (coordination-pedagogie/referents-aesh/)
    Humeur + pensée → code du pôle → Accueil · Mes AESH · Emploi du temps ·
    Vue d'ensemble · Besoins · Messages · Exporter.
-   Firestore : coordination_referents_aesh (pole_, aesh_, place_, abs_, reunion_, msg_, hist_)
+   Firestore : coordination_referents_aesh (pole_, aesh_, place_, abs_, reunion_, msg_, periode_) ; historique hist_ dans coordination_referents_aesh_hist
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-18c';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18c';
-import * as AV from './avatars.js?v=2026-09-18c';
+import * as K from './calculs.js?v=2026-09-18d';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18d';
+import * as AV from './avatars.js?v=2026-09-18d';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -37,7 +37,7 @@ export async function demarrer({ FS, db, erreur }) {
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18c')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18d')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -51,15 +51,26 @@ export async function demarrer({ FS, db, erreur }) {
     const auj = K.isoLocal(), js = K.jourSemaine(auj);
     return js >= 5 ? K.ajoute(K.lundiDe(auj), 7) : K.lundiDe(auj);
   }
-  function ecouter() {
+  /* Tiroir séparé (18/09) : les copies d'historique vont dans COL_HIST, que la page ne télécharge jamais.
+     On ne demande que les vrais documents : les anciennes copies hist_ restées dans la collection principale
+     ne sont plus téléchargées non plus. Si Firebase réclame un index pour cette demande, on revient seul à
+     l'ancienne (toute l'année) : la page continue de marcher. */
+  const COL_HIST = COLLECTION + '_hist';
+  const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode'];
+  function ecouter(simple) {
     if (erreur || !FS) { S.etat = 'horsligne'; return; }
     try {
-      FS.onSnapshot(FS.query(FS.collection(db, COLLECTION), FS.where('annee', '==', S.annee)), snap => {
+      const q = simple ? FS.query(FS.collection(db, COLLECTION), FS.where('annee', '==', S.annee))
+        : FS.query(FS.collection(db, COLLECTION), FS.where('annee', '==', S.annee), FS.where('type', 'in', TYPES_DOCS));
+      let arret = null;
+      arret = FS.onSnapshot(q, snap => {
         const m = new Map(); snap.forEach(d => { const x = d.data() || {}; if (x.type !== 'hist') m.set(x.id || d.id, { ...x, id: x.id || d.id }); });
         S.docs = m; versionDocs++; S.etat = 'ok'; appliquerPfmp();
         lsEcrit(K_CACHE, { annee: S.annee, docs: [...m.values()] });
         verifierSession(); rendre({ donnees: true });
-      }, err => { S.etat = typeErreur(err) === 'refus' ? 'refus' : 'horsligne'; rendre({ donnees: true }); });
+      }, err => {
+        if (!simple && err && err.code === 'failed-precondition') { try { arret && arret(); } catch (e) { } console.warn('Index Firestore absent : lecture de toute l’année.', err.message || ''); ecouter(true); return; }
+        S.etat = typeErreur(err) === 'refus' ? 'refus' : 'horsligne'; rendre({ donnees: true }); });
     } catch (e) { S.etat = 'horsligne'; }
   }
   let estEcoute = false;
@@ -168,8 +179,8 @@ export async function demarrer({ FS, db, erreur }) {
     if (contenu.length > 20000) throw Object.assign(new Error('trop volumineux'), { code: 'volume' });
     const hid = 'hist_' + alea(), hist = { id: hid, type: 'hist', annee: S.annee, de: d.id, typeDe: d.type, version: d.version, majLe: maintenant, par: d.par, contenu };
     /* Rien ne s'efface : la copie d'historique et le document partent ensemble (lot atomique), ou l'historique d'abord. */
-    if (typeof FS.writeBatch === 'function') { const b = FS.writeBatch(db); b.set(FS.doc(db, COLLECTION, hid), hist); b.set(FS.doc(db, COLLECTION, d.id), d); await avecDelai(b.commit()); }
-    else { await avecDelai(FS.setDoc(FS.doc(db, COLLECTION, hid), hist)); await avecDelai(FS.setDoc(FS.doc(db, COLLECTION, d.id), d)); }
+    if (typeof FS.writeBatch === 'function') { const b = FS.writeBatch(db); b.set(FS.doc(db, COL_HIST, hid), hist); b.set(FS.doc(db, COLLECTION, d.id), d); await avecDelai(b.commit()); }
+    else { await avecDelai(FS.setDoc(FS.doc(db, COL_HIST, hid), hist)); await avecDelai(FS.setDoc(FS.doc(db, COLLECTION, d.id), d)); }
     S.docs.set(d.id, d); versionDocs++;
     return d;
   }
@@ -189,7 +200,7 @@ export async function demarrer({ FS, db, erreur }) {
       const contenu = JSON.stringify(d);
       if (contenu.length > 20000) throw Object.assign(new Error('trop volumineux'), { code: 'volume' });
       const hid = 'hist_' + alea();
-      tx.set(FS.doc(db, COLLECTION, hid), { id: hid, type: 'hist', annee: S.annee, de: d.id, typeDe: d.type, version: d.version, majLe: maintenant, par: d.par, contenu });
+      tx.set(FS.doc(db, COL_HIST, hid), { id: hid, type: 'hist', annee: S.annee, de: d.id, typeDe: d.type, version: d.version, majLe: maintenant, par: d.par, contenu });
       tx.set(ref, d); ecrit = d;
     }));
     S.docs.set(ecrit.id, ecrit); versionDocs++;
@@ -213,7 +224,7 @@ export async function demarrer({ FS, db, erreur }) {
     }
     if (prets.length * 2 > 480) throw Object.assign(new Error('trop d’écritures'), { code: 'volume' });
     const b = FS.writeBatch(db);
-    prets.forEach(({ d, hist }) => { b.set(FS.doc(db, COLLECTION, hist.id), hist); b.set(FS.doc(db, COLLECTION, d.id), d); });
+    prets.forEach(({ d, hist }) => { b.set(FS.doc(db, COL_HIST, hist.id), hist); b.set(FS.doc(db, COLLECTION, d.id), d); });
     await avecDelai(b.commit());
     prets.forEach(({ d }) => S.docs.set(d.id, d)); versionDocs++;
     return prets.map(x => x.d);
@@ -1067,7 +1078,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-18c'), F = await import('./fichiers.js?v=2026-09-18c');
+    const X = await import('./exports.js?v=2026-09-18d'), F = await import('./fichiers.js?v=2026-09-18d');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
