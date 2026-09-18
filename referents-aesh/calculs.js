@@ -132,16 +132,45 @@ export function polesDesFilieres(a, cat, rattachement) {
   if (rattachement) equipes[rattachement] = 1;
   return equipes;
 }
-/* Heures d'un pôle, calculées à partir de ses filières. null si aucune filière de ce pôle n'a d'heures :
-   dans ce cas, le total déjà saisi pour le pôle reste en place (on ne perd rien d'une fiche d'avant). */
+/* Heures d'un pôle, calculées à partir de ses filières — seulement quand TOUTES les filières déclarées de ce pôle
+   ont leurs heures. Sinon null : le total déjà saisi pour le pôle reste en place (audit D19, 18/09 : PSR 2 h et
+   MELEC encore vide ne doivent pas remplacer un ancien total de 13 h par 2 h). */
 export function heuresDuPole(a, cat, pid) {
-  const fl = filieresDe(a) || {}; let somme = null;
+  const fl = filieresDe(a) || {}; let somme = 0, n = 0, vides = 0;
   Object.entries(fl).forEach(([id, v]) => {
     const f = cat.find(x => x.id === id); if (!f || f.pole !== pid) return;
-    const brut = v && v.h; if (brut === null || brut === undefined || brut === '') return;   /* pas saisi ≠ zéro */
-    const h = Number(brut); if (Number.isFinite(h)) somme = Math.round(((somme || 0) + h) * 100) / 100;
+    n++;
+    const brut = v && v.h; if (brut === null || brut === undefined || brut === '' || !Number.isFinite(Number(brut))) { vides++; return; }   /* pas saisi ≠ zéro */
+    somme += Number(brut);
   });
-  return somme;
+  return n && !vides ? Math.round(somme * 100) / 100 : null;
+}
+/* Somme des heures déjà saisies dans les filières d'un pôle (null si aucune). */
+export function sommeFilieres(a, cat, pid) {
+  const fl = filieresDe(a) || {}; let somme = 0, n = 0;
+  Object.entries(fl).forEach(([id, v]) => {
+    const f = cat.find(x => x.id === id); if (!f || f.pole !== pid) return;
+    const brut = v && v.h; if (brut === null || brut === undefined || brut === '' || !Number.isFinite(Number(brut))) return;
+    somme += Number(brut); n++;
+  });
+  return n ? Math.round(somme * 100) / 100 : null;
+}
+/* Heures d'un pôle pour une fiche en cours de saisie (audit D19, 18/09) :
+   - toutes les filières cochées ont leurs heures → leur somme ;
+   - la fiche avait un total « à l'ancienne » (aucune heure par filière à l'ouverture) et la répartition n'est
+     pas finie → on garde ce total, rien ne se perd ;
+   - sinon → la somme de ce qui est saisi. */
+export function heuresPoleSaisie(a, orig, cat, pid) {
+  const tout = heuresDuPole(a, cat, pid); if (tout != null) return tout;
+  const stocke = a && a.heures && Number.isFinite(+a.heures[pid]) && a.heures[pid] !== null && a.heures[pid] !== '' ? +a.heures[pid] : null;
+  if (stocke != null && sommeFilieres(orig || {}, cat, pid) == null) return stocke;
+  return sommeFilieres(a, cat, pid);
+}
+/* Filières d'un pôle déclarées sans heures, alors que d'autres en ont : répartition à terminer. */
+export function repartitionIncomplete(a, cat, pid) {
+  const fl = filieresDe(a) || {}, l = Object.entries(fl).filter(([id]) => { const f = cat.find(x => x.id === id); return f && f.pole === pid; });
+  const avec = l.filter(([, v]) => v && v.h !== null && v.h !== undefined && v.h !== '').length;
+  return avec > 0 && avec < l.length;
 }
 /* Les filières déclarées dans un pôle donné. */
 export const filieresDuPoleDe = (a, cat, pid) => Object.keys(filieresDe(a) || {}).map(id => cat.find(x => x.id === id)).filter(f => f && f.pole === pid);
@@ -159,11 +188,10 @@ export const heuresReunion = a => Number.isFinite(+(a || {}).reunionH) ? +a.reun
 /* Fin de contrat d'un AESH : après cette date, il n'est plus là. Vide = toute l'année. */
 export const finContratDe = a => a && RE_DATE.test(a.finContrat || '') ? a.finContrat : '';
 export const contratFini = (a, iso) => { const f = finContratDe(a); return !!f && f < iso; };
-/* Présence élève : les heures en classe. Saisie par le référent ; pour une fiche d'avant, on la déduit du contrat. */
+/* Présence élève : les heures en classe, saisies par le référent. Jamais déduite : vide = « à compléter »
+   (audit D05, 18/09 — décision de Brahim : « présence élève, on la note nous-mêmes »). */
 export function presenceEleve(a) {
-  if (Number.isFinite(+a.presence) && a.presence !== null && a.presence !== '') return +a.presence;
-  const c = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
-  return c == null ? null : Math.round((c - totalServices(a) - heuresReunion(a)) * 100) / 100;
+  return a && a.presence !== null && a.presence !== undefined && a.presence !== '' && Number.isFinite(+a.presence) ? +a.presence : null;
 }
 /* Contrat = présence élève + réunion + services ? Sinon, on le signale (on ne corrige rien tout seul). */
 export function ecartContrat(a) {

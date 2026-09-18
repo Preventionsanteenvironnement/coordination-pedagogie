@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
-import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-18a';
-import * as K from './calculs.js?v=2026-09-18a';
-import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-18a';
+import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-18b';
+import * as K from './calculs.js?v=2026-09-18b';
+import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-18b';
 
 const H0 = 8 * 60, H1 = 18 * 60;
 const GRIS = '#6b7280', LIGNE = '#e3e8ef', ENCRE = '#111827';

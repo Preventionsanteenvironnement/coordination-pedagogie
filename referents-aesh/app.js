@@ -6,9 +6,9 @@
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-18a';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18a';
-import * as AV from './avatars.js?v=2026-09-18a';
+import * as K from './calculs.js?v=2026-09-18b';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18b';
+import * as AV from './avatars.js?v=2026-09-18b';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -19,7 +19,7 @@ const lsEcrit = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } 
 const alea = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = crypto.getRandomValues(new Uint8Array(10)); return [...r].map(x => a[x % 36]).join(''); };
 const avecDelai = p => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('delai'), { code: 'delai' })), DELAI); })]).finally(() => clearTimeout(t)); };
 const typeErreur = e => { const t = `${(e && e.code) || ''} ${(e && e.message) || ''}`; return /permission|insufficient/i.test(t) ? 'refus' : /delai/.test(t) ? 'delai' : 'horsligne'; };
-const messageErreur = e => e && e.code === 'volume' ? 'Non enregistré : fiche trop volumineuse.' : ({ refus: 'Non enregistré : espace pas encore ouvert par la coordination.', delai: 'Pas de réponse du serveur. Vérifiez dans un instant.', horsligne: 'Non enregistré : pas de connexion. Réessayez.' })[typeErreur(e)];
+const messageErreur = e => e && e.code === 'contrat' ? 'Non enregistré : son contrat est déjà terminé à cette date.' : e && e.code === 'volume' ? 'Non enregistré : fiche trop volumineuse.' : ({ refus: 'Non enregistré : espace pas encore ouvert par la coordination.', delai: 'Pas de réponse du serveur. Vérifiez dans un instant.', horsligne: 'Non enregistré : pas de connexion. Réessayez.' })[typeErreur(e)];
 const anneeScolaire = (d = new Date()) => { const y = d.getFullYear(); return d.getMonth() >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`; };
 const nomPole = id => (pole(id) || { nom: id }).nom;
 const heureFr = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const auj = K.isoLocal(), j = K.isoLocal(d); return `${j === auj ? 'aujourd’hui' : K.dateCourte(j)} · ${d.getHours()} h ${K.z2(d.getMinutes())}`; };
@@ -37,7 +37,7 @@ export async function demarrer({ FS, db, erreur }) {
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18a')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18b')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -173,6 +173,29 @@ export async function demarrer({ FS, db, erreur }) {
     return d;
   }
   async function ecrireTout(docs) { for (const d of docs) await ecrire(d); }
+  /* Écriture groupée (audit P01, 18/09) : tous les documents d'une opération — et leurs copies d'historique —
+     partent dans UN seul lot. Une panne au milieu laisse tout inchangé : jamais de placement coupé à moitié. */
+  async function ecrireLot(docs) {
+    const parId = new Map(); (docs || []).forEach(x => { if (x && x.id) parId.set(x.id, x); });
+    const liste = [...parId.values()]; if (!liste.length) return [];
+    if (liste.length === 1 || typeof FS.writeBatch !== 'function') { const out = []; for (const x of liste) out.push(await ecrire(x)); return out; }
+    const maintenant = new Date().toISOString(), prets = [];
+    for (const doc of liste) {
+      const prec = S.docs.get(doc.id);
+      const d = { ...doc, annee: S.annee, version: ((prec && prec.version) || 0) + 1, majLe: maintenant, par: S.session ? S.session.pole : '' };
+      delete d.depart; if (!d.creeLe) d.creeLe = (prec && prec.creeLe) || maintenant;
+      Object.keys(d).forEach(k => { if (d[k] === undefined) delete d[k]; });
+      const contenu = JSON.stringify(d);
+      if (contenu.length > 20000) throw Object.assign(new Error('trop volumineux'), { code: 'volume' });
+      prets.push({ d, hist: { id: 'hist_' + alea(), type: 'hist', annee: S.annee, de: d.id, typeDe: d.type, version: d.version, majLe: maintenant, par: d.par, contenu } });
+    }
+    if (prets.length * 2 > 480) throw Object.assign(new Error('trop d’écritures'), { code: 'volume' });
+    const b = FS.writeBatch(db);
+    prets.forEach(({ d, hist }) => { b.set(FS.doc(db, COLLECTION, hist.id), hist); b.set(FS.doc(db, COLLECTION, d.id), d); });
+    await avecDelai(b.commit());
+    prets.forEach(({ d }) => S.docs.set(d.id, d)); versionDocs++;
+    return prets.map(x => x.d);
+  }
 
   /* ─────────── navigation (flèches du navigateur) ─────────── */
   function aller(e, p = {}, o = {}) {
@@ -188,7 +211,7 @@ export async function demarrer({ FS, db, erreur }) {
   window.addEventListener('popstate', ev => {
     if (S.ignorePop > 0) { S.ignorePop--; if (S.apresPop) { const f = S.apresPop; S.apresPop = null; f(); } return; }
     const st = ev.state;
-    if (S.feuille && !(st && st.f)) { if (S.envoi) { history.pushState({ ...S.route, n: S.n, f: 1 }, ''); return; } S.feuille = null; rendre(); return; }
+    if (S.feuille && !(st && st.f)) { if (S.envoi) { history.pushState({ ...S.route, n: S.n, f: 1 }, ''); return; } restaurerFilieres(S.feuille); S.feuille = null; rendre(); return; }
     S.feuille = null; S.menu = false;
     if (!st || !st.e) { S.route = { e: S.session ? 'accueil' : 'code', p: {} }; S.n = 0; rendre({ haut: true }); return; }
     S.n = st.n || 0;
@@ -351,10 +374,11 @@ export async function demarrer({ FS, db, erreur }) {
   /* Heures encore à répartir sur sa présence élève : ce que les autres référents peuvent encore prendre. */
   function resteAPartir(a) {
     const presence = K.presenceEleve(a); if (presence == null) return null;
-    const fl = K.filieresDe(a) || {};
+    /* Par pôle : les heures des filières quand elles sont toutes saisies, sinon le total déclaré du pôle.
+       Jamais les deux à la fois : pas de double compte (audit D19). */
+    const poles = new Set([...Object.keys(a.equipes || {}), ...Object.keys(K.polesDesFilieres(a, FILIERES, null))]);
     let somme = 0, saisi = false;
-    Object.values(fl).forEach(v => { const h = nombre(v.h); if (h != null) { somme += h; saisi = true; } });
-    Object.entries(a.heures || {}).forEach(([q, h]) => { if (K.heuresDuPole(a, FILIERES, q) == null && nombre(h) != null) { somme += nombre(h); saisi = true; } });
+    poles.forEach(q => { const h = K.heuresPoleSaisie(a, S.form && S.form.orig, FILIERES, q); if (h != null) { somme += h; saisi = true; } });
     const reste = Math.round((presence - somme) * 100) / 100;
     if (!saisi && !reste) return null;
     return { reste, somme, presence,
@@ -707,6 +731,7 @@ export async function demarrer({ FS, db, erreur }) {
     const garde = { ...f };
     S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: `${f.nom} · ${K.JOURS_C[f.j]}`, lignes, bouton: 'Confirmer', retourService: garde, avert: avert.join('\n'),
       travail: async () => {
+        const lot = [];
         for (const id of [...ajout, ...retrait]) {
           const a = idx().aesh.get(id); if (!a) continue;
           const doc = JSON.parse(JSON.stringify(a)); delete doc.depart;
@@ -715,8 +740,9 @@ export async function demarrer({ FS, db, erreur }) {
           if (ajout.includes(id)) { if (!x) { x = { nom: f.nom, h: 1, jours: [] }; serv.push(x); } if (!x.jours.includes(f.j)) x.jours.push(f.j); x.jours.sort(); }
           else if (x) x.jours = x.jours.filter(j => j !== f.j);
           doc.services = serv; doc.dispos = K.disposDe(doc); delete doc.jours; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
-          await ecrire(doc);
+          lot.push(doc);
         }
+        await ecrireLot(lot);
         return {};
       } };
     rendre({ focus: 'cf-oui' });
@@ -767,10 +793,22 @@ export async function demarrer({ FS, db, erreur }) {
     const garde = { ...f }, src = S.edt.classes[f.source], dest = S.edt.classes[f.classe];
     S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: a.sigle, bouton: 'Confirmer', retourDeplacer: garde,
       lignes: [['Libéré par', `PFMP ${src.court}`], ['Placé en', `${dest.court} · ${nomPole(poleDeClasse(f.classe))}`], ['Cours', cours.map(c => `${K.JOURS_C[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} ${c.lib}`).join(' · ')], ['Période', `du ${K.dateCourte(du)} au ${K.dateCourte(au)}`], ['Heures comptées dans', p.nom]],
-      avert: `Après le ${K.dateCourte(au)}, ${a.sigle} retrouve ses cours habituels en ${src.court}.`,
+      avert: [`Après le ${K.dateCourte(finPourAesh(a, au))}, ${a.sigle} retrouve ses cours habituels en ${src.court}.`,
+        K.finContratDe(a) && K.finContratDe(a) < au ? `Son contrat s’arrête le ${K.dateLongue(K.finContratDe(a))} : le placement s’arrêtera là.` : '',
+        poleDeClasse(f.classe) !== p.id ? `${dest.court} est une classe de ${nomPole(poleDeClasse(f.classe))} : un message part à son référent.` : ''].filter(Boolean).join('\n'),
       travail: async () => {
-        for (const c of cours) await ecrire({ id: 'place_' + alea(), type: 'place', aeshId: a.id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: c.d, fin: c.f, sem: c.sem, matiere: c.lib, du, au, statut: 'active' });
-        return { sous: `En ${dest.court} pendant la PFMP de ${src.court}` };
+        /* Même règles que le placement ordinaire (audit D10, 18/09) : fin de contrat respectée, référent de la
+           classe d'arrivée prévenu s'il est d'un autre pôle, et tout part en un seul lot. */
+        const auA = finPourAesh(a, au), lot = [];
+        if (auA < du) throw Object.assign(new Error('contrat terminé'), { code: 'contrat' });
+        cours.forEach(c => lot.push({ id: 'place_' + alea(), type: 'place', aeshId: a.id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: c.d, fin: c.f, sem: c.sem, matiere: c.lib, du, au: auA, statut: 'active' }));
+        const poleDest = poleDeClasse(f.classe);
+        if (poleDest && poleDest !== p.id) {
+          const texte = `@ ${nomPole(poleDest)} — pendant la PFMP de ${src.court}, ${a.sigle} est placé en ${dest.court} : ${cours.map(c => `${K.JOURS_C[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} ${c.lib}`).join(', ')}, du ${K.dateCourte(du)} au ${K.dateCourte(auA)}. C’est d’accord pour vous ?`;
+          lot.push({ id: 'msg_' + alea(), type: 'message', pole: p.id, texte: texte.slice(0, 1000), statut: 'active' });
+        }
+        await ecrireLot(lot);
+        return { sous: `En ${dest.court} pendant la PFMP de ${src.court}${poleDest && poleDest !== p.id ? ` · message envoyé au référent ${nomPole(poleDest)}` : ''}` };
       } };
     rendre({ focus: 'cf-oui' });
   }
@@ -978,7 +1016,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-18a'), F = await import('./fichiers.js?v=2026-09-18a');
+    const X = await import('./exports.js?v=2026-09-18b'), F = await import('./fichiers.js?v=2026-09-18b');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1087,6 +1125,14 @@ export async function demarrer({ FS, db, erreur }) {
   /* ─── « Où intervient X ? » (17/09/2026) ───
      Les filières du lycée, pôle par pôle. Cocher une filière = tous ses niveaux ; on déplie pour
      n'en garder que certaines classes. Rien n'est écrit ici : la fiche enregistre. */
+  /* Remet la fiche comme elle était à l'ouverture de la feuille des filières. Croix, Annuler, Échap et « Précédent »
+     passent tous par ici (audit I01, 18/09) : aucune sortie ne garde un changement non voulu. */
+  function restaurerFilieres(f) {
+    const a = S.form && S.form.a;
+    if (!a || !f || f.type !== 'filieres' || !f.avant) return;
+    a.filieres = f.avant.filieres ? JSON.parse(JSON.stringify(f.avant.filieres)) : undefined; a.rattachement = f.avant.rattachement || undefined;
+    a.equipes = JSON.parse(JSON.stringify(f.avant.equipes)); a.heures = JSON.parse(JSON.stringify(f.avant.heures));
+  }
   function feuilleFilieres(f) {
     const a = S.form && S.form.a;
     if (!a) return `<h2 id="f-titre" tabindex="-1">Fiche fermée</h2><div class="actions"><button type="button" class="btn" data-a="fermer">Fermer</button></div>`;
@@ -1095,6 +1141,7 @@ export async function demarrer({ FS, db, erreur }) {
         <button type="button" class="rond" id="fil-croix" data-a="fil-annuler" aria-label="Fermer sans rien changer" title="Fermer sans rien changer">✕</button></div>
       <p class="sous" style="margin:2px 0 0">Cochez ses filières, avec leurs heures. Une filière cochée, c’est tous ses niveaux.</p></div>
       ${POLES.map(q => `<div style="display:grid;gap:6px"><b style="color:${q.couleur}">${esc(q.nom)}</b>
+        ${K.repartitionIncomplete(a, FILIERES, q.id) && nombre((a.heures || {})[q.id]) != null && K.sommeFilieres((S.form && S.form.orig) || {}, FILIERES, q.id) == null ? `<span class="aide" style="margin:0">${esc(K.fmtH(a.heures[q.id]))} déclarées au total pour ce pôle. Tant que chaque filière cochée n’a pas ses heures, c’est ce total qui compte.</span>` : ''}
         ${filieresDuPole(q.id).map(x => {
           const on = !!fl[x.id], cl = on && Array.isArray(fl[x.id].classes) && fl[x.id].classes.length ? fl[x.id].classes : null, ouvert = f.ouvert === x.id;
           const pasF = (id, val) => `<span class="pas petit"><button type="button" id="pmf-${id}" data-a="fil-pas" data-v="${id}" data-d="-0.5" aria-label="Moins">−</button><input id="pvf-${id}" data-i="fil-h" data-v="${id}" inputmode="decimal" value="${nombre(val) == null ? '' : String(val).replace('.', ',')}" placeholder="—" aria-label="Heures en ${esc(x.nom)}"><button type="button" id="ppf-${id}" data-a="fil-pas" data-v="${id}" data-d="0.5" aria-label="Plus">+</button></span>`;
@@ -1185,8 +1232,14 @@ export async function demarrer({ FS, db, erreur }) {
           if (diff((orig.equipes || {})[q], (a.equipes || {})[q])) { if ((a.equipes || {})[q] == null) delete doc.equipes[q]; else doc.equipes[q] = a.equipes[q]; }
           if (diff(nombre((orig.heures || {})[q]), nombre((a.heures || {})[q]))) { if (nombre((a.heures || {})[q]) == null) delete doc.heures[q]; else doc.heures[q] = a.heures[q]; }
         });
-        if (diff(orig.services, a.services)) doc.services = a.services;
-        if (JSON.stringify(K.disposDe(orig)) !== JSON.stringify(K.disposDe(a))) doc.dispos = K.disposDe(a);
+        /* Services fusionnés un par un, par nom (audit C02, 18/09) : un service ajouté par un collègue est conservé. */
+        { const parNom = l => Object.fromEntries((l || []).map(x => [x.nom, x])), o = parNom(orig.services), n = parNom(a.services), r = parNom(K.servicesDe(recent));
+          [...new Set([...Object.keys(o), ...Object.keys(n)])].forEach(nom => { if (diff(o[nom], n[nom])) { if (n[nom]) r[nom] = n[nom]; else delete r[nom]; } });
+          doc.services = Object.values(r); }
+        /* Demi-journées fusionnées une par une (audit C02) : le vendredi changé par un collègue n'est pas écrasé. */
+        { const o = K.disposDe(orig), n = K.disposDe(a), r = { ...K.disposDe(recent) };
+          [...new Set([...Object.keys(o), ...Object.keys(n)])].forEach(k => { if (o[k] !== n[k]) { if (n[k]) r[k] = n[k]; else delete r[k]; } });
+          doc.dispos = r; }
         if (diff(orig.reunion, a.reunion)) doc.reunion = a.reunion;
         /* B01 : les filières se fusionnent une par une, comme les pôles — un autre référent a pu en ajouter entre-temps. */
         doc.filieres = { ...(K.filieresDe(recent) || filieresParDefaut(recent)) };
@@ -1206,7 +1259,7 @@ export async function demarrer({ FS, db, erreur }) {
       if (doc.equipes[doc.rattachement] == null) doc.rattachement = p.id;
       doc.heures = Object.fromEntries(Object.entries(doc.heures || {}).filter(([, v]) => nombre(v) != null).map(([k, v]) => [k, +v]));
       /* Les heures des filières font foi ; un pôle dont aucune filière n'a d'heures garde son total d'avant. */
-      POLES.forEach(q => { const h = K.heuresDuPole(doc, FILIERES, q.id); if (h != null) doc.heures[q.id] = h; else if (doc.equipes[q.id] == null) delete doc.heures[q.id]; });
+      POLES.forEach(q => { const h = K.heuresPoleSaisie(doc, f.orig, FILIERES, q.id); if (h != null) doc.heures[q.id] = h; else if (doc.equipes[q.id] == null) delete doc.heures[q.id]; });
       /* Qui a rempli les trois champs partagés : l'autre référent doit savoir qu'ils sont déjà posés. */
       { const au = { ...(doc.auteurs || {}) }, ref = f.orig || {};
         if (nombre(ref.contrat) !== nombre(a.contrat)) au.contrat = p.id;
@@ -1219,7 +1272,7 @@ export async function demarrer({ FS, db, erreur }) {
       doc.finContrat = K.RE_DATE.test(doc.finContrat || '') ? doc.finContrat : '';
       if (!doc.finContrat) delete doc.finContrat;
       if (doc.presence == null) delete doc.presence;
-      doc.reunionH = borne(doc.reunionH);
+      doc.reunionH = borne(doc.reunionH); if (doc.reunionH != null) doc.reunionH = Math.min(20, doc.reunionH);
       if (doc.reunionH == null) delete doc.reunionH;
       doc.heures = Object.fromEntries(Object.entries(doc.heures).map(([k, v]) => [k, borne(v)]).filter(([, v]) => v != null));
       doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h), jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => j >= 0 && j <= 4))].sort() : [] }));
@@ -1250,35 +1303,35 @@ export async function demarrer({ FS, db, erreur }) {
      tout ce qui coince est réuni dans « Vous confirmez ? », et le référent décide.
      Un AESH déjà pris ailleurs n'est pas dédoublé : on propose de le déplacer pour la période. */
 
-  /* Libère un placement sur [du, au] sans rien effacer : il s'arrête avant, reprend après. */
-  async function libererPlacement(x, du, au) {
-    if (x.du >= du && x.au <= au) { await ecrire({ ...x, statut: 'retire' }); return; }
+  /* Libère un placement sur [du, au] sans rien effacer : il s'arrête avant, reprend après.
+     Renvoie les documents à écrire — ils partent avec le reste de l'opération, dans le même lot. */
+  function morceauxLiberes(x, du, au) {
+    if (x.du >= du && x.au <= au) return [{ ...x, statut: 'retire' }];
     if (x.du < du && x.au > au) {
-      await ecrire({ ...x, au: K.ajoute(du, -1) });
       const suite = { ...x, id: 'place_' + alea(), du: K.ajoute(au, 1) };
       delete suite.version; delete suite.creeLe; delete suite.majLe; delete suite.par;
-      await ecrire(suite); return;
+      return [{ ...x, au: K.ajoute(du, -1) }, suite];
     }
-    if (x.du < du) { await ecrire({ ...x, au: K.ajoute(du, -1) }); return; }
-    await ecrire({ ...x, du: K.ajoute(au, 1) });
+    if (x.du < du) return [{ ...x, au: K.ajoute(du, -1) }];
+    return [{ ...x, du: K.ajoute(au, 1) }];
   }
-  /* Ajoute la classe (et sa filière) à la fiche de l'AESH. Renvoie le texte de l'info, ou rien si c'était déjà prévu. */
-  async function ajouterClasseAFiche(aeshId, classe) {
+  /* Ajoute la classe (et sa filière) à la fiche de l'AESH. Renvoie { doc, info } à écrire avec le reste, ou null si
+     c'était déjà prévu. Les heures de la filière sont conservées (audit D04, 18/09). */
+  function ficheAvecClasse(aeshId, classe) {
     const a = idx().aesh.get(aeshId), g = filiereDeClasse(classe);
-    if (!a || !g) return '';
+    if (!a || !g) return null;
     const doc = JSON.parse(JSON.stringify(a)); delete doc.depart;
     doc.filieres = { ...(K.filieresDe(doc) || filieresParDefaut(doc)) };
     const cur = doc.filieres[g.id];
-    if (!cur) doc.filieres[g.id] = { classes: [classe] };
+    if (!cur) doc.filieres[g.id] = { classes: [classe], h: null };
     else if (Array.isArray(cur.classes) && cur.classes.length) {
-      if (cur.classes.includes(classe)) return '';
-      doc.filieres[g.id] = { classes: g.classes.filter(n => cur.classes.includes(n) || n === classe) };
-    } else return '';
+      if (cur.classes.includes(classe)) return null;
+      doc.filieres[g.id] = { ...cur, classes: g.classes.filter(n => cur.classes.includes(n) || n === classe) };
+    } else return null;
     doc.rattachement = rattachementDe(doc);
     doc.equipes = { ...(doc.equipes || {}) };     /* une part déjà déclarée (0,5) n'est jamais écrasée */
     Object.keys(K.polesDesFilieres(doc, FILIERES, doc.rattachement)).forEach(q => { if (doc.equipes[q] == null) doc.equipes[q] = 1; });
-    await ecrire(doc);
-    return `Fiche de ${a.sigle} : ${S.edt.classes[classe].court} ajouté`;
+    return { doc, info: `Fiche de ${a.sigle} : ${S.edt.classes[classe].court} ajouté` };
   }
 
   function validerPlacer() {
@@ -1326,25 +1379,33 @@ export async function demarrer({ FS, db, erreur }) {
       /* Coché d'office pour VOS placements ; décoché quand le cours appartient à un autre pôle : on ne défait pas le travail d'un collègue sans le vouloir. */
       bascule: aLiberer.length ? { on: aLiberer.every(x => x.place.pole === p.id), label: `Le retirer de l’autre cours du ${K.dateCourte(du)} au ${K.dateCourte(au)}${aLiberer.some(x => x.place.pole !== p.id) ? ` (placement de ${nomPole(aLiberer.find(x => x.place.pole !== p.id).place.pole)})` : ''}` } : null,
       travail: async () => {
+        /* Tout est préparé d'abord, puis écrit en UN lot (audit P01) : placements, coupures, fiches, messages.
+           Une panne laisse tout comme avant — plus de placement raccourci sans sa suite. */
         const deplacer = !!(S.feuille && S.feuille.bascule && S.feuille.bascule.on);
-        if (deplacer) for (const x of aLiberer) await libererPlacement(x.place, du, au);
-        const infos = [];
-        for (const id of aRegler) { const t = await ajouterClasseAFiche(id, nom); if (t) infos.push(t); }
-        for (const id of ajout) {
+        const lot = [], infos = [];
+        if (deplacer) aLiberer.forEach(x => lot.push(...morceauxLiberes(x.place, du, au)));
+        aRegler.forEach(id => { const r = ficheAvecClasse(id, nom); if (r) { lot.push(r.doc); infos.push(r.info); } });
+        const placesFinales = [];
+        ajout.forEach(id => {
           const h = f.horaires[id] || { debut: c.d, fin: c.f };
           const auA = finPourAesh(I.aesh.get(id) || {}, au);
+          if (auA < du) return;                                    /* contrat déjà terminé à cette date */
           const d = { id: 'place_' + alea(), type: 'place', aeshId: id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: h.debut, fin: h.fin, sem: c.sem, matiere: c.lib, du, au: auA, statut: 'active' };
-          await ecrire(d);
-        }
-        for (const id of modifH) { const h = f.horaires[id] || { debut: c.d, fin: c.f }; for (const x of I.places.filter(x => x.aeshId === id && x.coursId === c.id && x.au >= du)) await ecrire({ ...x, debut: h.debut, fin: h.fin }); }
-        for (const id of retrait) for (const x of I.places.filter(x => x.aeshId === id && x.coursId === c.id && x.au >= du)) await ecrire(x.du >= du ? { ...x, statut: 'retire' } : { ...x, au: K.ajoute(du, -1) });
-        S.flash = c.id; setTimeout(() => { S.flash = null; }, 2600);
-        for (const q of aPrevenir) {
-          const qui = ajout.filter(id => rattachementDe(I.aesh.get(id) || {}) === q).map(sig).join(', ');
-          const texte = `@ ${nomPole(q)} — ${qui} ${ajout.length > 1 ? 'sont placés' : 'est placé'} en ${c.cls.map(n => S.edt.classes[n].court).join(' + ')}, ${K.JOURS[c.j].toLowerCase()} ${K.hFr(c.d)}–${K.hFr(c.f)} (${c.lib}), du ${K.dateCourte(du)} au ${K.dateCourte(au)}. C’est d’accord pour vous ?`;
-          await ecrire({ id: 'msg_' + alea(), type: 'message', pole: p.id, texte: texte.slice(0, 1000), statut: 'active' });
+          lot.push(d); placesFinales.push(d);
+        });
+        modifH.forEach(id => { const h = f.horaires[id] || { debut: c.d, fin: c.f }; I.places.filter(x => x.aeshId === id && x.coursId === c.id && x.au >= du).forEach(x => lot.push({ ...x, debut: h.debut, fin: h.fin })); });
+        retrait.forEach(id => I.places.filter(x => x.aeshId === id && x.coursId === c.id && x.au >= du).forEach(x => lot.push(x.du >= du ? { ...x, statut: 'retire' } : { ...x, au: K.ajoute(du, -1) })));
+        /* Le message reprend les placements réellement enregistrés : horaire et fin propres à chacun (audit D16). */
+        aPrevenir.forEach(q => {
+          const siens = placesFinales.filter(d => rattachementDe(I.aesh.get(d.aeshId) || {}) === q);
+          if (!siens.length) return;
+          const detail = siens.map(d => `${sig(d.aeshId)} (${K.hFr(d.debut)}–${K.hFr(d.fin)}, jusqu’au ${K.dateCourte(d.au)})`).join(', ');
+          const texte = `@ ${nomPole(q)} — ${detail} ${siens.length > 1 ? 'sont placés' : 'est placé'} en ${c.cls.map(n => S.edt.classes[n].court).join(' + ')}, ${K.JOURS[c.j].toLowerCase()} (${c.lib}), à partir du ${K.dateCourte(du)}. C’est d’accord pour vous ?`;
+          lot.push({ id: 'msg_' + alea(), type: 'message', pole: p.id, texte: texte.slice(0, 1000), statut: 'active' });
           infos.push(`Message envoyé au référent ${nomPole(q)}`);
-        }
+        });
+        await ecrireLot(lot);
+        S.flash = c.id; setTimeout(() => { S.flash = null; }, 2600);
         if (infos.length) setTimeout(() => toast(infos.join(' · ')), 1500);
         return {};
       } };
@@ -1374,7 +1435,7 @@ export async function demarrer({ FS, db, erreur }) {
         /* Pas de nouveau rendu à chaque appui : des appuis rapides ne doivent jamais se perdre. */
         const f = S.form, k = v, [genre, cle] = k.includes(':') ? k.split(':') : [k, ''];
         const cur = genre === 'pole' ? nombre(f.a.heures[cle]) : genre === 'serv' ? nombre((f.a.services[+cle] || {}).h) : nombre(f.a[k]);
-        const n = Math.max(0, Math.min(40, Math.round(((cur || 0) + (+b.dataset.d)) * 2) / 2));
+        const n = Math.max(0, Math.min(k === 'reunionH' ? 20 : 40, Math.round(((cur || 0) + (+b.dataset.d)) * 2) / 2));
         if (genre === 'pole') f.a.heures[cle] = n; else if (genre === 'serv') f.a.services[+cle].h = n; else f.a[k] = n;
         const inp = document.getElementById('pv-' + k.replace(':', '-')); if (inp) inp.value = String(n).replace('.', ',');
         const champ = b.closest('.champ'); if (champ) champ.classList.add('modif');
@@ -1398,10 +1459,7 @@ export async function demarrer({ FS, db, erreur }) {
         rendre({ focus: 'cf-oui' }); return; }
       case 'filieres': { const a = S.form && S.form.a; if (!a) return;
         ouvrir({ type: 'filieres', ouvert: null, avant: JSON.parse(JSON.stringify({ filieres: a.filieres || null, rattachement: a.rattachement || null, equipes: a.equipes || {}, heures: a.heures || {} })) }); return; }
-      case 'fil-annuler': { const f = S.feuille, a = S.form && S.form.a;
-        if (a && f && f.avant) { a.filieres = f.avant.filieres ? JSON.parse(JSON.stringify(f.avant.filieres)) : undefined; a.rattachement = f.avant.rattachement || undefined;
-          a.equipes = JSON.parse(JSON.stringify(f.avant.equipes)); a.heures = JSON.parse(JSON.stringify(f.avant.heures)); }
-        fermer(); return; }
+      case 'fil-annuler': restaurerFilieres(S.feuille); fermer(); return;
       case 'fil-toggle': {
         const f = S.form, a = f && f.a, x = filiere(v); if (!a || !x) return;
         a.filieres = { ...(a.filieres || {}) };
@@ -1563,7 +1621,7 @@ export async function demarrer({ FS, db, erreur }) {
     const t = ev.target, k = t.dataset && t.dataset.i;
     if (!k) return;
     const f = S.form;
-    if (!f && !['per-au', 'msg', 'signature', 'pt-texte', 'pf-du', 'pf-au'].includes(k)) return;
+    if (!f && !['per-au', 'per-edt-date', 'ph-debut', 'ph-fin', 'msg', 'signature', 'pt-texte', 'pf-du', 'pf-au'].includes(k)) return;
     if (k === 'recherche') { f.recherche = t.value; rendre({ focus: t.id }); return; }
     if (k === 'sigle') { f.a.sigle = t.value; const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false; const ch = t.closest('.champ'); if (ch) ch.classList.add('modif'); return; }
     if (k === 'serv-nom') { const i = +t.dataset.v, x = f.a.services[i]; if (x) { x.nom = t.value === 'Autre' ? '' : t.value; rendre({ focus: t.value === 'Autre' ? undefined : t.id }); if (t.value === 'Autre') { const inp = document.querySelector(`[data-i="serv-lib"][data-v="${i}"]`); if (inp) inp.focus(); } } return; }
@@ -1578,7 +1636,7 @@ export async function demarrer({ FS, db, erreur }) {
     if (k === 'nb') {
       /* Aucun nouveau rendu ici : la perte du focus (clic sur « Enregistrer ») ne doit pas avaler le clic. */
       const v = t.value.trim().replace(',', '.'); let n = v === '' ? null : Number(v); if (v !== '' && !Number.isFinite(n)) return;
-      if (n != null) { n = Math.max(0, Math.min(45, Math.round(n * 2) / 2)); const aff = String(n).replace('.', ','); if (t.value.trim() !== aff && ev.type === 'change') t.value = aff; }
+      if (n != null) { n = Math.max(0, Math.min(t.dataset.v === 'reunionH' ? 20 : 45, Math.round(n * 2) / 2)); const aff = String(n).replace('.', ','); if (t.value.trim() !== aff && ev.type === 'change') t.value = aff; }
       { const [genre, cle] = String(t.dataset.v).includes(':') ? t.dataset.v.split(':') : [t.dataset.v, '']; if (genre === 'pole') f.a.heures[cle] = n; else if (genre === 'serv') f.a.services[+cle].h = n; else f.a[t.dataset.v] = n; }
       const champ = t.closest('.champ'); if (champ) champ.classList.add('modif');
       const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false;
@@ -1612,7 +1670,7 @@ export async function demarrer({ FS, db, erreur }) {
   racine.addEventListener('keydown', ev => {
     if (ev.key === 'Enter' && ev.target.tagName === 'TR' && ev.target.dataset.a) { ev.target.click(); return; }
     if (ev.key === 'Enter' && ev.target.id === 'msg-txt' && (ev.metaKey || ev.ctrlKey)) { const b = document.getElementById('msg-envoyer'); if (b && !b.disabled) b.click(); return; }
-    if (ev.key === 'Escape') { if (S.menu) { S.menu = false; rendre(); } else if (S.feuille && !S.envoi) { if (S.feuille.type === 'confirmer' && S.feuille.retourPlacer) { S.feuille = S.feuille.retourPlacer; rendre(); } else fermer(); } }
+    if (ev.key === 'Escape') { if (S.menu) { S.menu = false; rendre(); } else if (S.feuille && !S.envoi) { if (S.feuille.type === 'confirmer' && S.feuille.retourPlacer) { S.feuille = S.feuille.retourPlacer; rendre(); } else { restaurerFilieres(S.feuille); fermer(); } } }
   });
   document.addEventListener('keydown', ev => { if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return; if ((S.route.e === 'code' || !S.session) && S.route.e !== 'humeur' && /^[0-9]$/.test(ev.key)) tapeCode(ev.key); else if (S.route.e === 'code' && ev.key === 'Backspace') tapeCode('⌫'); });
   document.addEventListener('click', ev => { if (S.menu && !ev.target.closest('.menu') && !ev.target.closest('#t-menu')) { S.menu = false; rendre(); } }, true);
