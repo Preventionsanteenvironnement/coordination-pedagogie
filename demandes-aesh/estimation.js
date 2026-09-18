@@ -602,7 +602,7 @@ export function creerEstimation(ctx) {
       fermerFeuille();
       if (statut === 'retire') { S.recap = null; toast('Estimation retirée'); }
       else if (rc) { S.recap = { ...rc, mode: 'fait' }; S.focus = 'r-titre'; dessiner(); annonce && annonce('Enregistré'); clearTimeout(recapTimer); recapTimer = setTimeout(fermerRecap, 2000); }
-      else { S.recap = null; toast('✓ Enregistré'); }
+      else { S.recap = null; S.flash = cr.cle; S.focus = 'cr-' + slug(cr.cle); setTimeout(() => { if (S.flash === cr.cle) { S.flash = null; } }, 2200); dessiner(); toast('✓ Enregistré'); }
     } catch (e) {
       S.envoi = false; S.recap = null;
       const t = String((e && (e.code || e.message)) || e);
@@ -635,7 +635,9 @@ export function creerEstimation(ctx) {
       if (a === 'ab') { S.f[v] = !S.f[v]; S.focus = b.id; dessiner(); return; }
       if (a === 'mod-per') { S.f.modPer = true; S.focus = 'f-au'; dessiner(); return; }
       if (a === 'mod-h') { S.f.modH = true; S.focus = 'f-hd'; dessiner(); return; }
-      if (a === 'enregistrer') { S.recap = recapDe('confirmer'); S.focus = 'r-oui'; dessiner(); return; }
+      /* 18/09 (retour d'un collègue, accord de Brahim) : plus de « Vous confirmez ? » à chaque cours — on enregistre
+         directement ; la vérification se fait une fois, à la validation de la classe (récapitulatif). Le retrait garde sa confirmation. */
+      if (a === 'enregistrer') { const k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel); if (cr && !S.envoi) { S.recap = null; ecrire(k, cr, 'active'); } return; }
       if (a === 'retirer') { S.recap = recapDe('retirer'); S.focus = 'r-oui'; dessiner(); return; }
       if (a === 'recap-non') { const m = S.recap && S.recap.mode; S.recap = null; S.focus = m === 'retirer' ? 'f-retirer' : 'f-enregistrer'; dessiner(); return; }
       if (a === 'recap-oui') { const m = S.recap && S.recap.mode, k = classeDe(S.classe), cr = k && k.creneaux.find(x => x.cle === S.sel); if (cr && (m === 'confirmer' || m === 'retirer')) ecrire(k, cr, m === 'retirer' ? 'retire' : 'active'); return; }
