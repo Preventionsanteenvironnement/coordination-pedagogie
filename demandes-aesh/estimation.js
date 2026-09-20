@@ -236,6 +236,7 @@ const CSS = `
 .e6-cours .p.n0{border-color:var(--ink-2);color:var(--ink)}.e6-cours .p.n1{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok-ink)}
 .e6-cours .p.n2{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn-ink)}.e6-cours .p.n3{background:var(--err-bg);border-color:var(--err-line);color:var(--err-ink)}
 .e6-bas{position:sticky;bottom:0;z-index:15;margin-top:18px;padding:10px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 30%)}
+.e6-onglets.bas{margin:0 0 8px;background:var(--card-2);box-shadow:0 0 0 6px var(--bg)}
 .e6-ov{position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center}
 @media(min-width:680px){.e6-ov{align-items:center;padding:20px}}
 .e6-feuille{background:var(--card);color:var(--ink);width:100%;max-width:440px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:12px 20px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.25)}
@@ -479,7 +480,13 @@ export function creerEstimation(ctx) {
           <span class="p ${cls}">${!d ? '+' : mien ? `${d.nb} AESH` : '✓'}</span></button>`;
       });
     });
-    return h + `<div class="e6-bas"><button type="button" class="e6-btn" id="e6-valider-classe" data-e="valider-classe">Valider ${esc(courtDe(k))}</button></div>`;
+    /* Le rappel de la semaine, resté sous la main : la barre du bas est colante, on perd
+       donc moins le fil en faisant défiler une longue liste de cours. Mêmes boutons qu'en
+       haut — même `data-e`, ids distincts pour ne pas doubler un identifiant. */
+    const ongletsBas = c.avecParite
+      ? `<div class="e6-onglets bas" role="group" aria-label="Semaine">${['A', 'B'].map(s => `<button type="button" id="sem-bas-${s}" data-e="sem" data-v="${s}" aria-pressed="${S.sem === s}">Semaine ${s}</button>`).join('')}</div>`
+      : '';
+    return h + `<div class="e6-bas">${ongletsBas}<button type="button" class="e6-btn" id="e6-valider-classe" data-e="valider-classe">Valider ${esc(courtDe(k))}</button></div>`;
   }
   function feuilleValidation() {
     const k = classeDe(S.valid); if (!k) { S.valid = null; return ''; }
