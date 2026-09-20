@@ -125,6 +125,10 @@ main{max-width:960px;margin:0 auto;padding:16px 14px calc(env(safe-area-inset-bo
 .sect{margin:26px 0 11px;display:flex;align-items:baseline;gap:9px}
 .sect h3{font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);font-weight:700}
 .sect em{font-style:normal;font-size:.76rem;color:var(--faint);margin-left:auto}
+.sect .plus{margin-left:11px;border:1.5px solid var(--line);background:var(--card);border-radius:var(--pill);
+  padding:7px 14px;font-size:.76rem;font-weight:700;color:var(--brand-d);min-height:38px;cursor:pointer}
+.sect .plus:hover{border-color:var(--brand)}
+[hidden]{display:none!important}
 
 .grid-cl{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:11px}
 .cl{background:var(--card);border:1px solid var(--line);border-radius:var(--r-m);padding:14px 14px 13px;
@@ -583,11 +587,14 @@ function codeAutorise(c){
   if(ACCES.size===0) return null;      // aucune liste : on n'enferme personne dehors
   return ACCES.has(normCode(c));
 }
-/* Ce que voit la personne connectée. La coordination voit tout ; une AESH PSR ou MELEC,
-   les classes de son secteur ; une autre AESH, les classes choisies pour elle ;
-   sans précision, toutes les classes. */
+/* Toutes les classes de l'établissement. Personne n'est enfermé dans son pôle : une AESH
+   peut se retrouver dans le cours d'un élève d'une autre filière, et son regard compte aussi.
+   Ce qui suit ne retire donc plus rien — il met en avant. */
+function toutesClasses(){ return ROSTER?ROSTER.classes:[]; }
+/* Les classes de la personne connectée : celles choisies pour elle, sinon celles de son
+   secteur. Elles s'affichent en premier ; les autres restent à un bouton. */
 function mesClasses(){
-  const toutes=ROSTER?ROSTER.classes:[], p=profil(moi);
+  const toutes=toutesClasses(), p=profil(moi);
   if(!p||p.coordo) return toutes;
   if(p.classes){ const l=toutes.filter(c=>p.classes.includes(c.nom)); if(l.length) return l; }
   if(p.section){ const l=toutes.filter(c=>String(c.section||'').toUpperCase()===p.section); if(l.length) return l; }
@@ -907,7 +914,16 @@ function allerClasses(){
   cleCourante='classes';
   vue='classes'; classeCour=null; eleveCour=''; matiereCour=''; stopFlux();
   tete('Les classes','Choisissez la classe où vous intervenez');
-  const rec=recentsClasses(), cls=mesClasses(), toutes=cls.length>=ROSTER.classes.length;
+  const rec=recentsClasses();
+  /* Les siennes d'abord, toutes les autres juste en dessous — un seul tableau d'index. */
+  const prio=mesClasses(), tout=toutesClasses();
+  const dejaLa=new Set(prio.map(c=>c.nom));
+  const autres=tout.filter(c=>!dejaLa.has(c.nom));
+  const cls=prio.concat(autres);
+  const carte=(l,base)=>l.map((c,i)=>'<button class="cl" data-cl="'+(base+i)+'">'
+      +'<i class="bar" style="background:'+teinte(c)+'"></i>'
+      +'<b>'+esc(c.affiche)+'</b><span>'+esc(c.label)+'</span>'
+      +'<span class="n">'+c.codes.length+' élèves</span></button>').join('');
   $('#vue').innerHTML=
    '<section class="hero"><span class="kicker">GEVA-Sco</span>'
    +'<h2>Ce que vous voyez aujourd\'hui remplira la grille de demain</h2>'
@@ -916,17 +932,27 @@ function allerClasses(){
      +rec.map(n=>{const c=cls.find(x=>x.nom===n);
         return c?'<button class="chip" data-rc="'+esc(c.nom)+'">'+esc(c.affiche)+'</button>':''}).join('')
      +'</div>':'')
-   +'<div class="sect"><h3>'+(toutes?'Toutes les classes':'Mes classes')+'</h3><em>'+cls.length+' classe'+(cls.length>1?'s':'')+'</em></div>'
-   +'<div class="grid-cl">'
-   +cls.map((c,i)=>'<button class="cl" data-cl="'+i+'">'
-      +'<i class="bar" style="background:'+teinte(c)+'"></i>'
-      +'<b>'+esc(c.affiche)+'</b><span>'+esc(c.label)+'</span>'
-      +'<span class="n">'+c.codes.length+' élèves</span></button>').join('')
-   +'</div>'
+   +'<div class="sect"><h3>'+(autres.length?'Vos classes':'Toutes les classes')+'</h3><em>'+prio.length+' classe'+(prio.length>1?'s':'')+'</em></div>'
+   +'<div class="grid-cl">'+carte(prio,0)+'</div>'
+   +(autres.length
+     ?'<div class="sect"><h3>Les autres classes</h3><em>'+autres.length+'</em>'
+       +'<button class="plus" id="a-autres" aria-expanded="false" aria-controls="bloc-autres">Afficher</button></div>'
+       +'<div id="bloc-autres" hidden>'
+       +'<p class="nf-aide">Si vous accompagnez un élève d\'une autre classe, observez-le ici : <b>votre regard s\'ajoute</b> à ceux de vos collègues.</p>'
+       +'<div class="grid-cl">'+carte(autres,prio.length)+'</div></div>'
+     :'')
    +'<div class="actions idee"><button class="act" id="a-idee"><span class="em">💡</span><span><b>Une idée pour améliorer l\'application ?</b><span>Écrivez-la : elle arrive directement à la coordination</span></span></button></div>'
    +'<p class="note-rgpd"><b>Rien de nominatif.</b> Les élèves sont désignés par un code de suivi, qui ne sert qu\'ici. Votre nom n\'apparaît nulle part : seul votre code à quatre chiffres accompagne vos observations, pour que la coordination sache qui a observé.</p>'
    +'<div class="hors" id="hors"></div>';
   document.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>allerEleves(cls[+b.dataset.cl]));
+  const plus=$('#a-autres');
+  if(plus) plus.onclick=()=>{
+    const bloc=$('#bloc-autres'), ouvert=!bloc.hidden;
+    bloc.hidden=ouvert;
+    plus.textContent=ouvert?'Afficher':'Masquer';
+    plus.setAttribute('aria-expanded',String(!ouvert));
+    if(!ouvert) bloc.scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
   $('#a-idee').onclick=feuilleSuggestion;
   document.querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>{
     const c=cls.find(x=>x.nom===b.dataset.rc); if(c) allerEleves(c);
