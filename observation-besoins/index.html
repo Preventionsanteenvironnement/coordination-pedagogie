@@ -219,6 +219,15 @@ main{max-width:960px;margin:0 auto;padding:16px 14px calc(env(safe-area-inset-bo
 .acti .tx{flex:1;min-width:0}
 .acti b{display:block;font-size:.9rem;font-weight:650;line-height:1.35}
 .acti span{display:block;font-size:.74rem;color:var(--faint);margin-top:2px;line-height:1.35}
+.regards{background:var(--card);border:1px solid var(--line);border-radius:var(--r-m);padding:11px 13px;margin:0 0 15px}
+.regards h4{margin:0 0 7px;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:700}
+.regards ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.regards li{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--faint);line-height:1.35}
+.regards li b{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:.72rem;font-weight:800}
+.regards li .qui{color:var(--ink);font-weight:650}
+.regards .apres{margin:8px 0 0;font-size:.74rem;color:var(--faint)}
+.acti .nb{display:block;font-size:.72rem;color:var(--brand);font-weight:700;margin-top:3px}
+
 .cotp{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
   font-weight:800;font-size:.82rem;font-family:"Bricolage Grotesque",sans-serif}
 .cotp.vide{background:var(--card-3);color:var(--faint);font-size:.95rem}
@@ -1386,8 +1395,9 @@ function feuilleRubriques(){
   document.querySelectorAll('[data-rub]').forEach(b=>b.onclick=()=>feuilleActivites(b.dataset.rub));
 }
 function feuilleActivites(rubId){
-  const r=RUBRIQUES.find(x=>x.id===rubId), derniere={};
+  const r=RUBRIQUES.find(x=>x.id===rubId), derniere={}, compte={};
   toutesObs().filter(o=>o.type==='activite').forEach(o=>{
+    compte[o.activiteId]=(compte[o.activiteId]||0)+1;
     const p=derniere[o.activiteId];
     if(!p||String(o.creeLe||'')>String(p.creeLe||'')) derniere[o.activiteId]=o;
   });
@@ -1395,8 +1405,11 @@ function feuilleActivites(rubId){
     titre:r.em+' '+esc(r.court), sous:"Quelle activité avez-vous observée ?",
     corps:r.items.map(it=>{
       const d=derniere[it.id], cot=d?d.cotation:null;
+      /* Combien de regards se sont posés sur cette activité : chacun compte, aucun n'efface l'autre. */
+      const nb=compte[it.id]||0;
       return '<button class="acti" data-act="'+it.id+'">'
-        +'<span class="tx"><b>'+esc(it.t)+'</b><span>'+esc(it.a)+'</span></span>'
+        +'<span class="tx"><b>'+esc(it.t)+'</b><span>'+esc(it.a)+'</span>'
+        +(nb>1?'<span class="nb">'+nb+' regards</span>':'')+'</span>'
         +'<span class="cotp '+(cot?'cot-'+cot:'vide')+'">'+(cot?esc(cot):'+')+'</span></button>';
     }).join(''),
     pied:'<button class="btn ghost full" id="f-back">← Les domaines</button>',
@@ -1420,9 +1433,23 @@ function feuilleSaisie(actId, existante){
   const chipsOb=(OBS_RUB[r.id]||[]).concat(OBS_COMMUNS);
   const chipsAp=(APP_RUB[r.id]||[]).concat(APP_COMMUNS);
   const cd = b.cotation==='C'||b.cotation==='D';
+  /* Ce que d'autres ont déjà noté sur cette activité. On ne remplace personne : un élève
+     peut être autonome en atelier et pas en maths, et les deux regards sont justes. */
+  const deja=toutesObs()
+    .filter(o=>o.type==='activite'&&o.activiteId===actId&&o.cotation&&(!existante||o.id!==existante.id))
+    .sort((x,y)=>String(y.creeLe||'').localeCompare(String(x.creeLe||'')))
+    .slice(0,6);
+  const blocDeja = deja.length
+    ? '<div class="regards"><h4>Déjà noté pour cette activité</h4><ul>'
+      +deja.map(o=>'<li><b class="cot-'+esc(o.cotation)+'">'+esc(o.cotation)+'</b>'
+        +'<span><span class="qui">'+(o.aeshCode===moi?'Vous':'AESH '+esc(o.aeshCode||'····'))+'</span>'
+        +(o.matiere?' · '+esc(o.matiere):'')+(o.date?' · '+esc(joli(o.date)):'')+'</span></li>').join('')
+      +'</ul><p class="apres">Votre observation s\'ajoute à celles-ci : elle n\'en efface aucune.</p></div>'
+    : '';
   ouvre({
     titre:esc(it.t), sous:it.a,
-    corps:'<label class="lab" style="margin-top:0">Comment ça s\'est passé ?</label>'
+    corps: blocDeja
+      +'<label class="lab" style="margin-top:0">Comment ça s\'est passé ?</label>'
       +'<div class="echelle" id="ech">'
       +COT.map(c=>'<button class="ech" data-v="'+c.v+'" aria-pressed="'+(b.cotation===c.v)+'"><b>'+c.v+'</b><span>'+esc(c.mot)+'</span></button>').join('')
       +'</div>'
