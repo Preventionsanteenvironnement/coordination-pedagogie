@@ -6,9 +6,9 @@
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-18e';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-18e';
-import * as AV from './avatars.js?v=2026-09-18e';
+import * as K from './calculs.js?v=2026-09-20a';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-20a';
+import * as AV from './avatars.js?v=2026-09-20a';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -37,7 +37,7 @@ export async function demarrer({ FS, db, erreur }) {
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-18e')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-20a')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -907,7 +907,9 @@ export async function demarrer({ FS, db, erreur }) {
       ${h ? `<select data-i="ph-debut" data-v="${esc(id)}" aria-label="De">${pasH.slice(0, -1).map(x => `<option value="${x}" ${x === h.debut ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted">à</span><select data-i="ph-fin" data-v="${esc(id)}" aria-label="À">${pasH.slice(1).map(x => `<option value="${x}" ${x === h.fin ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted" style="font-size:.85rem">le reste de son temps reste libre</span>` : ''}</div>`; }).join('')}</div>` : '';
     const modifHoraire = f.choisis.some(id => dejaIci.has(id) && JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
     return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}`) + `
-      ${bes ? `<div class="bandeau info">Estimé par les enseignants : <b>${bes.nb === 0 ? 'aucun AESH' : bes.nb + ' AESH'}</b>${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.au ? ` · jusqu’au ${K.jjmm(bes.au)}` : ''}${bes.majLe ? ` <span class="muted">· mis à jour le ${esc(K.dateCourte(String(bes.majLe).slice(0, 10)))}</span>` : ''}</div>` : ''}
+      ${bes ? `<div class="bandeau info">Estimé par les enseignants : <b>${bes.nb === 0 ? 'aucun AESH' : bes.nb + ' AESH'}</b>${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.nb > 0 ? ` · <b>${presents(c, iso, bes)} placé(s) sur ${bes.nb}</b>` : ''}${bes.au ? ` · jusqu’au ${K.jjmm(bes.au)}` : ''}${bes.majLe ? ` <span class="muted">· mis à jour le ${esc(K.dateCourte(String(bes.majLe).slice(0, 10)))}</span>` : ''}</div>`
+        : `<div class="bandeau">Pas encore estimé par l’enseignant de ce cours. <span class="muted">Aucune demande reçue : à vous de décider.</span>
+            <button type="button" class="btn petit" id="pl-mail" data-a="mail-estimation" data-v="${esc(f.coursId)}">✉️ Écrire à l’enseignant</button></div>`}
       <div><b>Qui accompagne ?</b></div>
       ${aVenir.length ? `<div class="bandeau info">À venir : ${aVenir.map(x => `<b>${esc(I.aesh.get(x.aeshId).sigle)}</b> dès le ${esc(K.dateCourte(x.du))}`).join(', ')} <span class="muted">· non modifié ici</span></div>` : ''}
       <div class="choix-aesh" role="group" aria-label="AESH du pôle">${candidats.map(a => bouton(a)).join('')}</div>
@@ -1094,7 +1096,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-18e'), F = await import('./fichiers.js?v=2026-09-18e');
+    const X = await import('./exports.js?v=2026-09-20a'), F = await import('./fichiers.js?v=2026-09-20a');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1656,6 +1658,21 @@ export async function demarrer({ FS, db, erreur }) {
       case 'autres-aesh': S.feuille.autres = true; rendre(); return;
       case 'horaire-tout': delete S.feuille.horaires[v]; rendre({ focus: b.id }); return;
       case 'horaire-partie': { const c = S.edt.cours[S.feuille.coursId]; S.feuille.horaires[v] = { debut: c.d, fin: K.hDe(Math.min(K.min(c.f), K.min(c.d) + 60)) }; rendre({ focus: b.id }); return; }
+      /* Relancer l'enseignant d'un cours qui n'a pas encore été estimé : message tout prêt, destinataire au choix. */
+      case 'mail-estimation': {
+        const c2 = S.edt.cours[v]; if (!c2) return;
+        const nom = classeCourante(), k = S.edt.classes[nom], fil = filiereDeClasse(nom);
+        const lien = new URL('../demandes-aesh/' + (fil ? '?filiere=' + encodeURIComponent(fil.id) : ''), location.href).href;
+        const sujet = `Accompagnement AESH — votre avis pour ${k.court} · ${c2.lib}`;
+        const corps = `Bonjour,\n\nPour préparer l'accompagnement des élèves, nous recensons cours par cours le besoin d'AESH.\n\n`
+          + `Votre cours : ${k.court} · ${c2.lib} · ${K.JOURS[c2.j]} ${K.hFr(c2.d)}–${K.hFr(c2.f)}`
+          + `${c2.sem === 'SA' ? ' (semaines A)' : c2.sem === 'SB' ? ' (semaines B)' : ''}\nIl n'a pas encore été estimé.\n\n`
+          + `En deux minutes, sur cette page : ${lien}\nVous y indiquez, pour chacun de vos cours, le nombre d'AESH souhaité.\n\n`
+          + `Merci beaucoup,\nLa coordination`;
+        try { navigator.clipboard.writeText(corps); } catch (e) { }
+        try { window.open('mailto:?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(corps), '_self'); } catch (e) { }
+        toast('Message préparé — choisissez le destinataire (il est aussi copié).');
+        return; }
       case 'lecture': return;
       case 'periode': S.feuille.periode = v; if (v === 'date' && !S.feuille.au) S.feuille.au = K.ajoute(S.lundi, 4); rendre({ focus: b.id }); return;
       case 'valider-placer': validerPlacer(); return;
