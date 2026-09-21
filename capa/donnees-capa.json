@@ -2,9 +2,9 @@
  "genere_le": "2026-09-21",
  "source": "capa_bibliotheque.json",
  "totaux": {
-  "cours": 25,
-  "seances": 62,
-  "notions": 271
+  "cours": 24,
+  "seances": 60,
+  "notions": 267
  },
  "modules": [
   {
@@ -1747,45 +1747,6 @@
          "d": "Manque d'eau dans l'organisme, provoqué par des pertes non remplacées."
         }
        ]
-      }
-     ]
-    },
-    {
-     "code": "BIO_synthese_oral",
-     "titre": "Préparer l'oral du CCF4",
-     "objectif": "Être capable de relier ses connaissances à sa pratique observée et de répondre aux questions de l'oral.",
-     "capacite": "CG2.2",
-     "ccf": "CCF4",
-     "notions_cours": [
-      {
-       "n": "Mise en œuvre",
-       "d": "Critère de la grille valant 10 points sur 20 : relier ce que l'on sait à ce que l'on a fait en séance."
-      },
-      {
-       "n": "Appropriation",
-       "d": "Critère valant 4 points : cohérence du propos, réponse aux relances, position personnelle argumentée."
-      },
-      {
-       "n": "Tirage au sort",
-       "d": "Désignation du thème de l'oral parmi Prévention, Fonctionnement et Énergie."
-      },
-      {
-       "n": "Carnet de séance",
-       "d": "Relevé personnel de chiffres et de sensations tenu au fil de l'année, ressource principale pour l'oral."
-      }
-     ],
-     "seances": [
-      {
-       "num": "1",
-       "titre": "Comprendre l'épreuve et ce qu'elle note",
-       "objectif": "Être capable d'expliquer le déroulé de l'épreuve et de repérer ce que chaque critère de la grille attend.",
-       "notions": []
-      },
-      {
-       "num": "2",
-       "titre": "S'entraîner à répondre",
-       "objectif": "Être capable de construire une réponse orale reliant les connaissances à la pratique observée.",
-       "notions": []
       }
      ]
     }

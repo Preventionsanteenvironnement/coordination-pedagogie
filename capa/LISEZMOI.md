@@ -9,7 +9,7 @@ de mémoire, ils parcourent la liste exacte de mes séances et disent ce qu'ils 
 
 | Page | Pour qui | Ce qu'elle fait |
 |---|---|---|
-| `index.html` | les collègues | la liste des séances à cocher, puis **Valider** |
+| `index.html` | les collègues | trois bandeaux à répondre, puis **J'ai terminé** |
 | `prof.html` | moi seul | ce qu'il me reste à faire, et le bouton qui prépare le courriel |
 | `programme.html` | les collègues, par le lien du courriel | mon programme final, en clair |
 
@@ -19,14 +19,30 @@ que porte le courriel.
 
 Le calcul commun est dans `commun.js`, le style des deux dernières pages dans `capa.css`.
 
+## Comment on répond, et pourquoi c'est rapide
+
+Trois bandeaux, un par module, chacun de sa couleur. Sous le bandeau : l'aperçu des thèmes
+qu'il contient, puis trois boutons.
+
+- **Je traite** → les séances du bloc passent toutes à « oui », le bloc se referme.
+- **Je ne traite pas** → toutes à « non », le bloc se referme.
+- **Je veux voir** → le bloc s'ouvre et l'on coche séance par séance.
+
+Un module entier se règle donc d'un clic quand il ne concerne pas le collègue : c'est ce
+qui évite de cocher soixante fois. Un second clic sur le même bouton retire la réponse.
+
+**Rien n'est coché par défaut.** L'état du bloc (tout / rien / en détail) n'est pas
+enregistré : il se **déduit** des séances, ce qui évite d'ajouter un champ au document et
+de toucher à la règle Firestore.
+
+Deux réponses seulement : **je le traite**, **je ne le traite pas**. La troisième
+(« une autre discipline le traite ») a été retirée le 21/09 : elle compliquait sans servir.
+
 ## La règle
 
 **Dès qu'un collègue coche « je le traite », la séance lui revient et sort de mon
-programme.** Tout le reste me revient :
-
-- « je ne le traite pas » ;
-- « une autre discipline le traite » — ce n'est pas lui qui la fait, donc elle reste à moi ;
-- les séances laissées sans réponse.
+programme.** Tout le reste me revient : « je ne le traite pas », et les séances laissées
+sans réponse.
 
 Le calcul est fait **filière par filière** : une séance couverte en jardinier paysagiste
 ne l'est pas en horticulture, et les élèves d'horticulture ne doivent pas la perdre pour
@@ -55,12 +71,15 @@ python3 capa/generer-donnees.py
 ```
 
 Le script réécrit `capa/donnees-capa.json` et affiche le décompte
-(aujourd'hui : **25 cours · 62 séances · 271 notions**). Il ne touche jamais la
+(aujourd'hui : **24 cours · 60 séances · 267 notions**). Il ne touche jamais la
 bibliothèque, qu'il lit seulement.
 
-**Le module MP1 (CCF6) est volontairement écarté** : c'est un dossier construit à partir
-d'un emploi observé, il ne se compare pas séance par séance. La liste `EXCLUS`, en tête du
-script, dit lesquels sont mis de côté.
+**Ce qui est volontairement écarté**, en tête du script :
+
+- `EXCLUS` — le module **MP1 (CCF6)** en entier : un dossier construit à partir d'un emploi
+  observé ne se compare pas séance par séance ;
+- `COURS_EXCLUS` — le cours **BIO_synthese_oral** (préparation de l'oral du CCF4), pour la
+  même raison.
 
 **Ne jamais retoucher `donnees-capa.json` à la main** : la prochaine régénération
 effacerait la correction. C'est le cours, dans l'Atelier, qu'il faut corriger.
@@ -84,8 +103,9 @@ reponse_<id>   { type:'reponse', source:'capa-cours', annee:'2026-2027',
                  reponses: { 'SESG_revenus/1': { r:'oui'|'non'|'autre', c:'…' } } }
 ```
 
-`r` vaut `oui` (je le traite), `non` (je ne le traite pas) ou `autre` (une autre discipline
-le traite). Seul `oui` retire la séance de mon programme.
+`r` vaut `oui` (je le traite) ou `non` (je ne le traite pas). Seul `oui` retire la séance de
+mon programme. La règle Firestore ne contrôle pas cette valeur : une ancienne réponse
+portant `autre` serait lue comme « ni oui », donc comme si la séance me revenait.
 
 `<id>` est tiré au hasard dans le navigateur du collègue et conservé sur son appareil :
 c'est ce qui lui permet de fermer la page et de revenir modifier sa réponse.
@@ -126,7 +146,8 @@ Le fichier complet, prêt à coller, a été déposé le 21/09 dans
   dans les navigateurs : ils servent l'ancien. C'est arrivé deux fois pendant la
   construction.
 - ⚠ Sans code d'accès, toute personne qui a l'adresse peut répondre. Une réponse
-  fantaisiste se supprime depuis `index.html?gestion=1`.
+  fantaisiste se supprime depuis **`prof.html?gestion=1`** : un lien « supprimer » apparaît
+  alors derrière chaque nom, dans « Ont répondu ».
 - Les pages sont en `noindex`, en clair, sans mode sombre.
 - Aucun nom d'élève nulle part. Les collègues donnent leur prénom et leur filière, rien
   d'autre.

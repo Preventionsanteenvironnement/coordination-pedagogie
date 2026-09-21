@@ -6,24 +6,23 @@
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#4a7830">
-<title>Ce que je traite en CAPa — comparaison entre collègues</title>
+<title>Ce que je traite en CAPa</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════════
-   Ce que je traite en CAPa — page unique
+   Ce que je traite en CAPa — la liste à cocher
    ---------------------------------------------------------------
-   Une seule page : le collègue lit ce que Brahim traite, coche pour
-   lui-même, et voit au même endroit ce que les autres ont répondu.
+   Trois modules, trois bandeaux. Sous chacun, l'aperçu des thèmes et
+   trois boutons : je traite / je ne traite pas / je veux voir.
+   Répondre au niveau du module répond pour toutes ses séances : c'est
+   ce qui fait gagner du temps. « Je veux voir » ouvre le détail, où
+   l'on coche séance par séance.
 
-   Le contenu affiché vient de donnees-capa.json, fabriqué par
-   generer-donnees.py depuis la bibliothèque CAPa de l'Atelier.
-   Ne jamais retoucher donnees-capa.json à la main : le régénérer.
+   Deux réponses seulement : je le traite, je ne le traite pas.
+   Rien n'est coché par défaut.
 
    Écrit : un document reponse_<id> par collègue.
-   Lit   : tous les documents reponse_* (pour montrer qui traite quoi).
    Collection Firestore : coordination_capa_cours.
-
-   Aucun code d'accès : prénom + filière (JP ou horticulture), rien
-   d'autre. Aucun nom d'élève, nulle part. Page en clair.
+   Le contenu vient de donnees-capa.json (generer-donnees.py).
    ═══════════════════════════════════════════════════════════════════ */
 :root{
   --bg:#f5f7f3; --card:#ffffff; --card-2:#fafbf8;
@@ -32,11 +31,8 @@
   --accent:#4a7830; --accent-d:#3a5f25; --accent-l:#e9f2e2; --on-accent:#ffffff;
   --focus:#1d4ed8;
   --oui:#15803d; --oui-bg:#e6f4ea; --oui-line:#15803d;
-  --aut:#b45309; --aut-bg:#fdf1de; --aut-line:#b45309;
   --non:#6b7280; --non-bg:#f1f2f4; --non-line:#9aa1ab;
-  --chaud:#b91c1c; --chaud-bg:#fdecec;
   --err-bg:#fdecec; --err-ink:#8f1d1d; --err-line:#b91c1c;
-  --info-bg:#eef3fb; --info-ink:#1e3a8a; --info-line:#1d4ed8;
   --r:14px; --r-s:10px;
   --sh:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.05);
   color-scheme:light;
@@ -44,210 +40,161 @@
 *{box-sizing:border-box}
 html{font-size:100%;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);
-  font:400 1rem/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:0 0 88px}
-h1,h2,h3{line-height:1.25;margin:0}
+  font:400 1rem/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:0 0 92px}
+h1,h2,h3,h4{line-height:1.25;margin:0}
 p{margin:.6em 0}
 a{color:var(--accent-d)}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ── en-tête ── */
 .marque{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;
   padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line)}
 .marque b{font-size:1rem}
 .marque .retour{font-size:1rem;font-weight:600;color:var(--muted);text-decoration:none}
 .marque .retour:hover{color:var(--accent-d);text-decoration:underline}
-main{max-width:900px;margin:0 auto;padding:0 16px}
-.entete{padding:22px 0 8px}
+main{max-width:860px;margin:0 auto;padding:0 16px}
+.entete{padding:24px 0 4px}
 .entete h1{font-size:1.5rem}
-.entete .sous{color:var(--muted);margin-top:6px}
+.entete .sous{color:var(--muted);margin-top:8px;max-width:60ch}
 
-/* ── blocs ── */
 .bloc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin:16px 0}
 .message{border-radius:var(--r-s);padding:12px 14px;margin:14px 0;border-left:5px solid}
 .message.err{background:var(--err-bg);color:var(--err-ink);border-color:var(--err-line)}
-.message.info{background:var(--info-bg);color:var(--info-ink);border-color:var(--info-line)}
 
-/* ── formulaire ── */
 label.champ{display:block;margin:16px 0 0;font-weight:600}
 label.champ .aide{display:block;font-weight:400;color:var(--muted);font-size:.92rem;margin-top:2px}
 input[type=text]{width:100%;margin-top:6px;padding:11px 12px;font-size:1rem;font-family:inherit;color:var(--ink);
   background:var(--card);border:1px solid var(--line);border-radius:var(--r-s)}
-textarea{width:100%;margin-top:8px;padding:10px 12px;font-size:.98rem;font-family:inherit;color:var(--ink);
-  background:var(--card-2);border:1px solid var(--line);border-radius:var(--r-s);resize:vertical;min-height:62px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:11px 18px;
+textarea{width:100%;margin-top:8px;padding:10px 12px;font-size:.96rem;font-family:inherit;color:var(--ink);
+  background:var(--card-2);border:1px solid var(--line);border-radius:var(--r-s);resize:vertical;min-height:54px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:12px 20px;
   border-radius:var(--r-s);font:inherit;font-weight:600;cursor:pointer;text-decoration:none;
   background:var(--card);color:var(--ink-2);border:1px solid var(--line)}
 .btn:hover{border-color:var(--accent);color:var(--accent-d)}
 .btn.primaire{background:var(--accent);color:var(--on-accent);border-color:var(--accent-d)}
-.btn.primaire:hover{background:var(--accent-d);color:var(--on-accent)}
+.btn.primaire:hover{background:var(--accent-d)}
 .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
 
 /* ── choix de la filière ── */
 fieldset.filiere{border:0;margin:18px 0 0;padding:0}
 fieldset.filiere legend{font-weight:600;padding:0}
-fieldset.filiere .aide{display:block;font-weight:400;color:var(--muted);font-size:.92rem;margin-top:2px}
 fieldset.filiere .choix{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-fieldset.filiere label{flex:1 1 220px;display:flex;align-items:center;gap:10px;min-height:56px;padding:12px 16px;
+fieldset.filiere label{flex:1 1 200px;display:flex;align-items:center;gap:10px;min-height:54px;padding:12px 16px;
   border:1px solid var(--line);border-radius:var(--r-s);background:var(--card);cursor:pointer;font-weight:600}
 fieldset.filiere label:hover{border-color:var(--accent)}
 fieldset.filiere input{position:absolute;opacity:0;width:1px;height:1px}
 fieldset.filiere label:has(input:checked){background:var(--accent-l);border-color:var(--accent-d);color:var(--accent-d);box-shadow:inset 0 0 0 1px var(--accent-d)}
-fieldset.filiere .sigle{flex:0 0 auto;min-width:34px;height:34px;border-radius:999px;background:var(--accent-l);color:var(--accent-d);
-  display:inline-flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800}
-fieldset.filiere label:has(input:checked) .sigle{background:var(--accent);color:var(--on-accent)}
 
-/* ── qui a répondu ── */
-.gens{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;padding:0;list-style:none}
-.gens li{display:inline-flex;align-items:center;gap:9px;padding:7px 13px;border:1px solid var(--line);
-  border-radius:999px;background:var(--card-2);font-size:.94rem}
-.gens .nom{font-weight:600}
-.gens .ou{color:var(--muted)}
-.gens .encours{color:var(--aut);font-weight:600}
-.gens .cestmoi{color:var(--accent-d);font-weight:700}
-.gens button{border:0;background:none;color:var(--chaud);font:inherit;font-weight:700;cursor:pointer;padding:0 2px;text-decoration:underline}
+/* ── le cadre réservé ── */
+a.reserve{display:flex;align-items:center;gap:14px;margin:18px 0 0;padding:13px 16px;
+  border:2px dashed var(--line-2);border-radius:var(--r);background:var(--card-2);
+  text-decoration:none;color:var(--muted)}
+a.reserve:hover{border-color:var(--accent);background:var(--accent-l)}
+a.reserve b{display:block;color:var(--ink-2);font-size:.98rem}
+a.reserve .fleche{margin-left:auto;color:var(--accent-d)}
 
-/* ── filtres et sommaire ── */
-.filtres{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.filtres button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 15px;
-  border:1px solid var(--line);border-radius:999px;background:var(--card);
-  font:inherit;font-weight:600;color:var(--ink-2);cursor:pointer}
-.filtres button:hover{border-color:var(--accent)}
-.filtres button[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:var(--accent-d)}
-.filtres .cpt{opacity:.75;font-weight:500;font-variant-numeric:tabular-nums}
-.filtres button .puce{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
-.filtres button[aria-pressed=true] .puce{box-shadow:0 0 0 2px var(--on-accent)}
-.quoi-filtre{font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:16px 0 0}
-.sommaire{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.sommaire a{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 13px;
-  border:1px solid var(--line);border-radius:999px;background:var(--card);
-  text-decoration:none;color:var(--ink-2);font-weight:600;font-size:.94rem}
-.sommaire a:hover{border-color:var(--accent);color:var(--accent-d)}
-.sommaire .cpt{color:var(--muted);font-weight:500}
+/* ── les trois modules ────────────────────────────────────────────
+   Couleurs validées : écart suffisant, y compris en vision des
+   couleurs déficiente. Chaque bandeau porte aussi son nom écrit :
+   la couleur ne porte jamais l'information seule. */
+.module{margin:20px 0 0;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;
+  border:1px solid var(--line);background:var(--card)}
+.module > header{padding:16px 18px;color:#fff;background:var(--teinte)}
+.module > header h2{font-size:1.18rem}
+.module > header .compte{display:block;font-size:.9rem;opacity:.92;margin-top:2px}
+.apercu{padding:13px 18px 0;color:var(--muted);font-size:.94rem}
+.apercu b{color:var(--ink-2);font-weight:600}
 
-/* ── module / cours / séance ── */
-.module{margin:28px 0 0}
-.module > h2{font-size:1.2rem;padding:14px 16px;background:var(--accent-l);
-  border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:var(--r)}
-.module > h2 .cadre{display:block;font-size:.9rem;font-weight:500;color:var(--ink-2);margin-top:3px}
-.cours{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);margin:14px 0;overflow:hidden}
-.cours > h3{font-size:1.06rem;padding:14px 16px 0}
-.cours .obj{color:var(--muted);font-size:.95rem;padding:2px 16px 0;margin:0}
-.notions-cours{padding:0 16px}
-.seance{border-top:1px solid var(--line-2);padding:14px 16px;margin-top:12px}
-.titre{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-.titre .num{flex:0 0 auto;min-width:26px;height:26px;border-radius:999px;background:var(--accent-l);
-  color:var(--accent-d);font-size:.85rem;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
-.titre h4{font-size:1rem;font-weight:700;flex:1 1 220px;margin:0}
-.verdict{flex:0 0 auto;font-size:.85rem;font-weight:700;padding:4px 11px;border-radius:999px;white-space:nowrap}
-.v-partout{background:var(--chaud-bg);color:var(--chaud)}
-.v-partie{background:var(--aut-bg);color:var(--aut)}
-.v-seul{background:var(--oui-bg);color:var(--oui)}
-.v-rien{background:var(--non-bg);color:var(--non)}
-.seance .obj{padding:4px 0 0;font-size:.94rem}
+.choix-module{display:flex;flex-wrap:wrap;gap:9px;padding:13px 18px 16px}
+.choix-module button{
+  flex:1 1 150px;min-height:50px;padding:12px 16px;border-radius:var(--r-s);
+  font:inherit;font-weight:700;cursor:pointer;background:var(--card);color:var(--ink-2);
+  border:2px solid var(--line);
+}
+.choix-module button:hover{border-color:var(--teinte);color:var(--teinte)}
+.choix-module button[aria-pressed=true].oui{background:var(--oui-bg);border-color:var(--oui);color:var(--oui)}
+.choix-module button[aria-pressed=true].non{background:var(--non-bg);border-color:var(--non-line);color:var(--non)}
+.choix-module button.voir{background:var(--teinte);color:#fff;border-color:var(--teinte)}
+.choix-module button.voir:hover{filter:brightness(1.12);color:#fff}
 
-/* ── notions ── */
-details.notions{margin-top:10px}
-details.notions > summary{cursor:pointer;min-height:40px;display:flex;align-items:center;gap:7px;
-  font-size:.93rem;font-weight:600;color:var(--accent-d);list-style:none}
+.etat-module{padding:0 18px 16px;font-size:.94rem;font-weight:600}
+.etat-module.e-oui{color:var(--oui)}
+.etat-module.e-non{color:var(--non)}
+.etat-module.e-detail{color:var(--teinte)}
+
+/* ── le détail ── */
+.detail{border-top:1px solid var(--line-2);background:var(--card-2)}
+.cours{padding:14px 18px;border-top:1px solid var(--line-2)}
+.cours:first-child{border-top:0}
+.cours > h3{font-size:1rem;color:var(--teinte)}
+.seance{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-2)}
+.seance:first-of-type{border-top:0;padding-top:4px}
+.seance .titre{display:flex;gap:9px;align-items:baseline}
+.seance .num{flex:0 0 auto;min-width:24px;height:24px;border-radius:999px;background:#fff;border:1px solid var(--line);
+  color:var(--ink-2);font-size:.82rem;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.seance h4{font-size:.98rem;font-weight:600}
+.seance .obj{margin:4px 0 0 33px;font-size:.92rem;color:var(--muted)}
+details.notions{margin:7px 0 0 33px}
+details.notions > summary{cursor:pointer;min-height:34px;display:flex;align-items:center;gap:7px;
+  font-size:.9rem;font-weight:600;color:var(--teinte);list-style:none}
 details.notions > summary::-webkit-details-marker{display:none}
 details.notions > summary::before{content:"";flex:0 0 auto;width:0;height:0;
-  border-left:7px solid currentColor;border-top:5px solid transparent;border-bottom:5px solid transparent;
+  border-left:6px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;
   transition:transform .15s;transform-origin:30% 50%}
 details.notions[open] > summary::before{transform:rotate(90deg)}
-details.notions dl{margin:8px 0 0;padding:12px 14px;background:var(--card-2);border:1px solid var(--line-2);border-radius:var(--r-s)}
-details.notions dt{font-weight:700;font-size:.94rem}
-details.notions dd{margin:1px 0 10px;color:var(--ink-2);font-size:.94rem}
+details.notions dl{margin:6px 0 0;padding:10px 12px;background:#fff;border:1px solid var(--line-2);border-radius:var(--r-s)}
+details.notions dt{font-weight:700;font-size:.92rem}
+details.notions dd{margin:1px 0 8px;color:var(--ink-2);font-size:.92rem}
 details.notions dd:last-child{margin-bottom:0}
 
-/* ── mes trois réponses ── */
-fieldset.rep{border:0;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+fieldset.rep{border:0;margin:9px 0 0 33px;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 fieldset.rep legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-fieldset.rep label{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;
-  border:1px solid var(--line);border-radius:999px;background:var(--card);
-  font-size:.95rem;font-weight:600;color:var(--ink-2);cursor:pointer}
+fieldset.rep label{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:7px 15px;
+  border:1px solid var(--line);border-radius:999px;background:#fff;
+  font-size:.94rem;font-weight:600;color:var(--ink-2);cursor:pointer}
 fieldset.rep input{position:absolute;opacity:0;width:1px;height:1px}
-fieldset.rep label:hover{border-color:var(--accent)}
+fieldset.rep label:hover{border-color:var(--teinte)}
 fieldset.rep input:focus-visible + span{outline:3px solid var(--focus);outline-offset:4px;border-radius:4px}
-fieldset.rep label.coche-oui:has(input:checked){background:var(--oui-bg);border-color:var(--oui-line);color:var(--oui);box-shadow:inset 0 0 0 1px var(--oui-line)}
-fieldset.rep label.coche-autre:has(input:checked){background:var(--aut-bg);border-color:var(--aut-line);color:var(--aut);box-shadow:inset 0 0 0 1px var(--aut-line)}
-fieldset.rep label.coche-non:has(input:checked){background:var(--non-bg);border-color:var(--non-line);color:var(--non);box-shadow:inset 0 0 0 1px var(--non-line)}
-.precision{margin-top:10px}
-.precision label{font-weight:600;font-size:.94rem;color:var(--ink-2)}
-
-/* ── ce que les autres ont répondu ── */
-.autres{margin-top:12px;padding:11px 13px;background:var(--card-2);border:1px solid var(--line-2);border-radius:var(--r-s)}
-.autres > .quoi{display:block;font-size:.82rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.groupe{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-top:8px}
-.groupe .quoi{font-size:.85rem;font-weight:700;color:var(--muted);min-width:9.5em}
-.qui{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px;flex:1 1 200px}
-.qui li{font-size:.9rem;padding:4px 11px;border-radius:999px}
-.qui .r-oui{background:var(--oui-bg);color:var(--oui)}
-.qui .r-autre{background:var(--aut-bg);color:var(--aut)}
-.qui .r-non{background:var(--non-bg);color:var(--non)}
-.mots{margin-top:9px}
-.mots p{margin:0 0 6px;font-size:.93rem;color:var(--ink-2)}
-.mots p:last-child{margin-bottom:0}
-.mots b{color:var(--aut)}
-.autres .vide{color:var(--muted);font-size:.92rem;margin:6px 0 0;padding:0}
-
-/* ── le cadre réservé, sur l'accueil ── */
-a.reserve{
-  display:flex;align-items:center;gap:14px;margin:18px 0 0;padding:14px 16px;
-  border:2px dashed var(--line-2);border-radius:var(--r);background:var(--card-2);
-  text-decoration:none;color:var(--muted);
-}
-a.reserve:hover{border-color:var(--accent);background:var(--accent-l)}
-a.reserve .cle{font-size:1.2rem;flex:0 0 auto}
-a.reserve b{display:block;color:var(--ink-2);font-size:.98rem}
-a.reserve span{font-size:.9rem}
-a.reserve .fleche{margin-left:auto;font-size:1.1rem;color:var(--accent-d)}
+fieldset.rep label.c-oui:has(input:checked){background:var(--oui-bg);border-color:var(--oui-line);color:var(--oui);box-shadow:inset 0 0 0 1px var(--oui-line)}
+fieldset.rep label.c-non:has(input:checked){background:var(--non-bg);border-color:var(--non-line);color:var(--non);box-shadow:inset 0 0 0 1px var(--non-line)}
+.aussi{margin:7px 0 0 33px;font-size:.88rem;color:var(--muted)}
+.replier{margin:0 18px 16px}
 
 /* ── barre du bas ── */
 .barre{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--card);border-top:1px solid var(--line);
   box-shadow:0 -6px 20px rgba(16,24,40,.08);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
-.barre .dedans{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
-.jauge{flex:1 1 220px;min-width:180px}
-.jauge .piste{height:9px;border-radius:999px;background:var(--line-2);overflow:hidden}
+.barre .dedans{max-width:860px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.jauge{flex:1 1 200px;min-width:170px}
+.jauge .piste{height:8px;border-radius:999px;background:var(--line-2);overflow:hidden}
 .jauge .part{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .25s}
-.jauge .txt{font-size:.9rem;color:var(--muted);margin-top:4px}
-.etat{font-size:.88rem;color:var(--muted)}
+.jauge .txt{font-size:.88rem;color:var(--muted);margin-top:4px}
+.etat{font-size:.86rem;color:var(--muted)}
 .etat.souci{color:var(--err-ink);font-weight:600}
 
-/* ── écran de fin ── */
-.fin h2{font-size:1.25rem}
-.recap{margin:14px 0 0;padding:0;list-style:none}
+.fin h2{font-size:1.2rem}
+.recap{margin:12px 0 0;padding:0;list-style:none}
 .recap li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line-2)}
 .recap li b{font-size:1.15rem;min-width:2.4em;text-align:right}
-.vide{color:var(--muted);padding:14px 0}
 
 @media (max-width:560px){
   .entete h1{font-size:1.3rem}
-  .seance{padding:14px 12px}
-  .cours > h3,.cours .obj,.notions-cours{padding-left:12px;padding-right:12px}
-  .groupe .quoi{min-width:0;flex:1 1 100%}
+  .module > header,.apercu,.choix-module,.etat-module,.cours,.replier{padding-left:14px;padding-right:14px}
+  .seance .obj,details.notions,fieldset.rep,.aussi{margin-left:0}
 }
 
-/* ── impression : la liste complète, cases vides à cocher au stylo ── */
 @media print{
-  :root{--bg:#fff}
   body{padding:0;font-size:10.5pt}
-  .marque,.barre,.actions,.sommaire,.filtres,.quoi-filtre,.no-print{display:none !important}
+  .marque,.barre,.actions,.choix-module,.replier,.no-print{display:none !important}
   main{max-width:none;padding:0}
-  .bloc{box-shadow:none}
-  .cours{break-inside:avoid;box-shadow:none;border:1px solid #999}
-  .module > h2{break-after:avoid;background:#eee}
-  .seance{break-inside:avoid}
+  .module{break-inside:auto;box-shadow:none}
+  .module > header{background:#eee !important;color:#000}
+  .detail{display:block !important;background:#fff}
+  .cours,.seance{break-inside:avoid}
   details.notions{display:block}
   details.notions > summary{display:none}
-  details.notions dl{background:#fff;border:1px solid #ccc}
   fieldset.rep label{border:1px solid #333;box-shadow:none !important;background:#fff !important;color:#000 !important;min-height:0;padding:2px 8px}
   fieldset.rep label::before{content:"☐ "}
   fieldset.rep label:has(input:checked)::before{content:"☒ "}
-  .precision{border-bottom:1px solid #999;height:26px}
-  .precision label{font-size:9pt;color:#444}
-  .precision textarea{display:none}
-  .autres{background:#fff;border:1px solid #ccc}
 }
 </style>
 </head>
@@ -260,7 +207,7 @@ a.reserve .fleche{margin-left:auto;font-size:1.1rem;color:var(--accent-d)}
 
 <main>
   <div id="ecran"></div>
-  <p id="chargement">Chargement de la liste…</p>
+  <p id="chargement">Chargement…</p>
   <noscript><p class="message err">Cette page a besoin de JavaScript pour fonctionner.</p></noscript>
 </main>
 
@@ -268,17 +215,15 @@ a.reserve .fleche{margin-left:auto;font-size:1.1rem;color:var(--accent-d)}
   <div class="dedans">
     <div class="jauge">
       <div class="piste"><div class="part" id="jauge-part"></div></div>
-      <div class="txt" id="jauge-txt">0 séance sur 70</div>
+      <div class="txt" id="jauge-txt"></div>
     </div>
     <span class="etat" id="etat"></span>
     <button type="button" class="btn primaire" id="btn-terminer">J’ai terminé</button>
   </div>
 </div>
-
 <div id="annonce" class="sr" role="status" aria-live="polite"></div>
 
 <script type="module">
-/* ═══════════════ Firebase ═══════════════ */
 const firebaseConfig = {
   apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com",
   projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
@@ -287,7 +232,6 @@ const firebaseConfig = {
 const COL = 'coordination_capa_cours';
 const DELAI_MS = 15000;
 const K_REPONSE = 'capa-cours-reponse-v1';
-const GESTION = new URLSearchParams(location.search).get('gestion') === '1';
 
 function anneeScolaire(d = new Date()){
   const y = d.getFullYear();
@@ -306,83 +250,61 @@ try {
   db = FS.getFirestore(app);
 } catch(e){ firebaseKO = e; }
 
-/* ═══════════════ outils ═══════════════ */
 const $ = (s, r = document) => r.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const annonce = t => { const n = $('#annonce'); if (n) n.textContent = t; };
-function avecDelai(promesse, ms){
+function avecDelai(p, ms = DELAI_MS){
   let t;
-  return Promise.race([
-    promesse,
-    new Promise((_, rej) => { t = setTimeout(() => { const e = new Error('Délai dépassé : pas de réponse du serveur.'); e.code = 'delai'; rej(e); }, ms); })
-  ]).finally(() => clearTimeout(t));
+  return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => { const e = new Error('Délai dépassé.'); e.code='delai'; rej(e); }, ms); })]).finally(() => clearTimeout(t));
 }
 const estRefus = e => `${(e && e.code) || ''} ${(e && e.message) || ''}`.includes('permission');
 function lsLit(k, def){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } }
 function lsEcrit(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
-function dateCourte(iso){
-  const d = new Date(iso || '');
-  return isNaN(d) ? '' : d.toLocaleDateString('fr-FR', { day:'numeric', month:'long' });
-}
 
 /* ═══════════════ état ═══════════════ */
-const LIBELLES = {
-  oui:  'Je le traite',
-  non:  'Je ne le traite pas',
-  autre:'Une autre discipline le traite',
-};
+const LIBELLES = { oui:'Je le traite', non:'Je ne le traite pas' };
 const FILIERES = {
   jp:   { sigle:'JP',   nom:'Jardinier paysagiste' },
   hort: { sigle:'Hort', nom:'Horticulture' },
 };
-const VERDICTS = {
-  partout: { texte:'Tous la traitent',  cls:'v-partout', filtre:'Traitées par tous' },
-  partie:  { texte:'Traitée en partie', cls:'v-partie',  filtre:'Traitées en partie' },
-  seul:    { texte:'Personne d’autre',  cls:'v-seul',    filtre:'Personne d’autre' },
-  rien:    { texte:'Sans réponse',      cls:'v-rien',    filtre:'Sans réponse' },
-};
-/* « une autre discipline le traite » ne se range pas dans un verdict : une séance peut
-   être traitée par tous ET signalée comme relevant d'une autre discipline. C'est donc
-   un filtre à part. */
-const FILTRE_DISCIPLINE = 'discipline';
+/* une teinte par module, dans l'ordre de la liste */
+const TEINTES = ['#2563eb', '#c2410c', '#15803d'];
 
 const S = {
   donnees: null,
   moi: lsLit(K_REPONSE, null),   // { id, nom, filiere, reponses:{}, termine }
-  seances: [],                   // à plat, pour compter
-  gens: [],                      // toutes les réponses lues, la mienne comprise
-  lectureKO: null,               // regles · reseau
-  envoi: 'attente',              // attente · ok · regles · reseau
-  filtre: 'toutes',              // toutes · partout · partie · seul · rien
-  filiere: 'toutes',             // toutes · jp · hort
+  seances: [],
+  gens: [],
+  ouverts: new Set(),            // modules dépliés (jamais enregistré : c'est de l'affichage)
+  envoi: 'attente',
 };
 
 function nouvelId(){
   const a = new Uint8Array(8); crypto.getRandomValues(a);
   return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
 }
-const cle = (cours, seance) => `${cours.code}/${seance.num}`;
+const cle = (c, s) => `${c.code}/${s.num}`;
 const reponse = k => (S.moi && S.moi.reponses && S.moi.reponses[k]) || null;
 const nbRepondues = () => S.seances.filter(({k}) => reponse(k)).length;
-const nomFiliere = f => (FILIERES[f] && FILIERES[f].nom) || '';
+const clesModule = m => m.cours.flatMap(c => c.seances.map(s => cle(c, s)));
 
-/* les autres : tout le monde sauf moi, dans la filière choisie */
-function autres(){
-  const moiId = S.moi ? `reponse_${S.moi.id}` : null;
-  return S.gens.filter(g => g.id !== moiId && (S.filiere === 'toutes' || g.filiere === S.filiere));
+function texteEtat(e){
+  if (e.etat === 'oui') return 'Vous traitez tout ce bloc.';
+  if (e.etat === 'non') return 'Vous ne traitez rien de ce bloc.';
+  if (e.etat === 'detail') return `${e.oui} séance${e.oui > 1 ? 's' : ''} sur ${e.total} que vous traitez.`;
+  return '';
 }
-function etatSeance(k, liste){
-  const dedans = liste.filter(g => g.reponses && g.reponses[k] && g.reponses[k].r);
-  const oui = dedans.filter(g => g.reponses[k].r === 'oui');
-  const autre = dedans.filter(g => g.reponses[k].r === 'autre');
-  const non = dedans.filter(g => g.reponses[k].r === 'non');
-  let verdict = 'rien';
-  if (liste.length && dedans.length){
-    if (oui.length === liste.length) verdict = 'partout';
-    else if (oui.length > 0) verdict = 'partie';
-    else verdict = 'seul';        // personne d'autre ne le traite lui-même
-  }
-  return { oui, autre, non, dedans, verdict };
+
+/* L'état d'un module se déduit de ses séances : rien à enregistrer en plus. */
+function etatModule(m){
+  const ks = clesModule(m);
+  const rs = ks.map(k => reponse(k)).filter(Boolean);
+  if (!rs.length) return { etat:'vide', oui:0, total:ks.length };
+  const oui = rs.filter(r => r.r === 'oui').length;
+  const non = rs.filter(r => r.r === 'non').length;
+  if (oui === ks.length) return { etat:'oui', oui, total:ks.length };
+  if (non === ks.length) return { etat:'non', oui, total:ks.length };
+  return { etat:'detail', oui, total:ks.length };
 }
 
 /* ═══════════════ enregistrement ═══════════════ */
@@ -393,24 +315,18 @@ function enregistrer({ tout_de_suite = false } = {}){
   lsEcrit(K_REPONSE, S.moi);
   clearTimeout(minuteur);
   if (tout_de_suite) return envoyer();
-  minuteur = setTimeout(envoyer, 1500);
+  minuteur = setTimeout(envoyer, 1200);
 }
 async function envoyer(){
   if (!S.moi) return;
   if (!db){ S.envoi = 'reseau'; majEtat(); return; }
   const doc = {
-    id: `reponse_${S.moi.id}`, type: 'reponse', source: 'capa-cours', annee: ANNEE,
+    id: `reponse_${S.moi.id}`, type:'reponse', source:'capa-cours', annee:ANNEE,
     nom: S.moi.nom, filiere: S.moi.filiere || '',
     reponses: S.moi.reponses, termine: !!S.moi.termine, maj: S.moi.maj,
   };
-  try {
-    await avecDelai(FS.setDoc(FS.doc(db, COL, doc.id), doc), DELAI_MS);
-    S.envoi = 'ok';
-    const i = S.gens.findIndex(g => g.id === doc.id);
-    if (i >= 0) S.gens[i] = doc; else S.gens.push(doc);
-  } catch(e){
-    S.envoi = estRefus(e) ? 'regles' : 'reseau';
-  }
+  try { await avecDelai(FS.setDoc(FS.doc(db, COL, doc.id), doc)); S.envoi = 'ok'; }
+  catch(e){ S.envoi = estRefus(e) ? 'regles' : 'reseau'; }
   majEtat();
 }
 function majEtat(){
@@ -418,9 +334,7 @@ function majEtat(){
   if (S.envoi === 'attente'){ n.className = 'etat'; n.textContent = ''; return; }
   if (S.envoi === 'ok'){ n.className = 'etat'; n.textContent = 'Enregistré'; return; }
   n.className = 'etat souci';
-  n.textContent = S.envoi === 'regles'
-    ? 'Réponses gardées sur cet appareil : le serveur les refuse'
-    : 'Réponses gardées sur cet appareil : le serveur ne répond pas';
+  n.textContent = S.envoi === 'regles' ? 'Gardé sur cet appareil : le serveur refuse' : 'Gardé sur cet appareil : pas de réseau';
 }
 function majJauge(){
   const fait = nbRepondues(), total = S.seances.length;
@@ -430,75 +344,52 @@ function majJauge(){
 }
 
 /* ═══════════════ écrans ═══════════════ */
-function ecranCourant(){
+const ecranCourant = () => {
   const h = (location.hash || '').replace('#', '');
   return (h === 'liste' || h === 'fin') ? h : 'accueil';
-}
-function aller(nom){
-  if (ecranCourant() === nom){ dessiner(); return; }
-  location.hash = nom;          // le bouton Précédent du navigateur fonctionne
-}
+};
+function aller(nom){ if (ecranCourant() === nom) dessiner(); else location.hash = nom; }
 addEventListener('hashchange', dessiner);
 
 function dessiner(){
-  const ecran = ecranCourant();
-  if (ecran !== 'accueil' && !S.moi){ location.replace('#accueil'); return dessinerAccueil(); }
-  if (ecran === 'liste') return dessinerListe();
-  if (ecran === 'fin') return dessinerFin();
+  const e = ecranCourant();
+  if (e !== 'accueil' && !S.moi){ location.replace('#accueil'); return dessinerAccueil(); }
+  if (e === 'liste') return dessinerListe();
+  if (e === 'fin') return dessinerFin();
   dessinerAccueil();
 }
 
-/* ── accueil ── */
+/* ── accueil : trois lignes, pas plus ── */
 function dessinerAccueil(){
   $('#barre').hidden = true;
-  const d = S.donnees, t = d.totaux;
   const repris = S.moi && nbRepondues() > 0;
-  const dejaLa = S.gens.filter(g => g.id !== (S.moi ? `reponse_${S.moi.id}` : null)).length;
   const choix = Object.entries(FILIERES).map(([id, f]) => `
-    <label><span class="sigle" aria-hidden="true">${f.sigle}</span>
-      <input type="radio" name="filiere" value="${id}"${S.moi && S.moi.filiere === id ? ' checked' : ''}>
+    <label><input type="radio" name="filiere" value="${id}"${S.moi && S.moi.filiere === id ? ' checked' : ''}>
       <span>${f.nom}</span></label>`).join('');
   $('#ecran').innerHTML = `
     <div class="entete">
-      <h1>Ce que je traite dans mes cours de CAPa</h1>
-      <p class="sous">Nous sommes plusieurs à enseigner le CAPa, et il est probable que nous traitions
-      les mêmes contenus sans le savoir. Plutôt que d’en discuter de mémoire, voici la liste exacte
-      de ce que je traite, séance par séance, avec les notions que j’y aborde.</p>
+      <h1>Ce que je traite en CAPa</h1>
+      <p class="sous">Voici mes cours, en trois blocs. Dites-moi ce que vous traitez déjà :
+      ce que vous prenez, je le retire de mon programme.</p>
     </div>
     <div class="bloc">
-      <h2>Ce que je vous demande</h2>
-      <p>Parcourez la liste et dites, pour chaque séance, si vous la traitez vous aussi.
-      Rien d’autre : c’est <b>votre</b> réponse qui compte, pas la mienne.</p>
-      <p>Trois réponses possibles : <b>${LIBELLES.oui}</b>, <b>${LIBELLES.non}</b>,
-      ou <b>${LIBELLES.autre}</b> — pour les contenus qui, chez vous, reviennent à un collègue
-      d’une autre matière. Si vous voulez préciser quelque chose, un champ libre est prévu sous chaque séance.</p>
-      <p>Ce que je ferai de vos réponses : repérer ce que nous faisons deux fois, et en discuter ensemble.
-      Personne ne décide à la place de personne.</p>
-      <p><b>${t.cours} cours · ${t.seances} séances · ${t.notions} notions.</b>
-      Comptez une vingtaine de minutes. Vos réponses s’enregistrent au fur et à mesure :
-      vous pouvez fermer la page, revenir, et modifier ce que vous avez coché.
-      Vous verrez en même temps ce que les autres ont répondu.</p>
-      ${dejaLa ? `<p class="sous">${dejaLa} collègue${dejaLa > 1 ? 's ont' : ' a'} déjà répondu.</p>` : ''}
-      ${firebaseKO || S.lectureKO ? '<p class="message err">La connexion au serveur n’a pas pu être établie. Vous pouvez répondre quand même : à la fin, un bouton vous permettra de télécharger votre réponse pour l’envoyer par courriel.</p>' : ''}
       <form id="f-identite" novalidate>
         <label class="champ" for="i-nom">Votre prénom
-          <span class="aide">Pour savoir qui a répondu quoi.</span>
           <input type="text" id="i-nom" name="nom" autocomplete="name" required maxlength="60" value="${esc(S.moi ? S.moi.nom : '')}">
         </label>
         <fieldset class="filiere">
-          <legend>Votre filière<span class="aide">Les séances sont les mêmes ; c’est pour savoir d’où vient la réponse.</span></legend>
+          <legend>Votre filière</legend>
           <div class="choix">${choix}</div>
         </fieldset>
         <p class="message err" id="err-identite" hidden></p>
         <div class="actions">
-          <button type="submit" class="btn primaire">${repris ? 'Reprendre où j’en étais' : 'Commencer'}</button>
+          <button type="submit" class="btn primaire">${repris ? 'Reprendre' : 'Commencer'}</button>
         </div>
       </form>
     </div>
     <a class="reserve" href="prof.html">
-      <span class="cle" aria-hidden="true">🔒</span>
       <span><b>Réservé au professeur de PSE</b>
-      <span>Le programme qu'il reste à assurer, une fois vos réponses prises en compte.</span></span>
+      <span>Ce qu'il me reste à faire, une fois vos réponses prises en compte.</span></span>
       <span class="fleche" aria-hidden="true">→</span>
     </a>`;
   $('#f-identite').addEventListener('submit', ev => {
@@ -506,7 +397,7 @@ function dessinerAccueil(){
     const nom = $('#i-nom').value.trim();
     const f = $('input[name=filiere]:checked');
     const err = $('#err-identite');
-    if (!nom){ err.textContent = 'Écrivez votre prénom pour commencer.'; err.hidden = false; $('#i-nom').focus(); return; }
+    if (!nom){ err.textContent = 'Écrivez votre prénom.'; err.hidden = false; $('#i-nom').focus(); return; }
     if (!f){ err.textContent = 'Choisissez votre filière.'; err.hidden = false; return; }
     if (!S.moi) S.moi = { id: nouvelId(), reponses: {}, termine: false };
     S.moi.nom = nom; S.moi.filiere = f.value;
@@ -515,164 +406,65 @@ function dessinerAccueil(){
   });
 }
 
-/* ── la liste : ce que je traite, ce que vous cochez, ce que les autres ont dit ── */
-function htmlNotions(items, titre){
+/* ── la liste ── */
+function htmlNotions(items){
   if (!items || !items.length) return '';
-  return `<details class="notions">
-    <summary>${esc(titre)} (${items.length})</summary>
-    <dl>${items.map(i => `<dt>${esc(i.n)}</dt><dd>${esc(i.d)}</dd>`).join('')}</dl>
-  </details>`;
+  return `<details class="notions"><summary>Les notions (${items.length})</summary>
+    <dl>${items.map(i => `<dt>${esc(i.n)}</dt><dd>${esc(i.d)}</dd>`).join('')}</dl></details>`;
 }
-function htmlAutres(k, etat, combien){
-  const groupe = (liste, cls, titre) => liste.length
-    ? `<div class="groupe"><span class="quoi">${titre}</span>
-        <ul class="qui">${liste.map(g => `<li class="r-${cls}">${esc(g.nom)}</li>`).join('')}</ul></div>`
-    : '';
-  const mots = etat.dedans.filter(g => (g.reponses[k].c || '').trim());
-  return `<div class="autres no-print">
-    <span class="quoi">Les autres collègues</span>
-    ${combien === 0 ? '<p class="vide">Personne d’autre n’a encore répondu.</p>' : ''}
-    ${etat.dedans.length === 0 && combien > 0 ? '<p class="vide">Aucune réponse sur cette séance.</p>' : ''}
-    ${groupe(etat.oui, 'oui', 'La traitent')}
-    ${groupe(etat.autre, 'autre', 'Autre discipline')}
-    ${groupe(etat.non, 'non', 'Ne la traitent pas')}
-    ${mots.length ? `<div class="mots">${mots.map(g => `<p><b>${esc(g.nom)}</b> — ${esc(g.reponses[k].c)}</p>`).join('')}</div>` : ''}
-  </div>`;
-}
-function htmlSeance(cours, s, etat, combien){
+function htmlSeance(cours, s){
   const k = cle(cours, s), r = reponse(k) || {};
-  const v = VERDICTS[etat.verdict];
-  const etiquette = etat.verdict === 'partie' ? `${etat.oui.length} sur ${combien} la traitent` : v.texte;
-  const radio = (val, cls) => `
-    <label class="coche-${cls}">
-      <input type="radio" name="r_${esc(k)}" value="${val}" data-cle="${esc(k)}"${r.r === val ? ' checked' : ''}>
-      <span>${LIBELLES[val]}</span>
-    </label>`;
+  const aussi = S.gens.filter(g => g.reponses && g.reponses[k] && g.reponses[k].r === 'oui').map(g => g.nom);
+  const radio = (v, cls) => `<label class="c-${cls}">
+    <input type="radio" name="r_${esc(k)}" value="${v}" data-cle="${esc(k)}"${r.r === v ? ' checked' : ''}>
+    <span>${LIBELLES[v]}</span></label>`;
   return `<section class="seance">
-    <div class="titre">
-      <span class="num" aria-hidden="true">${esc(s.num)}</span>
-      <h4><span class="sr">Séance ${esc(s.num)} — </span>${esc(s.titre)}</h4>
-      ${combien ? `<span class="verdict ${v.cls}">${esc(etiquette)}</span>` : ''}
-    </div>
+    <div class="titre"><span class="num" aria-hidden="true">${esc(s.num)}</span>
+      <h4><span class="sr">Séance ${esc(s.num)} — </span>${esc(s.titre)}</h4></div>
     ${s.objectif ? `<p class="obj">${esc(s.objectif)}</p>` : ''}
-    ${htmlNotions(s.notions, 'Les notions de cette séance')}
-    <fieldset class="rep">
-      <legend>${esc(cours.titre)} — séance ${esc(s.num)} : ${esc(s.titre)}</legend>
-      ${radio('oui', 'oui')}${radio('non', 'non')}${radio('autre', 'autre')}
-    </fieldset>
-    <div class="precision">
-      <label for="c_${esc(k)}">Préciser (facultatif) : la discipline concernée, le moment de l’année, ce que vous faites…</label>
-      <textarea id="c_${esc(k)}" data-cle-commentaire="${esc(k)}" rows="2">${esc(r.c || '')}</textarea>
+    ${htmlNotions(s.notions)}
+    <fieldset class="rep"><legend>${esc(s.titre)}</legend>${radio('oui','oui')}${radio('non','non')}</fieldset>
+    ${aussi.length ? `<p class="aussi">Aussi traité par ${esc(aussi.join(', '))}.</p>` : ''}
+  </section>`;
+}
+function htmlModule(m, i){
+  const e = etatModule(m);
+  const ouvert = S.ouverts.has(m.code);
+  const themes = m.cours.map(c => esc(c.titre)).join(' · ');
+  const etiquette = `<p class="etat-module e-${e.etat}">${texteEtat(e)}</p>`;
+
+  return `<section class="module" style="--teinte:${TEINTES[i % TEINTES.length]}" data-module="${esc(m.code)}">
+    <header>
+      <h2>${esc(m.nom)}</h2>
+      <span class="compte">${m.cours.length} thèmes · ${e.total} séances</span>
+    </header>
+    <p class="apercu"><b>Ce qu'il y a dedans :</b> ${themes}</p>
+    <div class="choix-module no-print">
+      <button type="button" class="oui" data-module-rep="oui" aria-pressed="${e.etat === 'oui'}">Je traite</button>
+      <button type="button" class="non" data-module-rep="non" aria-pressed="${e.etat === 'non'}">Je ne traite pas</button>
+      <button type="button" class="voir" data-module-voir>${ouvert ? 'Replier' : 'Je veux voir'}</button>
     </div>
-    ${htmlAutres(k, etat, combien)}
+    ${etiquette}
+    ${ouvert ? `<div class="detail">${m.cours.map(c => `
+      <article class="cours">
+        <h3>${esc(c.titre)}</h3>
+        ${c.notions_cours && c.notions_cours.length ? htmlNotions(c.notions_cours) : ''}
+        ${c.seances.map(s => htmlSeance(c, s)).join('')}
+      </article>`).join('')}
+      <div class="replier no-print"><button type="button" class="btn" data-module-voir>Replier ce bloc</button></div>
+    </div>` : ''}
   </section>`;
 }
 
-const COULEURS = { partout:'#b91c1c', partie:'#ca8a04', seul:'#15803d', rien:'#c4c9cd' };
-
 function dessinerListe(){
   $('#barre').hidden = false;
-  const d = S.donnees;
-  const lesAutres = autres();
-  const combien = lesAutres.length;
-
-  /* le verdict de chaque séance, calculé une fois */
-  const etats = new Map(), compte = { partout:0, partie:0, seul:0, rien:0, discipline:0 };
-  d.modules.forEach(m => m.cours.forEach(c => c.seances.forEach(s => {
-    const e = etatSeance(cle(c, s), lesAutres);
-    etats.set(cle(c, s), e);
-    compte[e.verdict]++;
-    if (e.autre.length) compte.discipline++;
-  })));
-
-  const moiId = S.moi ? `reponse_${S.moi.id}` : null;
-  /* moi d'abord, lu en direct : je me vois dès le premier clic, sans attendre l'envoi */
-  const liste = [{ ...S.moi, id: moiId, reponses: S.moi.reponses, maj: S.moi.maj, termine: S.moi.termine }]
-    .concat(S.gens.filter(g => g.id !== moiId));
-  const gens = liste.length
-    ? `<ul class="gens">${liste.map(g => {
-        const n = Object.values(g.reponses || {}).filter(r => r && r.r).length;
-        return `<li><span class="nom">${esc(g.nom)}</span>` +
-          `${g.id === moiId ? '<span class="cestmoi">vous</span>' : ''}` +
-          `${g.filiere ? `<span class="ou">${esc(nomFiliere(g.filiere))}</span>` : ''}` +
-          `<span class="ou">${n} séance${n > 1 ? 's' : ''}</span>` +
-          `${g.termine ? '' : '<span class="encours">en cours</span>'}` +
-          `${g.maj ? `<span class="ou">${esc(dateCourte(g.maj))}</span>` : ''}` +
-          `${GESTION ? `<button type="button" data-supprimer="${esc(g.id)}">supprimer</button>` : ''}</li>`;
-      }).join('')}</ul>`
-    : '';
-
-  const boutonsVerdict = [['toutes', 'Toutes les séances', d.totaux.seances]]
-    .concat(Object.entries(VERDICTS).map(([id, v]) => [id, v.filtre, compte[id]]))
-    .concat([[FILTRE_DISCIPLINE, 'Autre discipline', compte.discipline]])
-    .map(([id, t, n]) => {
-      const c = COULEURS[id] || (id === FILTRE_DISCIPLINE ? COULEURS.partie : null);
-      return `<button type="button" data-filtre="${id}" aria-pressed="${S.filtre === id}">` +
-        (c ? `<i class="puce" style="background:${c}" aria-hidden="true"></i>` : '') +
-        `${t} <span class="cpt">${n}</span></button>`;
-    })
-    .join('');
-  const boutonsFiliere = [['toutes', 'Les deux filières']]
-    .concat(Object.entries(FILIERES).map(([id, f]) => [id, f.nom]))
-    .map(([id, t]) => {
-      const n = id === 'toutes'
-        ? S.gens.filter(g => g.id !== moiId).length
-        : S.gens.filter(g => g.id !== moiId && g.filiere === id).length;
-      return `<button type="button" data-filiere="${id}" aria-pressed="${S.filiere === id}">${t} <span class="cpt">${n}</span></button>`;
-    }).join('');
-
-  const sommaire = d.modules.map(m => {
-    const tot = m.cours.reduce((n, c) => n + c.seances.length, 0);
-    return `<a href="#m_${esc(m.code.replace(/[^\w]/g, '_'))}"><span>${esc(m.code)}</span><span class="cpt">${tot}</span></a>`;
-  }).join('');
-
-  const modules = d.modules.map(m => {
-    const cours = m.cours.map(c => {
-      const seances = c.seances
-        .filter(s => {
-          if (S.filtre === 'toutes') return true;
-          const e = etats.get(cle(c, s));
-          return S.filtre === FILTRE_DISCIPLINE ? e.autre.length > 0 : e.verdict === S.filtre;
-        })
-        .map(s => htmlSeance(c, s, etats.get(cle(c, s)), combien)).join('');
-      return seances ? `<article class="cours">
-          <h3>${esc(c.titre)}</h3>
-          ${c.objectif ? `<p class="obj">${esc(c.objectif)}</p>` : ''}
-          ${c.notions_cours.length ? `<div class="notions-cours">${htmlNotions(c.notions_cours, 'Les notions de ce cours')}</div>` : ''}
-          ${seances}</article>` : '';
-    }).join('');
-    return cours ? `<section class="module" id="m_${esc(m.code.replace(/[^\w]/g, '_'))}">
-        <h2>${esc(m.nom)}<span class="cadre">${esc(m.cadre)}</span></h2>${cours}</section>` : '';
-  }).join('');
-
   $('#ecran').innerHTML = `
     <div class="entete">
-      <h1>Séance par séance</h1>
-      <p class="sous">Bonjour ${esc(S.moi.nom)}${S.moi.filiere ? ` — ${esc(nomFiliere(S.moi.filiere))}` : ''}.
-      Pour chaque séance, dites si vous la traitez. Les notions s’ouvrent d’un clic si vous voulez voir exactement ce qui est abordé.</p>
-      <div class="sommaire no-print">${sommaire}</div>
-      <div class="actions no-print">
-        <button type="button" class="btn" id="btn-imprimer">Imprimer la liste</button>
-        <a class="btn" href="#accueil">Changer mon prénom ou ma filière</a>
-      </div>
+      <h1>Bonjour ${esc(S.moi.nom)}</h1>
+      <p class="sous">Pour chaque bloc : <b>Je traite</b>, <b>Je ne traite pas</b>, ou <b>Je veux voir</b> pour répondre séance par séance.</p>
     </div>
-    <div class="bloc no-print">
-      <h2>Ont répondu</h2>
-      ${gens}
-      ${S.lectureKO ? `<p class="message err">${S.lectureKO === 'regles'
-          ? 'Le serveur refuse la lecture : la règle Firestore de la collection coordination_capa_cours n’est pas encore publiée (voir LISEZMOI.md).'
-          : 'Les réponses des autres n’ont pas pu être lues : connexion au serveur impossible.'}</p>` : ''}
-      <p class="quoi-filtre">Ne montrer que</p>
-      <div class="filtres" role="group" aria-label="Ne montrer que certaines séances">${boutonsVerdict}</div>
-      <p class="quoi-filtre">Comparer avec</p>
-      <div class="filtres" role="group" aria-label="Comparer avec une filière">${boutonsFiliere}</div>
-    </div>
-    ${modules || '<p class="vide">Aucune séance dans ce filtre.</p>'}
-    <div class="bloc no-print">
-      <p>C’est tout. Quand vous avez répondu à ce que vous pouviez, cliquez sur <b>J’ai terminé</b> en bas.
-      Les séances laissées vides resteront simplement sans réponse.</p>
-    </div>`;
-
+    ${S.donnees.modules.map(htmlModule).join('')}
+    <div class="bloc no-print"><p>Quand c'est fait, cliquez sur <b>J'ai terminé</b> en bas.</p></div>`;
   majJauge(); majEtat();
   enregistrer();
 }
@@ -680,38 +472,31 @@ function dessinerListe(){
 /* ── fin ── */
 function dessinerFin(){
   $('#barre').hidden = true;
-  /* arrivé ici sans qu'aucun envoi n'ait été tenté (lien direct) : on tente, puis on redessine */
-  if (S.envoi === 'attente' && S.moi){
-    envoyer().then(() => { if (ecranCourant() === 'fin') dessinerFin(); });
-  }
-  const compte = { oui:0, non:0, autre:0 };
-  S.seances.forEach(({k}) => { const r = reponse(k); if (r && r.r) compte[r.r]++; });
-  const sans = S.seances.length - (compte.oui + compte.non + compte.autre);
+  let oui = 0, non = 0;
+  S.seances.forEach(({k}) => { const r = reponse(k); if (r && r.r === 'oui') oui++; else if (r && r.r === 'non') non++; });
+  const sans = S.seances.length - oui - non;
   const s_ = n => n > 1 ? 's' : '';
   $('#ecran').innerHTML = `
     <div class="entete fin">
       <h1>Merci.</h1>
       <p class="sous">${S.envoi === 'ok'
-        ? 'Vos réponses sont enregistrées. Vous pouvez revenir les modifier à tout moment depuis cet appareil.'
-        : 'Vos réponses sont gardées sur cet appareil, mais elles n’ont pas pu être envoyées. Téléchargez-les ci-dessous et envoyez le fichier à Brahim.'}</p>
+        ? 'C’est enregistré. Vous pouvez revenir modifier quand vous voulez.'
+        : 'Vos réponses sont gardées sur cet appareil mais n’ont pas pu être envoyées. Téléchargez-les ci-dessous.'}</p>
     </div>
     <div class="bloc">
-      <h2>Ce que vous avez répondu</h2>
       <ul class="recap">
-        <li><b>${compte.oui}</b> <span>séance${s_(compte.oui)} que vous traitez comme moi</span></li>
-        <li><b>${compte.non}</b> <span>séance${s_(compte.non)} que vous ne traitez pas</span></li>
-        <li><b>${compte.autre}</b> <span>séance${s_(compte.autre)} traitée${s_(compte.autre)} chez vous par une autre discipline</span></li>
-        <li><b>${sans}</b> <span>séance${s_(sans)} laissée${s_(sans)} sans réponse</span></li>
+        <li><b>${oui}</b> <span>séance${s_(oui)} que vous traitez</span></li>
+        <li><b>${non}</b> <span>séance${s_(non)} que vous ne traitez pas</span></li>
+        ${sans ? `<li><b>${sans}</b> <span>séance${s_(sans)} sans réponse</span></li>` : ''}
       </ul>
-      ${S.envoi === 'ok' ? '' : `<p class="message err">Vos réponses n’ont pas pu être envoyées${S.envoi === 'regles' ? ' : le serveur les a refusées' : ' : la connexion a échoué'}.
-        Téléchargez-les et envoyez le fichier à Brahim par courriel.</p>`}
       <div class="actions">
-        <a class="btn primaire" href="#liste">Revoir la liste et les réponses de tous</a>
-        <button type="button" class="btn" id="btn-fichier">Télécharger ma réponse</button>
+        <a class="btn primaire" href="#liste">Revoir mes réponses</a>
+        ${S.envoi === 'ok' ? '' : '<button type="button" class="btn" id="btn-fichier">Télécharger ma réponse</button>'}
       </div>
     </div>`;
-  $('#btn-fichier').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify({ ...S.moi, annee: ANNEE, source: 'capa-cours' }, null, 1)], { type:'application/json' });
+  const b = $('#btn-fichier');
+  if (b) b.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ ...S.moi, annee:ANNEE, source:'capa-cours' }, null, 1)], { type:'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `capa-${(S.moi.nom || 'reponse').normalize('NFD').replace(/[^\w]+/g, '-').toLowerCase()}.json`;
@@ -720,69 +505,69 @@ function dessinerFin(){
 }
 
 /* ═══════════════ actions ═══════════════ */
+$('#ecran').addEventListener('click', ev => {
+  const bloc = ev.target.closest('[data-module]');
+
+  const rep = ev.target.closest('[data-module-rep]');
+  if (rep && bloc){
+    const m = S.donnees.modules.find(x => x.code === bloc.dataset.module);
+    const v = rep.dataset.moduleRep;
+    const deja = etatModule(m).etat === v;
+    clesModule(m).forEach(k => { if (deja) delete S.moi.reponses[k]; else S.moi.reponses[k] = { r: v }; });
+    if (!deja) S.ouverts.delete(m.code);          // répondu d'un bloc : on referme
+    majJauge(); enregistrer(); dessinerListe();
+    annonce(deja ? 'Réponse retirée.' : `${m.nom} : ${LIBELLES[v]}.`);
+    return;
+  }
+
+  const voir = ev.target.closest('[data-module-voir]');
+  if (voir && bloc){
+    const code = bloc.dataset.module;
+    if (S.ouverts.has(code)) S.ouverts.delete(code); else S.ouverts.add(code);
+    dessinerListe();
+    const n = document.querySelector(`[data-module="${code}"]`);
+    if (n) n.scrollIntoView({ block:'start' });
+    return;
+  }
+});
 $('#ecran').addEventListener('change', ev => {
   const k = ev.target.dataset.cle;
   if (!k) return;
-  const r = S.moi.reponses[k] || {};
-  r.r = ev.target.value;
-  S.moi.reponses[k] = r;
+  S.moi.reponses[k] = { r: ev.target.value };
   majJauge(); enregistrer();
-});
-$('#ecran').addEventListener('input', ev => {
-  const k = ev.target.dataset.cleCommentaire;
-  if (!k) return;
-  const r = S.moi.reponses[k] || {};
-  r.c = ev.target.value;
-  if (!r.r && !r.c) delete S.moi.reponses[k]; else S.moi.reponses[k] = r;
-  enregistrer();
-});
-$('#ecran').addEventListener('click', async ev => {
-  if (ev.target.id === 'btn-imprimer'){
-    document.querySelectorAll('details.notions').forEach(n => n.open = true);
-    print(); return;
-  }
-  const fv = ev.target.closest('[data-filtre]');
-  if (fv){ S.filtre = fv.dataset.filtre; dessinerListe(); annonce(`Filtre : ${fv.textContent.trim()}`); return; }
-  const ff = ev.target.closest('[data-filiere]');
-  if (ff){ S.filiere = ff.dataset.filiere; dessinerListe(); annonce(`Comparaison : ${ff.textContent.trim()}`); return; }
-  const sup = ev.target.closest('[data-supprimer]');
-  if (sup){
-    const g = S.gens.find(x => x.id === sup.dataset.supprimer);
-    if (!g) return;
-    if (!confirm(`Supprimer définitivement la réponse de ${g.nom} ? Elle ne pourra pas être récupérée.`)) return;
-    try {
-      await avecDelai(FS.deleteDoc(FS.doc(db, COL, g.id)), DELAI_MS);
-      S.gens = S.gens.filter(x => x.id !== g.id);
-      dessinerListe();
-      annonce(`Réponse de ${g.nom} supprimée.`);
-    } catch(e){ alert('La suppression a échoué : ' + (e && e.message ? e.message : 'erreur inconnue')); }
+  const bloc = ev.target.closest('[data-module]');
+  if (bloc){
+    const m = S.donnees.modules.find(x => x.code === bloc.dataset.module);
+    const e = etatModule(m);
+    const p = bloc.querySelector('.etat-module');
+    if (p){ p.textContent = texteEtat(e); p.className = 'etat-module e-' + e.etat; }
+    bloc.querySelectorAll('[data-module-rep]').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.moduleRep === e.etat)));
   }
 });
 $('#btn-terminer').addEventListener('click', () => {
   S.moi.termine = true;
-  enregistrer({ tout_de_suite: true });
+  enregistrer({ tout_de_suite:true });
   aller('fin');
-  annonce('Réponses enregistrées.');
 });
 
 /* ═══════════════ départ ═══════════════ */
 try {
-  const rep = await fetch('donnees-capa.json', { cache:'no-cache' });
-  if (!rep.ok) throw new Error(rep.status);
-  S.donnees = await rep.json();
+  const r = await fetch('donnees-capa.json', { cache:'no-cache' });
+  if (!r.ok) throw new Error(r.status);
+  S.donnees = await r.json();
 } catch(e){
-  $('#chargement').outerHTML = '<p class="message err">La liste des cours n’a pas pu être chargée. Rechargez la page ; si cela se reproduit, prévenez Brahim.</p>';
+  $('#chargement').outerHTML = '<p class="message err">La liste n’a pas pu être chargée. Rechargez la page.</p>';
   throw e;
 }
-S.donnees.modules.forEach(m => m.cours.forEach(c => c.seances.forEach(s => S.seances.push({ k: cle(c, s), cours: c, seance: s }))));
+S.donnees.modules.forEach(m => m.cours.forEach(c => c.seances.forEach(s => S.seances.push({ k: cle(c, s) }))));
 
-if (!db) S.lectureKO = 'reseau';
-else {
+if (db){
   try {
-    const snap = await avecDelai(FS.getDocs(FS.query(FS.collection(db, COL), FS.where('type', '==', 'reponse'))), DELAI_MS);
-    snap.forEach(doc => { const v = doc.data(); if (v && v.nom) S.gens.push({ ...v, id: doc.id }); });
-    S.gens.sort((a, b) => String(a.nom).localeCompare(String(b.nom), 'fr'));
-  } catch(e){ S.lectureKO = estRefus(e) ? 'regles' : 'reseau'; }
+    const snap = await avecDelai(FS.getDocs(FS.query(FS.collection(db, COL), FS.where('type', '==', 'reponse'))));
+    const moiId = S.moi ? `reponse_${S.moi.id}` : null;
+    snap.forEach(d => { const v = d.data(); if (v && v.nom && d.id !== moiId) S.gens.push({ ...v, id:d.id }); });
+  } catch(e){ /* la page marche sans : on n'affiche simplement pas « aussi traité par » */ }
 }
 $('#chargement').remove();
 dessiner();

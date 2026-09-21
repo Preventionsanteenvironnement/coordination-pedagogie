@@ -34,6 +34,10 @@ MODULES = [
 # compare pas séance par séance avec un collègue.
 EXCLUS = {"MP1 · Insertion"}
 
+# Cours mis de côté un par un, par leur code.
+# BIO_synthese_oral : preparation de l'oral du CCF4, rien a comparer avec un collegue.
+COURS_EXCLUS = {"BIO_synthese_oral"}
+
 
 def texte(v):
     return (v or "").strip()
@@ -91,7 +95,7 @@ def main():
 
     for entree in biblio:
         mod = texte(entree.get("module"))
-        if mod in EXCLUS:
+        if mod in EXCLUS or texte(entree.get("code")) in COURS_EXCLUS:
             ecartes += 1
             continue
         seances, en_attente, objectif_general = lire_cours(entree)

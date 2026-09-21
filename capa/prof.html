@@ -17,6 +17,7 @@
 .qui-liste{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;padding:0;list-style:none}
 .qui-liste li{padding:6px 13px;border:1px solid var(--line);border-radius:999px;background:var(--card-2);font-size:.92rem}
 .qui-liste .rien{border-style:dashed;color:var(--muted)}
+.qui-liste .sup{border:0;background:none;color:#b91c1c;font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;padding:0 2px}
 </style>
 </head>
 <body>
@@ -35,13 +36,17 @@
 <div id="annonce" class="sr" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { lireTout, programmes, texteMail, esc, dateCourte, FILIERES } from './commun.js?v=1';
+import { lireTout, programmes, texteMail, esc, dateCourte, FILIERES, COL, DELAI_MS, avecDelai } from './commun.js?v=2';
 
 const $ = (s, r = document) => r.querySelector(s);
 const annonce = t => { const n = $('#annonce'); if (n) n.textContent = t; };
 const LIEN_PUBLIC = location.href.replace(/prof\.html.*$/, 'programme.html');
+/* ?gestion=1 : les liens qui permettent de retirer une réponse fantaisiste.
+   L'adresse n'est écrite nulle part : ce n'est pas une protection, c'est une
+   précaution contre le clic malheureux. */
+const GESTION = new URLSearchParams(location.search).get('gestion') === '1';
 
-const { donnees, gens, erreur } = await lireTout('capa-prof');
+let { donnees, gens, erreur, FS, db } = await lireTout('capa-prof');
 const progs = programmes(donnees, gens);
 
 /* ─── affichage ─── */
@@ -63,7 +68,8 @@ function htmlFiliere(p){
   const pris = p.nbTotal - p.nbGardees;
   const qui = p.repondants.length
     ? `<ul class="qui-liste">${p.repondants.map(g =>
-        `<li>${esc(g.nom)}${g.termine ? '' : ' — en cours'}${g.maj ? ` · ${esc(dateCourte(g.maj))}` : ''}</li>`).join('')}</ul>`
+        `<li>${esc(g.nom)}${g.termine ? '' : ' — en cours'}${g.maj ? ` · ${esc(dateCourte(g.maj))}` : ''}` +
+        `${GESTION ? ` <button type="button" class="sup" data-supprimer="${esc(g.id)}">supprimer</button>` : ''}</li>`).join('')}</ul>`
     : '<ul class="qui-liste"><li class="rien">Personne n’a encore répondu pour cette filière : tout reste à ma charge.</li></ul>';
 
   const jauge = pris
@@ -113,7 +119,7 @@ function dessiner(){
     </div>
     <div class="regle">
       <b>La règle :</b> dès qu'un collègue coche « je le traite », la séance lui revient et sort de mon programme.
-      Tout le reste me revient — « je ne le traite pas », « une autre discipline le traite », et les séances sans réponse.
+      Tout le reste me revient : « je ne le traite pas » et les séances laissées sans réponse.
     </div>
     ${erreur ? `<p class="message err">${erreur === 'regles'
         ? 'Le serveur refuse la lecture : la règle Firestore de coordination_capa_cours n’est pas encore publiée (voir LISEZMOI.md). Le programme ci-dessous ne tient compte d’aucune réponse.'
@@ -130,6 +136,21 @@ function dessiner(){
       + '&body=' + encodeURIComponent(texteMail(progs, LIEN_PUBLIC));
   });
   $('#btn-imprimer').addEventListener('click', () => print());
+
+  document.querySelectorAll('[data-supprimer]').forEach(b => b.addEventListener('click', async () => {
+    const g = gens.find(x => x.id === b.dataset.supprimer);
+    if (!g || !db) return;
+    if (!confirm(`Supprimer définitivement la réponse de ${g.nom} ? Elle ne pourra pas être récupérée.`)) return;
+    try {
+      await avecDelai(FS.deleteDoc(FS.doc(db, COL, g.id)), DELAI_MS);
+      gens = gens.filter(x => x.id !== g.id);
+      progs.length = 0;
+      programmes(donnees, gens).forEach(p => progs.push(p));
+      dessiner();
+      annonce(`Réponse de ${g.nom} supprimée.`);
+    } catch(e){ alert('La suppression a échoué : ' + (e && e.message ? e.message : 'erreur inconnue')); }
+  }));
+
   annonce('Programme calculé.');
 }
 dessiner();

@@ -6,8 +6,7 @@
    LA RÈGLE, une seule :
    dès qu'un collègue de la filière coche « je le traite », la séance
    lui revient et sort de mon programme. Tout le reste me revient —
-   « je ne le traite pas », « une autre discipline le traite », et les
-   séances laissées sans réponse.
+   « je ne le traite pas » et les séances laissées sans réponse.
 
    Le calcul est fait FILIÈRE PAR FILIÈRE : une séance couverte en
    jardinier paysagiste ne l'est pas forcément en horticulture, et les
@@ -70,7 +69,7 @@ export async function lireTout(nomApp){
   } catch(e){
     erreur = estRefus(e) ? 'regles' : 'reseau';
   }
-  return { donnees, gens, erreur };
+  return { donnees, gens, erreur, FS, db };
 }
 
 /* ─── le calcul ───────────────────────────────────────────────────── */
