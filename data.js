@@ -89,16 +89,10 @@ const THEMATIQUES = [
     enfants: [
       {
         titre: "Ce que je traite en CAPa — comparer nos cours",
-        desc: "Séance par séance, avec les notions abordées : chaque collègue dit ce qu'il traite lui aussi, ce qu'il traite autrement, ce qu'il ne traite pas. La mise en commun montre où nous faisons deux fois la même chose.",
+        desc: "Séance par séance, avec les notions abordées : chaque collègue dit ce qu'il traite lui aussi, ce qu'il traite autrement, ce qu'il ne traite pas — et voit au même endroit ce que les autres ont répondu. Jardinier paysagiste et horticulture.",
         lien: "capa/",
         type: "À cocher",
         badge: "Nouveau",
-      },
-      {
-        titre: "Qui traite quoi en CAPa — la mise en commun",
-        desc: "Les réponses de chacun, séance par séance : ce que tout le monde traite, ce qui se traite autrement, ce que personne d'autre ne fait.",
-        lien: "capa/synthese.html",
-        type: "Synthèse",
       },
     ],
   },
