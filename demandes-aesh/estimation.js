@@ -237,6 +237,8 @@ const CSS = `
 .e6-cours .p.n2{background:var(--warn-bg);border-color:var(--warn-line);color:var(--warn-ink)}.e6-cours .p.n3{background:var(--err-bg);border-color:var(--err-line);color:var(--err-ink)}
 .e6-bas{position:sticky;bottom:0;z-index:15;margin-top:18px;padding:10px 0 calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--bg) 30%)}
 .e6-onglets.bas{margin:0 0 8px;background:var(--card-2);box-shadow:0 0 0 6px var(--bg)}
+.e6-zero{margin:8px 0 0;padding:10px 12px;border-radius:12px;background:var(--card-2);color:var(--ink-2);font-size:.92rem;line-height:1.5}
+.e6-zero b{color:var(--ink)}
 .e6-ov{position:fixed;inset:0;z-index:60;background:rgba(15,23,42,.45);display:flex;align-items:flex-end;justify-content:center}
 @media(min-width:680px){.e6-ov{align-items:center;padding:20px}}
 .e6-feuille{background:var(--card);color:var(--ink);width:100%;max-width:440px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:12px 20px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.25)}
@@ -459,11 +461,11 @@ export function creerEstimation(ctx) {
   function ecranEdt() {
     const c = cadre(), k = classeDe(S.classe);
     const pf = (k.pfmp || []).filter(p => p.fin >= c.periode.debut && p.debut <= c.periode.fin);
-    let h = barre(`${courtDe(k)}${k.effectif != null ? ` · ${k.effectif} élèves` : ''}`) + `${etape(3)}<h1 id="titre-ecran" tabindex="-1">Sélectionnez les cours de votre matière</h1><p class="e6-guide">Touchez chacun de vos cours et indiquez le nombre d’AESH.</p>`;
+    let h = barre(`${courtDe(k)}${k.effectif != null ? ` · ${k.effectif} élèves` : ''}`) + `${etape(3)}<h1 id="titre-ecran" tabindex="-1">Sélectionnez les cours de votre matière</h1><p class="e6-guide">Touchez chacun de vos cours et indiquez le nombre d’AESH. <b>Un cours sans besoin se marque 0 : c’est une réponse, elle compte.</b></p>`;
     if (c.avecParite) h += `<div class="e6-onglets" role="group" aria-label="Semaine">${['A', 'B'].map(s => `<button type="button" id="sem-${s}" data-e="sem" data-v="${s}" aria-pressed="${S.sem === s}">Semaine ${s}</button>`).join('')}</div>`;
     if (pf.length) h += `<p class="e6-info">${pf.map(p => `PFMP du ${esc(jjmm(p.debut))} au ${esc(jjmm(p.fin))}`).join(' · ')}</p>`;
     const ap = app();
-    h += `<p class="e6-legende"><span><span class="e6-qui vous">vous</span> : estimé par vous</span><span><span class="e6-qui coll">collègue</span> ✓ : par un collègue</span><span>+ : à estimer</span></p>`;
+    h += `<p class="e6-legende"><span><span class="e6-qui vous">vous</span> : estimé par vous</span><span><span class="e6-qui coll">collègue</span> ✓ : par un collègue</span><span>+ : pas encore répondu</span></p>`;
     JOURS.forEach(j => {
       const cj = k.creneaux.filter(cr => cr.jour === j && semaineVisible(cr)); if (!cj.length) return;
       h += `<h2 class="e6-jour">${JOURS_L[j]}</h2>`;
@@ -517,6 +519,7 @@ export function creerEstimation(ctx) {
       ${existe && !mien ? `<p class="e6-info" id="f-coll">Déjà estimé par un collègue. Votre réponse remplacera la sienne.</p>` : ''}
       <p class="e6-q" id="f-q">Combien d’AESH ?</p>
       <div class="e6-nbs" role="group" aria-labelledby="f-q">${[0, 1, 2, 3, 4, 5, 6].map(v => `<button type="button" id="nb-${v}" data-e="nb" data-v="${v}" aria-pressed="${f.nb === v}">${v}</button>`).join('')}</div>
+      ${f.nb == null ? `<p class="e6-zero" id="f-zero">Fermer sans choisir laisse ce cours « pas encore répondu ». <b>Aucun besoin ? Touchez 0</b> : c’est une réponse, et elle compte autant qu’une autre.</p>` : ''}
       <div class="e6-ligne"><span class="lib">Élèves dans ce cours <small style="display:block;font-size:.85rem">facultatif</small></span><span class="e6-ab" style="align-items:center"><button type="button" id="el-moins" data-e="eleves" data-v="-1" aria-label="Un élève de moins">−</button><b id="el-val" style="min-width:2.4em;text-align:center;font-size:1.15rem">${f.eleves == null ? '—' : esc(f.eleves)}</b><button type="button" id="el-plus" data-e="eleves" data-v="1" aria-label="Un élève de plus">+</button></span></div>
       <div class="e6-ligne"><span class="lib">Période</span><span class="val">${f.modPer
         ? `<label class="sr" for="f-au">Jusqu’au</label><input type="date" id="f-au" data-i="au" value="${esc(f.au)}" min="${esc(c.periode.debut)}" max="${esc(c.periode.fin)}">`

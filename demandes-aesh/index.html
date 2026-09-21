@@ -725,7 +725,7 @@ function monterEstimation(){
   const hote = $('#estimation-hote'); if (!hote) return;
   if (EST){ EST.monter(hote); return; }
   if (EST_CHARGEMENT) return;
-  EST_CHARGEMENT = import('./estimation.js?v=2026r14').then(m => {
+  EST_CHARGEMENT = import('./estimation.js?v=2026r15').then(m => {
     EST = m.creerEstimation({ FS, db, esc, annee:ANNEE, annonce, filiere:FILIERE, retourAccueil: () => actions.accueil(),
       pousser: est => histo('estimation', est), remplacer: est => histo('estimation', est, true) });
     const h = $('#estimation-hote'); if (h) EST.monter(h);
