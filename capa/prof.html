@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#3a5f25">
+<title>Ce qu'il me reste à faire — CAPa</title>
+<link rel="stylesheet" href="capa.css?v=3">
+<style>
+/* ── propre à la page réservée ── */
+.bandeau{background:var(--accent-d);color:var(--on-accent);padding:10px 16px;font-size:.92rem;font-weight:600}
+.bandeau span{opacity:.85;font-weight:400}
+.regle{margin:16px 0;padding:14px 16px;background:var(--accent-l);border-left:5px solid var(--accent);border-radius:var(--r-s)}
+.regle b{color:var(--accent-d)}
+.qui-liste{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0;padding:0;list-style:none}
+.qui-liste li{padding:6px 13px;border:1px solid var(--line);border-radius:999px;background:var(--card-2);font-size:.92rem}
+.qui-liste .rien{border-style:dashed;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="marque">
+  <b>Ce qu'il me reste à faire</b>
+  <a href="index.html">← La liste des collègues</a>
+  <a href="../">Portail coordination &amp; pédagogie</a>
+</div>
+<div class="bandeau">Réservé au professeur de PSE <span>— cette page n'est pas destinée à vos collègues.</span></div>
+
+<main>
+  <div id="ecran"><p class="vide">Lecture des réponses…</p></div>
+  <noscript><p class="message err">Cette page a besoin de JavaScript pour fonctionner.</p></noscript>
+</main>
+<div id="annonce" class="sr" role="status" aria-live="polite"></div>
+
+<script type="module">
+import { lireTout, programmes, texteMail, esc, dateCourte, FILIERES } from './commun.js?v=1';
+
+const $ = (s, r = document) => r.querySelector(s);
+const annonce = t => { const n = $('#annonce'); if (n) n.textContent = t; };
+const LIEN_PUBLIC = location.href.replace(/prof\.html.*$/, 'programme.html');
+
+const { donnees, gens, erreur } = await lireTout('capa-prof');
+const progs = programmes(donnees, gens);
+
+/* ─── affichage ─── */
+const s_ = n => n > 1 ? 's' : '';
+
+function htmlSeances(cours){
+  return `<ul class="seances">${cours.seances.map(s => {
+    const notions = (s.notions || []).map(n => n.n).join(', ');
+    return `<li class="${s.amoi ? 'amoi' : 'aeux'}">
+      <span class="num">${esc(s.num)}.</span>
+      <span class="titre">${esc(s.titre)}</span>
+      <span class="marqueur ${s.amoi ? 'm-amoi' : 'm-aeux'}">${s.amoi ? 'à moi' : esc(s.preneurs.map(g => g.nom).join(', '))}</span>
+      ${notions ? `<span class="notions">${esc(notions)}</span>` : ''}
+    </li>`;
+  }).join('')}</ul>`;
+}
+
+function htmlFiliere(p){
+  const pris = p.nbTotal - p.nbGardees;
+  const qui = p.repondants.length
+    ? `<ul class="qui-liste">${p.repondants.map(g =>
+        `<li>${esc(g.nom)}${g.termine ? '' : ' — en cours'}${g.maj ? ` · ${esc(dateCourte(g.maj))}` : ''}</li>`).join('')}</ul>`
+    : '<ul class="qui-liste"><li class="rien">Personne n’a encore répondu pour cette filière : tout reste à ma charge.</li></ul>';
+
+  const jauge = pris
+    ? `<div class="jauge" role="img" aria-label="${p.nbGardees} séances à moi, ${pris} aux collègues">
+         <span style="flex:${p.nbGardees};background:#15803d"></span>
+         <span style="flex:${pris};background:#ca8a04"></span>
+       </div>
+       <ul class="leg">
+         <li><i style="background:#15803d"></i><span>Je les traite</span> <b>${p.nbGardees}</b></li>
+         <li><i style="background:#ca8a04"></i><span>Elles leur reviennent</span> <b>${pris}</b></li>
+       </ul>`
+    : '';
+
+  const modules = p.modules.map(m => `
+    <section class="module">
+      <h3>${esc(m.nom)} <span class="cpt">— ${m.nbGardees} séance${s_(m.nbGardees)} sur ${m.nbTotal}</span></h3>
+      ${m.cours.map(c => `
+        <article class="cours">
+          <h4>${esc(c.titre)} <span class="cpt">· ${c.nbGardees}/${c.seances.length}</span></h4>
+          ${htmlSeances(c)}
+        </article>`).join('')}
+    </section>`).join('');
+
+  return `<section class="filiere">
+    <header>
+      <h2>${esc(p.nom)}</h2>
+      <span class="qui">${p.repondants.length} collègue${s_(p.repondants.length)} ${p.repondants.length > 1 ? 'ont' : 'a'} répondu</span>
+    </header>
+    <div class="gros">
+      <b>${p.nbGardees}</b><span class="sur">séance${s_(p.nbGardees)} sur ${p.nbTotal} restent à ma charge</span>
+      <span class="reste">${pris
+        ? `${pris} séance${s_(pris)} ${pris > 1 ? 'sont prises' : 'est prise'} en charge par vos collègues : je ne les traiterai pas.`
+        : 'Aucune séance n’est prise en charge par un collègue pour l’instant.'}</span>
+      ${jauge}
+    </div>
+    ${qui ? `<section class="module"><h3>Ont répondu</h3><div class="cours">${qui}</div></section>` : ''}
+    ${modules}
+  </section>`;
+}
+
+function dessiner(){
+  $('#ecran').innerHTML = `
+    <div class="entete">
+      <h1>Ce qu'il me reste à faire</h1>
+      <p class="sous">Le programme des deux années, une fois retirées les séances que vos collègues prennent en charge.
+      Le calcul est fait filière par filière.</p>
+    </div>
+    <div class="regle">
+      <b>La règle :</b> dès qu'un collègue coche « je le traite », la séance lui revient et sort de mon programme.
+      Tout le reste me revient — « je ne le traite pas », « une autre discipline le traite », et les séances sans réponse.
+    </div>
+    ${erreur ? `<p class="message err">${erreur === 'regles'
+        ? 'Le serveur refuse la lecture : la règle Firestore de coordination_capa_cours n’est pas encore publiée (voir LISEZMOI.md). Le programme ci-dessous ne tient compte d’aucune réponse.'
+        : 'Les réponses n’ont pas pu être lues : connexion au serveur impossible. Le programme ci-dessous ne tient compte d’aucune réponse.'}</p>` : ''}
+    <div class="actions no-print">
+      <button type="button" class="btn primaire" id="btn-mail">Envoyer le programme par courriel</button>
+      <a class="btn" href="programme.html">Voir la page que recevront les collègues</a>
+      <button type="button" class="btn" id="btn-imprimer">Imprimer</button>
+    </div>
+    ${progs.map(htmlFiliere).join('')}`;
+
+  $('#btn-mail').addEventListener('click', () => {
+    location.href = 'mailto:?subject=' + encodeURIComponent('CAPa — ce que je traiterai avec les élèves')
+      + '&body=' + encodeURIComponent(texteMail(progs, LIEN_PUBLIC));
+  });
+  $('#btn-imprimer').addEventListener('click', () => print());
+  annonce('Programme calculé.');
+}
+dessiner();
+</script>
+</body>
+</html>

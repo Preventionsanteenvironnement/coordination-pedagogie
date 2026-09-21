@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#3a5f25">
+<title>Ce que je traiterai en CAPa</title>
+<link rel="stylesheet" href="capa.css?v=3">
+<style>
+/* ── propre à la page publique : on montre, on ne compte pas ── */
+.entete h1{font-size:1.8rem}
+.filiere > header{border-radius:var(--r) var(--r) 0 0}
+.resume{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0 0}
+.resume .carte{flex:1 1 240px;padding:16px 18px;background:var(--card);border:1px solid var(--line);
+  border-left:5px solid var(--accent);border-radius:var(--r);box-shadow:var(--sh)}
+.resume .carte b{display:block;font-size:1.9rem;line-height:1.1;color:var(--accent-d);font-variant-numeric:tabular-nums}
+.resume .carte span{display:block;font-weight:600;margin-top:4px}
+.resume .carte em{display:block;font-style:normal;color:var(--muted);font-size:.9rem;margin-top:3px}
+ul.seances li.aeux{display:none}          /* ils savent ce qu'ils font : on ne le leur récite pas */
+.cours.vide-cours{display:none}
+.desaccord{margin:26px 0 0;padding:16px 18px;background:var(--card-2);border:1px dashed var(--line);border-radius:var(--r);color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<div class="marque">
+  <b>Ce que je traiterai en CAPa</b>
+  <a href="index.html">← La liste à cocher</a>
+</div>
+
+<main>
+  <div id="ecran"><p class="vide">Chargement…</p></div>
+  <noscript><p class="message err">Cette page a besoin de JavaScript pour fonctionner.</p></noscript>
+</main>
+
+<script type="module">
+import { lireTout, programmes, esc } from './commun.js?v=1';
+
+const $ = (s, r = document) => r.querySelector(s);
+const { donnees, gens, erreur } = await lireTout('capa-programme');
+const progs = programmes(donnees, gens);
+const s_ = n => n > 1 ? 's' : '';
+
+function htmlCours(c){
+  const gardees = c.seances.filter(s => s.amoi);
+  if (!gardees.length) return '';
+  return `<article class="cours">
+    <h4>${esc(c.titre)}</h4>
+    <ul class="seances">${gardees.map(s => {
+      const notions = (s.notions || []).map(n => n.n).join(', ');
+      return `<li class="amoi">
+        <span class="num">${esc(s.num)}.</span>
+        <span class="titre">${esc(s.titre)}</span>
+        ${notions ? `<span class="notions">${esc(notions)}</span>` : ''}
+      </li>`;
+    }).join('')}</ul>
+  </article>`;
+}
+
+function htmlFiliere(p){
+  const pris = p.nbTotal - p.nbGardees;
+  const modules = p.modules.filter(m => m.nbGardees).map(m => `
+    <section class="module">
+      <h3>${esc(m.nom)} <span class="cpt">— ${m.nbGardees} séance${s_(m.nbGardees)}</span></h3>
+      ${m.cours.map(htmlCours).join('')}
+    </section>`).join('');
+  return `<section class="filiere">
+    <header>
+      <h2>${esc(p.nom)}</h2>
+      <span class="qui">${p.nbGardees} séance${s_(p.nbGardees)}${pris ? ` — ${pris} vous ${pris > 1 ? 'reviennent' : 'revient'}` : ''}</span>
+    </header>
+    ${modules || '<section class="module"><div class="cours"><p class="vide">Rien ne me revient pour cette filière : vous traitez tout.</p></div></section>'}
+  </section>`;
+}
+
+const total = progs.reduce((n, p) => n + p.nbGardees, 0);
+const pris  = progs.reduce((n, p) => n + (p.nbTotal - p.nbGardees), 0);
+
+$('#ecran').innerHTML = `
+  <div class="entete">
+    <h1>Ce que je traiterai avec les élèves</h1>
+    <p class="sous">Voici mon programme de CAPa sur les deux années, une fois vos réponses prises en compte :
+    les séances que vous traitez déjà en sont retirées. Vous n'avez rien à faire ici — c'est pour information.</p>
+  </div>
+
+  <div class="resume">
+    ${progs.map(p => `<div class="carte"><b>${p.nbGardees}</b>
+      <span>${esc(p.nom)}</span>
+      <em>sur ${p.nbTotal} séances${p.nbTotal - p.nbGardees ? ` · ${p.nbTotal - p.nbGardees} vous ${(p.nbTotal - p.nbGardees) > 1 ? 'reviennent' : 'revient'}` : ''}</em></div>`).join('')}
+  </div>
+
+  ${erreur ? `<p class="message err">Les réponses n’ont pas pu être lues${erreur === 'regles' ? ' (règle Firestore non publiée)' : ' (connexion impossible)'} :
+    la liste ci-dessous montre mon programme entier, sans tenir compte de vos réponses.</p>` : ''}
+
+  ${progs.map(htmlFiliere).join('')}
+
+  <div class="desaccord">
+    <p><b>Si quelque chose ne va pas</b> — une séance que vous traitez déjà et qui apparaît encore ici, ou l'inverse —
+    dites-le moi, ou retournez cocher la liste : ce programme se recalcule tout seul.</p>
+    <p class="no-print"><a href="index.html">Revenir à la liste à cocher</a></p>
+  </div>`;
+</script>
+</body>
+</html>

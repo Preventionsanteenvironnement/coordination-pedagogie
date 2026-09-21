@@ -114,7 +114,9 @@ fieldset.filiere label:has(input:checked) .sigle{background:var(--accent);color:
   font:inherit;font-weight:600;color:var(--ink-2);cursor:pointer}
 .filtres button:hover{border-color:var(--accent)}
 .filtres button[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:var(--accent-d)}
-.filtres .cpt{opacity:.75;font-weight:500}
+.filtres .cpt{opacity:.75;font-weight:500;font-variant-numeric:tabular-nums}
+.filtres button .puce{width:9px;height:9px;border-radius:3px;flex:0 0 auto}
+.filtres button[aria-pressed=true] .puce{box-shadow:0 0 0 2px var(--on-accent)}
 .quoi-filtre{font-size:.85rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:16px 0 0}
 .sommaire{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .sommaire a{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 13px;
@@ -188,6 +190,18 @@ fieldset.rep label.coche-non:has(input:checked){background:var(--non-bg);border-
 .mots p:last-child{margin-bottom:0}
 .mots b{color:var(--aut)}
 .autres .vide{color:var(--muted);font-size:.92rem;margin:6px 0 0;padding:0}
+
+/* ── le cadre réservé, sur l'accueil ── */
+a.reserve{
+  display:flex;align-items:center;gap:14px;margin:18px 0 0;padding:14px 16px;
+  border:2px dashed var(--line-2);border-radius:var(--r);background:var(--card-2);
+  text-decoration:none;color:var(--muted);
+}
+a.reserve:hover{border-color:var(--accent);background:var(--accent-l)}
+a.reserve .cle{font-size:1.2rem;flex:0 0 auto}
+a.reserve b{display:block;color:var(--ink-2);font-size:.98rem}
+a.reserve span{font-size:.9rem}
+a.reserve .fleche{margin-left:auto;font-size:1.1rem;color:var(--accent-d)}
 
 /* ── barre du bas ── */
 .barre{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--card);border-top:1px solid var(--line);
@@ -447,16 +461,23 @@ function dessinerAccueil(){
   $('#ecran').innerHTML = `
     <div class="entete">
       <h1>Ce que je traite dans mes cours de CAPa</h1>
-      <p class="sous">Voici, séance par séance, ce que je traite avec mes classes de CAPa, et les notions que j’y aborde.
-      Dites pour chacune si vous la traitez vous aussi. Nous verrons ainsi ce qui se recoupe, et qui garde quoi.</p>
+      <p class="sous">Nous sommes plusieurs à enseigner le CAPa, et il est probable que nous traitions
+      les mêmes contenus sans le savoir. Plutôt que d’en discuter de mémoire, voici la liste exacte
+      de ce que je traite, séance par séance, avec les notions que j’y aborde.</p>
     </div>
     <div class="bloc">
+      <h2>Ce que je vous demande</h2>
+      <p>Parcourez la liste et dites, pour chaque séance, si vous la traitez vous aussi.
+      Rien d’autre : c’est <b>votre</b> réponse qui compte, pas la mienne.</p>
+      <p>Trois réponses possibles : <b>${LIBELLES.oui}</b>, <b>${LIBELLES.non}</b>,
+      ou <b>${LIBELLES.autre}</b> — pour les contenus qui, chez vous, reviennent à un collègue
+      d’une autre matière. Si vous voulez préciser quelque chose, un champ libre est prévu sous chaque séance.</p>
+      <p>Ce que je ferai de vos réponses : repérer ce que nous faisons deux fois, et en discuter ensemble.
+      Personne ne décide à la place de personne.</p>
       <p><b>${t.cours} cours · ${t.seances} séances · ${t.notions} notions.</b>
       Comptez une vingtaine de minutes. Vos réponses s’enregistrent au fur et à mesure :
-      vous pouvez fermer la page et reprendre plus tard sur le même appareil.</p>
-      <p>Pour chaque séance, trois réponses possibles : <b>${LIBELLES.oui}</b>,
-      <b>${LIBELLES.non}</b>, ou <b>${LIBELLES.autre}</b> — pour les séances qui, chez vous,
-      relèvent d’un collègue d’une autre matière. Vous verrez en même temps ce que les autres ont répondu.</p>
+      vous pouvez fermer la page, revenir, et modifier ce que vous avez coché.
+      Vous verrez en même temps ce que les autres ont répondu.</p>
       ${dejaLa ? `<p class="sous">${dejaLa} collègue${dejaLa > 1 ? 's ont' : ' a'} déjà répondu.</p>` : ''}
       ${firebaseKO || S.lectureKO ? '<p class="message err">La connexion au serveur n’a pas pu être établie. Vous pouvez répondre quand même : à la fin, un bouton vous permettra de télécharger votre réponse pour l’envoyer par courriel.</p>' : ''}
       <form id="f-identite" novalidate>
@@ -473,7 +494,13 @@ function dessinerAccueil(){
           <button type="submit" class="btn primaire">${repris ? 'Reprendre où j’en étais' : 'Commencer'}</button>
         </div>
       </form>
-    </div>`;
+    </div>
+    <a class="reserve" href="prof.html">
+      <span class="cle" aria-hidden="true">🔒</span>
+      <span><b>Réservé au professeur de PSE</b>
+      <span>Le programme qu'il reste à assurer, une fois vos réponses prises en compte.</span></span>
+      <span class="fleche" aria-hidden="true">→</span>
+    </a>`;
   $('#f-identite').addEventListener('submit', ev => {
     ev.preventDefault();
     const nom = $('#i-nom').value.trim();
@@ -541,6 +568,8 @@ function htmlSeance(cours, s, etat, combien){
   </section>`;
 }
 
+const COULEURS = { partout:'#b91c1c', partie:'#ca8a04', seul:'#15803d', rien:'#c4c9cd' };
+
 function dessinerListe(){
   $('#barre').hidden = false;
   const d = S.donnees;
@@ -576,7 +605,12 @@ function dessinerListe(){
   const boutonsVerdict = [['toutes', 'Toutes les séances', d.totaux.seances]]
     .concat(Object.entries(VERDICTS).map(([id, v]) => [id, v.filtre, compte[id]]))
     .concat([[FILTRE_DISCIPLINE, 'Autre discipline', compte.discipline]])
-    .map(([id, t, n]) => `<button type="button" data-filtre="${id}" aria-pressed="${S.filtre === id}">${t} <span class="cpt">${n}</span></button>`)
+    .map(([id, t, n]) => {
+      const c = COULEURS[id] || (id === FILTRE_DISCIPLINE ? COULEURS.partie : null);
+      return `<button type="button" data-filtre="${id}" aria-pressed="${S.filtre === id}">` +
+        (c ? `<i class="puce" style="background:${c}" aria-hidden="true"></i>` : '') +
+        `${t} <span class="cpt">${n}</span></button>`;
+    })
     .join('');
   const boutonsFiliere = [['toutes', 'Les deux filières']]
     .concat(Object.entries(FILIERES).map(([id, f]) => [id, f.nom]))

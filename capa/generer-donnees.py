@@ -27,9 +27,12 @@ MODULES = [
      "Module MG1 · capacité CG1.1 · CCF1 (oral)"),
     ("BIO", "Biologie — Le corps et la santé au travail",
      "Module MG1 · capacité CG1.3 · CCF4 (oral)"),
-    ("MP1 · Insertion", "MP1 — Insertion dans le monde du travail",
-     "Module professionnel · CCF6 (dossier)"),
 ]
+
+# Modules volontairement absents de la liste à comparer.
+# MP1 (CCF6) est un dossier construit à partir d'un emploi observé : il ne se
+# compare pas séance par séance avec un collègue.
+EXCLUS = {"MP1 · Insertion"}
 
 
 def texte(v):
@@ -84,10 +87,13 @@ def repartir(seances, restantes):
 def main():
     biblio = json.load(open(BIBLIO, encoding="utf-8"))
     par_module = {code: [] for code, _, _ in MODULES}
-    inconnus = []
+    inconnus, ecartes = [], 0
 
     for entree in biblio:
         mod = texte(entree.get("module"))
+        if mod in EXCLUS:
+            ecartes += 1
+            continue
         seances, en_attente, objectif_general = lire_cours(entree)
         notions_cours = repartir(seances, en_attente)
         cours = {
@@ -137,6 +143,8 @@ def main():
         json.dump(sortie, f, ensure_ascii=False, indent=1)
 
     print("Ecrit :", SORTIE)
+    if ecartes:
+        print("  ({} cours ecartes : {})".format(ecartes, ", ".join(sorted(EXCLUS))))
     print("  {cours} cours · {seances} seances · {notions} notions".format(**sortie["totaux"]))
     for m in modules:
         print("   - {:16} {:2} cours · {:2} seances".format(
