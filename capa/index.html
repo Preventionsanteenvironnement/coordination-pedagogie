@@ -483,7 +483,7 @@ function dessinerAccueil(){
       <form id="f-identite" novalidate>
         <label class="champ" for="i-nom">Votre prénom
           <span class="aide">Pour savoir qui a répondu quoi.</span>
-          <input type="text" id="i-nom" name="nom" autocomplete="name" required value="${esc(S.moi ? S.moi.nom : '')}">
+          <input type="text" id="i-nom" name="nom" autocomplete="name" required maxlength="60" value="${esc(S.moi ? S.moi.nom : '')}">
         </label>
         <fieldset class="filiere">
           <legend>Votre filière<span class="aide">Les séances sont les mêmes ; c’est pour savoir d’où vient la réponse.</span></legend>
