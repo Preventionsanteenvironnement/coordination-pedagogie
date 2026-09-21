@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#4a7830">
+<title>Ce que je traite en CAPa — comparaison entre collègues</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   Ce que je traite en CAPa — page des collègues
+   ---------------------------------------------------------------
+   Le contenu affiché vient de donnees-capa.json, fabriqué par
+   generer-donnees.py depuis la bibliothèque CAPa de l'Atelier.
+   Ne jamais retoucher donnees-capa.json à la main : le régénérer.
+
+   Écrit : un document reponse_<id> par collègue.
+   Lu    : rien (la mise en commun se lit dans synthese.html).
+   Collection Firestore : coordination_capa_cours.
+
+   Aucun code d'accès : chacun donne son prénom et son établissement.
+   Aucun nom d'élève, nulle part. Page en clair, sans mode sombre.
+   ═══════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#f5f7f3; --card:#ffffff; --card-2:#fafbf8;
+  --ink:#16200f; --ink-2:#39462f; --muted:#5b6a4e;
+  --line:#ccd6c2; --line-2:#e4eade;
+  --accent:#4a7830; --accent-d:#3a5f25; --accent-l:#e9f2e2; --on-accent:#ffffff;
+  --focus:#1d4ed8;
+  --oui:#15803d; --oui-bg:#e6f4ea; --oui-line:#15803d;
+  --aut:#b45309; --aut-bg:#fdf1de; --aut-line:#b45309;
+  --non:#6b7280; --non-bg:#f1f2f4; --non-line:#9aa1ab;
+  --err-bg:#fdecec; --err-ink:#8f1d1d; --err-line:#b91c1c;
+  --info-bg:#eef3fb; --info-ink:#1e3a8a; --info-line:#1d4ed8;
+  --r:14px; --r-s:10px;
+  --sh:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.05);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{font-size:100%;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:400 1rem/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding:0 0 88px;
+}
+h1,h2,h3{line-height:1.25;margin:0}
+p{margin:.6em 0}
+a{color:var(--accent-d)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ── en-tête ── */
+.marque{
+  display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;
+  padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);
+}
+.marque b{font-size:1rem}
+.marque .retour{font-size:1rem;font-weight:600;color:var(--muted);text-decoration:none}
+.marque .retour:hover{color:var(--accent-d);text-decoration:underline}
+main{max-width:860px;margin:0 auto;padding:0 16px}
+.entete{padding:22px 0 8px}
+.entete h1{font-size:1.5rem}
+.entete .sous{color:var(--muted);margin-top:6px}
+
+/* ── blocs ── */
+.bloc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:18px;margin:16px 0}
+.message{border-radius:var(--r-s);padding:12px 14px;margin:14px 0;border-left:5px solid}
+.message.err{background:var(--err-bg);color:var(--err-ink);border-color:var(--err-line)}
+.message.info{background:var(--info-bg);color:var(--info-ink);border-color:var(--info-line)}
+
+/* ── formulaire ── */
+label.champ{display:block;margin:14px 0 0;font-weight:600}
+label.champ .aide{display:block;font-weight:400;color:var(--muted);font-size:.92rem;margin-top:2px}
+input[type=text]{
+  width:100%;margin-top:6px;padding:11px 12px;font-size:1rem;font-family:inherit;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-s);
+}
+textarea{
+  width:100%;margin-top:8px;padding:10px 12px;font-size:.98rem;font-family:inherit;color:var(--ink);
+  background:var(--card-2);border:1px solid var(--line);border-radius:var(--r-s);resize:vertical;min-height:62px;
+}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:11px 18px;border-radius:var(--r-s);
+  font:inherit;font-weight:600;cursor:pointer;
+  background:var(--card);color:var(--ink-2);border:1px solid var(--line);
+}
+.btn:hover{border-color:var(--accent);color:var(--accent-d)}
+.btn.primaire{background:var(--accent);color:var(--on-accent);border-color:var(--accent-d)}
+.btn.primaire:hover{background:var(--accent-d);color:var(--on-accent)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+
+/* ── sommaire ── */
+.sommaire{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.sommaire a{
+  display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 13px;
+  border:1px solid var(--line);border-radius:999px;background:var(--card);
+  text-decoration:none;color:var(--ink-2);font-weight:600;font-size:.94rem;
+}
+.sommaire a:hover{border-color:var(--accent);color:var(--accent-d)}
+.sommaire .cpt{color:var(--muted);font-weight:500}
+
+/* ── module / cours / séance ── */
+.module{margin:28px 0 0}
+.module > h2{
+  font-size:1.2rem;padding:14px 16px;background:var(--accent-l);
+  border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:var(--r);
+}
+.module > h2 .cadre{display:block;font-size:.9rem;font-weight:500;color:var(--ink-2);margin-top:3px}
+.cours{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);margin:14px 0;overflow:hidden}
+.cours > h3{font-size:1.06rem;padding:14px 16px 0}
+.cours .obj{color:var(--muted);font-size:.95rem;padding:2px 16px 0;margin:0}
+.notions-cours{padding:0 16px}
+
+.seance{border-top:1px solid var(--line-2);padding:14px 16px;margin-top:12px}
+.seance:first-of-type{margin-top:12px}
+.seance h4{font-size:1rem;margin:0;display:flex;gap:9px;align-items:baseline}
+.seance h4 .num{
+  flex:0 0 auto;min-width:26px;height:26px;border-radius:999px;background:var(--accent-l);
+  color:var(--accent-d);font-size:.85rem;display:inline-flex;align-items:center;justify-content:center;font-weight:700;
+}
+.seance .obj{padding:4px 0 0;font-size:.94rem}
+
+/* ── notions ── */
+details.notions{margin-top:10px}
+details.notions > summary{
+  cursor:pointer;min-height:40px;display:flex;align-items:center;gap:7px;
+  font-size:.93rem;font-weight:600;color:var(--accent-d);list-style:none;
+}
+details.notions > summary::-webkit-details-marker{display:none}
+details.notions > summary::before{
+  content:"";flex:0 0 auto;width:0;height:0;
+  border-left:7px solid currentColor;border-top:5px solid transparent;border-bottom:5px solid transparent;
+  transition:transform .15s;transform-origin:30% 50%;
+}
+details.notions[open] > summary::before{transform:rotate(90deg)}
+details.notions dl{margin:8px 0 0;padding:12px 14px;background:var(--card-2);border:1px solid var(--line-2);border-radius:var(--r-s)}
+details.notions dt{font-weight:700;font-size:.94rem}
+details.notions dd{margin:1px 0 10px;color:var(--ink-2);font-size:.94rem}
+details.notions dd:last-child{margin-bottom:0}
+
+/* ── les trois réponses ── */
+fieldset.rep{border:0;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+fieldset.rep legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+fieldset.rep label{
+  display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;
+  border:1px solid var(--line);border-radius:999px;background:var(--card);
+  font-size:.95rem;font-weight:600;color:var(--ink-2);cursor:pointer;
+}
+fieldset.rep input{position:absolute;opacity:0;width:1px;height:1px}
+fieldset.rep label:hover{border-color:var(--accent)}
+fieldset.rep input:focus-visible + span{outline:3px solid var(--focus);outline-offset:4px;border-radius:4px}
+fieldset.rep label.coche-oui:has(input:checked){background:var(--oui-bg);border-color:var(--oui-line);color:var(--oui);box-shadow:inset 0 0 0 1px var(--oui-line)}
+fieldset.rep label.coche-aut:has(input:checked){background:var(--aut-bg);border-color:var(--aut-line);color:var(--aut);box-shadow:inset 0 0 0 1px var(--aut-line)}
+fieldset.rep label.coche-non:has(input:checked){background:var(--non-bg);border-color:var(--non-line);color:var(--non);box-shadow:inset 0 0 0 1px var(--non-line)}
+.precision{margin-top:10px}
+.precision label{font-weight:600;font-size:.94rem;color:var(--ink-2)}
+
+/* ── barre du bas ── */
+.barre{
+  position:fixed;left:0;right:0;bottom:0;z-index:5;
+  background:var(--card);border-top:1px solid var(--line);
+  box-shadow:0 -6px 20px rgba(16,24,40,.08);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+.barre .dedans{max-width:860px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.jauge{flex:1 1 220px;min-width:180px}
+.jauge .piste{height:9px;border-radius:999px;background:var(--line-2);overflow:hidden}
+.jauge .part{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .25s}
+.jauge .txt{font-size:.9rem;color:var(--muted);margin-top:4px}
+.etat{font-size:.88rem;color:var(--muted)}
+.etat.souci{color:var(--err-ink);font-weight:600}
+
+/* ── écran de fin ── */
+.fin h2{font-size:1.25rem}
+.recap{margin:14px 0 0;padding:0;list-style:none}
+.recap li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line-2)}
+.recap li b{font-size:1.15rem;min-width:2.4em;text-align:right}
+
+@media (max-width:560px){
+  .entete h1{font-size:1.3rem}
+  .seance{padding:14px 12px}
+  .cours > h3,.cours .obj,.notions-cours{padding-left:12px;padding-right:12px}
+}
+
+/* ── impression : la liste complète, cases vides à cocher au stylo ── */
+@media print{
+  :root{--bg:#fff}
+  body{padding:0;font-size:10.5pt}
+  .marque,.barre,.actions,.sommaire,.no-print{display:none !important}
+  main{max-width:none;padding:0}
+  .bloc{box-shadow:none}
+  .cours{break-inside:avoid;box-shadow:none;border:1px solid #999}
+  .module > h2{break-after:avoid;background:#eee}
+  .seance{break-inside:avoid}
+  details.notions{display:block}
+  details.notions > summary{display:none}
+  details.notions dl{background:#fff;border:1px solid #ccc}
+  fieldset.rep label{border:1px solid #333;box-shadow:none !important;background:#fff !important;color:#000 !important;min-height:0;padding:2px 8px}
+  fieldset.rep label::before{content:"☐ "}
+  fieldset.rep label:has(input:checked)::before{content:"☒ "}
+  .precision{border-bottom:1px solid #999;height:26px}
+  .precision label{font-size:9pt;color:#444}
+  .precision textarea{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="marque">
+  <b>Ce que je traite en CAPa</b>
+  <a class="retour" href="../">← Portail coordination &amp; pédagogie</a>
+</div>
+
+<main>
+  <div id="ecran"></div>
+  <p id="chargement">Chargement de la liste…</p>
+  <noscript><p class="message err">Cette page a besoin de JavaScript pour fonctionner.</p></noscript>
+</main>
+
+<div id="barre" class="barre" hidden>
+  <div class="dedans">
+    <div class="jauge">
+      <div class="piste"><div class="part" id="jauge-part"></div></div>
+      <div class="txt" id="jauge-txt">0 séance sur 70</div>
+    </div>
+    <span class="etat" id="etat"></span>
+    <button type="button" class="btn primaire" id="btn-terminer">J’ai terminé</button>
+  </div>
+</div>
+
+<div id="annonce" class="sr" role="status" aria-live="polite"></div>
+
+<script type="module">
+/* ═══════════════ Firebase ═══════════════ */
+const firebaseConfig = {
+  apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com",
+  projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
+  messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55"
+};
+const COL = 'coordination_capa_cours';
+const DELAI_MS = 15000;
+const K_REPONSE = 'capa-cours-reponse-v1';
+
+function anneeScolaire(d = new Date()){
+  const y = d.getFullYear();
+  return d.getMonth() >= 7 ? `${y}-${y+1}` : `${y-1}-${y}`;
+}
+const ANNEE = anneeScolaire();
+
+let FS = null, db = null, firebaseKO = null;
+try {
+  FS = window.__FIRESTORE_SHIM__ || await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+  let app = null;
+  if (!window.__FIRESTORE_SHIM__){
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
+    app = initializeApp(firebaseConfig, 'capa-cours');
+  }
+  db = FS.getFirestore(app);
+} catch(e){ firebaseKO = e; }
+
+/* ═══════════════ outils ═══════════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const annonce = t => { const n = $('#annonce'); if (n) n.textContent = t; };
+
+function avecDelai(promesse, ms){
+  let t;
+  return Promise.race([
+    promesse,
+    new Promise((_, rej) => { t = setTimeout(() => { const e = new Error('Délai dépassé : pas de réponse du serveur.'); e.code = 'delai'; rej(e); }, ms); })
+  ]).finally(() => clearTimeout(t));
+}
+function lsLit(k, def){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } }
+function lsEcrit(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+/* ═══════════════ état ═══════════════ */
+const LIBELLES = { oui:'Je le fais', autrement:'Je le fais autrement', non:'Je ne le fais pas' };
+
+const S = {
+  donnees: null,
+  moi: lsLit(K_REPONSE, null),   // { id, nom, etablissement, reponses:{}, termine }
+  seances: [],                   // à plat, pour compter
+  envoi: 'attente',              // attente · ok · regles · reseau
+};
+
+function nouvelId(){
+  const a = new Uint8Array(8); crypto.getRandomValues(a);
+  return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
+}
+function cle(cours, seance){ return `${cours.code}/${seance.num}`; }
+function reponse(k){ return (S.moi && S.moi.reponses && S.moi.reponses[k]) || null; }
+function nbRepondues(){ return S.seances.filter(({k}) => reponse(k)).length; }
+
+/* ═══════════════ enregistrement ═══════════════ */
+let minuteur = null;
+function enregistrer({ tout_de_suite = false } = {}){
+  if (!S.moi) return;
+  S.moi.maj = new Date().toISOString();
+  lsEcrit(K_REPONSE, S.moi);
+  clearTimeout(minuteur);
+  if (tout_de_suite) return envoyer();
+  minuteur = setTimeout(envoyer, 1500);
+}
+async function envoyer(){
+  if (!S.moi) return;
+  if (!db){ S.envoi = 'reseau'; majEtat(); return; }
+  const doc = {
+    id: `reponse_${S.moi.id}`, type: 'reponse', source: 'capa-cours', annee: ANNEE,
+    nom: S.moi.nom, etablissement: S.moi.etablissement,
+    reponses: S.moi.reponses, termine: !!S.moi.termine, maj: S.moi.maj,
+  };
+  try {
+    await avecDelai(FS.setDoc(FS.doc(db, COL, doc.id), doc), DELAI_MS);
+    S.envoi = 'ok';
+  } catch(e){
+    S.envoi = `${(e && e.code) || ''} ${(e && e.message) || ''}`.includes('permission') ? 'regles' : 'reseau';
+  }
+  majEtat();
+}
+
+function majEtat(){
+  const n = $('#etat'); if (!n) return;
+  if (S.envoi === 'attente'){ n.className = 'etat'; n.textContent = ''; return; }
+  if (S.envoi === 'ok'){ n.className = 'etat'; n.textContent = 'Enregistré'; return; }
+  n.className = 'etat souci';
+  n.textContent = S.envoi === 'regles'
+    ? 'Réponses gardées sur cet appareil : le serveur les refuse'
+    : 'Réponses gardées sur cet appareil : le serveur ne répond pas';
+}
+function majJauge(){
+  const fait = nbRepondues(), total = S.seances.length;
+  const p = $('#jauge-part'), t = $('#jauge-txt');
+  if (p) p.style.width = total ? `${Math.round(fait / total * 100)}%` : '0';
+  if (t) t.textContent = `${fait} séance${fait > 1 ? 's' : ''} sur ${total}`;
+}
+
+/* ═══════════════ écrans ═══════════════ */
+function ecranCourant(){
+  const h = (location.hash || '').replace('#', '');
+  if (h === 'liste' || h === 'fin') return h;
+  return 'accueil';
+}
+function aller(nom){
+  if (ecranCourant() === nom){ dessiner(); return; }
+  location.hash = nom;          // le bouton Précédent du navigateur fonctionne
+}
+addEventListener('hashchange', dessiner);
+
+function dessiner(){
+  const ecran = ecranCourant();
+  if (ecran !== 'accueil' && !S.moi){ location.replace('#accueil'); return dessinerAccueil(); }
+  if (ecran === 'liste') return dessinerListe();
+  if (ecran === 'fin') return dessinerFin();
+  dessinerAccueil();
+}
+
+/* ── accueil ── */
+function dessinerAccueil(){
+  $('#barre').hidden = true;
+  const d = S.donnees, t = d.totaux;
+  const repris = S.moi && nbRepondues() > 0;
+  $('#ecran').innerHTML = `
+    <div class="entete">
+      <h1>Ce que je traite dans mes cours de CAPa</h1>
+      <p class="sous">Voici, séance par séance, ce que je traite avec mes classes de CAPa, et les notions que j’y aborde.
+      Dites pour chacune si vous la traitez vous aussi. Nous verrons ainsi ce qui se recoupe, et qui garde quoi.</p>
+    </div>
+    <div class="bloc">
+      <p><b>${t.cours} cours · ${t.seances} séances · ${t.notions} notions.</b>
+      Comptez une vingtaine de minutes. Vos réponses s’enregistrent au fur et à mesure :
+      vous pouvez fermer la page et reprendre plus tard sur le même appareil.</p>
+      <p>Pour chaque séance, trois réponses possibles : <b>${LIBELLES.oui}</b>,
+      <b>${LIBELLES.autrement}</b> (le plus utile : dites en quoi) ou <b>${LIBELLES.non}</b>.</p>
+      ${firebaseKO ? '<p class="message err">La connexion au serveur n’a pas pu être établie. Vous pouvez répondre quand même : à la fin, un bouton vous permettra de télécharger votre réponse pour l’envoyer par courriel.</p>' : ''}
+      <form id="f-identite" novalidate>
+        <label class="champ" for="i-nom">Votre nom
+          <span class="aide">Pour savoir qui a répondu quoi. Prénom seul accepté.</span>
+          <input type="text" id="i-nom" name="nom" autocomplete="name" required value="${esc(S.moi ? S.moi.nom : '')}">
+        </label>
+        <label class="champ" for="i-etab">Votre établissement
+          <span class="aide">Facultatif.</span>
+          <input type="text" id="i-etab" name="etab" autocomplete="organization" value="${esc(S.moi ? S.moi.etablissement : '')}">
+        </label>
+        <p class="message err" id="err-identite" hidden>Écrivez au moins votre prénom pour commencer.</p>
+        <div class="actions">
+          <button type="submit" class="btn primaire">${repris ? 'Reprendre où j’en étais' : 'Commencer'}</button>
+          <a class="btn" href="synthese.html">Voir les réponses de tous</a>
+        </div>
+      </form>
+    </div>`;
+  $('#f-identite').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const nom = $('#i-nom').value.trim(), etab = $('#i-etab').value.trim();
+    if (!nom){ $('#err-identite').hidden = false; $('#i-nom').focus(); return; }
+    if (!S.moi) S.moi = { id: nouvelId(), reponses: {}, termine: false };
+    S.moi.nom = nom; S.moi.etablissement = etab;
+    enregistrer();
+    aller('liste');
+  });
+}
+
+/* ── liste ── */
+function htmlNotions(items, titre){
+  if (!items || !items.length) return '';
+  return `<details class="notions">
+    <summary>${esc(titre)} (${items.length})</summary>
+    <dl>${items.map(i => `<dt>${esc(i.n)}</dt><dd>${esc(i.d)}</dd>`).join('')}</dl>
+  </details>`;
+}
+function htmlSeance(cours, s){
+  const k = cle(cours, s), r = reponse(k) || {};
+  const radio = (v, cls) => `
+    <label class="coche-${cls}">
+      <input type="radio" name="r_${esc(k)}" value="${v}" data-cle="${esc(k)}"${r.r === v ? ' checked' : ''}>
+      <span>${LIBELLES[v]}</span>
+    </label>`;
+  return `<section class="seance" id="s_${esc(k.replace(/[^\w]/g, '_'))}">
+    <h4><span class="num" aria-hidden="true">${esc(s.num)}</span>
+      <span><span class="sr">Séance ${esc(s.num)} — </span>${esc(s.titre)}</span></h4>
+    ${s.objectif ? `<p class="obj">${esc(s.objectif)}</p>` : ''}
+    ${htmlNotions(s.notions, 'Les notions de cette séance')}
+    <fieldset class="rep">
+      <legend>${esc(cours.titre)} — séance ${esc(s.num)} : ${esc(s.titre)}</legend>
+      ${radio('oui', 'oui')}${radio('autrement', 'aut')}${radio('non', 'non')}
+    </fieldset>
+    <div class="precision">
+      <label for="c_${esc(k)}">Préciser (facultatif) : ce que vous faites, à quel moment de l’année…</label>
+      <textarea id="c_${esc(k)}" data-cle-commentaire="${esc(k)}" rows="2">${esc(r.c || '')}</textarea>
+    </div>
+  </section>`;
+}
+function dessinerListe(){
+  $('#barre').hidden = false;
+  const d = S.donnees;
+  const sommaire = d.modules.map(m => {
+    const tot = m.cours.reduce((n, c) => n + c.seances.length, 0);
+    return `<a href="#m_${esc(m.code.replace(/[^\w]/g, '_'))}"><span>${esc(m.code)}</span><span class="cpt">${tot}</span></a>`;
+  }).join('');
+
+  const modules = d.modules.map(m => `
+    <section class="module" id="m_${esc(m.code.replace(/[^\w]/g, '_'))}">
+      <h2>${esc(m.nom)}<span class="cadre">${esc(m.cadre)}</span></h2>
+      ${m.cours.map(c => `
+        <article class="cours">
+          <h3>${esc(c.titre)}</h3>
+          ${c.objectif ? `<p class="obj">${esc(c.objectif)}</p>` : ''}
+          ${c.notions_cours.length ? `<div class="notions-cours">${htmlNotions(c.notions_cours, 'Les notions de ce cours')}</div>` : ''}
+          ${c.seances.map(s => htmlSeance(c, s)).join('')}
+        </article>`).join('')}
+    </section>`).join('');
+
+  $('#ecran').innerHTML = `
+    <div class="entete">
+      <h1>Séance par séance</h1>
+      <p class="sous">Bonjour ${esc(S.moi.nom)}. Pour chaque séance, dites si vous la traitez.
+      Les notions s’ouvrent d’un clic si vous voulez voir exactement ce qui est abordé.</p>
+      <div class="sommaire no-print">${sommaire}</div>
+      <div class="actions no-print">
+        <button type="button" class="btn" id="btn-imprimer">Imprimer la liste</button>
+        <a class="btn" href="#accueil">Changer mon nom</a>
+      </div>
+    </div>
+    ${modules}
+    <div class="bloc no-print">
+      <p>C’est tout. Quand vous avez répondu à ce que vous pouviez, cliquez sur <b>J’ai terminé</b> en bas.
+      Les séances laissées vides resteront simplement sans réponse.</p>
+    </div>`;
+
+  $('#ecran').addEventListener('change', ev => {
+    const k = ev.target.dataset.cle;
+    if (!k) return;
+    const r = S.moi.reponses[k] || {};
+    r.r = ev.target.value;
+    S.moi.reponses[k] = r;
+    majJauge(); enregistrer();
+  });
+  $('#ecran').addEventListener('input', ev => {
+    const k = ev.target.dataset.cleCommentaire;
+    if (!k) return;
+    const r = S.moi.reponses[k] || {};
+    r.c = ev.target.value;
+    if (!r.r && !r.c) delete S.moi.reponses[k]; else S.moi.reponses[k] = r;
+    enregistrer();
+  });
+  $('#btn-imprimer').addEventListener('click', () => {
+    document.querySelectorAll('details.notions').forEach(n => n.open = true);
+    print();
+  });
+  majJauge(); majEtat();
+  enregistrer();
+}
+
+/* ── fin ── */
+function dessinerFin(){
+  $('#barre').hidden = true;
+  const compte = { oui:0, autrement:0, non:0 };
+  S.seances.forEach(({k}) => { const r = reponse(k); if (r && r.r) compte[r.r]++; });
+  const sans = S.seances.length - (compte.oui + compte.autrement + compte.non);
+  const s_ = n => n > 1 ? 's' : '';
+  $('#ecran').innerHTML = `
+    <div class="entete fin">
+      <h1>Merci.</h1>
+      <p class="sous">${S.envoi === 'ok'
+        ? 'Vos réponses sont enregistrées. Vous pouvez revenir les modifier à tout moment depuis cet appareil.'
+        : 'Vos réponses sont gardées sur cet appareil, mais elles n’ont pas pu être envoyées. Téléchargez-les ci-dessous et envoyez le fichier à Brahim.'}</p>
+    </div>
+    <div class="bloc">
+      <h2>Ce que vous avez répondu</h2>
+      <ul class="recap">
+        <li><b>${compte.oui}</b> <span>séance${s_(compte.oui)} que vous traitez comme moi</span></li>
+        <li><b>${compte.autrement}</b> <span>séance${s_(compte.autrement)} que vous traitez autrement</span></li>
+        <li><b>${compte.non}</b> <span>séance${s_(compte.non)} que vous ne traitez pas</span></li>
+        <li><b>${sans}</b> <span>séance${s_(sans)} laissée${s_(sans)} sans réponse</span></li>
+      </ul>
+      ${S.envoi === 'ok' ? '' : `<p class="message err">Vos réponses n’ont pas pu être envoyées${S.envoi === 'regles' ? ' : le serveur les a refusées' : ' : la connexion a échoué'}.
+        Téléchargez-les et envoyez le fichier à Brahim par courriel.</p>`}
+      <div class="actions">
+        <a class="btn primaire" href="synthese.html">Voir les réponses de tous</a>
+        <a class="btn" href="#liste">Revenir à mes réponses</a>
+        <button type="button" class="btn" id="btn-fichier">Télécharger ma réponse</button>
+      </div>
+    </div>`;
+  $('#btn-fichier').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({ ...S.moi, annee: ANNEE, source: 'capa-cours' }, null, 1)], { type:'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `capa-${(S.moi.nom || 'reponse').normalize('NFD').replace(/[^\w]+/g, '-').toLowerCase()}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+}
+
+$('#btn-terminer').addEventListener('click', async () => {
+  S.moi.termine = true;
+  enregistrer({ tout_de_suite: true });
+  aller('fin');
+  annonce('Réponses enregistrées.');
+});
+
+/* ═══════════════ départ ═══════════════ */
+try {
+  const rep = await fetch('donnees-capa.json', { cache:'no-cache' });
+  if (!rep.ok) throw new Error(rep.status);
+  S.donnees = await rep.json();
+} catch(e){
+  $('#chargement').outerHTML = '<p class="message err">La liste des cours n’a pas pu être chargée. Rechargez la page ; si cela se reproduit, prévenez Brahim.</p>';
+  throw e;
+}
+S.donnees.modules.forEach(m => m.cours.forEach(c => c.seances.forEach(s => S.seances.push({ k: cle(c, s), cours: c, seance: s }))));
+$('#chargement').remove();
+dessiner();
+</script>
+</body>
+</html>

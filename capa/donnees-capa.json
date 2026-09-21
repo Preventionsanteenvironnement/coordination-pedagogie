@@ -1,0 +1,2122 @@
+{
+ "genere_le": "2026-09-21",
+ "source": "capa_bibliotheque.json",
+ "totaux": {
+  "cours": 31,
+  "seances": 70,
+  "notions": 322
+ },
+ "modules": [
+  {
+   "code": "SESG",
+   "nom": "SESG — Consommateur averti et budget",
+   "cadre": "Module MG1 · capacité CG1.2 · CCF2 (écrit)",
+   "cours": [
+    {
+     "code": "SESG_revenus",
+     "titre": "Le ménage et ses revenus",
+     "objectif": "Identifier les sources de revenus possibles pour satisfaire les besoins d'un ménage.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Le ménage, le salarié et le travailleur indépendant",
+       "objectif": "1. Définir un ménage. 2. Distinguer un salarié d'un travailleur indépendant.",
+       "notions": [
+        {
+         "n": "Ménage",
+         "d": "Ensemble des personnes qui habitent habituellement le même logement, avec ou sans lien de parenté."
+        },
+        {
+         "n": "Salarié",
+         "d": "Personne qui travaille pour un employeur et reçoit un salaire."
+        },
+        {
+         "n": "Salaire",
+         "d": "Rémunération versée par un employeur à un salarié."
+        },
+        {
+         "n": "Travailleur indépendant",
+         "d": "Personne qui vend ses produits ou ses services à des clients : agriculteur, artisan, commerçant, micro-entrepreneur."
+        },
+        {
+         "n": "Chiffre d'affaires",
+         "d": "Total encaissé auprès des clients par un indépendant, avant toute dépense."
+        },
+        {
+         "n": "Honoraires",
+         "d": "Nom de la rémunération versée par le client à une profession libérale."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Lire un bulletin de paie et vérifier le SMIC",
+       "objectif": "1. Retrouver les lignes principales d'un bulletin de paie. 2. Vérifier qu'un salaire respecte le SMIC.",
+       "notions": [
+        {
+         "n": "Salaire brut",
+         "d": "Rémunération du salarié avant retrait des cotisations et de l'impôt."
+        },
+        {
+         "n": "Cotisations salariales",
+         "d": "Sommes prélevées sur le salaire brut pour financer la protection sociale, notamment la retraite."
+        },
+        {
+         "n": "Prélèvement à la source",
+         "d": "Impôt sur le revenu retenu directement par l'employeur."
+        },
+        {
+         "n": "Net payé",
+         "d": "Somme réellement versée sur le compte du salarié."
+        },
+        {
+         "n": "SMIC",
+         "d": "Salaire minimum légal en dessous duquel aucun employeur ne peut rémunérer un salarié."
+        },
+        {
+         "n": "Taux horaire brut",
+         "d": "Somme gagnée en brut pour une heure de travail. Exemple : un salarié payé 14 € brut par heure a un taux horaire brut de 14 €."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "Le revenu d'une micro-entreprise et les autres ressources",
+       "objectif": "1. Distinguer chiffre d'affaires et somme restant disponible. 2. Distinguer revenus d'activité, du capital et de transfert.",
+       "notions": [
+        {
+         "n": "Revenu d'activité",
+         "d": "Argent obtenu grâce au travail : salaire ou revenu d’un indépendant."
+        },
+        {
+         "n": "Revenu du capital",
+         "d": "Argent obtenu grâce à ce que l’on possède : loyer, intérêts d’un livret."
+        },
+        {
+         "n": "Revenu de transfert",
+         "d": "Argent versé par la protection sociale : allocations, retraite, RSA, chômage."
+        },
+        {
+         "n": "Frais professionnels",
+         "d": "Dépenses nécessaires pour travailler : déplacements, matériel, assurance."
+        },
+        {
+         "n": "Prestation familiale",
+         "d": "Aide financière destinée aux familles, par exemple les allocations familiales."
+        },
+        {
+         "n": "Mutualité sociale agricole (MSA)",
+         "d": "Organisme de protection sociale des personnes du secteur agricole."
+        }
+       ]
+      },
+      {
+       "num": "4",
+       "titre": "Le total des ressources du ménage",
+       "objectif": "1. Calculer le total des ressources d'un ménage. 2. Calculer la part qui provient du travail.",
+       "notions": [
+        {
+         "n": "Ressources du ménage",
+         "d": "Total de ce qui entre dans le ménage : revenus d'activité, du capital et de transfert."
+        },
+        {
+         "n": "Loyer perçu",
+         "d": "Somme versée par un locataire au propriétaire d'un bien mis en location."
+        },
+        {
+         "n": "Part en pourcentage",
+         "d": "Une partie divisée par le total, multipliée par 100."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_alimentation",
+     "titre": "S'alimenter : savoir choisir ce que l'on mange",
+     "objectif": "Être capable de faire des choix alimentaires raisonnés en tenant compte du prix, de l'origine et de la qualité des produits.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Où j'achète, et ce que ça change",
+       "objectif": "Être capable de comparer les circuits de distribution et de calculer le coût réel d'un même panier.",
+       "notions": [
+        {
+         "n": "Circuit long",
+         "d": "Chemin de distribution comportant plusieurs intermédiaires entre le producteur et le consommateur."
+        },
+        {
+         "n": "Circuit court",
+         "d": "Chemin de distribution comportant au plus un intermédiaire."
+        },
+        {
+         "n": "Vente directe",
+         "d": "Vente du producteur au consommateur, sans aucun intermédiaire."
+        },
+        {
+         "n": "Produit de saison",
+         "d": "Produit cultivé en pleine terre sous le climat local, à la période où il pousse naturellement."
+        },
+        {
+         "n": "Coût réel",
+         "d": "Prix total effectivement payé, frais de livraison et de déplacement compris."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Comment je choisis : lire une étiquette",
+       "objectif": "Être capable de lire une étiquette alimentaire et d'identifier les signes officiels de qualité.",
+       "notions": [
+        {
+         "n": "Dénomination",
+         "d": "Mention obligatoire indiquant ce qu'est réellement le produit."
+        },
+        {
+         "n": "Liste des ingrédients",
+         "d": "Liste classée par ordre décroissant de poids : le premier cité est le plus présent."
+        },
+        {
+         "n": "Signe officiel de qualité",
+         "d": "Logo reposant sur un cahier des charges public et contrôlé par les pouvoirs publics."
+        },
+        {
+         "n": "Agriculture biologique",
+         "d": "Mode de production sans produits chimiques de synthèse ni OGM, selon un cahier des charges européen."
+        },
+        {
+         "n": "Commerce équitable",
+         "d": "Système garantissant au producteur un prix minimum et des conditions d'achat stables."
+        },
+        {
+         "n": "Conditionnement",
+         "d": "Emballage qui protège le produit, devient un déchet après usage et pèse sur le prix."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_se_loger",
+     "titre": "Se loger, s'équiper, maîtriser ses charges",
+     "objectif": "1. Identifier les principales règles liées à la location d'un logement.\n2. Calculer le coût mensuel réel d'un logement.\n3. Comparer la location et l'achat d'un logement.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Louer un logement : le bail et l'entrée dans les lieux",
+       "objectif": "Identifier les principales règles liées à l'entrée dans un logement loué.",
+       "notions": [
+        {
+         "n": "Bail",
+         "d": "Contrat écrit qui fixe les conditions de la location entre le bailleur et le locataire."
+        },
+        {
+         "n": "Dépôt de garantie",
+         "d": "Somme versée au bailleur au début de la location pour garantir certaines sommes qui pourraient rester dues."
+        },
+        {
+         "n": "État des lieux",
+         "d": "Description du logement et de ses équipements à l'entrée puis à la sortie."
+        },
+        {
+         "n": "Index de compteur",
+         "d": "Valeur relevée sur un compteur à une date donnée."
+        },
+        {
+         "n": "Aide au logement",
+         "d": "Prestation pouvant réduire la dépense de logement selon la situation du foyer."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Ce que coûte vraiment un logement, et comment agir dessus",
+       "objectif": "Calculer le coût mensuel réel d'un logement.",
+       "notions": [
+        {
+         "n": "Abonnement",
+         "d": "Part fixe d'un contrat d'énergie, due indépendamment de la quantité consommée."
+        },
+        {
+         "n": "Consommation",
+         "d": "Quantité d'énergie réellement utilisée pendant une période."
+        },
+        {
+         "n": "Kilowattheure (kWh)",
+         "d": "Unité utilisée pour mesurer une quantité d'électricité consommée."
+        },
+        {
+         "n": "Mensualiser",
+         "d": "Ramener une dépense à un montant moyen par mois."
+        },
+        {
+         "n": "Coût réel du logement",
+         "d": "Ensemble des dépenses mensuelles de logement après prise en compte des aides."
+        },
+        {
+         "n": "Éco-geste",
+         "d": "Action simple visant à réduire les consommations et l'impact sur l'environnement."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "Rester locataires ou acheter : comparer avant de décider",
+       "objectif": "Justifier un choix entre location et achat à partir de données chiffrées et de contraintes concrètes.",
+       "notions": [
+        {
+         "n": "Mensualité de prêt",
+         "d": "Somme versée chaque mois à la banque pour rembourser un crédit immobilier."
+        },
+        {
+         "n": "Taxe foncière",
+         "d": "Impôt local dû par le propriétaire d'un bien immobilier."
+        },
+        {
+         "n": "Entretien courant",
+         "d": "Petits travaux et soins réguliers liés à l'usage normal du logement."
+        },
+        {
+         "n": "Grosses réparations",
+         "d": "Travaux importants relevant en principe du propriétaire dans un logement loué."
+        },
+        {
+         "n": "Patrimoine",
+         "d": "Ensemble des biens possédés par une personne ou un ménage."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_se_soigner_deplacer",
+     "titre": "Se soigner, se déplacer",
+     "objectif": "Faire des choix pour répondre aux besoins de la vie courante.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Se soigner : comprendre un remboursement",
+       "objectif": "1. Calculer le reste à charge après une consultation.\n2. Expliquer le rôle d'une complémentaire santé.",
+       "notions": [
+        {
+         "n": "Assurance Maladie obligatoire",
+         "d": "Protection de base qui rembourse une partie des dépenses de santé."
+        },
+        {
+         "n": "Mutualité sociale agricole (MSA)",
+         "d": "Organisme qui gère notamment l'Assurance Maladie des salariés et exploitants agricoles."
+        },
+        {
+         "n": "Complémentaire santé",
+         "d": "Couverture qui complète certains remboursements de l'Assurance Maladie."
+        },
+        {
+         "n": "Complémentaire santé solidaire",
+         "d": "Couverture destinée aux personnes disposant de ressources modestes, gratuite ou avec participation selon les ressources."
+        },
+        {
+         "n": "Tarif de base",
+         "d": "Montant utilisé pour calculer le remboursement de l'Assurance Maladie."
+        },
+        {
+         "n": "Ticket modérateur",
+         "d": "Part du tarif de base restant après le remboursement de l'Assurance Maladie."
+        },
+        {
+         "n": "Participation forfaitaire",
+         "d": "Somme retenue sur certains remboursements de soins lorsqu'elle s'applique."
+        },
+        {
+         "n": "Tiers payant",
+         "d": "Dispositif permettant de ne pas avancer tout ou partie des frais."
+        },
+        {
+         "n": "Carte Vitale",
+         "d": "Carte qui transmet les informations nécessaires au remboursement des soins."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Se déplacer : comparer les coûts et respecter les obligations",
+       "objectif": "1. Comparer le coût de plusieurs solutions de déplacement.\n2. Identifier des obligations et des risques liés à l'usage d'un véhicule.",
+       "notions": [
+        {
+         "n": "Responsabilité civile",
+         "d": "Garantie minimale couvrant les dommages causés aux autres avec un véhicule."
+        },
+        {
+         "n": "Contrôle technique",
+         "d": "Vérification réglementaire de l'état d'un véhicule."
+        },
+        {
+         "n": "Constat amiable",
+         "d": "Document décrivant les circonstances d'un accident matériel pour les transmettre à l'assureur."
+        },
+        {
+         "n": "Covoiturage",
+         "d": "Utilisation partagée d'un véhicule pour effectuer un trajet commun."
+        },
+        {
+         "n": "Coût annuel",
+         "d": "Somme de toutes les dépenses liées à une solution de déplacement pendant une année."
+        },
+        {
+         "n": "Risque routier professionnel",
+         "d": "Risque d'accident lors d'un déplacement lié au travail ou d'un trajet domicile-travail."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_consommer",
+     "titre": "Consommer : mes droits, mes vêtements, mes abonnements",
+     "objectif": "1. Distinguer un achat à distance d'un achat en magasin.\n2. Indiquer la durée de la garantie légale de conformité et le professionnel qui la doit.\n3. Ordonner les démarches à effectuer en cas de litige.\n4. Lire l'étiquette d'un vêtement et comparer deux étiquettes.\n5. Nommer la personne qui fournit et paie les équipements de protection individuelle.\n6. Calculer le coût annuel des abonnements d'un foyer.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Acheter : rétractation et garanties",
+       "objectif": "1. Distinguer un achat à distance d'un achat en magasin.\n2. Indiquer la durée de la garantie légale de conformité.\n3. Identifier le professionnel qui doit la garantie légale de conformité.",
+       "notions": [
+        {
+         "n": "Vente à distance",
+         "d": "Achat conclu sans se rendre dans le magasin : internet, téléphone, catalogue."
+        },
+        {
+         "n": "Droit de rétractation",
+         "d": "Possibilité d'annuler un achat conclu à distance ou par démarchage, dans un délai de 14 jours, sans donner de motif."
+        },
+        {
+         "n": "Geste commercial",
+         "d": "Reprise ou avantage accordé librement par une enseigne, sans obligation légale."
+        },
+        {
+         "n": "Garantie légale de conformité",
+         "d": "Garantie obligatoire et gratuite due par le vendeur professionnel, deux ans à compter de la livraison, sur un produit neuf comme sur un produit d'occasion."
+        },
+        {
+         "n": "Garantie commerciale",
+         "d": "Garantie facultative, souvent payante, proposée par un vendeur ou par un fabricant ; elle s'ajoute à la garantie légale sans la remplacer."
+        },
+        {
+         "n": "Présomption du défaut",
+         "d": "Période pendant laquelle l'acheteur n'a rien à prouver : le défaut est considéré comme existant déjà au moment de la livraison."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Faire valoir ses droits en cas de litige",
+       "objectif": "1. Ordonner les démarches à effectuer en cas de litige.\n2. Identifier le rôle de chaque interlocuteur.",
+       "notions": [
+        {
+         "n": "Litige",
+         "d": "Désaccord entre un consommateur et un professionnel au sujet d'un achat."
+        },
+        {
+         "n": "Réclamation",
+         "d": "Demande écrite et datée adressée au vendeur, décrivant le problème et ce qui est demandé."
+        },
+        {
+         "n": "Médiateur de la consommation",
+         "d": "Tiers gratuit qui aide le consommateur et le professionnel à rechercher une solution amiable ; il peut proposer une solution, sans l'imposer."
+        },
+        {
+         "n": "SignalConso",
+         "d": "Service en ligne de la répression des fraudes, qui transmet le signalement à l'entreprise et conserve la trace des problèmes signalés."
+        },
+        {
+         "n": "Association agréée de consommateurs",
+         "d": "Association reconnue par l'État, qui informe, conseille et accompagne ses adhérents."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "Les vêtements : étiquette, prix et protection",
+       "objectif": "1. Comparer deux étiquettes de vêtement.\n2. Identifier l'information obligatoire d'une étiquette textile.\n3. Identifier la personne qui fournit les équipements de protection individuelle.\n4. Justifier un choix d'achat à partir de résultats chiffrés.",
+       "notions": [
+        {
+         "n": "Étiquette",
+         "d": "Support fixé au vêtement, qui porte obligatoirement la composition en fibres."
+        },
+        {
+         "n": "Marque",
+         "d": "Nom déposé par une entreprise ; elle n'est pas contrôlée par les pouvoirs publics."
+        },
+        {
+         "n": "Code vestimentaire",
+         "d": "Attentes d'un milieu sur la façon de s'habiller."
+        },
+        {
+         "n": "Équipement de protection individuelle",
+         "d": "Vêtement ou accessoire répondant à une norme et à un risque précis, fourni gratuitement par l'employeur."
+        },
+        {
+         "n": "Grammage",
+         "d": "Masse d'un tissu par mètre carré, exprimée en grammes."
+        }
+       ]
+      },
+      {
+       "num": "4",
+       "titre": "Les abonnements : coût, engagement et résiliation",
+       "objectif": "1. Calculer le coût mensuel et annuel des abonnements d'un foyer.\n2. Distinguer un abonnement avec engagement d'un abonnement sans engagement.\n3. Indiquer les règles de résiliation d'un abonnement souscrit en ligne.",
+       "notions": [
+        {
+         "n": "Abonnement",
+         "d": "Contrat qui donne accès à un service contre un paiement répété, souvent mensuel."
+        },
+        {
+         "n": "Prélèvement automatique",
+         "d": "Somme retirée du compte bancaire à date fixe, sans démarche du client."
+        },
+        {
+         "n": "Engagement",
+         "d": "Durée minimale pendant laquelle l'abonnement doit être conservé."
+        },
+        {
+         "n": "Résiliation",
+         "d": "Fin d'un contrat d'abonnement à la demande du client."
+        },
+        {
+         "n": "Espace client",
+         "d": "Page personnelle du client sur le site du professionnel, où se trouve le bouton de résiliation."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_formalites",
+     "titre": "Les formalités de la vie familiale et civile",
+     "objectif": "Repérer les formalités administratives d'une situation de vie et savoir où les accomplir.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Mes documents administratifs",
+       "objectif": "Relever où demander un document administratif, ce qu'il coûte et combien de temps il est valable.",
+       "notions": [
+        {
+         "n": "Timbre fiscal",
+         "d": "Paiement électronique exigé pour certaines démarches administratives."
+        },
+        {
+         "n": "Acte de naissance",
+         "d": "Document d'état civil délivré par la mairie du lieu de naissance."
+        },
+        {
+         "n": "Durée de validité",
+         "d": "Période pendant laquelle un document reste utilisable."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Financer son permis",
+       "objectif": "Calculer le coût total d'un permis, le reste à charge après aides, et repérer où chercher une aide.",
+       "notions": [
+        {
+         "n": "Devis",
+         "d": "Document qui détaille le prix de chaque prestation avant l'achat."
+        },
+        {
+         "n": "Reste à charge",
+         "d": "Somme qui reste à payer une fois les aides déduites."
+        },
+        {
+         "n": "Mission locale",
+         "d": "Structure qui accompagne les jeunes dans leur insertion professionnelle."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "Vivre en couple et devenir parent",
+       "objectif": "Distinguer les effets du PACS et ceux du mariage, et énoncer les démarches obligatoires à la naissance.",
+       "notions": [
+        {
+         "n": "PACS",
+         "d": "Pacte civil de solidarité : contrat conclu entre deux personnes pour organiser leur vie commune."
+        },
+        {
+         "n": "Filiation",
+         "d": "Lien juridique entre un enfant et ses parents."
+        },
+        {
+         "n": "Reconnaissance",
+         "d": "Démarche par laquelle un père non marié établit sa filiation avec son enfant."
+        },
+        {
+         "n": "Autorité parentale",
+         "d": "Ensemble des devoirs des parents envers leur enfant."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_budget",
+     "titre": "Établir un budget",
+     "objectif": "Gérer le budget d'un ménage.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Les quatre familles du budget",
+       "objectif": "Classer une somme selon qu'elle est une dépense fixe, une dépense courante, une dépense occasionnelle ou une épargne.",
+       "notions": [
+        {
+         "n": "Dépense fixe",
+         "d": "Dépense d'un montant constant, revenant à date régulière, fixée par un contrat."
+        },
+        {
+         "n": "Dépense courante",
+         "d": "Dépense revenant chaque mois, dont le montant change selon les achats du foyer."
+        },
+        {
+         "n": "Dépense occasionnelle",
+         "d": "Dépense qui n'arrive pas tous les mois et qu'il faut mensualiser pour l'inscrire au budget."
+        },
+        {
+         "n": "Épargne",
+         "d": "Somme mise de côté, inscrite au budget avant les dépenses."
+        },
+        {
+         "n": "Mensualiser",
+         "d": "Diviser une dépense annuelle par douze pour l'inscrire chaque mois au budget."
+        },
+        {
+         "n": "Résilier",
+         "d": "Arrêter un contrat avant son terme."
+        },
+        {
+         "n": "Renégocier",
+         "d": "Demander un nouveau prix au même fournisseur, sans changer de contrat."
+        },
+        {
+         "n": "Cotisation",
+         "d": "Somme versée régulièrement à un organisme, par exemple une mutuelle."
+        },
+        {
+         "n": "Mensualité",
+         "d": "Somme payée chaque mois pour rembourser un crédit."
+        },
+        {
+         "n": "Charges",
+         "d": "Frais du logement qui s'ajoutent au loyer : eau, entretien, ordures ménagères."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Établir le budget et lire son équilibre",
+       "objectif": "1. Construire le budget mensuel du ménage. 2. Calculer le solde de ce budget.",
+       "notions": [
+        {
+         "n": "Budget",
+         "d": "Document qui met en regard les ressources et les sorties d'un ménage sur une période donnée."
+        },
+        {
+         "n": "Solde",
+         "d": "Différence entre les ressources et les sorties. Le solde est positif quand les ressources sont supérieures aux sorties."
+        },
+        {
+         "n": "Déficit",
+         "d": "Situation dans laquelle les sorties dépassent les ressources."
+        },
+        {
+         "n": "Reste à vivre",
+         "d": "Somme disponible une fois les dépenses fixes réglées."
+        },
+        {
+         "n": "Déficitaire",
+         "d": "Se dit d'un budget dont les sorties dépassent les ressources."
+        },
+        {
+         "n": "Prélèvement",
+         "d": "Somme retirée automatiquement du compte à une date prévue."
+        },
+        {
+         "n": "Veille",
+         "d": "État d'un appareil éteint qui continue de consommer de l'électricité."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "Prévoir l'imprévu",
+       "objectif": "1. Expliquer le rôle d'une épargne de précaution. 2. Évaluer la capacité d'un ménage à payer une dépense imprévue sans emprunter.",
+       "notions": [
+        {
+         "n": "Épargne de précaution",
+         "d": "Somme disponible immédiatement, réservée aux dépenses imprévues."
+        },
+        {
+         "n": "Dépense imprévue",
+         "d": "Dépense non prévue au budget : panne, réparation, frais de santé, baisse de revenu."
+        },
+        {
+         "n": "Intérêts",
+         "d": "Somme payée en plus du montant emprunté, en contrepartie d'un crédit."
+        },
+        {
+         "n": "Livret d'épargne",
+         "d": "Compte sur lequel l'argent reste disponible à tout moment."
+        },
+        {
+         "n": "Échéance",
+         "d": "Date à laquelle une somme doit être payée."
+        },
+        {
+         "n": "Mensualité",
+         "d": "Somme payée chaque mois pour rembourser un crédit."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_paiement_credit",
+     "titre": "Modes de paiement et crédit",
+     "objectif": "Utiliser les moyens de paiement et repérer les engagements d'un crédit.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Payer et se protéger",
+       "objectif": "Choisir un moyen de paiement adapté à une situation et réagir face à une opération suspecte.",
+       "notions": [
+        {
+         "n": "IBAN",
+         "d": "Numéro qui identifie un compte bancaire et permet de recevoir un virement."
+        },
+        {
+         "n": "Opposition",
+         "d": "Démarche qui bloque une carte bancaire et arrête les paiements à venir."
+        },
+        {
+         "n": "Contestation",
+         "d": "Démarche auprès de la banque pour obtenir le remboursement d'une opération non autorisée."
+        },
+        {
+         "n": "Perceval",
+         "d": "Plateforme officielle de signalement des fraudes à la carte bancaire."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Comparer un crédit et mesurer sa charge",
+       "objectif": "Comparer le coût de deux crédits et mesurer l'effet d'une mensualité sur un budget.",
+       "notions": [
+        {
+         "n": "TAEG",
+         "d": "Pourcentage qui prend en compte les intérêts et les frais obligatoires d'un crédit, et qui sert à comparer les offres."
+        },
+        {
+         "n": "Coût du crédit",
+         "d": "Différence, en euros, entre le montant total remboursé et la somme empruntée."
+        },
+        {
+         "n": "Mensualité",
+         "d": "Somme remboursée chaque mois."
+        },
+        {
+         "n": "Rétractation",
+         "d": "Possibilité de renoncer à un crédit dans les 14 jours calendaires qui suivent la signature."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "SESG_impots",
+     "titre": "Impôts, taxes et synthèse budgétaire",
+     "objectif": "Gérer le budget d'un ménage.",
+     "capacite": "CG1.2",
+     "ccf": "CCF2",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Les impôts et taxes du ménage",
+       "objectif": "1. Distinguer un impôt direct d'un impôt indirect. 2. Calculer la TVA d'un achat.",
+       "notions": [
+        {
+         "n": "Impôt direct",
+         "d": "Impôt payé directement par le contribuable à l'administration fiscale, en son nom."
+        },
+        {
+         "n": "Impôt indirect",
+         "d": "Impôt compris dans le prix d'un produit, reversé à l'État par le commerçant."
+        },
+        {
+         "n": "TVA",
+         "d": "Taxe sur la valeur ajoutée, présente sur presque tous les achats."
+        },
+        {
+         "n": "Prélèvement à la source",
+         "d": "Impôt sur le revenu retenu chaque mois sur le salaire."
+        },
+        {
+         "n": "Taxe foncière",
+         "d": "Impôt annuel dû par le propriétaire d'un bien immobilier."
+        },
+        {
+         "n": "Prix TTC",
+         "d": "Prix toutes taxes comprises, affiché en rayon."
+        },
+        {
+         "n": "Contribuable",
+         "d": "Personne qui paie l'impôt."
+        },
+        {
+         "n": "Reverser",
+         "d": "Transmettre à l'État une somme perçue auprès du client."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Le bilan annuel et la décision",
+       "objectif": "1. Dresser le bilan annuel d'un budget. 2. Justifier une décision chiffrée sur un projet d'achat.",
+       "notions": [
+        {
+         "n": "Bilan annuel",
+         "d": "Total des ressources et des dépenses d'un ménage sur douze mois."
+        },
+        {
+         "n": "Taux d'effort",
+         "d": "Part des revenus consacrée au remboursement des crédits."
+        },
+        {
+         "n": "Arbitrage budgétaire",
+         "d": "Choix entre deux dépenses lorsque le budget ne permet pas les deux."
+        },
+        {
+         "n": "Contrôle de cohérence",
+         "d": "Vérification qu'un total annuel correspond bien à douze fois le total mensuel."
+        },
+        {
+         "n": "Mensualité",
+         "d": "Somme payée chaque mois pour rembourser un crédit."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "code": "ESC",
+   "nom": "ESC — Identité sociale et culturelle",
+   "cadre": "Module MG1 · capacité CG1.1 · CCF1 (oral)",
+   "cours": [
+    {
+     "code": "ESC_environnement_culturel",
+     "titre": "Normes et socialisation",
+     "objectif": "Repérer les normes d'un milieu et expliquer comment elles s'apprennent sans être écrites.",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Normes et socialisation",
+       "objectif": "Repérer comment on apprend des règles de comportement en entrant dans de nouveaux groupes.",
+       "notions": [
+        {
+         "n": "Socialisation",
+         "d": "Apprentissage progressif des façons de vivre et d'agir avec les autres."
+        },
+        {
+         "n": "Norme",
+         "d": "Règle de comportement attendue dans une situation ou un groupe."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "ESC_consommation_marqueurs",
+     "titre": "Consommation de masse et marqueurs sociaux",
+     "objectif": "Être capable de repérer ce que les objets et les pratiques de consommation signalent, et de prendre position sur ce qui influence nos choix.",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [
+      {
+       "n": "Marqueur social",
+       "d": "Objet, vêtement ou pratique signalant l'appartenance à un groupe ; son sens dépend du regard des autres."
+      },
+      {
+       "n": "Consommation de masse",
+       "d": "Production et diffusion à très grande échelle de biens identiques, accessibles au plus grand nombre."
+      },
+      {
+       "n": "Répétition",
+       "d": "Mécanisme par lequel un nom vu très souvent devient familier, sans qu'aucune information ne soit transmise."
+      },
+      {
+       "n": "Association",
+       "d": "Mécanisme reliant un produit à une situation désirable dont il n'a pas la cause."
+      },
+      {
+       "n": "Rareté organisée",
+       "d": "Limitation volontaire de la disponibilité pour augmenter la valeur perçue d'un produit."
+      },
+      {
+       "n": "Partenariat commercial",
+       "d": "Rémunération d'une recommandation, dont la loi impose la mention explicite."
+      }
+     ],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Ce que les objets disent, sans qu'on le dise",
+       "objectif": "Être capable d'expliquer ce qu'est un marqueur social et de montrer qu'un même objet change de sens selon le lieu et l'époque.",
+       "notions": []
+      },
+      {
+       "num": "2",
+       "titre": "Comment se construit une envie",
+       "objectif": "Être capable de repérer les mécanismes qui orientent la consommation et de prendre position sur la liberté de choix.",
+       "notions": []
+      }
+     ]
+    },
+    {
+     "code": "ESC_medias",
+     "titre": "S'informer : d'où vient ce que je sais ?",
+     "objectif": "Comparer plusieurs publications sur un même fait et distinguer ce qui est vérifié de ce qui ne l'est pas.",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "S'informer : d'où vient ce que je sais ?",
+       "objectif": "Identifier la source d'une information et comprendre que plusieurs sources peuvent présenter un même événement sous des angles différents.",
+       "notions": [
+        {
+         "n": "Information",
+         "d": "Fait vérifié qui présente un intérêt pour un grand nombre de personnes."
+        },
+        {
+         "n": "Source",
+         "d": "Origine d'une information : personne, document ou organisme qui la fournit."
+        },
+        {
+         "n": "Opinion",
+         "d": "Jugement ou point de vue exprimé par une personne."
+        },
+        {
+         "n": "Angle",
+         "d": "Façon choisie pour traiter ou présenter un sujet."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "ESC_territoire",
+     "titre": "Environnement et ressources",
+     "objectif": "Décrire les ressources d'un territoire et expliquer ce qu'elles permettent ou empêchent.",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Environnement et ressources",
+       "objectif": "Repérer les ressources qui permettent de découvrir ou de poursuivre une pratique, et comprendre qu'une influence n'est pas une obligation.",
+       "notions": [
+        {
+         "n": "Environnement social et culturel",
+         "d": "Personnes, lieux, institutions, médias et situations avec lesquels une personne est en contact."
+        },
+        {
+         "n": "Influence",
+         "d": "Action qui peut orienter une manière de penser ou d'agir sans l'imposer."
+        },
+        {
+         "n": "Ressource",
+         "d": "Personne, service, équipement, information ou moyen qu'une personne peut utiliser."
+        },
+        {
+         "n": "Choix",
+         "d": "Décision prise parmi plusieurs possibilités."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "ESC_pratiques_choix",
+     "titre": "Mes pratiques, mes choix",
+     "objectif": "Être capable de repérer ce que ses activités hors de la classe indiquent de ses choix, et de distinguer ce qui relève du choix et ce qui relève de l'environnement.",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [
+      {
+       "n": "Pratique",
+       "d": "Activité menée en dehors des obligations scolaires ou professionnelles, régulière ou occasionnelle."
+      },
+      {
+       "n": "Déclencheur",
+       "d": "Ce qui a fait commencer une pratique : une personne, une circonstance, une obligation, un hasard."
+      },
+      {
+       "n": "Accessibilité",
+       "d": "Ce qui rend une pratique possible : distance, coût, équipement, temps disponible."
+      },
+      {
+       "n": "Visibilité",
+       "d": "Le fait d'avoir vu quelqu'un près de soi exercer une pratique, ce qui la rend envisageable."
+      },
+      {
+       "n": "Part de choix",
+       "d": "Ce qu'on décide de faire de ce qui est accessible et visible : commencer, continuer, arrêter, approfondir."
+      }
+     ],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Ce que je fais quand je ne suis pas obligé",
+       "objectif": "Être capable de recenser ses activités hors de la classe et de retrouver ce qui les a déclenchées.",
+       "notions": []
+      },
+      {
+       "num": "2",
+       "titre": "Ce qu'on partage, ce qui nous distingue",
+       "objectif": "Être capable d'exploiter une enquête collective et de prendre position sur la part de choix dans ses activités.",
+       "notions": []
+      }
+     ]
+    },
+    {
+     "code": "ESC_choix_engagement",
+     "titre": "Choix & engagement : je me positionne",
+     "objectif": "Prendre position dans une situation à caractère social et civique (CG1.1).",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "5",
+       "titre": "Choix & engagement : je me positionne",
+       "objectif": "Découvrir des formes d'engagement des jeunes, apprendre à formuler et défendre un point de vue avec la méthode « je pense que… parce que… par exemple… », et débattre dans le respect.",
+       "notions": [
+        {
+         "n": "S'engager",
+         "d": "Décider d'agir, à son échelle, pour une cause, un groupe ou l'intérêt général (même une petite action)."
+        },
+        {
+         "n": "Bénévolat",
+         "d": "Donner gratuitement un peu de son temps pour une association ou une cause, sans être payé."
+        },
+        {
+         "n": "Service civique",
+         "d": "Mission d'intérêt général indemnisée, de 6 à 12 mois, ouverte aux jeunes dès 16 ans, sans condition de diplôme."
+        },
+        {
+         "n": "Éco-délégué·e",
+         "d": "Élève élu·e qui mène des actions concrètes pour l'environnement dans sa classe et son établissement."
+        },
+        {
+         "n": "Argumenter",
+         "d": "Donner son avis ET l'expliquer : je pense que… parce que… par exemple…"
+        },
+        {
+         "n": "Débat réglé",
+         "d": "Échange où chacun parle à son tour, écoute les autres et répond aux idées, pas aux personnes."
+        },
+        {
+         "n": "Liberté d'expression",
+         "d": "Le droit de dire ce que l'on pense, dans le respect des autres et de leurs convictions."
+        },
+        {
+         "n": "Prendre position",
+         "d": "Choisir un avis et le défendre par des arguments, tout en restant ouvert à celui des autres."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "ESC_production_culturelle",
+     "titre": "Construire une production culturelle collective",
+     "objectif": "Être capable de rendre compte d'une pratique personnelle dans une production partageable, en la mettant en perspective.",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [
+      {
+       "n": "Mise en perspective",
+       "d": "Fait d'examiner un sujet sous les angles historique, géographique, social et culturel."
+      },
+      {
+       "n": "Production diffusable",
+       "d": "Travail conçu pour être montré à d'autres que l'enseignant : autre classe, familles, établissement."
+      },
+      {
+       "n": "Source",
+       "d": "Origine d'une information : auteur ou organisme, date, moyen d'y accéder."
+      },
+      {
+       "n": "Image libre de droits",
+       "d": "Image que l'on a explicitement le droit de réutiliser, en indiquant son origine."
+      },
+      {
+       "n": "Droit à l'image",
+       "d": "Droit de toute personne de refuser que son image soit diffusée ; l'accord des responsables légaux est requis pour un mineur."
+      }
+     ],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Choisir un sujet et le mettre en perspective",
+       "objectif": "Être capable de choisir un sujet personnel et de l'examiner sous quatre angles différents.",
+       "notions": []
+      },
+      {
+       "num": "2",
+       "titre": "Fabriquer et partager",
+       "objectif": "Être capable de choisir un format adapté, de répartir le travail et de citer ses sources.",
+       "notions": []
+      }
+     ]
+    },
+    {
+     "code": "ESC_dossier_oral",
+     "titre": "Le dossier et l'oral du CCF1",
+     "objectif": "Être capable de constituer son dossier support et de soutenir un oral de trente minutes sans préparation.",
+     "capacite": "CG1.1",
+     "ccf": "CCF1",
+     "notions_cours": [
+      {
+       "n": "Dossier support",
+       "d": "Ensemble des productions de l'année, organisé et numéroté, qui sert de base à l'échange lors de l'oral."
+      },
+      {
+       "n": "Sommaire",
+       "d": "Première page du dossier, listant les pièces numérotées avec un titre explicite."
+      },
+      {
+       "n": "Élément vérifiable",
+       "d": "Chiffre, date, document ou témoignage précis, dont on peut indiquer l'origine."
+      },
+      {
+       "n": "Prise de position",
+       "d": "Avis annoncé clairement et justifié par des éléments précis."
+      },
+      {
+       "n": "Nuance",
+       "d": "Reconnaissance de la valeur d'un argument opposé ; à cette épreuve, elle renforce une position au lieu de l'affaiblir."
+      }
+     ],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Constituer son dossier",
+       "objectif": "Être capable de rassembler et d'organiser les productions de l'année en un dossier support.",
+       "notions": []
+      },
+      {
+       "num": "2",
+       "titre": "Tenir trente minutes sans préparation",
+       "objectif": "Être capable de repérer ce que les examinateurs écoutent et de construire une réponse argumentée.",
+       "notions": []
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "code": "BIO",
+   "nom": "Biologie — Le corps et la santé au travail",
+   "cadre": "Module MG1 · capacité CG1.3 · CCF4 (oral)",
+   "cours": [
+    {
+     "code": "BIO_muscles_os",
+     "titre": "Muscles, tendons, os : l'appareil musculo-squelettique",
+     "objectif": "Expliquer comment un mouvement se produit, distinguer les principales lésions de l'appareil musculo-squelettique et énoncer les mesures qui les préviennent.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Les formes d'os",
+       "objectif": "Classer les os selon leur forme.",
+       "notions": [
+        {
+         "n": "Os long",
+         "d": "Os nettement plus long que large, comme le fémur."
+        },
+        {
+         "n": "Os court",
+         "d": "Os à peu près aussi long que large et épais, comme un os du poignet."
+        },
+        {
+         "n": "Os plat",
+         "d": "Os mince et large, comme le sternum."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "L'intérieur de l'os et la croissance",
+       "objectif": "Décrire la structure d'un os long et expliquer le rôle du cartilage de croissance.",
+       "notions": [
+        {
+         "n": "Diaphyse",
+         "d": "Partie centrale allongée d'un os long."
+        },
+        {
+         "n": "Épiphyse",
+         "d": "Extrémité renflée d'un os long."
+        },
+        {
+         "n": "Cartilage de croissance",
+         "d": "Zone qui permet à l'os de s'allonger, ouverte jusqu'à la fin de la croissance."
+        },
+        {
+         "n": "Os compact",
+         "d": "Tissu osseux dense qui forme la paroi de la diaphyse."
+        },
+        {
+         "n": "Os spongieux",
+         "d": "Tissu osseux fait d'alvéoles, situé dans les épiphyses."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "Le muscle et le mouvement",
+       "objectif": "Expliquer comment un mouvement se produit et nommer les muscles agoniste et antagoniste.",
+       "notions": [
+        {
+         "n": "Tendon",
+         "d": "Structure qui relie le muscle à l'os."
+        },
+        {
+         "n": "Muscle agoniste",
+         "d": "Muscle qui se contracte et réalise le mouvement."
+        },
+        {
+         "n": "Muscle antagoniste",
+         "d": "Muscle opposé, qui s'allonge et retient le mouvement."
+        },
+        {
+         "n": "Contraction",
+         "d": "Raccourcissement du muscle, qui fait tirer le tendon sur l'os."
+        }
+       ]
+      },
+      {
+       "num": "4",
+       "titre": "Ce dont le muscle a besoin",
+       "objectif": "Indiquer ce dont un muscle a besoin pendant l'effort et après l'effort.",
+       "notions": [
+        {
+         "n": "Nutriment",
+         "d": "Élément apporté par l'alimentation et transporté par le sang jusqu'au muscle."
+        },
+        {
+         "n": "Glucide",
+         "d": "Principal nutriment utilisé par le muscle pendant l'effort."
+        },
+        {
+         "n": "Récupération",
+         "d": "Temps de repos après l'effort, pendant lequel le muscle se répare."
+        },
+        {
+         "n": "Dioxygène",
+         "d": "Gaz apporté par le sang, nécessaire pour produire de l'énergie."
+        },
+        {
+         "n": "Crampe",
+         "d": "Contraction involontaire et douloureuse d'un muscle."
+        }
+       ]
+      },
+      {
+       "num": "5",
+       "titre": "L'articulation",
+       "objectif": "Nommer les éléments d'une articulation mobile et distinguer le tendon du ligament.",
+       "notions": [
+        {
+         "n": "Ligament",
+         "d": "Structure qui relie un os à un autre os."
+        },
+        {
+         "n": "Cartilage articulaire",
+         "d": "Tissu qui recouvre les extrémités des os, diminue les frottements et amortit les chocs."
+        },
+        {
+         "n": "Ménisque",
+         "d": "Coussinet qui améliore l'emboîtement des surfaces, présent au genou."
+        },
+        {
+         "n": "Liquide synovial",
+         "d": "Liquide qui lubrifie l'articulation et nourrit le cartilage. À ne pas confondre avec la synapse, qui appartient au système nerveux."
+        },
+        {
+         "n": "Articulation",
+         "d": "Endroit où deux os se rencontrent."
+        }
+       ]
+      },
+      {
+       "num": "6",
+       "titre": "Les lésions et leur prévention",
+       "objectif": "Distinguer les principales lésions musculo-squelettiques et énoncer les mesures qui les préviennent.",
+       "notions": [
+        {
+         "n": "Entorse",
+         "d": "Étirement ou rupture d'un ligament lors d'un mouvement forcé."
+        },
+        {
+         "n": "Tendinite",
+         "d": "Inflammation d'un tendon due à la répétition d'un même geste."
+        },
+        {
+         "n": "Déchirure",
+         "d": "Rupture de fibres du muscle, avec douleur brutale."
+        },
+        {
+         "n": "Fracture de fatigue",
+         "d": "Fissure de l'os provoquée par des contraintes répétées, sans choc."
+        },
+        {
+         "n": "Élongation",
+         "d": "Étirement excessif des fibres d'un muscle, sans rupture."
+        },
+        {
+         "n": "Troubles musculo-squelettiques",
+         "d": "Lésions dues à la répétition des gestes au travail."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "BIO_coeur_respiration",
+     "titre": "Le cœur et la respiration à l'effort",
+     "objectif": "Mesurer l'intensité d'un effort, lire une courbe de fréquence cardiaque et distinguer une adaptation normale d'un signal d'alerte.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Comparer deux efforts",
+       "objectif": "Calculer une fréquence maximale théorique et l'utiliser pour comparer deux efforts.",
+       "notions": [
+        {
+         "n": "Fréquence cardiaque",
+         "d": "Nombre de battements du cœur par minute."
+        },
+        {
+         "n": "Fréquence maximale théorique",
+         "d": "Valeur la plus haute que le cœur peut atteindre à l'effort, estimée par le calcul 220 moins l'âge."
+        },
+        {
+         "n": "Pourcentage de la FMT",
+         "d": "Part du maximum atteinte pendant un effort ; il permet de comparer deux personnes d'âges différents."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Les intensités d'effort",
+       "objectif": "Reconnaître l'intensité d'un effort et calculer une fréquence cible.",
+       "notions": [
+        {
+         "n": "Intensité modérée",
+         "d": "Effort avec un essoufflement modéré, pendant lequel on peut encore discuter."
+        },
+        {
+         "n": "Intensité élevée",
+         "d": "Effort avec un essoufflement marqué, pendant lequel la conversation devient difficile."
+        },
+        {
+         "n": "Test de la parole",
+         "d": "Repère simple : si l'on peut discuter pendant l'effort, l'intensité est modérée."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "La courbe d'un effort",
+       "objectif": "Lire une courbe de fréquence cardiaque et calculer une baisse de récupération.",
+       "notions": [
+        {
+         "n": "Plateau",
+         "d": "Phase où la fréquence cardiaque se stabilise, l'intensité de l'effort restant constante."
+        },
+        {
+         "n": "Récupération",
+         "d": "Phase de retour de la fréquence cardiaque vers sa valeur de repos, après l'arrêt de l'effort."
+        },
+        {
+         "n": "Fréquence de repos",
+         "d": "Nombre de battements par minute mesuré au calme, avant tout effort."
+        }
+       ]
+      },
+      {
+       "num": "4",
+       "titre": "La respiration à l'effort",
+       "objectif": "Distinguer un essoufflement normal d'un signal d'alerte et appliquer la règle de respiration en musculation.",
+       "notions": [
+        {
+         "n": "Essoufflement",
+         "d": "Accélération de la respiration à l'effort ; adaptation normale tant qu'elle est proportionnée et brève après l'arrêt."
+        },
+        {
+         "n": "Signal d'alerte",
+         "d": "Essoufflement disproportionné, persistant, ou accompagné d'un autre signe, qui impose d'arrêter."
+        },
+        {
+         "n": "Blocage respiratoire",
+         "d": "Fait de retenir volontairement sa respiration pendant un effort."
+        },
+        {
+         "n": "Cycle respiratoire",
+         "d": "Une inspiration suivie d'une expiration."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "BIO_cardio_respiratoire",
+     "titre": "Le cœur, les poumons, le sang : le corps à l'effort",
+     "objectif": "Mesurer l'intensité d'un effort, lire une courbe de fréquence cardiaque et distinguer une adaptation normale d'un signal d'alerte.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "L'air entre, le dioxygène passe dans le sang",
+       "objectif": "Décrire le trajet de l'air et nommer les deux gaz échangés dans les poumons.",
+       "notions": [
+        {
+         "n": "Alvéole",
+         "d": "Petit sac situé au bout des conduits du poumon, où le dioxygène passe dans le sang."
+        },
+        {
+         "n": "Dioxygène",
+         "d": "Gaz de l'air dont les cellules ont besoin pour produire de l'énergie."
+        },
+        {
+         "n": "Dioxyde de carbone",
+         "d": "Déchet produit par les cellules, transporté par le sang et rejeté quand on expire."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Le sang transporte, le cœur pousse",
+       "objectif": "Nommer le rôle du cœur, décrire le trajet du dioxygène jusqu'au muscle et calculer ce que le muscle prélève.",
+       "notions": [
+        {
+         "n": "Sang",
+         "d": "Liquide qui circule dans tout le corps et qui transporte le dioxygène, les nutriments et les déchets."
+        },
+        {
+         "n": "Cœur",
+         "d": "Organe qui fonctionne comme une pompe et met le sang en mouvement."
+        },
+        {
+         "n": "Nutriments",
+         "d": "Éléments apportés par l'alimentation, par exemple le glucose, utilisés par le muscle pour produire son énergie."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "Pourquoi tout s'accélère à l'effort",
+       "objectif": "Expliquer pourquoi la respiration et le cœur s'accélèrent pendant un effort.",
+       "notions": [
+        {
+         "n": "Fréquence respiratoire",
+         "d": "Nombre de respirations par minute."
+        },
+        {
+         "n": "Fréquence cardiaque",
+         "d": "Nombre de battements du cœur par minute."
+        },
+        {
+         "n": "Récupération",
+         "d": "Temps qui suit l'arrêt de l'effort, pendant lequel les deux fréquences diminuent progressivement."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "BIO_echauffement_recup",
+     "titre": "S'échauffer, ressentir, récupérer",
+     "objectif": "Être capable de repérer les indicateurs physiologiques et psychologiques de l'effort et d'adapter sa pratique pour préserver sa santé.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "S'échauffer et repérer ce que dit mon corps",
+       "objectif": "Être capable d'expliquer le rôle de l'échauffement et de relever les indicateurs de l'effort (fréquence cardiaque, rythme respiratoire, température, ressenti).",
+       "notions": [
+        {
+         "n": "Échauffement",
+         "d": "Phase progressive de début de séance qui élève la température musculaire, la fréquence cardiaque et le rythme respiratoire avant l'effort intense."
+        },
+        {
+         "n": "Fréquence cardiaque",
+         "d": "Nombre de battements du cœur en une minute, exprimé en batt/min."
+        },
+        {
+         "n": "Rythme respiratoire",
+         "d": "Nombre de cycles inspiration-expiration en une minute."
+        },
+        {
+         "n": "Sensation externe",
+         "d": "Information perçue autour de soi ou à la surface du corps : ce que je vois, entends ou touche."
+        },
+        {
+         "n": "Sensation interne",
+         "d": "Information venue de l'intérieur du corps : battements, respiration, chaleur, fatigue, douleur."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Récupérer après l'effort",
+       "objectif": "Être capable d'expliquer comment le corps revient au repos et de proposer des mesures simples pour bien récupérer.",
+       "notions": [
+        {
+         "n": "Retour au calme",
+         "d": "Phase de fin de séance, faite de mouvements lents, qui aide la fréquence cardiaque et la respiration à redescendre."
+        },
+        {
+         "n": "Courbature",
+         "d": "Douleur musculaire diffuse apparaissant 12 à 48 heures après un effort inhabituel, et disparaissant seule en quelques jours."
+        },
+        {
+         "n": "Sudation",
+         "d": "Production de sueur par la peau ; son évaporation refroidit le corps pendant l'effort."
+        },
+        {
+         "n": "Hydratation",
+         "d": "Apport d'eau compensant les pertes dues à la sudation, à répartir avant, pendant et après l'effort."
+        },
+        {
+         "n": "Récupération",
+         "d": "Ensemble de ce qui permet au corps de revenir à son état de repos : retour au calme, hydratation, alimentation et repos."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "BIO_alimentation_effort",
+     "titre": "L'alimentation adaptée à l'effort",
+     "objectif": "Mesurer l'intensité d'un effort, lire une courbe de fréquence cardiaque et distinguer une adaptation normale d'un signal d'alerte.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Ce dont le corps a besoin",
+       "objectif": "Nommer les trois rôles des aliments et expliquer pourquoi un travail physique augmente les besoins en énergie.",
+       "notions": [
+        {
+         "n": "Énergie",
+         "d": "Ce que les aliments fournissent à l'organisme pour faire fonctionner les muscles."
+        },
+        {
+         "n": "Protéines",
+         "d": "Éléments apportés par la viande, le poisson, les œufs, les produits laitiers et les légumes secs, qui construisent et réparent les tissus."
+        },
+        {
+         "n": "Féculents",
+         "d": "Aliments comme le pain, les pâtes, le riz et les pommes de terre, qui fournissent surtout de l'énergie."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "La journée de chantier",
+       "objectif": "Comparer deux organisations de repas sur une journée de travail et proposer des changements.",
+       "notions": [
+        {
+         "n": "Prise alimentaire",
+         "d": "Moment où l'on mange : un repas ou une collation."
+        },
+        {
+         "n": "Collation",
+         "d": "Petite quantité d'aliments prise entre deux repas, prévue à l'avance."
+        },
+        {
+         "n": "Poste du matin",
+         "d": "Horaire de travail qui commence tôt dans la matinée."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "BIO_hygiene_de_vie",
+     "titre": "Hygiène de vie : sommeil, santé mentale, risques du métier",
+     "objectif": "Mesurer l'intensité d'un effort, lire une courbe de fréquence cardiaque et distinguer une adaptation normale d'un signal d'alerte.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Le sommeil",
+       "objectif": "Expliquer le rôle du sommeil et repérer ce qui en dégrade la qualité.",
+       "notions": [
+        {
+         "n": "Cycle de sommeil",
+         "d": "Suite d'environ 90 minutes qui se répète 4 à 6 fois par nuit."
+        },
+        {
+         "n": "Dette de sommeil",
+         "d": "Manque de sommeil accumulé sur plusieurs nuits."
+        },
+        {
+         "n": "Mélatonine",
+         "d": "Hormone favorisant l'endormissement, dont la sécrétion est retardée par la lumière."
+        },
+        {
+         "n": "Horloge interne",
+         "d": "Système qui règle l'alternance entre la veille et le sommeil sur 24 heures."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "L'hygiène et les plaies",
+       "objectif": "Énoncer les règles d'hygiène du chantier et la conduite à tenir face à une plaie souillée.",
+       "notions": [
+        {
+         "n": "Tétanos",
+         "d": "Maladie grave due à une bactérie présente dans la terre, qui pénètre par une plaie."
+        },
+        {
+         "n": "Vaccination",
+         "d": "Principale protection contre le tétanos, et seule protection durable."
+        },
+        {
+         "n": "Rappel",
+         "d": "Nouvelle injection destinée à maintenir la protection dans le temps."
+        },
+        {
+         "n": "Plaie souillée",
+         "d": "Plaie en contact avec de la terre ou une matière sale."
+        }
+       ]
+      },
+      {
+       "num": "3",
+       "titre": "La santé mentale",
+       "objectif": "Définir la santé mentale, repérer ce qui l'entretient et savoir vers qui se tourner.",
+       "notions": [
+        {
+         "n": "Santé mentale",
+         "d": "État de bien-être mental qui permet de faire face aux difficultés de la vie, d'apprendre et de travailler."
+        },
+        {
+         "n": "Lien social",
+         "d": "Fait de parler, d'être écouté et de faire partie d'un groupe."
+        },
+        {
+         "n": "Mon soutien psy",
+         "d": "Dispositif permettant jusqu'à 12 séances de psychologue par année civile, sans prescription médicale."
+        },
+        {
+         "n": "Centre médico-psychologique",
+         "d": "Structure publique de consultation gratuite, accessible à partir de 16 ans."
+        }
+       ]
+      },
+      {
+       "num": "4",
+       "titre": "Le bruit et les risques du chantier",
+       "objectif": "Décrire le trajet du son dans l'oreille, évaluer une exposition au bruit et énoncer les mesures adaptées à chaque situation.",
+       "notions": [
+        {
+         "n": "Cellules ciliées",
+         "d": "Cellules de la cochlée qui captent le son ; détruites par le bruit, elles ne se régénèrent pas."
+        },
+        {
+         "n": "Acouphène",
+         "d": "Sifflement perçu en l'absence de tout son, signal d'alerte après une exposition au bruit."
+        },
+        {
+         "n": "Décibel",
+         "d": "Unité de mesure du niveau sonore."
+        },
+        {
+         "n": "Risque chimique",
+         "d": "Risque lié à l'inhalation d'un produit ou à son contact avec la peau."
+        },
+        {
+         "n": "Pollution des milieux ambiants",
+         "d": "Atteinte du sol, de l'eau ou de l'air par des produits ou des rejets."
+        },
+        {
+         "n": "Équipement de protection individuelle",
+         "d": "Protection adaptée à un risque précis, fournie par l'employeur."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "BIO_corps_chaleur",
+     "titre": "Le corps face à la chaleur",
+     "objectif": "Mesurer l'intensité d'un effort, lire une courbe de fréquence cardiaque et distinguer une adaptation normale d'un signal d'alerte.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Pourquoi le corps chauffe et pourquoi on transpire",
+       "objectif": "Expliquer le rôle de la transpiration pendant un effort.",
+       "notions": [
+        {
+         "n": "Thermorégulation",
+         "d": "Ensemble des mécanismes qui maintiennent la température du corps autour de 37 °C."
+        },
+        {
+         "n": "Sueur",
+         "d": "Liquide produit par la peau, contenant surtout de l'eau et des sels minéraux."
+        },
+        {
+         "n": "Évaporation",
+         "d": "Passage de la sueur de la peau vers l'air, qui emporte de la chaleur."
+        }
+       ]
+      },
+      {
+       "num": "2",
+       "titre": "Reconnaître les signaux et réagir",
+       "objectif": "Reconnaître les signaux d'alerte de la chaleur et énoncer les mesures qui protègent.",
+       "notions": [
+        {
+         "n": "Signal d'alerte",
+         "d": "Sensation ou signe qui indique que l'organisme supporte mal la chaleur."
+        },
+        {
+         "n": "Coup de chaleur",
+         "d": "Urgence vitale marquée notamment par une peau sèche et chaude et une absence de transpiration."
+        },
+        {
+         "n": "Déshydratation",
+         "d": "Manque d'eau dans l'organisme, provoqué par des pertes non remplacées."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "BIO_synthese_oral",
+     "titre": "Préparer l'oral du CCF4",
+     "objectif": "Être capable de relier ses connaissances à sa pratique observée et de répondre aux questions de l'oral.",
+     "capacite": "CG2.2",
+     "ccf": "CCF4",
+     "notions_cours": [
+      {
+       "n": "Mise en œuvre",
+       "d": "Critère de la grille valant 10 points sur 20 : relier ce que l'on sait à ce que l'on a fait en séance."
+      },
+      {
+       "n": "Appropriation",
+       "d": "Critère valant 4 points : cohérence du propos, réponse aux relances, position personnelle argumentée."
+      },
+      {
+       "n": "Tirage au sort",
+       "d": "Désignation du thème de l'oral parmi Prévention, Fonctionnement et Énergie."
+      },
+      {
+       "n": "Carnet de séance",
+       "d": "Relevé personnel de chiffres et de sensations tenu au fil de l'année, ressource principale pour l'oral."
+      }
+     ],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Comprendre l'épreuve et ce qu'elle note",
+       "objectif": "Être capable d'expliquer le déroulé de l'épreuve et de repérer ce que chaque critère de la grille attend.",
+       "notions": []
+      },
+      {
+       "num": "2",
+       "titre": "S'entraîner à répondre",
+       "objectif": "Être capable de construire une réponse orale reliant les connaissances à la pratique observée.",
+       "notions": []
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "code": "MP1 · Insertion",
+   "nom": "MP1 — Insertion dans le monde du travail",
+   "cadre": "Module professionnel · CCF6 (dossier)",
+   "cours": [
+    {
+     "code": "MP1_regles_structure",
+     "titre": "Les règles de fonctionnement d'une structure",
+     "objectif": "S'inscrire dans un collectif de travail et respecter les règles de fonctionnement de la structure (CG3.2).",
+     "capacite": "CG3.2",
+     "ccf": "CCF6",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "1",
+       "titre": "Les règles de fonctionnement d'une structure",
+       "objectif": "Comprendre comment une structure est organisée (acteurs, hiérarchie, organigramme) et quelles règles communes s'y appliquent (règlement intérieur), pour savoir s'y repérer et s'y intégrer en stage comme en emploi.",
+       "notions": [
+        {
+         "n": "Hiérarchie",
+         "d": "L'organisation des responsabilités dans une structure : qui décide, qui encadre, qui exécute, à qui l'on rend compte."
+        },
+        {
+         "n": "Lien de subordination",
+         "d": "Le fait de travailler sous l'autorité de l'employeur, qui peut donner des ordres, contrôler et sanctionner."
+        },
+        {
+         "n": "Direction",
+         "d": "La fonction qui fixe les objectifs, organise l'activité globale et représente la structure (chef d'entreprise, gérant)."
+        },
+        {
+         "n": "Encadrement",
+         "d": "La fonction qui donne les consignes au quotidien, organise le travail et veille à la sécurité (chef d'équipe, maître de stage)."
+        },
+        {
+         "n": "Organigramme",
+         "d": "Un schéma qui représente l'organisation d'une structure et les liens entre les fonctions (une « carte » de l'entreprise)."
+        },
+        {
+         "n": "Règlement intérieur",
+         "d": "Document rédigé par l'employeur fixant les règles de santé, de sécurité et de discipline ; obligatoire à partir de 50 salariés."
+        },
+        {
+         "n": "EPI",
+         "d": "Équipements de protection individuelle : chaussures de sécurité, gants, lunettes, casque, protection auditive…"
+        },
+        {
+         "n": "CSE",
+         "d": "Comité social et économique : instance qui représente les salariés ; il est consulté avant la mise en place du règlement intérieur."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "MP1_entreprises",
+     "titre": "Les entreprises pourvoyeuses d'emplois",
+     "objectif": "S'inscrire dans un environnement professionnel (CG3.2) : identifier les formes d'entreprises et les partenaires qui les entourent.",
+     "capacite": "CG3.2",
+     "ccf": "CCF6",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "2",
+       "titre": "Les entreprises pourvoyeuses d'emplois",
+       "objectif": "Découvrir que l'on peut travailler dans des structures juridiques différentes (entreprise individuelle, société, exploitation agricole, coopérative, association) et repérer les partenaires extérieurs qui entourent l'entreprise (MSA, clients, fournisseurs, banque, chambre d'agriculture, coopérative, France Travail, APECITA).",
+       "notions": [
+        {
+         "n": "Entreprise individuelle (EI)",
+         "d": "Une seule personne exerce une activité en son nom ; son patrimoine personnel est en principe protégé des dettes de l'activité."
+        },
+        {
+         "n": "SARL",
+         "d": "Société commerciale de 2 à 100 associés, à responsabilité limitée aux apports ; fréquente pour les PME et entreprises familiales."
+        },
+        {
+         "n": "EARL",
+         "d": "Exploitation Agricole à Responsabilité Limitée : société civile agricole (10 associés max.) prévue par le Code rural."
+        },
+        {
+         "n": "Coopérative agricole",
+         "d": "Société où des agriculteurs mettent des moyens en commun (vente, achat, matériel, services) pour améliorer leurs résultats."
+        },
+        {
+         "n": "Association (loi 1901)",
+         "d": "Projet collectif à but non lucratif (pas de partage de bénéfices) ; elle peut cependant employer des salariés et accueillir des stagiaires."
+        },
+        {
+         "n": "Responsabilité limitée",
+         "d": "En cas de dettes, l'associé ne perd que ce qu'il a apporté, et non l'ensemble de ses biens personnels."
+        },
+        {
+         "n": "MSA",
+         "d": "Mutualité sociale agricole : régime de sécurité sociale obligatoire des salariés et non-salariés agricoles (santé, famille, retraite, accidents du travail, cotisations)."
+        },
+        {
+         "n": "Partenaire extérieur",
+         "d": "Acteur qui intervient autour de l'entreprise : client, fournisseur, banque, chambre d'agriculture, coopérative, MSA, France Travail, APECITA."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "MP1_contrat_salaire",
+     "titre": "Le contrat de travail & le salaire",
+     "objectif": "Se situer dans un contexte professionnel pour préparer son insertion (CG3.2).",
+     "capacite": "CG3.2",
+     "ccf": "CCF6",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "3",
+       "titre": "Le contrat de travail : un cadre pour la relation de travail",
+       "objectif": "Comprendre ce qu'est un contrat de travail : ses éléments clés, les droits et les obligations du salarié.",
+       "notions": [
+        {
+         "n": "Contrat de travail",
+         "d": "Accord par lequel une personne (le salarié) travaille pour un employeur, contre rémunération et sous son autorité."
+        },
+        {
+         "n": "Lien de subordination",
+         "d": "Autorité de l'employeur : il donne des ordres, contrôle le travail et peut sanctionner ; c'est ce qui définit le salarié."
+        }
+       ]
+      },
+      {
+       "num": "4",
+       "titre": "Reconnaître les principaux types de contrat",
+       "objectif": "Distinguer les principaux types de contrat — CDI, CDD, apprentissage, intérim — et identifier les documents remis à la fin d'un contrat.",
+       "notions": [
+        {
+         "n": "CDI",
+         "d": "Contrat à durée indéterminée : emploi durable, sans date de fin prévue ; la forme normale de l'emploi."
+        },
+        {
+         "n": "CDD",
+         "d": "Contrat à durée déterminée : emploi temporaire, obligatoirement écrit et motivé ; ouvre droit à une prime de précarité (≥ 10 %)."
+        },
+        {
+         "n": "Apprentissage",
+         "d": "Contrat de travail en alternance (entreprise + CFA) pour préparer un diplôme ; apprenti de 29 ans révolus au plus (exceptions possibles)."
+        },
+        {
+         "n": "Intérim",
+         "d": "Travail temporaire à trois acteurs : l'intérimaire, l'agence de travail temporaire (l'employeur) et l'entreprise utilisatrice."
+        }
+       ]
+      },
+      {
+       "num": "5",
+       "titre": "Lire un bulletin de paie : du brut au net social",
+       "objectif": "Apprendre à lire un bulletin de paie, du salaire brut au salaire net et au montant net social, et se situer dans son futur emploi.",
+       "notions": [
+        {
+         "n": "Salaire brut",
+         "d": "Le salaire avant déduction des cotisations salariales."
+        },
+        {
+         "n": "Cotisations salariales",
+         "d": "Sommes retirées du brut pour financer la protection sociale (maladie, retraite, chômage, CSG/CRDS)."
+        },
+        {
+         "n": "Salaire net",
+         "d": "Ce que le salarié touche réellement, une fois les cotisations (et l'impôt) déduites."
+        },
+        {
+         "n": "Montant net social",
+         "d": "Revenu net après tous les prélèvements sociaux obligatoires ; sert à déclarer ses ressources (RSA, prime d'activité) à la CAF ou la MSA."
+        },
+        {
+         "n": "SMIC",
+         "d": "Salaire minimum légal ; depuis le 1ᵉʳ juin 2026 : 12,31 € brut de l'heure, soit 1 867,02 € brut par mois."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "MP1_cadre_collectif_securite",
+     "titre": "Le cadre collectif & la sécurité au travail",
+     "objectif": "S'inscrire dans un collectif de travail en respectant le cadre et les règles de sécurité (CG3.2).",
+     "capacite": "CG3.2",
+     "ccf": "CCF6",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "6",
+       "titre": "Le cadre collectif & la sécurité au travail",
+       "objectif": "Comprendre qu'un salarié ne travaille pas seul avec son contrat, mais dans un cadre collectif (convention collective, représentation du personnel) et un cadre de sécurité (obligations, EPI, risques, accident du travail), et repérer les bons comportements attendus sur un chantier.",
+       "notions": [
+        {
+         "n": "Convention collective",
+         "d": "Texte négocié entre représentants des employeurs et des salariés, qui adapte le Code du travail à un secteur (ex. paysage IDCC 7018, production agricole IDCC 7024)."
+        },
+        {
+         "n": "CSE",
+         "d": "Comité social et économique : l'instance qui représente le personnel, obligatoire à partir de 11 salariés ; il remplace les anciens DP, CE et CHSCT."
+        },
+        {
+         "n": "Inspection du travail",
+         "d": "Service extérieur qui veille à l'application du droit du travail ; un salarié peut la contacter sans risque de sanction."
+        },
+        {
+         "n": "Médecine du travail",
+         "d": "Médecin au rôle préventif, chargé de préserver la santé des travailleurs tout au long de leur carrière."
+        },
+        {
+         "n": "EPI",
+         "d": "Équipement de protection individuelle (gants, chaussures de sécurité, lunettes, casque…) porté quand les protections collectives ne suffisent pas."
+        },
+        {
+         "n": "DUERP",
+         "d": "Document unique où l'employeur évalue et consigne les risques de chaque poste de travail."
+        },
+        {
+         "n": "Accident du travail",
+         "d": "Accident survenu du fait ou à l'occasion du travail ; à déclarer avec des délais précis (salarié 24 h, employeur 48 h)."
+        },
+        {
+         "n": "MSA",
+         "d": "La Sécurité sociale agricole : elle gère la protection sociale (santé, accidents du travail) des salariés et exploitants agricoles."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "MP1_recherche_emploi",
+     "titre": "Se projeter dans le monde du travail",
+     "objectif": "S'insérer dans un environnement professionnel (CG3.2) : chercher, comprendre et préparer une candidature.",
+     "capacite": "CG3.2",
+     "ccf": "CCF6",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "7",
+       "titre": "Se projeter dans le monde du travail",
+       "objectif": "Savoir où chercher un emploi, un apprentissage ou un stage ; lire une offre et en repérer les informations clés ; préparer un CV, une lettre de motivation et un entretien.",
+       "notions": [
+        {
+         "n": "France Travail",
+         "d": "Service public de l'emploi (ex-Pôle emploi depuis le 1ᵉʳ janvier 2024) : offres, accompagnement et services en ligne."
+        },
+        {
+         "n": "APECITA",
+         "d": "Site spécialisé dans l'emploi en agriculture, agroalimentaire et environnement, classé par filières (dont le paysage)."
+        },
+        {
+         "n": "Offre d'emploi",
+         "d": "Annonce d'un poste à pourvoir : intitulé, lieu, contrat, missions, salaire, façon de postuler."
+        },
+        {
+         "n": "Candidature spontanée",
+         "d": "Postuler dans une entreprise qui n'a pas publié d'offre, en envoyant un CV et un message."
+        },
+        {
+         "n": "CV",
+         "d": "Document clair qui présente identité, formation, stages/expériences, compétences et qualités."
+        },
+        {
+         "n": "Lettre de motivation",
+         "d": "Lettre personnalisée qui dit qui l'on est, pourquoi l'entreprise nous intéresse et ce que l'on peut apporter."
+        },
+        {
+         "n": "Entretien d'embauche",
+         "d": "Rencontre avec le recruteur : arriver à l'heure, connaître l'offre, donner des exemples, poser une question utile."
+        },
+        {
+         "n": "Mention discriminatoire",
+         "d": "Mention interdite dans une offre (réserver un poste à un sexe ou à un âge, hors exception légale)."
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "code": "MP1_dossier_ccf6",
+     "titre": "Mon emploi observé : le dossier CCF6",
+     "objectif": "S'approprier les normes et cadres de références d'un collectif, dans le cadre de l'entreprise (CG3.2).",
+     "capacite": "CG3.2",
+     "ccf": "CCF6",
+     "notions_cours": [],
+     "seances": [
+      {
+       "num": "8",
+       "titre": "Mon emploi observé : le dossier CCF6",
+       "objectif": "Construire, pas à pas, le dossier de 2 fiches (organisation employeuse + emploi observé), préparer l'oral de 15 minutes (5 min de présentation + 10 min de questions) et savoir se positionner sur son employabilité.",
+       "notions": [
+        {
+         "n": "CCF6 (épreuve E3.2)",
+         "d": "L'épreuve qui évalue la capacité CG3.2 : comprendre le fonctionnement et les règles d'une entreprise, à partir d'un emploi observé."
+        },
+        {
+         "n": "Capacité CG3.2",
+         "d": "« S'approprier les normes et cadres de références d'un collectif » : montrer qu'on comprend les règles de l'entreprise."
+        },
+        {
+         "n": "Fiche organisation employeuse",
+         "d": "La fiche 1 : elle décrit la structure (nom, activité, forme juridique, taille, organisation, partenaires, règles)."
+        },
+        {
+         "n": "Fiche emploi observé",
+         "d": "La fiche 2 : elle décrit le poste (fonctions, tâches, matériel, autonomie, responsabilités, droits, obligations)."
+        },
+        {
+         "n": "Employabilité",
+         "d": "Sa capacité à occuper un emploi : savoir dire ce qu'on sait faire, ce qu'on a appris et ce qu'on doit encore améliorer."
+        },
+        {
+         "n": "Oral 5 + 10",
+         "d": "L'oral dure 15 minutes : 5 minutes maximum de présentation, puis 10 minutes de questions du jury."
+        },
+        {
+         "n": "Annexes",
+         "d": "Documents qui étayent le dossier (organigramme, photo, consigne, fiche EPI, offre d'emploi) — toujours avec précaution."
+        },
+        {
+         "n": "Anonymisation",
+         "d": "Masquer les noms, visages et données personnelles ou confidentielles sur les documents et les photos du dossier."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
