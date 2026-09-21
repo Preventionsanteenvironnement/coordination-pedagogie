@@ -272,7 +272,7 @@ const TEINTES = ['#2563eb', '#c2410c', '#15803d'];
 
 const S = {
   donnees: null,
-  moi: lsLit(K_REPONSE, null),   // { id, nom, filiere, reponses:{}, termine }
+  moi: lsLit(K_REPONSE, null),   // { id, nom, filiere, reponses:{}, mot, termine }
   seances: [],
   gens: [],
   ouverts: new Set(),            // modules dépliés (jamais enregistré : c'est de l'affichage)
@@ -323,7 +323,8 @@ async function envoyer(){
   const doc = {
     id: `reponse_${S.moi.id}`, type:'reponse', source:'capa-cours', annee:ANNEE,
     nom: S.moi.nom, filiere: S.moi.filiere || '',
-    reponses: S.moi.reponses, termine: !!S.moi.termine, maj: S.moi.maj,
+    reponses: S.moi.reponses, mot: (S.moi.mot || '').slice(0, 600),
+    termine: !!S.moi.termine, maj: S.moi.maj,
   };
   try { await avecDelai(FS.setDoc(FS.doc(db, COL, doc.id), doc)); S.envoi = 'ok'; }
   catch(e){ S.envoi = estRefus(e) ? 'regles' : 'reseau'; }
@@ -464,7 +465,13 @@ function dessinerListe(){
       <p class="sous">Pour chaque bloc : <b>Je traite</b>, <b>Je ne traite pas</b>, ou <b>Je veux voir</b> pour répondre séance par séance.</p>
     </div>
     ${S.donnees.modules.map(htmlModule).join('')}
-    <div class="bloc no-print"><p>Quand c'est fait, cliquez sur <b>J'ai terminé</b> en bas.</p></div>`;
+    <div class="bloc no-print">
+      <label class="champ" for="i-mot">Une remarque, une suggestion ?
+        <span class="aide">Facultatif. Ce que vous voulez me dire sur ces cours.</span>
+        <textarea id="i-mot" data-mot rows="3" maxlength="600">${esc(S.moi.mot || '')}</textarea>
+      </label>
+      <p>Quand c'est fait, cliquez sur <b>J'ai terminé</b> en bas.</p>
+    </div>`;
   majJauge(); majEtat();
   enregistrer();
 }
@@ -529,6 +536,11 @@ $('#ecran').addEventListener('click', ev => {
     if (n) n.scrollIntoView({ block:'start' });
     return;
   }
+});
+$('#ecran').addEventListener('input', ev => {
+  if (!('mot' in ev.target.dataset)) return;
+  S.moi.mot = ev.target.value;
+  enregistrer();
 });
 $('#ecran').addEventListener('change', ev => {
   const k = ev.target.dataset.cle;

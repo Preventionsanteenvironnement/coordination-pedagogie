@@ -99,13 +99,16 @@ Collection : **`coordination_capa_cours`**, projet `devoirs-pse`.
 
 ```text
 reponse_<id>   { type:'reponse', source:'capa-cours', annee:'2026-2027',
-                 nom, filiere:'jp'|'hort', termine, maj,
-                 reponses: { 'SESG_revenus/1': { r:'oui'|'non'|'autre', c:'…' } } }
+                 nom, filiere:'jp'|'hort', mot, termine, maj,
+                 reponses: { 'SESG_revenus/1': { r:'oui'|'non' } } }
 ```
 
 `r` vaut `oui` (je le traite) ou `non` (je ne le traite pas). Seul `oui` retire la séance de
 mon programme. La règle Firestore ne contrôle pas cette valeur : une ancienne réponse
 portant `autre` serait lue comme « ni oui », donc comme si la séance me revenait.
+
+`mot` est la remarque libre laissée en bas de la liste (600 caractères au plus, souvent
+vide). Elle s'affiche dans `prof.html`, sous « Ont répondu », filière par filière.
 
 `<id>` est tiré au hasard dans le navigateur du collègue et conservé sur son appareil :
 c'est ce qui lui permet de fermer la page et de revenir modifier sa réponse.
@@ -129,15 +132,20 @@ match /coordination_capa_cours/{docId} {
                         && request.resource.data.filiere in ['jp','hort']
                         && request.resource.data.reponses is map
                         && request.resource.data.reponses.size() <= 200
+                        && (!('mot' in request.resource.data)
+                            || (request.resource.data.mot is string && request.resource.data.mot.size() <= 600))
                         && request.resource.data.keys().hasOnly(['id','type','source','annee','nom','filiere',
-                             'reponses','termine','maj']);
+                             'reponses','mot','termine','maj']);
 
   allow delete: if true;
 }
 ```
 
-Le fichier complet, prêt à coller, a été déposé le 21/09 dans
-`~/Documents/regles-firestore-2026-09-21.rules`.
+Le fichier complet, prêt à coller, est dans `~/Documents/regles-firestore-2026-09-21.rules`.
+
+⚠ **La version du 21/09 après-midi ajoute le champ `mot`.** Tant qu'elle n'est pas publiée,
+chaque enregistrement est refusé — vérifié : 403. **Publier la règle AVANT de mettre la page
+en ligne**, jamais l'inverse.
 
 ## Ce qu'il faut savoir
 

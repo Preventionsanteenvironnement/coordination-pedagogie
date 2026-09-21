@@ -18,6 +18,11 @@
 .qui-liste li{padding:6px 13px;border:1px solid var(--line);border-radius:999px;background:var(--card-2);font-size:.92rem}
 .qui-liste .rien{border-style:dashed;color:var(--muted)}
 .qui-liste .sup{border:0;background:none;color:#b91c1c;font:inherit;font-weight:700;cursor:pointer;text-decoration:underline;padding:0 2px}
+.mots{margin:14px 0 0}
+.mots h3{font-size:1rem;color:var(--accent-d)}
+.mots blockquote{margin:9px 0 0;padding:11px 14px;background:var(--card-2);border-left:4px solid var(--accent);border-radius:0 var(--r-s) var(--r-s) 0}
+.mots blockquote b{display:block;font-size:.9rem;color:var(--muted)}
+.mots blockquote p{margin:4px 0 0}
 </style>
 </head>
 <body>
@@ -72,6 +77,12 @@ function htmlFiliere(p){
         `${GESTION ? ` <button type="button" class="sup" data-supprimer="${esc(g.id)}">supprimer</button>` : ''}</li>`).join('')}</ul>`
     : '<ul class="qui-liste"><li class="rien">Personne n’a encore répondu pour cette filière : tout reste à ma charge.</li></ul>';
 
+  const dits = p.repondants.filter(g => (g.mot || '').trim());
+  const mots = dits.length
+    ? `<div class="mots"><h3>Ce qu'ils ont écrit</h3>${dits.map(g =>
+        `<blockquote><b>${esc(g.nom)}</b><p>${esc(g.mot)}</p></blockquote>`).join('')}</div>`
+    : '';
+
   const jauge = pris
     ? `<div class="jauge" role="img" aria-label="${p.nbGardees} séances à moi, ${pris} aux collègues">
          <span style="flex:${p.nbGardees};background:#15803d"></span>
@@ -105,7 +116,7 @@ function htmlFiliere(p){
         : 'Aucune séance n’est prise en charge par un collègue pour l’instant.'}</span>
       ${jauge}
     </div>
-    ${qui ? `<section class="module"><h3>Ont répondu</h3><div class="cours">${qui}</div></section>` : ''}
+    <section class="module"><h3>Ont répondu</h3><div class="cours">${qui}${mots}</div></section>
     ${modules}
   </section>`;
 }
