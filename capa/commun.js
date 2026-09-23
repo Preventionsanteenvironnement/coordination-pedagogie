@@ -109,22 +109,67 @@ export const programmes = (donnees, gens) =>
 
 /* ─── le courriel ─────────────────────────────────────────────────── */
 
+/* Les séances qu'un collègue prend, et que je ne traiterai donc pas. */
+export function seancesPrises(prog){
+  const sortie = [];
+  prog.modules.forEach(m => m.cours.forEach(c => c.seances.forEach(s => {
+    if (!s.amoi) sortie.push({ cours:c.titre, num:s.num, titre:s.titre, preneurs:s.preneurs });
+  })));
+  return sortie;
+}
+
+/* Au-delà de ce nombre, on ne liste plus : le détail est dans le lien. */
+const MAX_LISTE = 15;
+
 export function texteMail(progs, lien){
   const L = [];
-  const total = progs.reduce((n, p) => n + p.repondants.length, 0);
+  const s_ = n => n > 1 ? 's' : '';
+  const repondants = [];
+  progs.forEach(p => p.repondants.forEach(g => { if (!repondants.some(x => x.id === g.id)) repondants.push(g); }));
+
   L.push('Bonjour,');
   L.push('');
-  L.push(total
-    ? 'Merci d’avoir pris le temps de répondre. Vos réponses m’ont permis de faire le tri dans mon programme.'
+  L.push(repondants.length
+    ? 'Merci d’avoir pris le temps de répondre. Voici ce que cela change dans mon programme.'
     : 'Voici ce que je traiterai avec les élèves.');
-  L.push('');
+
   progs.forEach(p => {
-    const pris = p.nbTotal - p.nbGardees;
-    L.push(`${p.nom.toUpperCase()} — ${p.nbGardees} séances sur ${p.nbTotal}`);
-    p.modules.filter(m => m.nbGardees).forEach(m => L.push(`  ${m.nom} : ${m.nbGardees} séances`));
-    if (pris) L.push(`  (${pris} séances vous reviennent, je ne les traiterai pas.)`);
+    const pris = seancesPrises(p);
     L.push('');
+    L.push(p.nom.toUpperCase());
+
+    if (!p.repondants.length){
+      L.push(`  Personne n’a répondu pour cette filière : je traiterai les ${p.nbTotal} séances.`);
+    } else if (!pris.length){
+      L.push(`  Vous ne prenez aucune séance : je traiterai les ${p.nbTotal}.`);
+    } else {
+      L.push('');
+      L.push(`  CE QUE JE NE TRAITERAI PAS — ${pris.length} séance${s_(pris.length)} que vous prenez :`);
+      if (pris.length <= MAX_LISTE){
+        pris.forEach(x => L.push(`    · ${x.cours} — ${x.num}. ${x.titre}`
+          + (x.preneurs.length ? ` (${x.preneurs.map(g => g.nom).join(', ')})` : '')));
+      } else {
+        L.push(`    Elles sont trop nombreuses pour tenir ici : voir le détail par le lien ci-dessous.`);
+      }
+      L.push('');
+      L.push(`  CE QUE JE TRAITERAI — ${p.nbGardees} séance${s_(p.nbGardees)} :`);
+    }
+    if (p.repondants.length && pris.length) p.modules.filter(m => m.nbGardees)
+      .forEach(m => L.push(`    ${m.nom} : ${m.nbGardees} séance${s_(m.nbGardees)}`));
   });
+
+  const mots = repondants.filter(g => (g.mot || '').trim());
+  if (mots.length){
+    L.push('');
+    L.push('CE QUE VOUS AVEZ ÉCRIT');
+    mots.forEach(g => {
+      L.push('');
+      L.push(`  ${g.nom} :`);
+      g.mot.trim().split('\n').forEach(ligne => L.push(`    ${ligne.trim()}`));
+    });
+  }
+
+  L.push('');
   L.push('Le détail, séance par séance :');
   L.push(lien);
   L.push('');

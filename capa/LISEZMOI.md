@@ -55,6 +55,14 @@ Le bouton de `prof.html` ouvre le logiciel de messagerie avec un message d'envir
 restent, le détail par module, le nombre de séances qui leur reviennent — et le lien vers
 `programme.html`. `mailto:` ne transporte que du texte brut : ni gras, ni couleurs.
 
+## Ce que le courriel dit, et dans quel ordre
+
+Il nomme **d'abord ce que je ne traiterai pas** : la ou les séances que les collègues
+prennent, avec le nom de qui les prend. Ensuite seulement ce qui me reste, par module.
+Au-delà de quinze séances prises, il renvoie au lien plutôt que de les énumérer.
+Il reprend les remarques laissées (champ `mot`) et signale une filière où personne n'a
+répondu. `mailto:` ne transporte que du texte brut : ni gras, ni couleurs.
+
 ## Le contenu vient de la bibliothèque
 
 La liste n'est pas écrite à la main. Elle est fabriquée depuis la bibliothèque CAPa de

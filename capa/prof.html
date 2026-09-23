@@ -41,7 +41,7 @@
 <div id="annonce" class="sr" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { lireTout, programmes, texteMail, esc, dateCourte, FILIERES, COL, DELAI_MS, avecDelai } from './commun.js?v=2';
+import { lireTout, programmes, texteMail, esc, dateCourte, FILIERES, COL, DELAI_MS, avecDelai } from './commun.js?v=3';
 
 const $ = (s, r = document) => r.querySelector(s);
 const annonce = t => { const n = $('#annonce'); if (n) n.textContent = t; };
@@ -63,7 +63,7 @@ function htmlSeances(cours){
     return `<li class="${s.amoi ? 'amoi' : 'aeux'}">
       <span class="num">${esc(s.num)}.</span>
       <span class="titre">${esc(s.titre)}</span>
-      <span class="marqueur ${s.amoi ? 'm-amoi' : 'm-aeux'}">${s.amoi ? 'à moi' : esc(s.preneurs.map(g => g.nom).join(', '))}</span>
+      <span class="marqueur ${s.amoi ? 'm-amoi' : 'm-aeux'}">${s.amoi ? 'à moi' : 'pris par ' + esc(s.preneurs.map(g => g.nom).join(', '))}</span>
       ${notions ? `<span class="notions">${esc(notions)}</span>` : ''}
     </li>`;
   }).join('')}</ul>`;
@@ -112,8 +112,10 @@ function htmlFiliere(p){
     <div class="gros">
       <b>${p.nbGardees}</b><span class="sur">séance${s_(p.nbGardees)} sur ${p.nbTotal} restent à ma charge</span>
       <span class="reste">${pris
-        ? `${pris} séance${s_(pris)} ${pris > 1 ? 'sont prises' : 'est prise'} en charge par vos collègues : je ne les traiterai pas.`
-        : 'Aucune séance n’est prise en charge par un collègue pour l’instant.'}</span>
+        ? `${pris} séance${s_(pris)} ${pris > 1 ? 'sont prises' : 'est prise'} en charge par vos collègues : je ne ${pris > 1 ? 'les' : 'la'} traiterai pas.`
+        : (p.repondants.length
+            ? 'Vos collègues ne prennent aucune séance pour l’instant.'
+            : 'Personne n’a encore répondu pour cette filière.')}</span>
       ${jauge}
     </div>
     <section class="module"><h3>Ont répondu</h3><div class="cours">${qui}${mots}</div></section>
