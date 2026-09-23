@@ -244,13 +244,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .leg-pfmp{display:inline-block;width:22px;height:14px;border-radius:4px;vertical-align:-2px;background:repeating-linear-gradient(135deg,#FFD9A8 0 5px,#FFEBD1 5px 10px);box-shadow:inset 0 0 0 1.5px #F08A24}
 .bloc{position:absolute;border-radius:10px;padding:5px 7px 5px 10px;overflow:hidden;text-align:left;border:1px solid color-mix(in srgb,var(--mc) 30%,var(--card));background:color-mix(in srgb,var(--mc) 14%,var(--card));color:var(--ink);display:flex;flex-direction:column;gap:2px;font-size:.8rem;line-height:1.2}
 .bloc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--mc)}
-.bloc:hover{box-shadow:0 0 0 2px var(--mc);z-index:3}
+.bloc:focus-within,.bloc:hover{box-shadow:0 0 0 2px var(--mc);z-index:3}
 .bloc b{font-weight:750;font-size:.82rem}
 .bloc .salle{color:var(--muted);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bloc .pills{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
 .pill{display:inline-flex;align-items:center;border-radius:7px;padding:1px 6px;font-size:.72rem;font-weight:800;background:var(--card);border:1px solid var(--line);color:var(--ink)}
 .pill.abs{background:var(--err-l);color:var(--err);border-color:transparent;text-decoration:line-through}
 .bes{position:absolute;top:4px;right:4px;border-radius:999px;font-size:.68rem;font-weight:800;padding:1px 6px}
+.bloc{padding:0}
+.bloc-contenu{border:0;background:transparent;color:inherit;text-align:left;font:inherit;width:100%;height:100%;padding:5px 7px 5px 10px;display:flex;flex-direction:column;gap:2px;cursor:pointer}
+.bloc.avec-besoin .bloc-contenu>b{padding-right:62px}
+.bes-action{min-width:56px;min-height:32px;font-size:.95rem;padding:4px 8px;border:1px solid currentColor;cursor:pointer;z-index:2;line-height:1.2}
+.bes-action:focus-visible,.bloc-contenu:focus-visible{outline:3px solid var(--ink);outline-offset:-3px}
+.besoin-explication{font-size:1.05rem;line-height:1.6}
+.besoin-explication strong{font-size:1.4rem}
+.cours-contenu{display:flex;gap:12px;align-items:center;border:0;background:transparent;color:inherit;text-align:left;font:inherit;width:100%;padding-right:64px}
 .bes.manque{background:var(--warn-l);color:var(--warn)}.bes.ok{background:var(--ok-l);color:var(--ok)}
 .bloc.flash{animation:flash .7s ease 3}
 @keyframes flash{50%{box-shadow:0 0 0 4px var(--pole)}}
@@ -413,7 +421,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-23b');
+  const m = await import('./app.js?v=2026-09-23c');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-23b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

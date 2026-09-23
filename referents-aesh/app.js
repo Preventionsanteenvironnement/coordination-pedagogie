@@ -747,16 +747,16 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const bes = K.besoinDuCours(S.est, nom, c, quand(iso)), [mc] = couleurMatiere(c.mat);
       const nbPresents = presents(c, iso, bes);
       const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');
-      const besHtml = bes ? `<span class="bes ${nbPresents >= bes.nb ? 'ok' : 'manque'}" title="Besoin estimé par les enseignants : ${bes.nb} AESH${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.plageDebut !== c.d || bes.plageFin !== c.f ? ` · de ${K.hFr(bes.plageDebut)} à ${K.hFr(bes.plageFin)}` : ''} · présents au moment le moins couvert : ${nbPresents}">${nbPresents}/${bes.nb}<span class="sr"> AESH présents sur ${bes.nb} demandés</span></span>` : '';
+      const besHtml = bes ? `<button type="button" class="bes bes-action ${nbPresents >= bes.nb ? 'ok' : 'manque'}" data-a="expliquer-besoin" data-v="${esc(c.id)}" data-classe="${esc(nom)}" aria-label="Expliquer le besoin : ${bes.nb} AESH demandés, ${nbPresents} présents" title="Comprendre le besoin en AESH">${nbPresents}/${bes.nb} <span aria-hidden="true">ⓘ</span></button>` : '';
       const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', AESH ' + aeshs.map(a => a.sigle).join(' ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
-        return `<button type="button" class="bloc ${S.flash === c.id ? 'flash' : ''}" id="c-${esc(c.id)}" ${lectureSeule ? `data-a="lecture" data-v="${esc(c.id)}"` : `data-a="placer" data-v="${esc(c.id)}"`} style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}" aria-label="${esc(lib)}">
-          ${besHtml}<b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}<span class="pills">${pills}</span></button>`;
+        return `<div class="bloc ${bes ? 'avec-besoin' : ''} ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
+          <button type="button" class="bloc-contenu" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}"><b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}<span class="pills">${pills}</span></button>${besHtml}</div>`;
       }
-      return `<button type="button" class="cours-l" id="cl-${esc(c.id)}" ${lectureSeule ? `data-a="lecture" data-v="${esc(c.id)}"` : `data-a="placer" data-v="${esc(c.id)}"`} style="--mc:${mc}${lieu ? '' : ';opacity:.5'}" aria-label="${esc(lib)}">
-        <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc([c.salle.join(' · '), c.cls.length > 1 ? 'avec ' + c.cls.filter(n => n !== nom).map(n => S.edt.classes[n].court).join(', ') : ''].filter(Boolean).join(' · '))}</small></span>
-        <span class="pills">${besHtml ? besHtml.replace('class="bes', 'style="position:static" class="bes') : ''}${pills || '<span class="pill" style="opacity:.55">＋</span>'}</span></button>`;
+      return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
+        <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>
+        <span class="pills">${pills || '<span class="pill" style="opacity:.55">＋</span>'}</span></button>${besHtml}</div>`;
     };
     /* colonnes pour les cours qui se chevauchent (semaine A et B affichées séparément, donc rares) */
     [0, 1, 2, 3, 4].forEach(j => {
@@ -783,7 +783,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${modePlanning ? '' : lignePeriode()}
       <div class="ligne" style="gap:8px"><span class="muted" style="font-size:.9rem">PFMP ${esc(k.court)} : ${(k.pfmp || []).length ? esc((k.pfmp || []).map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')) : 'aucune renseignée'}${k.pfmpSaisies ? ' <span class="puce">saisies par le référent</span>' : ''}</span>${modePlanning ? '' : '<button type="button" class="btn petit" id="pfmp-modifier" data-a="pfmp">Modifier les PFMP</button>'}</div>
       ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>${modePlanning ? '' : carteLiberes(nom)}` : ''}
-      <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> présents / besoin estimé</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
+      <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> Exemple : 1 présent pour 2 demandés · touchez une pastille pour comprendre</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
       ${modePlanning ? `<div class="bandeau info">${peutPlacer(nom) ? 'PSR · Touchez un cours pour placer un AESH.' : 'Consultation · Les affectations sont gérées par le référent.'}</div>` : ''}
       ${peutPlacer(nom) ? palettePlanning() : ''}
       ${grilleClasse(nom, !peutPlacer(nom))}
@@ -1248,6 +1248,20 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const f = S.feuille;
     let h = '', large = false;
     if (f.type === 'placer') { h = feuillePlacer(f); large = true; }
+    else if (f.type === 'besoin-detail') {
+      const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j);
+      const bes = K.besoinDuCours(S.est,f.classe,c,quand(iso));
+      const nb = bes ? presents(c,iso,bes) : 0, manque = bes ? Math.max(0,bes.nb-nb) : 0;
+      h = teteFeuille('Le besoin en AESH',`${esc(c.lib)} · ${esc(f.classe)}<br>${esc(K.dateLongue(iso))} · ${K.hFr(c.d)}–${K.hFr(c.f)}`) +
+        (bes ? `<div class="besoin-explication"><p><strong>${bes.nb}</strong> AESH demandé${bes.nb > 1 ? 's' : ''} par les enseignants.</p>
+          <p><strong>${nb}</strong> AESH présent${nb > 1 ? 's' : ''} selon le planning.</p>
+          <p class="bandeau ${manque ? 'warn' : 'info'}"><b>${bes.nb === 0 ? 'Aucun accompagnement demandé pour ce cours.' : manque ? `Il manque ${manque} AESH.` : 'Le besoin est couvert.'}</b></p>
+          ${bes.nb === 0 && nb > 0 ? '<p>Un AESH peut être placé même si aucun besoin n’a été demandé.</p>' : ''}
+          <p>La pastille <b>${nb}/${bes.nb}</b> signifie : <b>${nb} présent${nb > 1 ? 's' : ''} pour ${bes.nb} demandé${bes.nb > 1 ? 's' : ''}.</b> Ce ne sont pas des heures.</p>
+          ${bes.plageDebut !== c.d || bes.plageFin !== c.f ? `<p>Le besoin concerne ${K.hFr(bes.plageDebut)}–${K.hFr(bes.plageFin)}.</p>` : ''}
+          <p class="muted">Si la présence varie pendant ce créneau, le chiffre correspond au moment où il y a le moins d’AESH disponibles.</p></div>` : '<p>Aucun besoin renseigné pour ce cours cette semaine.</p>') +
+        '<div class="actions"><button type="button" class="btn pri" data-a="fermer">J’ai compris</button></div>';
+    }
     else if (f.type === 'lecture') {
       const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j), bes = K.besoinDuCours(S.est,f.classe,c,quand(iso));
       h = teteFeuille(esc(c.lib),`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} · Consultation`) +
@@ -1568,7 +1582,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
     if (modePlanning) {
-      const permis = ['selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
+      const permis = ['expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
       if (!permis.includes(a)) return;
       if (a === 'sortir') { awaitSortirPlanning(); return; }
       if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
@@ -1750,6 +1764,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         try { window.open('mailto:?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(corps), '_self'); } catch (e) { }
         toast('Message préparé — choisissez le destinataire (il est aussi copié).');
         return; }
+      case 'expliquer-besoin': if(S.edt.cours[v] && S.edt.classes[b.dataset.classe]) ouvrir({type:'besoin-detail',coursId:v,classe:b.dataset.classe}); return;
       case 'lecture': if(S.edt.cours[v]) ouvrir({type:'lecture',coursId:v,classe:classeCourante()}); return;
       case 'periode': S.feuille.periode = v; if (v === 'date' && !S.feuille.au) S.feuille.au = K.ajoute(S.lundi, 4); rendre({ focus: b.id }); return;
       case 'valider-placer': validerPlacer(); return;
