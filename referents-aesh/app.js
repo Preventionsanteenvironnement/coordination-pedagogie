@@ -1,16 +1,17 @@
+import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-23e';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — application (coordination-pedagogie/referents-aesh/)
    Humeur + pensée → code du pôle → Accueil · Mes AESH · Emploi du temps ·
    Vue d'ensemble · Besoins · Messages · Exporter.
    Firestore : coordination_referents_aesh (pole_, aesh_, place_, abs_, reunion_, msg_, periode_) ; historique hist_ dans coordination_referents_aesh_hist
-               coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
+               coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-23d';
-import * as K from './calculs.js?v=2026-09-23d';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-23d';
-import { enregistrerPlanning } from './enregistrement.js?v=2026-09-23d';
-import * as AV from './avatars.js?v=2026-09-23d';
+import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-23e';
+import * as K from './calculs.js?v=2026-09-23e';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-23e';
+import { enregistrerPlanning } from './enregistrement.js?v=2026-09-23e';
+import * as AV from './avatars.js?v=2026-09-23e';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -32,7 +33,7 @@ const CRENEAUX_H = []; for (let m = 7 * 60 + 30; m <= 21 * 60; m += 30) CRENEAUX
 export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAccesPlanning }) {
   let droitsPlanning = null;
   const S = {
-    annee: anneeScolaire(), edt: null, C: null, docs: new Map(), etat: 'chargement', est: [], cadreEst: null, estEtat: 'chargement',
+    annee: anneeScolaire(), edt: null, C: null, docs: new Map(), etat: 'chargement', est: [], cadreEst: null, cadreEstBrut: null, estDocs: new Map(), estEtat: 'chargement',
     session: modePlanning ? null : lsLit(K_SESSION, null), vu: null, route: { e: 'humeur', p: {} }, lundi: null, feuille: null, menu: false, toast: null,
     code: '', codeMsg: '', codeErr: false, form: null, info: null, exp: { quoi: 'pole', ids: [], format: 'pdf' }, msgBrouillon: '', ignorePop: 0, n: 0, flash: null, envoi: false
   };
@@ -40,7 +41,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-23d')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-23e')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -83,9 +84,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (estEcoute || erreur || !FS) return; estEcoute = true;
     try {
       FS.onSnapshot(FS.query(FS.collection(db, COL_ESTIMATION), FS.where('annee', '==', S.annee)), snap => {
-        let cadre = null; const l = [];
-        snap.forEach(d => { const x = d.data() || {}; if (x.type === 'cadre' && (x.id || d.id) === 'cadre_' + S.annee) cadre = x; else if (x.type === 'cours' && x.statut === 'active') l.push({ ...x, id: x.id || d.id }); });
-        S.cadreEst = cadre && cadre.periode ? cadre.periode : null;
+        let cadre = null; const l = []; S.estDocs = new Map();
+        snap.forEach(d => { const x = d.data() || {}; if(x.type === 'cours') S.estDocs.set(d.id,x); if (x.type === 'cadre' && (x.id || d.id) === 'cadre_' + S.annee) cadre = x; else if (x.type === 'cours' && x.statut === 'active') l.push({ ...x, id: x.id || d.id }); });
+        S.cadreEstBrut = cadre; S.cadreEst = cadre && cadre.periode ? cadre.periode : null;
         S.est = S.cadreEst ? l.filter(x => !x.periode || x.periode.debut === S.cadreEst.debut) : l;
         S.estEtat = 'ok'; rendre({ donnees: true });
       }, () => { S.estEtat = 'horsligne'; rendre({ donnees: true }); });
@@ -485,7 +486,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <button type="button" class="tuile" id="tu-aesh" data-a="aller" data-v="aesh"><span class="ic">👥</span><span><b>Mes AESH</b><br><small>${bs.length} AESH · ${K.fmtH(prevu)} dans le pôle${incomplets ? ` · <span style="color:var(--warn);font-weight:700">${incomplets} à compléter</span>` : ''}</small></span></button>
         <button type="button" class="tuile forte" id="tu-edt" data-a="aller" data-v="edt"><span class="ic">🗓️</span><span><b>Emploi du temps</b><br><small>${prevu ? `${K.fmtH(place)} placées sur ${K.fmtH(prevu)} cette semaine` : `${K.fmtH(place)} placées · heures du pôle à compléter`}</small></span><div class="barre-p"><i style="width:${prevu ? Math.min(100, place / prevu * 100) : 0}%"></i></div></button>
         <button type="button" class="tuile" id="tu-ens" data-a="aller" data-v="ensemble"><span class="ic">🧭</span><span><b>Vue d’ensemble</b><br><small>Qui est où, jour par jour</small></span></button>
-        <button type="button" class="tuile" id="tu-bes" data-a="aller" data-v="besoins"><span class="ic">📋</span><span><b>Besoins</b><br><small>${nb.estimes} cours estimés par les enseignants${nb.manque ? ` · <span style="color:var(--warn);font-weight:700">${nb.manque} à couvrir</span>` : ''}</small></span></button>
+        <button type="button" class="tuile" id="tu-bes" data-a="aller" data-v="besoins"><span class="ic">📋</span><span><b>Besoins</b><br><small>${nb.estimes} cours avec un besoin renseigné${nb.manque ? ` · <span style="color:var(--warn);font-weight:700">${nb.manque} à couvrir</span>` : ''}</small></span></button>
         <button type="button" class="tuile" id="tu-msg" data-a="aller" data-v="messages"><span class="ic">💬</span><span><b>Messages</b><br><small>${nonLus ? `<span style="color:var(--err);font-weight:700">${nonLus} nouveau${nonLus > 1 ? 'x' : ''}</span>` : 'Entre référents'}</small></span></button>
         <button type="button" class="tuile" id="tu-exp" data-a="aller" data-v="exporter"><span class="ic">⬇️</span><span><b>Exporter</b><br><small>PDF · Excel</small></span></button>
       </div>
@@ -756,11 +757,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         return `<span class="presence-bande ${absent?'presence-absence':''}" style="background:${couleurAesh(a.id)};top:${100*(K.min(h.debut)-K.min(c.d))/minutes}%;height:${100*(K.min(h.fin)-K.min(h.debut))/minutes}%;left:${i*100/aeshs.length}%;width:${100/aeshs.length}%" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${absent?' · absence à vérifier':''}">${esc(a.sigle)}<small>${K.hFr(h.debut)}–${K.hFr(h.fin)}</small></span>`;
       }).join('')).join('');
       const decoupes = Array.from({length:Math.max(0,Math.ceil(minutes/30)-1)},(_,i)=>`<span class="presence-repere" style="top:${100*(i+1)*30/minutes}%"></span>`).join('');
-      const besHtml = bes ? `<button type="button" class="bes bes-action ${nbPresents >= bes.nb ? 'ok' : 'manque'}" data-a="expliquer-besoin" data-v="${esc(c.id)}" data-classe="${esc(nom)}" aria-label="Expliquer le besoin : ${bes.nb} AESH demandés, ${nbPresents} présents" title="Comprendre le besoin en AESH">${nbPresents}/${bes.nb} <span aria-hidden="true">ⓘ</span></button>` : '';
+      const besHtml = bes ? `<button type="button" class="bes bes-action ${nbPresents >= bes.nb ? 'ok' : 'manque'}" data-a="expliquer-besoin" data-v="${esc(c.id)}" data-classe="${esc(nom)}" aria-label="Expliquer le besoin : ${bes.nb} AESH demandés, ${nbPresents} présents" title="Comprendre le besoin en AESH">${nbPresents}/${bes.nb} <span aria-hidden="true">ⓘ</span></button>` : `<button type="button" class="bes bes-action" data-a="expliquer-besoin" data-v="${esc(c.id)}" data-classe="${esc(nom)}" aria-label="Besoin AESH non renseigné : ouvrir">Besoin ?</button>`;
       const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', ' + pl.map(x => (I.aesh.get(x.aeshId)?.sigle || '?')+' '+K.horairePlace(x,c).debut+'–'+K.horairePlace(x,c).fin).join(', ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
-        return `<div class="bloc avec-presences ${bes ? 'avec-besoin' : ''} ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
+        return `<div class="bloc avec-presences avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
           <button type="button" class="bloc-contenu" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}"><b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}<span class="presence-timeline" aria-hidden="true">${decoupes}${bandes}</span><span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
@@ -1088,6 +1089,28 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${grille}`;
   }
 
+  const peutEstimer = nom => !modePlanning && !!S.session && classesDu(S.session.pole).includes(nom);
+  function editeurBesoin(f) {
+    if(!peutEstimer(f.classe)) return '';
+    if(S.estEtat!=='ok' || !f.cible) return '<p class="bandeau info">Saisie indisponible : le cadre des estimations doit être chargé et ce cours doit y être identifié sans ambiguïté.</p>';
+    const d=f.base, c=f.cible;
+    return `<hr><h3>Renseigner le besoin après un échange</h3><p>Combien d’AESH sont demandés ? <b>0 signifie aucun besoin.</b></p>
+      <div class="choix" role="group" aria-label="Nombre d’AESH demandés">${[0,1,2,3,4,5,6].map(n=>`<button type="button" id="besoin-nb-${n}" data-a="besoin-nombre" data-v="${n}" aria-pressed="${f.nb===n}" ${S.envoi?'disabled':''}>${n}</button>`).join('')}</div>
+      <p>Semaines : <b>${esc(c.cr.parite || (d?.semaines==='A'||d?.semaines==='B' ? d.semaines : 'A et B'))}</b> · du ${K.jjmm(c.periode.debut)} au ${K.jjmm(d?.au || c.periode.fin)}.<br>Horaire : ${K.hFr(d?.hDebut || c.cr.debut)}–${K.hFr(d?.hFin || c.cr.fin)}.</p>
+      <p class="muted">Cette réponse est partagée avec les enseignants et visible par Antoine. Vous modifiez le nombre ; la période et les horaires du besoin sont conservés. Cela ne place aucun AESH automatiquement.</p>
+      <button type="button" class="btn valider" data-a="besoin-enregistrer" ${Number.isInteger(f.nb)&&!S.envoi?'':'disabled'}>${S.envoi?'Enregistrement…':'Enregistrer le besoin'}</button>`;
+  }
+  async function sauverBesoin() {
+    const f=S.feuille;
+    if(S.envoi || f?.type!=='besoin-detail' || !peutEstimer(f.classe) || !f.cible || S.estEtat!=='ok') return;
+    S.envoi=true; rendre();
+    try {
+      const d=await avecDelai(enregistrerBesoin(FS,db,f.cible,f.base,f.nb));
+      S.estDocs.set(d.id,d); S.est=S.est.filter(x=>x.id!==d.id).concat(d);
+      S.envoi=false; fermer(); toast('Besoin enregistré et partagé avec les enseignants et Antoine.');
+    } catch(e) { S.envoi=false; toast(e.code==='besoin-conflit'?e.message:messageErreur(e),true); }
+  }
+
   /* ─────────── besoins ─────────── */
   function besoinsResume(pid) {
     let estimes = 0, manque = 0; const vus = new Set();
@@ -1140,7 +1163,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const blocManquants = S.estEtat !== 'ok' ? '' : !nManq ? `<div class="manq ok" id="bes-manq"><b>✓ Tous les cours sont estimés</b>${filtre ? ` <span>en ${esc(S.edt.classes[filtre].court)}</span>` : ''}</div>`
       : `<div class="manq" id="bes-manq"><div class="manq-t">⚠️ Pas encore estimé : ${nManq} cours${filtre ? ` <span>en ${esc(S.edt.classes[filtre].court)}</span>` : ''}</div>
         <div class="manq-l">${ordre.map((m, i) => `<button type="button" id="bm-${i}" data-a="bes-mat" data-v="${esc(m.lib)}" aria-pressed="${fMat === m.lib}"><i style="background:${couleurMatiere(m.mat)[0]}"></i><b>${esc(m.lib)}</b><span>${esc([...m.classes].sort((x, y) => ordreCl.indexOf(x) - ordreCl.indexOf(y)).map(x => S.edt.classes[x].court).join(', '))} · ${m.n} cours</span></button>`).join('')}</div></div>`;
-    return `<div class="salut"><div><h1 id="titre" tabindex="-1">Besoins</h1><p class="sous">Estimés par les enseignants${S.cadreEst ? ` · ${esc(S.cadreEst.label || '')} ${K.jjmm(S.cadreEst.debut)} → ${K.jjmm(S.cadreEst.fin)}` : ''}</p></div>${selecteurSemaine()}</div>
+    return `<div class="salut"><div><h1 id="titre" tabindex="-1">Besoins</h1><p class="sous">Renseignés par les enseignants ou les référents${S.cadreEst ? ` · ${esc(S.cadreEst.label || '')} ${K.jjmm(S.cadreEst.debut)} → ${K.jjmm(S.cadreEst.fin)}` : ''}</p></div>${selecteurSemaine()}</div>
       <div class="ligne"><button type="button" class="btn pri" id="bes-partager" data-a="partager">✉️ Envoyer le lien à mes collègues</button></div>
       ${S.estEtat === 'horsligne' ? `<div class="bandeau warn">Les estimations n’ont pas pu être lues.</div>` : ''}
       <div class="stats">
@@ -1193,12 +1216,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-23d'),F=await import('./fichiers.js?v=2026-09-23d');
+      const X=await import('./exports.js?v=2026-09-23e'),F=await import('./fichiers.js?v=2026-09-23e');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-23d'), F = await import('./fichiers.js?v=2026-09-23d');
+    const X = await import('./exports.js?v=2026-09-23e'), F = await import('./fichiers.js?v=2026-09-23e');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1309,14 +1332,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const bes = K.besoinDuCours(S.est,f.classe,c,quand(iso));
       const nb = bes ? presents(c,iso,bes) : 0, manque = bes ? Math.max(0,bes.nb-nb) : 0;
       h = teteFeuille('Le besoin en AESH',`${esc(c.lib)} · ${esc(f.classe)}<br>${esc(K.dateLongue(iso))} · ${K.hFr(c.d)}–${K.hFr(c.f)}`) +
-        (bes ? `<div class="besoin-explication">${detailCouverture(c,iso,bes)}<p><strong>${bes.nb}</strong> AESH demandé${bes.nb > 1 ? 's' : ''} par les enseignants.</p>
+        (bes ? `<div class="besoin-explication">${detailCouverture(c,iso,bes)}<p><strong>${bes.nb}</strong> AESH demandé${bes.nb > 1 ? 's' : ''} pour ce cours.</p>
           <p><strong>${nb}</strong> AESH présent${nb > 1 ? 's' : ''} selon le planning.</p>
           <p class="bandeau ${manque ? 'warn' : 'info'}"><b>${bes.nb === 0 ? 'Aucun accompagnement demandé pour ce cours.' : manque ? `Il manque ${manque} AESH.` : 'Le besoin est couvert.'}</b></p>
           ${bes.nb === 0 && nb > 0 ? '<p>Un AESH peut être placé même si aucun besoin n’a été demandé.</p>' : ''}
           <p>La pastille <b>${nb}/${bes.nb}</b> signifie : <b>${nb} présent${nb > 1 ? 's' : ''} pour ${bes.nb} demandé${bes.nb > 1 ? 's' : ''}.</b> Ce ne sont pas des heures.</p>
           ${bes.plageDebut !== c.d || bes.plageFin !== c.f ? `<p>Le besoin concerne ${K.hFr(bes.plageDebut)}–${K.hFr(bes.plageFin)}.</p>` : ''}
           <p class="muted">Si la présence varie pendant ce créneau, le chiffre correspond au moment où il y a le moins d’AESH disponibles.</p></div>` : '<p>Aucun besoin renseigné pour ce cours cette semaine.</p>') +
-        '<div class="actions"><button type="button" class="btn pri" data-a="fermer">J’ai compris</button></div>';
+        editeurBesoin(f) + '<div class="actions"><button type="button" class="btn" data-a="fermer">Fermer</button></div>';
     }
     else if (f.type === 'lecture') {
       const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j), bes = K.besoinDuCours(S.est,f.classe,c,quand(iso));
@@ -1832,7 +1855,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         try { window.open('mailto:?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(corps), '_self'); } catch (e) { }
         toast('Message préparé — choisissez le destinataire (il est aussi copié).');
         return; }
-      case 'expliquer-besoin': if(S.edt.cours[v] && S.edt.classes[b.dataset.classe]) ouvrir({type:'besoin-detail',coursId:v,classe:b.dataset.classe}); return;
+      case 'expliquer-besoin': if(S.edt.cours[v] && S.edt.classes[b.dataset.classe]) {
+        const cible = cibleBesoin(S.cadreEstBrut,S.edt,b.dataset.classe,S.edt.cours[v]);
+        const base = cible ? S.estDocs.get(cible.id) || null : null;
+        ouvrir({type:'besoin-detail',coursId:v,classe:b.dataset.classe,cible,base:base ? JSON.parse(JSON.stringify(base)) : null,nb:base?.statut==='active' ? base.nb : null});
+      } return;
+      case 'besoin-nombre': if(S.feuille?.type==='besoin-detail' && peutEstimer(S.feuille.classe)) { S.feuille.nb=Number(v); rendre({focus:b.id}); } return;
+      case 'besoin-enregistrer': sauverBesoin(); return;
       case 'lecture': if(S.edt.cours[v]) ouvrir({type:'lecture',coursId:v,classe:classeCourante()}); return;
       case 'periode': S.feuille.periode = v; if (v === 'date' && !S.feuille.au) S.feuille.au = K.ajoute(S.lundi, 4); rendre({ focus: b.id }); return;
       case 'valider-placer': validerPlacer(); return;

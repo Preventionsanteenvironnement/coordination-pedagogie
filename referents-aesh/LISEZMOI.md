@@ -127,3 +127,28 @@ Le déploiement effectif du site et de l’application installée reste distinct
 Tests locaux : planning.test.mjs, presences.test.mjs, acces-simple.test.mjs ; navigateur
 fictif (deux passages, compteur B=1h/A=0h, DP=0,5h, navigation métiers d’art) ; Excel
 fictif relu et rendu ; passerelle testée sur des objets fictifs, jamais le store réel.
+
+
+### 23/09/2026 — Besoins modifiables depuis les pastilles des référents
+Chaque référent peut ouvrir une pastille de sa grille et saisir un nombre de 0 à 6,
+y compris pour un cours non encore estimé. Antoine consulte le résultat. La fiche
+est la même que dans demandes-aesh : même cadre normalisé, même clé, même document
+coordination_estimation_aesh/cours_… ; aucun compteur parallèle. Une valeur zéro
+est une réponse explicite. Le nombre change ; horaires, semaines et fin de période
+existants sont conservés et affichés. Un cours absent/ambigu dans le cadre ne crée
+pas de nouvelle fiche devinée. Les enseignants peuvent ensuite modifier la réponse.
+Transactions des deux interfaces : une fiche changée depuis l’ouverture provoque
+un avertissement, sans écraser la réponse concurrente. Historique du référent
+atomique avec son écriture. Recharger les deux pages après publication pour que
+les anciens clients utilisent aussi cette protection.
+Pas de nouvelle règle nécessaire d’après le fichier complet fourni par Brahim :
+champs cours et archives déjà autorisés. Pas de lecture de la console déployée,
+pas de test sur les données réelles, pas d’écriture Firestore distante.
+Tests : besoins (identité partagée, zéro, conflit, maintien des paramètres,
+quatre pôles, cours commun), 17 scénarios planning, 11 présences, accès simple,
+syntaxe et diff. Navigateur fictif : pastille vide → 2 → 0, réouverture détaillée,
+aucune erreur console. Simulation locale, pas de validation réseau Firebase réelle.
+Modifications : demandes-aesh/estimation.js et index.html ; referents-aesh/app.js,
+index.html, nouveau besoins.js et tests/besoins.test.mjs ; LISEZMOI.md.
+Miroir cockpit-site source actualisé par script officiel avec sauvegarde préalable.
+L’app Electron installée reste inchangée. Pas de commit, push ou déploiement.

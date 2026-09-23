@@ -1,0 +1,37 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const url=s=>'data:text/javascript;base64,'+Buffer.from(s).toString('base64');
+const enseignant=fs.readFileSync(new URL('../../demandes-aesh/estimation.js',import.meta.url),'utf8');
+const E=await import(url(enseignant));
+const B=await import(url(fs.readFileSync(new URL('../besoins.js',import.meta.url),'utf8').replace('../demandes-aesh/estimation.js?v=2026r16',url(enseignant))));
+const cr={cle:'lun|09:00|10:00|TEST|',jour:'lun',debut:'09:00',fin:'10:00',matiere:'TEST',parite:''};
+const cadre={annee:'2026-2027',periode:{debut:'2026-09-01',fin:'2027-07-02',label:'Année'},classes:[{nom:'C1PSR',pole:'PSR',creneaux:[cr]}]};
+const cours={id:'c',j:0,d:'09:00',f:'10:00',lib:'TEST',sem:'TOUTES',cls:['C1PSR']};
+const cible=B.cibleBesoin(cadre,null,'C1PSR',cours);
+assert.equal(cible.id,E.idCours(cadre.periode.debut,'C1PSR',cr.cle));
+assert.equal(B.cibleBesoin(null,null,'C1PSR',cours),null);
+assert.equal(B.cibleBesoin({...cadre,classes:[{nom:'C1PSR',creneaux:[cr,{...cr,cle:'autre'}]}]},null,'C1PSR',cours),null);
+let stock=new Map();
+const FS={doc:(_,col,id)=>id,runTransaction:async(_,fn)=>{const ops=[];const out=await fn({get:async id=>({exists:()=>stock.has(id),data:()=>structuredClone(stock.get(id))}),set:(id,d)=>ops.push([id,d])});for(const [id,d] of ops)stock.set(id,d);return out;}};
+let doc=await B.enregistrerBesoin(FS,{},cible,null,2);
+assert.equal(doc.nb,2);assert.equal(stock.size,2);assert.equal(E.declarationsDeCours([doc])[0].lignes[0].nb,2);
+doc={...doc,semaines:'B',hDebut:'09:30',eleves:5,au:'2026-12-18'};stock.set(doc.id,doc);
+let zero=await B.enregistrerBesoin(FS,{},cible,structuredClone(doc),0);
+assert.equal(zero.nb,0);assert.equal(zero.statut,'active');
+for(const k of ['semaines','hDebut','eleves','au'])assert.equal(zero[k],doc[k]);
+assert.equal(zero.version,2);assert(stock.has(E.idArchiveCours(doc.id,2)));
+await assert.rejects(B.enregistrerBesoin(FS,{},cible,doc,3),e=>e.code==='besoin-conflit');
+await assert.rejects(B.enregistrerBesoin(FS,{},cible,zero,7));
+assert.equal(stock.get(doc.id).nb,0);
+assert(E.memeEstimation({a:1,b:2},{b:2,a:1}));
+for(const pole of ['AGORA','CAPA','MDA']){
+ const edt={poles:{[pole]:['TEST']},classes:{TEST:{cours:['c']}},cours:{c:{...cours,cls:['TEST'],salle:[]}}};
+ const c=B.cibleBesoin(cadre,edt,'TEST',cours);assert(c);assert.equal(c.id,E.idCours(cadre.periode.debut,'TEST',cr.cle));
+}
+const commun={poles:{MDA:['C1VAN','C2VAN']},classes:{C1VAN:{cours:['c']},C2VAN:{cours:['c']}},cours:{c:{...cours,cls:['C1VAN','C2VAN'],salle:[]}}};
+assert.equal(B.cibleBesoin(cadre,commun,'C1VAN',cours).id,B.cibleBesoin(cadre,commun,'C2VAN',cours).id);
+const rules=fs.readFileSync('/Users/brahms/Documents/Codex/2026-09-22/va/outputs/FIRESTORE-COMPLET-CODE-SIMPLE.txt','utf8');
+assert(rules.includes("'nb','eleves','au','semaines','hDebut','hFin','statut','version','majLe','source'"));
+assert(/^cours_[0-9]{4}-[0-9]{2}-[0-9]{2}_[A-Z0-9]{2,12}_[a-z0-9]{4,16}$/.test(doc.id));
+assert(/^archive_[a-z0-9]{8,40}_v[0-9]{1,4}$/.test(E.idArchiveCours(doc.id,2)));
+console.log('Besoins : document enseignants partagé, zéro explicite, historique, conflit, périodes préservées, quatre pôles et cours communs vérifiés.');

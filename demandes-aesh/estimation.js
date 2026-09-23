@@ -119,7 +119,7 @@ export function agreger(cadre, declarations, options = {}) {
 }
 
 /* ═════════ normalisation du cadre publié ═════════ */
-function normaliserCadre(d, edt, volumesRef) {
+export function normaliserCadre(d, edt, volumesRef) {
   if (!d || !Array.isArray(d.classes)) return null;
   const disciplines = (Array.isArray(d.disciplines) ? d.disciplines : []).filter(x => x && typeof x.id === 'string').map(x => ({ id: x.id, label: LIBELLES_DISC[x.id] || String(x.label || x.id) }));
   const pe = d.periode && RE_DATE.test(d.periode.debut || '') && RE_DATE.test(d.periode.fin || '') ? d.periode : null;
@@ -293,6 +293,7 @@ const empreinte = s => { let h = 5381; for (const ch of String(s)) h = (Math.imu
 export const familleMatiere = m => String(m || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\b(tp|pole [12]|psr|lv1)\b/g, ' ').split(/[\s,/()-]+/).filter(Boolean).slice(0, 2).join(' ');
 const couleurMatiere = m => PALETTE[parseInt(empreinte(familleMatiere(m)), 36) % PALETTE.length];
 /* Identifiant du document d'un cours pour une période. */
+export const memeEstimation = (a,b) => { const tri=x=>x && typeof x==='object' ? (Array.isArray(x)?x.map(tri):Object.fromEntries(Object.keys(x).sort().map(k=>[k,tri(x[k])]))) : x; return JSON.stringify(tri(a))===JSON.stringify(tri(b)); };
 export const idCours = (periodeDebut, classe, cle) => `cours_${periodeDebut}_${classe}_${empreinte(cle)}`;
 export const idArchiveCours = (id, version) => `archive_${String(id).replace(/[^A-Za-z0-9]/g, '').toLowerCase()}_v${version}`;
 /* Les documents « cours » vus comme des déclarations d'une ligne : même agrégation que l'Atelier. */
@@ -585,10 +586,10 @@ export function creerEstimation(ctx) {
   }
   function ouvrir(cle) {
     const c = cadre(), k = classeDe(S.classe), cr = k.creneaux.find(x => x.cle === cle); if (!cr) return;
-    /* Cours d'un collègue : rien de sa réponse n'est repris (ni nombre, ni période, ni semaines, ni horaire). */
-    const d = estMien(k, cr) ? docDe(k, cr) : null, hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
+    /* La fiche partagée est préremplie, que la réponse vienne du référent ou d’un enseignant. */
+    const d = docDe(k, cr), hl = d ? horaireLigne(cr, d) : { debut: cr.debut, fin: cr.fin };
     S.sel = cle;
-    S.f = { nb: d ? d.nb : null, eleves: d && Number.isInteger(d.eleves) ? d.eleves : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
+    S.f = { base: S.docs.get(idDe(k,cr)) ? JSON.parse(JSON.stringify(S.docs.get(idDe(k,cr)))) : null, nb: d ? d.nb : null, eleves: d && Number.isInteger(d.eleves) ? d.eleves : null, au: d && RE_DATE.test(d.au || '') ? d.au : c.periode.fin, hDebut: hl.debut, hFin: hl.fin, modPer: false, modH: false,
       A: cr.parite ? cr.parite === 'A' : (d ? d.semaines !== 'B' : true), B: cr.parite ? cr.parite === 'B' : (d ? d.semaines !== 'A' : true) };
     if (!S.navFeuille) { S.navFeuille = true; pousser(); }
     S.focus = S.f.nb != null ? 'nb-' + S.f.nb : 'f-titre'; dessiner();
@@ -602,7 +603,7 @@ export function creerEstimation(ctx) {
     try { const aid = idArchiveCours(id, doc.version); Promise.resolve(FS.setDoc(FS.doc(db, COL, aid), { ...doc, id: aid, type: 'archive', declaration: id, lignes: declarationsDeCours([doc])[0].lignes, commentaire: '' })).catch(() => { }); } catch (e) { }
   }
   async function ecrire(k, cr, statut) {
-    const c = cadre(), id = idDe(k, cr), prec = S.docs.get(id), f = S.f, maintenant = new Date().toISOString(), rc = S.recap;
+    const c = cadre(), id = idDe(k, cr), prec = S.f.base, f = S.f, maintenant = new Date().toISOString(), rc = S.recap;
     const hl = horaireLigne(cr, { hDebut: f.hDebut, hFin: f.hFin });
     const doc = { id, type: 'cours', annee, periode: { debut: c.periode.debut, fin: c.periode.fin, label: String(c.periode.label || '').slice(0, 40) },
       classe: cr.classeRef || k.nom, cle: cr.cle, jour: cr.jour, debut: cr.debut, fin: cr.fin, matiere: cr.matiere, parite: cr.parite,
@@ -612,11 +613,11 @@ export function creerEstimation(ctx) {
     if (statut !== 'retire' && Number.isInteger(f.eleves) && f.eleves > 0) doc.eleves = f.eleves;
     S.envoi = true; dessiner();
     /* L'écriture peut aboutir après le délai d'attente : elle est alors retenue sur l'appareil quand elle arrive. */
-    const envoi = Promise.resolve().then(() => FS.setDoc(FS.doc(db, COL, id), doc)).catch(e => {
-      /* Règle Firestore pas encore mise à jour pour « eleves » : on enregistre l'essentiel sans ce champ. */
-      if ('eleves' in doc && /permission|insufficient/i.test(String(e && (e.code || e.message)))) { delete doc.eleves; return FS.setDoc(FS.doc(db, COL, id), doc); }
-      throw e;
-    }).then(() => enregistreIci(k, id, doc));
+    const envoi = FS.runTransaction(db, async tx => {
+      const ref=FS.doc(db,COL,id), snap=await tx.get(ref), actuel=snap.exists()?snap.data():null;
+      if(!memeEstimation(actuel,f.base)) throw Object.assign(new Error('Le besoin a été modifié par un collègue. Fermez puis rouvrez le cours pour voir sa réponse.'),{code:'besoin-conflit'});
+      tx.set(ref,doc);
+    }).then(() => enregistreIci(k,id,doc));
     envoi.catch(() => { });
     try {
       await Promise.race([envoi, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), { code: 'delai' })), 15000))]);
@@ -628,7 +629,7 @@ export function creerEstimation(ctx) {
     } catch (e) {
       S.envoi = false; S.recap = null;
       const t = String((e && (e.code || e.message)) || e);
-      toast(t === 'delai' ? 'Pas de réponse du serveur. Vérifiez dans un instant : le cours se mettra à jour s’il est bien arrivé.'
+      toast(t === 'besoin-conflit' ? e.message : t === 'delai' ? 'Pas de réponse du serveur. Vérifiez dans un instant : le cours se mettra à jour s’il est bien arrivé.'
         : /permission|insufficient/i.test(t) ? 'Non enregistré : espace pas encore ouvert par la coordination.' : 'Non enregistré : pas de connexion. Réessayez.', true);
     }
   }
