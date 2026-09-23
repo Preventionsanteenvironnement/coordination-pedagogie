@@ -192,19 +192,19 @@ const THEMATIQUES = [
         ],
       },
       {
-        titre: "La coordination",
-        desc: "Votre emploi du temps d'accompagnement. Entrez votre code à quatre chiffres : vous arrivez directement sur vos créneaux, ceux de l'équipe, et vos services.",
-        lien: "edt-aesh/",
-        type: "Code d'accès",
-        icon: "calendar",
-        badge: "Nouveau",
-      },
-      {
         titre: "Besoins d'accompagnement",
         desc: "Pour les enseignants du lycée — PSR, MELEC, AGOrA, CAPa, Métiers d'Art : estimez les besoins d'accompagnement des élèves, cours par cours, directement sur l'emploi du temps de vos classes (0 à 6 AESH).",
         lien: "demandes-aesh/",
         type: "Formulaire",
         icon: "users",
+        badge: "Nouveau",
+      },
+      {
+        titre: "Planning Antoine",
+        desc: "Grilles PSR et MELEC : positionner les AESH en PSR, consulter MELEC. Accès par code à quatre chiffres.",
+        lien: "planning-equipe/",
+        type: "Code d'accès",
+        icon: "calendar",
         badge: "Nouveau",
       },
       {

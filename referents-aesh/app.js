@@ -6,9 +6,10 @@
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-20a';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-20a';
-import * as AV from './avatars.js?v=2026-09-20a';
+import * as K from './calculs.js?v=2026-09-23a';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-23a';
+import { enregistrerPlanning } from './enregistrement.js?v=2026-09-23a';
+import * as AV from './avatars.js?v=2026-09-23a';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -19,7 +20,7 @@ const lsEcrit = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } 
 const alea = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = crypto.getRandomValues(new Uint8Array(10)); return [...r].map(x => a[x % 36]).join(''); };
 const avecDelai = p => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('delai'), { code: 'delai' })), DELAI); })]).finally(() => clearTimeout(t)); };
 const typeErreur = e => { const t = `${(e && e.code) || ''} ${(e && e.message) || ''}`; return /permission|insufficient/i.test(t) ? 'refus' : /delai/.test(t) ? 'delai' : 'horsligne'; };
-const messageErreur = e => e && e.code === 'conflit' ? `Non enregistré : ${e.qui || 'un autre référent'} a modifié en même temps ${e.champs && e.champs.length ? '« ' + e.champs.join(' », « ') + ' »' : 'cette donnée'}. Regardez sa valeur ; si vous enregistrez de nouveau, la vôtre la remplacera.` : e && e.code === 'contrat' ? 'Non enregistré : son contrat est déjà terminé à cette date.' : e && e.code === 'volume' ? 'Non enregistré : fiche trop volumineuse.' : ({ refus: 'Non enregistré : espace pas encore ouvert par la coordination.', delai: 'Pas de réponse du serveur. Vérifiez dans un instant.', horsligne: 'Non enregistré : pas de connexion. Réessayez.' })[typeErreur(e)];
+const messageErreur = e => e && e.code === 'fiche-aesh-manquante' ? 'Non enregistré : le référent doit d’abord enregistrer la fiche et le contrat de cet AESH.' : e && e.code === 'conflit' ? `Non enregistré : ${e.qui || 'un autre référent'} a modifié en même temps ${e.champs && e.champs.length ? '« ' + e.champs.join(' », « ') + ' »' : 'cette donnée'}. Regardez sa valeur ; si vous enregistrez de nouveau, la vôtre la remplacera.` : e && e.code === 'contrat' ? 'Non enregistré : son contrat est déjà terminé à cette date.' : e && e.code === 'volume' ? 'Non enregistré : fiche trop volumineuse.' : ({ refus: 'Non enregistré : espace pas encore ouvert par la coordination.', delai: 'Pas de réponse du serveur. Vérifiez dans un instant.', horsligne: 'Enregistrement non confirmé. Vérifiez la connexion et le planning avant de réessayer.' })[typeErreur(e)];
 const anneeScolaire = (d = new Date()) => { const y = d.getFullYear(); return d.getMonth() >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`; };
 const nomPole = id => (pole(id) || { nom: id }).nom;
 const heureFr = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const auj = K.isoLocal(), j = K.isoLocal(d); return `${j === auj ? 'aujourd’hui' : K.dateCourte(j)} · ${d.getHours()} h ${K.z2(d.getMinutes())}`; };
@@ -27,22 +28,23 @@ const nombre = v => v === null || v === undefined || v === '' || !Number.isFinit
 const hOu = v => nombre(v) == null ? '—' : K.fmtH(v);
 const CRENEAUX_H = []; for (let m = 7 * 60 + 30; m <= 18 * 60; m += 30) CRENEAUX_H.push(K.hDe(m));
 
-export async function demarrer({ FS, db, erreur }) {
+export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAccesPlanning }) {
+  let droitsPlanning = null;
   const S = {
     annee: anneeScolaire(), edt: null, C: null, docs: new Map(), etat: 'chargement', est: [], cadreEst: null, estEtat: 'chargement',
-    session: lsLit(K_SESSION, null), vu: null, route: { e: 'humeur', p: {} }, lundi: null, feuille: null, menu: false, toast: null,
+    session: modePlanning ? null : lsLit(K_SESSION, null), vu: null, route: { e: 'humeur', p: {} }, lundi: null, feuille: null, menu: false, toast: null,
     code: '', codeMsg: '', codeErr: false, form: null, info: null, exp: { quoi: 'pole', ids: [], format: 'pdf' }, msgBrouillon: '', ignorePop: 0, n: 0, flash: null, envoi: false
   };
   const racine = document.getElementById('app');
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-20a')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-23a')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
   const cache = lsLit(K_CACHE, null);
-  if (cache && cache.annee === S.annee && Array.isArray(cache.docs)) cache.docs.forEach(d => d && d.id && S.docs.set(d.id, d));
+  if (!modePlanning && cache && cache.annee === S.annee && Array.isArray(cache.docs)) cache.docs.forEach(d => d && d.id && S.docs.set(d.id, d));
   let I = null, versionI = -1, versionDocs = 0;
   const idx = () => { if (versionI !== versionDocs) { I = K.indexer([...S.docs.values()], EQUIPES_DEPART, POLES.map(x => x.id), FILIERES); versionI = versionDocs; } return I; };
   const ctx = () => ({ C: S.C, edt: S.edt, I: idx(), estimations: S.est, nomPole, aujourdhui: K.isoLocal(), annee: S.annee });
@@ -57,16 +59,18 @@ export async function demarrer({ FS, db, erreur }) {
      l'ancienne (toute l'année) : la page continue de marcher. */
   const COL_HIST = COLLECTION + '_hist';
   const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode'];
+  let arretPlanning = null;
   function ecouter(simple) {
+    if (arretPlanning) { arretPlanning(); arretPlanning = null; }
     if (erreur || !FS) { S.etat = 'horsligne'; return; }
     try {
       const q = simple ? FS.query(FS.collection(db, COLLECTION), FS.where('annee', '==', S.annee))
         : FS.query(FS.collection(db, COLLECTION), FS.where('annee', '==', S.annee), FS.where('type', 'in', TYPES_DOCS));
       let arret = null;
-      arret = FS.onSnapshot(q, snap => {
+      arretPlanning = arret = FS.onSnapshot(q, snap => {
         const m = new Map(); snap.forEach(d => { const x = d.data() || {}; if (x.type !== 'hist') m.set(x.id || d.id, { ...x, id: x.id || d.id }); });
         S.docs = m; versionDocs++; S.etat = 'ok'; appliquerPfmp();
-        lsEcrit(K_CACHE, { annee: S.annee, docs: [...m.values()] });
+        if (!modePlanning) lsEcrit(K_CACHE, { annee: S.annee, docs: [...m.values()] });
         verifierSession(); rendre({ donnees: true });
       }, err => {
         if (!simple && err && err.code === 'failed-precondition') { try { arret && arret(); } catch (e) { } console.warn('Index Firestore absent : lecture de toute l’année.', err.message || ''); ecouter(true); return; }
@@ -88,6 +92,14 @@ export async function demarrer({ FS, db, erreur }) {
   }
   const codeDe = id => { const d = S.docs.get('pole_' + id); return d && /^\d{4}$/.test(d.code || '') ? d.code : pole(id).codeDepart; };
   function verifierSession() {
+    if (modePlanning) {
+      if (S.session && droitsPlanning?.sessionValide && !droitsPlanning.sessionValide(S.docs.get('pole_PSR_MELEC'))) {
+        S.session = null; droitsPlanning = null; S.feuille = null;
+        S.route = {e:'code',p:{}}; S.codeMsg = 'Le code a changé ou l’accès a été désactivé.';
+        history.replaceState({e:'code',p:{},n:S.n},'');
+      }
+      return;
+    }
     if (!S.session || S.etat !== 'ok') return;
     if (codeDe(S.session.pole) !== S.session.code) {
       S.session = null; lsEcrit(K_SESSION, null);
@@ -103,7 +115,7 @@ export async function demarrer({ FS, db, erreur }) {
   const avatarHtml = (pid, taille, o = {}) => { const a = avatarDe(pid), q = pole(pid) || POLES[0]; return a ? AV.svgAvatar(a, { humeur: o.humeur === undefined ? humeurDe(pid) : o.humeur, taille, label: `référent ${q.nom}`, classe: o.classe }) : `<span class="sigle" style="--pole:${q.couleur};width:${taille}px;height:${taille}px;font-size:${Math.max(9, taille * .3)}px" aria-label="référent ${esc(q.nom)}">${esc(q.nom.replace(/[^A-Z]/g, '').slice(0, 3) || q.nom.slice(0, 2))}</span>`; };
   /* Le document du pôle regroupe code, « complet », avatar et humeur : on écrit toujours l'ensemble. */
   const ecrirePole = (pid, patch) => ecrireTransaction('pole_' + pid, serveur => { const d = serveur || S.docs.get('pole_' + pid) || {};
-    return { id: 'pole_' + pid, type: 'pole', pole: pid, code: /^\d{4}$/.test(d.code || '') ? d.code : codeDe(pid), complet: d.complet || null, avatar: d.avatar || null, humeur: d.humeur || null, pfmp: d.pfmp || null, ...(d.creeLe ? { creeLe: d.creeLe } : {}), ...patch }; });
+    return { id: 'pole_' + pid, type: 'pole', pole: pid, code: /^\d{4}$/.test(d.code || '') ? d.code : codeDe(pid), complet: d.complet || null, avatar: d.avatar || null, humeur: d.humeur || null, pfmp: d.pfmp || null, ...(d.accesPlanning ? {accesPlanning:d.accesPlanning} : {}), ...(d.creeLe ? { creeLe: d.creeLe } : {}), ...patch }; });
   /* PFMP saisies par les référents (document du pôle, champ pfmp) : elles remplacent celles du fichier pour la classe. */
   const PFMP_FICHIER = {};
   function appliquerPfmp() {
@@ -139,7 +151,8 @@ export async function demarrer({ FS, db, erreur }) {
     return `<div class="carte pad" style="display:grid;gap:8px"><div class="ligne ecarte"><div><h2>Mon emploi du temps</h2><span class="muted" style="font-size:.9rem">${c ? `Déclaré complet jusqu’au ${esc(K.dateCourte(c.jusquau))}. Les autres référents peuvent compter sur les heures libres de vos AESH.` : 'Quand vos AESH sont tous placés, dites-le : les autres référents sauront que les heures libres sont fiables.'}</span></div>
       ${c ? `<button type="button" class="btn" id="complet-non" data-a="complet-non">Reprendre la saisie</button>` : `<button type="button" class="btn pri" id="complet-oui" data-a="complet">✓ Mon emploi du temps est complet</button>`}</div></div>`;
   }
-  const classesDu = pid => S.edt.poles[pid] || [];
+  const classesDu = pid => modePlanning ? (droitsPlanning?.lectureClasses || []).filter(n => !!S.edt.classes[n]) : (S.edt.poles[pid] || []);
+  const peutPlacer = nom => !modePlanning || !!droitsPlanning?.ecritureClasses.includes(nom);
 
   /* ─── Période de l'emploi du temps (17/09/2026, décision de Brahim) ───
      Une seule période pour les quatre pôles : c'est ce qui permet aux emplois du temps de se croiser.
@@ -149,7 +162,7 @@ export async function demarrer({ FS, db, erreur }) {
     const out = S.C.vacances.filter(v => /^Vacances/.test(v.label) && !/été/i.test(v.label))
       .map(v => ({ id: 'v-' + v.debut, label: `Jusqu’aux ${v.label.charAt(0).toLowerCase()}${v.label.slice(1)}`, fin: avant(v.debut) }));
     const ete = S.C.vacances.find(v => /été/i.test(v.label));
-    out.push({ id: 'annee', label: 'Toute l’année', fin: ete ? avant(ete.debut) : '2027-07-02' });
+    out.push({ id: 'annee', label: 'Fin de l’année scolaire', fin: ete ? avant(ete.debut) : '2027-07-02' });
     return out;
   }
   const periodeDefaut = () => { const l = periodesPossibles(), noel = l.find(x => /noël/i.test(x.label)); return (noel || l[l.length - 1]).fin; };
@@ -208,7 +221,19 @@ export async function demarrer({ FS, db, erreur }) {
   }
   /* Écriture groupée (audit P01, 18/09) : tous les documents d'une opération — et leurs copies d'historique —
      partent dans UN seul lot. Une panne au milieu laisse tout inchangé : jamais de placement coupé à moitié. */
-  async function ecrireLot(docs) {
+  async function ecrireLot(docs, base) {
+    if (modePlanning && docs.some(d => {
+      const classes = S.edt.cours[d.coursId]?.cls;
+      return d.type !== 'place' || !Array.isArray(classes) || !classes.length || !classes.every(peutPlacer);
+    })) {
+      throw Object.assign(new Error('Consultation uniquement'),{code:'permission-denied'});
+    }
+    if ((docs || []).some(d => d.type === 'place')) {
+      const resultat = await avecDelai(enregistrerPlanning({ FS, db, collection:COLLECTION, historique:COL_HIST,
+        docs, base:base || new Map(S.docs), annee:S.annee, par:S.session ? S.session.pole : '', nouvelId:alea, maintenant:new Date().toISOString() }));
+      resultat.forEach(d => S.docs.set(d.id,d)); versionDocs++;
+      return resultat;
+    }
     const parId = new Map(); (docs || []).forEach(x => { if (x && x.id) parId.set(x.id, x); });
     const liste = [...parId.values()]; if (!liste.length) return [];
     if (liste.length === 1 || typeof FS.writeBatch !== 'function') { const out = []; for (const x of liste) out.push(await ecrire(x)); return out; }
@@ -232,6 +257,7 @@ export async function demarrer({ FS, db, erreur }) {
 
   /* ─────────── navigation (flèches du navigateur) ─────────── */
   function aller(e, p = {}, o = {}) {
+    if (modePlanning && S.session && !['edt','code'].includes(e)) e = 'edt';
     S.route = { e, p }; S.menu = false;
     if (S.feuille) { S.feuille = null; history.replaceState({ e, p, n: S.n }, ''); }
     else if (o.remplacer) history.replaceState({ e, p, n: S.n }, '');
@@ -261,7 +287,7 @@ export async function demarrer({ FS, db, erreur }) {
     const actif = document.activeElement, idActif = actif && racine.contains(actif) ? actif.id : null, y = window.scrollY;
     let sel = null; try { if (actif && typeof actif.selectionStart === 'number') sel = [actif.selectionStart, actif.selectionEnd]; } catch (e) { }
     document.documentElement.style.setProperty('--pole', P().couleur);
-    const e = S.route.e;
+    const e = modePlanning && S.session ? 'edt' : S.route.e;
     let html;
     if (e === 'humeur') html = ecranHumeur();
     else if (e === 'code' || !S.session) html = ecranCode();
@@ -288,6 +314,7 @@ export async function demarrer({ FS, db, erreur }) {
     return '';
   }
   function entete() {
+    if (modePlanning) return `<header class="tete"><div class="tete-in"><div class="marque"><b>Emplois du temps</b></div><button class="btn petit" data-a="sortir">Se déconnecter</button></div></header>`;
     const e = S.route.e, nonLus = messagesNonLus();
     const ong = [['accueil', 'Accueil'], ['aesh', 'Mes AESH'], ['edt', 'Emploi du temps'], ['ensemble', 'Vue d’ensemble'], ['besoins', 'Besoins'], ['messages', 'Messages'], ['exporter', 'Exporter']];
     const actif = { fiche: 'aesh', absence: 'aesh', reunions: 'aesh', moncode: 'accueil' }[e] || e;
@@ -331,17 +358,28 @@ export async function demarrer({ FS, db, erreur }) {
   }
   function ecranCode() {
     return `<main class="entree">
-      <div><h1 id="titre" tabindex="-1">Référents de pôle</h1><p class="sous">Code du pôle</p></div>
-      <div class="plots ${S.codeErr ? 'err' : ''}" aria-hidden="true">${[0, 1, 2, 3].map(i => `<span class="plot ${i < S.code.length ? 'on' : ''}">${i < S.code.length ? '•' : ''}</span>`).join('')}</div>
+      <div><h1 id="titre" tabindex="-1">${modePlanning ? "Emplois du temps" : "Référents de pôle"}</h1><p class="sous">${modePlanning ? "Votre code à quatre chiffres" : "Code du pôle"}</p></div>
+      <div class="plots ${S.codeErr ? 'err' : ''}" aria-hidden="true">${Array.from({length:4},(_,i)=>i).map(i => `<span class="plot ${i < S.code.length ? 'on' : ''}">${i < S.code.length ? '•' : ''}</span>`).join('')}</div>
       <p class="msg-code" role="status" id="code-msg">${esc(S.codeMsg)}</p>
       <div class="pave" role="group" aria-label="Pavé numérique">${['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'].map(k => k ? `<button type="button" id="k-${k === '⌫' ? 'eff' : k}" data-a="touche" data-v="${k}" class="${k === '⌫' ? 'fn' : ''}" aria-label="${k === '⌫' ? 'Effacer' : k}">${k}</button>` : '<span></span>').join('')}</div>
-      <button type="button" class="lien" data-a="aller-humeur" id="c-humeur">‹ Retour</button>
+      ${modePlanning ? '' : '<button type="button" class="lien" data-a="aller-humeur" id="c-humeur">‹ Retour</button>'}
     </main>`;
   }
-  function tapeCode(k) {
+  async function tapeCode(k) {
+    if (S.authEnCours) return;
     S.codeErr = false; S.codeMsg = '';
-    if (k === '⌫') S.code = S.code.slice(0, -1); else if (/^\d$/.test(k) && S.code.length < 4) S.code += k;
-    if (S.code.length === 4) {
+    if (k === '⌫') S.code = S.code.slice(0, -1); else if (/^\d$/.test(k) && S.code.length < (4)) S.code += k;
+    if (S.code.length === (4)) {
+      if (modePlanning) {
+        S.authEnCours = true; S.codeMsg = 'Vérification…'; rendre();
+        try {
+          droitsPlanning = await ouvrirAccesPlanning(S.code);
+          S.session = {pole:droitsPlanning.pole}; S.code = ''; S.vu = null;
+          ecouter(); ecouterEstimations(); aller('edt',{}, {remplacer:true});
+        } catch(e) { S.code = ''; S.codeErr = true; S.codeMsg = e.message || 'Accès indisponible.'; }
+        finally { S.authEnCours = false; rendre(); }
+        return;
+      }
       if (S.etat === 'chargement') { S.codeMsg = 'Vérification…'; rendre(); setTimeout(() => { if (S.code.length === 4) tapeCode(''); }, 600); return; }
       const p = POLES.find(x => codeDe(x.id) === S.code);
       if (p) {
@@ -370,11 +408,11 @@ export async function demarrer({ FS, db, erreur }) {
   function bilans(pid) { const c = ctx(); return K.aeshActifs(c.I, pid).map(a => ({ a, b: K.bilan(c, a.id, S.lundi) })); }
   /* Les placements en cours à cette date — pas ceux d'un AESH dont le contrat est fini (audit D01). */
   function placesCours(coursId, iso) {
-    const I = idx(); return I.places.filter(p => p.coursId === coursId && iso >= p.du && iso <= p.au && !K.contratFini(I.aesh.get(p.aeshId), iso));
+    const I = idx(); return I.places.filter(p => p.coursId === coursId && K.placementPrevu(S.C, S.edt.cours[coursId], p, iso) && (!p.renfortPfmp || K.placementALieu(ctx(), p, iso)) && !K.contratFini(I.aesh.get(p.aeshId), iso));
   }
   /* Placé ici, cette semaine : en cours le jour du cours. Un placement qui commence plus tard est « à venir » :
      il ne compte pas comme déjà placé et n'est jamais modifié sans le dire (audit D12). */
-  const placeIci = (x, c, du) => x.coursId === c.id && x.du <= K.ajoute(du, c.j) && x.au >= du;
+  const placeIci = (x, c, du) => x.coursId === c.id && K.placementPrevu(S.C, c, x, K.ajoute(du, c.j)) && (!x.renfortPfmp || K.placementALieu(ctx(),x,K.ajoute(du,c.j)));
   const placeAVenir = (x, c, du) => x.coursId === c.id && x.du > K.ajoute(du, c.j);
   /* Présents au pire moment de la plage estimée : 30 min placées sur 3 h ne font pas « couvert » (audit D02). */
   const presents = (c, iso, bes) => K.presentsMin(ctx(), c, iso, bes && bes.plageDebut, bes && bes.plageFin);
@@ -709,14 +747,14 @@ export async function demarrer({ FS, db, erreur }) {
       const bes = K.besoinDuCours(S.est, nom, c, quand(iso)), [mc] = couleurMatiere(c.mat);
       const nbPresents = presents(c, iso, bes);
       const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');
-      const besHtml = bes ? `<span class="bes ${nbPresents >= bes.nb ? 'ok' : 'manque'}" title="Besoin estimé par les enseignants : ${bes.nb} AESH${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.plageDebut !== c.d || bes.plageFin !== c.f ? ` · de ${K.hFr(bes.plageDebut)} à ${K.hFr(bes.plageFin)}` : ''} · présents au moment le moins couvert : ${nbPresents}">${nbPresents}/${bes.nb}</span>` : '';
-      const lib = `${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', AESH ' + aeshs.map(a => a.sigle).join(' ') : ', aucun AESH'}`;
+      const besHtml = bes ? `<span class="bes ${nbPresents >= bes.nb ? 'ok' : 'manque'}" title="Besoin estimé par les enseignants : ${bes.nb} AESH${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.plageDebut !== c.d || bes.plageFin !== c.f ? ` · de ${K.hFr(bes.plageDebut)} à ${K.hFr(bes.plageFin)}` : ''} · présents au moment le moins couvert : ${nbPresents}">${nbPresents}/${bes.nb}<span class="sr"> AESH présents sur ${bes.nb} demandés</span></span>` : '';
+      const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', AESH ' + aeshs.map(a => a.sigle).join(' ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
-        return `<button type="button" class="bloc ${S.flash === c.id ? 'flash' : ''}" id="c-${esc(c.id)}" ${lectureSeule ? 'data-a="lecture"' : `data-a="placer" data-v="${esc(c.id)}"`} style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}" aria-label="${esc(lib)}">
+        return `<button type="button" class="bloc ${S.flash === c.id ? 'flash' : ''}" id="c-${esc(c.id)}" ${lectureSeule ? `data-a="lecture" data-v="${esc(c.id)}"` : `data-a="placer" data-v="${esc(c.id)}"`} style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}" aria-label="${esc(lib)}">
           ${besHtml}<b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}<span class="pills">${pills}</span></button>`;
       }
-      return `<button type="button" class="cours-l" id="cl-${esc(c.id)}" ${lectureSeule ? 'data-a="lecture"' : `data-a="placer" data-v="${esc(c.id)}"`} style="--mc:${mc}${lieu ? '' : ';opacity:.5'}" aria-label="${esc(lib)}">
+      return `<button type="button" class="cours-l" id="cl-${esc(c.id)}" ${lectureSeule ? `data-a="lecture" data-v="${esc(c.id)}"` : `data-a="placer" data-v="${esc(c.id)}"`} style="--mc:${mc}${lieu ? '' : ';opacity:.5'}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc([c.salle.join(' · '), c.cls.length > 1 ? 'avec ' + c.cls.filter(n => n !== nom).map(n => S.edt.classes[n].court).join(', ') : ''].filter(Boolean).join(' · '))}</small></span>
         <span class="pills">${besHtml ? besHtml.replace('class="bes', 'style="position:static" class="bes') : ''}${pills || '<span class="pill" style="opacity:.55">＋</span>'}</span></button>`;
     };
@@ -742,12 +780,22 @@ export async function demarrer({ FS, db, erreur }) {
     const pf = (k.pfmp || []).filter(x => x.debut <= K.ajoute(S.lundi, 4) && x.fin >= S.lundi);
     return `<div class="salut"><div><h1 id="titre" tabindex="-1">Emploi du temps</h1><p class="sous">${esc(k.court)} · ${sem.parite ? 'semaine ' + sem.parite : 'pas de cours'}</p></div>${selecteurSemaine()}</div>
       <div class="classes" role="group" aria-label="Classe">${classesDu(p.id).map(n => `<button type="button" id="cls-${n}" data-a="classe" data-v="${n}" aria-pressed="${n === nom}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>
-      ${lignePeriode()}
-      <div class="ligne" style="gap:8px"><span class="muted" style="font-size:.9rem">PFMP ${esc(k.court)} : ${(k.pfmp || []).length ? esc((k.pfmp || []).map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')) : 'aucune renseignée'}${k.pfmpSaisies ? ' <span class="puce">saisies par le référent</span>' : ''}</span><button type="button" class="btn petit" id="pfmp-modifier" data-a="pfmp">Modifier les PFMP</button></div>
-      ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>${carteLiberes(nom)}` : ''}
+      ${modePlanning ? '' : lignePeriode()}
+      <div class="ligne" style="gap:8px"><span class="muted" style="font-size:.9rem">PFMP ${esc(k.court)} : ${(k.pfmp || []).length ? esc((k.pfmp || []).map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')) : 'aucune renseignée'}${k.pfmpSaisies ? ' <span class="puce">saisies par le référent</span>' : ''}</span>${modePlanning ? '' : '<button type="button" class="btn petit" id="pfmp-modifier" data-a="pfmp">Modifier les PFMP</button>'}</div>
+      ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>${modePlanning ? '' : carteLiberes(nom)}` : ''}
       <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> présents / besoin estimé</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
-      ${grilleClasse(nom, false)}
-      ${bandeauServices()}`;
+      ${modePlanning ? `<div class="bandeau info">${peutPlacer(nom) ? 'PSR · Touchez un cours pour placer un AESH.' : 'Consultation · Les affectations sont gérées par le référent.'}</div>` : ''}
+      ${peutPlacer(nom) ? palettePlanning() : ''}
+      ${grilleClasse(nom, !peutPlacer(nom))}
+      ${modePlanning ? '' : bandeauServices()}`;
+  }
+
+  function palettePlanning() {
+    const cx = ctx();
+    return `<div class="carte pad"><b>Placer un AESH</b><p class="muted">Touchez un AESH puis un cours, ou glissez-le sur le cours. Le guidage vous accompagne avant d’enregistrer.</p><div class="choix" role="group" aria-label="AESH et heures de la semaine">${K.aeshActifs(cx.I,P().id).map(a => {
+      const b = K.bilan(cx,a.id,S.lundi);
+      return `<button type="button" id="palette-${esc(a.id)}" draggable="true" data-aesh-drag="${esc(a.id)}" data-a="selection-aesh" data-v="${esc(a.id)}" aria-pressed="${S.aeshChoisi === a.id}"><b>${esc(a.sigle)}</b><br>${K.fmtH(b.total)}${b.contrat == null ? '' : ` / ${K.fmtH(b.contrat)}`}<br><small>${b.reste == null ? 'Contrat à compléter' : `Reste ${K.fmtH(b.reste)}`}</small></button>`;
+    }).join('')}</div>${S.aeshChoisi ? '<p role="status">Choisissez maintenant un cours.</p>' : ''}</div>`;
   }
 
   /* ─── Cantine et internat, sous la grille (17/09/2026, demande de Brahim) ───
@@ -822,15 +870,14 @@ export async function demarrer({ FS, db, erreur }) {
       ${l.length ? `<div class="choix" role="group" aria-label="AESH libérés">${l.map(x => `<button type="button" id="lib-${esc(x.a.id)}" data-a="pfmp-deplacer" data-v="${esc(x.a.id)}"><b>${esc(x.a.sigle)}</b> <span class="muted">· ${K.fmtH(x.heures)} · ${esc(creneauxTxt(x.creneaux))}</span></button>`).join('')}</div>` : `<span class="muted">Aucun AESH n’était placé sur les cours de ${esc(k.court)} cette semaine.</span>`}</div>`;
   }
   function bornesDeplacer(f) {
-    const pf = K.pfmpDeLaSemaine(S.edt.classes[f.source], S.lundi), ven = K.ajoute(S.lundi, 4);
-    return { du: S.lundi, au: f.periode === 'pfmp' && pf && pf.fin > ven ? pf.fin : ven, pf, ven };
+    return K.bornesRenfort(S.edt.classes[f.source], S.lundi, f.periode) || { du: S.lundi, au: K.ajoute(S.lundi, -1), pf: null, ven: K.ajoute(S.lundi, 4) };
   }
   function feuilleDeplacer(f) {
     const I = idx(), a = I.aesh.get(f.aeshId) || { sigle: '?' }, src = S.edt.classes[f.source], { du, au, pf, ven } = bornesDeplacer(f);
     const lib = K.liberesParPfmp(ctx(), f.source, S.lundi).find(x => x.a.id === f.aeshId);
     const classes = f.pole ? classesDu(f.pole).filter(n => n !== f.source) : [];
     const poss = f.classe ? K.coursPossibles(ctx(), f.aeshId, [f.classe], du, au, P().id) : [];
-    const libres = poss.filter(x => x.d.etat === 'libre' && !x.d.deja), autres = poss.length - libres.length;
+    const libres = poss.filter(x => x.d.etat === 'libre' && !x.d.deja && K.datesPlacement(ctx(), {aeshId:f.aeshId,coursId:x.c.id,du,au,sem:x.c.sem,renfortPfmp:f.source}).length), autres = poss.length - libres.length;
     /* D'abord les cours qui tombent PENDANT les créneaux libérés par la PFMP : c'est le temps que l'AESH vient de
        récupérer. Les autres cours où il est libre suivent, pour laisser le choix au référent. */
     const pendant = x => !!lib && lib.creneaux.some(k => k.j === x.c.j && K.chevauche(k.debut, k.fin, x.c.d, x.c.f));
@@ -849,7 +896,10 @@ export async function demarrer({ FS, db, erreur }) {
     const f = S.feuille, I = idx(), a = I.aesh.get(f.aeshId), p = P(), { du, au } = bornesDeplacer(f);
     const cours = f.choisis.map(id => S.edt.cours[id]).filter(Boolean);
     if (!a || !cours.length) return;
-    const chevauchent = cours.some((x, i) => cours.some((y, k) => k > i && x.j === y.j && K.chevauche(x.d, x.f, y.d, y.f)));
+    if (cours.some(c => !K.datesPlacement(ctx(),{aeshId:a.id,coursId:c.id,du,au,sem:c.sem,renfortPfmp:f.source}).length)) {
+      toast('Ce renfort ne correspond plus à un créneau libéré par la PFMP. Rouvrez le choix des cours.',true); return;
+    }
+    const chevauchent = cours.some((x, i) => cours.some((y, k) => k > i && K.placementsEnConflit(ctx(), {aeshId:a.id,coursId:x.id,du,au,sem:x.sem}, {aeshId:a.id,coursId:y.id,du,au,sem:y.sem})));
     if (chevauchent) { toast('Deux cours choisis se chevauchent : gardez-en un seul par créneau.', true); return; }
     const garde = { ...f }, src = S.edt.classes[f.source], dest = S.edt.classes[f.classe];
     S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: a.sigle, bouton: 'Confirmer', retourDeplacer: garde,
@@ -862,13 +912,13 @@ export async function demarrer({ FS, db, erreur }) {
            classe d'arrivée prévenu s'il est d'un autre pôle, et tout part en un seul lot. */
         const auA = finPourAesh(a, au), lot = [];
         if (auA < du) throw Object.assign(new Error('contrat terminé'), { code: 'contrat' });
-        cours.forEach(c => lot.push({ id: 'place_' + alea(), type: 'place', aeshId: a.id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: c.d, fin: c.f, sem: c.sem, matiere: c.lib, du, au: auA, statut: 'active' }));
+        cours.forEach(c => lot.push({ id: 'place_' + alea(), type: 'place', aeshId: a.id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: c.d, fin: c.f, sem: c.sem, matiere: c.lib, du, au: auA, statut: 'active', renfortPfmp:f.source }));
         const poleDest = poleDeClasse(f.classe);
         if (poleDest && poleDest !== p.id) {
           const texte = `@ ${nomPole(poleDest)} — pendant la PFMP de ${src.court}, ${a.sigle} est placé en ${dest.court} : ${cours.map(c => `${K.JOURS_C[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} ${c.lib}`).join(', ')}, du ${K.dateCourte(du)} au ${K.dateCourte(auA)}. C’est d’accord pour vous ?`;
           lot.push({ id: 'msg_' + alea(), type: 'message', pole: p.id, texte: texte.slice(0, 1000), statut: 'active' });
         }
-        await ecrireLot(lot);
+        await ecrireLot(lot, f.base);
         return { sous: `En ${dest.court} pendant la PFMP de ${src.court}${poleDest && poleDest !== p.id ? ` · message envoyé au référent ${nomPole(poleDest)}` : ''}` };
       } };
     rendre({ focus: 'cf-oui' });
@@ -885,41 +935,43 @@ export async function demarrer({ FS, db, erreur }) {
     const enContrat = a => !K.contratFini(a, du);
     const candidats = K.aeshActifs(I, p.id).filter(enContrat).slice().sort((x, y) => (prevuIci(y) ? 1 : 0) - (prevuIci(x) ? 1 : 0)), dispo = K.disponiblesAilleurs(cx, p.id, S.lundi, poleComplet), dispoDe = Object.fromEntries(dispo.map(x => [x.a.id, x]));
     const libereDe = a => K.liberePfmpCreneau(cx, a.id, S.lundi, c.j, c.d, c.f);
-    const autres = K.aeshActifs(I).filter(a => !(a.equipes || {})[p.id] && enContrat(a))
+    const autres = K.aeshActifs(I).filter(a => !modePlanning && !(a.equipes || {})[p.id] && enContrat(a))
       .sort((x, y) => (libereDe(y) ? 1 : 0) - (libereDe(x) ? 1 : 0) || ((dispoDe[y.id] || {}).dispo || 0) - ((dispoDe[x.id] || {}).dispo || 0));
     const liberes = autres.filter(a => libereDe(a));
     /* Rien n'est interdit : un AESH pris, en réunion ou au bout de ses heures reste choisissable.
        Ce qui pose problème est écrit sur son bouton, puis rappelé dans « Vous confirmez ? ». */
     const bouton = (a, ailleurs) => {
-      const d = K.disponibilite(cx, a.id, c.id, du, au, p.id), on = f.choisis.includes(a.id);
+      const d = K.disponibilite(cx, a.id, c.id, du, au, p.id, {semaines:f.semaines, ...(f.horaires[a.id] || {})}), on = f.choisis.includes(a.id);
       const cl = d.etat === 'pris' && !dejaIci.has(a.id) ? 'pris' : d.etat === 'trop' ? 'trop' : d.etat === 'reunion' ? 'reunion' : '';
       const b = K.bilan(cx, a.id, S.lundi), x = dispoDe[a.id];
       const pv = K.prevuPourClasse(a, FILIERES, nom);
       const ligne3 = ailleurs ? (x ? `${K.fmtH(x.dispo)} dispo · ${x.complets.map(q => nomPole(q.p) + (q.complet ? ' complet' : ' en cours')).join(', ')}` : `${Object.keys(a.equipes || {}).map(nomPole).join(', ')} · rien de disponible`) : (b && b.reste != null ? `reste ${K.fmtH(b.reste)}` : '');
-      const ct = d.contrainte, lib = ailleurs ? libereDe(a) : '';
+      const ct = d.contrainte, lib = libereDe(a);
       return `<button type="button" class="${cl} ${lib ? 'libere' : ''} ${ct ? (ct.etat === 'x' ? 'indispo' : 'souhait') : ''}" id="pa-${esc(a.id)}" data-a="choix-aesh" data-v="${esc(a.id)}" aria-pressed="${on}" title="${esc(d.detail || '')}"><b>${esc(a.sigle)}</b><small>${on ? '✓ choisi' : esc(dejaIci.has(a.id) ? 'placé' : d.texte)}</small>${ligne3 ? `<small>${esc(ligne3)}</small>` : ''}${lib ? `<small class="ct-lib">libre · PFMP ${esc(S.edt.classes[lib].court)}</small>` : ''}${ct && !on ? `<small class="${ct.etat === 'x' ? 'ct-x' : 'ct-s'}">${ct.etat === 'x' ? '✕ contrat' : '◐ souhait'}</small>` : ''}${pv.connu && !pv.prevu && !dejaIci.has(a.id) ? `<small class="horspr">pas prévu ici</small>` : ''}</button>`;
     };
     const avant = [...dejaIci], ajout = f.choisis.filter(x => !dejaIci.has(x)), retrait = avant.filter(x => !f.choisis.includes(x));
-    const rac = raccourcis();
+    const rac = raccourcis().filter(r => ['annee','semaine'].includes(r.id)).sort((a,b) => a.id === 'annee' ? -1 : 1);
     const pasH = []; for (let m = K.min(c.d); m <= K.min(c.f); m += 30) pasH.push(K.hDe(m)); if (pasH[pasH.length - 1] !== c.f) pasH.push(c.f);
     const horaires = f.choisis.length ? `<div style="display:grid;gap:8px"><b>Pendant tout le cours ?</b>${f.choisis.map(id => { const a = I.aesh.get(id), h = f.horaires[id]; return `<div class="ligne" style="gap:8px"><span class="pill" style="font-size:.9rem">${esc(a ? a.sigle : id)}</span>
       <div class="choix" style="gap:6px"><button type="button" id="ph-tout-${esc(id)}" data-a="horaire-tout" data-v="${esc(id)}" aria-pressed="${!h}">Tout le cours</button><button type="button" id="ph-part-${esc(id)}" data-a="horaire-partie" data-v="${esc(id)}" aria-pressed="${!!h}">Une partie</button></div>
       ${h ? `<select data-i="ph-debut" data-v="${esc(id)}" aria-label="De">${pasH.slice(0, -1).map(x => `<option value="${x}" ${x === h.debut ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted">à</span><select data-i="ph-fin" data-v="${esc(id)}" aria-label="À">${pasH.slice(1).map(x => `<option value="${x}" ${x === h.fin ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted" style="font-size:.85rem">le reste de son temps reste libre</span>` : ''}</div>`; }).join('')}</div>` : '';
     const modifHoraire = f.choisis.some(id => dejaIci.has(id) && JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
     return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}`) + `
-      ${bes ? `<div class="bandeau info">Estimé par les enseignants : <b>${bes.nb === 0 ? 'aucun AESH' : bes.nb + ' AESH'}</b>${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.nb > 0 ? ` · <b>${presents(c, iso, bes)} placé(s) sur ${bes.nb}</b>` : ''}${bes.au ? ` · jusqu’au ${K.jjmm(bes.au)}` : ''}${bes.majLe ? ` <span class="muted">· mis à jour le ${esc(K.dateCourte(String(bes.majLe).slice(0, 10)))}</span>` : ''}</div>`
+      ${bes ? `<div class="bandeau info">Estimé par les enseignants : <b>${bes.nb === 0 ? 'aucun AESH' : bes.nb + ' AESH'}</b>${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.nb > 0 ? ` · <b>Présents : ${presents(c, iso, bes)} · Manque : ${Math.max(0, bes.nb - presents(c, iso, bes))}</b>` : ''}${bes.au ? ` · jusqu’au ${K.jjmm(bes.au)}` : ''}${bes.majLe ? ` <span class="muted">· mis à jour le ${esc(K.dateCourte(String(bes.majLe).slice(0, 10)))}</span>` : ''}</div>`
         : `<div class="bandeau">Pas encore estimé par l’enseignant de ce cours. <span class="muted">Aucune demande reçue : à vous de décider.</span>
-            <button type="button" class="btn petit" id="pl-mail" data-a="mail-estimation" data-v="${esc(f.coursId)}">✉️ Écrire à l’enseignant</button></div>`}
-      <div><b>Qui accompagne ?</b></div>
+            ${modePlanning ? '' : `<button type="button" class="btn petit" id="pl-mail" data-a="mail-estimation" data-v="${esc(f.coursId)}">✉️ Écrire à l’enseignant</button>`}</div>`}
+      <div><b>1 · Qui accompagne ?</b><p class="muted">Touchez un AESH. Les heures et les disponibilités vous aident à choisir.</p></div>
       ${aVenir.length ? `<div class="bandeau info">À venir : ${aVenir.map(x => `<b>${esc(I.aesh.get(x.aeshId).sigle)}</b> dès le ${esc(K.dateCourte(x.du))}`).join(', ')} <span class="muted">· non modifié ici</span></div>` : ''}
       <div class="choix-aesh" role="group" aria-label="AESH du pôle">${candidats.map(a => bouton(a)).join('')}</div>
       ${autres.length ? ((f.autres || liberes.length) ? `<div><b>Autres pôles</b>${liberes.length ? ` <span class="puce warn">${liberes.length} libéré${liberes.length > 1 ? 's' : ''} par une PFMP</span>` : ''} <span class="muted" style="font-weight:500;font-size:.9rem">· triés par heures disponibles</span></div><div class="choix-aesh" role="group" aria-label="AESH des autres pôles">${autres.map(a => bouton(a, true)).join('')}</div>` : `<button type="button" class="lien" id="pa-autres" data-a="autres-aesh">＋ AESH d’un autre pôle${dispo.length ? ` (${dispo.length} avec des heures disponibles)` : ''}</button>`) : ''}
       ${horaires}
-      <div style="display:grid;gap:8px"><b>À partir du ${esc(K.dateCourte(du))}, jusqu’à</b><div class="choix" role="group" aria-label="Période">${rac.map(r => `<button type="button" id="per-${r.id}" data-a="periode" data-v="${r.id}" aria-pressed="${f.periode === r.id}">${esc(r.label)} <span class="muted">(${K.jjmm(r.fin)})</span></button>`).join('')}
+      <div class="guide-etape"><b>2 · Quelles semaines ?</b><div class="choix" role="group" aria-label="Semaines du placement">${(c.sem === 'SA' ? ['A'] : c.sem === 'SB' ? ['B'] : ['A','B','AB']).map(q => `<button type="button" id="pl-sem-${q}" data-a="pl-semaines" data-v="${q}" aria-pressed="${f.semaines === q}">${q === 'AB' ? 'A et B' : q + ' seulement'}</button>`).join('')}</div><small>Ce choix concerne l’AESH. Les vacances et jours fériés restent exclus.</small></div>
+      ${Object.entries(f.renforts || {}).filter(([id]) => f.choisis.includes(id)).map(([id,r]) => `<div class="bandeau info"><b>Renfort PFMP · ${esc((I.aesh.get(id)||{}).sigle)}</b><br>En soutien depuis ${esc(r.source)}, du ${K.dateCourte(r.du)} au ${K.dateCourte(r.au)}. Son planning habituel et les AESH déjà placés sont conservés.</div>`).join('')}
+      <div style="display:grid;gap:8px"><b>3 · À partir du ${esc(K.dateCourte(du))}, jusqu’à</b><div class="choix" role="group" aria-label="Période">${rac.map(r => `<button type="button" id="per-${r.id}" data-a="periode" data-v="${r.id}" aria-pressed="${f.periode === r.id}">${esc(r.label)} <span class="muted">(${K.jjmm(r.fin)})</span></button>`).join('')}
         <button type="button" id="per-date" data-a="periode" data-v="date" aria-pressed="${f.periode === 'date'}">Une date</button></div>
         ${f.periode === 'date' ? `<input type="date" id="per-au" data-i="per-au" value="${esc(f.au || '')}" min="${esc(du)}">` : ''}</div>
       <div class="actions"><button type="button" class="btn" id="pl-fermer" data-a="fermer">Fermer</button>
-        <button type="button" class="btn valider" id="pl-valider" data-a="valider-placer" ${(ajout.length || retrait.length || modifHoraire) && K.RE_DATE.test(au) && au >= du ? '' : 'disabled'}>✓ Enregistrer</button></div>`;
+        <button type="button" class="btn valider" id="pl-valider" data-a="valider-placer" ${(ajout.length || retrait.length || modifHoraire || f.semaines !== f.semainesInit) && K.RE_DATE.test(au) && au >= du ? '' : 'disabled'}>Vérifier le placement →</button></div>`;
   }
   function raccourcis() {
     const l = S.lundi, out = [{ id: 'semaine', label: 'Cette semaine', fin: K.ajoute(l, 4) }, { id: 'edt', label: 'Période de l’emploi du temps', fin: periodeEdt() }];
@@ -927,7 +979,7 @@ export async function demarrer({ FS, db, erreur }) {
     S.C.vacances.filter(v => /^Vacances/.test(v.label) && !/été/.test(v.label) && v.debut > l).slice(0, 2)
       .forEach(v => out.push({ id: 'v-' + v.debut, label: `Jusqu’aux ${v.label.charAt(0).toLowerCase()}${v.label.slice(1)}`, fin: avant(v.debut) }));
     const ete = S.C.vacances.find(v => /été/.test(v.label));
-    out.push({ id: 'annee', label: 'Toute l’année', fin: ete ? avant(ete.debut) : '2027-07-02' });
+    out.push({ id: 'annee', label: 'Fin de l’année scolaire', fin: ete ? avant(ete.debut) : '2027-07-02' });
     return out;
   }
   const finPeriode = f => f.periode === 'date' ? (f.au || '') : ((raccourcis().find(r => r.id === f.periode) || {}).fin || '');
@@ -1096,7 +1148,7 @@ export async function demarrer({ FS, db, erreur }) {
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-20a'), F = await import('./fichiers.js?v=2026-09-20a');
+    const X = await import('./exports.js?v=2026-09-23a'), F = await import('./fichiers.js?v=2026-09-23a');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1157,7 +1209,7 @@ export async function demarrer({ FS, db, erreur }) {
 
   /* ─────────── mon code ─────────── */
   function ecranMonCode() {
-    if (!S.form || S.form.kind !== 'code') S.form = { kind: 'code', voir: false, n1: '', n2: '' };
+    if (!S.form || S.form.kind !== 'code') S.form = { kind: 'code', voir: false, n1: '', n2: '', antoine1:'', antoine2:'' };
     const f = S.form, p = pole(S.session.pole), actuel = codeDe(p.id);
     const autre = POLES.find(x => x.id !== p.id && codeDe(x.id) === f.n1);
     const ok = /^\d{4}$/.test(f.n1) && f.n1 === f.n2 && f.n1 !== actuel && !autre;
@@ -1168,7 +1220,22 @@ export async function demarrer({ FS, db, erreur }) {
         <div class="champ"><label class="lib" for="mc-n2"><b>Encore une fois</b></label><input type="text" id="mc-n2" data-i="n2" inputmode="numeric" maxlength="4" value="${esc(f.n2)}" style="width:120px;text-align:center;font-size:1.3rem;letter-spacing:.2em;font-weight:800"></div>
       </div>
       ${autre ? `<div class="bandeau err">Ce code est déjà celui d’un autre pôle.</div>` : f.n2.length === 4 && f.n1 !== f.n2 ? `<div class="bandeau err">Les deux codes ne sont pas identiques.</div>` : ''}
-      <div class="barre-bas"><button type="button" class="btn valider" id="mc-valider" data-a="valider-code" ${ok ? '' : 'disabled'}>✓ Changer le code</button></div></div>`;
+      <div class="barre-bas"><button type="button" class="btn valider" id="mc-valider" data-a="valider-code" ${ok ? '' : 'disabled'}>✓ Changer le code</button></div>${p.id === 'PSR_MELEC' ? carteAccesAntoine(f) : ''}</div>`;
+  }
+
+  function carteAccesAntoine(f) {
+    const acces = S.docs.get('pole_PSR_MELEC')?.accesPlanning;
+    const ok = /^\d{4}$/.test(f.antoine1 || '') && f.antoine1 === f.antoine2
+      && !POLES.some(p => codeDe(p.id) === f.antoine1);
+    const lien = new URL('../planning-equipe/',location.href).href;
+    return `<section class="carte pad" style="margin-top:24px"><h2>Accès Antoine</h2>
+      <p>PSR : placement des AESH. MELEC : consultation.</p>
+      <p><b>${acces?.actif ? 'Accès activé' : 'Accès désactivé'}</b> · <a href="${esc(lien)}" target="_blank" rel="noopener">Ouvrir son interface</a></p>
+      <p class="muted">Un code distinct de celui du pôle, à lui transmettre.</p>
+      <div class="champs"><div class="champ"><label for="antoine1">Code Antoine — 4 chiffres</label><input type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" id="antoine1" data-i="antoine1" value="${esc(f.antoine1)}"></div>
+      <div class="champ"><label for="antoine2">Confirmer le code</label><input type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" id="antoine2" data-i="antoine2" value="${esc(f.antoine2)}"></div></div>
+      <div class="actions"><button type="button" class="btn valider" data-a="antoine-activer" ${ok ? '' : 'disabled'}>Enregistrer et activer</button>
+      ${acces?.actif ? '<button type="button" class="btn" data-a="antoine-desactiver">Désactiver cet accès</button>' : ''}</div></section>`;
   }
 
   /* ─────────── feuilles ─────────── */
@@ -1181,6 +1248,11 @@ export async function demarrer({ FS, db, erreur }) {
     const f = S.feuille;
     let h = '', large = false;
     if (f.type === 'placer') { h = feuillePlacer(f); large = true; }
+    else if (f.type === 'lecture') {
+      const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j), bes = K.besoinDuCours(S.est,f.classe,c,quand(iso));
+      h = teteFeuille(esc(c.lib),`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} · Consultation`) +
+        `<div class="bandeau info">${bes ? `Besoin : <b>${bes.nb} AESH</b> · Présents : ${presents(c,iso,bes)} · Manque : ${Math.max(0,bes.nb-presents(c,iso,bes))}` : 'Besoin non renseigné par l’enseignant.'}</div><p>Les affectations sont gérées par le référent.</p>`;
+    }
     else if (f.type === 'confirmer') h = feuilleConfirmer(f);
     else if (f.type === 'partager') h = feuillePartager(f);
     else if (f.type === 'pfmp') h = feuillePfmp(f);
@@ -1430,89 +1502,80 @@ export async function demarrer({ FS, db, erreur }) {
 
   function validerPlacer() {
     const f = S.feuille, p = P(), c = S.edt.cours[f.coursId], I = idx(), du = S.lundi, au = finPeriode(f);
-    const dejaIci = [...new Set(I.places.filter(x => placeIci(x, c, du)).map(x => x.aeshId))];
-    const ajout = f.choisis.filter(x => !dejaIci.includes(x)), retrait = dejaIci.filter(x => !f.choisis.includes(x));
+    if (!K.RE_DATE.test(au) || au < du) return;
     const sig = id => (I.aesh.get(id) || {}).sigle || '?';
-    const hOf = id => f.horaires[id] ? ` (${K.hFr(f.horaires[id].debut)}–${K.hFr(f.horaires[id].fin)})` : '';
-    const modifH = f.choisis.filter(id => dejaIci.includes(id) && JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
-    const lignes = [['Cours', `${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} · ${c.lib}`], ['Classe', c.cls.map(n => S.edt.classes[n].court).join(' + ')]];
-    if (ajout.length) lignes.push(['Ajout', ajout.map(id => sig(id) + hOf(id)).join(', ')], ['Période', `du ${K.dateCourte(du)} au ${K.dateCourte(au)}`]);
-    if (modifH.length) lignes.push(['Horaire modifié', modifH.map(id => sig(id) + (f.horaires[id] ? hOf(id) : ' (tout le cours)')).join(', ')]);
-    if (retrait.length) lignes.push(['Retrait', `${retrait.map(sig).join(', ')} à partir du ${K.dateCourte(du)}`]);
-    /* Tout ce qui coince, réuni : contrat, heures du pôle, réunion, jour non travaillé, classe pas prévue, déjà pris. */
-    const cx = ctx(), nom = f.classe, avert = [], aRegler = [], aLiberer = [];
-    ajout.forEach(id => {
-      const a = I.aesh.get(id); if (!a) return;
-      const d = K.disponibilite(cx, id, c.id, du, au, p.id), pv = K.prevuPourClasse(a, FILIERES, nom);
-      if (pv.connu && !pv.prevu) {
-        const ou = pv.filiereAbsente ? libFilieres(a) : (pv.classes || []).map(n => S.edt.classes[n].court).join(', ');
-        avert.push(`${a.sigle} est prévu${ou ? ` en ${ou}` : ''} : ${S.edt.classes[nom].court} sera ajouté à sa fiche.`);
-        aRegler.push(id);
+    const avant = [...new Set(I.places.filter(x => placeIci(x, c, du)).map(x => x.aeshId))];
+    const retrait = avant.filter(id => !f.choisis.includes(id));
+    const lot = [], avert = [], lignes = [['Cours', `${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} · ${c.lib}`],
+      ['Classe', c.cls.map(n => S.edt.classes[n].court).join(' + ')],
+      ['Semaines', f.semaines === 'AB' ? 'A et B' : f.semaines + ' seulement'],
+      ['Période', `Du ${K.dateCourte(du)} au ${K.dateCourte(au)}. Les autres semaines sont conservées.`]];
+    const cx = ctx();
+    const modifies = f.choisis.filter(id => !avant.includes(id) || f.semaines !== f.semainesInit
+      || JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
+    for (const id of [...new Set([...modifies, ...retrait])]) {
+      const a = I.aesh.get(id); if (!a) continue;
+      const renfort = (f.renforts || {})[id], debut = renfort ? renfort.du : du;
+      const fin = finPourAesh(a, renfort ? (renfort.au < au ? renfort.au : au) : au);
+      if (fin < debut) { toast(`${sig(id)} : aucune date avant la fin du contrat.`, true); return; }
+      const h = f.horaires[id] || { debut:c.d, fin:c.f };
+      const prochain = { id:'place_' + alea(), type:'place', aeshId:id, pole:p.id, coursId:c.id, classes:c.cls,
+        jour:c.j, debut:h.debut, fin:h.fin, sem:c.sem, semaines:f.semaines, matiere:c.lib, du:debut, au:fin, statut:'active',
+        ...(renfort ? { renfortPfmp:renfort.source } : {}) };
+      if (f.choisis.includes(id)) {
+        if (!K.datesPlacement(cx, prochain).length) { toast(`${sig(id)} : aucun cours sur les semaines et dates choisies.`, true); return; }
+        const conflit = I.places.find(x => x.coursId !== c.id && K.placementsEnConflit(cx, x, prochain));
+        if (conflit) { toast(`${sig(id)} est déjà placé sur un autre cours aux mêmes dates. Modifiez d’abord cette affectation ; aucun retrait automatique.`, true); return; }
+        const dispo = K.disponibilite(cx, id, c.id, debut, fin, p.id, prochain);
+        if (dispo.contrainte) avert.push(`${sig(id)} : ${dispo.contrainte.texte}.`);
+        if (['reunion','absent'].includes(dispo.etat)) avert.push(`${sig(id)} : ${dispo.texte}${dispo.detail ? ' — ' + dispo.detail : ''}.`);
+        if (K.finContratDe(a) && fin < au) avert.push(`${sig(id)} : placement limité au ${K.dateCourte(fin)} (contrat ou renfort temporaire).`);
+        lignes.push([sig(id), `${K.hFr(h.debut)}–${K.hFr(h.fin)} · ${K.fmtH(K.duree(h.debut,h.fin))} par semaine ${f.semaines === 'AB' ? 'A et B' : f.semaines} · du ${K.dateCourte(debut)} au ${K.dateCourte(fin)}${renfort ? ' · renfort PFMP' : ''}`]);
+      } else lignes.push(['Retrait', `${sig(id)} : seulement ${f.semaines === 'AB' ? 'en A et B' : 'en '+f.semaines}, du ${K.dateCourte(debut)} au ${K.dateCourte(fin)}`]);
+      // Scinder tous les fragments du cours sur la portée explicite, sans toucher aux autres cours.
+      I.places.filter(x => x.aeshId === id && x.coursId === c.id).forEach(x =>
+        lot.push(...K.modifierPeriode(x, debut, fin, f.semaines, null, () => 'place_' + alea())));
+      if (f.choisis.includes(id)) {
+        lot.push(prochain);
+        const pv = K.prevuPourClasse(a,FILIERES,f.classe);
+        if(!modePlanning && pv.connu && !pv.prevu) { const r = ficheAvecClasse(id,f.classe); if(r) { lot.push(r.doc); avert.push(r.info); } }
+        const q = rattachementDe(a);
+        if(!modePlanning && q && q !== p.id && !avant.includes(id)) {
+          avert.push(`${sig(id)} : un message sera enregistré pour le référent ${nomPole(q)}.`);
+          lot.push({id:'msg_'+alea(),type:'message',pole:p.id,statut:'active',texte:`@ ${nomPole(q)} — ${sig(id)} est placé en ${c.cls.join(' + ')} : ${K.JOURS[c.j]} ${K.hFr(h.debut)}–${K.hFr(h.fin)}, semaines ${f.semaines}, du ${debut} au ${fin}. C’est d’accord pour vous ?`});
+        }
       }
-      if (d.contrainte) avert.push(`${a.sigle} : ${d.contrainte.texte}${d.contrainte.etat === 'x' ? '' : ' (souhait)'}.`);
-      if (d.etat === 'reunion') avert.push(`${a.sigle} : ${d.texte} au même moment${d.detail ? ` (${d.detail})` : ''}.`);
-      if (d.etat === 'trop') avert.push(`${a.sigle} : ${d.texte}${d.detail ? ` — ${d.detail}` : ''}.`);
-      const hp = f.horaires[id] || { debut: c.d, fin: c.f };
-      I.places.forEach(x => {
-        if (x.aeshId !== id || x.coursId === c.id || x.jour !== c.j || x.au < du || x.du > au) return;
-        const oc = S.edt.cours[x.coursId]; if (!oc) return;
-        const ho = K.horairePlace(x, oc);
-        if (!K.chevauche(ho.debut, ho.fin, hp.debut, hp.fin)) return;
-        aLiberer.push({ id, place: x, cours: oc });
-      });
-    });
-    ajout.forEach(id => { const x = I.places.find(y => y.aeshId === id && placeAVenir(y, c, du) && y.du <= au);
-      if (x) avert.push(`${sig(id)} est déjà prévu sur ce cours à partir du ${K.dateLongue(x.du)}.`); });
-    ajout.forEach(id => { const a = I.aesh.get(id), fin = a && K.finContratDe(a);
-      if (fin && fin < au) avert.push(`${sig(id)} : son contrat s’arrête le ${K.dateLongue(fin)} — son placement s’arrêtera là.`); });
-    /* Un AESH d'une autre équipe : son référent doit être au courant (décision de Brahim, 17/09). */
-    const aPrevenir = [...new Set(ajout.map(id => { const a = I.aesh.get(id); if (!a) return ''; const q = rattachementDe(a); return q && q !== p.id ? q : ''; }).filter(Boolean))];
-    aPrevenir.forEach(q => avert.push(`${ajout.filter(id => rattachementDe(I.aesh.get(id) || {}) === q).map(sig).join(', ')} : de l’équipe ${nomPole(q)} — un message part à son référent pour validation.`));
-    aLiberer.forEach(({ id, cours }) => avert.push(`${sig(id)} est déjà en ${cours.cls.map(n => S.edt.classes[n].court).join('/')} (${cours.lib}) à cette heure.`));
-    const garde = { ...f };
-    S.feuille = { type: 'confirmer', titre: retrait.length && !ajout.length && !modifH.length ? `Retirer ${retrait.map(sig).join(', ')} de ce cours ?` : 'Vous confirmez ?', danger: retrait.length && !ajout.length && !modifH.length, grand: f.choisis.length ? f.choisis.map(sig).join(' · ') : 'Aucun AESH', lignes, bouton: retrait.length && !ajout.length && !modifH.length ? 'Retirer' : 'Confirmer', retourPlacer: garde,
-      avert: avert.join('\n'),
-      /* Coché d'office pour VOS placements ; décoché quand le cours appartient à un autre pôle : on ne défait pas le travail d'un collègue sans le vouloir. */
-      bascule: aLiberer.length ? { on: aLiberer.every(x => x.place.pole === p.id), label: `Le retirer de l’autre cours du ${K.dateCourte(du)} au ${K.dateCourte(au)}${aLiberer.some(x => x.place.pole !== p.id) ? ` (placement de ${nomPole(aLiberer.find(x => x.place.pole !== p.id).place.pole)})` : ''}` } : null,
-      travail: async () => {
-        /* Tout est préparé d'abord, puis écrit en UN lot (audit P01) : placements, coupures, fiches, messages.
-           Une panne laisse tout comme avant — plus de placement raccourci sans sa suite. */
-        const deplacer = !!(S.feuille && S.feuille.bascule && S.feuille.bascule.on);
-        const lot = [], infos = [];
-        if (deplacer) aLiberer.forEach(x => lot.push(...morceauxLiberes(x.place, du, au)));
-        aRegler.forEach(id => { const r = ficheAvecClasse(id, nom); if (r) { lot.push(r.doc); infos.push(r.info); } });
-        const placesFinales = [];
-        ajout.forEach(id => {
-          const h = f.horaires[id] || { debut: c.d, fin: c.f };
-          const auA = finPourAesh(I.aesh.get(id) || {}, au);
-          if (auA < du) return;                                    /* contrat déjà terminé à cette date */
-          const d = { id: 'place_' + alea(), type: 'place', aeshId: id, pole: p.id, coursId: c.id, classes: c.cls, jour: c.j, debut: h.debut, fin: h.fin, sem: c.sem, matiere: c.lib, du, au: auA, statut: 'active' };
-          lot.push(d); placesFinales.push(d);
-        });
-        modifH.forEach(id => { const h = f.horaires[id] || { debut: c.d, fin: c.f }; I.places.filter(x => x.aeshId === id && placeIci(x, c, du)).forEach(x => lot.push({ ...x, debut: h.debut, fin: h.fin })); });
-        retrait.forEach(id => I.places.filter(x => x.aeshId === id && placeIci(x, c, du)).forEach(x => lot.push(x.du >= du ? { ...x, statut: 'retire' } : { ...x, au: K.ajoute(du, -1) })));
-        /* Le message reprend les placements réellement enregistrés : horaire et fin propres à chacun (audit D16). */
-        aPrevenir.forEach(q => {
-          const siens = placesFinales.filter(d => rattachementDe(I.aesh.get(d.aeshId) || {}) === q);
-          if (!siens.length) return;
-          const detail = siens.map(d => `${sig(d.aeshId)} (${K.hFr(d.debut)}–${K.hFr(d.fin)}, jusqu’au ${K.dateCourte(d.au)})`).join(', ');
-          const texte = `@ ${nomPole(q)} — ${detail} ${siens.length > 1 ? 'sont placés' : 'est placé'} en ${c.cls.map(n => S.edt.classes[n].court).join(' + ')}, ${K.JOURS[c.j].toLowerCase()} (${c.lib}), à partir du ${K.dateCourte(du)}. C’est d’accord pour vous ?`;
-          lot.push({ id: 'msg_' + alea(), type: 'message', pole: p.id, texte: texte.slice(0, 1000), statut: 'active' });
-          infos.push(`Message envoyé au référent ${nomPole(q)}`);
-        });
-        await ecrireLot(lot);
-        S.flash = c.id; setTimeout(() => { S.flash = null; }, 2600);
-        if (infos.length) setTimeout(() => toast(infos.join(' · ')), 1500);
-        return {};
-      } };
-    rendre({ focus: 'cf-oui' });
+    }
+    if (!lot.length) return;
+    const simulation = new Map(I.places.map(x => [x.id,x]));
+    lot.filter(x => x.type === 'place').forEach(x => simulation.set(x.id,x));
+    const futur = {...cx,I:{...I,places:[...simulation.values()].filter(x => x.statut === 'active')}};
+    for (const id of modifies) {
+      for (const l of K.lundisEntre(S.C,du,au)) {
+        const bilan = K.bilan(futur,id,l);
+        if (bilan && bilan.alertes.some(x => x.type === 'contrat' || x.type === 'pole')) {
+          avert.push(`${sig(id)} : le planning obtenu dépasse un volume prévu la semaine du ${K.dateCourte(l)} (${K.fmtH(bilan.total)} au total).`); break;
+        }
+      }
+    }
+    S.feuille = { type:'confirmer', titre:'Vérifier le placement', grand:f.choisis.map(sig).join(' · ') || 'Retrait',
+      lignes, avert:avert.join('\n'), bouton:'Enregistrer', retourPlacer:f,
+      travail:async () => { await ecrireLot(lot, f.base); S.flash = c.id; return {}; } };
+    rendre({focus:'cf-oui'});
   }
 
   function gererClic(ev) {
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
+    if (modePlanning) {
+      const permis = ['selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
+      if (!permis.includes(a)) return;
+      if (a === 'sortir') { awaitSortirPlanning(); return; }
+      if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
+    }
     if (a === 'voile') { if (ev.target === b && !S.envoi && !(S.feuille && S.feuille.type === 'confirmer' && !S.feuille.fait)) fermer(); return; }
     switch (a) {
+      case 'selection-aesh': S.aeshChoisi = S.aeshChoisi === v ? null : v; rendre({focus:b.id}); return;
       case 'humeur': S.humeur = +v; rendre({ focus: b.id }); return;
       case 'entrer': try { sessionStorage.setItem(K_HUMEUR, '1'); } catch (e) { } if (S.session) { ecouterEstimations(); publierHumeur(); aller(!avatarDe(S.session.pole) && S.etat === 'ok' ? 'avatar' : 'accueil', !avatarDe(S.session.pole) ? { premiere: 1 } : {}, { remplacer: true }); } else aller('code'); return;
       case 'aller-humeur': aller('humeur', {}, { remplacer: true }); return;
@@ -1642,7 +1705,7 @@ export async function demarrer({ FS, db, erreur }) {
         S.feuille = { type: 'confirmer', titre: 'Vous confirmez ?', grand: k.court, lignes: lignes.length ? lignes.map(x => [x.label, `du ${K.dateLongue(x.debut)} au ${K.dateLongue(x.fin)}`]) : [['PFMP', 'aucune']], bouton: 'Confirmer',
           travail: async () => { const d = S.docs.get('pole_' + p.id) || {}; await ecrirePole(p.id, { pfmp: { ...(d.pfmp || {}), [f.classe]: lignes } }); appliquerPfmp(); return {}; } };
         rendre({ focus: 'cf-oui' }); return; }
-      case 'pfmp-deplacer': ouvrir({ type: 'deplacer', aeshId: v, source: classeCourante(), periode: 'semaine', pole: P().id, classe: null, choisis: [] }); return;
+      case 'pfmp-deplacer': ouvrir({ type: 'deplacer', aeshId: v, source: classeCourante(), periode: 'pfmp', pole: P().id, classe: null, choisis: [], base: new Map(S.docs) }); return;
       case 'dep-periode': S.feuille.periode = v; S.feuille.choisis = []; rendre({ focus: b.id }); return;
       case 'dep-pole': S.feuille.pole = v; S.feuille.classe = null; S.feuille.choisis = []; rendre({ focus: b.id }); return;
       case 'dep-classe': S.feuille.classe = v; S.feuille.choisis = []; rendre({ focus: b.id }); return;
@@ -1652,9 +1715,23 @@ export async function demarrer({ FS, db, erreur }) {
         if (S.C.semaine(S.lundi).toute) return;
         const choisis = [...new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId))];
         const horaires = {}; choisis.forEach(id => { const x = I.places.find(y => y.aeshId === id && placeIci(y, c, S.lundi)), hp = K.horairePlace(x, c); if (hp.partiel) horaires[id] = { debut: hp.debut, fin: hp.fin }; });
-        ouvrir({ type: 'placer', coursId: v, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'edt', au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
+        ouvrir({ type: 'placer', coursId: v, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', semaines: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', semainesInit: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', renforts: {}, base: new Map(S.docs), au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
+        if (S.aeshChoisi) {
+          const id = S.aeshChoisi; S.aeshChoisi = null;
+          const choix = document.getElementById('pa-' + id);
+          if (choix && !S.feuille.choisis.includes(id)) choix.click();
+        }
         void iso; return; }
-      case 'choix-aesh': { const f = S.feuille, i = f.choisis.indexOf(v); if (i < 0) f.choisis.push(v); else f.choisis.splice(i, 1); rendre({ focus: b.id }); return; }
+      case 'pl-semaines': S.feuille.semaines = v; rendre({ focus: b.id }); return;
+      case 'choix-aesh': {
+        const f = S.feuille, i = f.choisis.indexOf(v);
+        if (i < 0) {
+          f.choisis.push(v);
+          const c = S.edt.cours[f.coursId], source = K.liberePfmpCreneau(ctx(), v, S.lundi, c.j, c.d, c.f);
+          if (source) { const r = K.bornesRenfort(S.edt.classes[source], S.lundi, 'pfmp'); if (r) f.renforts[v] = { source, du:r.du, au:r.au }; }
+        } else { f.choisis.splice(i, 1); delete f.renforts[v]; }
+        rendre({ focus: b.id }); return;
+      }
       case 'autres-aesh': S.feuille.autres = true; rendre(); return;
       case 'horaire-tout': delete S.feuille.horaires[v]; rendre({ focus: b.id }); return;
       case 'horaire-partie': { const c = S.edt.cours[S.feuille.coursId]; S.feuille.horaires[v] = { debut: c.d, fin: K.hDe(Math.min(K.min(c.f), K.min(c.d) + 60)) }; rendre({ focus: b.id }); return; }
@@ -1673,7 +1750,7 @@ export async function demarrer({ FS, db, erreur }) {
         try { window.open('mailto:?subject=' + encodeURIComponent(sujet) + '&body=' + encodeURIComponent(corps), '_self'); } catch (e) { }
         toast('Message préparé — choisissez le destinataire (il est aussi copié).');
         return; }
-      case 'lecture': return;
+      case 'lecture': if(S.edt.cours[v]) ouvrir({type:'lecture',coursId:v,classe:classeCourante()}); return;
       case 'periode': S.feuille.periode = v; if (v === 'date' && !S.feuille.au) S.feuille.au = K.ajoute(S.lundi, 4); rendre({ focus: b.id }); return;
       case 'valider-placer': validerPlacer(); return;
       case 'edt-cours': { const [nom, id] = v.split('|'); const c = S.edt.cours[id]; if (!c) return;
@@ -1702,6 +1779,21 @@ export async function demarrer({ FS, db, erreur }) {
       case 'exp-format': S.exp.format = v; rendre({ focus: b.id }); return;
       case 'exporter': b.disabled = true; lancerExport().catch(e => { console.error(e); toast('L’export n’a pas pu être fabriqué.', true); }).finally(() => { b.disabled = false; }); return;
       case 'code-voir': S.form.voir = !S.form.voir; rendre({ focus: b.id }); return;
+      case 'antoine-activer': {
+        if (modePlanning || S.session?.pole !== 'PSR_MELEC') return;
+        const code = S.form?.antoine1;
+        if (!/^\d{4}$/.test(code || '') || code !== S.form?.antoine2 || POLES.some(p => codeDe(p.id) === code)) return;
+        confirmerPuis({titre:'Activer l’accès Antoine ?',sous:'PSR modifiable et MELEC en consultation dans son interface.',bouton:'Activer'},async()=>{
+          await ecrirePole('PSR_MELEC',{accesPlanning:{actif:true,code}}); S.form=null; return {};
+        }); return;
+      }
+      case 'antoine-desactiver': {
+        if (modePlanning || S.session?.pole !== 'PSR_MELEC') return;
+        const acces=S.docs.get('pole_PSR_MELEC')?.accesPlanning; if(!acces) return;
+        confirmerPuis({titre:'Désactiver l’accès Antoine ?',sous:'Les emplois du temps restent conservés.',bouton:'Désactiver'},async()=>{
+          await ecrirePole('PSR_MELEC',{accesPlanning:{...acces,actif:false}}); return {};
+        }); return;
+      }
       case 'valider-code': { const f = S.form, p = pole(S.session.pole);
         confirmerPuis({ titre: 'Changer le code ?', grand: f.n1, sous: `Pôle ${p.nom}. Pensez à le noter : l’ancien code ne marchera plus.`, bouton: 'Changer' }, async () => {
           await ecrirePole(p.id, { code: f.n1 });
@@ -1779,10 +1871,20 @@ export async function demarrer({ FS, db, erreur }) {
     if (k === 'per-edt-date') { if (S.feuille) S.feuille.fin = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'per-au') { S.feuille.au = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'msg') { const avant = !!S.msgBrouillon.trim(); S.msgBrouillon = t.value; if (avant !== !!t.value.trim()) { const btn = document.getElementById('msg-envoyer'); if (btn) btn.disabled = !t.value.trim() || S.envoi; } return; }
-    if (k === 'n1' || k === 'n2') { f[k] = t.value.replace(/\D/g, '').slice(0, 4); rendre({ focus: t.id }); return; }
+    if (['n1','n2','antoine1','antoine2'].includes(k)) { f[k] = t.value.replace(/\D/g, '').slice(0, 4); rendre({ focus: t.id }); return; }
     if (k === 'signature') { S.feuille.signature = t.value; lsEcrit(K_SIGN, t.value); S.feuille.texte = texteMessage(P(), t.value); const ta = document.getElementById('pt-texte'); if (ta) ta.value = S.feuille.texte; const m = document.getElementById('pt-mail'); if (m) m.href = `mailto:?subject=${encodeURIComponent(`Besoins d’accompagnement des élèves · ${P().nom}`)}&body=${encodeURIComponent(S.feuille.texte)}`; return; }
     if (k === 'pt-texte') { S.feuille.texte = t.value; const m = document.getElementById('pt-mail'); if (m) m.href = `mailto:?subject=${encodeURIComponent(`Besoins d’accompagnement des élèves · ${P().nom}`)}&body=${encodeURIComponent(t.value)}`; return; }
   }
+  racine.addEventListener('dragstart', ev => {
+    const b = ev.target.closest('[data-aesh-drag]'); if (!b || !ev.dataTransfer) return;
+    ev.dataTransfer.setData('text/plain',b.dataset.aeshDrag); ev.dataTransfer.effectAllowed = 'copy';
+  });
+  racine.addEventListener('dragover', ev => { if(ev.target.closest('[data-a="placer"]')) ev.preventDefault(); });
+  racine.addEventListener('drop', ev => {
+    const b = ev.target.closest('[data-a="placer"]'), id = ev.dataTransfer?.getData('text/plain');
+    if(!b || !idx().aesh.has(id) || !peutPlacer(classeCourante())) return;
+    ev.preventDefault(); S.aeshChoisi = id; b.click();
+  });
   racine.addEventListener('click', gererClic);
   racine.addEventListener('input', gererSaisie);
   racine.addEventListener('change', gererSaisie);
@@ -1794,10 +1896,13 @@ export async function demarrer({ FS, db, erreur }) {
   document.addEventListener('keydown', ev => { if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return; if ((S.route.e === 'code' || !S.session) && S.route.e !== 'humeur' && /^[0-9]$/.test(ev.key)) tapeCode(ev.key); else if (S.route.e === 'code' && ev.key === 'Backspace') tapeCode('⌫'); });
   document.addEventListener('click', ev => { if (S.menu && !ev.target.closest('.menu') && !ev.target.closest('#t-menu')) { S.menu = false; rendre(); } }, true);
 
+  async function awaitSortirPlanning() {
+    try { await droitsPlanning?.deconnecter?.(); } finally { location.reload(); }
+  }
   /* ─────────── départ ─────────── */
-  ecouter();
+  if (!modePlanning) ecouter();
   let humeurVue = false; try { humeurVue = !!sessionStorage.getItem(K_HUMEUR); } catch (e) { }
-  const premier = !humeurVue ? 'humeur' : S.session ? 'accueil' : 'code';
+  const premier = modePlanning ? 'code' : !humeurVue ? 'humeur' : S.session ? 'accueil' : 'code';
   S.route = { e: premier, p: {} };
   history.replaceState({ e: premier, p: {}, n: 0 }, '');
   if (S.session) ecouterEstimations();

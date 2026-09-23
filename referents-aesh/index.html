@@ -388,6 +388,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .etat-vide b{display:block;color:var(--ink);font-size:1.15rem;margin-bottom:6px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media print{.tete,.barre-bas,.ecrire{display:none}}
+.guide-etape{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.guide-etape small{color:var(--muted)}
 </style>
 </head>
 <body>
@@ -400,10 +402,10 @@ const firebaseConfig = {
   projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
   messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55"
 };
-let FS = null, db = null, erreur = null;
+let FS = null, db = null, erreur = null, app = null;
 try {
   FS = window.__FIRESTORE_SHIM__ || await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
-  let app = null;
+
   if (!window.__FIRESTORE_SHIM__) {
     const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
     app = initializeApp(firebaseConfig, 'referents-aesh');
@@ -411,8 +413,10 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-20a');
-  m.demarrer({ FS, db, erreur });
+  const m = await import('./app.js?v=2026-09-23a');
+  const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-23a');
+  m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
+    ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
 } catch (e) {
   document.getElementById('app').innerHTML = '<p style="padding:30px;text-align:center">La page n’a pas pu se charger. Vérifiez la connexion puis rechargez.</p>';
   console.error(e);

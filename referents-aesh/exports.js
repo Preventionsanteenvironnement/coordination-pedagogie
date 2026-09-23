@@ -109,7 +109,7 @@ function aeshDans(pdf, ctx, ids, lundi) {
 function aeshDuCours(ctx, nom, c, iso) {
   const I = ctx.I, parAesh = new Map();
   I.places.forEach(x => {
-    if (x.coursId !== c.id || iso < x.du || iso > x.au) return;
+    if (x.coursId !== c.id || !K.placementALieu(ctx, x, iso)) return;
     const a = I.aesh.get(x.aeshId); if (!a || K.contratFini(a, iso)) return;
     const hp = K.horairePlace(x, c);
     if (!parAesh.has(a.id)) parAesh.set(a.id, { a, iv: [] });

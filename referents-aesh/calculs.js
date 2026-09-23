@@ -78,6 +78,68 @@ export function coursALieu(C, edt, cours, iso) {
   return true;
 }
 
+/* Alternance de l'affectation, indépendante de celle du cours. Les anciens documents
+   gardent leur comportement ; S1/S2 restent des contraintes du cours. */
+export const semainesPlace = p => ['A', 'B', 'AB'].includes(p && p.semaines) ? p.semaines
+  : p && p.sem === 'SA' ? 'A' : p && p.sem === 'SB' ? 'B' : 'AB';
+export const semaineCompatible = (p, C, iso) => semainesPlace(p) === 'AB' || semainesPlace(p) === C.parite(lundiDe(iso));
+export function placementPrevu(C, c, p, iso) {
+  return !!c && iso >= p.du && iso <= p.au && jourSemaine(iso) === c.j
+    && C.coursSemaine(c, lundiDe(iso)) && semaineCompatible(p, C, iso);
+}
+export function placementALieu(ctx, p, iso) {
+  const c = ctx.edt.cours[p.coursId];
+  if (!placementPrevu(ctx.C,c,p,iso) || !coursALieu(ctx.C,ctx.edt,c,iso)) return false;
+  if (!p.renfortPfmp) return true;
+  const source = ctx.edt.classes[p.renfortPfmp];
+  if (!enPfmp(source,iso)) return false;
+  const h = horairePlace(p,c), iv = [];
+  ctx.I.places.forEach(x => {
+    const oc = ctx.edt.cours[x.coursId];
+    if (x.renfortPfmp || x.aeshId !== p.aeshId || !oc || !oc.cls.includes(p.renfortPfmp)
+      || !placementPrevu(ctx.C,oc,x,iso) || coursALieu(ctx.C,ctx.edt,oc,iso)) return;
+    const k = horairePlace(x,oc); iv.push([min(k.debut),min(k.fin)]);
+  });
+  return recouvrement(iv,min(h.debut),min(h.fin)) >= min(h.fin)-min(h.debut);
+}
+export function datesPlacement(ctx, p, du = p.du, au = p.au) {
+  const c = ctx.edt.cours[p.coursId]; if (!c) return [];
+  return lundisEntre(ctx.C, du, au).map(l => ajoute(l, c.j))
+    .filter(iso => iso >= du && iso <= au && placementALieu(ctx, p, iso) && !contratFini(ctx.I.aesh.get(p.aeshId), iso));
+}
+/* Un vrai conflit requiert au moins une date commune, pas seulement le même horaire. */
+export function placementsEnConflit(ctx, x, y) {
+  const c = ctx.edt.cours[x.coursId], d = ctx.edt.cours[y.coursId];
+  if (!c || !d || x.aeshId !== y.aeshId || c.j !== d.j) return false;
+  const h = horairePlace(x, c), k = horairePlace(y, d);
+  if (!chevauche(h.debut, h.fin, k.debut, k.fin)) return false;
+  return datesPlacement(ctx, x, x.du > y.du ? x.du : y.du, x.au < y.au ? x.au : y.au)
+    .some(iso => placementALieu(ctx, y, iso));
+}
+/* Retrait/modification bornés : conserver le passé, la suite et l'autre parité.
+   Un original retiré reste dans l'historique. Les fragments reçoivent de nouveaux IDs. */
+export function modifierPeriode(p, du, au, semaines, changement, nouvelId) {
+  const debut = p.du > du ? p.du : du, fin = p.au < au ? p.au : au;
+  const avant = semainesPlace(p), cible = semaines || 'AB';
+  if (debut > fin || (avant !== 'AB' && cible !== 'AB' && avant !== cible)) return [];
+  const out = [{ ...p, statut: 'retire' }];
+  const fragment = (d, f, sem, patch = {}) => {
+    if (d > f) return;
+    const x = { ...p, ...patch, id: nouvelId(), du: d, au: f, semaines: sem, statut: 'active' };
+    ['version', 'creeLe', 'majLe', 'par'].forEach(k => delete x[k]); out.push(x);
+  };
+  if (p.du < debut) fragment(p.du, ajoute(debut, -1), avant);
+  if (avant === 'AB' && cible !== 'AB') fragment(debut, fin, cible === 'A' ? 'B' : 'A');
+  if (changement) fragment(debut, fin, cible === 'AB' ? avant : cible, changement);
+  if (p.au > fin) fragment(ajoute(fin, 1), p.au, avant);
+  return out;
+}
+export function bornesRenfort(classe, lundi, periode) {
+  const pf = pfmpDeLaSemaine(classe, lundi), ven = ajoute(lundi, 4);
+  if (!pf) return null;
+  return { du: pf.debut > lundi ? pf.debut : lundi, au: periode === 'pfmp' ? pf.fin : (pf.fin < ven ? pf.fin : ven), pf, ven };
+}
+
 /* ─────────────── données normalisées ─────────────── */
 /* docs : liste brute de documents Firestore de la collection. Retourne l'état exploitable. */
 const nombreOk = (v, max = 45) => { const n = Number(v); return v === null || v === undefined || v === '' ? null : Number.isFinite(n) && n >= 0 && n <= max ? n : null; };
@@ -246,7 +308,7 @@ export function occupations(ctx, aeshId, lundi) {
     const parCours = new Map();
     I.places.forEach(p => {
       if (p.aeshId !== aeshId || p.jour !== j || iso < p.du || iso > p.au) return;
-      const c = edt.cours[p.coursId]; if (!c || !coursALieu(C, edt, c, iso)) return;
+      const c = edt.cours[p.coursId]; if (!c || !placementALieu(ctx, p, iso)) return;
       const hp = horairePlace(p, c);
       if (!parCours.has(p.coursId)) parCours.set(p.coursId, { c, p, iv: [] });
       parCours.get(p.coursId).iv.push([min(hp.debut), min(hp.fin)]);
@@ -409,18 +471,18 @@ export function lundisEntre(C, du, au) {
   return out;
 }
 /* État d'un AESH pour un cours sur une période : libre, pris, absent, reunion, trop. */
-export function disponibilite(ctx, aeshId, coursId, du, au, pole) {
+export function disponibilite(ctx, aeshId, coursId, du, au, pole, choix = {}) {
   const { C, edt, I } = ctx, c = edt.cours[coursId], a = I.aesh.get(aeshId);
   if (!c || !a) return { etat: 'pris', texte: '—' };
   const contrainte = contrainteCreneau(a, c.j, c.d, c.f);
   const deja = I.places.some(p => p.aeshId === aeshId && p.coursId === coursId && p.au >= du && p.du <= au);
   let premierPris = null, premierAbs = null, premiereReu = null, nbSem = 0, nbAbs = 0, premierTrop = null;
-  const h = duree(c.d, c.f), prevu = +((a.heures || {})[pole]);
+  const hp = horairePlace(choix, c), h = duree(hp.debut, hp.fin), prevu = +((a.heures || {})[pole]);
   /* Après la fin de son contrat, il n'est plus proposé (audit D01). */
   const fin = finContratDe(a);
   if (fin && fin < du) return { etat: 'aucun', contrainte, texte: 'contrat terminé', detail: `depuis le ${dateCourte(fin)}`, deja };
   for (const l of lundisEntre(C, du, au)) {
-    const iso = ajoute(l, c.j); if (iso < du || iso > au || (fin && iso > fin) || !coursALieu(C, edt, c, iso)) continue;
+    const iso = ajoute(l, c.j); if (iso < du || iso > au || (fin && iso > fin) || !coursALieu(C, edt, c, iso) || !semaineCompatible(choix, C, iso)) continue;
     nbSem++;
     const ab = absentLe(I, aeshId, iso, c.d, c.f);
     if (ab) { nbAbs++; if (!premierAbs) premierAbs = { iso, ab }; }
@@ -431,7 +493,7 @@ export function disponibilite(ctx, aeshId, coursId, du, au, pole) {
       else if (b && Number.isFinite(prevu) && (b.parPole[pole] || 0) + h > prevu + 1e-9) premierTrop = { iso, texte: 'heures du pôle atteintes', detail: `semaine du ${dateCourte(l)}` };
     }
     const autre = I.places.find(p => p.aeshId === aeshId && p.coursId !== coursId && p.jour === c.j && iso >= p.du && iso <= p.au
-      && edt.cours[p.coursId] && (hp => chevauche(hp.debut, hp.fin, c.d, c.f))(horairePlace(p, edt.cours[p.coursId])) && coursALieu(C, edt, edt.cours[p.coursId], iso));
+      && edt.cours[p.coursId] && (hp => chevauche(hp.debut, hp.fin, c.d, c.f))(horairePlace(p, edt.cours[p.coursId])) && placementALieu(ctx, p, iso));
     if (autre && !premierPris) premierPris = { iso, p: autre };
     if (a.reunion && a.reunion.jour === c.j && RE_HEURE.test(a.reunion.debut || '') && chevauche(a.reunion.debut, a.reunion.fin, c.d, c.f) && !institutionCetteSemaine(I, l) && !premiereReu) premiereReu = { iso };
     const inst = I.reunions.find(r => r.date === iso && chevauche(r.debut, r.fin, c.d, c.f));
@@ -477,7 +539,7 @@ export function presentsMin(ctx, cours, iso, debut, fin) {
   const { I } = ctx, a0 = min(debut || cours.d), b0 = min(fin || cours.f), iv = [];
   const vus = new Map();
   I.places.forEach(p => {
-    if (p.coursId !== cours.id || iso < p.du || iso > p.au) return;
+    if (p.coursId !== cours.id || !placementALieu(ctx, p, iso)) return;
     const a = I.aesh.get(p.aeshId); if (!a || a.actif === false || (finContratDe(a) && iso > finContratDe(a))) return;
     const hp = horairePlace(p, cours);
     if (!vus.has(p.aeshId)) vus.set(p.aeshId, []);
@@ -555,7 +617,7 @@ export function liberesParPfmp(ctx, nomClasse, lundi) {
     I.places.forEach(p => {
       if (p.jour !== j || iso < p.du || iso > p.au) return;
       const c = edt.cours[p.coursId];
-      if (!c || !(c.cls || []).includes(nomClasse) || !C.coursSemaine(c, lundi)) return;
+      if (!c || !(c.cls || []).includes(nomClasse) || !placementPrevu(C, c, p, iso)) return;
       if (coursALieu(C, edt, c, iso)) return;
       const a = I.aesh.get(p.aeshId);
       if (!a || a.actif === false || contratFini(a, iso)) return;
@@ -580,7 +642,7 @@ export function liberePfmpCreneau(ctx, aeshId, lundi, j, debut, fin) {
   let libere = '';
   I.places.forEach(p => {
     if (libere || p.aeshId !== aeshId || p.jour !== j || iso < p.du || iso > p.au) return;
-    const c = edt.cours[p.coursId]; if (!c || !C.coursSemaine(c, lundi)) return;
+    const c = edt.cours[p.coursId]; if (!c || !placementPrevu(C, c, p, iso)) return;
     const hp = horairePlace(p, c);
     if (!chevauche(hp.debut, hp.fin, debut, fin)) return;
     if (coursALieu(C, edt, c, iso)) return;                     /* le cours a lieu : il n'est pas libéré */
