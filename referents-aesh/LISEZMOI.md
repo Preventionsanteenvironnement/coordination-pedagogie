@@ -85,3 +85,10 @@ Navigateur local : connexion quatre chiffres, PSR modifiable, MELEC consultable,
 panneau de gestion depuis le référent et désactivation enregistrée en simulation.
 Règles publiées précédemment confirmées par copie utilisateur identique (856 lignes).
 Le nouvel ajout `accesPlanning` n'est pas encore publié.
+
+Le code actuel du référent PSR-MELEC ouvre également l'interface Antoine, même
+si son accès personnel est désactivé ou pas encore configuré. Il est relu dans
+le document du pôle, jamais codé en dur. La session ouverte avec ce code expire
+lorsque ce code change ; le code personnel Antoine reste indépendant. Cette
+entrée conserve la présentation Antoine et ses restrictions applicatives PSR/MELEC.
+Aucun ajout aux règles n'est nécessaire pour cette entrée supplémentaire.

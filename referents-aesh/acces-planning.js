@@ -3,13 +3,17 @@
    Ce code n'est pas une barrière de sécurité Firestore. */
 export function verifierCodePlanning(code, documentPole) {
   const acces = documentPole?.accesPlanning;
-  if (!/^\d{4}$/.test(code || '') || acces?.actif !== true || acces.code !== code)
+  const codeValide = /^\d{4}$/.test(code || '');
+  const referent = codeValide && documentPole?.code === code;
+  if (!codeValide || (!referent && (acces?.actif !== true || acces.code !== code)))
     throw new Error('Code inconnu ou accès désactivé.');
   return {
     pole:'PSR_MELEC',
     lectureClasses:['C1PSR','C2PSR','B2MELEC','B1MELEC','BTMELEC'],
     ecritureClasses:['C1PSR','C2PSR'],
-    sessionValide:doc => doc?.accesPlanning?.actif === true && doc.accesPlanning.code === code,
+    // Chaque session reste liée au code qui l’a ouverte.
+    sessionValide:doc => referent ? doc?.code === code
+      : doc?.accesPlanning?.actif === true && doc.accesPlanning.code === code,
     deconnecter:async()=>{}
   };
 }

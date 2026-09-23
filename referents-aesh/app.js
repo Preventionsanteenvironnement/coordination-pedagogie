@@ -1231,7 +1231,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return `<section class="carte pad" style="margin-top:24px"><h2>Accès Antoine</h2>
       <p>PSR : placement des AESH. MELEC : consultation.</p>
       <p><b>${acces?.actif ? 'Accès activé' : 'Accès désactivé'}</b> · <a href="${esc(lien)}" target="_blank" rel="noopener">Ouvrir son interface</a></p>
-      <p class="muted">Un code distinct de celui du pôle, à lui transmettre.</p>
+      <p class="muted">Un code distinct de celui du pôle, à lui transmettre. Votre code de référent ouvre aussi cette interface, même si son accès personnel est désactivé.</p>
       <div class="champs"><div class="champ"><label for="antoine1">Code Antoine — 4 chiffres</label><input type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" id="antoine1" data-i="antoine1" value="${esc(f.antoine1)}"></div>
       <div class="champ"><label for="antoine2">Confirmer le code</label><input type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" id="antoine2" data-i="antoine2" value="${esc(f.antoine2)}"></div></div>
       <div class="actions"><button type="button" class="btn valider" data-a="antoine-activer" ${ok ? '' : 'disabled'}>Enregistrer et activer</button>
