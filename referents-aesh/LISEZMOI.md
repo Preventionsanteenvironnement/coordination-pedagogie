@@ -92,3 +92,38 @@ le document du pôle, jamais codé en dur. La session ouverte avec ce code expir
 lorsque ce code change ; le code personnel Antoine reste indépendant. Cette
 entrée conserve la présentation Antoine et ses restrictions applicatives PSR/MELEC.
 Aucun ajout aux règles n'est nécessaire pour cette entrée supplémentaire.
+
+
+## Présences, services et centralisation — 23 septembre 2026, lot local suivant
+
+Ce lot remplace les descriptions antérieures du périmètre Antoine et du placement :
+- PSR, AGOrA, CAPa et Métiers d’art modifiables par Antoine ; MELEC reste consultable.
+  Boutons de pôle, mêmes documents que les référents, aucun duplicata de planning.
+- Cours inchangé ; bandes de présence colorées par identifiant AESH, repères de 30 minutes.
+  Chaque personne peut avoir un ou plusieurs passages, ou couvrir tout le cours.
+- Début de période explicite, A/B/AB et fin par défaut à l’année (bornée par le contrat).
+  Un retrait/remplacement conserve les fragments passés et les périodes hors sélection.
+- Compteurs de la semaine et comparaison de semaines A/B datées. Un chevauchement est
+  signalé mais ne double pas les minutes du total global. Les besoins ont un détail par tranche.
+- DP — Demi-pension, Internat, DAFI et PIAL : ajout de créneaux avec jour, heures, A/B et dates.
+  Champs optionnels dans services[] : horaires[] et calendrierDepuis. Le forfait antérieur
+  n’est plus ajouté à partir de calendrierDepuis. Avant cette date il reste préservé.
+  Le volume h dans la fiche reste une prévision contractuelle, distincte du réalisé planifié.
+- Réunion PSR automatique 13–14 le lundi pour les quatre identifiants de l’équipe initiale.
+  Réunion institutionnelle datée : remplace celle d’équipe la même semaine ; vacances,
+  absences et fin de contrat prises en compte. Autres équipes : leur réunion renseignée.
+- Placements, absences et réunions partagent la vérification transactionnelle des fiches.
+  Un ancien client non actualisé ne participe pas à cette protection : recharger les appareils.
+- Export Antoine : classes et AESH, deux semaines réelles A/B, couleurs, demi-heures,
+  services jusqu’à 21 h. Classe : colonnes cours et présences séparées pour garder le cours entier.
+  L’Excel est un export ; modifier le fichier sur ordinateur ne synchronise pas le site.
+- Aucun import automatique des Excel personnels d’Antoine, aucune création de vrai code,
+  aucune écriture de données en ligne effectués pendant ce lot.
+
+Pas de nouvelle règle Firestore nécessaire pour ce lot : services est déjà une liste
+admise et revisionPlanning était prévu dans les règles complètes précédentes.
+Le déploiement effectif du site et de l’application installée reste distinct du code local.
+
+Tests locaux : planning.test.mjs, presences.test.mjs, acces-simple.test.mjs ; navigateur
+fictif (deux passages, compteur B=1h/A=0h, DP=0,5h, navigation métiers d’art) ; Excel
+fictif relu et rendu ; passerelle testée sur des objets fictifs, jamais le store réel.

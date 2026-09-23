@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const load=async name=>import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(new URL('../'+name,import.meta.url),'utf8')).toString('base64'));
+const K=await load('calculs.js'),P=await load('presences.js');
+let n=0;function test(label,f){f();console.log('OK',label);n++;}
+function fixture(){
+ const a={id:'fictif',sigle:'TEST',contrat:25,reunionH:0,services:[],equipes:{P:1},heures:{P:25}};
+ const c={id:'c',j:0,d:'09:00',f:'11:00',sem:'TOUTES',cls:['C'],lib:'Cours fictif'};
+ const edt={semaine1:'2026-08-31',vacances:[],classes:{C:{cours:['c'],pfmp:[]}},cours:{c}};
+ const p={id:'p',type:'place',aeshId:a.id,pole:'P',coursId:'c',jour:0,du:'2026-08-31',au:'2027-07-02',semaines:'AB',statut:'active'};
+ return {edt,C:K.creerCalendrier(edt),I:{aesh:new Map([[a.id,a]]),places:[],reunions:[],absences:[]},a,p};
+}
+test('Deux passages disjoints du même AESH et trou de couverture',()=>{const x=fixture();x.I.places=[{...x.p,debut:'09:00',fin:'09:30'},{...x.p,id:'p2',debut:'10:00',fin:'11:00'}];assert.equal(K.bilan(x,x.a.id,'2026-08-31').total,1.5);assert.equal(K.presentsMin(x,x.edt.cours.c,'2026-08-31'),0);assert.equal(K.presentsMin(x,x.edt.cours.c,'2026-08-31','10:00','11:00'),1);});
+test('Relais sans trou : besoin couvert et comptes individuels',()=>{const x=fixture();x.I.aesh.set('autre',{...x.a,id:'autre'});x.I.places=[{...x.p,debut:'09:00',fin:'10:00'},{...x.p,id:'p2',aeshId:'autre',debut:'10:00',fin:'11:00'}];assert.equal(K.presentsMin(x,x.edt.cours.c,'2026-08-31'),1);assert.equal(K.bilan(x,'autre','2026-08-31').total,1);});
+test('Chevauchements interclasses signalés sans doubler le total',()=>{const x=fixture();x.edt.cours.d={...x.edt.cours.c,id:'d'};x.I.places=[x.p,{...x.p,id:'p2',coursId:'d'}];const b=K.bilan(x,x.a.id,'2026-08-31');assert.equal(b.total,2);assert.ok(b.alertes.some(a=>a.type==='conflit'));});
+test('DP A uniquement, demi-heure, ancien forfait remplacé',()=>{const x=fixture();x.a.services=[{nom:'Cantine',h:2,jours:[0],calendrierDepuis:'2026-08-31',horaires:[{jour:0,debut:'12:30',fin:'13:00',du:'2026-08-31',au:'2027-07-02',semaines:'A'}]}];assert.equal(K.bilan(x,x.a.id,'2026-08-31').total,.5);assert.equal(K.bilan(x,x.a.id,'2026-09-07').total,0);});
+test('Internat jusqu’à 21 h, absence partielle et fin de contrat',()=>{const x=fixture();x.a.services=[{nom:'Internat',h:3,jours:[0],calendrierDepuis:'2026-08-31',horaires:[{jour:0,debut:'18:00',fin:'21:00',du:'2026-08-31',au:'2027-07-02',semaines:'AB'}]}];x.I.absences=[{aeshId:x.a.id,du:'2026-08-31',au:'2026-08-31',journee:false,debut:'19:00',fin:'20:00'}];assert.equal(K.bilan(x,x.a.id,'2026-08-31').total,2);x.a.finContrat='2026-09-01';assert.equal(K.bilan(x,x.a.id,'2026-09-07').total,0);});
+test('Institutionnelle remplace équipe, annulation rétablit équipe',()=>{const x=fixture();x.a.reunion={jour:0,debut:'13:00',fin:'14:00'};x.I.reunions=[{date:'2026-08-31',debut:'08:30',fin:'09:30'}];assert.equal(K.bilan(x,x.a.id,'2026-08-31').reunion,1);assert.equal(K.occupations(x,x.a.id,'2026-08-31').filter(o=>o.type==='reunion').length,0);x.I.reunions=[];assert.equal(K.bilan(x,x.a.id,'2026-08-31').reunion,1);});
+test('Réunion pendant vacances ne retire pas celle de la semaine ouverte',()=>{const x=fixture();x.a.reunion={jour:0,debut:'13:00',fin:'14:00'};x.C=K.creerCalendrier({...x.edt,vacances:[{debut:'2026-09-01',fin:'2026-09-01',label:'Fermé'}]});x.I.reunions=[{date:'2026-09-01',debut:'08:30',fin:'09:30'}];assert.equal(K.bilan(x,x.a.id,'2026-08-31').reunion,1);assert.equal(K.occupations(x,x.a.id,'2026-08-31').some(o=>o.type==='reunion'),true);});
+test('Remplacement daté conserve les séances précédentes',()=>{const x=fixture();x.edt.cours.c.j=2;x.p.jour=2;let i=0;x.I.places=K.modifierPeriode(x.p,'2026-09-10','2027-07-02','AB',null,()=>`n${++i}`).filter(p=>p.statut==='active');assert.equal(K.bilan(x,x.a.id,'2026-09-07').total,2);assert.equal(K.bilan(x,x.a.id,'2026-09-14').total,0);});
+test('Couleur stable indépendamment de l’ordre des personnes',()=>{assert.equal(P.couleurAesh('fictif'),P.couleurAesh('fictif'));assert.equal(P.libelleService('Cantine'),'DP — Demi-pension');});
+test('Réunion PSR fixe : lundi 13–14, même avec ancien horaire',()=>{const r=K.reunionDe({id:'aesh_d01',reunion:{jour:0,debut:'13:30',fin:'14:00'}});assert.deepEqual(r,{jour:0,debut:'13:00',fin:'14:00'});assert.equal(K.heuresReunion({id:'aesh_d01',reunionH:.5}),1);});
+test('Une présence courte ne crée pas de faux conflit plus tard dans le cours',()=>{const x=fixture();x.edt.cours.d={...x.edt.cours.c,id:'d',d:'10:00',f:'11:00'};x.I.places=[{...x.p,coursId:'d',debut:'10:00',fin:'11:00'}];assert.equal(K.disponibilite(x,x.a.id,'c','2026-08-31','2026-08-31','P',{debut:'09:00',fin:'09:30',semaines:'A'}).etat,'libre');});
+console.log(`${n} scénarios présences/services réussis, données fictives uniquement.`);

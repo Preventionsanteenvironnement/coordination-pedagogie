@@ -398,6 +398,16 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 @media print{.tete,.barre-bas,.ecrire{display:none}}
 .guide-etape{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
 .guide-etape small{color:var(--muted)}
+
+.presence-reglage{display:grid;gap:10px;padding:12px;border:1px solid var(--line,#ddd);border-radius:12px;margin:10px 0}
+.bloc.avec-presences .bloc-contenu{position:relative;padding-right:48%;}
+.bloc.avec-presences.avec-besoin .bloc-contenu>b{padding-right:0}
+.presence-timeline{position:absolute;top:0;bottom:0;right:0;width:46%;pointer-events:none;border-left:1px dashed #64748b}
+.presence-bande{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:800;font-size:12px;border:1px solid white;overflow:hidden;box-sizing:border-box;min-height:0}
+.presence-bande small{font-size:10px;font-weight:600;white-space:nowrap}
+.presence-repere{position:absolute;left:0;right:0;border-top:1px dashed #64748b;z-index:2}
+.presence-absence{background-image:repeating-linear-gradient(135deg,transparent,transparent 5px,#ffffff66 5px,#ffffff66 8px)!important}
+.avec-presences .bes-action{right:auto;left:6px;bottom:3px;top:auto}
 </style>
 </head>
 <body>
@@ -421,8 +431,8 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-23c');
-  const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-23b');
+  const m = await import('./app.js?v=2026-09-23d');
+  const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-23d');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
 } catch (e) {

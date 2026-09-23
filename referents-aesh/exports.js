@@ -1,11 +1,12 @@
+import { couleurAesh, libelleService } from './presences.js?v=2026-09-23d';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
-import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-18e';
-import * as K from './calculs.js?v=2026-09-18e';
-import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-18e';
+import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-23d';
+import * as K from './calculs.js?v=2026-09-23d';
+import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-23d';
 
-const H0 = 8 * 60, H1 = 18 * 60;
+const H0 = 8 * 60, H1 = 21 * 60;
 const GRIS = '#6b7280', LIGNE = '#e3e8ef', ENCRE = '#111827';
 const nomPole = id => (pole(id) || { nom: id }).nom;
 const titreSemaine = (C, lundi) => {
@@ -80,7 +81,7 @@ function blocsAesh(ctx, aeshId, lundi) {
         l1: o.cours.lib || o.cours.mat, l2: `${o.cours.cls.map(n => (ctx.edt.classes[n] || {}).court || n).join(' · ')}${o.absent ? ' · à couvrir' : ''}`, l3: (o.cours.salle || []).join(' · ') };
     }
     if (o.type === 'absence') return { j: o.j, debut: o.debut, fin: o.fin, fond: '#fff4f2', trait: '#b42318', l1: o.label, l2: o.absence && o.absence.note ? o.absence.note : '', encre: '#8a1c1c' };
-    return { j: o.j, debut: o.debut, fin: o.fin, fond: o.type === 'institution' ? '#e6e9ef' : '#eef1f4', trait: '#64748b', l1: o.label, l2: '' };
+    return { j: o.j, debut: o.debut, fin: o.fin, fond: o.type === 'institution' ? '#e6e9ef' : '#eef1f4', trait: '#64748b', l1: libelleService(o.label), l2: '' };
   }));
 }
 
@@ -180,7 +181,7 @@ function feuilleGrille(nom, titre, sous, C, lundi, blocs) {
   const sem = C.semaine(lundi);
   lignesX.push([{ v: '' }, ...sem.jours.map((jr, j) => ({ v: `${K.JOURS[j]} ${K.jjmm(jr.date)}`, s: S.jour }))]);
   const base = lignesX.length;
-  for (let i = 0; i < nbL; i++) { const m = H0 + i * PAS; lignesX.push([{ v: m % 60 === 0 ? K.hFr(K.hDe(m)) : '', s: S.heure }, ...[0, 1, 2, 3, 4].map(() => ({ v: '', s: { bord: true } }))]); }
+  for (let i = 0; i < nbL; i++) { const m = H0 + i * PAS; lignesX.push([{ v: K.hFr(K.hDe(m)), s: S.heure }, ...[0, 1, 2, 3, 4].map(() => ({ v: '', s: { bord: true } }))]); }
   sem.jours.forEach((jr, j) => {
     if (!jr.off) return;
     const col = colonne(j + 1); fusions.push(`${col}${base + 1}:${col}${base + nbL}`);
@@ -239,4 +240,47 @@ function feuilleSynthese(ctx, poleId, lundi) {
 export function json(ctx, docsBruts) {
   const b = new Blob([JSON.stringify({ exporteLe: new Date().toISOString(), annee: ctx.annee, source: 'referents-aesh', documents: docsBruts }, null, 2)], { type: 'application/json' });
   return b;
+}
+
+/* Deux semaines réelles, avec les mêmes présences que la grille. Une colonne cours entière
+   et une colonne présences découpées par jour : aucune fusion ne cache un relais. */
+export function excelPlanning(ctx,noms,ids,lundi) {
+  const feuilles=[];
+  for(const semaine of Object.values(K.semainesComparaison(ctx.C,lundi)).sort()) {
+    const sem=ctx.C.semaine(semaine),suffixe=ctx.C.parite(semaine)||K.jjmm(semaine).replace('/','-');
+    for(const nom of noms) {
+      const k=ctx.edt.classes[nom],lignesX=[[{v:`${k.court} · ${titreSemaine(ctx.C,semaine)}`,s:{gras:true,taille:15}}],
+        [{v:'Heure'},...K.JOURS.flatMap(j=>[{v:j+' · cours',s:{gras:true}},{v:'Présences AESH',s:{gras:true}}])]],fusions=[];
+      const cours=k.cours.map(id=>ctx.edt.cours[id]).filter(c=>ctx.C.coursSemaine(c,semaine));
+      for(let m=8*60+30;m<21*60;m+=30) {
+        const ligne=[{v:K.hFr(K.hDe(m)),s:{bord:true}}];
+        for(let j=0;j<5;j++) {
+          const iso=K.ajoute(semaine,j),cs=cours.filter(c=>c.j===j && K.min(c.d)<m+30 && K.min(c.f)>m);
+          const textes=[],couleurs=[];
+          for(const a of ctx.I.aesh.values()) {
+            for(const o of K.occupations(ctx,a.id,semaine).filter(o=>o.j===j && !o.absent && K.min(o.debut)<m+30 && K.min(o.fin)>m && ((o.type==='cours' && o.cours.cls.includes(nom)) || (ids.includes(a.id) && ['service','reunion','institution'].includes(o.type))))) {
+              textes.push(`${a.sigle} ${K.hFr(o.debut)}–${K.hFr(o.fin)}${o.type==='cours'?'':' · '+libelleService(o.label)}${o.partiel?' · absence partielle':''}`); couleurs.push(couleurAesh(a.id));
+            }
+          }
+          const ferme=sem.jours[j].off || (K.enPfmp(k,iso)?'PFMP':'');
+          ligne.push({v:ferme || cs.map(c=>{const b=K.besoinDuCours(ctx.estimations,nom,c,{iso,parite:ctx.C.parite(semaine)});return `${c.lib} (${c.d}–${c.f})${b?' · besoin '+b.nb+' AESH':''}`;}).join(' / '),s:{bord:true,retour:true,fond:ferme?'#eceff3':cs.length?couleurMatiere(cs[0].mat)[1]:'#ffffff'}},
+            {v:[...new Set(textes)].join('\n'),s:{bord:true,retour:true,fond:couleurs.length===1?couleurs[0]:'#ffffff',couleur:couleurs.length===1?'#ffffff':'#111827'}});
+        }
+        lignesX.push(ligne);
+      }
+      // Les cours gardent un cadre entier ; seules les présences à leur droite sont découpées.
+      for(let j=0;j<5;j++) for(let r=2;r<lignesX.length;) {
+        let z=r;const col=1+j*2,v=lignesX[r][col].v;
+        while(v && z+1<lignesX.length && lignesX[z+1][col].v===v)z++;
+        if(z>r){fusions.push(`${colonne(col)}${r+1}:${colonne(col)}${z+1}`);for(let q=r+1;q<=z;q++)lignesX[q][col].v='';}r=z+1;
+      }
+      feuilles.push({nom:`${nom} ${suffixe}`,lignes:lignesX,fusions,largeurs:[10,...Array(10).fill(24)],hauteurs:Object.fromEntries(lignesX.map((_,i)=>[i+1,i<2?26:34])),figer:[1,2]});
+    }
+    for(const id of ids) {
+      const a=ctx.I.aesh.get(id);if(!a)continue;
+      const b=K.bilan(ctx,id,semaine);
+      feuilles.push(feuilleGrille(`${a.sigle} ${suffixe}`,`${a.sigle} · ${K.fmtH(b.total)} placées${b.contrat==null?'':' / '+K.fmtH(b.contrat)}`,titreSemaine(ctx.C,semaine),ctx.C,semaine,blocsAesh(ctx,id,semaine)));
+    }
+  }
+  return xlsx(feuilles);
 }

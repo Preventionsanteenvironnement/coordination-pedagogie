@@ -151,7 +151,7 @@ export function normaliserAesh(d, polesAutorises, cat) {
   Object.entries(d.heures && typeof d.heures === 'object' ? d.heures : {}).forEach(([q, v]) => { if (ok(q) && nombreOk(v) != null) heures[q] = nombreOk(v); });
   const r = d.reunion && typeof d.reunion === 'object' && Number.isInteger(+d.reunion.jour) && +d.reunion.jour >= 0 && +d.reunion.jour <= 4 && RE_HEURE.test(d.reunion.debut || '') && RE_HEURE.test(d.reunion.fin || '') ? { jour: +d.reunion.jour, debut: d.reunion.debut, fin: d.reunion.fin } : null;
   const out = { ...d, sigle: String(d.sigle || '?').slice(0, 6), equipes, heures, contrat: nombreOk(d.contrat), reunion: r, actif: d.actif !== false,
-    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) > 0).map(x => ({ nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
+    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) > 0).map(x => ({ ...x, horaires:Array.isArray(x.horaires)?x.horaires.filter(h=>h && Number.isInteger(h.jour) && h.jour>=0 && h.jour<5 && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'')):[], nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
       jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [] })) : undefined,
     jours: Array.isArray(d.jours) ? d.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4) : undefined };
   if (out.services === undefined) delete out.services; if (out.jours === undefined) delete out.jours;
@@ -246,7 +246,8 @@ export function prevuPourClasse(a, cat, classe) {
   return { connu: true, prevu: !cl || cl.includes(classe), filiere: f, classes: cl, filiereAbsente: false };
 }
 /* Heures de réunion par semaine : saisies par le référent (1 h tant qu'il n'a rien changé). */
-export const heuresReunion = a => Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1;
+export const reunionFixePsr = a => ['aesh_d01','aesh_d02','aesh_d03','aesh_d04'].includes(a?.id);
+export const heuresReunion = a => reunionFixePsr(a) ? 1 : Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1;
 /* Fin de contrat d'un AESH : après cette date, il n'est plus là. Vide = toute l'année. */
 export const finContratDe = a => a && RE_DATE.test(a.finContrat || '') ? a.finContrat : '';
 export const contratFini = (a, iso) => { const f = finContratDe(a); return !!f && f < iso; };
@@ -293,6 +294,24 @@ export function horairePlace(p, c) {
 }
 /* ─────────────── occupations d'une semaine ─────────────── */
 /* Toutes les occupations d'un AESH sur une semaine réelle : cours, réunion d'équipe, réunions institutionnelles, absences. */
+export function reunionDe(a) {
+  if (reunionFixePsr(a))
+    return {jour:0,debut:'13:00',fin:'14:00'};
+  return a?.reunion || null;
+}
+export function reunionsEffectives(ctx,aeshId,lundi) {
+  const a=ctx.I.aesh.get(aeshId); if(!a) return [];
+  const inst=ctx.I.reunions.filter(r=>lundiDe(r.date)===lundi && !ctx.C.off(r.date) && !contratFini(a,r.date) && joursDe(a).includes(jourSemaine(r.date)));
+  const r=reunionDe(a), date=r ? ajoute(lundi,r.jour) : '';
+  const reunions=inst.length ? inst.map(r=>({...r,type:'institution',label:r.libelle || 'Réunion institutionnelle'}))
+    : r && !ctx.C.off(date) && !contratFini(a,date) && joursDe(a).includes(r.jour) ? [{...r,date,type:'reunion',label:'Réunion d’équipe'}] : [];
+  return reunions.map(r=>({...r,j:jourSemaine(r.date),partiel:recouvrement(absencesDuJour(ctx.I,aeshId,r.date),min(r.debut),min(r.fin))/60})).filter(r=>duree(r.debut,r.fin)>r.partiel);
+}
+export function serviceALieu(ctx,a,x,h,iso) {
+  return Number.isInteger(h.jour) && jourSemaine(iso)===h.jour && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'') && iso>=h.du && iso<=h.au
+    && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && min(h.fin)>min(h.debut)
+    && !ctx.C.off(iso) && !contratFini(a,iso) && (!h.semaines || h.semaines==='AB' || h.semaines===ctx.C.parite(lundiDe(iso)));
+}
 export function occupations(ctx, aeshId, lundi) {
   const { C, edt, I } = ctx, a = I.aesh.get(aeshId), out = [];
   const sem = C.semaine(lundi);
@@ -322,9 +341,11 @@ export function occupations(ctx, aeshId, lundi) {
           absent: manque >= h - 1e-9, partiel: manque > 1e-9 && manque < h - 1e-9 ? manque : 0, absence: ab });
       });
     });
-    if (a && a.reunion && RE_HEURE.test(a.reunion.debut || '') && a.reunion.jour === j && !institutionCetteSemaine(I, lundi) && !absentLe(I, aeshId, iso, a.reunion.debut, a.reunion.fin))
-      out.push({ j, date: iso, type: 'reunion', debut: a.reunion.debut, fin: a.reunion.fin, label: 'Réunion d’équipe' });
-    I.reunions.forEach(r => { if (r.date === iso) out.push({ j, date: iso, type: 'institution', debut: r.debut, fin: r.fin, label: r.libelle || 'Réunion institutionnelle' }); });
+    reunionsEffectives(ctx,aeshId,lundi).filter(r=>r.date===iso).forEach(r=>out.push(r));
+    if(a) servicesDe(a).forEach(x=>(x.horaires || []).filter(h=>serviceALieu(ctx,a,x,h,iso)).forEach(h=>{
+      const manque=recouvrement(absencesDuJour(I,aeshId,iso),min(h.debut),min(h.fin))/60;
+      out.push({...h,j,date:iso,type:'service',label:x.nom,partiel:manque,absent:manque>=duree(h.debut,h.fin)});
+    }));
     I.absences.forEach(x => { if (x.aeshId === aeshId && iso >= x.du && iso <= x.au) out.push({ j, date: iso, type: 'absence', debut: x.journee === false ? x.debut : '08:00', fin: x.journee === false ? x.fin : '18:00', label: MOTIFS[x.motif] || 'Absence', absence: x }); });
   });
   return out.sort((x, y) => x.j - y.j || min(x.debut) - min(y.debut));
@@ -347,7 +368,7 @@ export const institutionCetteSemaine = (I, lundi) => I.reunions.some(r => lundiD
 /* Services d'un AESH : liste {nom, h}. Les anciennes fiches (cantine / internat / service) sont lues telles quelles. */
 export function servicesDe(a) {
   const jours = x => Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [];
-  if (Array.isArray(a.services)) return a.services.filter(x => x && Number.isFinite(+x.h) && +x.h > 0).map(x => ({ nom: String(x.nom || 'Service'), h: +x.h, jours: jours(x) }));
+  if (Array.isArray(a.services)) return a.services.filter(x => x && Number.isFinite(+x.h) && +x.h > 0).map(x => ({ ...x, nom: String(x.nom || 'Service'), h: +x.h, jours: jours(x) }));
   return [['Cantine', a.cantine], ['Internat', a.internat], [a.serviceLib || 'Autre service', a.service]].filter(([, h]) => +h > 0).map(([nom, h]) => ({ nom, h: +h, jours: [] }));
 }
 /* Cet AESH assure-t-il ce service ce jour-là ? (les jours sont saisis dans le bandeau sous la grille ou sur sa fiche) */
@@ -423,17 +444,25 @@ export function bilan(ctx, aeshId, lundi) {
   });
   /* Services : chaque service compte ses heures sur SES jours ; un jour férié ou de vacances les réduit d'autant.
      Une semaine normale compte les heures saisies, entières (audit D08). Sans jours précisés : ses jours de travail. */
-  const services = servicesDe(a).reduce((t, x) => {
+  const services = occ.filter(o=>o.type==='service' && !o.absent).reduce((t,o)=>t+duree(o.debut,o.fin)-(o.partiel||0),0) + servicesDe(a).reduce((t, x) => {
     const jrs = x.jours && x.jours.length ? x.jours : joursDe(a);
     if (!jrs.length) return t;
-    const ouverts = jrs.filter(i => sem.jours[i] && !sem.jours[i].off).length;
+    const ouverts = jrs.filter(i => sem.jours[i] && !sem.jours[i].off && !contratFini(a,sem.jours[i].date) && (!x.calendrierDepuis || sem.jours[i].date < x.calendrierDepuis) && !I.absences.some(ab=>ab.aeshId===aeshId && ab.journee!==false && sem.jours[i].date>=ab.du && sem.jours[i].date<=ab.au)).length;
     return t + x.h * ouverts / jrs.length;
   }, 0);
   /* La réunion d'équipe, telle que le référent l'a saisie. Une semaine de réunion institutionnelle, c'est elle qui
      compte, à sa vraie durée (audit D09). */
-  const inst = I.reunions.filter(r => lundiDe(r.date) === lundi && !C.off(r.date) && joursDe(a).includes(jourSemaine(r.date)));
-  const reunion = !joursTravail ? 0 : inst.length ? inst.reduce((t, r) => t + duree(r.debut, r.fin), 0) : heuresReunion(a);
-  const total = cours + services + reunion;
+  const reunion = reunionsEffectives(ctx,aeshId,lundi).reduce((t,r)=>t+duree(r.debut,r.fin)-(r.partiel||0),0);
+  // Un chevauchement est signalé, mais une minute de travail ne se compte jamais deux fois.
+  let doubleCompte=0;
+  for(let j=0;j<5;j++) {
+    const l=occ.filter(o=>o.j===j && ['cours','service','reunion','institution'].includes(o.type) && !o.absent);
+    const abs=absencesDuJour(I,aeshId,ajoute(lundi,j));
+    const somme=l.reduce((t,o)=>t+min(o.fin)-min(o.debut)-recouvrement(abs,min(o.debut),min(o.fin)),0);
+    const union=unionIntervalles(l.map(o=>[min(o.debut),min(o.fin)])).reduce((t,[d,f])=>t+f-d-recouvrement(abs,d,f),0);
+    doubleCompte+=(somme-union)/60;
+  }
+  const total = cours + services + reunion - doubleCompte;
   const contrat = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
   const prevuPoles = a.heures || {};
   const alertes = [];
@@ -448,7 +477,7 @@ export function bilan(ctx, aeshId, lundi) {
 
 /* Chevauchements dans une liste d'occupations (même jour). */
 export function conflits(occ, nomPole) {
-  const res = [], act = occ.filter(o => ['cours', 'reunion', 'institution'].includes(o.type) && !o.absent);
+  const res = [], act = occ.filter(o => ['cours', 'service', 'reunion', 'institution'].includes(o.type) && !o.absent);
   for (let i = 0; i < act.length; i++) for (let k = i + 1; k < act.length; k++) {
     const x = act[i], y = act[k];
     if (x.j !== y.j || !chevauche(x.debut, x.fin, y.debut, y.fin)) continue;
@@ -470,21 +499,34 @@ export function lundisEntre(C, du, au) {
   for (let n = 0; l <= au && n < 60; n++, l = ajoute(l, 7)) if (!C.semaine(l).toute) out.push(l);
   return out;
 }
+/* Semaines réelles A et B proches de la sélection, sans prendre une semaine de vacances
+   pour la semaine opposée. Les dates accompagnent toujours les deux totaux. */
+export function semainesComparaison(C,lundi) {
+  const out={},debut=C.cal.semaine1,fin=(C.cal.annee?.slice(-4) || String(+lundi.slice(0,4)+1))+'-07-31';
+  for(let n=0;n<54 && Object.keys(out).length<2;n++) {
+    const d=ajoute(lundi,n*7);if(d>fin)break;const p=C.parite(d);if(p && !out[p])out[p]=d;
+  }
+  for(let n=1;n<54 && Object.keys(out).length<2;n++) {
+    const d=ajoute(lundi,-n*7);if(d<debut)break;const p=C.parite(d);if(p && !out[p])out[p]=d;
+  }
+  return out;
+}
 /* État d'un AESH pour un cours sur une période : libre, pris, absent, reunion, trop. */
 export function disponibilite(ctx, aeshId, coursId, du, au, pole, choix = {}) {
   const { C, edt, I } = ctx, c = edt.cours[coursId], a = I.aesh.get(aeshId);
   if (!c || !a) return { etat: 'pris', texte: '—' };
-  const contrainte = contrainteCreneau(a, c.j, c.d, c.f);
+  const hp = horairePlace(choix,c), hd=hp.debut,hf=hp.fin;
+  const contrainte = contrainteCreneau(a,c.j,hd,hf);
   const deja = I.places.some(p => p.aeshId === aeshId && p.coursId === coursId && p.au >= du && p.du <= au);
   let premierPris = null, premierAbs = null, premiereReu = null, nbSem = 0, nbAbs = 0, premierTrop = null;
-  const hp = horairePlace(choix, c), h = duree(hp.debut, hp.fin), prevu = +((a.heures || {})[pole]);
+  const h = duree(hd,hf), prevu = +((a.heures || {})[pole]);
   /* Après la fin de son contrat, il n'est plus proposé (audit D01). */
   const fin = finContratDe(a);
   if (fin && fin < du) return { etat: 'aucun', contrainte, texte: 'contrat terminé', detail: `depuis le ${dateCourte(fin)}`, deja };
   for (const l of lundisEntre(C, du, au)) {
     const iso = ajoute(l, c.j); if (iso < du || iso > au || (fin && iso > fin) || !coursALieu(C, edt, c, iso) || !semaineCompatible(choix, C, iso)) continue;
     nbSem++;
-    const ab = absentLe(I, aeshId, iso, c.d, c.f);
+    const ab = absentLe(I, aeshId, iso, hd, hf);
     if (ab) { nbAbs++; if (!premierAbs) premierAbs = { iso, ab }; }
     /* I09 : la capacité est vérifiée pour chaque semaine où le cours a lieu, pas seulement la première. */
     if (!deja && !premierTrop) {
@@ -493,11 +535,13 @@ export function disponibilite(ctx, aeshId, coursId, du, au, pole, choix = {}) {
       else if (b && Number.isFinite(prevu) && (b.parPole[pole] || 0) + h > prevu + 1e-9) premierTrop = { iso, texte: 'heures du pôle atteintes', detail: `semaine du ${dateCourte(l)}` };
     }
     const autre = I.places.find(p => p.aeshId === aeshId && p.coursId !== coursId && p.jour === c.j && iso >= p.du && iso <= p.au
-      && edt.cours[p.coursId] && (hp => chevauche(hp.debut, hp.fin, c.d, c.f))(horairePlace(p, edt.cours[p.coursId])) && placementALieu(ctx, p, iso));
+      && edt.cours[p.coursId] && (hp => chevauche(hp.debut, hp.fin, hd, hf))(horairePlace(p, edt.cours[p.coursId])) && placementALieu(ctx, p, iso));
     if (autre && !premierPris) premierPris = { iso, p: autre };
-    if (a.reunion && a.reunion.jour === c.j && RE_HEURE.test(a.reunion.debut || '') && chevauche(a.reunion.debut, a.reunion.fin, c.d, c.f) && !institutionCetteSemaine(I, l) && !premiereReu) premiereReu = { iso };
-    const inst = I.reunions.find(r => r.date === iso && chevauche(r.debut, r.fin, c.d, c.f));
-    if (inst && !premiereReu) premiereReu = { iso, inst };
+    const reunions = reunionsEffectives(ctx,aeshId,l).filter(r=>r.date===iso && chevauche(r.debut,r.fin,hd,hf));
+    if(reunions.length && !premiereReu) premiereReu={iso,inst:reunions[0].type==='institution'};
+    const service = servicesDe(a).find(x=>(x.horaires||[]).some(h=>serviceALieu(ctx,a,x,h,iso) && chevauche(h.debut,h.fin,hd,hf)));
+    if(service && !premiereReu) premiereReu={iso,service:service.nom};
+
   }
   if (premierPris) {
     const oc = edt.cours[premierPris.p.coursId];
@@ -506,7 +550,7 @@ export function disponibilite(ctx, aeshId, coursId, du, au, pole, choix = {}) {
   }
   if (nbSem === 0) return { etat: 'aucun', contrainte, texte: 'pas de cours sur cette période', deja };
   if (nbAbs === nbSem) return { etat: 'absent', contrainte, texte: MOTIFS[premierAbs.ab.motif] || 'absent', deja };
-  if (premiereReu) return { etat: 'reunion', contrainte, texte: premiereReu.inst ? 'réunion instit.' : 'réunion', detail: dateCourte(premiereReu.iso), deja };
+  if (premiereReu) return { etat: 'reunion', contrainte, texte: premiereReu.service || (premiereReu.inst ? 'réunion instit.' : 'réunion'), detail: dateCourte(premiereReu.iso), deja };
   if (premierTrop) return { etat: 'trop', contrainte, texte: premierTrop.texte, detail: premierTrop.detail, deja };
   if (!deja && premierAbs) return { etat: 'libre', contrainte, texte: `libre · absent ${nbAbs} fois (${jjmm(premierAbs.iso)}…)`, deja };
   return { etat: 'libre', contrainte, texte: contrainte ? contrainte.texte : (deja ? 'placé' : 'libre'), deja };

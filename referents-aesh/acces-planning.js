@@ -9,8 +9,8 @@ export function verifierCodePlanning(code, documentPole) {
     throw new Error('Code inconnu ou accès désactivé.');
   return {
     pole:'PSR_MELEC',
-    lectureClasses:['C1PSR','C2PSR','B2MELEC','B1MELEC','BTMELEC'],
-    ecritureClasses:['C1PSR','C2PSR'],
+    lectureClasses:['C1PSR','C2PSR','B2MELEC','B1MELEC','BTMELEC','B2GATL1','B2GATL2','B1AGO1','B1AGO2','BTAGO1','BTAGO2','C1JP','C2JP','C1HORT','C2HORT','C1CAN','C2CAN','C1VAN','C2VAN'],
+    ecritureClasses:['C1PSR','C2PSR','B2GATL1','B2GATL2','B1AGO1','B1AGO2','BTAGO1','BTAGO2','C1JP','C2JP','C1HORT','C2HORT','C1CAN','C2CAN','C1VAN','C2VAN'],
     // Chaque session reste liée au code qui l’a ouverte.
     sessionValide:doc => referent ? doc?.code === code
       : doc?.accesPlanning?.actif === true && doc.accesPlanning.code === code,

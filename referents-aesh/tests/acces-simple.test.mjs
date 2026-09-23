@@ -4,7 +4,8 @@ const source=fs.readFileSync(new URL('../acces-planning.js',import.meta.url),'ut
 const {verifierCodePlanning,authentifierPlanning}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const d={accesPlanning:{actif:true,code:'1234'}};
 const acces=verifierCodePlanning('1234',d);
-assert.deepEqual(acces.ecritureClasses,['C1PSR','C2PSR']);
+assert.equal(acces.ecritureClasses.includes('C1VAN'),true);
+assert.equal(acces.ecritureClasses.includes('C2JP'),true);
 assert.equal(acces.lectureClasses.includes('B2MELEC'),true);
 assert.equal(acces.ecritureClasses.includes('B2MELEC'),false);
 for(const [code,doc] of [['0000',d],['123456',d],['123',d],['1234',null],['1234',{accesPlanning:{actif:false,code:'1234'}}]])
@@ -22,7 +23,7 @@ console.log('Accès simple : code, 4 chiffres, PSR/MELEC, désactivation, change
 // Code référent fictif : jamais le vrai code dans les tests.
 const pole={code:'9876',...d};
 const responsable=verifierCodePlanning('9876',pole);
-assert.deepEqual(responsable.ecritureClasses,['C1PSR','C2PSR']);
+assert.deepEqual(responsable.ecritureClasses,acces.ecritureClasses);
 assert.equal(responsable.sessionValide({...pole,accesPlanning:{actif:false,code:'5678'}}),true);
 assert.equal(responsable.sessionValide({...pole,code:'8765'}),false);
 assert.equal(verifierCodePlanning('9876',{code:'9876'}).pole,'PSR_MELEC');

@@ -6,10 +6,11 @@
                coordination_estimation_aesh (lecture : cadre et cours estimés par les enseignants)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import * as K from './calculs.js?v=2026-09-23a';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-23a';
-import { enregistrerPlanning } from './enregistrement.js?v=2026-09-23a';
-import * as AV from './avatars.js?v=2026-09-23a';
+import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-23d';
+import * as K from './calculs.js?v=2026-09-23d';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-23d';
+import { enregistrerPlanning } from './enregistrement.js?v=2026-09-23d';
+import * as AV from './avatars.js?v=2026-09-23d';
 
 const DELAI = 15000;
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -26,7 +27,7 @@ const nomPole = id => (pole(id) || { nom: id }).nom;
 const heureFr = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const auj = K.isoLocal(), j = K.isoLocal(d); return `${j === auj ? 'aujourd’hui' : K.dateCourte(j)} · ${d.getHours()} h ${K.z2(d.getMinutes())}`; };
 const nombre = v => v === null || v === undefined || v === '' || !Number.isFinite(+v) ? null : +v;
 const hOu = v => nombre(v) == null ? '—' : K.fmtH(v);
-const CRENEAUX_H = []; for (let m = 7 * 60 + 30; m <= 18 * 60; m += 30) CRENEAUX_H.push(K.hDe(m));
+const CRENEAUX_H = []; for (let m = 7 * 60 + 30; m <= 21 * 60; m += 30) CRENEAUX_H.push(K.hDe(m));
 
 export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAccesPlanning }) {
   let droitsPlanning = null;
@@ -39,7 +40,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
 
   /* ─────────── données ─────────── */
-  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-23a')).json(); }
+  try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-23d')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
   S.lundi = semaineParDefaut();
@@ -151,7 +152,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return `<div class="carte pad" style="display:grid;gap:8px"><div class="ligne ecarte"><div><h2>Mon emploi du temps</h2><span class="muted" style="font-size:.9rem">${c ? `Déclaré complet jusqu’au ${esc(K.dateCourte(c.jusquau))}. Les autres référents peuvent compter sur les heures libres de vos AESH.` : 'Quand vos AESH sont tous placés, dites-le : les autres référents sauront que les heures libres sont fiables.'}</span></div>
       ${c ? `<button type="button" class="btn" id="complet-non" data-a="complet-non">Reprendre la saisie</button>` : `<button type="button" class="btn pri" id="complet-oui" data-a="complet">✓ Mon emploi du temps est complet</button>`}</div></div>`;
   }
-  const classesDu = pid => modePlanning ? (droitsPlanning?.lectureClasses || []).filter(n => !!S.edt.classes[n]) : (S.edt.poles[pid] || []);
+  const classesDu = pid => modePlanning ? (droitsPlanning?.lectureClasses || []).filter(n => S.edt.classes[n]?.pole === pid) : (S.edt.poles[pid] || []);
   const peutPlacer = nom => !modePlanning || !!droitsPlanning?.ecritureClasses.includes(nom);
 
   /* ─── Période de l'emploi du temps (17/09/2026, décision de Brahim) ───
@@ -184,6 +185,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
 
   /* ─────────── écritures ─────────── */
   async function ecrire(doc) {
+    if(["absence","reunion"].includes(doc.type)) return (await ecrireLot([doc],new Map(S.docs))).find(d=>d.id===doc.id);
     const prec = S.docs.get(doc.id), maintenant = new Date().toISOString();
     const d = { ...doc, annee: S.annee, version: ((prec && prec.version) || 0) + 1, majLe: maintenant, par: S.session ? S.session.pole : '' };
     delete d.depart;
@@ -228,7 +230,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     })) {
       throw Object.assign(new Error('Consultation uniquement'),{code:'permission-denied'});
     }
-    if ((docs || []).some(d => d.type === 'place')) {
+    if ((docs || []).some(d => ['place','absence','reunion'].includes(d.type))) {
       const resultat = await avecDelai(enregistrerPlanning({ FS, db, collection:COLLECTION, historique:COL_HIST,
         docs, base:base || new Map(S.docs), annee:S.annee, par:S.session ? S.session.pole : '', nouvelId:alea, maintenant:new Date().toISOString() }));
       resultat.forEach(d => S.docs.set(d.id,d)); versionDocs++;
@@ -532,7 +534,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   const filieresParDefaut = a => Object.fromEntries(Object.keys(a.equipes || {}).flatMap(q => filieresDuPole(q).map(f => [f.id, { classes: null }])));
   function copieFiche(a) {
     const copie = JSON.parse(JSON.stringify(a)); delete copie.depart;
-    copie.services = K.servicesDe(a); copie.dispos = K.disposDe(a); delete copie.jours; delete copie.cantine; delete copie.internat; delete copie.service; delete copie.serviceLib;
+    copie.reunion=K.reunionDe(a); copie.services = K.servicesDe(a); copie.dispos = K.disposDe(a); delete copie.jours; delete copie.cantine; delete copie.internat; delete copie.service; delete copie.serviceLib;
     if (!K.filieresDe(copie)) copie.filieres = filieresParDefaut(copie);
     copie.rattachement = rattachementDe(copie);
     return copie;
@@ -570,7 +572,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (!S.form || S.form.kind !== 'fiche' || S.form.cle !== id) { const f = initForm(id); if (!f) return null; S.form = { ...f, kind: 'fiche', cle: id }; }
     return S.form;
   }
-  const SERVICES_TYPES = ['Cantine', 'Internat', 'Vie scolaire', 'Étude', 'Périscolaire', 'Autre'];
+  const SERVICES_TYPES = ['Cantine', 'Internat', 'DAFI', 'PIAL', 'Vie scolaire', 'Étude', 'Périscolaire', 'Autre'];
   function changements(f) {
     const a = f.a, o = f.orig || {}, p = P().id, l = [];
     const v = x => nombre(x) == null ? '—' : K.fmtH(x);
@@ -620,16 +622,17 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <div class="champ ${estModif((o.finContrat || '') !== (a.finContrat || ''))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Durée du contrat ${aide('duree')}</b><small>${a.finContrat ? `jusqu’au ${esc(K.dateLongue(a.finContrat))}` : 'toute l’année'}</small>${aideTexte('duree')}</span>
           <span class="ligne" style="gap:6px"><input type="date" id="f-fin" data-i="fin-contrat" value="${esc(a.finContrat || '')}" style="min-height:40px">${a.finContrat ? `<button type="button" class="lien" id="f-fin-non" data-a="fin-aucune">toute l’année</button>` : ''}</span></div>
         <div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine</small>${parQui(a, 'presence')}${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}</div>
-        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
+        ${K.reunionFixePsr(a) ? '<div class="champ"><span class="lib"><b>Réunion PSR · 1 h</b><small>Lundi 13 h–14 h · automatique pour cette équipe. Une réunion institutionnelle programmée la remplace cette semaine-là.</small></span></div>' : `        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
           <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, i) => `<button type="button" class="jourc" id="rj-${i}" data-a="reu-jour" data-v="${i}" aria-pressed="${reu.jour === i && !!reu.debut}">${j}</button>`).join('')}
             <label class="sr" for="f-reu-h">Heure</label><select id="f-reu-h" data-i="reu-h" ${reu.debut ? '' : 'disabled'}>${reu.debut ? '' : '<option value="">heure</option>'}${CRENEAUX_H.slice(0, -2).map(h => `<option value="${h}" ${reu.debut === h ? 'selected' : ''}>${K.hFr(h)} – ${K.hFr(K.hDe(K.min(h) + 60))}</option>`).join('')}</select>
             ${reu.debut ? `<button type="button" class="lien" id="f-reu-non" data-a="reu-aucune">aucune</button>` : ''}</div>
           ${prochaineReunion ? `<small class="muted" style="grid-column:1/-1">Prochaine : ${esc(K.dateLongue(prochaineReunion))}, ${K.hFr(reu.debut)}–${K.hFr(reu.fin)}</small>` : ''}</div>
+`}
         ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
         <div class="champ ${estModif(libFilieres(o) !== libFilieres(a))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Intervient en ${aide('intervient')}</b><small>${esc(libFilieres(a))}</small>${aideTexte('intervient')}</span><button type="button" class="btn petit" id="f-filieres" data-a="filieres">Modifier</button></div>
-        ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${t}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
+        ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option value="${esc(t)}" ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${esc(libelleService(t))}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
           <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div></div>`).join('')}
-        <div class="champ" style="grid-template-columns:1fr"><div class="ligne"><span class="muted" style="font-weight:700">Services :</span><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ Cantine, internat, autre service</button></div></div>
+        <div class="champ" style="grid-template-columns:1fr"><div class="ligne"><span class="muted" style="font-weight:700">Services :</span><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ DP — Demi-pension, internat, dispositif</button></div></div>
         <div class="champ ${estModif(JSON.stringify(K.disposDe(o)) !== JSON.stringify(K.disposDe(a)))}" style="grid-template-columns:1fr"><span class="lib"><b>Quand il travaille ${aide('jours')}</b><small>touchez une case pour la changer</small>${aideTexte('jours')}</span>
           <div class="demis" role="group" aria-label="Disponibilités par demi-journée">
             <span></span>${K.JOURS_C.map(j => `<span class="dj-t">${j}</span>`).join('')}
@@ -746,13 +749,19 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const aeshs = [...parAesh.keys()].map(id => I.aesh.get(id));
       const bes = K.besoinDuCours(S.est, nom, c, quand(iso)), [mc] = couleurMatiere(c.mat);
       const nbPresents = presents(c, iso, bes);
-      const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');
+      const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="background:${couleurAesh(a.id)};color:white;border-color:${couleurAesh(a.id)};${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');
+      const minutes = K.min(c.f)-K.min(c.d);
+      const bandes = aeshs.map((a,i) => pl.filter(x => x.aeshId===a.id).map(x => {
+        const h=K.horairePlace(x,c), absent=K.absentLe(I,a.id,iso,h.debut,h.fin);
+        return `<span class="presence-bande ${absent?'presence-absence':''}" style="background:${couleurAesh(a.id)};top:${100*(K.min(h.debut)-K.min(c.d))/minutes}%;height:${100*(K.min(h.fin)-K.min(h.debut))/minutes}%;left:${i*100/aeshs.length}%;width:${100/aeshs.length}%" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${absent?' · absence à vérifier':''}">${esc(a.sigle)}<small>${K.hFr(h.debut)}–${K.hFr(h.fin)}</small></span>`;
+      }).join('')).join('');
+      const decoupes = Array.from({length:Math.max(0,Math.ceil(minutes/30)-1)},(_,i)=>`<span class="presence-repere" style="top:${100*(i+1)*30/minutes}%"></span>`).join('');
       const besHtml = bes ? `<button type="button" class="bes bes-action ${nbPresents >= bes.nb ? 'ok' : 'manque'}" data-a="expliquer-besoin" data-v="${esc(c.id)}" data-classe="${esc(nom)}" aria-label="Expliquer le besoin : ${bes.nb} AESH demandés, ${nbPresents} présents" title="Comprendre le besoin en AESH">${nbPresents}/${bes.nb} <span aria-hidden="true">ⓘ</span></button>` : '';
-      const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', AESH ' + aeshs.map(a => a.sigle).join(' ') : ', aucun AESH'}`;
+      const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', ' + pl.map(x => (I.aesh.get(x.aeshId)?.sigle || '?')+' '+K.horairePlace(x,c).debut+'–'+K.horairePlace(x,c).fin).join(', ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
-        return `<div class="bloc ${bes ? 'avec-besoin' : ''} ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
-          <button type="button" class="bloc-contenu" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}"><b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}<span class="pills">${pills}</span></button>${besHtml}</div>`;
+        return `<div class="bloc avec-presences ${bes ? 'avec-besoin' : ''} ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
+          <button type="button" class="bloc-contenu" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}"><b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}<span class="presence-timeline" aria-hidden="true">${decoupes}${bandes}</span><span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>
@@ -779,22 +788,22 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const p = P(), nom = classeCourante(), k = S.edt.classes[nom], sem = S.C.semaine(S.lundi);
     const pf = (k.pfmp || []).filter(x => x.debut <= K.ajoute(S.lundi, 4) && x.fin >= S.lundi);
     return `<div class="salut"><div><h1 id="titre" tabindex="-1">Emploi du temps</h1><p class="sous">${esc(k.court)} · ${sem.parite ? 'semaine ' + sem.parite : 'pas de cours'}</p></div>${selecteurSemaine()}</div>
-      <div class="classes" role="group" aria-label="Classe">${classesDu(p.id).map(n => `<button type="button" id="cls-${n}" data-a="classe" data-v="${n}" aria-pressed="${n === nom}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>
+      ${modePlanning ? `<div class="classes" role="group" aria-label="Pôle">${POLES.map(q=>`<button type="button" data-a="planning-pole" data-v="${q.id}" aria-pressed="${q.id===p.id}">${esc(q.nom)}</button>`).join('')}</div><button type="button" class="btn" data-a="planning-excel">⬇ Excel · classes et AESH · A et B</button>` : ''}<div class="classes" role="group" aria-label="Classe">${classesDu(p.id).map(n => `<button type="button" id="cls-${n}" data-a="classe" data-v="${n}" aria-pressed="${n === nom}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>
       ${modePlanning ? '' : lignePeriode()}
       <div class="ligne" style="gap:8px"><span class="muted" style="font-size:.9rem">PFMP ${esc(k.court)} : ${(k.pfmp || []).length ? esc((k.pfmp || []).map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')) : 'aucune renseignée'}${k.pfmpSaisies ? ' <span class="puce">saisies par le référent</span>' : ''}</span>${modePlanning ? '' : '<button type="button" class="btn petit" id="pfmp-modifier" data-a="pfmp">Modifier les PFMP</button>'}</div>
       ${pf.length ? `<div class="bandeau warn">Cette semaine : PFMP ${pf.map(x => `du ${K.dateCourte(x.debut)} au ${K.dateCourte(x.fin)}`).join(' · ')}</div>${modePlanning ? '' : carteLiberes(nom)}` : ''}
-      <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> Exemple : 1 présent pour 2 demandés · touchez une pastille pour comprendre</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
-      ${modePlanning ? `<div class="bandeau info">${peutPlacer(nom) ? 'PSR · Touchez un cours pour placer un AESH.' : 'Consultation · Les affectations sont gérées par le référent.'}</div>` : ''}
+      <div class="legende">${pf.length ? '<span><span class="leg-pfmp"></span> PFMP : classe en stage</span>' : ''}<span><span class="pill">CÉ</span> AESH placé · une couleur par personne</span><span><span class="pill">CÉ <small>9h30–10h30</small></span> sur une partie du cours</span><span><span class="bes manque" style="position:static">1/2</span> Exemple : 1 présent pour 2 demandés · touchez une pastille pour comprendre</span><span><span class="pill abs">L</span> absent : à couvrir</span></div>
+      ${modePlanning ? `<div class="bandeau info">${peutPlacer(nom) ? 'Touchez un cours pour saisir les présences. Le référent du pôle reçoit les mêmes modifications.' : 'Consultation · Les affectations sont gérées par le référent.'}</div>` : ''}
       ${peutPlacer(nom) ? palettePlanning() : ''}
       ${grilleClasse(nom, !peutPlacer(nom))}
-      ${modePlanning ? '' : bandeauServices()}`;
+      ${bandeauServices()}`;
   }
 
   function palettePlanning() {
-    const cx = ctx();
+    const cx = ctx(), comparaison=K.semainesComparaison(S.C,S.lundi);
     return `<div class="carte pad"><b>Placer un AESH</b><p class="muted">Touchez un AESH puis un cours, ou glissez-le sur le cours. Le guidage vous accompagne avant d’enregistrer.</p><div class="choix" role="group" aria-label="AESH et heures de la semaine">${K.aeshActifs(cx.I,P().id).map(a => {
       const b = K.bilan(cx,a.id,S.lundi);
-      return `<button type="button" id="palette-${esc(a.id)}" draggable="true" data-aesh-drag="${esc(a.id)}" data-a="selection-aesh" data-v="${esc(a.id)}" aria-pressed="${S.aeshChoisi === a.id}"><b>${esc(a.sigle)}</b><br>${K.fmtH(b.total)}${b.contrat == null ? '' : ` / ${K.fmtH(b.contrat)}`}<br><small>${b.reste == null ? 'Contrat à compléter' : `Reste ${K.fmtH(b.reste)}`}</small></button>`;
+      return `<button type="button" style="border-left:8px solid ${couleurAesh(a.id)}" id="palette-${esc(a.id)}" draggable="true" data-aesh-drag="${esc(a.id)}" data-a="selection-aesh" data-v="${esc(a.id)}" aria-pressed="${S.aeshChoisi === a.id}"><b>${esc(a.sigle)}</b><br>${K.fmtH(b.total)}${b.contrat == null ? '' : ` / ${K.fmtH(b.contrat)}`}<br><small>${['A','B'].map(q=>comparaison[q]?`${q} du ${K.jjmm(comparaison[q])} : ${K.fmtH(K.bilan(cx,a.id,comparaison[q]).total)}`:'').filter(Boolean).join(' · ')}</small><br><small>${b.reste == null ? 'Contrat à compléter' : `Reste ${K.fmtH(b.reste)}`}</small></button>`;
     }).join('')}</div>${S.aeshChoisi ? '<p role="status">Choisissez maintenant un cours.</p>' : ''}</div>`;
   }
 
@@ -808,15 +817,50 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return l;
   }
   function bandeauServices() {
-    const I = idx(), sem = S.C.semaine(S.lundi), p = P();
-    return `<div class="carte pad services-bande"><div class="ligne ecarte"><h2>Cantine, internat</h2><span class="muted" style="font-size:.9rem">Hors classe, tous pôles confondus. Touchez un jour.</span></div>
-      <div class="serv-grille">
-        <span></span>${K.JOURS_C.map((j, i) => `<span class="dj-t">${j}<small class="muted" style="display:block;font-weight:600">${K.jjmm(sem.jours[i].date)}</small></span>`).join('')}
-        ${nomsServices().map(nom => `<span class="serv-nom">${esc(nom)}</span>${[0, 1, 2, 3, 4].map(j => {
-          const l = K.auService(I, nom, j);
-          return `<button type="button" class="serv-case ${l.length ? 'on' : ''}" id="sv-${esc(nom)}-${j}" data-a="service" data-v="${esc(nom)}|${j}" aria-label="${esc(nom)} ${esc(K.JOURS[j])} : ${l.length ? l.map(a => a.sigle).join(', ') : 'personne'}">${l.length ? l.map(a => `<span class="pill" style="border-color:${(pole(rattachementDe(a)) || p).couleur}">${esc(a.sigle)}</span>`).join('') : '<span class="plus">＋</span>'}</button>`;
-        }).join('')}`).join('')}
-      </div></div>`;
+    const anciens=K.aeshActifs(idx(),P().id).flatMap(a=>K.servicesDe(a).filter(x=>!x.calendrierDepuis || x.calendrierDepuis>S.lundi).map(x=>`${a.sigle} · ${libelleService(x.nom)} : ${K.fmtH(x.h)}`));
+    return `<div class="carte pad services-bande"><h2>DP — Demi-pension, internat et dispositifs</h2><p class="muted">Repas et soirées : chaque créneau daté compte à sa durée réelle, selon A ou B.</p><button type="button" class="btn" data-a="service-horaire">＋ Planifier DP, internat ou dispositif</button>${resumeHorsClasse()}${anciens.length?`<p class="bandeau">Horaires à préciser : ${esc(anciens.join(' · '))}. Ces volumes restent comptés provisoirement.</p>`:''}</div>`;
+  }
+  function resumeHorsClasse() {
+    return `<div class="hors-classe">${K.JOURS_C.map((j,i)=>{
+      const l=K.aeshActifs(idx(),P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.j===i && ['service','reunion','institution'].includes(o.type)).map(o=>`<span class="pill" style="border-left:6px solid ${couleurAesh(a.id)}">${esc(a.sigle)} · ${esc(libelleService(o.label))} ${K.hFr(o.debut)}–${K.hFr(o.fin)}</span>`));
+      return l.length?`<p><b>${j}</b> ${l.join(' ')}</p>`:'';
+    }).join('')}</div>`;
+  }
+  function feuilleServiceHoraire(f) {
+    const champ=(key,label,values)=>`<label>${label} <select id="sh-${key}" data-i="service-champ" data-champ="${key}">${values.map(([v,l])=>`<option value="${esc(v)}" ${String(f[key])===String(v)?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`;
+    const services=K.servicesDe(idx().aesh.get(f.aeshId)||{});
+    return teteFeuille('Planifier un service','DP = Demi-pension · les horaires indiqués comptent dans la semaine choisie.')+`<div class="presence-reglage">${champ('aeshId','AESH',K.aeshActifs(idx(),P().id).map(a=>[a.id,a.sigle]))}${champ('nom','Activité',['Cantine','Internat','DAFI','PIAL'].map(n=>[n,libelleService(n)]))}${champ('jour','Jour',K.JOURS.map((j,i)=>[i,j]))}${champ('debut','De',CRENEAUX_H.map(h=>[h,K.hFr(h)]))}${champ('fin','À',CRENEAUX_H.map(h=>[h,K.hFr(h)]))}${champ('semaines','Semaines',[['AB','A et B'],['A','A seulement'],['B','B seulement']])}${['du','au'].map(k=>`<label>${k==='du'?'À partir du':'Jusqu’au'} <input id="sh-${k}" type="date" data-i="service-champ" data-champ="${k}" value="${esc(f[k])}"></label>`).join('')}<p>Le calendrier précis remplace le volume forfaitaire de cette activité à partir de la date indiquée. Le passé est conservé.</p><button type="button" class="btn valider" data-a="service-enregistrer">Vérifier le créneau</button></div><h3>Créneaux déjà prévus</h3>${services.flatMap((s,si)=>(s.horaires||[]).map((h,hi)=>`<p>${esc(libelleService(s.nom))} · ${K.JOURS[h.jour]} ${h.debut}–${h.fin} · ${h.semaines} · ${K.jjmm(h.du)} → ${K.jjmm(h.au)} <button class="btn petit" data-a="service-fin" data-v="${si}|${hi}">Arrêter à partir du ${K.jjmm(f.du)}</button></p>`)).join('')}`;
+  }
+  async function sauvegarderService(f,services) {
+    const attendu=f.base.get(f.aeshId);
+    if(!attendu) {toast('Le référent doit d’abord enregistrer la fiche AESH.',true);return;}
+    await ecrireTransaction(f.aeshId,actuel=>{
+      if(actuel?.version!==attendu.version || JSON.stringify(actuel?.services || [])!==JSON.stringify(attendu.services || [])) throw Object.assign(new Error('La fiche a changé. Rouvrez le service.'),{code:'conflit',champs:['services']});
+      return {...actuel,services,revisionPlanning:(+actuel.revisionPlanning||0)+1};
+    });
+  }
+  function enregistrerServiceHoraire() {
+    const f=S.feuille;
+    if(!f.aeshId || !K.RE_DATE.test(f.du)||!K.RE_DATE.test(f.au)||f.au<f.du||K.min(f.fin)<=K.min(f.debut)) {toast('Vérifiez les dates et les horaires.',true);return;}
+    const services=K.servicesDe(idx().aesh.get(f.aeshId)).map(x=>JSON.parse(JSON.stringify(x)));
+    let x=services.find(x=>x.nom===f.nom);
+    if(!x){x={nom:f.nom,h:K.duree(f.debut,f.fin),jours:[],horaires:[]};services.push(x);}
+    x.calendrierDepuis=x.calendrierDepuis && x.calendrierDepuis<f.du ? x.calendrierDepuis:f.du;
+    x.horaires=x.horaires||[];
+    const h={jour:f.jour,debut:f.debut,fin:f.fin,du:f.du,au:f.au,semaines:f.semaines};
+    if(x.horaires.some(y=>JSON.stringify(y)===JSON.stringify(h))){toast('Ce créneau existe déjà.',true);return;}
+    x.horaires.push(h); x.jours=[...new Set([...x.jours,f.jour])];
+    const futur={...ctx(),I:{...idx(),aesh:new Map(idx().aesh)}};
+    futur.I.aesh.set(f.aeshId,{...idx().aesh.get(f.aeshId),services});
+    const alertes=[...new Set(K.lundisEntre(S.C,f.du,f.au).flatMap(l=>K.bilan(futur,f.aeshId,l).alertes.map(a=>a.texte)))];
+    confirmerPuis({titre:'Enregistrer ce service ?',grand:libelleService(f.nom),lignes:[['AESH',idx().aesh.get(f.aeshId).sigle],['Horaires',`${K.JOURS[f.jour]} ${f.debut}–${f.fin} (${K.fmtH(K.duree(f.debut,f.fin))})`],['Période',`${f.du} → ${f.au} · ${f.semaines}`]],avert:alertes.join('\n'),bouton:'Enregistrer'},async()=>{await sauvegarderService(f,services);return {};});
+  }
+  function terminerService(b) {
+    const f=S.feuille,[si,hi]=b.dataset.v.split('|').map(Number);
+    if(!K.RE_DATE.test(f.du))return;
+    const services=K.servicesDe(idx().aesh.get(f.aeshId)).map(x=>JSON.parse(JSON.stringify(x))),h=services[si].horaires[hi];
+    h.au=h.au<K.ajoute(f.du,-1)?h.au:K.ajoute(f.du,-1);
+    confirmerPuis({titre:'Arrêter ce créneau ?',grand:libelleService(services[si].nom),sous:`À partir du ${K.dateCourte(f.du)}. Les dates précédentes restent conservées.`,bouton:'Confirmer'},async()=>{await sauvegarderService(f,services);return {};});
   }
   function feuilleService(f) {
     const I = idx(), l = K.aeshActifs(I), dedans = new Set(f.choisis);
@@ -927,9 +971,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   /* feuille « placer des AESH » */
   function feuillePlacer(f) {
     const p = P(), c = S.edt.cours[f.coursId], nom = f.classe, I = idx(), cx = ctx(), iso = K.ajoute(S.lundi, c.j);
-    const au = finPeriode(f), du = S.lundi;
+    const au = finPeriode(f), du = f.du || S.lundi;
     const bes = K.besoinDuCours(S.est, nom, c, quand(iso));
-    const dejaIci = new Set(I.places.filter(x => placeIci(x, c, du)).map(x => x.aeshId));
+    const dejaIci = new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId));
     const aVenir = I.places.filter(x => placeAVenir(x, c, du) && I.aesh.get(x.aeshId));
     const prevuIci = a => K.prevuPourClasse(a, FILIERES, nom).prevu || !K.prevuPourClasse(a, FILIERES, nom).connu;
     const enContrat = a => !K.contratFini(a, du);
@@ -941,37 +985,37 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     /* Rien n'est interdit : un AESH pris, en réunion ou au bout de ses heures reste choisissable.
        Ce qui pose problème est écrit sur son bouton, puis rappelé dans « Vous confirmez ? ». */
     const bouton = (a, ailleurs) => {
-      const d = K.disponibilite(cx, a.id, c.id, du, au, p.id, {semaines:f.semaines, ...(f.horaires[a.id] || {})}), on = f.choisis.includes(a.id);
+      const d = K.disponibilite(cx, a.id, c.id, du, au, p.id, {semaines:f.semaines, ...plagesDe(f.horaires[a.id],c)[0]}), on = f.choisis.includes(a.id);
       const cl = d.etat === 'pris' && !dejaIci.has(a.id) ? 'pris' : d.etat === 'trop' ? 'trop' : d.etat === 'reunion' ? 'reunion' : '';
       const b = K.bilan(cx, a.id, S.lundi), x = dispoDe[a.id];
       const pv = K.prevuPourClasse(a, FILIERES, nom);
       const ligne3 = ailleurs ? (x ? `${K.fmtH(x.dispo)} dispo · ${x.complets.map(q => nomPole(q.p) + (q.complet ? ' complet' : ' en cours')).join(', ')}` : `${Object.keys(a.equipes || {}).map(nomPole).join(', ')} · rien de disponible`) : (b && b.reste != null ? `reste ${K.fmtH(b.reste)}` : '');
       const ct = d.contrainte, lib = libereDe(a);
-      return `<button type="button" class="${cl} ${lib ? 'libere' : ''} ${ct ? (ct.etat === 'x' ? 'indispo' : 'souhait') : ''}" id="pa-${esc(a.id)}" data-a="choix-aesh" data-v="${esc(a.id)}" aria-pressed="${on}" title="${esc(d.detail || '')}"><b>${esc(a.sigle)}</b><small>${on ? '✓ choisi' : esc(dejaIci.has(a.id) ? 'placé' : d.texte)}</small>${ligne3 ? `<small>${esc(ligne3)}</small>` : ''}${lib ? `<small class="ct-lib">libre · PFMP ${esc(S.edt.classes[lib].court)}</small>` : ''}${ct && !on ? `<small class="${ct.etat === 'x' ? 'ct-x' : 'ct-s'}">${ct.etat === 'x' ? '✕ contrat' : '◐ souhait'}</small>` : ''}${pv.connu && !pv.prevu && !dejaIci.has(a.id) ? `<small class="horspr">pas prévu ici</small>` : ''}</button>`;
+      return `<button type="button" class="${cl} ${lib ? 'libere' : ''} ${ct ? (ct.etat === 'x' ? 'indispo' : 'souhait') : ''}" style="border-left:8px solid ${couleurAesh(a.id)}" id="pa-${esc(a.id)}" data-a="choix-aesh" data-v="${esc(a.id)}" aria-pressed="${on}" title="${esc(d.detail || '')}"><b>${esc(a.sigle)}</b><small>${on ? '✓ choisi' : esc(dejaIci.has(a.id) ? 'placé' : d.texte)}</small>${ligne3 ? `<small>${esc(ligne3)}</small>` : ''}${lib ? `<small class="ct-lib">libre · PFMP ${esc(S.edt.classes[lib].court)}</small>` : ''}${ct && !on ? `<small class="${ct.etat === 'x' ? 'ct-x' : 'ct-s'}">${ct.etat === 'x' ? '✕ contrat' : '◐ souhait'}</small>` : ''}${pv.connu && !pv.prevu && !dejaIci.has(a.id) ? `<small class="horspr">pas prévu ici</small>` : ''}</button>`;
     };
     const avant = [...dejaIci], ajout = f.choisis.filter(x => !dejaIci.has(x)), retrait = avant.filter(x => !f.choisis.includes(x));
     const rac = raccourcis().filter(r => ['annee','semaine'].includes(r.id)).sort((a,b) => a.id === 'annee' ? -1 : 1);
     const pasH = []; for (let m = K.min(c.d); m <= K.min(c.f); m += 30) pasH.push(K.hDe(m)); if (pasH[pasH.length - 1] !== c.f) pasH.push(c.f);
-    const horaires = f.choisis.length ? `<div style="display:grid;gap:8px"><b>Pendant tout le cours ?</b>${f.choisis.map(id => { const a = I.aesh.get(id), h = f.horaires[id]; return `<div class="ligne" style="gap:8px"><span class="pill" style="font-size:.9rem">${esc(a ? a.sigle : id)}</span>
-      <div class="choix" style="gap:6px"><button type="button" id="ph-tout-${esc(id)}" data-a="horaire-tout" data-v="${esc(id)}" aria-pressed="${!h}">Tout le cours</button><button type="button" id="ph-part-${esc(id)}" data-a="horaire-partie" data-v="${esc(id)}" aria-pressed="${!!h}">Une partie</button></div>
-      ${h ? `<select data-i="ph-debut" data-v="${esc(id)}" aria-label="De">${pasH.slice(0, -1).map(x => `<option value="${x}" ${x === h.debut ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted">à</span><select data-i="ph-fin" data-v="${esc(id)}" aria-label="À">${pasH.slice(1).map(x => `<option value="${x}" ${x === h.fin ? 'selected' : ''}>${K.hFr(x)}</option>`).join('')}</select><span class="muted" style="font-size:.85rem">le reste de son temps reste libre</span>` : ''}</div>`; }).join('')}</div>` : '';
+    const horaires = f.choisis.length ? `<div class="guide-etape"><b>2 · À quelle heure intervient chaque AESH ?</b><p class="muted">Le cours reste entier. Vous pouvez organiser un relais ou plusieurs passages.</p>${f.choisis.map(id => { const a = I.aesh.get(id), h = f.horaires[id]; return `<div class="presence-reglage"><b style="color:${couleurAesh(id)}">● ${esc(a ? a.sigle : id)}</b>
+      <div class="choix"><button type="button" id="ph-tout-${esc(id)}" data-a="horaire-tout" data-v="${esc(id)}" aria-pressed="${!h}">Tout le cours</button><button type="button" id="ph-part-${esc(id)}" data-a="horaire-partie" data-v="${esc(id)}" aria-pressed="${!!h}">Une partie du cours</button></div>
+      ${h ? plagesDe(h,c).map((v,i) => `<div class="ligne"><label>De <select id="ph-d-${esc(id)}-${i}" data-i="ph-debut" data-v="${esc(id)}" data-index="${i}">${pasH.slice(0,-1).map(x => `<option value="${x}" ${x===v.debut?'selected':''}>${K.hFr(x)}</option>`).join('')}</select></label><label>à <select id="ph-f-${esc(id)}-${i}" data-i="ph-fin" data-v="${esc(id)}" data-index="${i}">${pasH.slice(1).map(x => `<option value="${x}" ${x===v.fin?'selected':''}>${K.hFr(x)}</option>`).join('')}</select></label><span>${K.fmtH(K.duree(v.debut,v.fin))}</span>${plagesDe(h,c).length>1?`<button type="button" data-a="horaire-retirer" data-v="${esc(id)}" data-index="${i}">Retirer ce passage</button>`:''}</div>`).join('')+`<button type="button" class="btn petit" data-a="horaire-ajouter" data-v="${esc(id)}">＋ Un autre passage dans ce cours</button>` : `<span>${K.hFr(c.d)}–${K.hFr(c.f)} · ${K.fmtH(K.duree(c.d,c.f))}</span>`}</div>`; }).join('')}</div>` : '';
     const modifHoraire = f.choisis.some(id => dejaIci.has(id) && JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
     return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}`) + `
       ${bes ? `<div class="bandeau info">Estimé par les enseignants : <b>${bes.nb === 0 ? 'aucun AESH' : bes.nb + ' AESH'}</b>${bes.eleves != null ? ` · ${bes.eleves} élèves` : ''}${bes.nb > 0 ? ` · <b>Présents : ${presents(c, iso, bes)} · Manque : ${Math.max(0, bes.nb - presents(c, iso, bes))}</b>` : ''}${bes.au ? ` · jusqu’au ${K.jjmm(bes.au)}` : ''}${bes.majLe ? ` <span class="muted">· mis à jour le ${esc(K.dateCourte(String(bes.majLe).slice(0, 10)))}</span>` : ''}</div>`
         : `<div class="bandeau">Pas encore estimé par l’enseignant de ce cours. <span class="muted">Aucune demande reçue : à vous de décider.</span>
             ${modePlanning ? '' : `<button type="button" class="btn petit" id="pl-mail" data-a="mail-estimation" data-v="${esc(f.coursId)}">✉️ Écrire à l’enseignant</button>`}</div>`}
       <div><b>1 · Qui accompagne ?</b><p class="muted">Touchez un AESH. Les heures et les disponibilités vous aident à choisir.</p></div>
-      ${aVenir.length ? `<div class="bandeau info">À venir : ${aVenir.map(x => `<b>${esc(I.aesh.get(x.aeshId).sigle)}</b> dès le ${esc(K.dateCourte(x.du))}`).join(', ')} <span class="muted">· non modifié ici</span></div>` : ''}
+      ${aVenir.length ? `<div class="bandeau info">À venir : ${aVenir.map(x => `<b>${esc(I.aesh.get(x.aeshId).sigle)}</b> dès le ${esc(K.dateCourte(x.du))}`).join(', ')} <span class="muted">· vérifiez la période : une nouvelle présence peut remplacer ces prévisions</span></div>` : ''}
       <div class="choix-aesh" role="group" aria-label="AESH du pôle">${candidats.map(a => bouton(a)).join('')}</div>
       ${autres.length ? ((f.autres || liberes.length) ? `<div><b>Autres pôles</b>${liberes.length ? ` <span class="puce warn">${liberes.length} libéré${liberes.length > 1 ? 's' : ''} par une PFMP</span>` : ''} <span class="muted" style="font-weight:500;font-size:.9rem">· triés par heures disponibles</span></div><div class="choix-aesh" role="group" aria-label="AESH des autres pôles">${autres.map(a => bouton(a, true)).join('')}</div>` : `<button type="button" class="lien" id="pa-autres" data-a="autres-aesh">＋ AESH d’un autre pôle${dispo.length ? ` (${dispo.length} avec des heures disponibles)` : ''}</button>`) : ''}
       ${horaires}
-      <div class="guide-etape"><b>2 · Quelles semaines ?</b><div class="choix" role="group" aria-label="Semaines du placement">${(c.sem === 'SA' ? ['A'] : c.sem === 'SB' ? ['B'] : ['A','B','AB']).map(q => `<button type="button" id="pl-sem-${q}" data-a="pl-semaines" data-v="${q}" aria-pressed="${f.semaines === q}">${q === 'AB' ? 'A et B' : q + ' seulement'}</button>`).join('')}</div><small>Ce choix concerne l’AESH. Les vacances et jours fériés restent exclus.</small></div>
+      <div class="guide-etape"><b>3 · Quelles semaines ?</b><div class="choix" role="group" aria-label="Semaines du placement">${(c.sem === 'SA' ? ['A'] : c.sem === 'SB' ? ['B'] : ['A','B','AB']).map(q => `<button type="button" id="pl-sem-${q}" data-a="pl-semaines" data-v="${q}" aria-pressed="${f.semaines === q}">${q === 'AB' ? 'A et B' : q + ' seulement'}</button>`).join('')}</div><small>Ce choix concerne l’AESH. Les vacances et jours fériés restent exclus.</small></div>
       ${Object.entries(f.renforts || {}).filter(([id]) => f.choisis.includes(id)).map(([id,r]) => `<div class="bandeau info"><b>Renfort PFMP · ${esc((I.aesh.get(id)||{}).sigle)}</b><br>En soutien depuis ${esc(r.source)}, du ${K.dateCourte(r.du)} au ${K.dateCourte(r.au)}. Son planning habituel et les AESH déjà placés sont conservés.</div>`).join('')}
-      <div style="display:grid;gap:8px"><b>3 · À partir du ${esc(K.dateCourte(du))}, jusqu’à</b><div class="choix" role="group" aria-label="Période">${rac.map(r => `<button type="button" id="per-${r.id}" data-a="periode" data-v="${r.id}" aria-pressed="${f.periode === r.id}">${esc(r.label)} <span class="muted">(${K.jjmm(r.fin)})</span></button>`).join('')}
+      <div style="display:grid;gap:8px"><b>4 · Pour quelle période ?</b><label>À partir du <input id="pl-du" type="date" data-i="pl-du" value="${esc(du)}" min="${esc(S.C.debut || S.lundi)}" max="${esc(au)}"></label><b>Jusqu’à</b><div class="choix" role="group" aria-label="Période">${rac.map(r => `<button type="button" id="per-${r.id}" data-a="periode" data-v="${r.id}" aria-pressed="${f.periode === r.id}">${esc(r.label)} <span class="muted">(${K.jjmm(r.fin)})</span></button>`).join('')}
         <button type="button" id="per-date" data-a="periode" data-v="date" aria-pressed="${f.periode === 'date'}">Une date</button></div>
         ${f.periode === 'date' ? `<input type="date" id="per-au" data-i="per-au" value="${esc(f.au || '')}" min="${esc(du)}">` : ''}</div>
       <div class="actions"><button type="button" class="btn" id="pl-fermer" data-a="fermer">Fermer</button>
-        <button type="button" class="btn valider" id="pl-valider" data-a="valider-placer" ${(ajout.length || retrait.length || modifHoraire || f.semaines !== f.semainesInit) && K.RE_DATE.test(au) && au >= du ? '' : 'disabled'}>Vérifier le placement →</button></div>`;
+        <button type="button" class="btn valider" id="pl-valider" data-a="valider-placer" ${(ajout.length || retrait.length || modifHoraire || f.semaines !== f.semainesInit || du !== S.lundi) && K.RE_DATE.test(du) && K.RE_DATE.test(au) && au >= du ? '' : 'disabled'}>Vérifier le placement →</button></div>`;
   }
   function raccourcis() {
     const l = S.lundi, out = [{ id: 'semaine', label: 'Cette semaine', fin: K.ajoute(l, 4) }, { id: 'edt', label: 'Période de l’emploi du temps', fin: periodeEdt() }];
@@ -1147,8 +1191,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       </div>
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
+  async function exporterPlanningSimple() {
+    try {
+      const X=await import('./exports.js?v=2026-09-23d'),F=await import('./fichiers.js?v=2026-09-23d');
+      F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
+    } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
+  }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-23a'), F = await import('./fichiers.js?v=2026-09-23a');
+    const X = await import('./exports.js?v=2026-09-23d'), F = await import('./fichiers.js?v=2026-09-23d');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1229,7 +1279,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       && !POLES.some(p => codeDe(p.id) === f.antoine1);
     const lien = new URL('../planning-equipe/',location.href).href;
     return `<section class="carte pad" style="margin-top:24px"><h2>Accès Antoine</h2>
-      <p>PSR : placement des AESH. MELEC : consultation.</p>
+      <p>PSR, AGOrA, CAPa et Métiers d’art : saisie des emplois du temps. MELEC : consultation. Les contrats restent gérés par les référents.</p>
       <p><b>${acces?.actif ? 'Accès activé' : 'Accès désactivé'}</b> · <a href="${esc(lien)}" target="_blank" rel="noopener">Ouvrir son interface</a></p>
       <p class="muted">Un code distinct de celui du pôle, à lui transmettre. Votre code de référent ouvre aussi cette interface, même si son accès personnel est désactivé.</p>
       <div class="champs"><div class="champ"><label for="antoine1">Code Antoine — 4 chiffres</label><input type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" id="antoine1" data-i="antoine1" value="${esc(f.antoine1)}"></div>
@@ -1244,16 +1294,22 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   const teteFeuille = (titre, sous) => `<div class="tete-f"><div class="ligne ecarte"><h2 id="f-titre" tabindex="-1">${titre}</h2>
       <button type="button" class="rond" id="f-croix" data-a="fermer" aria-label="Fermer sans rien valider" title="Fermer sans rien valider">✕</button></div>
     ${sous ? `<p class="sous" style="margin:2px 0 0">${sous}</p>` : ''}</div>`;
+  function detailCouverture(c,iso,bes) {
+    const d=K.min(bes.plageDebut || c.d),z=K.min(bes.plageFin || c.f),l=[];
+    for(let m=d;m<z;m+=30){const f=Math.min(m+30,z),n=K.presentsMin(ctx(),c,iso,K.hDe(m),K.hDe(f));l.push(`<tr><td>${K.hFr(K.hDe(m))}–${K.hFr(K.hDe(f))}</td><td>${n} / ${bes.nb}</td><td>${n>=bes.nb?'Couvert':'Manque '+(bes.nb-n)}</td></tr>`);}
+    return `<table><caption>Couverture pendant le cours</caption><thead><tr><th>Horaire</th><th>Présents / demandés</th><th>Besoin</th></tr></thead><tbody>${l.join('')}</tbody></table>`;
+  }
   function feuille() {
     const f = S.feuille;
     let h = '', large = false;
-    if (f.type === 'placer') { h = feuillePlacer(f); large = true; }
+    if (f.type === 'service-horaire') { h = feuilleServiceHoraire(f); large=true; }
+    else if (f.type === 'placer') { h = feuillePlacer(f); large = true; }
     else if (f.type === 'besoin-detail') {
       const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j);
       const bes = K.besoinDuCours(S.est,f.classe,c,quand(iso));
       const nb = bes ? presents(c,iso,bes) : 0, manque = bes ? Math.max(0,bes.nb-nb) : 0;
       h = teteFeuille('Le besoin en AESH',`${esc(c.lib)} · ${esc(f.classe)}<br>${esc(K.dateLongue(iso))} · ${K.hFr(c.d)}–${K.hFr(c.f)}`) +
-        (bes ? `<div class="besoin-explication"><p><strong>${bes.nb}</strong> AESH demandé${bes.nb > 1 ? 's' : ''} par les enseignants.</p>
+        (bes ? `<div class="besoin-explication">${detailCouverture(c,iso,bes)}<p><strong>${bes.nb}</strong> AESH demandé${bes.nb > 1 ? 's' : ''} par les enseignants.</p>
           <p><strong>${nb}</strong> AESH présent${nb > 1 ? 's' : ''} selon le planning.</p>
           <p class="bandeau ${manque ? 'warn' : 'info'}"><b>${bes.nb === 0 ? 'Aucun accompagnement demandé pour ce cours.' : manque ? `Il manque ${manque} AESH.` : 'Le besoin est couvert.'}</b></p>
           ${bes.nb === 0 && nb > 0 ? '<p>Un AESH peut être placé même si aucun besoin n’a été demandé.</p>' : ''}
@@ -1446,7 +1502,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       doc.reunionH = borne(doc.reunionH); if (doc.reunionH != null) doc.reunionH = Math.min(20, doc.reunionH);
       if (doc.reunionH == null) delete doc.reunionH;
       doc.heures = Object.fromEntries(Object.entries(doc.heures).map(([k, v]) => [k, borne(v)]).filter(([, v]) => v != null));
-      doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h), jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => j >= 0 && j <= 4))].sort() : [] }));
+      doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ ...x, nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h), jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => j >= 0 && j <= 4))].sort() : [] }));
       doc.dispos = K.disposDe(doc); delete doc.jours; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
       doc.actif = true;
       return doc;
@@ -1515,42 +1571,46 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
 
   function validerPlacer() {
-    const f = S.feuille, p = P(), c = S.edt.cours[f.coursId], I = idx(), du = S.lundi, au = finPeriode(f);
-    if (!K.RE_DATE.test(au) || au < du) return;
+    const f = S.feuille, p = P(), c = S.edt.cours[f.coursId], I = idx(), du = f.du || S.lundi, au = finPeriode(f);
+    if (!K.RE_DATE.test(du) || !K.RE_DATE.test(au) || au < du) return;
     const sig = id => (I.aesh.get(id) || {}).sigle || '?';
-    const avant = [...new Set(I.places.filter(x => placeIci(x, c, du)).map(x => x.aeshId))];
+    const avant = [...new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId))];
     const retrait = avant.filter(id => !f.choisis.includes(id));
     const lot = [], avert = [], lignes = [['Cours', `${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)} · ${c.lib}`],
       ['Classe', c.cls.map(n => S.edt.classes[n].court).join(' + ')],
       ['Semaines', f.semaines === 'AB' ? 'A et B' : f.semaines + ' seulement'],
       ['Période', `Du ${K.dateCourte(du)} au ${K.dateCourte(au)}. Les autres semaines sont conservées.`]];
     const cx = ctx();
-    const modifies = f.choisis.filter(id => !avant.includes(id) || f.semaines !== f.semainesInit
+    const modifies = f.choisis.filter(id => !avant.includes(id) || f.semaines !== f.semainesInit || du !== S.lundi
       || JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
     for (const id of [...new Set([...modifies, ...retrait])]) {
       const a = I.aesh.get(id); if (!a) continue;
-      const renfort = (f.renforts || {})[id], debut = renfort ? renfort.du : du;
+      const renfort = (f.renforts || {})[id], debut = renfort && renfort.du > du ? renfort.du : du;
       const fin = finPourAesh(a, renfort ? (renfort.au < au ? renfort.au : au) : au);
       if (fin < debut) { toast(`${sig(id)} : aucune date avant la fin du contrat.`, true); return; }
-      const h = f.horaires[id] || { debut:c.d, fin:c.f };
+      const plages = plagesDe(f.horaires[id], c);
+      if (!plages.length || plages.some(h => !K.RE_HEURE.test(h.debut) || !K.RE_HEURE.test(h.fin) || K.min(h.debut) < K.min(c.d) || K.min(h.fin) > K.min(c.f) || K.min(h.fin) <= K.min(h.debut))) { toast('Vérifiez les heures de présence dans le cours.', true); return; }
+      const fusion = K.unionIntervalles(plages.map(h => [K.min(h.debut),K.min(h.fin)]));
+      const h = {debut:K.hDe(fusion[0][0]),fin:K.hDe(fusion[0][1])};
       const prochain = { id:'place_' + alea(), type:'place', aeshId:id, pole:p.id, coursId:c.id, classes:c.cls,
         jour:c.j, debut:h.debut, fin:h.fin, sem:c.sem, semaines:f.semaines, matiere:c.lib, du:debut, au:fin, statut:'active',
         ...(renfort ? { renfortPfmp:renfort.source } : {}) };
+      const prochains = fusion.map(([d,z],i) => ({...prochain,id:i ? 'place_'+alea() : prochain.id,debut:K.hDe(d),fin:K.hDe(z)}));
       if (f.choisis.includes(id)) {
         if (!K.datesPlacement(cx, prochain).length) { toast(`${sig(id)} : aucun cours sur les semaines et dates choisies.`, true); return; }
-        const conflit = I.places.find(x => x.coursId !== c.id && K.placementsEnConflit(cx, x, prochain));
+        const conflit = I.places.find(x => x.coursId !== c.id && prochains.some(y => K.placementsEnConflit(cx, x, y)));
         if (conflit) { toast(`${sig(id)} est déjà placé sur un autre cours aux mêmes dates. Modifiez d’abord cette affectation ; aucun retrait automatique.`, true); return; }
         const dispo = K.disponibilite(cx, id, c.id, debut, fin, p.id, prochain);
         if (dispo.contrainte) avert.push(`${sig(id)} : ${dispo.contrainte.texte}.`);
         if (['reunion','absent'].includes(dispo.etat)) avert.push(`${sig(id)} : ${dispo.texte}${dispo.detail ? ' — ' + dispo.detail : ''}.`);
         if (K.finContratDe(a) && fin < au) avert.push(`${sig(id)} : placement limité au ${K.dateCourte(fin)} (contrat ou renfort temporaire).`);
-        lignes.push([sig(id), `${K.hFr(h.debut)}–${K.hFr(h.fin)} · ${K.fmtH(K.duree(h.debut,h.fin))} par semaine ${f.semaines === 'AB' ? 'A et B' : f.semaines} · du ${K.dateCourte(debut)} au ${K.dateCourte(fin)}${renfort ? ' · renfort PFMP' : ''}`]);
+        lignes.push([sig(id), `${prochains.map(y => K.hFr(y.debut)+'–'+K.hFr(y.fin)).join(' puis ')} · ${K.fmtH(fusion.reduce((t,[d,z]) => t+(z-d)/60,0))} par semaine ${f.semaines === 'AB' ? 'A et B' : f.semaines} · du ${K.dateCourte(debut)} au ${K.dateCourte(fin)}${renfort ? ' · renfort PFMP' : ''}`]);
       } else lignes.push(['Retrait', `${sig(id)} : seulement ${f.semaines === 'AB' ? 'en A et B' : 'en '+f.semaines}, du ${K.dateCourte(debut)} au ${K.dateCourte(fin)}`]);
       // Scinder tous les fragments du cours sur la portée explicite, sans toucher aux autres cours.
       I.places.filter(x => x.aeshId === id && x.coursId === c.id).forEach(x =>
         lot.push(...K.modifierPeriode(x, debut, fin, f.semaines, null, () => 'place_' + alea())));
       if (f.choisis.includes(id)) {
-        lot.push(prochain);
+        lot.push(...prochains);
         const pv = K.prevuPourClasse(a,FILIERES,f.classe);
         if(!modePlanning && pv.connu && !pv.prevu) { const r = ficheAvecClasse(id,f.classe); if(r) { lot.push(r.doc); avert.push(r.info); } }
         const q = rattachementDe(a);
@@ -1567,13 +1627,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     for (const id of modifies) {
       for (const l of K.lundisEntre(S.C,du,au)) {
         const bilan = K.bilan(futur,id,l);
+        if (bilan && bilan.alertes.some(x => x.type === 'conflit')) avert.push(...bilan.alertes.filter(x=>x.type==='conflit').map(x=>sig(id)+' : '+x.texte));
         if (bilan && bilan.alertes.some(x => x.type === 'contrat' || x.type === 'pole')) {
           avert.push(`${sig(id)} : le planning obtenu dépasse un volume prévu la semaine du ${K.dateCourte(l)} (${K.fmtH(bilan.total)} au total).`); break;
         }
       }
     }
     S.feuille = { type:'confirmer', titre:'Vérifier le placement', grand:f.choisis.map(sig).join(' · ') || 'Retrait',
-      lignes, avert:avert.join('\n'), bouton:'Enregistrer', retourPlacer:f,
+      lignes, avert:[...new Set(avert)].join('\n'), bouton:'Enregistrer', retourPlacer:f,
       travail:async () => { await ecrireLot(lot, f.base); S.flash = c.id; return {}; } };
     rendre({focus:'cf-oui'});
   }
@@ -1582,13 +1643,18 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
     if (modePlanning) {
-      const permis = ['expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
+      const permis = ['service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
       if (!permis.includes(a)) return;
       if (a === 'sortir') { awaitSortirPlanning(); return; }
       if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
     }
     if (a === 'voile') { if (ev.target === b && !S.envoi && !(S.feuille && S.feuille.type === 'confirmer' && !S.feuille.fait)) fermer(); return; }
     switch (a) {
+      case 'service-horaire': ouvrir({type:'service-horaire',aeshId:K.aeshActifs(idx(),P().id)[0]?.id || '',nom:'Cantine',jour:0,debut:'12:30',fin:'13:00',du:S.lundi,au:raccourcis().find(r=>r.id==='annee')?.fin || '',semaines:'AB',base:new Map(S.docs)}); return;
+      case 'service-enregistrer': enregistrerServiceHoraire(); return;
+      case 'service-fin': terminerService(b); return;
+      case 'planning-pole': if(POLES.some(p=>p.id===v)){S.vu=v;S.route.p={};S.aeshChoisi=null;rendre();} return;
+      case 'planning-excel': exporterPlanningSimple(); return;
       case 'selection-aesh': S.aeshChoisi = S.aeshChoisi === v ? null : v; rendre({focus:b.id}); return;
       case 'humeur': S.humeur = +v; rendre({ focus: b.id }); return;
       case 'entrer': try { sessionStorage.setItem(K_HUMEUR, '1'); } catch (e) { } if (S.session) { ecouterEstimations(); publierHumeur(); aller(!avatarDe(S.session.pole) && S.etat === 'ok' ? 'avatar' : 'accueil', !avatarDe(S.session.pole) ? { premiere: 1 } : {}, { remplacer: true }); } else aller('code'); return;
@@ -1728,8 +1794,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'placer': { const c = S.edt.cours[v], nom = classeCourante(), I = idx(), iso = K.ajoute(S.lundi, c.j);
         if (S.C.semaine(S.lundi).toute) return;
         const choisis = [...new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId))];
-        const horaires = {}; choisis.forEach(id => { const x = I.places.find(y => y.aeshId === id && placeIci(y, c, S.lundi)), hp = K.horairePlace(x, c); if (hp.partiel) horaires[id] = { debut: hp.debut, fin: hp.fin }; });
-        ouvrir({ type: 'placer', coursId: v, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', semaines: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', semainesInit: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', renforts: {}, base: new Map(S.docs), au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
+        const horaires = {}; choisis.forEach(id => { const ps = I.places.filter(y => y.aeshId === id && placeIci(y,c,S.lundi)).map(y => K.horairePlace(y,c)); if(ps.length>1 || ps[0]?.partiel) horaires[id]=ps.map(h => ({debut:h.debut,fin:h.fin})); });
+        ouvrir({ type: 'placer', du: S.lundi, coursId: v, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', semaines: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', semainesInit: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', renforts: {}, base: new Map(S.docs), au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
         if (S.aeshChoisi) {
           const id = S.aeshChoisi; S.aeshChoisi = null;
           const choix = document.getElementById('pa-' + id);
@@ -1748,6 +1814,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       }
       case 'autres-aesh': S.feuille.autres = true; rendre(); return;
       case 'horaire-tout': delete S.feuille.horaires[v]; rendre({ focus: b.id }); return;
+      case 'horaire-ajouter': { const f=S.feuille,c=S.edt.cours[f.coursId]; f.horaires[v]=[...plagesDe(f.horaires[v],c),{debut:c.d,fin:K.hDe(Math.min(K.min(c.f),K.min(c.d)+30))}]; rendre(); return; }
+      case 'horaire-retirer': S.feuille.horaires[v].splice(+b.dataset.index,1); rendre(); return;
       case 'horaire-partie': { const c = S.edt.cours[S.feuille.coursId]; S.feuille.horaires[v] = { debut: c.d, fin: K.hDe(Math.min(K.min(c.f), K.min(c.d) + 60)) }; rendre({ focus: b.id }); return; }
       /* Relancer l'enseignant d'un cours qui n'a pas encore été estimé : message tout prêt, destinataire au choix. */
       case 'mail-estimation': {
@@ -1798,7 +1866,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         if (modePlanning || S.session?.pole !== 'PSR_MELEC') return;
         const code = S.form?.antoine1;
         if (!/^\d{4}$/.test(code || '') || code !== S.form?.antoine2 || POLES.some(p => codeDe(p.id) === code)) return;
-        confirmerPuis({titre:'Activer l’accès Antoine ?',sous:'PSR modifiable et MELEC en consultation dans son interface.',bouton:'Activer'},async()=>{
+        confirmerPuis({titre:'Activer l’accès Antoine ?',sous:'PSR et autres pôles modifiables et MELEC en consultation dans son interface.',bouton:'Activer'},async()=>{
           await ecrirePole('PSR_MELEC',{accesPlanning:{actif:true,code}}); S.form=null; return {};
         }); return;
       }
@@ -1847,7 +1915,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const t = ev.target, k = t.dataset && t.dataset.i;
     if (!k) return;
     const f = S.form;
-    if (!f && !['per-au', 'per-edt-date', 'ph-debut', 'ph-fin', 'msg', 'signature', 'pt-texte', 'pf-du', 'pf-au'].includes(k)) return;
+    if(k==='service-champ') { const q=S.feuille; if(q?.type!=='service-horaire') return; q[t.dataset.champ]=t.dataset.champ==='jour'?+t.value:t.value; if(t.dataset.champ==='nom') { q.debut=q.nom==='Internat'?'18:00':'12:30'; q.fin=q.nom==='Internat'?'21:00':'13:00'; } if(ev.type==='change') rendre({focus:t.id}); return; }
+    if (!f && !['per-au', 'per-edt-date', 'ph-debut', 'ph-fin', 'pl-du', 'msg', 'signature', 'pt-texte', 'pf-du', 'pf-au'].includes(k)) return;
     if (k === 'recherche') { f.recherche = t.value; rendre({ focus: t.id }); return; }
     if (k === 'sigle') { f.a.sigle = t.value; const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false; const ch = t.closest('.champ'); if (ch) ch.classList.add('modif'); return; }
     if (k === 'serv-nom') { const i = +t.dataset.v, x = f.a.services[i]; if (x) { x.nom = t.value === 'Autre' ? '' : t.value; rendre({ focus: t.value === 'Autre' ? undefined : t.id }); if (t.value === 'Autre') { const inp = document.querySelector(`[data-i="serv-lib"][data-v="${i}"]`); if (inp) inp.focus(); } } return; }
@@ -1882,7 +1951,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (k === 'r-debut') { f.debut = t.value; if (K.min(f.fin) <= K.min(f.debut)) f.fin = K.hDe(K.min(f.debut) + 60); rendre({ focus: t.id }); return; }
     if (k === 'r-fin') { f.fin = t.value; rendre({ focus: t.id }); return; }
     if (k === 'pf-du' || k === 'pf-au') { const x = S.feuille && S.feuille.lignes[+t.dataset.v]; if (!x) return; if (k === 'pf-du') { x.debut = t.value; if (x.fin && x.fin < x.debut) x.fin = x.debut; } else x.fin = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
-    if (k === 'ph-debut' || k === 'ph-fin') { const h = S.feuille && S.feuille.horaires[t.dataset.v]; if (!h) return; if (k === 'ph-debut') { h.debut = t.value; if (K.min(h.fin) <= K.min(h.debut)) h.fin = K.hDe(K.min(h.debut) + 30); } else { h.fin = t.value; if (K.min(h.fin) <= K.min(h.debut)) h.debut = K.hDe(K.min(h.fin) - 30); } rendre({ focus: t.id }); return; }
+    if (k === 'pl-du') { S.feuille.du = t.value; if (ev.type === 'change') rendre({focus:t.id}); return; }
+    if (k === 'ph-debut' || k === 'ph-fin') { const h = S.feuille && plagesDe(S.feuille.horaires[t.dataset.v],S.edt.cours[S.feuille.coursId])[+(t.dataset.index || 0)]; if (!h) return; if (k === 'ph-debut') { h.debut = t.value; if (K.min(h.fin) <= K.min(h.debut)) h.fin = K.hDe(Math.min(K.min(S.edt.cours[S.feuille.coursId].f),K.min(h.debut) + 30)); } else { h.fin = t.value; if (K.min(h.fin) <= K.min(h.debut)) h.debut = K.hDe(Math.max(K.min(S.edt.cours[S.feuille.coursId].d),K.min(h.fin) - 30)); } rendre({ focus: t.id }); return; }
     if (k === 'per-edt-date') { if (S.feuille) S.feuille.fin = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'per-au') { S.feuille.au = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'msg') { const avant = !!S.msgBrouillon.trim(); S.msgBrouillon = t.value; if (avant !== !!t.value.trim()) { const btn = document.getElementById('msg-envoyer'); if (btn) btn.disabled = !t.value.trim() || S.envoi; } return; }

@@ -7,7 +7,10 @@ const conflit = () => Object.assign(new Error('Planning modifié pendant la sais
 export async function enregistrerPlanning({FS, db, collection, historique, docs, base, annee, par, nouvelId, maintenant}) {
   if (!FS.runTransaction) throw Object.assign(new Error('Transaction indisponible'), {code:'transaction-indisponible'});
   const souhaites = new Map(docs.map(d => [d.id,d]));
-  const aeshIds = new Set(docs.filter(d => d.type === 'place').map(d => d.aeshId));
+  const aeshIds = new Set(docs.filter(d => ['place','absence'].includes(d.type)).map(d => d.aeshId));
+  // L'ajout d'une absence ou d'une réunion invalide aussi une fenêtre de placement
+  // déjà ouverte : ces écritures prennent les mêmes verrous de fiche.
+  if(docs.some(d=>d.type==='reunion')) for(const [id,a] of base) if(a.type==='aesh') aeshIds.add(id);
   const ids = new Set([...souhaites.keys(), ...aeshIds]);
   // Contrats, absences, réunions et PFMP consultés doivent encore être identiques.
   for (const [id,d] of base) if (['pole','reunion','absence'].includes(d.type) || (d.type === 'place' && aeshIds.has(d.aeshId))) ids.add(id);

@@ -35,4 +35,8 @@ const size=server.size;await assert.rejects(E.enregistrerPlanning({...args,docs:
 const beforeMissing = JSON.stringify([...server]);
 await assert.rejects(E.enregistrerPlanning({...args,docs:[{...p,id:'nouveau',aeshId:'absent'}],base:new Map()}),e=>e.code==='fiche-aesh-manquante');
 assert.equal(JSON.stringify([...server]),beforeMissing);n++;console.log('OK fiche absente : aucun placement ni historique incomplet');
+const baseReunion=new Map([['a1',structuredClone(server.get('main/a1'))],['p1',structuredClone(server.get('main/p1'))]]);
+await E.enregistrerPlanning({...args,base:baseReunion,docs:[{id:'reunion_test',type:'reunion',date:'2026-09-07',debut:'08:30',fin:'09:30',statut:'active'}]});
+await assert.rejects(E.enregistrerPlanning({...args,base:baseReunion,docs:[{...p,id:'apres_reunion'}]}),e=>e.code==='conflit');
+n++;console.log('OK réunion ajoutée pendant un placement : saisie périmée refusée');
 console.log(`${n} scénarios réussis, données fictives uniquement.`);
