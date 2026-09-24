@@ -152,3 +152,20 @@ Modifications : demandes-aesh/estimation.js et index.html ; referents-aesh/app.j
 index.html, nouveau besoins.js et tests/besoins.test.mjs ; LISEZMOI.md.
 Miroir cockpit-site source actualisé par script officiel avec sauvegarde préalable.
 L’app Electron installée reste inchangée. Pas de commit, push ou déploiement.
+
+
+### 24/09/2026 — Planning multipage épuré (travail local)
+Pages Planning / Équipe / Réglages pour référents et Antoine. Téléphone : un jour
+à la fois, cinq boutons ; ordinateur : semaine entière. Équipe : sigle et total /
+contrat, sans doublon A/B ni reste. Réglages séparés : période, PFMP, services, Excel.
+Réunions et services datés inclus à leur horaire dans la grille (jusqu’à la fin du
+dernier service, y compris internat 21 h), détails au toucher, source occupations
+commune aux calculs. Besoins : matière/date, trois chiffres, détail horaire seulement
+si couverture varie ; retrait des explications répétées. Nombre modifiable depuis
+la pastille avec deuxième clic de confirmation ; bouton vers le placement guidé.
+Aucune importation des affectations Excel, aucune modification des données réelles.
+Tests : syntaxe/diff, 17 planning + 11 présences + besoins partagés. Navigateur
+fictif 390×844 : navigation, besoin confirmé, accès placement, Équipe compacte,
+DP 12h30–13h dans la grille et détails ; pas d’erreur console. Pas de test Firestore
+réel. Pas de nouvelles règles. Source miroir Electron actualisée, application
+installée inchangée. Aucun commit, push ni déploiement. .DS_Store conservé.
