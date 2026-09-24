@@ -303,7 +303,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     else html = `${entete()}<main class="corps" id="contenu" ${S.feuille ? 'inert' : ''}>${bandeauEtat()}${(ECRANS[e] || ECRANS.accueil)()}</main>`;
     if (S.feuille) html += feuille();
     if (S.toast) html += `<div class="toast ${S.toast.err ? 'err' : ''}" role="status">${esc(S.toast.t)}</div>`;
+    const decalages=[...racine.querySelectorAll('.planning-horizontal,.comparaison-semaine > .defile')].map(el=>el.scrollLeft);
     racine.innerHTML = html;
+    racine.querySelectorAll('.planning-horizontal,.comparaison-semaine > .defile').forEach((el,i)=>{el.scrollLeft=decalages[i]||0;});
     document.title = `${TITRES[e] || 'Référents de pôle'} — Référents de pôle AESH`;
     const f = o.focus && document.getElementById(o.focus);
     if (f) { f.focus({ preventScroll: !o.haut }); if (sel && f.id === idActif) try { f.setSelectionRange(sel[0], sel[1]); } catch (x) { } }
@@ -837,7 +839,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function grillesPlanning(personne,nom) {
     const choix=S.route.p.parite, paire=semainesAB(S.C,S.lundi), type=!!S.route.p.edtType;
     const dates=choix==='AB'?[paire.A,paire.B]:[type && !S.C.parite(S.lundi)?paire.A:S.lundi];
-    return (type?'<p class="bandeau">EDT type · organisation habituelle pour la période affichée. Sans absences, vacances, PFMP ni réunions ponctuelles. Consultation.</p>':'')+dates.map(l=>{
+    const contenu=dates.map(l=>{
       const cx=type?contexteType(ctx()):ctx(), ancien=S.lundi;let html;
       if(personne) html=grillePersonne(personne,l,cx,type);
       else if(type) {
@@ -854,6 +856,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const b=personne?K.bilan(cx,personne.id,l):null;
       return `<section class="comparaison-semaine">${dates.length>1 && b?`<h2>Semaine ${S.C.parite(l)} · ${K.fmtH(b.total)}${b.contrat==null?'':` / ${K.fmtH(b.contrat)}`}</h2>`:''}${html.replaceAll('data-a=',`data-lundi="${l}" data-a=`)}</section>`;
     }).join('');
+    const aide=type?'<p class="bandeau">EDT type · organisation habituelle pour la période affichée. Sans absences, vacances, PFMP ni réunions ponctuelles. Consultation.</p>':'';
+    return aide+(dates.length>1?`<div class="planning-horizontal" tabindex="0" role="region" aria-label="Planning semaines A et B, défilement horizontal"><div class="planning-ab" data-affichage="${S.route.p.affichage==='jour'?'jour':'semaine'}">${contenu}</div></div>`:contenu);
   }
   function ecranEdt() {
     const p = P(), nom = classeCourante(), k = S.edt.classes[nom], sem = S.C.semaine(S.lundi);

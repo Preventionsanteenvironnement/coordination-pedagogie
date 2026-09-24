@@ -434,6 +434,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .verification-guide input[type=checkbox],.verification-guide input[type=radio]{min-height:initial}
 .verification-guide footer{position:sticky;bottom:-24px;background:white;padding:16px 0;justify-content:space-between}
 .comparaison-semaine{margin-top:18px}.comparaison-semaine button.occupation-aesh:disabled{opacity:1;cursor:default}
+/* Contenir la largeur : la grille défile, pas la page entière. */
+.corps{min-width:0;grid-template-columns:minmax(0,1fr)}
+.comparaison-semaine{min-width:0;max-width:100%}
+.defile,.planning-horizontal{min-width:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom}
+.planning-horizontal{border:1px solid var(--line);border-radius:18px}
+.planning-horizontal:focus-visible{outline:3px solid var(--pole);outline-offset:2px}
+.planning-ab{display:flex;width:max-content;align-items:flex-start}
+.planning-ab > .comparaison-semaine{flex:0 0 1054px;width:1054px;max-width:none;margin:0}
+.planning-ab > .comparaison-semaine + .comparaison-semaine{border-left:3px solid var(--pole)}
+.planning-ab .defile{overflow:visible;border-radius:0}
+.planning-ab .grille-edt{border-radius:0;grid-template-columns:54px repeat(5,minmax(200px,1fr))}
+.planning-ab h2{margin:0;padding:12px;font-size:1rem}
+.planning-ab .semaine-repere{margin:0;border-radius:0}
+.planning-ab[data-affichage="jour"] > .comparaison-semaine{flex-basis:360px;width:360px}
+.planning-ab[data-affichage="jour"] .grille-edt{grid-template-columns:42px minmax(0,1fr)}
 </style>
 </head>
 <body>
@@ -457,7 +472,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-24g');
+  const m = await import('./app.js?v=2026-09-24h');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-24f');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

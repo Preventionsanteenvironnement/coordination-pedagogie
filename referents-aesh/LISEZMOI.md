@@ -253,3 +253,8 @@ Publication restante : commit/push par Brahim, puis remplacement des règles ave
 
 ### 24 septembre 2026 — Grille AESH toutes classes
 Vérification demandée et autorisée : le filtre AESH lit déjà toutes les affectations de la personne, indépendamment de la classe et du pôle affichés. Ajout du repère « Toutes ses classes » au titre, sans changement des calculs ou des droits. Test fictif dédié : trois niveaux MELEC, CAP 1/2 PSR et CAPa regroupés, alternance A/B et EDT type ; sept fichiers de tests réussis. Pas de contrôle des affectations réelles ni écriture distante. Fichiers : app.js, index.html (cache), tests/ab-type-reunions.test.mjs, LISEZMOI.md. Aucune nouvelle règle Firestore nécessaire. Commit/push laissés à Brahim ; .DS_Store préservé.
+
+
+### 24 septembre 2026 - A+B cote a cote
+Demande autorisee : fais le. app.js et index.html : A/B dans un seul conteneur horizontal, compte separe, toutes les classes de la personne ; largeur de page bornee et position horizontale conservee lors des rendus. Cache app 2026-09-24h. Rendu commun referents/Antoine. Aucune modification des calculs ou regles Firestore.
+Tests : sept fichiers automatises reussis. Navigateur local avec donnees fictives, format 390 px : page 390 px, zone 356 px, contenu 2112 px ; A/B sur la meme ligne, defilement clavier effectif. Clic cours B : bonne semaine et date du 21/09. EDT type puis B seule : pas de debordement de page ; aucune erreur console. Telephone physique et production non testes. Source miroir actualisee, application Electron installee inchangee. Aucun commit/push/deploiement ni ecriture distante. .DS_Store preserve.
