@@ -421,6 +421,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .grille-edt[data-vue="jour"][data-jour="0"] .jour-col[data-j="0"]{display:block}.grille-edt[data-vue="jour"][data-jour="1"] .jour-col[data-j="1"]{display:block}.grille-edt[data-vue="jour"][data-jour="2"] .jour-col[data-j="2"]{display:block}.grille-edt[data-vue="jour"][data-jour="3"] .jour-col[data-j="3"]{display:block}.grille-edt[data-vue="jour"][data-jour="4"] .jour-col[data-j="4"]{display:block}
 @media(max-width:700px){.presence-horaire{display:none!important}.grille-edt[data-vue="semaine"]{min-width:1054px;grid-template-columns:54px repeat(5,minmax(200px,1fr))}.grille-edt[data-vue="semaine"] .bloc-contenu b{font-size:.85rem;line-height:1.2}.grille-edt[data-vue="semaine"] .salle{display:none}.grille-edt[data-vue="semaine"] .presence-bande{font-size:.9rem}.corps{gap:10px}.equipe-compacte{grid-template-columns:1fr}.semaine-repere{font-size:.85rem}.bloc-contenu b{font-size:.85rem}}
 
+
+.verification-guide{width:min(640px,94vw);max-height:92dvh;overflow:auto;border:0;border-radius:20px;padding:24px;color:#17212b;background:#fff}
+.verification-guide .principal{background:#0f766e;color:#fff;border-color:#0f766e}
+.verification-guide h2{color:#0f766e}
+.verification-guide [data-resume]{font-size:16px;line-height:1.4}
+.verification-guide::backdrop{background:#152a3a99}
+.verification-guide label{display:block;margin:12px 0}
+.verification-guide fieldset{border:1px solid #cbd5e1;border-radius:12px;margin:14px 0;padding:14px}
+.verification-guide select{width:100%;max-width:100%}
+.verification-guide input,.verification-guide select,.verification-guide button{font:inherit;min-height:44px;padding:8px;border:1px solid #cbd5e1;border-radius:8px}
+.verification-guide input[type=checkbox],.verification-guide input[type=radio]{min-height:initial}
+.verification-guide footer{position:sticky;bottom:-24px;background:white;padding:16px 0;justify-content:space-between}
 </style>
 </head>
 <body>
@@ -444,8 +456,8 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-24c');
-  const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-24c');
+  const m = await import('./app.js?v=2026-09-24e');
+  const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-24e');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
 } catch (e) {

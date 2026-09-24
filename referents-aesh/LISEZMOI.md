@@ -200,3 +200,41 @@ console. Syntaxe et diff vérifiés. Vérification Firebase réelle non effectu�
 Sources modifiées : app.js, calculs.js, index.html, LISEZMOI.md et nouveau test
 indicateurs-reunions.test.mjs. Miroir source Electron régénéré par script officiel,
 app installée inchangée. Aucun commit/push/déploiement. .DS_Store conservé.
+
+
+## Vérification guidée des propositions Excel — 24/09/2026
+
+L’espace planning et les référents PSR-MELEC partagent le module `verification.js`.
+Le référent charge un fichier local au format `verification-psr-v1` depuis les réglages :
+quatre brouillons `verification_d01_20262027` à `verification_d04_20262027` sont créés
+dans `coordination_referents_aesh`, sans modifier les affectations. Le fichier réel
+reste hors du dépôt public. Ne pas importer les noms ou coordonnées des enseignants.
+
+Le parcours propose une journée à la fois, A puis B. Cours, service, heures et
+passages restent modifiables. Chaque journée acceptée sauvegarde le brouillon ;
+la reprise saute aux journées restant à vérifier. DP et présence/absence d’internat
+sont confirmées explicitement. Les réunions ne sont jamais importées ni modifiées.
+
+La confirmation finale est individuelle : remplacement borné des affectations PSR
+de l’AESH et des cours hors PSR explicitement sélectionnés, conservation des périodes
+antérieures/postérieures, des autres personnes et des renforts PFMP. Services DP,
+internat, PIAL et DAFI datés. Le calendrier précis prend le relais des forfaits à
+partir de la date choisie, comme dans les réglages ordinaires. Contrat limitant la fin.
+Le même moteur calcule A/B, vacances, PFMP, heures et conflits ; les chevauchements
+bloquent, les dépassements de volume figurent au récapitulatif.
+
+Enregistrement atomique avec historique, verrou de fiche AESH et contrôle de l’état
+d’ouverture : une modification concurrente impose de rouvrir la vérification. Une
+validation ne s’applique pas deux fois. Les ajustements ultérieurs passent par la grille.
+
+Règles : ajouter uniquement le type `verification` (contenu JSON ≤ 18000 caractères),
+en conservant les règles existantes. Le code personnel reste dans `accesPlanning`,
+pas dans les règles ni dans le dépôt. Le contrôle par code reste celui de l’application ;
+ces règles ne constituent pas une authentification serveur nominative.
+
+Tests : `node referents-aesh/tests/verification.test.mjs`, plus les tests existants.
+Les tests utilisent exclusivement des données fictives.
+
+Test utilisateur du 24/09 : les services datés sans forfait (h=0) sont maintenant
+comptés et conservés ; aucune heure forfaitaire n’est ajoutée avant leur début.
+Les totaux affichés conservent les centièmes, notamment pour les quarts d’heure.

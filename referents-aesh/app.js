@@ -1,3 +1,4 @@
+import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-24e';
 import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — application (coordination-pedagogie/referents-aesh/)
@@ -8,9 +9,9 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
 import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-24b';
-import * as K from './calculs.js?v=2026-09-24b';
+import * as K from './calculs.js?v=2026-09-24e';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
-import { enregistrerPlanning } from './enregistrement.js?v=2026-09-24b';
+import { enregistrerPlanning } from './enregistrement.js?v=2026-09-24d';
 import * as AV from './avatars.js?v=2026-09-24b';
 
 const DELAI = 15000;
@@ -64,7 +65,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      ne sont plus téléchargées non plus. Si Firebase réclame un index pour cette demande, on revient seul à
      l'ancienne (toute l'année) : la page continue de marcher. */
   const COL_HIST = COLLECTION + '_hist';
-  const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode'];
+  const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode', 'verification'];
   let arretPlanning = null;
   function ecouter(simple) {
     if (arretPlanning) { arretPlanning(); arretPlanning = null; }
@@ -797,6 +798,34 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     grille += `</div></div>`;
     return grille;
   }
+  function panneauVerification() {
+    if(P().id!=='PSR_MELEC') return '';
+    const ds=[...S.docs.values()].filter(d=>d.type==='verification' && PERSONNES.includes(d.aeshId));
+    return `<div class="carte pad"><h2>Vérifier les semaines A et B</h2>${ds.map(d=>`<button class="btn" data-a="verification" data-v="${esc(d.id)}">${esc(idx().aesh.get(d.aeshId)?.sigle || d.aeshId)} · ${d.statut==='valide'?'Validé ✓':'À vérifier'}</button>`).join('')}${!modePlanning?'<button class="btn" data-a="verification-import">Charger les propositions Excel préparées</button>':''}</div>`;
+  }
+  async function ecrireVerification(docs,base) {
+    if(!S.session || S.session.pole!=='PSR_MELEC') throw Error('Accès PSR requis.');
+    const resultat=await enregistrerPlanning({FS,db,collection:COLLECTION,historique:COL_HIST,docs,base,annee:S.annee,par:'PSR_MELEC',nouvelId:alea,maintenant:new Date().toISOString()});
+    resultat.forEach(d=>S.docs.set(d.id,d));versionDocs++;return resultat;
+  }
+  function lancerVerification(id) {
+    const d=S.docs.get(id);if(!d || d.type!=='verification' || d.statut==='valide') {toast('Ce planning a déjà été validé. Les ajustements restent possibles dans la grille.');return;}
+    ouvrirVerification({draft:d,base:new Map(S.docs),ctx:ctx(),enregistrer:ecrireVerification,ferme:()=>rendre(),nouvelId:alea});
+  }
+  function importerVerification() {
+    if(modePlanning || S.session?.pole!=='PSR_MELEC')return;
+    const input=document.createElement('input');input.type='file';input.accept='.json,application/json';
+    input.onchange=async()=>{try{
+      const file=input.files[0];if(!file || file.size>200000)throw Error('Fichier trop volumineux.');
+      const paquet=JSON.parse(await file.text());
+      if(paquet.format!=='verification-psr-v1' || paquet.annee!==S.annee || paquet.personnes?.length!==4)throw Error('Fichier de propositions non reconnu.');
+      const base=new Map(S.docs),annee=S.annee.replace('-',''),du=K.isoLocal(),au=raccourcis().find(r=>r.id==='annee')?.fin;
+      const docs=paquet.personnes.map(p=>({id:'verification_'+p.aeshId.slice(5)+'_'+annee,type:'verification',aeshId:p.aeshId,statut:'brouillon',contenu:JSON.stringify({lignes:p.lignes,notes:p.notes,valides:[],internat:null,dpConfirmee:false,du,au})}));
+      docs.forEach(d=>{lireBrouillon(d);if(base.has(d.id))throw Error('Des propositions existent déjà : elles sont conservées.');});
+      if(new Set(docs.map(d=>d.id)).size!==4)throw Error('Personne en double.');
+      ouvrir({type:'confirmer',titre:'Préparer la vérification',grand:'4 AESH · semaines A et B',lignes:[['Planning','Aucune affectation ne change. Antoine devra vérifier puis confirmer.']],bouton:'Mettre les propositions à disposition',travail:async()=>{await ecrireVerification(docs,base);return {};}});
+    }catch(e){toast(e.message,true);}};input.click();
+  }
   function ecranEdt() {
     const p = P(), nom = classeCourante(), k = S.edt.classes[nom], sem = S.C.semaine(S.lundi);
     const pf = (k.pfmp || []).filter(x => x.debut <= K.ajoute(S.lundi, 4) && x.fin >= S.lundi);
@@ -805,11 +834,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${modePlanning ? `<div class="classes" aria-label="Pôle">${POLES.map(q=>`<button data-a="planning-pole" data-v="${q.id}" aria-pressed="${q.id===p.id}">${esc(q.nom)}</button>`).join('')}</div>`:''}`;
     if(vue==='reunions') return tete+reunionsPole();
     const classes=`<div class="classes" role="group" aria-label="Classe">${classesDu(p.id).map(n=>`<button type="button" id="cls-${n}" data-a="classe" data-v="${n}" aria-pressed="${n===nom}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>`;
-    if(vue==='reglages') return tete+classes+`${modePlanning?'':lignePeriode()}
+    if(vue==='reglages') return tete+classes+panneauVerification()+`${modePlanning?'':lignePeriode()}
       <div class="carte pad"><h2>PFMP · ${esc(k.court)}</h2><p>${(k.pfmp||[]).map(x=>`${K.jjmm(x.debut)} → ${K.jjmm(x.fin)}`).join(' · ')||'Aucune période'}</p>${modePlanning?'':'<button class="btn" data-a="pfmp">Modifier les PFMP</button>'}</div>
       ${pf.length && !modePlanning ? carteLiberes(nom) : ''}${bandeauServices()}<div class="carte pad carte-reunions"><h2>Réunions</h2><button class="btn" data-a="edt-page" data-v="reunions">Réunion d’équipe · Réunion instit.</button></div><button class="btn" data-a="planning-excel">Exporter en Excel · A et B</button>`;
     const id=S.route.p.aesh, personne=K.aeshActifs(idx(),P().id).find(a=>a.id===id), bilan=personne?K.bilan(ctx(),id,S.lundi):null;
-    return tete+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)} · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}</h2>`:classes)+`
+    return tete+(modePlanning && [...S.docs.values()].some(d=>d.type==='verification' && d.statut==='brouillon')?panneauVerification():'')+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)} · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}</h2>`:classes)+`
       <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label></div>
       ${S.route.p.affichage==='jour'?`<nav class="edt-jours" aria-label="Jour">${K.JOURS_C.map((j,i)=>`<button type="button" data-a="edt-jour" data-v="${i}" aria-pressed="${+(S.route.p.jour||0)===i}">${j}</button>`).join('')}</nav>`:''}
       ${personne?grillePersonne(personne):grilleClasse(nom,!peutPlacer(nom))}`;
@@ -1262,12 +1291,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-24b'),F=await import('./fichiers.js?v=2026-09-24b');
+      const X=await import('./exports.js?v=2026-09-24e'),F=await import('./fichiers.js?v=2026-09-24b');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-24b'), F = await import('./fichiers.js?v=2026-09-24b');
+    const X = await import('./exports.js?v=2026-09-24e'), F = await import('./fichiers.js?v=2026-09-24b');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1711,13 +1740,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
     if (modePlanning) {
-      const permis = ['personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
+      const permis = ['verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
       if (!permis.includes(a)) return;
       if (a === 'sortir') { awaitSortirPlanning(); return; }
       if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
     }
     if (a === 'voile') { if (ev.target === b && !S.envoi && !(S.feuille && S.feuille.type === 'confirmer' && !S.feuille.fait)) fermer(); return; }
     switch (a) {
+      case 'verification': lancerVerification(v); return;
+      case 'verification-import': importerVerification(); return;
       case 'service-detail': if(/^[0-4]$/.test(v)) ouvrir({type:'service-detail',jour:+v}); return;
       case 'edt-page': if(['planning','reglages','reunions'].includes(v)) aller('edt',{...S.route.p,vue:v}); return;
       case 'personne-cours': {const c=S.edt.cours[v];if(!c)return;const nom=c.cls.find(n=>classesDu(P().id).includes(n));if(nom && peutPlacer(nom))ouvrirPlacement(v,nom);else ouvrir({type:'lecture',coursId:v,classe:c.cls[0]});return;}

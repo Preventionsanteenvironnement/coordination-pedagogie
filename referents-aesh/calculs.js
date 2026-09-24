@@ -14,7 +14,7 @@ export const z2 = n => String(n).padStart(2, '0');
 export const min = h => { const [a, b] = String(h).split(':').map(Number); return a * 60 + b; };
 export const hDe = m => `${z2(Math.floor(m / 60))}:${z2(m % 60)}`;
 export const hFr = h => RE_HEURE.test(h || '') ? `${parseInt(h, 10)}h${h.slice(3) === '00' ? '' : h.slice(3)}` : '';
-export const fmtH = x => { const v = Math.round((Number(x) || 0) * 100) / 100; const s = Number.isInteger(v) ? String(v) : String(Math.round(v * 10) / 10).replace('.', ','); return s + ' h'; };
+export const fmtH = x => { const v = Math.round((Number(x) || 0) * 100) / 100; const s = Number.isInteger(v) ? String(v) : String(v).replace('.', ','); return s + ' h'; };
 const dUTC = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
 export const ajoute = (iso, n) => { const d = dUTC(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 export const jourSemaine = iso => (dUTC(iso).getUTCDay() + 6) % 7;          // lundi = 0
@@ -151,7 +151,7 @@ export function normaliserAesh(d, polesAutorises, cat) {
   Object.entries(d.heures && typeof d.heures === 'object' ? d.heures : {}).forEach(([q, v]) => { if (ok(q) && nombreOk(v) != null) heures[q] = nombreOk(v); });
   const r = d.reunion && typeof d.reunion === 'object' && Number.isInteger(+d.reunion.jour) && +d.reunion.jour >= 0 && +d.reunion.jour <= 4 && RE_HEURE.test(d.reunion.debut || '') && RE_HEURE.test(d.reunion.fin || '') ? { jour: +d.reunion.jour, debut: d.reunion.debut, fin: d.reunion.fin } : null;
   const out = { ...d, sigle: String(d.sigle || '?').slice(0, 6), equipes, heures, contrat: nombreOk(d.contrat), reunion: r, actif: d.actif !== false,
-    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) > 0).map(x => ({ ...x, horaires:Array.isArray(x.horaires)?x.horaires.filter(h=>h && Number.isInteger(h.jour) && h.jour>=0 && h.jour<5 && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'')):[], nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
+    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) !== null && (nombreOk(x.h) > 0 || (Array.isArray(x.horaires) && x.horaires.length > 0))).map(x => ({ ...x, horaires:Array.isArray(x.horaires)?x.horaires.filter(h=>h && Number.isInteger(h.jour) && h.jour>=0 && h.jour<5 && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'')):[], nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
       jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [] })) : undefined,
     jours: Array.isArray(d.jours) ? d.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4) : undefined };
   if (out.services === undefined) delete out.services; if (out.jours === undefined) delete out.jours;
@@ -368,7 +368,7 @@ export const institutionCetteSemaine = (I, lundi) => I.reunions.some(r => lundiD
 /* Services d'un AESH : liste {nom, h}. Les anciennes fiches (cantine / internat / service) sont lues telles quelles. */
 export function servicesDe(a) {
   const jours = x => Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [];
-  if (Array.isArray(a.services)) return a.services.filter(x => x && Number.isFinite(+x.h) && +x.h > 0).map(x => ({ ...x, nom: String(x.nom || 'Service'), h: +x.h, jours: jours(x) }));
+  if (Array.isArray(a.services)) return a.services.filter(x => x && Number.isFinite(+x.h) && +x.h >= 0 && (+x.h > 0 || (Array.isArray(x.horaires) && x.horaires.length > 0))).map(x => ({ ...x, nom: String(x.nom || 'Service'), h: +x.h, jours: jours(x) }));
   return [['Cantine', a.cantine], ['Internat', a.internat], [a.serviceLib || 'Autre service', a.service]].filter(([, h]) => +h > 0).map(([nom, h]) => ({ nom, h: +h, jours: [] }));
 }
 /* Cet AESH assure-t-il ce service ce jour-là ? (les jours sont saisis dans le bandeau sous la grille ou sur sa fiche) */
