@@ -433,6 +433,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .verification-guide input,.verification-guide select,.verification-guide button{font:inherit;min-height:44px;padding:8px;border:1px solid #cbd5e1;border-radius:8px}
 .verification-guide input[type=checkbox],.verification-guide input[type=radio]{min-height:initial}
 .verification-guide footer{position:sticky;bottom:-24px;background:white;padding:16px 0;justify-content:space-between}
+.comparaison-semaine{margin-top:18px}.comparaison-semaine button.occupation-aesh:disabled{opacity:1;cursor:default}
 </style>
 </head>
 <body>
@@ -456,8 +457,8 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-24e');
-  const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-24e');
+  const m = await import('./app.js?v=2026-09-24f');
+  const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-24f');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
 } catch (e) {

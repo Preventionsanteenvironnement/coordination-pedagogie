@@ -1,3 +1,4 @@
+import { semainesAB, contexteType } from './vues-planning.js?v=2026-09-24f';
 import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-24e';
 import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
@@ -9,7 +10,7 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
 import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-24b';
-import * as K from './calculs.js?v=2026-09-24e';
+import * as K from './calculs.js?v=2026-09-24f';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-24d';
 import * as AV from './avatars.js?v=2026-09-24b';
@@ -551,7 +552,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const trois = (o, m, r) => chg(o, m) && chg(o, r) && chg(m, r), out = [];
     const num = k => x => nombre((x || {})[k]);
     [['sigle', 'Sigle', x => x.sigle], ['contrat', 'Contrat', num('contrat')], ['presence', 'Présence élève', num('presence')], ['reunionH', 'Réunion', num('reunionH')],
-      ['finContrat', 'Durée du contrat', x => x.finContrat || null], ['rattachement', 'Équipe', x => x.rattachement || null], ['reunion', 'Jour de la réunion', x => x.reunion || null]]
+      ['finContrat', 'Durée du contrat', x => x.finContrat || null], ['rattachement', 'Équipe', x => x.rattachement || null], ['reunion', 'Jour de la réunion', x => x.reunion || null], ['reunionsSupplementaires','Réunions supplémentaires',x=>x.reunionsSupplementaires||[]]]
       .forEach(([, lib, v]) => { if (trois(v(orig), v(a), v(recent))) out.push(lib); });
     const fl = x => K.filieresDe(x) || filieresParDefaut(x), dp = x => K.disposDe(x), sv = x => Object.fromEntries(K.servicesDe(x).map(y => [y.nom, y]));
     [[fl, id => (filiere(id) || { nom: id }).nom], [dp, k => `${K.JOURS_C[+k[0]]} ${k[1] === 'M' ? 'matin' : 'ap.-midi'}`], [sv, nom => nom]].forEach(([f, lib]) => {
@@ -596,8 +597,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (dv(o) !== dv(a)) l.push(['Quand il travaille', dv(o), dv(a)]);
     const r = x => x && K.RE_HEURE.test(x.debut || '') ? `${K.JOURS[x.jour]} ${K.hFr(x.debut)}–${K.hFr(x.fin)}` : '—';
     if (r(o.reunion) !== r(a.reunion)) l.push(['Jour de la réunion', r(o.reunion), r(a.reunion)]);
+    if(JSON.stringify(o.reunionsSupplementaires||[])!==JSON.stringify(a.reunionsSupplementaires||[])) {const desc=x=>(x.reunionsSupplementaires||[]).map(r=>`${nomPole(r.pole)} · ${K.JOURS[r.jour]} ${r.debut}–${r.fin} · ${r.semaines} · ${r.du} → ${r.au}`).join(' ; ')||'Aucune';l.push(['Réunions supplémentaires',desc(o),desc(a)]);}
     if (nombre(o.reunionH) !== nombre(a.reunionH)) l.push(['Réunion', K.fmtH(K.heuresReunion(o)), K.fmtH(K.heuresReunion(a))]);
     return l;
+  }
+  function champsReunionsSupplementaires(a) {
+    const lignes=a.reunionsSupplementaires||[];
+    const champ=(r,i,k,label,type='text')=>`<label>${label}<input id="rs-${i}-${k}" type="${type}" data-i="reu-extra-champ" data-index="${i}" data-champ="${k}" value="${esc(r[k])}"></label>`;
+    return `<div class="champ" style="grid-template-columns:1fr"><h3>Réunions supplémentaires</h3>${lignes.map((r,i)=>`<fieldset><legend>Réunion ${i+2}</legend><div class="ligne"><label>Pôle <select data-i="reu-extra-champ" data-index="${i}" data-champ="pole">${POLES.map(p=>`<option value="${p.id}" ${p.id===r.pole?'selected':''}>${p.nom}</option>`).join('')}</select></label><label>Jour <select data-i="reu-extra-champ" data-index="${i}" data-champ="jour">${K.JOURS.map((j,n)=>`<option value="${n}" ${n===r.jour?'selected':''}>${j}</option>`).join('')}</select></label>${champ(r,i,'debut','De','time')}${champ(r,i,'fin','À','time')}<label>Semaines <select data-i="reu-extra-champ" data-index="${i}" data-champ="semaines">${['AB','A','B'].map(v=>`<option value="${v}" ${v===r.semaines?'selected':''}>${v==='AB'?'A et B':v}</option>`).join('')}</select></label>${champ(r,i,'du','À partir du','date')}${champ(r,i,'au','Jusqu’au','date')}</div><small>Conservée même lorsqu’une réunion institutionnelle remplace la réunion principale.</small><button class="btn petit" data-a="reu-extra-retirer" data-v="${i}">Retirer cette réunion</button></fieldset>`).join('')}<button class="btn" data-a="reu-extra-ajouter">+ Ajouter une réunion</button></div>`;
   }
   function ecranFiche() {
     const f = formFiche(), p = P();
@@ -634,6 +641,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
             ${reu.debut ? `<button type="button" class="lien" id="f-reu-non" data-a="reu-aucune">aucune</button>` : ''}</div>
           ${prochaineReunion ? `<small class="muted" style="grid-column:1/-1">Prochaine : ${esc(K.dateLongue(prochaineReunion))}, ${K.hFr(reu.debut)}–${K.hFr(reu.fin)}</small>` : ''}</div>
 `}
+        ${champsReunionsSupplementaires(a)}
         ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
         <div class="champ ${estModif(libFilieres(o) !== libFilieres(a))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Intervient en ${aide('intervient')}</b><small>${esc(libFilieres(a))}</small>${aideTexte('intervient')}</span><button type="button" class="btn petit" id="f-filieres" data-a="filieres">Modifier</button></div>
         ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option value="${esc(t)}" ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${esc(libelleService(t))}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
@@ -826,6 +834,27 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ouvrir({type:'confirmer',titre:'Préparer la vérification',grand:'4 AESH · semaines A et B',lignes:[['Planning','Aucune affectation ne change. Antoine devra vérifier puis confirmer.']],bouton:'Mettre les propositions à disposition',travail:async()=>{await ecrireVerification(docs,base);return {};}});
     }catch(e){toast(e.message,true);}};input.click();
   }
+  function grillesPlanning(personne,nom) {
+    const choix=S.route.p.parite, paire=semainesAB(S.C,S.lundi), type=!!S.route.p.edtType;
+    const dates=choix==='AB'?[paire.A,paire.B]:[type && !S.C.parite(S.lundi)?paire.A:S.lundi];
+    return (type?'<p class="bandeau">EDT type · organisation habituelle pour la période affichée. Sans absences, vacances, PFMP ni réunions ponctuelles. Consultation.</p>':'')+dates.map(l=>{
+      const cx=type?contexteType(ctx()):ctx(), ancien=S.lundi;let html;
+      if(personne) html=grillePersonne(personne,l,cx,type);
+      else if(type) {
+        const presents=K.aeshActifs(cx.I).flatMap(a=>K.occupations(cx,a.id,l).filter(o=>o.cours?.cls.includes(nom)).map(o=>({...o,sigle:a.sigle})));
+        const occ=S.edt.classes[nom].cours.map(id=>S.edt.cours[id]).filter(c=>cx.C.coursSemaine(c,l)).map(c=>({j:c.j,debut:c.d,fin:c.f,cours:c,label:c.lib,detail:presents.filter(o=>o.cours.id===c.id).map(o=>`${o.sigle} ${K.hFr(o.debut)}–${K.hFr(o.fin)}`).join(' · ')}));
+        const horsCours=new Map();
+        K.aeshActifs(cx.I,P().id).forEach(a=>K.occupations(cx,a.id,l).filter(o=>['service','reunion'].includes(o.type)).forEach(o=>{
+          const cle=[o.type,o.label,o.j,o.debut,o.fin].join('|');
+          if(!horsCours.has(cle))horsCours.set(cle,{...o,detail:a.sigle});
+          else horsCours.get(cle).detail+=' · '+a.sigle;
+        }));
+        html=grillePersonne({id:'type-classe'},l,cx,true,[...occ,...horsCours.values()]);
+      }else {try{S.lundi=l;html=grilleClasse(nom,!peutPlacer(nom));}finally{S.lundi=ancien;}}
+      const b=personne?K.bilan(cx,personne.id,l):null;
+      return `<section class="comparaison-semaine">${dates.length>1 && b?`<h2>Semaine ${S.C.parite(l)} · ${K.fmtH(b.total)}${b.contrat==null?'':` / ${K.fmtH(b.contrat)}`}</h2>`:''}${html.replaceAll('data-a=',`data-lundi="${l}" data-a=`)}</section>`;
+    }).join('');
+  }
   function ecranEdt() {
     const p = P(), nom = classeCourante(), k = S.edt.classes[nom], sem = S.C.semaine(S.lundi);
     const pf = (k.pfmp || []).filter(x => x.debut <= K.ajoute(S.lundi, 4) && x.fin >= S.lundi);
@@ -837,11 +866,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(vue==='reglages') return tete+classes+panneauVerification()+`${modePlanning?'':lignePeriode()}
       <div class="carte pad"><h2>PFMP · ${esc(k.court)}</h2><p>${(k.pfmp||[]).map(x=>`${K.jjmm(x.debut)} → ${K.jjmm(x.fin)}`).join(' · ')||'Aucune période'}</p>${modePlanning?'':'<button class="btn" data-a="pfmp">Modifier les PFMP</button>'}</div>
       ${pf.length && !modePlanning ? carteLiberes(nom) : ''}${bandeauServices()}<div class="carte pad carte-reunions"><h2>Réunions</h2><button class="btn" data-a="edt-page" data-v="reunions">Réunion d’équipe · Réunion instit.</button></div><button class="btn" data-a="planning-excel">Exporter en Excel · A et B</button>`;
-    const id=S.route.p.aesh, personne=K.aeshActifs(idx(),P().id).find(a=>a.id===id), bilan=personne?K.bilan(ctx(),id,S.lundi):null;
-    return tete+(modePlanning && [...S.docs.values()].some(d=>d.type==='verification' && d.statut==='brouillon')?panneauVerification():'')+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)} · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}</h2>`:classes)+`
+    const id=S.route.p.aesh, personne=K.aeshActifs(idx(),P().id).find(a=>a.id===id), bilan=personne?K.bilan(S.route.p.edtType?contexteType(ctx()):ctx(),id,S.lundi):null;
+    return tete+(modePlanning && [...S.docs.values()].some(d=>d.type==='verification' && d.statut==='brouillon')?panneauVerification():'')+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)}${S.route.p.parite==='AB'?'':` · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}`}</h2>`:classes)+`
       <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label></div>
+      <div class="ligne"><div class="choix" role="group" aria-label="Alternance">${['A','B','AB'].map(v=>`<button data-a="edt-parite" data-v="${v}" aria-pressed="${(S.route.p.parite || S.C.parite(S.lundi))===v}">${v==='AB'?'A+B':v}</button>`).join('')}</div><button class="btn" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}">EDT type</button></div>
       ${S.route.p.affichage==='jour'?`<nav class="edt-jours" aria-label="Jour">${K.JOURS_C.map((j,i)=>`<button type="button" data-a="edt-jour" data-v="${i}" aria-pressed="${+(S.route.p.jour||0)===i}">${j}</button>`).join('')}</nav>`:''}
-      ${personne?grillePersonne(personne):grilleClasse(nom,!peutPlacer(nom))}`;
+      ${grillesPlanning(personne,nom)}`;
   }
   function reunionsPole() {
     const liste=K.aeshActifs(idx(),P().id),groupes=P().id==='PSR_MELEC'?['PSR','MELEC']:[P().id];
@@ -849,11 +879,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       return `<div class="carte pad carte-reunions"><h2>Réunion d’équipe · ${esc(g)}</h2>${l.length?l.map(a=>{const r=K.reunionDe(a);return `<p><b style="color:${couleurAesh(a.id)}">${esc(a.sigle)}</b> · ${r?`${K.JOURS[r.jour]} ${K.hFr(r.debut)}–${K.hFr(r.fin)}`:'Horaire à renseigner dans sa fiche'}</p>`;}).join(''):'<p>Aucun AESH rattaché</p>'}</div>`;}).join('');
     return equipes+(modePlanning?`<div class="carte pad"><h2>Réunion instit.</h2>${idx().reunions.map(r=>`<p>${K.dateLongue(r.date)} · ${K.hFr(r.debut)}–${K.hFr(r.fin)}</p>`).join('')||'<p>Aucune date prévue</p>'}<p>Dates fixées par les référents.</p></div>`:ecranReunions());
   }
-  function grillePersonne(a) {
-    const occ=K.occupations(ctx(),a.id,S.lundi).filter(o=>!['repos','vacances'].includes(o.type)),fin=Math.max(18*60,...occ.map(o=>K.min(o.fin))),px=1.25;
-    return `<div class="semaine-repere">Semaine ${S.C.parite(S.lundi)||'—'} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}<small>${K.jjmm(K.ajoute(S.lundi,i))}</small></div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
+  function grillePersonne(a,lundi=S.lundi,cx=ctx(),type=false,liste=null) {
+    const occ=(liste || K.occupations(cx,a.id,lundi)).filter(o=>!['repos','vacances'].includes(o.type)),fin=Math.max(18*60,...occ.map(o=>K.min(o.fin))),px=1.25;
+    return `<div class="semaine-repere">${type?'EDT type · ':''}Semaine ${S.C.parite(lundi)||'—'} · ${K.jjmm(lundi)}–${K.jjmm(K.ajoute(lundi,4))}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}<small>${K.jjmm(K.ajoute(lundi,i))}</small></div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
       const l=occ.filter(o=>o.j===i),cols=[];l.forEach(o=>{let n=cols.findIndex(c=>c.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
-      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(K.min(o.fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}"><b>${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
+      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(K.min(o.fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}"><b>${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
     }).join('')}</div></div>`;
   }
 
@@ -1291,12 +1321,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-24e'),F=await import('./fichiers.js?v=2026-09-24b');
+      const X=await import('./exports.js?v=2026-09-24f'),F=await import('./fichiers.js?v=2026-09-24b');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-24e'), F = await import('./fichiers.js?v=2026-09-24b');
+    const X = await import('./exports.js?v=2026-09-24f'), F = await import('./fichiers.js?v=2026-09-24b');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1530,11 +1560,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (!a.sigle) { toast('Le sigle est vide.', true); return; }
     const doublon = [...I.aesh.values()].find(x => x.id !== a.id && x.actif !== false && K.cleSigle(x.sigle) === K.cleSigle(a.sigle));
     if (doublon) { toast(`Le sigle ${a.sigle} est déjà utilisé.`, true); return; }
+    if((a.reunionsSupplementaires||[]).length>12 || K.reunionsSupplementairesDe(a).length!==(a.reunionsSupplementaires||[]).length || (a.reunionsSupplementaires||[]).some(r=>!POLES.some(p=>p.id===r.pole))){toast('Vérifiez les dates et horaires des réunions supplémentaires (12 maximum).',true);return;}
     const nouveau = f.id === 'nouveau' && !f.existant;
+    const cx={...ctx(),I:{...idx(),aesh:new Map(idx().aesh)}};cx.I.aesh.set(a.id,a);
+    const alertesReunions=[...new Set((a.reunionsSupplementaires||[]).flatMap(r=>K.lundisEntre(S.C,r.du,r.au).flatMap(l=>(K.bilan(cx,a.id,l)?.alertes||[]).filter(x=>['conflit','contrat'].includes(x.type)).map(x=>`${K.dateCourte(l)} : ${x.texte}`))))];
     const ch = changements(f);
     const recent0 = a.id ? idx().aesh.get(a.id) : null, entreTemps = recent0 && f.orig && recent0.version != null && recent0.version !== f.orig.version;
     confirmerPuis({ titre: nouveau ? 'Ajouter cet AESH ?' : 'Vous confirmez ?', grand: a.sigle, lignes: ch.map(l => nouveau ? [l[0], l[2]] : l), bouton: nouveau ? 'Ajouter' : 'Confirmer', faitSous: nouveau ? `${a.sigle} est dans ${p.nom}` : '',
-      avert: entreTemps ? `Cette fiche a été modifiée entre-temps par ${nomPole(recent0.par) || 'un autre référent'} : seuls vos changements ci-dessus seront appliqués, le reste est conservé.` : '' }, async () => {
+      avert: alertesReunions.join('\n') + (entreTemps ? `Cette fiche a été modifiée entre-temps par ${nomPole(recent0.par) || 'un autre référent'} : seuls vos changements ci-dessus seront appliqués, le reste est conservé.` : '') }, async () => {
       /* B01 : on repart de la fiche la plus récente et on n'y applique que ce qui a été changé ici.
          Lot 2 (18/09) : « la plus récente » est relue sur le serveur au moment d'écrire (transaction). */
       const orig = f.orig || {};
@@ -1565,6 +1598,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
           [...new Set([...Object.keys(o), ...Object.keys(n)])].forEach(k => { if (o[k] !== n[k]) { if (n[k]) r[k] = n[k]; else delete r[k]; } });
           doc.dispos = r; }
         if (diff(orig.reunion, a.reunion)) doc.reunion = a.reunion;
+        if(diff(orig.reunionsSupplementaires||[],a.reunionsSupplementaires||[])){doc.reunionsSupplementaires=a.reunionsSupplementaires||[];doc.revisionPlanning=(Number(doc.revisionPlanning)||0)+1;}
         /* B01 : les filières se fusionnent une par une, comme les pôles — un autre référent a pu en ajouter entre-temps. */
         doc.filieres = { ...(K.filieresDe(recent) || filieresParDefaut(recent)) };
         [...new Set([...Object.keys(orig.filieres || {}), ...Object.keys(a.filieres || {})])].forEach(id => {
@@ -1599,7 +1633,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       doc.reunionH = borne(doc.reunionH); if (doc.reunionH != null) doc.reunionH = Math.min(20, doc.reunionH);
       if (doc.reunionH == null) delete doc.reunionH;
       doc.heures = Object.fromEntries(Object.entries(doc.heures).map(([k, v]) => [k, borne(v)]).filter(([, v]) => v != null));
-      doc.services = (doc.services || []).filter(x => x && borne(x.h) > 0).map(x => ({ ...x, nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h), jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => j >= 0 && j <= 4))].sort() : [] }));
+      doc.services = (doc.services || []).filter(x => x && (borne(x.h) > 0 || (Array.isArray(x.horaires) && x.horaires.length))).map(x => ({ ...x, nom: String(x.nom || 'Autre service').trim().slice(0, 40) || 'Autre service', h: borne(x.h), jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => j >= 0 && j <= 4))].sort() : [] }));
       doc.dispos = K.disposDe(doc); delete doc.jours; delete doc.cantine; delete doc.internat; delete doc.service; delete doc.serviceLib;
       doc.actif = true;
       return doc;
@@ -1739,8 +1773,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function gererClic(ev) {
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
+    if(b.dataset.lundi && K.RE_DATE.test(b.dataset.lundi)){S.lundi=b.dataset.lundi;if(S.route.p.parite!=='AB')S.route.p.parite=S.C.parite(S.lundi);}
     if (modePlanning) {
-      const permis = ['verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
+      const permis = ['edt-parite','edt-type','verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
       if (!permis.includes(a)) return;
       if (a === 'sortir') { awaitSortirPlanning(); return; }
       if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
@@ -1752,6 +1787,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'service-detail': if(/^[0-4]$/.test(v)) ouvrir({type:'service-detail',jour:+v}); return;
       case 'edt-page': if(['planning','reglages','reunions'].includes(v)) aller('edt',{...S.route.p,vue:v}); return;
       case 'personne-cours': {const c=S.edt.cours[v];if(!c)return;const nom=c.cls.find(n=>classesDu(P().id).includes(n));if(nom && peutPlacer(nom))ouvrirPlacement(v,nom);else ouvrir({type:'lecture',coursId:v,classe:c.cls[0]});return;}
+      case 'edt-parite': if(['A','B','AB'].includes(v)){if(v!=='AB')S.lundi=semainesAB(S.C,S.lundi)[v];aller('edt',{...S.route.p,parite:v});} return;
+      case 'edt-type': aller('edt',{...S.route.p,edtType:!S.route.p.edtType});return;
       case 'edt-vue': if(['jour','semaine'].includes(v)) aller('edt',{...S.route.p,affichage:v},{remplacer:true}); return;
       case 'edt-jour': if(/^[0-4]$/.test(v)) aller('edt',{...S.route.p,jour:v},{remplacer:true}); return;
       case 'besoin-placer': if(S.feuille?.type==='besoin-detail' && peutPlacer(S.feuille.classe)){const nom=S.feuille.classe; S.feuille=null; ouvrirPlacement(v,nom);} return;
@@ -1773,7 +1810,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'fond': { const n = document.documentElement.dataset.fond === 'blanc' ? 'clair' : 'blanc'; document.documentElement.dataset.fond = n; lsEcrit(K_FOND, n); S.menu = false; rendre(); return; }
       case 'vu': S.vu = v === S.session.pole ? null : v; S.menu = false; S.form = null; S.exp.ids = []; rendre(); return;
       case 'sortir': S.session = null; lsEcrit(K_SESSION, null); S.vu = null; S.menu = false; S.route = { e: 'code', p: {} }; history.replaceState({ e: 'code', p: {}, n: 0 }, ''); S.n = 0; rendre({ haut: true }); return;
-      case 'semaine': S.lundi = +v === 0 ? semaineParDefaut() : K.ajoute(S.lundi, +v); rendre({ focus: b.id }); return;
+      case 'semaine': S.lundi = +v === 0 ? semaineParDefaut() : K.ajoute(S.lundi, +v); if(S.route.p.parite!=='AB')delete S.route.p.parite; rendre({ focus: b.id }); return;
       case 'fiche': S.form = null; aller('fiche', { id: v }); return;
       case 'pas': {
         /* Pas de nouveau rendu à chaque appui : des appuis rapides ne doivent jamais se perdre. */
@@ -1787,6 +1824,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         clearTimeout(gererClic.t); gererClic.t = setTimeout(() => { if (S.route.e === 'fiche' && S.form === f && !S.feuille) rendre({ focus: document.activeElement && document.activeElement.id }); }, 900);
         return;
       }
+      case 'reu-extra-ajouter': {const a=S.form.a;a.reunionsSupplementaires=a.reunionsSupplementaires||[];a.reunionsSupplementaires.push({pole:P().id,jour:0,debut:'13:00',fin:'14:00',semaines:'AB',du:K.isoLocal(),au:raccourcis().find(x=>x.id==='annee').fin});rendre();return;}
+      case 'reu-extra-retirer': S.form.a.reunionsSupplementaires.splice(+v,1);rendre();return;
       case 'reu-jour': { const f = S.form, r = f.a.reunion || {}; f.a.reunion = { jour: +v, debut: r.debut || '13:00', fin: r.fin || '14:00' }; rendre({ focus: b.id }); return; }
       case 'reu-aucune': S.form.a.reunion = null; rendre(); return;
       case 'fin-aucune': S.form.a.finContrat = ''; rendre(); return;
@@ -2046,6 +2085,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       return;
     }
     if (k === 'fin-contrat') { f.a.finContrat = t.value || ''; if (ev.type === 'change') rendre({ focus: t.id }); return; }
+    if(k==='reu-extra-champ'){const r=f.a.reunionsSupplementaires?.[+t.dataset.index];if(r)r[t.dataset.champ]=t.dataset.champ==='jour'?+t.value:t.value;return;}
     if (k === 'reu-h') { f.a.reunion = { ...(f.a.reunion || { jour: 0 }), debut: t.value, fin: K.hDe(K.min(t.value) + 60) }; rendre({ focus: t.id }); return; }
     if (k === 'abs-du') { f.du = t.value; if (f.au < f.du) f.au = f.du; if (ev.type === 'change') rendre({ focus: t.id }); return; }
     if (k === 'abs-au') { f.au = t.value; if (ev.type === 'change') rendre({ focus: t.id }); return; }

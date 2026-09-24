@@ -238,3 +238,14 @@ Les tests utilisent exclusivement des données fictives.
 Test utilisateur du 24/09 : les services datés sans forfait (h=0) sont maintenant
 comptés et conservés ; aucune heure forfaitaire n’est ajoutée avant leur début.
 Les totaux affichés conservent les centièmes, notamment pour les quarts d’heure.
+
+
+## 24 septembre 2026 — A/B, EDT type et réunions supplémentaires
+
+Lot autorisé par « vas y ». Référents et Antoine utilisent les mêmes boutons A, B, A+B et EDT type. A+B affiche deux grilles distinctes avec comptes séparés par AESH. EDT type est une consultation de l’organisation habituelle pour les dates de référence affichées : absences, vacances, PFMP, renforts PFMP et réunions institutionnelles masqués ; contrats, alternance et dates de validité conservés. Recliquer revient au planning daté.
+
+Dans la fiche AESH, ajout de réunions supplémentaires (pôle, jour, horaires, A/B, début/fin). Elles comptent dans les heures et restent présentes lorsque l’institutionnelle remplace la réunion principale. Chevauchement ou dépassement : avertissement avant confirmation, sans blocage imposé. Champ partagé `reunionsSupplementaires`, préservé par la passerelle source Electron. Application Electron installée non remplacée.
+
+Validation : sept fichiers de tests automatisés réussis ; navigateur avec données fictives, vue A+B, retour EDT type, bonne semaine à l’ouverture d’un cours, ajout/enregistrement d’une réunion puis présence en grille et décompte. Aucune donnée réelle écrite. Synchronisation multi-utilisateur réelle et règles en production non testées dans ce lot.
+
+Publication restante : commit/push par Brahim, puis remplacement des règles avec le fichier complet `/Users/brahms/Documents/Codex/2026-09-22/va/outputs/FIRESTORE-COMPLET-REUNIONS-SUPPLEMENTAIRES-2026-09-24.txt`. Ce fichier ajoute uniquement le champ optionnel à la validation AESH (liste, 12 maximum). Aucun déploiement ni commit/push effectué par l’agent.

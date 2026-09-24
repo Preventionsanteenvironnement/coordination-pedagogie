@@ -5,7 +5,7 @@ const kURI=uri(fs.readFileSync(new URL('../calculs.js',import.meta.url),'utf8'))
 const dURI=uri(fs.readFileSync(new URL('../donnees.js',import.meta.url),'utf8'));
 const K=await import(kURI);
 assert.equal(K.fmtH(2.25),'2,25 h','Les quarts d’heure restent précis à l’affichage');
-const V=await import(uri(fs.readFileSync(new URL('../verification.js',import.meta.url),'utf8').replace('./calculs.js?v=2026-09-24e',kURI).replace('./donnees.js?v=2026-09-24b',dURI)));
+const V=await import(uri(fs.readFileSync(new URL('../verification.js',import.meta.url),'utf8').replace('./calculs.js?v=2026-09-24f',kURI).replace('./donnees.js?v=2026-09-24b',dURI)));
 const {enregistrerPlanning}=await import(uri(fs.readFileSync(new URL('../enregistrement.js',import.meta.url),'utf8')));
 const du=K.ajoute(K.lundiDe(K.isoLocal()),7),au=K.ajoute(du,11);
 const c={id:'test',lib:'Cours fictif',j:0,d:'09:00',f:'11:00',sem:'TOUTES',cls:['C1PSR']};

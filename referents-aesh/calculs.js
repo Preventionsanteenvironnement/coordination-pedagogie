@@ -247,7 +247,12 @@ export function prevuPourClasse(a, cat, classe) {
 }
 /* Heures de réunion par semaine : saisies par le référent (1 h tant qu'il n'a rien changé). */
 export const reunionFixePsr = a => ['aesh_d01','aesh_d02','aesh_d03','aesh_d04'].includes(a?.id) || !!a?.filieres?.PSR || !!a?.filieres?.MELEC || (!!a?.equipes?.PSR_MELEC && !Object.keys(a?.filieres || {}).length);
-export const heuresReunion = a => reunionFixePsr(a) ? 1 : Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1;
+export function reunionsSupplementairesDe(a) {
+  return (Array.isArray(a?.reunionsSupplementaires)?a.reunionsSupplementaires:[]).filter(r=>r && Number.isInteger(r.jour) && r.jour>=0 && r.jour<5 && RE_HEURE.test(r.debut||'') && RE_HEURE.test(r.fin||'') && r.fin>r.debut && ['A','B','AB'].includes(r.semaines) && RE_DATE.test(r.du||'') && RE_DATE.test(r.au||'') && r.du<=r.au);
+}
+export const heuresReunion = a => (reunionFixePsr(a) ? 1 : Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1)
+  + Math.max(...['A','B'].map(s=>reunionsSupplementairesDe(a).filter(r=>r.semaines==='AB'||r.semaines===s).reduce((t,r)=>t+duree(r.debut,r.fin),0)));
+
 /* Fin de contrat d'un AESH : après cette date, il n'est plus là. Vide = toute l'année. */
 export const finContratDe = a => a && RE_DATE.test(a.finContrat || '') ? a.finContrat : '';
 export const contratFini = (a, iso) => { const f = finContratDe(a); return !!f && f < iso; };
@@ -305,6 +310,11 @@ export function reunionsEffectives(ctx,aeshId,lundi) {
   const r=reunionDe(a), date=r ? ajoute(lundi,r.jour) : '';
   const reunions=inst.length ? inst.map(r=>({...r,type:'institution',label:r.libelle || 'Réunion institutionnelle'}))
     : r && !ctx.C.off(date) && !contratFini(a,date) && joursDe(a).includes(r.jour) ? [{...r,date,type:'reunion',label:'Réunion d’équipe'}] : [];
+  // Une institutionnelle remplace la réunion principale, pas celles des autres pôles.
+  reunions.push(...reunionsSupplementairesDe(a).filter(r=>{
+    const d=ajoute(lundi,r.jour);
+    return d>=r.du && d<=r.au && !ctx.C.off(d) && !contratFini(a,d) && (r.semaines==='AB'||r.semaines===ctx.C.parite(lundi));
+  }).map(r=>({...r,date:ajoute(lundi,r.jour),type:'reunion',supplementaire:true,label:'Réunion · '+(ctx.nomPole?ctx.nomPole(r.pole):r.pole)})));
   return reunions.map(r=>({...r,j:jourSemaine(r.date),partiel:recouvrement(absencesDuJour(ctx.I,aeshId,r.date),min(r.debut),min(r.fin))/60})).filter(r=>duree(r.debut,r.fin)>r.partiel);
 }
 export function serviceALieu(ctx,a,x,h,iso) {
@@ -483,7 +493,7 @@ export function conflits(occ, nomPole) {
     if (x.j !== y.j || !chevauche(x.debut, x.fin, y.debut, y.fin)) continue;
     if (x.type === 'institution' || y.type === 'institution') {
       /* La réunion institutionnelle remplace la réunion d'équipe : pas de conflit entre elles. */
-      if (x.type === 'reunion' || y.type === 'reunion') continue;
+      if ((x.type === 'reunion' && !x.supplementaire) || (y.type === 'reunion' && !y.supplementaire)) continue;
     }
     const cl = o => o.cours.cls.map(n => n.replace(/^(C[12]|B[12T])/, '$1 ')).join('/');
     const nom = o => o.type === 'cours' ? `${o.cours.lib || o.cours.mat} (${cl(o)})${nomPole ? ' par ' + nomPole(o.pole) : ''}` : o.label;

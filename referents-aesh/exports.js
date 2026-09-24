@@ -3,7 +3,7 @@ import { couleurAesh, libelleService } from './presences.js?v=2026-09-23d';
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
 import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-23d';
-import * as K from './calculs.js?v=2026-09-24e';
+import * as K from './calculs.js?v=2026-09-24f';
 import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-23d';
 
 const H0 = 8 * 60, H1 = 21 * 60;
