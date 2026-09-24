@@ -169,3 +169,34 @@ fictif 390×844 : navigation, besoin confirmé, accès placement, Équipe compac
 DP 12h30–13h dans la grille et détails ; pas d’erreur console. Pas de test Firestore
 réel. Pas de nouvelles règles. Source miroir Electron actualisée, application
 installée inchangée. Aucun commit, push ni déploiement. .DS_Store conservé.
+
+
+### 24/09/2026 — Semaine, filtre AESH, cercles et réunions communes
+Demandes validées par Brahim, y compris MELEC lundi 13–14 (« pareil »).
+Téléphone : cinq jours visibles par défaut, zoom navigateur conservé, bouton Jour,
+rappel semaine collant. Roue seule accessible (aria-label Réglages), suppression
+onglet Équipe. Filtre AESH : occupations de toutes ses classes, réunions et services,
+total/contrat ; cours ouvrables selon droits existants, MELEC Antoine toujours lecture.
+Cercles non interactifs : inconnu ?, zéro barré gris, vide rouge, partiel orange,
+plein vert. Analyse aux bornes réelles des placements/absences (pas seulement 30 min).
+Le cours ouvre une fenêtre épurée avec cercle + ratio, demande séparée du placement.
+Modification de la demande par le référent avec confirmation, document enseignants
+inchangé. Sigles seuls dans les bandes sur téléphone ; découpes conservées.
+Services : DP, internat, DAFI, PIAL conservés ; Autre avec intitulé ajouté. Alertes
+calculées avec le moteur partagé. Encart Réunions distinct avec page séparée.
+Réunion d’équipe 13–14 lundi pour PSR et MELEC (affiliations des fiches et anciens
+IDs PSR). Institutionnelle : lundi daté, durée 1 h, défaut 08h30–09h30, une par semaine,
+prévisualisation conflits, transaction sur base d’ouverture et verrous AESH.
+Elle remplace l’équipe cette semaine sans double comptage, annulation rétablit
+l’équipe. Institutionnelle conserve sa portée existante établissement/tous AESH ;
+création par référents, consultation Antoine, pas de droit nouveau silencieux.
+Même application, mêmes documents Firestore référents/Antoine ; aucun fichier Excel
+importé, aucune écriture réelle distante. Pas de nouvelles règles nécessaires.
+Tests : 17 planning, 11 présences, besoins, accès simple, passerelle fictive,
+nouveaux tests indicateurs/réunions (partiel 15 min, MELEC, remplacement, retour).
+Navigateur fictif 390×844 : semaine/jour, filtre, clic cours filtré, placement,
+besoin 0/2 avec cercle, institution 08h30 remplaçant 13h avec total 1 h ; zéro erreur
+console. Syntaxe et diff vérifiés. Vérification Firebase réelle non effectuée.
+Sources modifiées : app.js, calculs.js, index.html, LISEZMOI.md et nouveau test
+indicateurs-reunions.test.mjs. Miroir source Electron régénéré par script officiel,
+app installée inchangée. Aucun commit/push/déploiement. .DS_Store conservé.

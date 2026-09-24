@@ -246,7 +246,7 @@ export function prevuPourClasse(a, cat, classe) {
   return { connu: true, prevu: !cl || cl.includes(classe), filiere: f, classes: cl, filiereAbsente: false };
 }
 /* Heures de réunion par semaine : saisies par le référent (1 h tant qu'il n'a rien changé). */
-export const reunionFixePsr = a => ['aesh_d01','aesh_d02','aesh_d03','aesh_d04'].includes(a?.id);
+export const reunionFixePsr = a => ['aesh_d01','aesh_d02','aesh_d03','aesh_d04'].includes(a?.id) || !!a?.filieres?.PSR || !!a?.filieres?.MELEC || (!!a?.equipes?.PSR_MELEC && !Object.keys(a?.filieres || {}).length);
 export const heuresReunion = a => reunionFixePsr(a) ? 1 : Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1;
 /* Fin de contrat d'un AESH : après cette date, il n'est plus là. Vide = toute l'année. */
 export const finContratDe = a => a && RE_DATE.test(a.finContrat || '') ? a.finContrat : '';
@@ -713,4 +713,14 @@ export function coursPossibles(ctx, aeshId, classes, du, au, pole) {
     });
   });
   return out.sort((x, y) => x.c.j - y.c.j || min(x.c.d) - min(y.c.d));
+}
+
+/* Indicateur de couverture : distingue zéro demandé, absence de réponse et présence partielle. */
+export function etatBesoin(ctx,c,iso,bes) {
+  if(!bes)return 'inconnu'; if(bes.nb===0)return 'zero';
+  const d=min(bes.plageDebut||c.d),f=min(bes.plageFin||c.f),bornes=new Set([d,f]);
+  ctx.I.places.filter(p=>p.coursId===c.id).forEach(p=>{const h=horairePlace(p,c);bornes.add(Math.max(d,Math.min(f,min(h.debut))));bornes.add(Math.max(d,Math.min(f,min(h.fin))));});
+  ctx.I.absences.forEach(a=>{if(a.du<=iso&&a.au>=iso&&a.journee===false){bornes.add(Math.max(d,Math.min(f,min(a.debut))));bornes.add(Math.max(d,Math.min(f,min(a.fin))));}});
+  const b=[...bornes].sort((a,b)=>a-b),n=b.slice(1).map((fin,i)=>presentsMin(ctx,c,iso,hDe(b[i]),hDe(fin)));
+  return n.length&&Math.min(...n)>=bes.nb?'plein':n.some(x=>x>0)?'partiel':'vide';
 }
