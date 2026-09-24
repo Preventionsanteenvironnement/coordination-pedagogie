@@ -249,3 +249,7 @@ Dans la fiche AESH, ajout de réunions supplémentaires (pôle, jour, horaires, 
 Validation : sept fichiers de tests automatisés réussis ; navigateur avec données fictives, vue A+B, retour EDT type, bonne semaine à l’ouverture d’un cours, ajout/enregistrement d’une réunion puis présence en grille et décompte. Aucune donnée réelle écrite. Synchronisation multi-utilisateur réelle et règles en production non testées dans ce lot.
 
 Publication restante : commit/push par Brahim, puis remplacement des règles avec le fichier complet `/Users/brahms/Documents/Codex/2026-09-22/va/outputs/FIRESTORE-COMPLET-REUNIONS-SUPPLEMENTAIRES-2026-09-24.txt`. Ce fichier ajoute uniquement le champ optionnel à la validation AESH (liste, 12 maximum). Aucun déploiement ni commit/push effectué par l’agent.
+
+
+### 24 septembre 2026 — Grille AESH toutes classes
+Vérification demandée et autorisée : le filtre AESH lit déjà toutes les affectations de la personne, indépendamment de la classe et du pôle affichés. Ajout du repère « Toutes ses classes » au titre, sans changement des calculs ou des droits. Test fictif dédié : trois niveaux MELEC, CAP 1/2 PSR et CAPa regroupés, alternance A/B et EDT type ; sept fichiers de tests réussis. Pas de contrôle des affectations réelles ni écriture distante. Fichiers : app.js, index.html (cache), tests/ab-type-reunions.test.mjs, LISEZMOI.md. Aucune nouvelle règle Firestore nécessaire. Commit/push laissés à Brahim ; .DS_Store préservé.

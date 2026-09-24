@@ -26,3 +26,17 @@ ctx.I.absences=[{aeshId:a.id,du:'2026-09-28',au:'2026-09-28',journee:true}];
 assert.equal(K.bilan(ctx,a.id,'2026-09-28').total,0);assert.equal(K.bilan(V.contexteType(ctx),a.id,'2026-09-28').total,2);
 a.finContrat='2026-09-20';assert.equal(K.bilan(V.contexteType(ctx),a.id,'2026-09-21').total,0);
 console.log('A/B + EDT type : vacances, PFMP, absences, contrat préservé ; deuxième réunion, alternance, institutionnelle et conflit vérifiés.');
+
+// Une personne : trois niveaux MELEC, deux PSR et un autre pôle dans la même liste.
+const niveaux=['B1MELEC','B2MELEC','BTMELEC','C1PSR','C2PSR','CAPA'];
+const cours=Object.fromEntries(niveaux.map((n,i)=>[n,{id:n,lib:'Cours fictif',cls:[n],j:i%5,d:i===5?'11:00':'09:00',f:i===5?'12:00':'10:00',sem:'TOUTES'}]));
+const multi={C,edt:{classes:Object.fromEntries(niveaux.map(n=>[n,{cours:[n],pfmp:[]}])),cours},I:{aesh:new Map([['multi',{id:'multi',sigle:'TEST',contrat:30,reunionH:0,equipes:{PSR_MELEC:1,CAPA:1},services:[]}]]),places:niveaux.map((n,i)=>({id:n,type:'place',aeshId:'multi',pole:i===5?'CAPA':'PSR_MELEC',coursId:n,jour:i%5,du:'2026-09-01',au:'2026-12-18',semaines:i===4?'B':'AB',statut:'active'})),absences:[],reunions:[]}};
+for(const [l,n] of [['2026-09-21',5],['2026-09-28',6]]){
+ for(const cx of [multi,V.contexteType(multi)]) {
+  const o=K.occupations(cx,'multi',l).filter(o=>o.type==='cours');
+  assert.equal(o.length,n);assert.equal(K.bilan(cx,'multi',l).cours,n);
+  assert(o.some(o=>o.pole==='CAPA'));
+  assert.deepEqual(o.map(o=>o.cours.id).sort(),niveaux.filter(c=>n===6||c!=='C2PSR').sort());
+ }
+}
+console.log('Grille AESH multiclasse et multipôle : six classes, A/B et EDT type vérifiés.');
