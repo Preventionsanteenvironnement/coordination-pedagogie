@@ -1,4 +1,4 @@
-import { semainesAB, contexteType, occupationsAB, resumeSemaine } from './vues-planning.js?v=2026-09-25b';
+import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-25c';
 import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-24e';
 import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
@@ -915,12 +915,19 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       return `<div class="carte pad carte-reunions"><h2>Réunion d’équipe · ${esc(g)}</h2>${l.length?l.map(a=>{const r=K.reunionDe(a);return `<p><b style="color:${couleurAesh(a.id)}">${esc(a.sigle)}</b> · ${r?`${K.JOURS[r.jour]} ${K.hFr(r.debut)}–${K.hFr(r.fin)}`:'Horaire à renseigner dans sa fiche'}</p>`;}).join(''):'<p>Aucun AESH rattaché</p>'}</div>`;}).join('');
     return equipes+(modePlanning?`<div class="carte pad"><h2>Réunion instit.</h2>${idx().reunions.map(r=>`<p>${K.dateLongue(r.date)} · ${K.hFr(r.debut)}–${K.hFr(r.fin)}</p>`).join('')||'<p>Aucune date prévue</p>'}<p>Dates fixées par les référents.</p></div>`:ecranReunions());
   }
+  /* ─── Plage fixe et totaux par jour (25/09/2026) ───
+     Les fiches papier des référents tiennent toutes sur la même plage, 8 h → 18 h : les
+     créneaux de trente minutes du midi y sont visibles même quand personne ne travaille
+     l'après-midi. Ce qui dépasse 18 h passe dans la bande « Soirée », sous la grille,
+     plutôt que d'étirer toute la journée. Chaque jour porte son total, comme au crayon. */
+  const FIN_GRILLE = 18 * 60;
   function grillePersonne(a,lundi=S.lundi,cx=ctx(),type=false,liste=null) {
-    const occ=(liste || K.occupations(cx,a.id,lundi)).filter(o=>!['repos','vacances'].includes(o.type)),fin=Math.max(18*60,...occ.map(o=>K.min(o.fin))),px=1.25;
+    const tous=(liste || K.occupations(cx,a.id,lundi)).filter(o=>!['repos','vacances'].includes(o.type)),px=1.25,fin=FIN_GRILLE;
+    const occ=tous.filter(o=>K.min(o.debut)<fin), soir=tous.filter(o=>K.min(o.fin)>fin), tot=totauxJours(K,tous);
     return `<div class="semaine-repere">${type?'EDT type · ':''}Semaine ${S.C.parite(lundi)||'—'} · ${K.jjmm(lundi)}–${K.jjmm(K.ajoute(lundi,4))}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}<small>${K.jjmm(K.ajoute(lundi,i))}</small></div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
       const l=occ.filter(o=>o.j===i),cols=[];l.forEach(o=>{let n=cols.findIndex(c=>c.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
-      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''} ${(K.min(o.fin)-K.min(o.debut))<45?'court':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(K.min(o.fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}">${o.sem&&o.sem!=='AB'?`<span class="pastille-sem">${o.sem}</span>`:''}<b>${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
-    }).join('')}</div></div>`;
+      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''} ${(K.min(o.fin)-K.min(o.debut))<45?'court':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(Math.min(K.min(o.fin),fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}">${o.sem&&o.sem!=='AB'?`<span class="pastille-sem">${o.sem}</span>`:''}<b>${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
+    }).join('')}<div class="g-pied">Total</div>${K.JOURS.map((j,i)=>`<div class="g-pied jour-col" data-j="${i}">${esc(libelleTotal(K,tot[i]))}</div>`).join('')}</div></div>${soir.length?`<div class="bande-soiree"><b>Soirée</b>${soir.map(o=>`<span>${esc(K.JOURS[o.j])} ${K.hFr(o.debut)}–${K.hFr(o.fin)} · ${esc(o.cours?.lib || libelleService(o.label))}</span>`).join('')}</div>`:''}`;
   }
 
   function palettePlanning() {
@@ -1373,7 +1380,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!a){toast('Choisissez d’abord un AESH.',true);return;}
     if(S.envoi)return; S.envoi=true; rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-25c'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-25d'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
       const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
       F.telecharger(blob,nom);
@@ -1396,7 +1403,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-25c'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-25d'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -1405,12 +1412,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-25c'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-25d'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-25c'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-25d'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }

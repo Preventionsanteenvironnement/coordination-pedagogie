@@ -1,4 +1,4 @@
-import { semainesAB, occupationsAB, resumeSemaine } from './vues-planning.js?v=2026-09-25b';
+import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-25c';
 import { couleurAesh, libelleService } from './presences.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
@@ -56,6 +56,15 @@ function grille(pdf, top, C, lundi, blocs, cadre = {}) {
     const y = y0 + (m - h0) / 60 * hPx, pleine = m % 60 === 0;
     pdf.line(xt, y, droite, y, { color: pleine ? LIGNE : '#f2f4f8' });
     if (pleine) pdf.text(x0, y + 3, K.hFr(K.hDe(m)), { size: 8, color: GRIS });
+  }
+  /* 25/09/2026 : sous chaque colonne, ce que pèse la journée — comme au crayon sur les fiches. */
+  if (cadre.totaux) {
+    pdf.text(x0, bas + 15, 'Total', { size: 7.5, color: GRIS });
+    sem.jours.forEach((jr, j) => {
+      const x = xt + j * lc;
+      pdf.rect(x + 2, bas + 4, lc - 4, 15, { fill: '#f1f4f8', r: 6 });
+      pdf.text(x + lc / 2, bas + 15, cadre.totaux[j] || '—', { size: 8.5, bold: true, color: jr.off ? GRIS : ENCRE, align: 'center' });
+    });
   }
   blocs.forEach(b => {
     if (sem.jours[b.j] && sem.jours[b.j].off) return;
@@ -336,17 +345,25 @@ export function pdfSemaineType(ctx, ids, lundi) {
     pdf.page();
     entete(pdf, couleurAesh(id), `Emploi du temps · ${a.sigle}`,
       `${ctx.exportType ? 'Organisation habituelle · ' : ''}Semaines A et B réunies · ${K.fmtH(moyenne)} par semaine en moyenne${bA.contrat == null ? '' : ' · contrat ' + K.fmtH(bA.contrat)}`);
-    /* La grille s'arrête à la dernière heure travaillée, arrondie : pas de vide jusqu'à 21 h. */
-    const finMax = Math.max(17 * 60, ...occ.map(o => K.min(o.fin)));
-    const h1 = Math.min(21 * 60, Math.ceil(finMax / 60) * 60);
-    grille(pdf, 112, ctx.C, ab.A, blocsDepuis(ctx, occ), { x: 28, droite: pdf.W - 28, bas: pdf.H - 106, h1 });
-    let y = pdf.H - 84;
+    /* 25/09/2026 : la plage ne bouge plus, 8 h → 18 h. Une journée sans après-midi garde
+       ses créneaux de midi, où se placent la demi-pension et la réunion hebdomadaire.
+       Ce qui commence après 18 h — internat, soirée — s'écrit sous la grille. */
+    const FIN = 18 * 60;
+    const soir = occ.filter(o => K.min(o.fin) > FIN).sort((x, y) => x.j - y.j || K.min(x.debut) - K.min(y.debut));
+    const totaux = totauxJours(K, occ).map(t => libelleTotal(K, t));
+    grille(pdf, 112, ctx.C, ab.A, blocsDepuis(ctx, occ), { x: 28, droite: pdf.W - 28, bas: pdf.H - 128, h1: FIN, totaux });
+    let y = pdf.H - 90;
+    if (soir.length) {
+      pdf.text(28, y, 'Soirée · ' + soir.map(o => `${K.JOURS[o.j]} ${K.hFr(o.debut)}–${K.hFr(o.fin)} ${o.cours ? o.cours.lib : libelleService(o.label)}${o.sem && o.sem !== 'AB' ? ' (sem. ' + o.sem + ')' : ''}`).join('   ·   '),
+        { size: 9, bold: true, color: '#334155' });
+      y += 14;
+    }
     pdf.text(28, y, deux
-      ? 'Les créneaux précédés de « sem. A » ou « sem. B » ne reviennent qu’une semaine sur deux. Les autres sont identiques chaque semaine.'
+      ? 'Les créneaux encadrés en pointillé, précédés de « A · » ou « B · », ne reviennent qu’une semaine sur deux ; les autres sont identiques chaque semaine. En pied de colonne, un total donné en deux nombres se lit semaine A / semaine B.'
       : 'Toutes les semaines sont identiques : il n’y a pas d’alternance A / B.', { size: 9, color: '#475569' });
     const r = resumeSemaine(K, occ);
-    if (r.length) pdf.text(28, y + 15, r.map(([n, h]) => `${n} : ${K.fmtH(h)}`).join('   ·   '), { size: 9, color: '#475569' });
-    pdf.text(28, y + 30, `Semaine A : ${K.fmtH(bA.total)}   ·   Semaine B : ${K.fmtH(bB.total)}`, { size: 9, color: '#475569' });
+    if (r.length) pdf.text(28, y + 14, r.map(([n, h]) => `${n} : ${K.fmtH(h)}`).join('   ·   '), { size: 9, color: '#475569' });
+    pdf.text(28, y + 28, `Semaine A : ${K.fmtH(bA.total)}   ·   Semaine B : ${K.fmtH(bB.total)}`, { size: 9, color: '#475569' });
   }
   return numeroter(pdf);
 }
@@ -363,7 +380,8 @@ export function pdfGrillesAesh(ctx,ids,lundi,mode='AB') {
       lot.forEach((d,i)=>{
         const b=K.bilan(ctx,id,d),x=28+i*(pdf.W/2),droite=groupe?(i?pdf.W-28:pdf.W/2-12):pdf.W-28;
         pdf.text(x,108,`Semaine ${ctx.C.parite(d)} · ${K.jjmm(d)}–${K.jjmm(K.ajoute(d,4))} · ${K.fmtH(b.total)}${b.contrat==null?'':' / '+K.fmtH(b.contrat)}`,{size:12,bold:true});
-        grille(pdf,122,ctx.C,d,blocsAesh(ctx,id,d),{x,droite});
+        const bl=blocsAesh(ctx,id,d);
+        grille(pdf,122,ctx.C,d,bl,{x,droite,totaux:totauxJours(K,bl).map(t=>libelleTotal(K,t))});
       });
     }
   }
@@ -384,6 +402,10 @@ export function feuillesSemaineType(ctx, ids, lundi) {
     f.fusions.push('A1:F1', 'A2:F2');
     f.lignes[1][0].s.retour = true; f.hauteurs[2] = 32;
     for (let r = 5; r <= f.lignes.length; r++) f.hauteurs[r] = 36;
+    /* 25/09/2026 : dernière ligne, le total de chaque journée — semaine A / semaine B. */
+    f.lignes.push([{ v: 'Total', s: { couleur: '#6b7280', droite: true, gras: true } },
+      ...totauxJours(K, occ).map(t => ({ v: libelleTotal(K, t) || '—', s: { gras: true, fond: '#f1f4f8', centre: true, bord: true } }))]);
+    f.hauteurs[f.lignes.length] = 24;
     f.unePage = true; f.papier = 9;
     out.push(f);
   }

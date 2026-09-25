@@ -7,7 +7,7 @@ const acces=verifierCodePlanning('1234',d);
 assert.equal(acces.ecritureClasses.includes('C1VAN'),true);
 assert.equal(acces.ecritureClasses.includes('C2JP'),true);
 assert.equal(acces.lectureClasses.includes('B2MELEC'),true);
-assert.equal(acces.ecritureClasses.includes('B2MELEC'),false);
+assert.equal(acces.ecritureClasses.includes('B2MELEC'),true); // ouvert le 24/09/2026 (bd805e3)
 for(const [code,doc] of [['0000',d],['123456',d],['123',d],['1234',null],['1234',{accesPlanning:{actif:false,code:'1234'}}]])
  assert.throws(()=>verifierCodePlanning(code,doc));
 assert.equal(acces.sessionValide(d),true);

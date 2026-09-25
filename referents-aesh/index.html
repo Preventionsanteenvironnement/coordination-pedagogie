@@ -232,6 +232,15 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .g-heures span{position:absolute;right:6px;font-size:.75rem;color:var(--muted);transform:translateY(-50%);font-variant-numeric:tabular-nums}
 .g-jour{position:relative;border-right:1px solid var(--line-2);margin-block:12px;background:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px 75px),repeating-linear-gradient(to bottom,transparent 0 37.5px,var(--line-2) 37.5px 38.5px,transparent 38.5px 75px)}
 .g-jour:last-child{border-right:0}
+/* 25/09/2026 — Pied de colonne : le total du jour, comme sur les fiches papier. Deux
+   nombres séparés d'une barre quand la semaine A et la semaine B ne pèsent pas pareil. */
+.g-pied{background:var(--card-2);border-top:1px solid var(--line);border-right:1px solid var(--line-2);padding:7px 4px;text-align:center;font-weight:750;font-size:.82rem;font-variant-numeric:tabular-nums;color:var(--ink)}
+.g-pied:last-child{border-right:0}
+.g-pied:first-child{position:sticky;left:0;z-index:3;text-align:right;padding-right:7px;font-weight:600;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+/* Au-delà de 18 h : hors grille, pour ne pas étirer la journée entière. */
+.bande-soiree{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;padding:9px 12px;background:var(--card-2);border:1px solid var(--line);border-radius:12px;font-size:.88rem}
+.bande-soiree b{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em}
+.bande-soiree span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
 .g-ligne{position:absolute;left:0;right:0;border-top:1px solid var(--line-2)}
 .g-vac{position:absolute;inset:0;background:repeating-linear-gradient(135deg,var(--card-2) 0 10px,var(--bg) 10px 20px);display:grid;place-items:center;color:var(--muted);font-weight:700;text-align:center;padding:10px}
 .g-vac.g-pfmp{background:repeating-linear-gradient(135deg,#FFD9A8 0 12px,#FFEBD1 12px 24px);color:#8A3F00;box-shadow:inset 0 0 0 2px #F08A24;font-size:1.05rem;letter-spacing:.02em}
@@ -497,7 +506,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-25d');
+  const m = await import('./app.js?v=2026-09-25e');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25a');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

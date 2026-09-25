@@ -56,3 +56,20 @@ export function resumeSemaine(K, occ) {
   });
   return [...par.entries()].filter(([, h]) => h > 0).sort((x, y) => y[1] - x[1]);
 }
+
+/* ─── Total d'heures par jour (25/09/2026) ───
+   Les fiches papier des référents portent, sous chaque colonne, ce que pèse la journée ;
+   leur somme est le contrat. Avec l'alternance, une journée peut peser deux choses
+   différentes : on donne alors les deux, semaine A puis semaine B. */
+export function totauxJours(K, occ) {
+  return K.JOURS.map((_, j) => {
+    let a = 0, b = 0;
+    occ.filter(o => o.j === j).forEach(o => {
+      const h = (K.min(o.fin) - K.min(o.debut)) / 60;
+      if (o.sem !== 'B') a += h;
+      if (o.sem !== 'A') b += h;
+    });
+    return { a, b };
+  });
+}
+export const libelleTotal = (K, t) => !t.a && !t.b ? '' : t.a === t.b ? K.fmtH(t.a) : `${K.fmtH(t.a)} / ${K.fmtH(t.b)}`;
