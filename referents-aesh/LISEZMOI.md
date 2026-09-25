@@ -281,3 +281,26 @@ Fichiers : `vues-planning.js` (`totauxJours`, `libelleTotal`, source unique écr
 Aucun changement de droits, de collection Firestore ou de données. Aucune règle nouvelle à publier.
 
 Tests : neuf fichiers automatisés réussis, dont le nouveau `tests/semaine-type-totaux.test.mjs` (totaux A/B, plage 8 h–18 h, bande Soirée, ligne de totaux Excel). `tests/acces-simple.test.mjs` affirmait encore qu’Antoine ne pouvait pas écrire sur B2MELEC : mis à jour, l’écriture a été ouverte le 24/09 (bd805e3). Rendu écran vérifié hors ligne par mesure (`getBoundingClientRect`) : les six pieds alignés sur une même ligne, grille fermée à 710 px, bande soirée à 736 px, aucun débordement de page en 1200 px comme en 375 px. PDF de semaine type généré puis rasterisé et examiné, avec et sans alternance : totaux `3,5 h / 2,5 h`, bande « Soirée · Mardi 18h–21h Internat », demi-pension de 12 h 30 visible. Données réelles, application Electron et production non touchées.
+
+
+### 25 septembre 2026 — Le coordonnateur AESH a les mêmes droits qu'un référent
+Demande de Brahim : « Antoine doit avoir accès à tout ». Il avait déjà les 19 classes en lecture
+et en écriture depuis le 24/09, mais son accès restait en pratique une consultation augmentée :
+il pouvait **placer un AESH sur un cours, et rien d'autre**. Trois verrous s'y opposaient.
+
+1. `ecrireLot` refusait tout document dont le type n'était pas `place` — donc aucune fiche AESH,
+   aucune absence, aucune réunion, aucun message, aucune période.
+2. Une **liste blanche d'actions** ignorait en silence tout bouton absent de la liste : les
+   commandes existaient à l'écran mais ne répondaient pas.
+3. Plusieurs gardes `!modePlanning` masquaient la période, les PFMP, les classes libérées,
+   la saisie des réunions, les AESH des autres pôles et le rattachement automatique d'une fiche.
+
+`acces-planning.js` renvoie désormais `tousDroits: true`, et `app.js` décide par un seul point,
+`accesComplet()`. Ses placements restent bornés par `ecritureClasses` : la vérification par classe
+n'a pas bougé. Il ne peut toujours pas modifier le code qui lui ouvre la porte (`antoine-activer`
+et `antoine-desactiver` restent réservés au référent PSR·MELEC).
+
+Fichiers : `acces-planning.js`, `app.js`, `index.html` (caches `app` → `2026-09-25g`,
+`acces-planning` → `2026-09-25b`), `tests/acces-simple.test.mjs`.
+Aucune règle Firestore à changer : elles n'ont jamais distingué le coordonnateur d'un référent,
+c'est l'application qui restreignait. Neuf fichiers de tests réussis.

@@ -161,6 +161,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   const classesDu = pid => modePlanning ? (droitsPlanning?.lectureClasses || []).filter(n => S.edt.classes[n]?.pole === pid) : (S.edt.poles[pid] || []);
   const peutPlacer = nom => !modePlanning || !!droitsPlanning?.ecritureClasses.includes(nom);
+  /* 25/09/2026 — Le coordonnateur AESH n'est plus en consultation : il tient les fiches, les
+     absences, les réunions, les PFMP et la période comme un référent. Seuls ses placements
+     restent bornés aux classes de ecritureClasses. */
+  const accesComplet = () => !modePlanning || droitsPlanning?.tousDroits === true;
 
   /* ─── Période de l'emploi du temps (17/09/2026, décision de Brahim) ───
      Une seule période pour les quatre pôles : c'est ce qui permet aux emplois du temps de se croiser.
@@ -232,8 +236,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      partent dans UN seul lot. Une panne au milieu laisse tout inchangé : jamais de placement coupé à moitié. */
   async function ecrireLot(docs, base) {
     if (modePlanning && docs.some(d => {
+      if (d.type !== 'place') return !accesComplet();
       const classes = S.edt.cours[d.coursId]?.cls;
-      return d.type !== 'place' || !Array.isArray(classes) || !classes.length || !classes.every(peutPlacer);
+      return !Array.isArray(classes) || !classes.length || !classes.every(peutPlacer);
     })) {
       throw Object.assign(new Error('Consultation uniquement'),{code:'permission-denied'});
     }
@@ -811,7 +816,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function panneauVerification() {
     if(P().id!=='PSR_MELEC') return '';
     const ds=[...S.docs.values()].filter(d=>d.type==='verification' && PERSONNES.includes(d.aeshId));
-    return `<div class="carte pad"><h2>Vérifier les semaines A et B</h2>${ds.map(d=>`<button class="btn" data-a="verification" data-v="${esc(d.id)}">${esc(idx().aesh.get(d.aeshId)?.sigle || d.aeshId)} · ${d.statut==='valide'?'Validé ✓':'À vérifier'}</button>`).join('')}${!modePlanning?'<button class="btn" data-a="verification-import">Charger les propositions Excel préparées</button>':''}</div>`;
+    return `<div class="carte pad"><h2>Vérifier les semaines A et B</h2>${ds.map(d=>`<button class="btn" data-a="verification" data-v="${esc(d.id)}">${esc(idx().aesh.get(d.aeshId)?.sigle || d.aeshId)} · ${d.statut==='valide'?'Validé ✓':'À vérifier'}</button>`).join('')}${accesComplet()?'<button class="btn" data-a="verification-import">Charger les propositions Excel préparées</button>':''}</div>`;
   }
   async function ecrireVerification(docs,base) {
     if(!S.session || S.session.pole!=='PSR_MELEC') throw Error('Accès PSR requis.');
@@ -823,7 +828,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     ouvrirVerification({draft:d,base:new Map(S.docs),ctx:ctx(),enregistrer:ecrireVerification,ferme:()=>rendre(),nouvelId:alea});
   }
   function importerVerification() {
-    if(modePlanning || S.session?.pole!=='PSR_MELEC')return;
+    if(!accesComplet() || (!modePlanning && S.session?.pole!=='PSR_MELEC'))return;
     const input=document.createElement('input');input.type='file';input.accept='.json,application/json';
     input.onchange=async()=>{try{
       const file=input.files[0];if(!file || file.size>200000)throw Error('Fichier trop volumineux.');
@@ -898,9 +903,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${modePlanning ? `<div class="classes" aria-label="Pôle">${POLES.map(q=>`<button data-a="planning-pole" data-v="${q.id}" aria-pressed="${q.id===p.id}">${esc(q.nom)}</button>`).join('')}</div>`:''}`;
     if(vue==='reunions') return tete+reunionsPole();
     const classes=`<div class="classes" role="group" aria-label="Classe">${classesDu(p.id).map(n=>`<button type="button" id="cls-${n}" data-a="classe" data-v="${n}" aria-pressed="${n===nom}">${esc(S.edt.classes[n].court)}</button>`).join('')}</div>`;
-    if(vue==='reglages') return tete+classes+panneauVerification()+`${modePlanning?'':lignePeriode()}
-      <div class="carte pad"><h2>PFMP · ${esc(k.court)}</h2><p>${(k.pfmp||[]).map(x=>`${K.jjmm(x.debut)} → ${K.jjmm(x.fin)}`).join(' · ')||'Aucune période'}</p>${modePlanning?'':'<button class="btn" data-a="pfmp">Modifier les PFMP</button>'}</div>
-      ${pf.length && !modePlanning ? carteLiberes(nom) : ''}${bandeauServices()}<div class="carte pad carte-reunions"><h2>Réunions</h2><button class="btn" data-a="edt-page" data-v="reunions">Réunion d’équipe · Réunion instit.</button></div><button class="btn" data-a="planning-excel">Exporter en Excel · A et B</button>`;
+    if(vue==='reglages') return tete+classes+panneauVerification()+`${accesComplet()?lignePeriode():''}
+      <div class="carte pad"><h2>PFMP · ${esc(k.court)}</h2><p>${(k.pfmp||[]).map(x=>`${K.jjmm(x.debut)} → ${K.jjmm(x.fin)}`).join(' · ')||'Aucune période'}</p>${accesComplet()?'<button class="btn" data-a="pfmp">Modifier les PFMP</button>':''}</div>
+      ${pf.length && accesComplet() ? carteLiberes(nom) : ''}${bandeauServices()}<div class="carte pad carte-reunions"><h2>Réunions</h2><button class="btn" data-a="edt-page" data-v="reunions">Réunion d’équipe · Réunion instit.</button></div><button class="btn" data-a="planning-excel">Exporter en Excel · A et B</button>`;
     const id=S.route.p.aesh, personne=K.aeshActifs(idx(),P().id).find(a=>a.id===id), bilan=personne?K.bilan(S.route.p.edtType?contexteType(ctx()):ctx(),id,S.lundi):null;
     return tete+(modePlanning && [...S.docs.values()].some(d=>d.type==='verification' && d.statut==='brouillon')?panneauVerification():'')+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)} · Toutes ses classes${S.route.p.parite==='AB'?'':` · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}`}</h2>`:classes)+`
       <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label></div>
@@ -913,7 +918,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const liste=K.aeshActifs(idx(),P().id),groupes=P().id==='PSR_MELEC'?['PSR','MELEC']:[P().id];
     const equipes=groupes.map(g=>{const l=liste.filter(a=>P().id!=='PSR_MELEC'||a.filieres?.[g] || (g==='PSR'&&['aesh_d01','aesh_d02','aesh_d03','aesh_d04'].includes(a.id)) || !Object.keys(a.filieres||{}).length);
       return `<div class="carte pad carte-reunions"><h2>Réunion d’équipe · ${esc(g)}</h2>${l.length?l.map(a=>{const r=K.reunionDe(a);return `<p><b style="color:${couleurAesh(a.id)}">${esc(a.sigle)}</b> · ${r?`${K.JOURS[r.jour]} ${K.hFr(r.debut)}–${K.hFr(r.fin)}`:'Horaire à renseigner dans sa fiche'}</p>`;}).join(''):'<p>Aucun AESH rattaché</p>'}</div>`;}).join('');
-    return equipes+(modePlanning?`<div class="carte pad"><h2>Réunion instit.</h2>${idx().reunions.map(r=>`<p>${K.dateLongue(r.date)} · ${K.hFr(r.debut)}–${K.hFr(r.fin)}</p>`).join('')||'<p>Aucune date prévue</p>'}<p>Dates fixées par les référents.</p></div>`:ecranReunions());
+    return equipes+(modePlanning && !accesComplet()?`<div class="carte pad"><h2>Réunion instit.</h2>${idx().reunions.map(r=>`<p>${K.dateLongue(r.date)} · ${K.hFr(r.debut)}–${K.hFr(r.fin)}</p>`).join('')||'<p>Aucune date prévue</p>'}<p>Dates fixées par les référents.</p></div>`:ecranReunions());
   }
   /* ─── Plage fixe et totaux par jour (25/09/2026) ───
      Les fiches papier des référents tiennent toutes sur la même plage, 8 h → 18 h : les
@@ -1123,7 +1128,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const enContrat = a => !K.contratFini(a, du);
     const candidats = K.aeshActifs(I, p.id).filter(enContrat).slice().sort((x, y) => (prevuIci(y) ? 1 : 0) - (prevuIci(x) ? 1 : 0)), dispo = K.disponiblesAilleurs(cx, p.id, S.lundi, poleComplet), dispoDe = Object.fromEntries(dispo.map(x => [x.a.id, x]));
     const libereDe = a => K.liberePfmpCreneau(cx, a.id, S.lundi, c.j, c.d, c.f);
-    const autres = K.aeshActifs(I).filter(a => !modePlanning && !(a.equipes || {})[p.id] && enContrat(a))
+    const autres = K.aeshActifs(I).filter(a => accesComplet() && !(a.equipes || {})[p.id] && enContrat(a))
       .sort((x, y) => (libereDe(y) ? 1 : 0) - (libereDe(x) ? 1 : 0) || ((dispoDe[y.id] || {}).dispo || 0) - ((dispoDe[x.id] || {}).dispo || 0));
     const liberes = autres.filter(a => libereDe(a));
     /* Rien n'est interdit : un AESH pris, en réunion ou au bout de ses heures reste choisissable.
@@ -1835,9 +1840,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if (f.choisis.includes(id)) {
         lot.push(...prochains);
         const pv = K.prevuPourClasse(a,FILIERES,f.classe);
-        if(!modePlanning && pv.connu && !pv.prevu) { const r = ficheAvecClasse(id,f.classe); if(r) { lot.push(r.doc); avert.push(r.info); } }
+        if(accesComplet() && pv.connu && !pv.prevu) { const r = ficheAvecClasse(id,f.classe); if(r) { lot.push(r.doc); avert.push(r.info); } }
         const q = rattachementDe(a);
-        if(!modePlanning && q && q !== p.id && !avant.includes(id)) {
+        if(accesComplet() && q && q !== p.id && !avant.includes(id)) {
           avert.push(`${sig(id)} : un message sera enregistré pour le référent ${nomPole(q)}.`);
           lot.push({id:'msg_'+alea(),type:'message',pole:p.id,statut:'active',texte:`@ ${nomPole(q)} — ${sig(id)} est placé en ${c.cls.join(' + ')} : ${K.JOURS[c.j]} ${K.hFr(h.debut)}–${K.hFr(h.fin)}, semaines ${f.semaines}, du ${debut} au ${fin}. C’est d’accord pour vous ?`});
         }
@@ -1867,8 +1872,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const a = b.dataset.a, v = b.dataset.v;
     if(b.dataset.lundi && K.RE_DATE.test(b.dataset.lundi)){S.lundi=b.dataset.lundi;if(S.route.p.parite!=='AB')S.route.p.parite=S.C.parite(S.lundi);}
     if (modePlanning) {
+      /* 25/09/2026 — Avec l'accès complet, le coordonnateur dispose des mêmes actions qu'un
+         référent. La liste blanche ne sert plus qu'à l'accès restreint ; dans les deux cas
+         il ne touche jamais au code qui lui ouvre la porte (voir « antoine-activer »). */
       const permis = ['export-grille','export-grille-choix','export-grille-telecharger','edt-parite','edt-type','verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
-      if (!permis.includes(a)) return;
+      if (!accesComplet() && !permis.includes(a)) return;
       if (a === 'sortir') { awaitSortirPlanning(); return; }
       if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
     }
