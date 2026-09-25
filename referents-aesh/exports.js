@@ -1,11 +1,11 @@
 import { semainesAB } from './vues-planning.js?v=2026-09-24f';
-import { couleurAesh, libelleService } from './presences.js?v=2026-09-23d';
+import { couleurAesh, libelleService } from './presences.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
 import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-24i';
 import * as K from './calculs.js?v=2026-09-24f';
-import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-23d';
+import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-24b';
 
 const H0 = 8 * 60, H1 = 21 * 60;
 const GRIS = '#6b7280', LIGNE = '#e3e8ef', ENCRE = '#111827';
