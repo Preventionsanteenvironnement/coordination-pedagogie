@@ -119,7 +119,7 @@ export function xlsx(feuilles) {
     const cols = (f.largeurs || []).map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('');
     const merges = (f.fusions || []).length ? `<mergeCells count="${f.fusions.length}">${f.fusions.map(m => `<mergeCell ref="${m}"/>`).join('')}</mergeCells>` : '';
     const pane = f.figer ? `<sheetViews><sheetView workbookViewId="0"><pane xSplit="${f.figer[0]}" ySplit="${f.figer[1]}" topLeftCell="${colonne(f.figer[0])}${f.figer[1] + 1}" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>` : '';
-    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${pane}${cols ? `<cols>${cols}</cols>` : ''}<sheetData>${rows}</sheetData>${merges}<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.2" footer="0.2"/><pageSetup orientation="landscape" paperSize="9" fitToWidth="1"/></worksheet>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${f.unePage?'<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>':''}${pane}${cols ? `<cols>${cols}</cols>` : ''}<sheetData>${rows}</sheetData>${merges}<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.2" footer="0.2"/><pageSetup orientation="landscape" paperSize="${f.papier || 9}" fitToWidth="1"${f.unePage?' fitToHeight="1"':''}/></worksheet>`;
   });
   const xfs = ['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'];
   styles.forEach(k => {

@@ -875,6 +875,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label></div>
       <div class="ligne"><div class="choix" role="group" aria-label="Alternance">${['A','B','AB'].map(v=>`<button data-a="edt-parite" data-v="${v}" aria-pressed="${(S.route.p.parite || S.C.parite(S.lundi))===v}">${v==='AB'?'A+B':v}</button>`).join('')}</div><button class="btn" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}">EDT type</button></div>
       ${S.route.p.affichage==='jour'?`<nav class="edt-jours" aria-label="Jour">${K.JOURS_C.map((j,i)=>`<button type="button" data-a="edt-jour" data-v="${i}" aria-pressed="${+(S.route.p.jour||0)===i}">${j}</button>`).join('')}</nav>`:''}
+      <button class="btn" data-a="export-grille">Exporter la grille · PDF / Excel</button>
       ${grillesPlanning(personne,nom)}`;
   }
   function reunionsPole() {
@@ -1323,14 +1324,37 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       </div>
       <div class="barre-bas"><button type="button" class="btn valider" id="x-telecharger" data-a="exporter" ${pret || e.format === 'json' ? '' : 'disabled'}>⬇ Télécharger</button></div>`;
   }
+  function feuilleExportGrille(f) {
+    const a=idx().aesh.get(S.route.p.aesh);
+    const choix=(champ,options)=>`<div class="choix" role="group" aria-label="${champ}">${options.map(([v,t])=>`<button data-a="export-grille-choix" data-champ="${champ}" data-v="${v}" aria-pressed="${f[champ]===v}">${esc(t)}</button>`).join('')}</div>`;
+    return teteFeuille('Exporter la grille',S.route.p.edtType?'EDT type · Toutes les classes':'Toutes les classes')+
+      '<b>Pour qui ?</b>'+choix('qui',[...(a?[['personne',a.sigle]]:[]),['equipe','Toute l’équipe du pôle']])+
+      '<b>Semaines</b>'+choix('semaines',[['A','A seule'],['B','B seule'],['separe','A et B séparées'],['AB','A+B regroupées']])+
+      '<p>Une fiche par AESH. A+B : une page PDF paysage ou un onglet Excel par personne.</p>'+choix('format',[['pdf','PDF'],['excel','Excel']])+
+      `<button class="btn valider" data-a="export-grille-telecharger" ${S.envoi?'disabled':''}>${S.envoi?'Préparation…':'Télécharger'}</button>`;
+  }
+  async function telechargerGrille() {
+    if(S.envoi)return;
+    const f={...S.feuille},cx=S.route.p.edtType?{...contexteType(ctx()),exportType:true}:ctx();
+    const ids=K.aeshActifs(cx.I,P().id).filter(a=>f.qui==='equipe'||a.id===S.route.p.aesh).map(a=>a.id);
+    if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
+    S.envoi=true;rendre();
+    try{
+      const X=await import('./exports.js?v=2026-09-24i'),F=await import('./fichiers.js?v=2026-09-24i');
+      const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
+      const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
+      F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
+      S.envoi=false;fermer();
+    }catch(e){S.envoi=false;rendre();toast('Export impossible : '+e.message,true);}
+  }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-24f'),F=await import('./fichiers.js?v=2026-09-24b');
+      const X=await import('./exports.js?v=2026-09-24i'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-24f'), F = await import('./fichiers.js?v=2026-09-24b');
+    const X = await import('./exports.js?v=2026-09-24i'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1436,7 +1460,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function feuille() {
     const f = S.feuille;
     let h = '', large = false;
-    if(f.type==='service-detail') h=teteFeuille('Réunions et services',K.dateLongue(K.ajoute(S.lundi,f.jour)))+K.aeshActifs(idx(),P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.j===f.jour && ['service','reunion','institution'].includes(o.type)).map(o=>`<p style="border-left:5px solid ${couleurAesh(a.id)};padding-left:10px"><b>${esc(a.sigle)}</b> · ${esc(libelleService(o.label))}<br>${K.hFr(o.debut)}–${K.hFr(o.fin)}</p>`)).join('');
+    if(f.type==='export-grille') h=feuilleExportGrille(f);
+    else if(f.type==='service-detail') h=teteFeuille('Réunions et services',K.dateLongue(K.ajoute(S.lundi,f.jour)))+K.aeshActifs(idx(),P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.j===f.jour && ['service','reunion','institution'].includes(o.type)).map(o=>`<p style="border-left:5px solid ${couleurAesh(a.id)};padding-left:10px"><b>${esc(a.sigle)}</b> · ${esc(libelleService(o.label))}<br>${K.hFr(o.debut)}–${K.hFr(o.fin)}</p>`)).join('');
     else if (f.type === 'service-horaire') { h = feuilleServiceHoraire(f); large=true; }
     else if (f.type === 'placer') { h = feuillePlacer(f); large = true; }
     else if (f.type === 'besoin-detail') {
@@ -1779,7 +1804,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const a = b.dataset.a, v = b.dataset.v;
     if(b.dataset.lundi && K.RE_DATE.test(b.dataset.lundi)){S.lundi=b.dataset.lundi;if(S.route.p.parite!=='AB')S.route.p.parite=S.C.parite(S.lundi);}
     if (modePlanning) {
-      const permis = ['edt-parite','edt-type','verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
+      const permis = ['export-grille','export-grille-choix','export-grille-telecharger','edt-parite','edt-type','verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
       if (!permis.includes(a)) return;
       if (a === 'sortir') { awaitSortirPlanning(); return; }
       if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
@@ -1800,6 +1825,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'service-enregistrer': enregistrerServiceHoraire(); return;
       case 'service-fin': terminerService(b); return;
       case 'planning-pole': if(POLES.some(p=>p.id===v)){S.vu=v;S.route.p={};S.aeshChoisi=null;rendre();} return;
+      case 'export-grille': ouvrir({type:'export-grille',qui:S.route.p.aesh?'personne':'equipe',semaines:S.route.p.parite||S.C.parite(S.lundi)||'AB',format:'pdf'});return;
+      case 'export-grille-choix': if(S.feuille?.type==='export-grille'){S.feuille[b.dataset.champ]=v;rendre();}return;
+      case 'export-grille-telecharger': telechargerGrille();return;
       case 'planning-excel': exporterPlanningSimple(); return;
       case 'selection-aesh': S.aeshChoisi = S.aeshChoisi === v ? null : v; aller('edt',{...S.route.p,vue:'planning'}); return;
       case 'humeur': S.humeur = +v; rendre({ focus: b.id }); return;

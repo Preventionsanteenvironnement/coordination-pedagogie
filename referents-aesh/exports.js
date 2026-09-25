@@ -1,8 +1,9 @@
+import { semainesAB } from './vues-planning.js?v=2026-09-24f';
 import { couleurAesh, libelleService } from './presences.js?v=2026-09-23d';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
-import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-23d';
+import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-24i';
 import * as K from './calculs.js?v=2026-09-24f';
 import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-23d';
 
@@ -37,8 +38,8 @@ function puces(pdf, y, liste) {
   });
 }
 /* Grille lundi → vendredi, 8 h → 18 h. blocs : [{j, debut, fin, fond, trait, l1, l2, l3, hachure}] */
-function grille(pdf, top, C, lundi, blocs) {
-  const x0 = 28, xt = 62, bas = pdf.H - 40, hPx = (bas - top - 22) / ((H1 - H0) / 60), lc = (pdf.W - 28 - xt) / 5, y0 = top + 22;
+function grille(pdf, top, C, lundi, blocs, cadre = {}) {
+  const x0 = cadre.x ?? 28, droite = cadre.droite ?? pdf.W - 28, xt = x0 + 34, bas = pdf.H - 40, hPx = (bas - top - 22) / ((H1 - H0) / 60), lc = (droite - xt) / 5, y0 = top + 22;
   const sem = C.semaine(lundi);
   sem.jours.forEach((jr, j) => {
     const x = xt + j * lc;
@@ -48,7 +49,7 @@ function grille(pdf, top, C, lundi, blocs) {
   });
   for (let m = H0; m <= H1; m += 60) {
     const y = y0 + (m - H0) / 60 * hPx;
-    pdf.line(xt, y, pdf.W - 28, y, { color: LIGNE });
+    pdf.line(xt, y, droite, y, { color: LIGNE });
     pdf.text(x0, y + 3, K.hFr(K.hDe(m)), { size: 8, color: GRIS });
   }
   blocs.forEach(b => {
@@ -284,3 +285,50 @@ export function excelPlanning(ctx,noms,ids,lundi) {
   }
   return xlsx(feuilles);
 }
+
+// Grilles individuelles : mêmes dates et occupations que la vue A/B.
+export function datesExport(C,lundi,mode) {
+  const ab=semainesAB(C,lundi);
+  return mode==='A'?[ab.A]:mode==='B'?[ab.B]:[ab.A,ab.B];
+}
+export function pdfGrillesAesh(ctx,ids,lundi,mode='AB') {
+  const pdf=new PDF(),dates=datesExport(ctx.C,lundi,mode),groupe=mode==='AB';
+  if(groupe){pdf.W=1190.55;pdf.H=841.89;}
+  for(const id of ids){
+    const a=ctx.I.aesh.get(id);if(!a)continue;
+    for(const lot of groupe?[dates]:dates.map(d=>[d])){
+      pdf.page();
+      entete(pdf,couleurAesh(id),`Emploi du temps · ${a.sigle}`,`${ctx.exportType?'EDT type · ':''}Toutes ses classes · ${lot.map(d=>'Semaine '+ctx.C.parite(d)).join(' + ')}`);
+      lot.forEach((d,i)=>{
+        const b=K.bilan(ctx,id,d),x=28+i*(pdf.W/2),droite=groupe?(i?pdf.W-28:pdf.W/2-12):pdf.W-28;
+        pdf.text(x,108,`Semaine ${ctx.C.parite(d)} · ${K.jjmm(d)}–${K.jjmm(K.ajoute(d,4))} · ${K.fmtH(b.total)}${b.contrat==null?'':' / '+K.fmtH(b.contrat)}`,{size:12,bold:true});
+        grille(pdf,122,ctx.C,d,blocsAesh(ctx,id,d),{x,droite});
+      });
+    }
+  }
+  return numeroter(pdf);
+}
+export function feuillesGrillesAesh(ctx,ids,lundi,mode='AB') {
+  const dates=datesExport(ctx.C,lundi,mode),out=[];
+  for(const id of ids){
+    const a=ctx.I.aesh.get(id);if(!a)continue;
+    const fs=dates.map(d=>{
+      const b=K.bilan(ctx,id,d);
+      const blocs=blocsAesh(ctx,id,d).map(b=>({...b,l3:K.hFr(b.debut)+'–'+K.hFr(b.fin)}));
+      const feuille=feuilleGrille(`${a.sigle} ${ctx.C.parite(d)}`,`${a.sigle} · Semaine ${ctx.C.parite(d)} · ${K.fmtH(b.total)}${b.contrat==null?'':' / '+K.fmtH(b.contrat)}`,`${ctx.exportType?'EDT type · ':''}${titreSemaine(ctx.C,d)} · Toutes ses classes`,ctx.C,d,blocs);
+      feuille.fusions.push('A1:F1','A2:F2');
+      feuille.lignes[1][0].s.retour=true;feuille.hauteurs[2]=32;
+      for(let r=5;r<=feuille.lignes.length;r++)feuille.hauteurs[r]=36;
+      feuille.unePage=true;
+      return feuille;
+    });
+    if(mode!=='AB'){out.push(...fs);continue;}
+    const [aF,bF]=fs;
+    const decale=ref=>ref.replace(/[A-Z]+/g,c=>colonne([...c].reduce((n,l)=>n*26+l.charCodeAt(0)-64,0)-1+7));
+    out.push({...aF,nom:a.sigle+' A+B',largeurs:[...aF.largeurs,3,...bF.largeurs],
+      lignes:aF.lignes.map((r,i)=>[...Array.from({length:6},(_,k)=>r[k]||{}),{},...bF.lignes[i]]),
+      fusions:[...aF.fusions,...bF.fusions.map(decale)],papier:8,unePage:true});
+  }
+  return out;
+}
+export function excelGrillesAesh(ctx,ids,lundi,mode='AB'){return xlsx(feuillesGrillesAesh(ctx,ids,lundi,mode));}
