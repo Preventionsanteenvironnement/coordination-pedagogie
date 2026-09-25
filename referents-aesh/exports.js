@@ -358,9 +358,12 @@ export function pdfSemaineType(ctx, ids, lundi) {
         { size: 9, bold: true, color: '#334155' });
       y += 14;
     }
-    pdf.text(28, y, deux
-      ? 'Les créneaux encadrés en pointillé, précédés de « A · » ou « B · », ne reviennent qu’une semaine sur deux ; les autres sont identiques chaque semaine. En pied de colonne, un total donné en deux nombres se lit semaine A / semaine B.'
-      : 'Toutes les semaines sont identiques : il n’y a pas d’alternance A / B.', { size: 9, color: '#475569' });
+    /* La clé de lecture tient sur deux lignes : une seule déborde de la page en paysage. */
+    if (deux) {
+      pdf.text(28, y, 'Les créneaux en pointillé, précédés de « A · » ou « B · », ne reviennent qu’une semaine sur deux ; les autres sont identiques chaque semaine.', { size: 9, color: '#475569' });
+      pdf.text(28, y + 12, 'En pied de colonne, un total donné en deux nombres se lit semaine A / semaine B.', { size: 9, color: '#475569' });
+      y += 12;
+    } else pdf.text(28, y, 'Toutes les semaines sont identiques : il n’y a pas d’alternance A / B.', { size: 9, color: '#475569' });
     const r = resumeSemaine(K, occ);
     if (r.length) pdf.text(28, y + 14, r.map(([n, h]) => `${n} : ${K.fmtH(h)}`).join('   ·   '), { size: 9, color: '#475569' });
     pdf.text(28, y + 28, `Semaine A : ${K.fmtH(bA.total)}   ·   Semaine B : ${K.fmtH(bB.total)}`, { size: 9, color: '#475569' });
