@@ -1,4 +1,4 @@
-import { semainesAB, contexteType } from './vues-planning.js?v=2026-09-24f';
+import { semainesAB, contexteType, occupationsAB, resumeSemaine } from './vues-planning.js?v=2026-09-25b';
 import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-24e';
 import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
@@ -836,8 +836,39 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ouvrir({type:'confirmer',titre:'Préparer la vérification',grand:'4 AESH · semaines A et B',lignes:[['Planning','Aucune affectation ne change. Antoine devra vérifier puis confirmer.']],bouton:'Mettre les propositions à disposition',travail:async()=>{await ecrireVerification(docs,base);return {};}});
     }catch(e){toast(e.message,true);}};input.click();
   }
+  /* La semaine type d'un AESH : A et B dans une seule grille paysage. */
+  function grilleSemaineType(personne,paire,type) {
+    const cx=type?contexteType(ctx()):ctx();
+    const occ=occupationsAB(K,cx,personne.id,paire.A,paire.B);
+    const bA=K.bilan(cx,personne.id,paire.A), bB=K.bilan(cx,personne.id,paire.B);
+    const moyenne=(bA.total+bB.total)/2, contrat=bA.contrat;
+    const resume=resumeSemaine(K,occ);
+    const deuxSemaines=occ.some(o=>o.sem!=='AB');
+    return `<div class="semaine-type">
+      <div class="st-tete">
+        <div><h2>Semaine type · ${esc(personne.sigle)}</h2>
+          <p>${type?'Organisation habituelle, hors absences et PFMP. ':''}Semaines A et B réunies.
+             ${deuxSemaines?'Les blocs marqués <b>A</b> ou <b>B</b> ne reviennent qu\'une semaine sur deux.':'Toutes les semaines sont identiques.'}</p></div>
+        <div class="st-chiffres">
+          <div><b>${K.fmtH(moyenne)}</b><small>par semaine en moyenne</small></div>
+          ${contrat==null?'':`<div><b>${K.fmtH(contrat)}</b><small>au contrat</small></div>`}
+          <div><b>${K.fmtH(bA.total)} / ${K.fmtH(bB.total)}</b><small>semaine A / semaine B</small></div>
+        </div>
+      </div>
+      ${grillePersonne(personne,paire.A,cx,type,occ)}
+      ${resume.length?`<div class="st-resume">${resume.map(([n,h])=>`<span><b>${esc(n)}</b> ${K.fmtH(h)}</span>`).join('')}</div>`:''}
+      <div class="st-actions">
+        <button type="button" class="btn" data-a="export-grille">⬇ Enregistrer en PDF ou Excel</button>
+        <button type="button" class="btn ghost" data-a="envoyer-grille">✉️ Envoyer à ${esc(personne.sigle)}</button>
+      </div></div>`;
+  }
+
   function grillesPlanning(personne,nom) {
-    const choix=S.route.p.parite, paire=semainesAB(S.C,S.lundi), type=!!S.route.p.edtType;
+    const choix=S.route.p.parite || (personne?'AB':S.C.parite(S.lundi)), paire=semainesAB(S.C,S.lundi), type=!!S.route.p.edtType;
+    /* 25/09/2026 : une personne, un seul document. « A+B » n'aligne plus deux grilles :
+       il n'en montre qu'une, où chaque bloc dit s'il revient les deux semaines ou une seule.
+       A et B restent accessibles pour entrer dans le détail. */
+    if(choix==='AB' && personne) return grilleSemaineType(personne,paire,type);
     const dates=choix==='AB'?[paire.A,paire.B]:[type && !S.C.parite(S.lundi)?paire.A:S.lundi];
     const contenu=dates.map(l=>{
       const cx=type?contexteType(ctx()):ctx(), ancien=S.lundi;let html;
@@ -873,9 +904,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const id=S.route.p.aesh, personne=K.aeshActifs(idx(),P().id).find(a=>a.id===id), bilan=personne?K.bilan(S.route.p.edtType?contexteType(ctx()):ctx(),id,S.lundi):null;
     return tete+(modePlanning && [...S.docs.values()].some(d=>d.type==='verification' && d.statut==='brouillon')?panneauVerification():'')+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)} · Toutes ses classes${S.route.p.parite==='AB'?'':` · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}`}</h2>`:classes)+`
       <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label></div>
-      <div class="ligne"><div class="choix" role="group" aria-label="Alternance">${['A','B','AB'].map(v=>`<button data-a="edt-parite" data-v="${v}" aria-pressed="${(S.route.p.parite || S.C.parite(S.lundi))===v}">${v==='AB'?'A+B':v}</button>`).join('')}</div><button class="btn" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}">EDT type</button></div>
+      <div class="ligne"><div class="choix" role="group" aria-label="Alternance">${[['AB','Semaine type'],['A','Détail A'],['B','Détail B']].map(([v,t])=>`<button data-a="edt-parite" data-v="${v}" aria-pressed="${(S.route.p.parite || (personne?'AB':S.C.parite(S.lundi)))===v}">${t}</button>`).join('')}</div><button class="btn" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}">EDT type</button></div>
       ${S.route.p.affichage==='jour'?`<nav class="edt-jours" aria-label="Jour">${K.JOURS_C.map((j,i)=>`<button type="button" data-a="edt-jour" data-v="${i}" aria-pressed="${+(S.route.p.jour||0)===i}">${j}</button>`).join('')}</nav>`:''}
-      <button class="btn" data-a="export-grille">Exporter la grille · PDF / Excel</button>
+      ${personne && (S.route.p.parite||'AB')==='AB' ? '' : '<button class="btn" data-a="export-grille">Exporter la grille · PDF / Excel</button>'}
       ${grillesPlanning(personne,nom)}`;
   }
   function reunionsPole() {
@@ -888,7 +919,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const occ=(liste || K.occupations(cx,a.id,lundi)).filter(o=>!['repos','vacances'].includes(o.type)),fin=Math.max(18*60,...occ.map(o=>K.min(o.fin))),px=1.25;
     return `<div class="semaine-repere">${type?'EDT type · ':''}Semaine ${S.C.parite(lundi)||'—'} · ${K.jjmm(lundi)}–${K.jjmm(K.ajoute(lundi,4))}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}<small>${K.jjmm(K.ajoute(lundi,i))}</small></div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
       const l=occ.filter(o=>o.j===i),cols=[];l.forEach(o=>{let n=cols.findIndex(c=>c.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
-      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(K.min(o.fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}"><b>${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
+      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(K.min(o.fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}">${o.sem&&o.sem!=='AB'?`<span class="pastille-sem">${o.sem}</span>`:''}<b>${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
     }).join('')}</div></div>`;
   }
 
@@ -1329,10 +1360,35 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const choix=(champ,options)=>`<div class="choix" role="group" aria-label="${champ}">${options.map(([v,t])=>`<button data-a="export-grille-choix" data-champ="${champ}" data-v="${v}" aria-pressed="${f[champ]===v}">${esc(t)}</button>`).join('')}</div>`;
     return teteFeuille('Exporter la grille',S.route.p.edtType?'EDT type · Toutes les classes':'Toutes les classes')+
       '<b>Pour qui ?</b>'+choix('qui',[...(a?[['personne',a.sigle]]:[]),['equipe','Toute l’équipe du pôle']])+
-      '<b>Semaines</b>'+choix('semaines',[['A','A seule'],['B','B seule'],['separe','A et B séparées'],['AB','A+B regroupées']])+
-      '<p>Une fiche par AESH. A+B : une page PDF paysage ou un onglet Excel par personne.</p>'+choix('format',[['pdf','PDF'],['excel','Excel']])+
+      '<b>Semaines</b>'+choix('semaines',[['TYPE','Semaine type · A et B réunies'],['A','A seule'],['B','B seule'],['separe','A et B séparées']])+
+      '<p>Une fiche par AESH. La semaine type tient sur une page paysage : c’est le document à remettre à la personne.</p>'+choix('format',[['pdf','PDF'],['excel','Excel']])+
       `<button class="btn valider" data-a="export-grille-telecharger" ${S.envoi?'disabled':''}>${S.envoi?'Préparation…':'Télécharger'}</button>`;
   }
+  /* Envoyer sa semaine type à l'AESH : le PDF est préparé et enregistré, puis le message
+     s'ouvre, prêt à partir. Un navigateur ne sait pas joindre un fichier lui-même : la pièce
+     jointe reste à glisser, et le message le dit. */
+  async function envoyerGrille() {
+    const cx=S.route.p.edtType?{...contexteType(ctx()),exportType:true}:ctx();
+    const a=cx.I.aesh.get(S.route.p.aesh);
+    if(!a){toast('Choisissez d’abord un AESH.',true);return;}
+    if(S.envoi)return; S.envoi=true; rendre();
+    try{
+      const X=await import('./exports.js?v=2026-09-25b'),F=await import('./fichiers.js?v=2026-09-24i');
+      const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
+      const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
+      F.telecharger(blob,nom);
+      const sujet=`Votre emploi du temps · ${a.sigle}`;
+      const corps=[`Bonjour,`,'',
+        `Voici l’emploi du temps de la semaine type, semaines A et B réunies sur une seule page.`,
+        `Les blocs marqués A ou B ne reviennent qu’une semaine sur deux ; les autres sont identiques chaque semaine.`,
+        '', `Le fichier « ${nom} » vient d’être enregistré : il reste à le joindre à ce message.`,
+        '', `Bonne journée.`].join('\n');
+      window.open('mailto:?subject='+encodeURIComponent(sujet)+'&body='+encodeURIComponent(corps),'_self');
+      toast('PDF enregistré. Joignez-le au message qui vient de s’ouvrir.');
+    }catch(e){toast(e.message||'Envoi impossible.',true);}
+    finally{S.envoi=false;rendre();}
+  }
+
   async function telechargerGrille() {
     if(S.envoi)return;
     const f={...S.feuille},cx=S.route.p.edtType?{...contexteType(ctx()),exportType:true}:ctx();
@@ -1340,7 +1396,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-25a'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-25b'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -1349,12 +1405,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-25a'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-25b'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-25a'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-25b'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1825,7 +1881,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'service-enregistrer': enregistrerServiceHoraire(); return;
       case 'service-fin': terminerService(b); return;
       case 'planning-pole': if(POLES.some(p=>p.id===v)){S.vu=v;S.route.p={};S.aeshChoisi=null;rendre();} return;
-      case 'export-grille': ouvrir({type:'export-grille',qui:S.route.p.aesh?'personne':'equipe',semaines:S.route.p.parite||S.C.parite(S.lundi)||'AB',format:'pdf'});return;
+      case 'envoyer-grille': envoyerGrille(); return;
+      case 'export-grille': ouvrir({type:'export-grille',qui:S.route.p.aesh?'personne':'equipe',semaines:S.route.p.aesh?'TYPE':(S.route.p.parite||S.C.parite(S.lundi)||'AB'),format:'pdf'});return;
       case 'export-grille-choix': if(S.feuille?.type==='export-grille'){S.feuille[b.dataset.champ]=v;rendre();}return;
       case 'export-grille-telecharger': telechargerGrille();return;
       case 'planning-excel': exporterPlanningSimple(); return;

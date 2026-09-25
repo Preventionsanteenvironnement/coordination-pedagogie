@@ -1,4 +1,4 @@
-import { semainesAB } from './vues-planning.js?v=2026-09-24f';
+import { semainesAB, occupationsAB, resumeSemaine } from './vues-planning.js?v=2026-09-25b';
 import { couleurAesh, libelleService } from './presences.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
@@ -39,7 +39,10 @@ function puces(pdf, y, liste) {
 }
 /* Grille lundi → vendredi, 8 h → 18 h. blocs : [{j, debut, fin, fond, trait, l1, l2, l3, hachure}] */
 function grille(pdf, top, C, lundi, blocs, cadre = {}) {
-  const x0 = cadre.x ?? 28, droite = cadre.droite ?? pdf.W - 28, xt = x0 + 34, bas = pdf.H - 40, hPx = (bas - top - 22) / ((H1 - H0) / 60), lc = (droite - xt) / 5, y0 = top + 22;
+  /* 25/09/2026 : la plage horaire et le bas de la grille sont réglables, pour que la
+     semaine type tienne sur une page sans écraser le pied de document. */
+  const h0 = cadre.h0 ?? H0, h1 = cadre.h1 ?? H1;
+  const x0 = cadre.x ?? 28, droite = cadre.droite ?? pdf.W - 28, xt = x0 + 34, bas = cadre.bas ?? (pdf.H - 40), hPx = (bas - top - 22) / ((h1 - h0) / 60), lc = (droite - xt) / 5, y0 = top + 22;
   const sem = C.semaine(lundi);
   sem.jours.forEach((jr, j) => {
     const x = xt + j * lc;
@@ -47,16 +50,16 @@ function grille(pdf, top, C, lundi, blocs, cadre = {}) {
     pdf.text(x + lc / 2, top + 12.5, `${K.JOURS[j]} ${K.jjmm(jr.date)}`, { size: 9, bold: true, color: ENCRE, align: 'center' });
     if (jr.off) { pdf.rect(x + 2, y0, lc - 4, bas - y0, { fill: '#f3f4f6', r: 6 }); pdf.text(x + lc / 2, (y0 + bas) / 2, coupe(jr.off, lc - 14, 9), { size: 9, color: GRIS, align: 'center' }); }
   });
-  for (let m = H0; m <= H1; m += 60) {
-    const y = y0 + (m - H0) / 60 * hPx;
+  for (let m = h0; m <= h1; m += 60) {
+    const y = y0 + (m - h0) / 60 * hPx;
     pdf.line(xt, y, droite, y, { color: LIGNE });
     pdf.text(x0, y + 3, K.hFr(K.hDe(m)), { size: 8, color: GRIS });
   }
   blocs.forEach(b => {
     if (sem.jours[b.j] && sem.jours[b.j].off) return;
-    const a = Math.max(H0, K.min(b.debut)), z = Math.min(H1, K.min(b.fin)); if (z <= a) return;
-    const x = xt + b.j * lc + (b.col || 0) * ((lc - 6) / (b.cols || 1)) + 3, w = (lc - 6) / (b.cols || 1) - 2, y = y0 + (a - H0) / 60 * hPx + 1, h = (z - a) / 60 * hPx - 2;
-    pdf.rect(x, y, w, h, { fill: b.fond, r: 5, stroke: b.hachure ? '#b42318' : null, dash: !!b.hachure, lw: 0.8 });
+    const a = Math.max(h0, K.min(b.debut)), z = Math.min(h1, K.min(b.fin)); if (z <= a) return;
+    const x = xt + b.j * lc + (b.col || 0) * ((lc - 6) / (b.cols || 1)) + 3, w = (lc - 6) / (b.cols || 1) - 2, y = y0 + (a - h0) / 60 * hPx + 1, h = (z - a) / 60 * hPx - 2;
+    pdf.rect(x, y, w, h, { fill: b.fond, r: 5, stroke: b.hachure ? '#b42318' : (b.pointille ? (b.trait || '#94a3b8') : null), dash: !!b.hachure || !!b.pointille, lw: 0.8 });
     if (b.trait) pdf.rect(x, y, 3.2, h, { fill: b.trait, r: 1.5 });
     const tx = x + 7, tw = w - 11; let ty = y + 11;
     if (h < 14) { pdf.text(tx, y + h - 3.5, b.l1, { size: 7, bold: true, color: b.encre || ENCRE, max: tw }); return; }
@@ -74,10 +77,38 @@ function colonnes(blocs) {
   });
   return blocs;
 }
+/* 25/09/2026 — Semaine type : les blocs viennent d'une liste déjà fusionnée (A, B ou les deux).
+   Un bloc d'une seule semaine porte sa lettre et un fond plus pâle, pour se distinguer d'un
+   créneau qui revient chaque semaine. */
+function blocsDepuis(ctx, occ) {
+  return colonnes(occ.filter(o => o.type !== 'vacances').map(o => {
+    const une = o.sem && o.sem !== 'AB';
+    let b;
+    if (o.type === 'cours') {
+      const p = pole(o.pole) || { color: '#475569', clair: '#eef1f4' };
+      b = { j: o.j, debut: o.debut, fin: o.fin, fond: o.absent ? '#fdecea' : p.clair,
+        trait: o.absent ? '#b42318' : p.couleur, hachure: o.absent,
+        l1: o.cours.lib || o.cours.mat,
+        l2: `${o.cours.cls.map(n => (ctx.edt.classes[n] || {}).court || n).join(' · ')}`,
+        l3: K.hFr(o.debut) + '–' + K.hFr(o.fin) };
+    } else if (o.type === 'absence') {
+      b = { j: o.j, debut: o.debut, fin: o.fin, fond: '#fff4f2', trait: '#b42318', l1: o.label, l2: '', encre: '#8a1c12' };
+    } else {
+      b = { j: o.j, debut: o.debut, fin: o.fin, fond: '#eef1f4', trait: '#64748b',
+        l1: libelleService(o.label), l2: '', l3: K.hFr(o.debut) + '–' + K.hFr(o.fin) };
+    }
+    if (une) {
+      b.l1 = o.sem + ' · ' + b.l1;                       /* le titre reste lisible */
+      b.pointille = true;
+    }
+    return b;
+  }));
+}
+
 function blocsAesh(ctx, aeshId, lundi) {
   return colonnes(K.occupations(ctx, aeshId, lundi).filter(o => o.type !== 'vacances').map(o => {
     if (o.type === 'cours') {
-      const p = pole(o.pole) || { couleur: '#475569', clair: '#eef1f4' };
+      const p = pole(o.pole) || { color: '#475569', clair: '#eef1f4' };
       return { j: o.j, debut: o.debut, fin: o.fin, fond: o.absent ? '#fdecea' : p.clair, trait: o.absent ? '#b42318' : p.couleur, hachure: o.absent,
         l1: o.cours.lib || o.cours.mat, l2: `${o.cours.cls.map(n => (ctx.edt.classes[n] || {}).court || n).join(' · ')}${o.absent ? ' · à couvrir' : ''}`, l3: (o.cours.salle || []).join(' · ') };
     }
@@ -291,7 +322,35 @@ export function datesExport(C,lundi,mode) {
   const ab=semainesAB(C,lundi);
   return mode==='A'?[ab.A]:mode==='B'?[ab.B]:[ab.A,ab.B];
 }
+/* 25/09/2026 — Le document que reçoit l'AESH : une page A4 paysage, sa semaine type,
+   A et B réunies. En pied, ce qu'il fait dans la semaine et la clé de lecture. */
+export function pdfSemaineType(ctx, ids, lundi) {
+  const pdf = new PDF(), ab = semainesAB(ctx.C, lundi);
+  for (const id of ids) {
+    const a = ctx.I.aesh.get(id); if (!a) continue;
+    const occ = occupationsAB(K, ctx, id, ab.A, ab.B);
+    const bA = K.bilan(ctx, id, ab.A), bB = K.bilan(ctx, id, ab.B);
+    const moyenne = (bA.total + bB.total) / 2, deux = occ.some(o => o.sem !== 'AB');
+    pdf.page();
+    entete(pdf, couleurAesh(id), `Emploi du temps · ${a.sigle}`,
+      `${ctx.exportType ? 'Organisation habituelle · ' : ''}Semaines A et B réunies · ${K.fmtH(moyenne)} par semaine en moyenne${bA.contrat == null ? '' : ' · contrat ' + K.fmtH(bA.contrat)}`);
+    /* La grille s'arrête à la dernière heure travaillée, arrondie : pas de vide jusqu'à 21 h. */
+    const finMax = Math.max(17 * 60, ...occ.map(o => K.min(o.fin)));
+    const h1 = Math.min(21 * 60, Math.ceil(finMax / 60) * 60);
+    grille(pdf, 112, ctx.C, ab.A, blocsDepuis(ctx, occ), { x: 28, droite: pdf.W - 28, bas: pdf.H - 96, h1 });
+    let y = pdf.H - 84;
+    pdf.text(28, y, deux
+      ? 'Les créneaux précédés de « sem. A » ou « sem. B » ne reviennent qu’une semaine sur deux. Les autres sont identiques chaque semaine.'
+      : 'Toutes les semaines sont identiques : il n’y a pas d’alternance A / B.', { size: 9, color: '#475569' });
+    const r = resumeSemaine(K, occ);
+    if (r.length) pdf.text(28, y + 15, r.map(([n, h]) => `${n} : ${K.fmtH(h)}`).join('   ·   '), { size: 9, color: '#475569' });
+    pdf.text(28, y + 30, `Semaine A : ${K.fmtH(bA.total)}   ·   Semaine B : ${K.fmtH(bB.total)}`, { size: 9, color: '#475569' });
+  }
+  return numeroter(pdf);
+}
+
 export function pdfGrillesAesh(ctx,ids,lundi,mode='AB') {
+  if(mode==='TYPE') return pdfSemaineType(ctx,ids,lundi);
   const pdf=new PDF(),dates=datesExport(ctx.C,lundi,mode),groupe=mode==='AB';
   if(groupe){pdf.W=1190.55;pdf.H=841.89;}
   for(const id of ids){
@@ -308,7 +367,29 @@ export function pdfGrillesAesh(ctx,ids,lundi,mode='AB') {
   }
   return numeroter(pdf);
 }
+/* 25/09/2026 — La semaine type en Excel : une feuille par personne, A et B réunies. */
+export function feuillesSemaineType(ctx, ids, lundi) {
+  const ab = semainesAB(ctx.C, lundi), out = [];
+  for (const id of ids) {
+    const a = ctx.I.aesh.get(id); if (!a) continue;
+    const occ = occupationsAB(K, ctx, id, ab.A, ab.B);
+    const bA = K.bilan(ctx, id, ab.A), bB = K.bilan(ctx, id, ab.B);
+    const blocs = blocsDepuis(ctx, occ).map(b => ({ ...b, l3: b.l3 || '' }));
+    const f = feuilleGrille(`${a.sigle} type`,
+      `${a.sigle} · Semaine type · ${K.fmtH((bA.total + bB.total) / 2)} par semaine en moyenne`,
+      `${ctx.exportType ? 'Organisation habituelle · ' : ''}Semaines A et B réunies · A : ${K.fmtH(bA.total)} · B : ${K.fmtH(bB.total)}`,
+      ctx.C, ab.A, blocs);
+    f.fusions.push('A1:F1', 'A2:F2');
+    f.lignes[1][0].s.retour = true; f.hauteurs[2] = 32;
+    for (let r = 5; r <= f.lignes.length; r++) f.hauteurs[r] = 36;
+    f.unePage = true; f.papier = 9;
+    out.push(f);
+  }
+  return out;
+}
+
 export function feuillesGrillesAesh(ctx,ids,lundi,mode='AB') {
+  if(mode==='TYPE') return feuillesSemaineType(ctx,ids,lundi);
   const dates=datesExport(ctx.C,lundi,mode),out=[];
   for(const id of ids){
     const a=ctx.I.aesh.get(id);if(!a)continue;

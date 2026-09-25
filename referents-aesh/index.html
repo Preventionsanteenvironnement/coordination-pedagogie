@@ -449,6 +449,32 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .planning-ab .semaine-repere{margin:0;border-radius:0}
 .planning-ab[data-affichage="jour"] > .comparaison-semaine{flex-basis:360px;width:360px}
 .planning-ab[data-affichage="jour"] .grille-edt{grid-template-columns:42px minmax(0,1fr)}
+/* ─── Semaine type : A et B dans une seule grille (25/09/2026) ─── */
+.semaine-type{background:#fff;border:1px solid var(--trait,#e3e8ef);border-radius:14px;overflow:hidden;
+  box-shadow:0 1px 3px rgba(16,24,40,.06);margin-top:12px}
+.st-tete{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:flex-start;
+  padding:16px 18px;background:linear-gradient(135deg,var(--pole-clair,#eef2f8),#fff)}
+.st-tete h2{margin:0 0 3px;font-size:1.15rem;color:var(--pole,#12315f)}
+.st-tete p{margin:0;font-size:.85rem;color:#5c6675;max-width:52ch;line-height:1.45}
+.st-chiffres{display:flex;gap:18px;flex-wrap:wrap}
+.st-chiffres div{text-align:right}
+.st-chiffres b{display:block;font-size:1.25rem;color:var(--pole,#12315f);font-variant-numeric:tabular-nums}
+.st-chiffres small{color:#667085;font-size:.72rem}
+.semaine-type .semaine-repere{display:none}
+.st-resume{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid #eef1f6;background:#fbfcfe}
+.st-resume span{background:#fff;border:1px solid #e3e8ef;border-radius:999px;padding:5px 12px;font-size:.8rem;color:#3c4a60}
+.st-resume b{color:#12315f;font-weight:600}
+.st-actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid #eef1f6}
+/* Un bloc qui ne revient qu'une semaine sur deux : liseré interrompu et pastille. */
+.occupation-aesh.une-semaine{border-style:dashed;border-width:1px;border-color:#c4d1e3}
+.pastille-sem{position:absolute;top:3px;right:3px;background:#12315f;color:#fff;font-size:.6rem;
+  font-weight:700;line-height:1;padding:2px 5px;border-radius:4px;letter-spacing:.5px}
+.occupation-aesh{position:relative}
+@media print{
+  .st-actions,nav,.choix,.classes{display:none!important}
+  .semaine-type{border:none;box-shadow:none}
+  @page{size:A4 landscape;margin:10mm}
+}
 </style>
 </head>
 <body>
@@ -472,7 +498,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-25a');
+  const m = await import('./app.js?v=2026-09-25b');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25a');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
