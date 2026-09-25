@@ -50,10 +50,12 @@ function grille(pdf, top, C, lundi, blocs, cadre = {}) {
     pdf.text(x + lc / 2, top + 12.5, `${K.JOURS[j]} ${K.jjmm(jr.date)}`, { size: 9, bold: true, color: ENCRE, align: 'center' });
     if (jr.off) { pdf.rect(x + 2, y0, lc - 4, bas - y0, { fill: '#f3f4f6', r: 6 }); pdf.text(x + lc / 2, (y0 + bas) / 2, coupe(jr.off, lc - 14, 9), { size: 9, color: GRIS, align: 'center' }); }
   });
-  for (let m = h0; m <= h1; m += 60) {
-    const y = y0 + (m - h0) / 60 * hPx;
-    pdf.line(xt, y, droite, y, { color: LIGNE });
-    pdf.text(x0, y + 3, K.hFr(K.hDe(m)), { size: 8, color: GRIS });
+  /* 25/09/2026 : l'établissement place tous ses cours sur l'heure ou la demie.
+     Une graduation de 30 min place chaque bloc au pixel : aucun n'a besoin d'écrire son horaire. */
+  for (let m = h0; m <= h1; m += 30) {
+    const y = y0 + (m - h0) / 60 * hPx, pleine = m % 60 === 0;
+    pdf.line(xt, y, droite, y, { color: pleine ? LIGNE : '#f2f4f8' });
+    if (pleine) pdf.text(x0, y + 3, K.hFr(K.hDe(m)), { size: 8, color: GRIS });
   }
   blocs.forEach(b => {
     if (sem.jours[b.j] && sem.jours[b.j].off) return;
@@ -90,12 +92,12 @@ function blocsDepuis(ctx, occ) {
         trait: o.absent ? '#b42318' : p.couleur, hachure: o.absent,
         l1: o.cours.lib || o.cours.mat,
         l2: `${o.cours.cls.map(n => (ctx.edt.classes[n] || {}).court || n).join(' · ')}`,
-        l3: K.hFr(o.debut) + '–' + K.hFr(o.fin) };
+        l3: (K.min(o.debut) % 30 || K.min(o.fin) % 30) ? K.hFr(o.debut) + '–' + K.hFr(o.fin) : '' };
     } else if (o.type === 'absence') {
       b = { j: o.j, debut: o.debut, fin: o.fin, fond: '#fff4f2', trait: '#b42318', l1: o.label, l2: '', encre: '#8a1c12' };
     } else {
       b = { j: o.j, debut: o.debut, fin: o.fin, fond: '#eef1f4', trait: '#64748b',
-        l1: libelleService(o.label), l2: '', l3: K.hFr(o.debut) + '–' + K.hFr(o.fin) };
+        l1: libelleService(o.label), l2: '', l3: (K.min(o.debut) % 30 || K.min(o.fin) % 30) ? K.hFr(o.debut) + '–' + K.hFr(o.fin) : '' };
     }
     if (une) {
       b.l1 = o.sem + ' · ' + b.l1;                       /* le titre reste lisible */
@@ -337,7 +339,7 @@ export function pdfSemaineType(ctx, ids, lundi) {
     /* La grille s'arrête à la dernière heure travaillée, arrondie : pas de vide jusqu'à 21 h. */
     const finMax = Math.max(17 * 60, ...occ.map(o => K.min(o.fin)));
     const h1 = Math.min(21 * 60, Math.ceil(finMax / 60) * 60);
-    grille(pdf, 112, ctx.C, ab.A, blocsDepuis(ctx, occ), { x: 28, droite: pdf.W - 28, bas: pdf.H - 96, h1 });
+    grille(pdf, 112, ctx.C, ab.A, blocsDepuis(ctx, occ), { x: 28, droite: pdf.W - 28, bas: pdf.H - 106, h1 });
     let y = pdf.H - 84;
     pdf.text(28, y, deux
       ? 'Les créneaux précédés de « sem. A » ou « sem. B » ne reviennent qu’une semaine sur deux. Les autres sont identiques chaque semaine.'
