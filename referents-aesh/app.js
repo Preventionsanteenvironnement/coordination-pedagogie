@@ -1,4 +1,4 @@
-import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal, comptesEleves as comptesClasse, libelleEleves as libelleClasse } from './vues-planning.js?v=2026-09-26a';
+import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal, comptesEleves as comptesClasse, libelleEleves as libelleClasse } from './vues-planning.js?v=2026-09-26b';
 import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-24e';
 import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
@@ -849,7 +849,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
         return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
-          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}">${lettre ? `<span class="sem-lettre">${lettre}</span>` : ''}<b>${esc(c.lib)}</b>${h > 44 && sallesCourtes(c.salle) ? `<span class="salle">${esc(sallesCourtes(c.salle))}</span>` : ''}${h > 54 ? elvHtml : ''}${aeshs.length ? `<span class="past-ligne" aria-hidden="true">${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
+          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}">${lettre ? `<span class="sem-lettre">${lettre}</span>` : ''}<b>${esc(c.lib)}</b>${h > 96 && sallesCourtes(c.salle) ? `<span class="salle">${esc(sallesCourtes(c.salle))}</span>` : ''}${h > 116 ? elvHtml : ''}${aeshs.length ? `<span class="past-ligne" aria-hidden="true">${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>

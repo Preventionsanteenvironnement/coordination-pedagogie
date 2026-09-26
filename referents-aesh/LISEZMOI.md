@@ -506,3 +506,20 @@ grille du doigt sur un téléphone — le défilement horizontal était déjà l
 
 Fichiers : `app.js`, `presences.js` (`sigleService`, `SIGLES_SERVICE`), `exports.js` (version),
 `index.html` (cache `2026-09-26i`). Onze fichiers de tests réussis.
+
+**Rendu sur téléphone (26/09)** — maquette à 375 px, vraies données CAP 1 PSR. Quatre défauts
+trouvés et corrigés, dans cet ordre :
+1. `padding-right:48%` réservait encore la place des anciennes bandes verticales : le titre était
+   écrasé sur la moitié gauche et « Accompagnement perso. maths » s'affichait « Acc pers mat ».
+2. Salle et compteur d'élèves s'affichaient dès 44 et 54 px de haut, ce qui poussait les pastilles
+   hors du bloc. Seuils portés à 96 et 116 px : un cours d'une heure montre son titre et ses AESH,
+   rien d'autre.
+3. Le rond du besoin, passé en haut à gauche, recouvrait la première lettre du titre (« co… » pour
+   « Co-enseignement »). Il est revenu en bas, et les pastilles lui laissent 20 px.
+4. À trois AESH sur un bloc étroit, les pastilles s'empilaient sur trois lignes et chassaient le
+   titre. Elles tiennent désormais sur une seule ligne ; ce qui dépasse est coupé, le détail est
+   au clic.
+
+Les colonnes passent de 200 à 260 px sur téléphone — la grille défile de toute façon — et un cours
+d'une heure a droit à deux lignes de titre. Le compteur d'élèves se dit court : « 6 él. · 2 AI ·
+2 AM · 6 ULIS », l'ancien libellé étant coupé avant d'être utile.

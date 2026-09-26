@@ -93,9 +93,11 @@ export function comptesEleves(liste) {
 }
 export function libelleEleves(c) {
   if (!c || !c.notifies) return '';
+  /* Court, parce qu'un bloc d'une heure n'a pas la place d'écrire « 6 notifiés dont
+     2 individualisée » : la phrase était coupée au moment de devenir utile. */
   const p = [];
-  if (c.ai) p.push(c.ai + ' ind');
-  if (c.am) p.push(c.am + ' mut');
+  if (c.ai) p.push(c.ai + ' AI');
+  if (c.am) p.push(c.am + ' AM');
   if (c.ulis) p.push(c.ulis + ' ULIS');
-  return c.notifies + ' notifié' + (c.notifies > 1 ? 's' : '') + (p.length ? ' · ' + p.join(' · ') : '');
+  return c.notifies + ' él.' + (p.length ? ' · ' + p.join(' · ') : '');
 }

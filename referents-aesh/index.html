@@ -268,7 +268,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .opt-menu button{display:flex;align-items:center;gap:9px;border:0;background:none;padding:8px 10px;font:inherit;font-size:.9rem;color:var(--ink);cursor:pointer;border-radius:8px;text-align:left}
 .opt-menu button:hover{background:var(--card-2)}
 /* Les AESH au pied du bloc : le cours garde toute sa largeur. */
-.past-ligne{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto;padding-top:3px}
+/* Une seule ligne de pastilles : à trois AESH sur un bloc étroit, elles s'empilaient et
+   chassaient le titre hors du bloc. Ce qui dépasse est coupé ; le détail est au clic. */
+.past-ligne{display:flex;flex-wrap:nowrap;gap:3px;margin-top:auto;padding-top:3px;overflow:hidden}
 .past-aesh{display:inline-flex;align-items:baseline;gap:3px;color:#fff;border-radius:6px;padding:1px 6px;font-size:.72rem;font-weight:800;letter-spacing:.02em;line-height:1.5;white-space:nowrap}
 .past-aesh.abs{outline:2px dashed var(--err);outline-offset:1px}
 .past-aesh i{font-style:normal;font-weight:600;font-size:.66rem;opacity:.9}
@@ -282,6 +284,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .opt-menu .opt-titre:first-child{padding-top:4px}
 /* Un cours qui ne revient qu'une semaine sur deux, dans la grille commune A+B. */
 .bloc-contenu.une-sem{border-style:dashed}
+.bloc-contenu.une-sem b{padding-right:22px}
 .sem-lettre{position:absolute;top:3px;right:5px;z-index:2;background:var(--ink);color:var(--card);border-radius:5px;font-size:.66rem;font-weight:800;padding:0 5px;line-height:1.45}
 .opt-case{width:19px;height:19px;flex:none;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center;font-weight:800;font-size:.78rem;color:var(--pole,#0f766e)}
 .opt-menu button[aria-pressed="true"] .opt-case{background:var(--card-2);border-color:var(--pole,#0f766e)}
@@ -493,7 +496,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .guide-etape small{color:var(--muted)}
 
 .presence-reglage{display:grid;gap:10px;padding:12px;border:1px solid var(--line,#ddd);border-radius:12px;margin:10px 0}
-.bloc.avec-presences .bloc-contenu{position:relative;padding-right:48%;}
+.bloc.avec-presences /* 26/09/2026 — Les AESH ne sont plus des bandes verticales : le bloc récupère sa largeur.
+   Le titre tient sur deux lignes au plus, et la rangée de pastilles garde sa place en bas. */
+.bloc-contenu{position:relative}
+.bloc-contenu b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bloc[style*="height:5"] .bloc-contenu b,.bloc[style*="height:4"] .bloc-contenu b,.bloc[style*="height:3"] .bloc-contenu b{-webkit-line-clamp:1}
+.past-ligne{flex:0 0 auto}
+.bloc-contenu .salle,.bloc-contenu .eleves-bloc{flex:0 0 auto}
 .bloc.avec-presences.avec-besoin .bloc-contenu>b{padding-right:0}
 .presence-timeline{position:absolute;top:0;bottom:0;right:0;width:46%;pointer-events:none;border-left:1px dashed #64748b}
 .presence-bande{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;font-weight:800;font-size:12px;border:1px solid white;overflow:hidden;box-sizing:border-box;min-height:0}
@@ -509,10 +518,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .sans-presence .bes-action{top:auto;bottom:3px;left:6px;right:auto}.sans-presence .bloc-contenu b{max-width:100%}.besoin-chiffres{display:flex;gap:10px;justify-content:space-between;padding:12px 0}.besoin-chiffres span{text-align:center}.besoin-chiffres b{display:block;font-size:1.8rem}.besoin-titre{padding-left:12px}
 
 .edt-jours{display:flex}.filtre-grille{justify-content:space-between}.filtre-grille select{max-width:150px}.semaine-repere{position:sticky;top:110px;z-index:5;background:var(--card);padding:8px 12px;border:1px solid var(--line);border-radius:10px;font-weight:700}
-.bes-cercle{position:absolute;right:5px;bottom:5px;width:16px;height:16px;box-sizing:border-box;border:2px solid currentColor;border-radius:50%;font-size:12px;line-height:12px;text-align:center;font-weight:800;pointer-events:none;background:var(--card);color:#737b85;z-index:2}.bes-cercle.vide{color:#c13737}.bes-cercle.partiel{color:#b85b00;background:linear-gradient(90deg,#b85b00 50%,var(--card) 50%)}.bes-cercle.plein{color:#087d5b;background:#087d5b}.bes-cercle.zero{font-size:19px}.avec-presences .bes-cercle{left:5px;right:auto}.demande-cours{padding-bottom:12px;border-bottom:1px solid var(--line)}.carte-reunions{background:#eef1ff;border-left:5px solid #7773bc}.occupation-aesh{position:absolute;background:#eff6f5;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:5px;overflow:hidden;font-size:.8rem}.occupation-aesh small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.occupation-aesh b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}/* Un créneau de 30 min : une seule ligne tient. */.occupation-aesh.court{padding:2px 5px;font-size:.74rem;display:flex;align-items:center}.occupation-aesh.court b{-webkit-line-clamp:1;line-height:1.15}.occupation-aesh.court small{display:none}.occupation-aesh.abs{opacity:.5;text-decoration:line-through}
+.bes-cercle{position:absolute;right:5px;bottom:5px;width:16px;height:16px;box-sizing:border-box;border:2px solid currentColor;border-radius:50%;font-size:12px;line-height:12px;text-align:center;font-weight:800;pointer-events:none;background:var(--card);color:#737b85;z-index:2}.bes-cercle.vide{color:#c13737}.bes-cercle.partiel{color:#b85b00;background:linear-gradient(90deg,#b85b00 50%,var(--card) 50%)}.bes-cercle.plein{color:#087d5b;background:#087d5b}.bes-cercle.zero{font-size:19px}.avec-presences /* Le rond du besoin reste en bas à gauche : en haut il recouvrait la première lettre du
+   titre (« co… » pour « Co-enseignement »). Les pastilles lui laissent sa place. */
+.bes-cercle{left:5px;right:auto;top:auto;bottom:5px}
+.past-ligne{padding-left:20px}.demande-cours{padding-bottom:12px;border-bottom:1px solid var(--line)}.carte-reunions{background:#eef1ff;border-left:5px solid #7773bc}.occupation-aesh{position:absolute;background:#eff6f5;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:5px;overflow:hidden;font-size:.8rem}.occupation-aesh small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.occupation-aesh b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}/* Un créneau de 30 min : une seule ligne tient. */.occupation-aesh.court{padding:2px 5px;font-size:.74rem;display:flex;align-items:center}.occupation-aesh.court b{-webkit-line-clamp:1;line-height:1.15}.occupation-aesh.court small{display:none}.occupation-aesh.abs{opacity:.5;text-decoration:line-through}
 .grille-edt[data-vue="jour"]{min-width:0;grid-template-columns:42px minmax(0,1fr)}.grille-edt[data-vue="jour"] .jour-col{display:none}
 .grille-edt[data-vue="jour"][data-jour="0"] .jour-col[data-j="0"]{display:block}.grille-edt[data-vue="jour"][data-jour="1"] .jour-col[data-j="1"]{display:block}.grille-edt[data-vue="jour"][data-jour="2"] .jour-col[data-j="2"]{display:block}.grille-edt[data-vue="jour"][data-jour="3"] .jour-col[data-j="3"]{display:block}.grille-edt[data-vue="jour"][data-jour="4"] .jour-col[data-j="4"]{display:block}
-@media(max-width:700px){.presence-horaire{display:none!important}.grille-edt[data-vue="semaine"]{min-width:1054px;grid-template-columns:54px repeat(5,minmax(200px,1fr))}.grille-edt[data-vue="semaine"] .bloc-contenu b{font-size:.85rem;line-height:1.2}.grille-edt[data-vue="semaine"] .salle{display:none}.grille-edt[data-vue="semaine"] .presence-bande{font-size:.9rem}.corps{gap:10px}.equipe-compacte{grid-template-columns:1fr}.semaine-repere{font-size:.85rem}.bloc-contenu b{font-size:.85rem}}
+@media(max-width:700px){.presence-horaire{display:none!important}.grille-edt[data-vue="semaine"]{min-width:1354px;grid-template-columns:54px repeat(5,minmax(260px,1fr))}.grille-edt[data-vue="semaine"] .bloc-contenu b{font-size:.85rem;line-height:1.2}.grille-edt[data-vue="semaine"] .salle{display:none}.grille-edt[data-vue="semaine"] .presence-bande{font-size:.9rem}.corps{gap:10px}.equipe-compacte{grid-template-columns:1fr}.semaine-repere{font-size:.85rem}.bloc-contenu b{font-size:.85rem}}
 
 
 .verification-guide{width:min(640px,94vw);max-height:92dvh;overflow:auto;border:0;border-radius:20px;padding:24px;color:#17212b;background:#fff}
@@ -590,7 +602,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26i');
+  const m = await import('./app.js?v=2026-09-26o');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

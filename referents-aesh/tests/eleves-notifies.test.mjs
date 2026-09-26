@@ -20,13 +20,13 @@ assert.equal(c.ai, 2);
 assert.equal(c.am, 1);
 assert.equal(c.ulis, 3);              // un élève ULIS sans aide humaine compte quand même
 assert.equal(c.heures, 15);
-assert.equal(V.libelleEleves(c), '3 notifiés · 2 ind · 1 mut · 3 ULIS');
+assert.equal(V.libelleEleves(c), '3 él. · 2 AI · 1 AM · 3 ULIS');
 
 /* Une classe sans personne de notifié n'écrit rien sur les blocs : pas de bruit inutile. */
 assert.equal(V.libelleEleves(V.comptesEleves([{ code: 'AAAAA', notif: 'non' }])), '');
 assert.equal(V.libelleEleves(V.comptesEleves([])), '');
-/* Un seul notifié : le singulier. */
-assert.equal(V.libelleEleves(V.comptesEleves([{ code: 'AAAAA', notif: 'oui', aide: 'aucune' }])), '1 notifié');
+/* Un seul notifié : le compteur reste court. */
+assert.equal(V.libelleEleves(V.comptesEleves([{ code: 'AAAAA', notif: 'oui', aide: 'aucune' }])), '1 él.');
 /* Les heures acceptent « 15 h », « 2,5 » ou rien, sans jamais casser le total. */
 assert.equal(V.comptesEleves([{ code: 'A', notif: 'oui', heures: '2,5' }, { code: 'B', notif: 'oui', heures: 'à préciser' }]).heures, 2.5);
 /* Une entrée sans code est ignorée : un document abîmé ne fausse pas le compte. */
