@@ -528,3 +528,18 @@ d'une heure a droit à deux lignes de titre. Le compteur d'élèves se dit court
 (`position:sticky`) : en défilant il passait par-dessus les cours et masquait ce qu'on cherchait à
 lire. Il reste désormais en haut, sans flotter. Et les trois points disent ce qu'ils font :
 bouton **« Affichage ⋯ »** au lieu d'un rond muet.
+
+**La lettre A ou B entre dans le titre (26/09)** — six variantes montrées à Brahim sur le même
+créneau, à la largeur d'un téléphone : devant le titre, en filigrane, par la barre latérale, par
+le cadre, en bas à droite, ou rien. Retenue : **devant le titre**, avec deux couleurs (A en vert
+sombre, B en violet) pour distinguer d'un coup d'œil sans avoir à lire.
+
+Le défaut n'était pas la lettre mais sa position : posée en surimpression, elle mangeait le
+dernier mot — « Accompagnement perso. » perdait « maths ». Dans le flux du texte, elle n'entre en
+conflit avec rien, sur un bloc d'une demi-heure comme de quatre heures. Écartées : le filigrane
+(le fond des blocs est trop clair et il brouille le titre), la barre et le cadre (il faut
+apprendre le code, et le pointillé dit déjà « ne revient pas toutes les semaines »), le coin bas
+droit (il se bat avec les pastilles AESH), et rien du tout (un cours seul en A, sans jumeau en B,
+n'aurait plus aucune indication).
+
+Même traitement dans la grille d'un AESH, où la lettre était aussi une pastille posée par-dessus.

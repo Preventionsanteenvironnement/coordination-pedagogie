@@ -289,8 +289,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .opt-menu .opt-titre:first-child{padding-top:4px}
 /* Un cours qui ne revient qu'une semaine sur deux, dans la grille commune A+B. */
 .bloc-contenu.une-sem{border-style:dashed}
-.bloc-contenu.une-sem b{padding-right:22px}
-.sem-lettre{position:absolute;top:3px;right:5px;z-index:2;background:var(--ink);color:var(--card);border-radius:5px;font-size:.66rem;font-weight:800;padding:0 5px;line-height:1.45}
+
+/* 26/09/2026 — La lettre entre DANS le titre au lieu de se poser dessus : posée en
+   surimpression, elle mangeait le dernier mot (« Accompagnement perso. » perdait « maths »).
+   Deux couleurs pour distinguer A de B du coin de l'œil, sans avoir à lire. */
+.sem-lettre{font-style:normal;display:inline-block;background:#0f766e;color:#fff;border-radius:4px;font-size:.66rem;font-weight:800;padding:0 4px;margin-right:4px;vertical-align:1px}
+.sem-lettre.b{background:#6d4bd1}
 .opt-case{width:19px;height:19px;flex:none;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center;font-weight:800;font-size:.78rem;color:var(--pole,#0f766e)}
 .opt-menu button[aria-pressed="true"] .opt-case{background:var(--card-2);border-color:var(--pole,#0f766e)}
 /* Sauvegarde : l'aperçu de ce qui va changer, avant d'écrire quoi que ce soit. */
@@ -579,8 +583,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .st-actions{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid #eef1f6}
 /* Un bloc qui ne revient qu'une semaine sur deux : liseré interrompu et pastille. */
 .occupation-aesh.une-semaine{border-style:dashed;border-width:1px;border-color:#c4d1e3}
-.pastille-sem{position:absolute;top:3px;right:3px;background:#12315f;color:#fff;font-size:.6rem;
-  font-weight:700;line-height:1;padding:2px 5px;border-radius:4px;letter-spacing:.5px}
 @media print{
   .st-actions,nav,.choix,.classes{display:none!important}
   .semaine-type{border:none;box-shadow:none}
@@ -609,7 +611,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26q');
+  const m = await import('./app.js?v=2026-09-26r');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
