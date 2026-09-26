@@ -53,6 +53,36 @@ export function horsClasse(service) {
   return d ? !d.grilleClasse : false;
 }
 
+/* 26/09/2026 — Les noms courts de la grille, calés sur ce qu'Antoine écrit dans ses
+   classeurs : PSE, ENS PRO, AP FR, CO ENS MATHS. Un bloc d'une heure tient deux lignes, pas
+   plus ; « Prévention santé environnement » n'y entrait jamais. Le nom entier reste au survol,
+   sur les documents imprimés et dans les exports : un remplaçant lit une feuille, pas un code. */
+const NOMS_COURTS = {
+  'Prévention santé environnement': 'PSE',
+  'Enseignement pro. (GA)': 'Ens. pro',
+  'Français, histoire-géo': 'Français-HG',
+  'Histoire-géo, EMC': 'Hist.-géo EMC',
+  'Mathématiques': 'Maths',
+  'Accompagnement perso. maths': 'AP maths',
+  'Accompagnement perso. français': 'AP français',
+  'Accompagnement personnalisé': 'AP',
+  'Co-enseignement maths': 'Co-ens. maths',
+  'Co-enseignement français': 'Co-ens. français',
+  'Communication technique': 'Com. tech.',
+  'MP3/4 Technique pro.': 'MP3/4 tech.',
+  'MP3 Techniques prof.': 'MP3 tech.',
+  'MP3/4 Travaux pratiques': 'MP3/4 TP',
+  'MP1 Économie d’entreprise': 'MP1 éco.',
+  'MP2 Maintenance équipement': 'MP2 maint.',
+  'Sciences appliquées production': 'Sc. appli. prod.',
+  'TP production': 'TP prod.',
+  'Arts appliqués': 'Arts appl.',
+  'Soutien au parcours': 'Soutien parcours',
+  'Cannage-paillage': 'Cannage',
+  'Physique-chimie': 'Phys.-chimie',
+  'Économie-droit': 'Éco-droit',
+};
+export const libCourt = lib => NOMS_COURTS[lib] || lib;
 export const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
 export const JOURS_C = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
 export const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
