@@ -482,3 +482,27 @@ se referme dès qu'on choisit.
 A+B est désormais le défaut partout, pour une classe comme pour une personne.
 
 Fichiers : `app.js`, `index.html` (cache `2026-09-26h`). Onze fichiers de tests réussis.
+
+
+### 26 septembre 2026 — La grille respire : pastilles, salles courtes, sigles de service
+Critique du rendu avec Brahim. Ce qu'on lisait lundi 9h30 : « Acc pers mat » et « Co-ens mat ».
+Pas des noms de cours, des débris. Trois causes cumulées, trois corrections.
+
+**Les AESH passaient en bandes verticales** occupant la moitié de la largeur du bloc, avec leur
+horaire écrit dedans — tronqué en « 30–11 », « h–10h3 ». Ils sont désormais en **pastilles au
+pied du bloc** : le cours récupère toute sa largeur. L'horaire disparaît, sauf pour une présence
+partielle, qui ne se devine pas.
+
+**Les noms de salle** sortaient de PRONOTE en entier : « SALLE 008_PSR » mangeait une ligne pour
+dire « 08 ». `salleCourte()` retire le mot SALLE, le suffixe de filière et un seul zéro de tête —
+008 → 08, 010 → 10, 016A → 16A, 119B inchangé. Un atelier garde son nom, abrégé : « At. Vannerie ».
+
+**Les services** s'écrivaient « DP — Demi-pension » dans un bloc de trente minutes. Deux lettres
+suffisent (DP, RE, RI, IN, PI, ES, PE), et une **légende sous la grille** rappelle leur sens, une
+seule fois, seulement pour ceux qui apparaissent cette semaine-là.
+
+Le cadre horaire porte maintenant une ombre légère : il reste lisible quand on fait glisser la
+grille du doigt sur un téléphone — le défilement horizontal était déjà là, il se voit mieux.
+
+Fichiers : `app.js`, `presences.js` (`sigleService`, `SIGLES_SERVICE`), `exports.js` (version),
+`index.html` (cache `2026-09-26i`). Onze fichiers de tests réussis.

@@ -9,7 +9,7 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
                coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-24b';
+import { couleurAesh, plagesDe, libelleService, sigleService, SIGLES_SERVICE } from './presences.js?v=2026-09-26a';
 import * as K from './calculs.js?v=2026-09-24f';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
@@ -768,6 +768,20 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     </div>`;
   }
 
+  /* 26/09/2026 — Le nom de salle tel qu'il sort de PRONOTE mange une ligne entière pour
+     rien : « SALLE 008_PSR » se lit « 08 ». On retire le mot SALLE, le suffixe de filière,
+     et le zéro de tête des numéros à trois chiffres. Un atelier garde son nom, abrégé. */
+  function salleCourte(x) {
+    let t = String(x || '').trim();
+    if (!t) return '';
+    if (/^ATELIER\s/i.test(t)) return 'At. ' + t.slice(8).toLowerCase().replace(/^./, c => c.toUpperCase());
+    t = t.replace(/^SALLE\s*/i, '').split('_')[0].trim();
+    /* Un seul zéro de tête : « 008 » se lit « 08 », pas « 8 ». */
+    const m = t.match(/^(\d{1,3}[A-Z]?)\b/);
+    return m ? m[1].replace(/^0(\d{2}[A-Z]?)$/, '$1') : t.replace(/\s+/g, ' ');
+  }
+  const sallesCourtes = l => [...new Set((l || []).map(salleCourte).filter(Boolean))].join(' · ');
+
   /* ─────────── emploi du temps ─────────── */
   function classeCourante() {
     const l = classesDu(P().id); let c = S.route.p.classe;
@@ -799,7 +813,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const serviceHtml=j=>{
       const groupes=new Map(); services.filter(o=>o.j===j).forEach(o=>{const key=[o.label,o.debut,o.fin].join('|');if(!groupes.has(key))groupes.set(key,{...o,personnes:[]});groupes.get(key).personnes.push(o.a);});
       const liste=[...groupes.values()].sort((a,b)=>a.debut.localeCompare(b.debut)), cols=[]; liste.forEach(o=>{let n=cols.findIndex(l=>l.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
-      return liste.map(o=>`<button type="button" data-a="service-detail" data-v="${j}" class="service-grille" style="width:${34/cols.length}%;right:calc(2px + ${o.col*34/cols.length}%);top:${(K.min(o.debut)-H0)*PX}px;height:${(K.min(o.fin)-K.min(o.debut))*PX-2}px"><b>${esc(libelleService(o.label))}</b>${K.min(o.debut)%30||K.min(o.fin)%30?`<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>`:''}<span>${o.personnes.map(a=>`<span style="border-left:4px solid ${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join(' ')}</span></button>`).join('');
+      return liste.map(o=>`<button type="button" data-a="service-detail" data-v="${j}" class="service-grille" style="width:${34/cols.length}%;right:calc(2px + ${o.col*34/cols.length}%);top:${(K.min(o.debut)-H0)*PX}px;height:${(K.min(o.fin)-K.min(o.debut))*PX-2}px"><b>${esc(sigleService(o.label))}</b><span class="serv-past">${o.personnes.map(a=>`<span style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</span></button>`).join('');
     };
     const blocHtml = (c, large) => {
       const iso = K.ajoute(lundiDe(c), c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
@@ -814,10 +828,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const nbPresents = presents(c, iso, bes);
       const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="background:${couleurAesh(a.id)};color:white;border-color:${couleurAesh(a.id)};${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');
       const minutes = K.min(c.f)-K.min(c.d);
-      const bandes = aeshs.map((a,i) => pl.filter(x => x.aeshId===a.id).map(x => {
-        const h=K.horairePlace(x,c), absent=K.absentLe(I,a.id,iso,h.debut,h.fin);
-        return `<span class="presence-bande ${absent?'presence-absence':''}" style="background:${couleurAesh(a.id)};top:${100*(K.min(h.debut)-K.min(c.d))/minutes}%;height:${100*(K.min(h.fin)-K.min(h.debut))/minutes}%;left:${i*100/aeshs.length}%;width:${100/aeshs.length}%" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${absent?' · absence à vérifier':''}">${esc(a.sigle)}<small class="presence-horaire">${K.hFr(h.debut)}–${K.hFr(h.fin)}</small></span>`;
-      }).join('')).join('');
+      /* 26/09/2026 — Les AESH passent en pastilles au pied du bloc. En bandes verticales, ils
+         mangeaient la moitié de la largeur et le nom du cours finissait en « Acc pers mat ».
+         L'horaire n'y figure plus : il est autour de la grille. Seule une présence partielle
+         le dit encore, parce que celle-là ne se devine pas. */
+      const bandes = aeshs.map(a => {
+        const x = parAesh.get(a.id), h = K.horairePlace(x, c), absent = K.absentLe(I, a.id, iso, h.debut, h.fin);
+        return `<span class="past-aesh ${absent ? 'abs' : ''}" style="background:${couleurAesh(a.id)}" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${absent ? ' · absence à vérifier' : ''}">${esc(a.sigle)}${h.partiel ? `<i>${K.hFr(h.debut)}–${K.hFr(h.fin)}</i>` : ''}</span>`;
+      }).join('');
       const decoupes = Array.from({length:Math.max(0,Math.ceil(minutes/30)-1)},(_,i)=>`<span class="presence-repere" style="top:${100*(i+1)*30/minutes}%"></span>`).join('');
       const etat=K.etatBesoin(ctx(),c,iso,bes),libEtat={inconnu:'Besoin non renseigné',zero:'Aucun AESH demandé',vide:'Besoin non couvert',partiel:'Besoin partiellement couvert',plein:'Besoin couvert'};
       const besHtml=montrer('besoins')?`<span class="bes-cercle ${etat}" role="img" aria-label="${libEtat[etat]}" title="${libEtat[etat]}">${etat==='inconnu'?'?':etat==='zero'?'╱':''}</span>`:'';
@@ -831,7 +849,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
         return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
-          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}">${lettre ? `<span class="sem-lettre">${lettre}</span>` : ''}<b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}${aeshs.length ? `<span class="presence-timeline" aria-hidden="true">${decoupes}${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span>${h > 54 ? elvHtml : ''}</button>${besHtml}</div>`;
+          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}">${lettre ? `<span class="sem-lettre">${lettre}</span>` : ''}<b>${esc(c.lib)}</b>${h > 44 && sallesCourtes(c.salle) ? `<span class="salle">${esc(sallesCourtes(c.salle))}</span>` : ''}${h > 54 ? elvHtml : ''}${aeshs.length ? `<span class="past-ligne" aria-hidden="true">${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>
@@ -852,6 +870,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         ${!jr.off && K.enPfmp(k, jr.date) ? `<div class="g-filigrane" aria-hidden="true"><b>PFMP</b><small>classe en stage · AESH libres</small></div>` : ''}</div>`;
     });
     grille += `</div></div>`;
+    /* La légende des deux lettres, sous la grille : DP, RE… Écrite petit, une seule fois,
+       plutôt que déroulée dans chaque bloc de trente minutes. */
+    const vus = [...new Set(services.map(o => sigleService(o.label)))];
+    if (vus.length) grille += `<p class="legende-serv">${SIGLES_SERVICE.filter(([k]) => vus.includes(k))
+      .map(([k, t]) => `<span><b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
     return grille;
   }
   function panneauVerification() {

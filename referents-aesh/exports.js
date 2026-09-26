@@ -1,5 +1,5 @@
 import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-26a';
-import { couleurAesh, libelleService } from './presences.js?v=2026-09-24b';
+import { couleurAesh, libelleService } from './presences.js?v=2026-09-26a';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */

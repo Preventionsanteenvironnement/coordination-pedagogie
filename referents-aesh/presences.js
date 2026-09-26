@@ -12,3 +12,18 @@ export function plagesDe(valeur, cours) {
 export function libelleService(nom) {
   return ['Cantine','DP','Demi-pension'].includes(nom) ? 'DP — Demi-pension' : nom;
 }
+/* 26/09/2026 — Dans la grille, deux lettres suffisent : le sens est rappelé en légende, sous
+   la grille. « DP — Demi-pension » écrit en entier mangeait deux lignes d'un bloc de 30 min. */
+export const SIGLES_SERVICE = [['DP', 'Demi-pension'], ['RE', 'Réunion d’équipe'],
+  ['RI', 'Réunion institutionnelle'], ['IN', 'Internat'], ['PI', 'PIAL'], ['ES', 'ESAT'], ['PE', 'Périscolaire']];
+export function sigleService(nom) {
+  const t = String(nom || '').toLowerCase();
+  if (['cantine', 'dp', 'demi-pension'].includes(t)) return 'DP';
+  if (t.startsWith('réunion d') || t.startsWith('reunion d')) return 'RE';
+  if (t.startsWith('réunion') || t.startsWith('reunion')) return 'RI';
+  if (t.startsWith('internat')) return 'IN';
+  if (t.startsWith('pial')) return 'PI';
+  if (t.startsWith('esat')) return 'ES';
+  if (t.startsWith('péri') || t.startsWith('peri')) return 'PE';
+  return String(nom || '').slice(0, 2).toUpperCase();
+}
