@@ -929,7 +929,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         : `left:${3 + o._col * (100 / large)}%;width:calc(${100 / large}% - 6px)`;
       const past = avecSigles ? o.gens.slice().sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
         .map(a => `<span style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('') : '';
-      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${avecSigles ? 'presence' : 'sans-eleves'}"
+      /* 26/09/2026 — Le code couleur d'Antoine, celui de ses classeurs : orange pour les
+         réunions et la coordination, violet pour le repas et l'internat, rose pour ce qui se
+         passe ailleurs (ESAT, PIAL, DAFI). Les AESH gardent leur couleur propre, la même d'un
+         pôle à l'autre : c'est la personne qu'on doit reconnaître d'un coup d'œil. */
+      const fam = (o.sig === 'RE' || o.sig === 'RI') ? 'fam-reunion'
+        : K.avecEleves({ nom: o.label, avecEleves: o.avecEleves }) ? 'fam-eleves' : 'fam-hors';
+      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${fam} ${avecSigles ? 'presence' : 'sans-eleves'}"
         title="${esc(libelleService(o.label))} · ${K.hFr(o.d)}–${K.hFr(o.f)} · ${o.gens.map(a => a.sigle).join(', ')}"
         style="top:${top + 1}px;height:${Math.max(18, h)}px;${pos}">
         <b>${avecSigles ? logoService(o.sig) + esc(o.sig)
