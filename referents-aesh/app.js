@@ -816,7 +816,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if(!horsParCle.has(cle)) horsParCle.set(cle,{cle,sig,j:o.j,d:o.debut,f:o.fin,label:o.label,gens:[]});
       const g=horsParCle.get(cle).gens; if(!g.some(x=>x.id===o.a.id)) g.push(o.a);
     });
-    const horsBlocs=[...horsParCle.values()];
+    /* 26/09/2026 — Les réunions sortent de la grille : même créneau pour tout le pôle, toutes
+       les semaines. Elles y laissaient une grande case vide sans rien apprendre. Sous la
+       grille, elles disent en plus QUI y est — ce que la case ne disait pas. */
+    const horsBlocs=[...horsParCle.values()].filter(o=>o.sig!=='RE' && o.sig!=='RI');
+    const reunionsBas=[...horsParCle.values()].filter(o=>o.sig==='RE' || o.sig==='RI');
     const H0 = 8 * 60, H1 = Math.max(18*60,...services.map(o=>K.min(o.fin))), PX = 1.25;
     /* 26/09/2026 — Une épreuve se pose PAR-DESSUS les cours : elle ne les remplace pas,
        elle dit qu'à ce moment-là il se passe autre chose, et combien d'AESH sont demandés. */
@@ -916,9 +920,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     grille += `</div></div>`;
     /* La légende des deux lettres, sous la grille : DP, RE… Écrite petit, une seule fois,
        plutôt que déroulée dans chaque bloc de trente minutes. */
-    const vus = [...new Set(services.map(o => sigleService(o.label)))];
+    if (reunionsBas.length) grille += `<div class="sous-grille">${reunionsBas
+      .sort((a, b) => a.j - b.j || K.min(a.d) - K.min(b.d)).map(o =>
+        `<p><b>${esc(libelleService(o.label))}</b><span class="quand">${K.JOURS[o.j]} ${K.hFr(o.d)}–${K.hFr(o.f)}</span>${o.gens
+          .sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
+          .map(a => `<span class="past-aesh" style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</p>`).join('')}</div>`;
+    const vus = [...new Set(horsBlocs.map(o => o.sig))];
     if (vus.length) grille += `<p class="legende-serv">${SIGLES_SERVICE.filter(([k]) => vus.includes(k))
-      .map(([k, t]) => `<span><b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
+      .map(([k, t]) => `<span>${logoService(k)}<b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
     return grille;
   }
   function panneauVerification() {
