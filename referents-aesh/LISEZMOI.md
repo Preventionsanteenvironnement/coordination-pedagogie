@@ -557,3 +557,19 @@ pleines — tête de lit, matelas, oreiller, pied — et sa silhouette se lit à
 
 Fichiers : `presences.js` (`logoService`), `app.js`, `exports.js` (version), `index.html`
 (cache `2026-09-26s`).
+
+**La demi-pension et la réunion reprennent leur place dans la colonne (26/09)** — elles étaient
+collées dans une bande étroite à droite du jour, décalées et illisibles. Elles entrent désormais
+dans le **même calcul de colonnes que les cours** : quand le créneau est libre — midi, le plus
+souvent — elles prennent la largeur ; quand un TP l'occupe, elles se rangent à côté, ce qui était
+le comportement souhaité par Brahim pour ce cas.
+
+**Cadre en pointillé** : ce n'est pas une présence en classe avec les élèves. Le sigle, son dessin
+et les AESH tiennent sur une seule ligne — un créneau de demi-pension fait trente minutes, il n'y
+a pas la place pour deux.
+
+**La réunion d'équipe n'affiche plus les sigles** : elle rassemble tout le pôle, y lister chacun
+n'apprend rien. Juste « RE », en pointillé, à son heure. La ligne sous la grille qui les listait
+est supprimée — l'information est revenue dans la grille.
+
+Vaut pour les quatre pôles.

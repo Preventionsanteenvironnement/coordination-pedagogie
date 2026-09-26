@@ -276,6 +276,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .past-aesh{display:inline-flex;align-items:baseline;gap:3px;color:#fff;border-radius:6px;padding:1px 6px;font-size:.72rem;font-weight:800;letter-spacing:.02em;line-height:1.5;white-space:nowrap}
 .past-aesh.abs{outline:2px dashed var(--err);outline-offset:1px}
 .past-aesh i{font-style:normal;font-weight:600;font-size:.66rem;opacity:.9}
+/* Hors classe — demi-pension, réunion : dans la colonne comme les cours, mais en pointillé.
+   Le trait discontinu dit que ce n'est pas une présence en classe avec les élèves. */
+.hors-classe-bloc{position:absolute;z-index:3;display:flex;flex-wrap:wrap;gap:3px 6px;align-items:center;align-content:flex-start;
+  background:var(--card);border:1.5px dashed #94a3b8;border-radius:10px;padding:4px 8px;font:inherit;text-align:left;
+  color:var(--muted);cursor:pointer;overflow:hidden}
+.hors-classe-bloc b{display:flex;align-items:center;gap:3px;color:var(--ink);font-size:.78rem;letter-spacing:.02em}
+.hors-classe-bloc b svg{flex:none;opacity:.8}
+.hors-classe-bloc .serv-past{margin:0}
 .service-grille b{display:flex;align-items:center;gap:3px}
 .service-grille b svg{flex:none;opacity:.85}
 .serv-past{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}
@@ -613,7 +621,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26s');
+  const m = await import('./app.js?v=2026-09-26u');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

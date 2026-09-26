@@ -803,9 +803,20 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        même créneau pour tout le monde, toutes les semaines. Une ligne sous la grille suffit,
        avec qui y est. La demi-pension, elle, reste dans la grille : elle varie d'un jour et
        d'une personne à l'autre, on a besoin de la voir posée sur l'heure. */
+    /* 26/09/2026 — La demi-pension et la réunion d'équipe reprennent leur place DANS la
+       colonne, à leur heure, au lieu d'une bande étroite collée à droite. Elles entrent dans
+       le même calcul de colonnes que les cours : quand le créneau est libre — midi, le plus
+       souvent — elles prennent la largeur ; quand un TP l'occupe, elles se rangent à côté.
+       Cadre en pointillé : ce n'est pas une présence en classe avec les élèves. */
     const horsClasse=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})));
-    const services=horsClasse.filter(o=>o.type==='service');
-    const reunions=horsClasse.filter(o=>o.type!=='service');
+    const services=horsClasse;
+    const horsParCle=new Map();
+    horsClasse.forEach(o=>{
+      const sig=sigleService(o.label), cle=[sig,o.j,o.debut,o.fin].join('|');
+      if(!horsParCle.has(cle)) horsParCle.set(cle,{cle,sig,j:o.j,d:o.debut,f:o.fin,label:o.label,gens:[]});
+      const g=horsParCle.get(cle).gens; if(!g.some(x=>x.id===o.a.id)) g.push(o.a);
+    });
+    const horsBlocs=[...horsParCle.values()];
     const H0 = 8 * 60, H1 = Math.max(18*60,...services.map(o=>K.min(o.fin))), PX = 1.25;
     /* 26/09/2026 — Une épreuve se pose PAR-DESSUS les cours : elle ne les remplace pas,
        elle dit qu'à ce moment-là il se passe autre chose, et combien d'AESH sont demandés. */
@@ -816,11 +827,19 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <b>${esc(libNature(e.nature))}</b>${e.matiere ? `<small>${esc(e.matiere)}</small>` : ''}
         <span class="ep-chiffres">${b.total} él.${e.nbAesh ? ' · ' + e.nbAesh + ' AESH' : ''}</span></button>`;
     }).join('');
-    const serviceHtml=j=>{
-      const groupes=new Map(); services.filter(o=>o.j===j).forEach(o=>{const key=[o.label,o.debut,o.fin].join('|');if(!groupes.has(key))groupes.set(key,{...o,personnes:[]});groupes.get(key).personnes.push(o.a);});
-      const liste=[...groupes.values()].sort((a,b)=>a.debut.localeCompare(b.debut)), cols=[]; liste.forEach(o=>{let n=cols.findIndex(l=>l.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
-      return liste.map(o=>`<button type="button" data-a="service-detail" data-v="${j}" class="service-grille" style="width:${34/cols.length}%;right:calc(2px + ${o.col*34/cols.length}%);top:${(K.min(o.debut)-H0)*PX}px;height:${(K.min(o.fin)-K.min(o.debut))*PX-2}px"><b>${logoService(sigleService(o.label))}${esc(sigleService(o.label))}</b><span class="serv-past">${o.personnes.map(a=>`<span style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</span></button>`).join('');
-    };
+    /* Un bloc hors classe : le dessin, les deux lettres, et les sigles — sauf pour la
+       réunion d'équipe, qui rassemble tout le pôle : y lister tout le monde n'apprend rien. */
+    const serviceHtml = j => horsBlocs.filter(o => o.j === j).map(o => {
+      const top = (K.min(o.d) - H0) * PX, h = (K.min(o.f) - K.min(o.d)) * PX - 2;
+      const large = o._cols || 1, avecSigles = o.sig !== 'RE' && o.sig !== 'RI';
+      const past = avecSigles ? o.gens.slice().sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
+        .map(a => `<span style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('') : '';
+      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc"
+        title="${esc(libelleService(o.label))} · ${K.hFr(o.d)}–${K.hFr(o.f)} · ${o.gens.map(a => a.sigle).join(', ')}"
+        style="top:${top + 1}px;height:${Math.max(18, h)}px;left:${3 + (o._col || 0) * (100 / large)}%;width:calc(${100 / large}% - 6px)">
+        <b>${logoService(o.sig)}${esc(o.sig)}</b>${past ? `<span class="serv-past">${past}</span>` : ''}</button>`;
+    }).join('');
+
     const blocHtml = (c, large) => {
       const iso = K.ajoute(lundiDe(c), c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
       const lettre = deuxSemaines && c.sem === 'SA' ? 'A' : deuxSemaines && c.sem === 'SB' ? 'B' : '';
@@ -863,7 +882,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     };
     /* colonnes pour les cours qui se chevauchent (semaine A et B affichées séparément, donc rares) */
     [0, 1, 2, 3, 4].forEach(j => {
-      const l = cours.filter(c => c.j === j).sort((a, b) => K.min(a.d) - K.min(b.d)), cols = [];
+      const l = [...cours.filter(c => c.j === j), ...horsBlocs.filter(o => o.j === j)].sort((a, b) => K.min(a.d) - K.min(b.d)), cols = [];
       l.forEach(c => { let i = cols.findIndex(col => col.every(x => !K.chevauche(x.d, x.f, c.d, c.f))); if (i < 0) { cols.push([]); i = cols.length - 1; } cols[i].push(c); c._col = i; });
       l.forEach(c => { const g = l.filter(x => K.chevauche(x.d, x.f, c.d, c.f)); c._cols = Math.max(1, ...g.map(x => x._col + 1)); });
     });
@@ -878,15 +897,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     grille += `</div></div>`;
     /* La légende des deux lettres, sous la grille : DP, RE… Écrite petit, une seule fois,
        plutôt que déroulée dans chaque bloc de trente minutes. */
-    const parReunion = new Map();
-    reunions.forEach(o => {
-      const cle = `${esc(libelleService(o.label))} · ${K.JOURS[o.j]} ${K.hFr(o.debut)}–${K.hFr(o.fin)}`;
-      if (!parReunion.has(cle)) parReunion.set(cle, []);
-      if (!parReunion.get(cle).some(x => x.id === o.a.id)) parReunion.get(cle).push(o.a);
-    });
-    if (parReunion.size) grille += `<div class="sous-grille">${[...parReunion].map(([cle, gens]) =>
-      `<p><b>${cle}</b> : ${gens.sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
-        .map(a => `<span class="past-aesh" style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</p>`).join('')}</div>`;
     const vus = [...new Set(services.map(o => sigleService(o.label)))];
     if (vus.length) grille += `<p class="legende-serv">${SIGLES_SERVICE.filter(([k]) => vus.includes(k))
       .map(([k, t]) => `<span><b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
