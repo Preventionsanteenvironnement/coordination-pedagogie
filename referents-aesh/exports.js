@@ -1,5 +1,5 @@
 import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-26b';
-import { couleurAesh, libelleService } from './presences.js?v=2026-09-26c';
+import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-26d';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
@@ -18,9 +18,12 @@ const maintenant = () => { const d = new Date(); return `${K.z2(d.getDate())}/${
 
 /* ─────────────── PDF ─────────────── */
 function entete(pdf, couleur, titre, sous) {
+  /* 26/09/2026 — Le bandeau porte la couleur de l'AESH ; certaines sont claires, du blanc
+     dessus ne se lirait pas. L'encre suit la clarté du fond. */
+  const encre = encreSur(couleur);
   pdf.rect(28, 24, pdf.W - 56, 62, { fill: couleur, r: 12 });
-  pdf.text(48, 52, titre, { size: 20, bold: true, color: '#ffffff', max: pdf.W - 120 });
-  pdf.text(48, 72, sous, { size: 11, color: '#ffffff', max: pdf.W - 120 });
+  pdf.text(48, 52, titre, { size: 20, bold: true, color: encre, max: pdf.W - 120 });
+  pdf.text(48, 72, sous, { size: 11, color: encre, max: pdf.W - 120 });
 }
 function pied(pdf, n, total) {
   pdf.line(28, pdf.H - 26, pdf.W - 28, pdf.H - 26, { color: LIGNE });
