@@ -164,8 +164,17 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   /* Ce qu'on montre sur les blocs, en plus du cours : deux interrupteurs gardés sur
      l'appareil. Par défaut tout est montré — on cache quand on veut respirer. */
-  const OPTIONS_GRILLE = [['eleves', 'Élèves notifiés'], ['besoins', 'Besoins des enseignants'], ['dispositifs', 'Dispositifs hors classe (PIAL, DAFI…)']];
-  let optionsGrille = { eleves: true, besoins: true, dispositifs: false, ...(lsLit(K_OPTIONS, null) || {}) };
+  const OPTIONS_GRILLE = [['eleves', 'Élèves notifiés'], ['besoins', 'Besoins des enseignants']];
+  let optionsGrille = { eleves: true, besoins: true, ...(lsLit(K_OPTIONS, null) || {}) };
+  /* 26/09/2026 — Un filtre par dispositif, pas un interrupteur pour tous. La grille d'une
+     classe est l'emploi du temps DES ÉLÈVES : le repas et l'internat y sont, le PIAL, le
+     DAFI et l'ESAT non — ceux-là appartiennent au contrat de l'AESH et se lisent sur sa
+     feuille à lui. Chacun se coche à part, et le choix se retient. */
+  const cleDisp = nom => 'disp:' + String(nom || '');
+  const montrerDisp = o => {
+    const v = optionsGrille[cleDisp(o.label)];
+    return typeof v === 'boolean' ? v : !horsClasse({ nom: o.label, horsClasse: o.horsClasse });
+  };
   const montrer = k => optionsGrille[k] !== false;
   const classesDu = pid => modePlanning ? (droitsPlanning?.lectureClasses || []).filter(n => S.edt.classes[n]?.pole === pid) : (S.edt.poles[pid] || []);
   const peutPlacer = nom => !modePlanning || !!droitsPlanning?.ecritureClasses.includes(nom);
@@ -834,9 +843,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        Cadre en pointillé : ce n'est pas une présence en classe avec les élèves. */
     /* 26/09/2026 — Le PIAL, le DAFI, l'ESAT sont du temps de l'AESH, pas du temps de cette
        classe : ils encombraient la grille du groupe sans rien lui apprendre. Ils restent
-       entiers dans la semaine de la personne, et une case du menu les rappelle ici. */
+       entiers dans la semaine de la personne ; ici, chacun a sa case dans le menu. */
+    const tousServices=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.type==='service'));
+    S.dispoVus=[...new Map(tousServices.map(o=>[String(o.label||''),o])).values()]
+      .sort((x,y)=>String(x.label).localeCompare(String(y.label),'fr'));
     const services=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})))
-      .filter(o=>o.type!=='service' || montrer('dispositifs') || !horsClasse({nom:o.label,horsClasse:o.horsClasse}));
+      .filter(o=>o.type!=='service' || montrerDisp(o));
     const horsParCle=new Map();
     services.forEach(o=>{
       const sig=sigleService(o.label), cle=[sig,o.j,o.debut,o.fin].join('|');
@@ -1066,6 +1078,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
             <div class="opt-titre">Ce qu'on affiche</div>
             ${OPTIONS_GRILLE.map(([k, t]) =>
               `<button type="button" data-a="opt-basculer" data-v="${k}" aria-pressed="${montrer(k)}"><span class="opt-case">${montrer(k) ? '✓' : ''}</span>${esc(t)}</button>`).join('')}
+            ${(S.dispoVus || []).length ? `<div class="opt-titre">Dispositifs</div>${(S.dispoVus || []).map(o => {
+              const on = montrerDisp(o);
+              return `<button type="button" data-a="opt-basculer" data-v="${esc(cleDisp(o.label))}" aria-pressed="${on}"><span class="opt-case">${on ? '✓' : ''}</span>${esc(libelleService(o.label))}</button>`;
+            }).join('')}` : ''}
             <button type="button" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}"><span class="opt-case">${S.route.p.edtType?'✓':''}</span>EDT type · sans absences ni PFMP</button>
             <button type="button" data-a="export-grille"><span class="opt-case">⬇</span>Exporter la grille · PDF / Excel</button>
           </div>` : ''}</div></div>
@@ -2346,8 +2362,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'edt-type': S.optOuvert=false; aller('edt',{...S.route.p,edtType:!S.route.p.edtType});return;
       case 'opt-ouvrir': S.optOuvert = !S.optOuvert; rendre({ focus: 'opt-bouton' }); return;
       case 'toast-fermer': clearTimeout(toastT); S.toast = null; rendre(); break;
-      case 'opt-basculer': optionsGrille = { ...optionsGrille, [v]: !montrer(v) };
-        lsEcrit(K_OPTIONS, optionsGrille); rendre({ focus: b.id }); return;
+      case 'opt-basculer': {
+        const d = String(v).startsWith('disp:') ? (S.dispoVus || []).find(o => cleDisp(o.label) === v) : null;
+        optionsGrille = { ...optionsGrille, [v]: d ? !montrerDisp(d) : !montrer(v) };
+        lsEcrit(K_OPTIONS, optionsGrille); rendre({ focus: b.id }); return; }
       /* ─── Élèves notifiés (26/09/2026) ─── */
       case 'eleves-classe': aller('eleves', { ...S.route.p, classeEleves: v || '' }, { remplacer: true }); return;
       case 'eleves-vue': aller('eleves', { ...S.route.p, vueEleves: v }, { remplacer: true }); return;
