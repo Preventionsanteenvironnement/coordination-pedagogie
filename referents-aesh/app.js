@@ -650,17 +650,36 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        Les lignes de service gardent exactement leurs contrôles : seul leur rangement change. */
     function ligneService(a, o, x, i) {
       return `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option value="${esc(t)}" ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${esc(libelleService(t))}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
-            <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div>
-          <div class="ligne" style="grid-column:1/-1;align-items:center;gap:8px">${creneauxDuService(a, x)}<button type="button" class="btn petit" data-a="service-horaire" data-v="${esc((a.id || '') + '|' + x.nom)}">🕐 Poser les heures</button></div></div>`;
+            ${(x.horaires || []).length ? '' : `<div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div>`}
+          ${creneauxDuService(a, x, i)}</div>`;
   }
-    /* Tant qu'aucune heure n'est posée, le dispositif ne peut pas entrer dans une grille :
-       c'est un volume, pas un moment. La ligne le dit au lieu de laisser deviner. */
-    function creneauxDuService(a, x) {
-      const l = (x.horaires || []).filter(h => Number.isInteger(h.jour) && h.debut && h.fin);
-      if (!l.length) return `<span class="muted" style="font-size:.82rem">aucune heure posée — n’apparaît pas encore dans les grilles</span>`;
-      return `<span style="font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px">${l
-        .sort((p, q) => p.jour - q.jour || String(p.debut).localeCompare(String(q.debut)))
-        .map(h => `<span class="pill">${K.JOURS_C[h.jour]} ${K.hFr(h.debut)}–${K.hFr(h.fin)}${h.semaines && h.semaines !== 'AB' ? ' · ' + h.semaines : ''}</span>`).join('')}</span>`;
+    /* 26/09/2026 — Les heures se posent ICI, dans le contrat, et nulle part ailleurs : jour,
+       début, fin, semaines, ajouter. Rien à taper, tout se clique, à la demi-heure. Ce qui est
+       posé part avec la fiche au moment d'enregistrer — un seul geste, une seule écriture. */
+    function creneauxDuService(a, x, i) {
+      const c = (S.form && S.form.creneau && S.form.creneau.i === i) ? S.form.creneau : null;
+      const l = (x.horaires || []).map((h, k) => [h, k]).filter(([h]) => Number.isInteger(h.jour) && h.debut && h.fin)
+        .sort(([p], [q]) => p.jour - q.jour || String(p.debut).localeCompare(String(q.debut)));
+      const pose = l.reduce((t, [h]) => t + K.duree(h.debut, h.fin) * (h.semaines === 'AB' ? 1 : 0.5), 0);
+      const reste = Number.isFinite(+x.h) ? +x.h - pose : null;
+      const heure = (champ, val) => `<select data-i="crn-${champ}" data-v="${i}" aria-label="${champ === 'debut' ? 'De' : 'À'}" style="min-height:38px">${
+        CRENEAUX_H.map(h => `<option value="${h}" ${val === h ? 'selected' : ''}>${K.hFr(h)}</option>`).join('')}</select>`;
+      return `<div class="creneaux" style="grid-column:1/-1">
+        ${l.length ? `<div class="ligne" style="gap:6px">${l.map(([h, k]) =>
+          `<span class="pill">${K.JOURS_C[h.jour]} ${K.hFr(h.debut)}–${K.hFr(h.fin)}${h.semaines && h.semaines !== 'AB' ? ' · sem. ' + h.semaines : ''}
+            <button type="button" class="lien" data-a="crn-retirer" data-v="${i}|${k}" aria-label="Retirer ce créneau">✕</button></span>`).join('')}
+          ${reste == null ? '' : `<span class="muted" style="font-size:.8rem">${reste > 1e-9 ? `reste ${K.fmtH(reste)} à poser` : reste < -1e-9 ? `${K.fmtH(-reste)} de plus que le volume` : 'tout est posé'}</span>`}</div>`
+          : '<p class="muted" style="margin:0;font-size:.82rem">Aucune heure posée : ce dispositif n’apparaît dans aucune grille.</p>'}
+        ${c ? `<div class="ligne" style="gap:6px;flex-wrap:wrap;align-items:center">
+            ${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" data-a="crn-jour" data-v="${i}|${n}" aria-pressed="${c.jour === n}">${j}</button>`).join('')}
+            <span class="muted" style="font-size:.82rem">de</span>${heure('debut', c.debut)}
+            <span class="muted" style="font-size:.82rem">à</span>${heure('fin', c.fin)}
+            <select data-i="crn-sem" data-v="${i}" aria-label="Semaines" style="min-height:38px">${
+              [['AB', 'A et B'], ['A', 'Semaine A'], ['B', 'Semaine B']].map(([v, t]) => `<option value="${v}" ${c.semaines === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+            <button type="button" class="btn petit valider" data-a="crn-ajouter" data-v="${i}">Ajouter</button>
+            <button type="button" class="lien" data-a="crn-fermer">annuler</button></div>`
+          : `<button type="button" class="btn petit" data-a="crn-ouvrir" data-v="${i}">＋ ajouter un créneau</button>`}
+      </div>`;
     }
     function champPresence(a, o) {
       const serv = (a.services || []), dedans = serv.map((x, i) => [x, i]).filter(([x]) => K.avecEleves(x));
@@ -673,7 +692,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
           ${cours != null && cours < -1e-9 ? `<p class="bandeau warn" style="margin:0">Les dispositifs comptent ${K.fmtH(pris)}, plus que la présence élève de ${K.fmtH(p)}.</p>` : ''}
           ${dedans.map(([x, i]) => ligneService(a, o, x, i)).join('')}
           <div class="ligne"><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ repas, internat, DAFI, ESAT…</button></div>
-        </div></div>`;
+        </div></div></div>`;
   }
     function champHorsPresence(a, o) {
       const dehors = (a.services || []).map((x, i) => [x, i]).filter(([x]) => !K.avecEleves(x));
@@ -682,7 +701,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <div class="sous-champs" style="grid-column:1/-1">
           ${dehors.map(([x, i]) => ligneService(a, o, x, i)).join('')}
           <div class="ligne"><button type="button" class="btn petit" data-a="serv-ajouter">＋ PIAL, dispositif administratif…</button></div>
-        </div></div>`;
+        </div></div></div>`;
   }
     const o = f.orig || {};
     const b = !nouveau ? K.bilan(ctx(), a.id, S.lundi) : null;
@@ -2524,6 +2543,26 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         rendre({ focus: b.id }); return;
       }
       case 'fil-rattach': { const a = S.form && S.form.a; if (a) a.rattachement = v; rendre({ focus: b.id }); return; }
+      /* 26/09/2026 — Les créneaux vivent dans la fiche jusqu'à « Enregistrer » : aucune
+         écriture séparée, donc aucun conflit avec la fiche qu'on est en train de remplir. */
+      case 'crn-ouvrir': S.form.creneau = { i: +v, jour: 0, debut: '08:30', fin: '09:30', semaines: 'AB' }; rendre(); return;
+      case 'crn-fermer': S.form.creneau = null; rendre(); return;
+      case 'crn-jour': { const [i0, j0] = v.split('|').map(Number); if (S.form.creneau && S.form.creneau.i === i0) S.form.creneau.jour = j0; rendre(); return; }
+      case 'crn-retirer': { const [i0, k0] = v.split('|').map(Number); const x = (S.form.a.services || [])[i0];
+        if (x && Array.isArray(x.horaires)) { x.horaires = x.horaires.filter((_, n) => n !== k0); if (!x.horaires.length) delete x.calendrierDepuis; }
+        rendre(); return; }
+      case 'crn-ajouter': { const c = S.form.creneau, x = (S.form.a.services || [])[+v];
+        if (!c || !x) return;
+        if (K.min(c.fin) <= K.min(c.debut)) { toast('L’heure de fin doit venir après l’heure de début.', true); return; }
+        x.horaires = x.horaires || [];
+        const h = { jour: c.jour, debut: c.debut, fin: c.fin, semaines: c.semaines,
+          du: S.lundi, au: finAnneeScolaire() };
+        if (x.horaires.some(y => y.jour === h.jour && y.debut === h.debut && y.fin === h.fin && y.semaines === h.semaines)) { toast('Ce créneau est déjà posé.', true); return; }
+        x.horaires.push(h);
+        x.calendrierDepuis = x.calendrierDepuis && x.calendrierDepuis < h.du ? x.calendrierDepuis : h.du;
+        x.jours = [...new Set(x.horaires.map(y => y.jour))].sort();
+        S.form.creneau = { ...c, jour: Math.min(4, c.jour + 1) };
+        rendre(); return; }
       case 'serv-ajouter': { const f = S.form; f.a.services = f.a.services || []; f.a.services.push({ nom: f.a.services.some(x => x.nom === 'Cantine') ? (f.a.services.some(x => x.nom === 'Internat') ? '' : 'Internat') : 'Cantine', h: 1, jours: [] }); rendre(); return; }
       case 'serv-jour': { const f = S.form, [i, j] = String(v).split('|').map(Number), x = f.a.services[i]; if (!x) return;
         const l = Array.isArray(x.jours) ? [...x.jours] : []; x.jours = l.includes(j) ? l.filter(y => y !== j) : [...l, j].sort(); rendre({ focus: b.id }); return; }
@@ -2711,6 +2750,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (!f && !['per-au', 'per-edt-date', 'ph-debut', 'ph-fin', 'pl-du', 'msg', 'signature', 'pt-texte', 'pf-du', 'pf-au'].includes(k)) return;
     if (k === 'recherche') { f.recherche = t.value; rendre({ focus: t.id }); return; }
     if (k === 'sigle') { f.a.sigle = t.value; const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false; const ch = t.closest('.champ'); if (ch) ch.classList.add('modif'); return; }
+    if (k === 'crn-debut' || k === 'crn-fin' || k === 'crn-sem') {
+      const c = f.creneau; if (!c || c.i !== +t.dataset.v) return;
+      if (k === 'crn-sem') c.semaines = t.value;
+      else { c[k === 'crn-debut' ? 'debut' : 'fin'] = t.value;
+        /* Choisir un début plus tardif que la fin ne doit pas obliger à corriger l'autre. */
+        if (K.min(c.fin) <= K.min(c.debut)) c.fin = K.hDe(Math.min(21 * 60, K.min(c.debut) + 60)); }
+      rendre(); return;
+    }
     if (k === 'serv-nom') { const i = +t.dataset.v, x = f.a.services[i]; if (x) { x.nom = t.value === 'Autre' ? '' : t.value; rendre({ focus: t.value === 'Autre' ? undefined : t.id }); if (t.value === 'Autre') { const inp = document.querySelector(`[data-i="serv-lib"][data-v="${i}"]`); if (inp) inp.focus(); } } return; }
     if (k === 'serv-lib') { const x = f.a.services[+t.dataset.v]; if (x) x.nom = t.value.slice(0, 40); const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false; return; }
     if (k === 'fil-h') { const a = S.form && S.form.a, id = t.dataset.v; if (!a || !a.filieres || !a.filieres[id]) return;

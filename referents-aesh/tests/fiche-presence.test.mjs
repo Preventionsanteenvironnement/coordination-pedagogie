@@ -6,10 +6,13 @@ import * as K from '../calculs.js';
 const src = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
 const corps = src.slice(src.indexOf('    function ligneService(a, o, x, i) {'),
                         src.indexOf('    const o = f.orig || {};'));
-const F = new Function('K', 'esc', 'nombre', 'estModif', 'aide', 'aideTexte', 'parQui', 'pas',
-  'SERVICES_TYPES', 'libelleService', corps + '; return { champPresence, champHorsPresence };')(
+const CRENEAUX_H = []; for (let m = 7 * 60 + 30; m <= 21 * 60; m += 30) CRENEAUX_H.push(K.hDe(m));
+const faire = (S = { form: null }) => new Function('K', 'esc', 'nombre', 'estModif', 'aide', 'aideTexte',
+  'parQui', 'pas', 'SERVICES_TYPES', 'libelleService', 'CRENEAUX_H', 'S',
+  corps + '; return { champPresence, champHorsPresence };')(
   K, String, v => v == null || v === '' || !Number.isFinite(+v) ? null : +v, () => '', () => '',
-  () => '', () => '', (c, v) => `[${v}]`, K.SERVICES_TYPES, n => n);
+  () => '', () => '', (c, v) => `[${v}]`, K.SERVICES_TYPES, n => n, CRENEAUX_H, S);
+const F = faire();
 
 const a = { presence: 26, services: [{ nom: 'PIAL', h: 12 }, { nom: 'Cantine', h: 1.5 }, { nom: 'DAFI', h: 2 }] };
 const p = F.champPresence(a, {}), h = F.champHorsPresence(a, {});
@@ -28,12 +31,22 @@ assert.match(F.champPresence({ presence: 1, services: [{ nom: 'Cantine', h: 3 }]
 assert.match(F.champPresence({ services: [] }, {}), /Cours et ateliers<\/span><b>—/);
 /* Chaque ligne porte le bouton qui pose l'heure exacte, avec son AESH et son activité. */
 const avecId = F.champHorsPresence({ id: 'aesh_d00', services: [{ nom: 'PIAL', h: 12 }] }, {});
-assert.match(avecId, /data-a="service-horaire" data-v="aesh_d00\|PIAL"/);
+assert.match(avecId, /data-a="crn-ouvrir"/);
 /* Sans heure posée, la ligne dit que le dispositif n'ira dans aucune grille. */
-assert.match(avecId, /aucune heure posée/);
+assert.match(avecId, /Aucune heure posée/);
 /* Une fois les heures posées, elles se lisent sur la ligne. */
 const pose = F.champHorsPresence({ id: 'aesh_d00', services: [{ nom: 'PIAL', h: 12,
   horaires: [{ jour: 3, debut: '08:30', fin: '12:30', semaines: 'AB' }] }] }, {});
 assert.match(pose, /Jeu 8h30–12h30/);
-assert.doesNotMatch(pose, /aucune heure posée/);
+assert.doesNotMatch(pose, /Aucune heure posée/);
+/* Ce qui reste à poser se lit sur la ligne : 12 h déclarées, 4 h posées. */
+assert.match(pose, /reste 8 h à poser/);
+/* L'éditeur ouvert ne propose que des clics : jours, deux listes d'heures, semaines. */
+const ouvert = faire({ form: { creneau: { i: 0, jour: 3, debut: '08:30', fin: '12:30', semaines: 'AB' } } })
+  .champHorsPresence({ id: 'aesh_d00', services: [{ nom: 'PIAL', h: 12 }] }, {});
+assert.match(ouvert, /data-a="crn-jour" data-v="0\|3" aria-pressed="true"/);
+assert.match(ouvert, /data-i="crn-debut"/);
+assert.match(ouvert, /data-i="crn-fin"/);
+assert.match(ouvert, /data-a="crn-ajouter"/);
+assert.doesNotMatch(ouvert, /type="time"|type="text"/);
 console.log('fiche présence élève : ok');

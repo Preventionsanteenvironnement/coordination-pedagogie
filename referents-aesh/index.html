@@ -462,7 +462,17 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .feuille h2{font-size:1.3rem}
 /* 26/09/2026 — Le détail d'une rubrique, en retrait sous son total : on voit d'un coup
    d'œil ce qui compose la présence élève sans ouvrir quoi que ce soit. */
-.sous-champs{margin:8px 0 2px;padding:6px 10px;background:var(--card-2);border-radius:10px;display:grid;gap:6px}
+/* 26/09/2026 — « Présence élève » et « Hors présence élève » se confondaient : deux encarts
+   nettement separes, chacun avec sa couleur et sa barre, pour qu'on voie ou l'un finit. */
+.encart{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:14px 0;background:var(--card)}
+.encart+.encart{margin-top:16px}
+.encart>.champ{border:0;padding:0}
+.encart-eleves{border-left:6px solid #087966;background:color-mix(in srgb,#087966 4%,var(--card))}
+.encart-hors{border-left:6px solid #7a8894;background:color-mix(in srgb,#7a8894 5%,var(--card))}
+.creneaux{display:grid;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.creneaux .pill{display:inline-flex;align-items:center;gap:6px}
+.sous-champs{margin:8px 0 2px;padding:8px 10px;background:var(--card-2);border:1px solid var(--line);border-radius:10px;display:grid;gap:10px}
+.sous-champs>.champ+.champ{border-top:1px solid var(--line);padding-top:10px}
 .sous-ligne{display:flex;align-items:center;justify-content:space-between;margin:0;font-size:.9rem}
 .sous-ligne b{font-weight:700}
 .sous-champs .champ{padding:6px 0;border:0;background:transparent}
@@ -645,7 +655,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26af');
+  const m = await import('./app.js?v=2026-09-26ag');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
