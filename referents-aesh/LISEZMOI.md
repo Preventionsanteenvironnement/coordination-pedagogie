@@ -523,3 +523,8 @@ trouvés et corrigés, dans cet ordre :
 Les colonnes passent de 200 à 260 px sur téléphone — la grille défile de toute façon — et un cours
 d'une heure a droit à deux lignes de titre. Le compteur d'élèves se dit court : « 6 él. · 2 AI ·
 2 AM · 6 ULIS », l'ancien libellé étant coupé avant d'être utile.
+
+**Deux retouches après essai sur téléphone (26/09)** — le repère « Semaines A et B » était collant
+(`position:sticky`) : en défilant il passait par-dessus les cours et masquait ce qu'on cherchait à
+lire. Il reste désormais en haut, sans flotter. Et les trois points disent ce qu'ils font :
+bouton **« Affichage ⋯ »** au lieu d'un rond muet.
