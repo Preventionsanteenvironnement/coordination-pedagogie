@@ -816,11 +816,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if(!horsParCle.has(cle)) horsParCle.set(cle,{cle,sig,j:o.j,d:o.debut,f:o.fin,label:o.label,gens:[]});
       const g=horsParCle.get(cle).gens; if(!g.some(x=>x.id===o.a.id)) g.push(o.a);
     });
-    /* 26/09/2026 — Les réunions sortent de la grille : même créneau pour tout le pôle, toutes
-       les semaines. Elles y laissaient une grande case vide sans rien apprendre. Sous la
-       grille, elles disent en plus QUI y est — ce que la case ne disait pas. */
-    const horsBlocs=[...horsParCle.values()].filter(o=>o.sig!=='RE' && o.sig!=='RI');
-    const reunionsBas=[...horsParCle.values()].filter(o=>o.sig==='RE' || o.sig==='RI');
+    const estReunion=o=>o.sig==='RE'||o.sig==='RI';
+    const horsBlocs=[...horsParCle.values()];
+    const reunionsBas=horsBlocs.filter(estReunion);
     const H0 = 8 * 60, H1 = Math.max(18*60,...services.map(o=>K.min(o.fin))), PX = 1.25;
     /* 26/09/2026 — Une épreuve se pose PAR-DESSUS les cours : elle ne les remplace pas,
        elle dit qu'à ce moment-là il se passe autre chose, et combien d'AESH sont demandés. */
@@ -860,7 +858,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${avecSigles ? 'presence' : 'sans-eleves'}"
         title="${esc(libelleService(o.label))} · ${K.hFr(o.d)}–${K.hFr(o.f)} · ${o.gens.map(a => a.sigle).join(', ')}"
         style="top:${top + 1}px;height:${Math.max(18, h)}px;${pos}">
-        <b>${logoService(o.sig)}${esc(o.sig)}</b>${past ? `<span class="serv-past">${past}</span>` : ''}</button>`;
+        <b>${avecSigles ? logoService(o.sig) + esc(o.sig)
+          : esc(libelleService(o.label)).replace(/\s+/, '<br>')}</b>${past ? `<span class="serv-past">${past}</span>` : ''}</button>`;
     }).join('');
 
     const blocHtml = (c, large) => {
@@ -925,7 +924,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         `<p><b>${esc(libelleService(o.label))}</b><span class="quand">${K.JOURS[o.j]} ${K.hFr(o.d)}–${K.hFr(o.f)}</span>${o.gens
           .sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
           .map(a => `<span class="past-aesh" style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</p>`).join('')}</div>`;
-    const vus = [...new Set(horsBlocs.map(o => o.sig))];
+    const vus = [...new Set(horsBlocs.filter(o => !estReunion(o)).map(o => o.sig))];
     if (vus.length) grille += `<p class="legende-serv">${SIGLES_SERVICE.filter(([k]) => vus.includes(k))
       .map(([k, t]) => `<span>${logoService(k)}<b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
     return grille;
