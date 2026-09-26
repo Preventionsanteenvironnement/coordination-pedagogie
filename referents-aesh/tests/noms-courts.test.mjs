@@ -24,4 +24,9 @@ assert.equal(K.libCourt(undefined), undefined);
 const cours = JSON.parse(fs.readFileSync(new URL('../edt-lycee.json', import.meta.url), 'utf8')).cours;
 const trop = [...new Set(Object.values(cours).map(c => K.libCourt(c.lib)))].filter(x => x && x.length > 17);
 assert.deepEqual(trop, [], 'trop longs : ' + trop.join(', '));
+/* Les noms courts ne servent QUE dans la vue « A et B réunies » : partout ailleurs on
+   écrit le cours en entier — semaine seule, emploi du temps d'une personne, impression. */
+const app = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
+assert.match(app, /deuxSemaines \? K\.libCourt\(c\.lib\) : c\.lib/);
+assert.equal((app.match(/K\.libCourt\(/g) || []).length, 1, 'libCourt ne doit servir que dans la grille A+B');
 console.log('noms courts : ok');
