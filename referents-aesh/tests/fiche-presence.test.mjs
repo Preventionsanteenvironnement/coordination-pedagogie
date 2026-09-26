@@ -26,4 +26,14 @@ assert.match(p, /data-a="serv-jour"/);
 assert.match(F.champPresence({ presence: 1, services: [{ nom: 'Cantine', h: 3 }] }, {}), /bandeau warn/);
 /* Présence élève vide : aucun calcul inventé. */
 assert.match(F.champPresence({ services: [] }, {}), /Cours et ateliers<\/span><b>—/);
+/* Chaque ligne porte le bouton qui pose l'heure exacte, avec son AESH et son activité. */
+const avecId = F.champHorsPresence({ id: 'aesh_d00', services: [{ nom: 'PIAL', h: 12 }] }, {});
+assert.match(avecId, /data-a="service-horaire" data-v="aesh_d00\|PIAL"/);
+/* Sans heure posée, la ligne dit que le dispositif n'ira dans aucune grille. */
+assert.match(avecId, /aucune heure posée/);
+/* Une fois les heures posées, elles se lisent sur la ligne. */
+const pose = F.champHorsPresence({ id: 'aesh_d00', services: [{ nom: 'PIAL', h: 12,
+  horaires: [{ jour: 3, debut: '08:30', fin: '12:30', semaines: 'AB' }] }] }, {});
+assert.match(pose, /Jeu 8h30–12h30/);
+assert.doesNotMatch(pose, /aucune heure posée/);
 console.log('fiche présence élève : ok');

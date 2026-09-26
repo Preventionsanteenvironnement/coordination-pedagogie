@@ -650,8 +650,18 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        Les lignes de service gardent exactement leurs contrôles : seul leur rangement change. */
     function ligneService(a, o, x, i) {
       return `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option value="${esc(t)}" ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${esc(libelleService(t))}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
-            <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div></div>`;
+            <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div>
+          <div class="ligne" style="grid-column:1/-1;align-items:center;gap:8px">${creneauxDuService(a, x)}<button type="button" class="btn petit" data-a="service-horaire" data-v="${esc((a.id || '') + '|' + x.nom)}">🕐 Poser les heures</button></div></div>`;
   }
+    /* Tant qu'aucune heure n'est posée, le dispositif ne peut pas entrer dans une grille :
+       c'est un volume, pas un moment. La ligne le dit au lieu de laisser deviner. */
+    function creneauxDuService(a, x) {
+      const l = (x.horaires || []).filter(h => Number.isInteger(h.jour) && h.debut && h.fin);
+      if (!l.length) return `<span class="muted" style="font-size:.82rem">aucune heure posée — n’apparaît pas encore dans les grilles</span>`;
+      return `<span style="font-size:.82rem;display:flex;flex-wrap:wrap;gap:6px">${l
+        .sort((p, q) => p.jour - q.jour || String(p.debut).localeCompare(String(q.debut)))
+        .map(h => `<span class="pill">${K.JOURS_C[h.jour]} ${K.hFr(h.debut)}–${K.hFr(h.fin)}${h.semaines && h.semaines !== 'AB' ? ' · ' + h.semaines : ''}</span>`).join('')}</span>`;
+    }
     function champPresence(a, o) {
       const serv = (a.services || []), dedans = serv.map((x, i) => [x, i]).filter(([x]) => K.avecEleves(x));
     const p = Number.isFinite(+a.presence) && a.presence !== null && a.presence !== '' ? +a.presence : null;
@@ -1147,6 +1157,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if(actuel?.version!==attendu.version || JSON.stringify(actuel?.services || [])!==JSON.stringify(attendu.services || [])) throw Object.assign(new Error('La fiche a changé. Rouvrez le service.'),{code:'conflit',champs:['services']});
       return {...actuel,services,revisionPlanning:(+actuel.revisionPlanning||0)+1};
     });
+    /* 26/09/2026 — Poser une heure écrit tout de suite sur le serveur. Si la fiche du même
+       AESH est ouverte avec des modifications en cours, elle croirait qu'un collègue a touché
+       ses services et refuserait d'enregistrer. On lui remet la version qui vient d'être
+       écrite, des deux côtés : ce que le référent tape ailleurs dans la fiche est conservé. */
+    if (S.form && S.form.a && S.form.a.id === f.aeshId) {
+      const frais = JSON.parse(JSON.stringify(services));
+      S.form.a.services = frais;
+      if (S.form.orig) S.form.orig.services = JSON.parse(JSON.stringify(services));
+    }
   }
   function enregistrerServiceHoraire() {
     const f=S.feuille;
@@ -2399,7 +2418,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'edt-vue': if(['jour','semaine'].includes(v)) aller('edt',{...S.route.p,affichage:v},{remplacer:true}); return;
       case 'edt-jour': if(/^[0-4]$/.test(v)) aller('edt',{...S.route.p,jour:v},{remplacer:true}); return;
       case 'besoin-placer': if(S.feuille?.type==='besoin-detail' && peutPlacer(S.feuille.classe)){const nom=S.feuille.classe; S.feuille=null; ouvrirPlacement(v,nom);} return;
-      case 'service-horaire': ouvrir({type:'service-horaire',aeshId:K.aeshActifs(idx(),P().id)[0]?.id || '',nom:'Cantine',jour:0,debut:'12:30',fin:'13:00',du:S.lundi,au:raccourcis().find(r=>r.id==='annee')?.fin || '',semaines:'AB',base:new Map(S.docs)}); return;
+      /* 26/09/2026 — Depuis la fiche, le bouton arrive avec l'AESH et l'activité : on pose
+         l'heure exacte là où on déclare le dispositif, au lieu d'aller la chercher dans un
+         autre écran. Sans paramètre, il s'ouvre comme avant. */
+      case 'service-horaire': { const [qui, quoi] = String(v || '').split('|');
+        ouvrir({type:'service-horaire',aeshId: qui || (S.form && S.form.a && S.form.a.id) || K.aeshActifs(idx(),P().id)[0]?.id || '',nom: quoi || 'Cantine',jour:0,debut:'12:30',fin:'13:00',du:S.lundi,au:raccourcis().find(r=>r.id==='annee')?.fin || '',semaines:'AB',base:new Map(S.docs)}); return; }
       case 'service-enregistrer': enregistrerServiceHoraire(); return;
       case 'service-fin': terminerService(b); return;
       case 'planning-pole': if(POLES.some(p=>p.id===v)){S.vu=v;S.route.p={};S.aeshChoisi=null;rendre();} return;
