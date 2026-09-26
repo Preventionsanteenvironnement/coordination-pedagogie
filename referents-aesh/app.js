@@ -773,7 +773,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const blocHtml = (c, large) => {
       const iso = K.ajoute(S.lundi, c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
       const pl = placesCours(c.id, iso), parAesh = new Map(); pl.forEach(x => { if (I.aesh.get(x.aeshId)) parAesh.set(x.aeshId, x); });
-      const aeshs = [...parAesh.keys()].map(id => I.aesh.get(id));
+      /* 26/09/2026 — Même ordre d'un cours à l'autre. Sans tri, la colonne d'un AESH dépendait
+         de l'ordre d'écriture de son placement : ST devant ANT sur un bloc, derrière sur le
+         suivant. Le sigle est déjà l'ordre partout ailleurs (calculs.js) : l'œil suit la personne. */
+      const aeshs = [...parAesh.keys()].map(id => I.aesh.get(id))
+        .sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'));
       const bes = K.besoinDuCours(S.est, nom, c, quand(iso)), [mc] = couleurMatiere(c.mat);
       const nbPresents = presents(c, iso, bes);
       const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="background:${couleurAesh(a.id)};color:white;border-color:${couleurAesh(a.id)};${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');

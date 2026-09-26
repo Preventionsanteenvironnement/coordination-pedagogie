@@ -304,3 +304,22 @@ Fichiers : `acces-planning.js`, `app.js`, `index.html` (caches `app` → `2026-0
 `acces-planning` → `2026-09-25b`), `tests/acces-simple.test.mjs`.
 Aucune règle Firestore à changer : elles n'ont jamais distingué le coordonnateur d'un référent,
 c'est l'application qui restreignait. Neuf fichiers de tests réussis.
+
+
+### 26 septembre 2026 — Les AESH dans le même ordre d'un cours à l'autre
+Remarque de Brahim : sur un bloc « Stella puis Antoine », sur celui du dessous « Antoine puis
+Stella ». L'ordre n'était pas un choix : `placesCours` rend les placements tels qu'ils sont en
+base, donc dans l'ordre où ils ont été écrits, et la colonne d'un AESH suivait ce rang. Après
+l'import du 25/09, cet ordre était essentiellement celui du hasard.
+
+La liste des AESH d'un cours est désormais triée par sigle, comme partout ailleurs dans
+l'application (`calculs.js`, trois endroits). Sur CAP 1 PSR, 11 blocs sur 19 changent d'ordre et
+ANT passe systématiquement devant F, N, ST et TI.
+
+Ce qui ne change pas : l'alignement n'est parfait que si deux cours empilés ont la même équipe.
+Un cours à ANT + ST au-dessus d'un cours à ST seul laisse ST occuper toute la largeur du second.
+Réserver une colonne fixe par personne sur toute la journée donnerait des blocs étroits et vides :
+écarté.
+
+Fichiers : `app.js` (une ligne dans `grilleClasse`), `index.html` (cache `2026-09-26a`).
+Aucune donnée touchée, aucun calcul d'heures modifié. Neuf fichiers de tests réussis.
