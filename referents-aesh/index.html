@@ -460,6 +460,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 @media (min-width:700px){.feuille{border-radius:24px}}
 .poignee{width:42px;height:5px;border-radius:3px;background:var(--line);margin:0 auto}
 .feuille h2{font-size:1.3rem}
+/* 26/09/2026 — Le détail d'une rubrique, en retrait sous son total : on voit d'un coup
+   d'œil ce qui compose la présence élève sans ouvrir quoi que ce soit. */
+.sous-champs{margin:8px 0 2px;padding:6px 10px;background:var(--card-2);border-radius:10px;display:grid;gap:6px}
+.sous-ligne{display:flex;align-items:center;justify-content:space-between;margin:0;font-size:.9rem}
+.sous-ligne b{font-weight:700}
+.sous-champs .champ{padding:6px 0;border:0;background:transparent}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 .actions .btn{flex:1;min-width:130px}
 .recap{text-align:center;display:grid;gap:6px;padding:8px 0}
@@ -631,7 +637,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26ab');
+  const m = await import('./app.js?v=2026-09-26ac');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

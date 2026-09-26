@@ -16,7 +16,6 @@ import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPE
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
 import * as AV from './avatars.js?v=2026-09-24b';
-
 const DELAI = 15000;
 const K_OPTIONS = 'referents-aesh-options-v1';
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
@@ -34,7 +33,6 @@ const heureFr = iso => { const d = new Date(iso); if (isNaN(d)) return ''; const
 const nombre = v => v === null || v === undefined || v === '' || !Number.isFinite(+v) ? null : +v;
 const hOu = v => nombre(v) == null ? '—' : K.fmtH(v);
 const CRENEAUX_H = []; for (let m = 7 * 60 + 30; m <= 21 * 60; m += 30) CRENEAUX_H.push(K.hDe(m));
-
 export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAccesPlanning }) {
   let droitsPlanning = null;
   const S = {
@@ -44,7 +42,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   };
   const racine = document.getElementById('app');
   document.documentElement.dataset.fond = lsLit(K_FOND, 'clair');
-
   /* ─────────── données ─────────── */
   try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-24b')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
@@ -59,7 +56,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   let I = null, versionI = -1, versionDocs = 0;
   const idx = () => { if (versionI !== versionDocs) { I = K.indexer([...S.docs.values()], EQUIPES_DEPART, POLES.map(x => x.id), FILIERES); versionI = versionDocs; } return I; };
   const ctx = () => ({ C: S.C, edt: S.edt, I: idx(), estimations: S.est, nomPole, aujourdhui: K.isoLocal(), annee: S.annee });
-
   function resumeDemande(c,iso,bes) {
     const etat=K.etatBesoin(ctx(),c,iso,bes),n=bes?presents(c,iso,bes):0;
     return `<span class="bes-cercle ${etat}" style="position:relative;display:inline-block;left:auto;right:auto;bottom:auto;vertical-align:middle;margin-right:8px" aria-hidden="true">${etat==='inconnu'?'?':etat==='zero'?'╱':''}</span><b>${!bes?'Besoin non renseigné':bes.nb===0?'0 AESH demandé':`${n}/${bes.nb} AESH demandé${bes.nb>1?'s':''}`}</b>`;
@@ -177,7 +173,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      absences, les réunions, les PFMP et la période comme un référent. Seuls ses placements
      restent bornés aux classes de ecritureClasses. */
   const accesComplet = () => !modePlanning || droitsPlanning?.tousDroits === true;
-
   /* ─── Période de l'emploi du temps (17/09/2026, décision de Brahim) ───
      Une seule période pour les quatre pôles : c'est ce qui permet aux emplois du temps de se croiser.
      Par défaut jusqu'aux vacances de Noël ; si un référent l'étend, elle est étendue pour tout le monde. */
@@ -211,7 +206,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="actions"><button type="button" class="btn" id="pe-fermer" data-a="fermer">Annuler</button>
         <button type="button" class="btn valider" id="pe-valider" data-a="per-valider" ${K.RE_DATE.test(fin) && fin !== periodeEdt() ? '' : 'disabled'}>✓ Enregistrer</button></div>`;
   }
-
   /* ─────────── écritures ─────────── */
   async function ecrire(doc) {
     if(["absence","reunion"].includes(doc.type)) return (await ecrireLot([doc],new Map(S.docs))).find(d=>d.id===doc.id);
@@ -286,7 +280,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     prets.forEach(({ d }) => S.docs.set(d.id, d)); versionDocs++;
     return prets.map(x => x.d);
   }
-
   /* ─────────── navigation (flèches du navigateur) ─────────── */
   function aller(e, p = {}, o = {}) {
     if (modePlanning && S.session && !['edt','code'].includes(e)) e = 'edt';
@@ -310,7 +303,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (!S.session && !['humeur', 'code'].includes(st.e)) S.route = { e: 'code', p: {} };
     rendre({ haut: true });
   });
-
   /* ─────────── rendu ─────────── */
   let toastT = null;
   function toast(t, err) { S.toast = { t, err }; rendre(); clearTimeout(toastT); toastT = setTimeout(() => { S.toast = null; rendre(); }, err ? 4200 : 1800); annonce(t); }
@@ -341,7 +333,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (S.route.e === 'messages') { const f = document.getElementById('fil-fin'); if (f && !apresRendu.vu) { f.scrollIntoView({ block: 'end' }); apresRendu.vu = true; } marquerLus(); }
     else apresRendu.vu = false;
   }
-
   function bandeauEtat() {
     if (S.etat === 'refus') return `<div class="bandeau warn" role="alert">Espace en cours d’ouverture par la coordination : consultation possible, enregistrement pas encore autorisé.</div>`;
     if (S.etat === 'horsligne') return `<div class="bandeau warn" role="alert">Pas de connexion au serveur : les données affichées sont celles de la dernière visite.</div>`;
@@ -371,7 +362,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <hr><button type="button" role="menuitem" id="m-sortir" data-a="sortir">↩︎ Se déconnecter</button></div>` : ''}
     </header>`;
   }
-
   /* ─────────── entrée : humeur, pensée, code ─────────── */
   function penseeDuJour() {
     const m = lsLit(K_PENSEES, { jour: '', i: -1, vues: [] }), auj = K.isoLocal();
@@ -426,7 +416,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }
     rendre();
   }
-
   /* ─────────── semaines ─────────── */
   function selecteurSemaine(id = 'sem') {
     const s = S.C.semaine(S.lundi), v = K.ajoute(S.lundi, 4);
@@ -438,7 +427,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${S.lundi !== semaineParDefaut() ? `<button type="button" id="${id}-auj" data-a="semaine" data-v="0" aria-label="Cette semaine" title="Cette semaine" style="width:auto;padding:0 10px;border-radius:999px;font-size:.85rem;font-weight:700">Auj.</button>` : ''}
     </div>`;
   }
-
   /* ─────────── outils de calcul pour l'affichage ─────────── */
   function bilans(pid) { const c = ctx(); return K.aeshActifs(c.I, pid).map(a => ({ a, b: K.bilan(c, a.id, S.lundi) })); }
   /* Les placements en cours à cette date — pas ceux d'un AESH dont le contrat est fini (audit D01). */
@@ -462,7 +450,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="leg">${parts.map(p => `<span><em style="background:${p[2]}"></em>${esc(p[0])}</span>`).join('')}</div>`;
   }
   const aCompleter = a => nombre(a.contrat) == null || nombre((a.heures || {})[P().id]) == null;
-
   /* ─── explications ⓘ (17/09/2026) : un mot simple, affiché seulement quand on le demande ─── */
   const AIDES = {
     contrat: 'Le total d’heures dues par semaine : présence élève, services (cantine, internat…), réunion, etc. Il est commun à tous les pôles où l’AESH travaille : on ne le compte qu’une fois.',
@@ -502,7 +489,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   /* Pôle de l'équipe qui gère l'AESH : ce qu'il déclare, sinon le premier pôle où il intervient. */
   const rattachementDe = a => a.rattachement && (a.equipes || {})[a.rattachement] != null ? a.rattachement : Object.keys(a.equipes || {})[0] || P().id;
-
   /* ═══════════════════ ÉCRANS ═══════════════════ */
   const ECRANS = {
     eleves: ecranEleves,
@@ -531,7 +517,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${carteDisponibles()}
       <div class="ligne"><button type="button" class="btn" id="acc-partager" data-a="partager">✉️ Envoyer le lien des besoins à mes collègues</button></div>`;
     },
-
     aesh() {
       const p = P(), bs = bilans(p.id);
       return `<div class="salut"><div><h1 id="titre" tabindex="-1">Mes AESH</h1><p class="sous">${esc(p.nom)} · heures par semaine</p></div>${selecteurSemaine()}</div>
@@ -551,7 +536,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <button type="button" class="btn" id="aesh-absence" data-a="aller" data-v="absence">Absence ou formation</button>
         <button type="button" class="btn" id="aesh-reunions" data-a="aller" data-v="reunions">Réunions institutionnelles</button></div>`;
     },
-
     fiche() { return ecranFiche(); },
     absence() { return ecranAbsence(); },
     reunions() { return ecranReunions(); },
@@ -563,7 +547,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     moncode() { return ecranMonCode(); },
     avatar() { return ecranAvatar(); }
   };
-
   /* ─────────── fiche AESH ─────────── */
   /* Une fiche d'avant les filières ne dit pas où l'AESH intervient : « dans son pôle » se lit
      « dans toutes les filières de ce pôle ». On ne devine rien de plus. */
@@ -643,6 +626,36 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const ch = changements(f), modifie = ch.length > 0;
     const pas = (cle, val, pasV = 0.5, sous) => { const id = cle.replace(':', '-'); return `<span class="pas"><button type="button" id="pm-${id}" data-a="pas" data-v="${cle}" data-d="-${pasV}" aria-label="Moins">−</button><input id="pv-${id}" data-i="nb" data-v="${cle}" inputmode="decimal" value="${nombre(val) == null ? '' : String(val).replace('.', ',')}" placeholder="—" aria-label="${esc(sous || cle)}"><button type="button" id="pp-${id}" data-a="pas" data-v="${cle}" data-d="${pasV}" aria-label="Plus">+</button></span>`; };
     const estModif = test => test ? 'modif' : '';
+    /* 26/09/2026 — La fiche sépare enfin les deux questions. Ce qui se passe AUPRÈS D'ÉLÈVES
+       (repas, internat, DAFI, ESAT) est DANS la présence élève : « Cours et ateliers » est ce
+       qu'il en reste, calculé, jamais saisi. Ce qui n'en est pas (le PIAL) s'ajoute au contrat.
+       Les lignes de service gardent exactement leurs contrôles : seul leur rangement change. */
+    function ligneService(a, o, x, i) {
+      return `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option value="${esc(t)}" ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${esc(libelleService(t))}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
+            <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div></div>`;
+  }
+    function champPresence(a, o) {
+      const serv = (a.services || []), dedans = serv.map((x, i) => [x, i]).filter(([x]) => K.avecEleves(x));
+    const p = Number.isFinite(+a.presence) && a.presence !== null && a.presence !== '' ? +a.presence : null;
+    const pris = dedans.reduce((t, [x]) => t + (Number.isFinite(+x.h) ? +x.h : 0), 0);
+    const cours = p == null ? null : p - pris;
+    return `<div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine, réparties ci-dessous</small>${parQui(a, 'presence')}${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}
+        <div class="sous-champs" style="grid-column:1/-1">
+          <p class="sous-ligne"><span>Cours et ateliers</span><b>${cours == null ? '—' : K.fmtH(cours)}</b></p>
+          ${cours != null && cours < -1e-9 ? `<p class="bandeau warn" style="margin:0">Les dispositifs comptent ${K.fmtH(pris)}, plus que la présence élève de ${K.fmtH(p)}.</p>` : ''}
+          ${dedans.map(([x, i]) => ligneService(a, o, x, i)).join('')}
+          <div class="ligne"><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ repas, internat, DAFI, ESAT…</button></div>
+        </div></div>`;
+  }
+    function champHorsPresence(a, o) {
+      const dehors = (a.services || []).map((x, i) => [x, i]).filter(([x]) => !K.avecEleves(x));
+    const total = dehors.reduce((t, [x]) => t + (Number.isFinite(+x.h) ? +x.h : 0), 0);
+    return `<div class="champ" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Hors présence élève</b><small>compté au contrat, pas aux élèves</small></span><b style="font-size:1.05rem">${total ? K.fmtH(total) : '—'}</b>
+        <div class="sous-champs" style="grid-column:1/-1">
+          ${dehors.map(([x, i]) => ligneService(a, o, x, i)).join('')}
+          <div class="ligne"><button type="button" class="btn petit" data-a="serv-ajouter">＋ PIAL, dispositif administratif…</button></div>
+        </div></div>`;
+  }
     const o = f.orig || {};
     const b = !nouveau ? K.bilan(ctx(), a.id, S.lundi) : null;
     const absences = I.absences.filter(x => x.aeshId === a.id && x.au >= K.isoLocal()).sort((x, y) => x.du.localeCompare(y.du));
@@ -664,7 +677,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${parQui(a, 'contrat')}${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
         <div class="champ ${estModif((o.finContrat || '') !== (a.finContrat || ''))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Durée du contrat ${aide('duree')}</b><small>${a.finContrat ? `jusqu’au ${esc(K.dateLongue(a.finContrat))}` : `toute l’année, jusqu’au ${esc(K.dateLongue(finAnneeScolaire()))}`}</small>${aideTexte('duree')}</span>
           <span class="ligne" style="gap:6px"><input type="date" id="f-fin" data-i="fin-contrat" value="${esc(a.finContrat || '')}" style="min-height:40px">${a.finContrat ? `<button type="button" class="lien" id="f-fin-non" data-a="fin-aucune">toute l’année</button>` : ''}</span></div>
-        <div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine</small>${parQui(a, 'presence')}${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}</div>
+        <div class="champ ${estModif(libFilieres(o) !== libFilieres(a))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Intervient en ${aide('intervient')}</b><small>${esc(libFilieres(a))}</small>${aideTexte('intervient')}</span><button type="button" class="btn petit" id="f-filieres" data-a="filieres">Modifier</button></div>
+        ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
+        ${champPresence(a, o)}
+        ${champHorsPresence(a, o)}
         ${K.reunionFixePsr(a) ? '<div class="champ"><span class="lib"><b>Réunion d’équipe · 1 h</b><small>Lundi 13 h–14 h · automatique pour cette équipe. Une réunion institutionnelle programmée la remplace cette semaine-là.</small></span></div>' : `        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
           <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, i) => `<button type="button" class="jourc" id="rj-${i}" data-a="reu-jour" data-v="${i}" aria-pressed="${reu.jour === i && !!reu.debut}">${j}</button>`).join('')}
             <label class="sr" for="f-reu-h">Heure</label><select id="f-reu-h" data-i="reu-h" ${reu.debut ? '' : 'disabled'}>${reu.debut ? '' : '<option value="">heure</option>'}${CRENEAUX_H.slice(0, -2).map(h => `<option value="${h}" ${reu.debut === h ? 'selected' : ''}>${K.hFr(h)} – ${K.hFr(K.hDe(K.min(h) + 60))}</option>`).join('')}</select>
@@ -672,11 +688,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
           ${prochaineReunion ? `<small class="muted" style="grid-column:1/-1">Prochaine : ${esc(K.dateLongue(prochaineReunion))}, ${K.hFr(reu.debut)}–${K.hFr(reu.fin)}</small>` : ''}</div>
 `}
         ${champsReunionsSupplementaires(a)}
-        ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
-        <div class="champ ${estModif(libFilieres(o) !== libFilieres(a))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Intervient en ${aide('intervient')}</b><small>${esc(libFilieres(a))}</small>${aideTexte('intervient')}</span><button type="button" class="btn petit" id="f-filieres" data-a="filieres">Modifier</button></div>
-        ${(a.services || []).map((x, i) => `<div class="champ ${estModif(JSON.stringify((o.services || [])[i] || null) !== JSON.stringify(x))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><span class="ligne" style="gap:6px"><select data-i="serv-nom" data-v="${i}" aria-label="Service" style="min-height:38px;padding:6px 10px">${SERVICES_TYPES.map(t => `<option value="${esc(t)}" ${(SERVICES_TYPES.includes(x.nom) ? x.nom : 'Autre') === t ? 'selected' : ''}>${esc(libelleService(t))}</option>`).join('')}</select>${SERVICES_TYPES.includes(x.nom) && x.nom !== 'Autre' ? '' : `<input type="text" data-i="serv-lib" data-v="${i}" value="${esc(x.nom === 'Autre' ? '' : x.nom)}" maxlength="40" placeholder="quel service ?" style="width:150px;min-height:38px">`}<button type="button" class="lien" data-a="serv-retirer" data-v="${i}">retirer</button></span><small>heures par semaine</small></span>${pas('serv:' + i, x.h, 0.5, 'Heures ' + x.nom)}
-          <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, n) => `<button type="button" class="jourc" id="sj-${i}-${n}" data-a="serv-jour" data-v="${i}|${n}" aria-pressed="${(x.jours || []).includes(n)}">${j}</button>`).join('')}</div></div>`).join('')}
-        <div class="champ" style="grid-template-columns:1fr"><div class="ligne"><span class="muted" style="font-weight:700">Services :</span><button type="button" class="btn petit" id="f-serv-ajouter" data-a="serv-ajouter">＋ DP — Demi-pension, internat, dispositif</button></div></div>
         <div class="champ ${estModif(JSON.stringify(K.disposDe(o)) !== JSON.stringify(K.disposDe(a)))}" style="grid-template-columns:1fr"><span class="lib"><b>Quand il travaille ${aide('jours')}</b><small>touchez une case pour la changer</small>${aideTexte('jours')}</span>
           <div class="demis" role="group" aria-label="Disponibilités par demi-journée">
             <span></span>${K.JOURS_C.map(j => `<span class="dj-t">${j}</span>`).join('')}
@@ -717,7 +728,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }));
     return out.sort((x, y) => (y.besoin - y.places) - (x.besoin - x.places) || x.cours.j - y.cours.j);
   }
-
   /* ─────────── absences ─────────── */
   function formAbsence() {
     if (!S.form || S.form.kind !== 'absence') {
@@ -759,7 +769,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${aVenir.length ? `<div class="carte pad" style="display:grid;gap:10px"><h2>À venir</h2>${aVenir.map(x => { const a = I.aesh.get(x.aeshId); return `<div class="ligne ecarte"><span><b>${esc(a ? a.sigle : '?')}</b> · <span class="puce err">${esc(K.MOTIFS[x.motif])}</span> ${x.du === x.au ? esc(K.dateLongue(x.du)) : `du ${esc(K.dateCourte(x.du))} au ${esc(K.dateCourte(x.au))}`}${x.journee === false ? ` · ${K.hFr(x.debut)}–${K.hFr(x.fin)}` : ''}${x.note ? ` · <span class="muted">${esc(x.note)}</span>` : ''}</span><span class="ligne" style="gap:6px"><button type="button" class="btn petit" id="ab-mod-${esc(x.id)}" data-a="modifier-absence" data-v="${esc(x.id)}">Modifier</button><button type="button" class="btn petit danger" id="ab-ret-${esc(x.id)}" data-a="retirer-absence" data-v="${esc(x.id)}">Retirer</button></span></div>`; }).join('')}</div>` : ''}
     </div>`;
   }
-
   /* ─────────── réunions institutionnelles ─────────── */
   function ecranReunions() {
     const I = idx();
@@ -775,7 +784,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="carte pad" style="display:grid;gap:10px"><h2>Dates prévues</h2>${liste.length ? liste.map(r => `<div class="ligne ecarte"><span><b>${esc(K.dateLongue(r.date))}</b> · ${K.hFr(r.debut)}–${K.hFr(r.fin)}${r.date < K.isoLocal() ? ' <span class="puce">passée</span>' : ''}</span><button type="button" class="btn petit danger" id="r-ret-${esc(r.id)}" data-a="retirer-reunion" data-v="${esc(r.id)}">Retirer</button></div>`).join('') : '<span class="muted">Aucune date pour l’instant.</span>'}</div>
     </div>`;
   }
-
   /* 26/09/2026 — Le nom de salle tel qu'il sort de PRONOTE mange une ligne entière pour
      rien : « SALLE 008_PSR » se lit « 08 ». On retire le mot SALLE, le suffixe de filière,
      et le zéro de tête des numéros à trois chiffres. Un atelier garde son nom, abrégé. */
@@ -789,7 +797,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return m ? m[1].replace(/^0(\d{2}[A-Z]?)$/, '$1') : t.replace(/\s+/g, ' ');
   }
   const sallesCourtes = l => [...new Set((l || []).map(salleCourte).filter(Boolean))].join(' · ');
-
   /* ─────────── emploi du temps ─────────── */
   function classeCourante() {
     const l = classesDu(P().id); let c = S.route.p.classe;
@@ -872,7 +879,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <b>${avecSigles ? logoService(o.sig) + esc(o.sig)
           : esc(libelleService(o.label)).replace(/\s+/, '<br>')}</b>${past ? `<span class="serv-past">${past}</span>` : ''}</button>`;
     }).join('');
-
     const blocHtml = (c, large) => {
       const iso = K.ajoute(lundiDe(c), c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
       const lettre = deuxSemaines && c.sem === 'SA' ? 'A' : deuxSemaines && c.sem === 'SB' ? 'B' : '';
@@ -902,7 +908,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
          Des nombres seulement — aucun code, aucune date, aucun nom. */
       const elv = libelleEleves(nom);
       const elvHtml = elv && montrer('eleves') ? `<span class="eleves-bloc" title="Élèves notifiés dans cette classe">${esc(elv)}</span>` : '';
-
       const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', ' + pl.map(x => (I.aesh.get(x.aeshId)?.sigle || '?')+' '+K.horairePlace(x,c).debut+'–'+K.horairePlace(x,c).fin).join(', ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
@@ -1000,7 +1005,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <button type="button" class="btn ghost" data-a="envoyer-grille">✉️ Envoyer à ${esc(personne.sigle)}</button>
       </div></div>`;
   }
-
   function grillesPlanning(personne,nom) {
     const choix=S.route.p.parite || 'AB', paire=semainesAB(S.C,S.lundi), type=!!S.route.p.edtType;
     /* 25/09/2026 : une personne, un seul document. « A+B » n'aligne plus deux grilles :
@@ -1080,7 +1084,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''} ${(K.min(o.fin)-K.min(o.debut))<45?'court':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(Math.min(K.min(o.fin),fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}"><b>${o.sem&&o.sem!=='AB'?`<i class="sem-lettre ${o.sem==='B'?'b':''}">${o.sem}</i>`:''}${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
     }).join('')}<div class="g-pied">Total</div>${K.JOURS.map((j,i)=>`<div class="g-pied jour-col" data-j="${i}">${esc(libelleTotal(K,tot[i]))}</div>`).join('')}</div></div>${soir.length?`<div class="bande-soiree"><b>Soirée</b>${soir.map(o=>`<span>${esc(K.JOURS[o.j])} ${K.hFr(o.debut)}–${K.hFr(o.fin)} · ${esc(o.cours?.lib || libelleService(o.label))}</span>`).join('')}</div>`:''}`;
   }
-
   function palettePlanning() {
     const cx=ctx();
     return `<div class="equipe-compacte" role="group" aria-label="AESH et heures de la semaine">${K.aeshActifs(cx.I,P().id).map(a=>{
@@ -1088,7 +1091,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       return `<button type="button" class="btn" style="border-left:6px solid ${couleurAesh(a.id)}" data-a="selection-aesh" data-v="${esc(a.id)}"><b>${esc(a.sigle)}</b><span>${K.fmtH(b.total)}${b.contrat==null?'':` / ${K.fmtH(b.contrat)}`}</span></button>`;
     }).join('')}</div>`;
   }
-
   /* ─── Cantine et internat, sous la grille (17/09/2026, demande de Brahim) ───
      À part de la grille, pour ne pas l'embrouiller. Tous pôles confondus : un AESH de CAPa peut être
      à la cantine le même jour qu'un des vôtres, et chaque référent le voit. */
@@ -1187,7 +1189,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       } };
     rendre({ focus: 'cf-oui' });
   }
-
   /* ─── PFMP : AESH libérés et redéploiement (17/09/2026) ───
      Pendant la PFMP d'une classe, ses cours n'ont pas lieu. Les AESH qui y étaient placés sont libres sur ces
      créneaux : on les montre, et le référent peut les envoyer ailleurs — n'importe quelle classe, n'importe quel
@@ -1254,7 +1255,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       } };
     rendre({ focus: 'cf-oui' });
   }
-
   function ouvrirPlacement(coursId,nom) {
     const c=S.edt.cours[coursId],I=idx(),iso=K.ajoute(S.lundi,c.j);
         if (S.C.semaine(S.lundi).toute) return;
@@ -1353,7 +1353,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   const finPeriode = f => f.periode === 'date' ? (f.au || '') : ((raccourcis().find(r => r.id === f.periode) || {}).fin || '');
   /* La fin de contrat l'emporte sur la période : après, l'AESH n'est plus là. */
   const finPourAesh = (a, au) => { const f = K.finContratDe(a); return f && f < au ? f : au; };
-
   /* ─────────── vue d'ensemble ─────────── */
   function ecranEnsemble() {
     const p = P(), I = idx(), cx = ctx(), tous = !!S.route.p.tous, liste = tous ? K.aeshActifs(I) : K.aeshActifs(I, p.id), sem = S.C.semaine(S.lundi);
@@ -1417,7 +1416,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="ligne ecarte"><span><b>${esc(a.sigle)}</b> · ${K.fmtH(b.total)} cette semaine${b.reste != null ? ` · reste ${K.fmtH(b.reste)}` : ''}</span><button type="button" class="btn petit" data-a="fiche" data-v="${esc(a.id)}">Sa fiche ›</button></div>
       ${grille}`;
   }
-
   const peutEstimer = nom => !modePlanning && !!S.session && classesDu(S.session.pole).includes(nom);
   function editeurBesoin(f) {
     if(!peutEstimer(f.classe)) return '';
@@ -1426,7 +1424,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return `<hr><h3>Modifier le nombre demandé</h3>
       <div class="choix" role="group" aria-label="Nombre d’AESH demandés">${[0,1,2,3,4,5,6].map(n=>`<button type="button" id="besoin-nb-${n}" data-a="besoin-nombre" data-v="${n}" aria-pressed="${f.nb===n}" ${S.envoi?'disabled':''}>${n}</button>`).join('')}</div>
       <p>Semaines : <b>${esc(c.cr.parite || (d?.semaines==='A'||d?.semaines==='B' ? d.semaines : 'A et B'))}</b> · du ${K.jjmm(c.periode.debut)} au ${K.jjmm(d?.au || c.periode.fin)}.</p>
-
       <button type="button" class="btn valider" data-a="besoin-enregistrer" ${Number.isInteger(f.nb)&&!S.envoi?'':'disabled'}>${S.envoi?'Enregistrement…':f.confirmation?'Confirmer le besoin : '+f.nb+' AESH':'Valider le nombre'}</button>`;
   }
   async function sauverBesoin() {
@@ -1440,7 +1437,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       S.envoi=false; fermer(); toast('Besoin enregistré et partagé avec les enseignants et Antoine.');
     } catch(e) { S.envoi=false; toast(e.code==='besoin-conflit'?e.message:messageErreur(e),true); }
   }
-
   /* ─────────── besoins ─────────── */
   function besoinsResume(pid) {
     let estimes = 0, manque = 0; const vus = new Set();
@@ -1460,7 +1456,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      ne s'efface jamais : les règles l'interdisent — « remettre à l'identique » passe en
      « retiré » ce qui a été ajouté depuis, dans le seul périmètre choisi. */
   const PERIMETRES = [['tout', 'Tout'], ['pole', 'Mon pôle'], ['classe', 'Une classe']];
-
   function sauvegarder() {
     const docs = [...S.docs.values()].filter(d => d && d.id && d.type !== 'hist');
     const paquet = { format: SAUVE.FORMAT, version: 1, annee: S.annee,
@@ -1470,12 +1465,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         `Referents-AESH-${S.annee}-${K.isoLocal()}.json`))
       .catch(() => toast('Téléchargement impossible.', true));
   }
-
   const optsSauve = f => ({ perimetre: f.perimetre, pole: P().id, classe: f.classe, mode: f.mode,
     classesDuPole: S.edt.poles[P().id] || [],
     aeshDuPole: [...S.docs.values()].filter(d => d.type === 'aesh' && (d.equipes || {})[P().id]).map(d => d.id) });
   const analyserRestauration = f => SAUVE.analyser(f.paquet, S.docs, optsSauve(f));
-
   function feuilleSauvegarde(f) {
     const a = f.paquet ? analyserRestauration(f) : null;
     const seg = (champ, val, opts) => `<div class="seg">${opts.map(([k, t]) =>
@@ -1500,7 +1493,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="actions"><button type="button" class="btn" data-a="fermer">Fermer</button>
         ${f.paquet ? `<button type="button" class="btn valider" data-a="sauve-restaurer" ${a.ajoutes.length + a.modifies.length + a.enTrop.length ? '' : 'disabled'}>✓ Restaurer</button>` : ''}</div>`;
   }
-
   function choisirSauvegarde() {
     const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json';
     input.onchange = async () => {
@@ -1514,7 +1506,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     };
     input.click();
   }
-
   async function restaurer() {
     const f = S.feuille; if (!f || !f.paquet || S.envoi) return;
     const a = analyserRestauration(f);
@@ -1529,7 +1520,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         return { message: total + ' document' + (total > 1 ? 's restaurés' : ' restauré') };
       });
   }
-
   /* ═══════════ Épreuves posées par-dessus l'emploi du temps (26/09/2026) ═══════════
      Un CCF, un bac blanc, un test : ce n'est pas un cours, c'est un événement daté que le
      référent pose lui-même. Il porte ce que l'enseignant a demandé — combien d'AESH — et ce
@@ -1540,7 +1530,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   const libNature = n => (NATURES_EPREUVE.find(x => x[0] === n) || ['', n || 'Épreuve'])[1];
   const epreuves = () => [...S.docs.values()].filter(d => d.type === 'epreuve' && d.statut !== 'retire');
   const epreuvesDu = (classe, iso) => epreuves().filter(e => e.classe === classe && e.date === iso);
-
   /* Ce qu'il faut savoir des élèves qui passent : repris de l'onglet « Élèves », jamais ressaisi. */
   function besoinsEpreuve(e) {
     const tous = elevesDe(e.classe);
@@ -1554,7 +1543,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return out;
   }
   const resumeBesoins = b => EL_AMEN.filter(([c]) => b.parAmen[c]).map(([c, t]) => b.parAmen[c] + ' ' + t.toLowerCase()).join(' · ');
-
   function ecranEpreuves() {
     const l = epreuves().slice().sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.debut).localeCompare(String(b.debut)));
     const cartes = l.map(e => {
@@ -1576,7 +1564,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <button type="button" class="btn valider" data-a="epreuve-nouvelle">＋ Une épreuve</button></div>
       ${l.length ? cartes : '<div class="carte pad"><p>Aucune épreuve prévue. Le bouton ci-dessus en pose une : elle apparaîtra dans l’emploi du temps de la classe, par-dessus les cours.</p></div>'}`;
   }
-
   function feuilleEpreuve(f) {
     const classes = POLES.flatMap(q => (S.edt.poles[q.id] || []));
     const champ = (id, lab, html) => `<label class="ch-ep"><span>${lab}</span>${html}</label>`;
@@ -1598,7 +1585,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="actions"><button type="button" class="btn" data-a="fermer">Annuler</button>
         <button type="button" class="btn valider" id="ep-valider" data-a="epreuve-enregistrer" ${f.classe && K.RE_DATE.test(f.date || '') && K.min(f.fin) > K.min(f.debut) ? '' : 'disabled'}>✓ Enregistrer</button></div>`;
   }
-
   /* La feuille qu'un AESH venu d'ailleurs lit en arrivant : ce qu'il doit savoir, rien de plus. */
   function ficheEpreuve(id) {
     const e = S.docs.get(id); if (!e) return;
@@ -1622,7 +1608,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         `Epreuve-${e.classe}-${e.date}.txt`))
       .catch(() => toast('Téléchargement impossible.', true));
   }
-
   /* ═══════════ Élèves notifiés (26/09/2026) ═══════════
      Une entrée par classe, une ligne par CODE de suivi — jamais un nom, jamais un prénom.
      Deux vues sur la même liste : « Aide humaine » sert à placer les AESH toute l'année ;
@@ -1634,7 +1619,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   const EL_NOTIFS = [['oui', 'notifiée'], ['encours', 'en cours'], ['non', 'non']];
   const EL_AIDES = [['individualisee', 'ind.'], ['mutualisee', 'mut.'], ['aucune', 'aucune']];
   const EL_DOCS = [['PPS', 'PPS'], ['PAP', 'PAP'], ['', 'aucun']];
-
   const docEleves = nom => S.docs.get('eleves_' + nom + '_' + S.annee) || null;
   function elevesDe(nom) {
     const d = docEleves(nom);
@@ -1644,7 +1628,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   const comptesEleves = nom => comptesClasse(elevesDe(nom));
   const libelleEleves = nom => libelleClasse(comptesClasse(elevesDe(nom)));
-
   function ecranEleves() {
     const vue = S.route.p.vueEleves === 'epreuve' ? 'epreuve' : 'aide';
     const ouverte = S.route.p.classeEleves || '';
@@ -1692,7 +1675,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return `<div class="salut"><div><h1 id="titre" tabindex="-1">Élèves</h1>
       <p class="sous">Codes de suivi uniquement · aucun nom en ligne</p></div></div>${blocs}`;
   }
-
   /* Enregistre sans faire attendre : l'écran suit tout de suite, le réseau derrière.
      Une erreur remet la valeur d'avant et le dit — jamais de modification perdue en silence. */
   function enregistrerEleve(nom, i, patch) {
@@ -1708,7 +1690,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       toast(e && e.code === 'permission-denied' ? 'Règle Firestore « eleves » pas encore publiée.' : 'Enregistrement impossible. Réessayez.', true);
     });
   }
-
   function enregistrerEpreuve() {
     const f = S.feuille; if (!f || f.type !== 'epreuve') return;
     if (!f.classe || !K.RE_DATE.test(f.date || '') || K.min(f.fin) <= K.min(f.debut)) { toast('Vérifiez la classe, la date et les horaires.', true); return; }
@@ -1727,7 +1708,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       avert: nb === 0 ? 'Aucun AESH demandé : l’épreuve apparaîtra quand même dans l’emploi du temps.' : '',
       bouton: 'Enregistrer' }, async () => { await ecrire(doc); return {}; });
   }
-
   /* Le tableau que réclame le formulaire « Organisation des CCF » du lycée, prêt à recopier. */
   function tableauCcf(nom) {
     const k = S.edt.classes[nom] || { court: nom };
@@ -1740,7 +1720,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       .then(F => F.telecharger(new Blob([txt], { type: 'text/plain;charset=utf-8' }), `CCF-${nom}-${S.annee}.txt`))
       .catch(() => toast('Téléchargement impossible.', true));
   }
-
   /* Écrit une classe. Le document porte la liste entière : une seule version par classe. */
   async function majEleve(nom, i, patch) {
     const liste = elevesDe(nom).map(x => ({ ...x, amenagements: Array.isArray(x.amenagements) ? [...x.amenagements] : [] }));
@@ -1749,7 +1728,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const d = docEleves(nom) || { id: 'eleves_' + nom + '_' + S.annee, type: 'eleves', classe: nom };
     await ecrire({ ...d, id: 'eleves_' + nom + '_' + S.annee, type: 'eleves', classe: nom, eleves: liste });
   }
-
   function ecranBesoins() {
     const p = P(), I = idx(), filtre = S.route.p.classe || '', fMat = S.route.p.mat || '';
     let lignes = '', demandees = 0, total = 0, estimes = 0, manque = 0; const comptes = new Set();
@@ -1808,7 +1786,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="defile"><table class="table" style="min-width:680px"><thead><tr><th>Créneau</th><th>Matière</th><th>Besoin</th><th>Élèves</th><th>Placés</th><th>État</th></tr></thead><tbody>${lignes}</tbody></table></div>
       ${manque ? carteDisponibles('Pour couvrir : disponibles ailleurs') : ''}`;
   }
-
   /* ─────────── messages ─────────── */
   function messagesNonLus() {
     if (!S.session) return 0;
@@ -1827,7 +1804,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="ecrire"><div class="choix" role="group" aria-label="Écrire à" style="width:100%;gap:6px">${POLES.filter(x => x.id !== moi).map(x => `<button type="button" class="petit" id="a-${x.id}" data-a="ecrire-a" data-v="${x.id}" style="min-height:32px;padding:4px 10px;font-size:.85rem;border-color:${x.couleur}40;color:${x.couleur}">@ ${esc(x.nom)}</button>`).join('')}</div><label class="sr" for="msg-txt">Votre message</label><textarea id="msg-txt" data-i="msg" maxlength="1000" placeholder="Votre message (sans nom d’élève)">${esc(S.msgBrouillon)}</textarea>
         <button type="button" class="btn pri" id="msg-envoyer" data-a="envoyer-message" ${S.msgBrouillon.trim() && !S.envoi ? '' : 'disabled'}>${S.envoi ? '…' : 'Envoyer'}</button></div>`;
   }
-
   /* ─────────── exporter ─────────── */
   function ecranExporter() {
     const p = P(), I = idx(), e = S.exp, liste = K.aeshActifs(I, p.id);
@@ -1876,7 +1852,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }catch(e){toast(e.message||'Envoi impossible.',true);}
     finally{S.envoi=false;rendre();}
   }
-
   async function telechargerGrille() {
     if(S.envoi)return;
     const f={...S.feuille},cx=S.route.p.edtType?{...contexteType(ctx()),exportType:true}:ctx();
@@ -1917,7 +1892,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       else F.telecharger(X.excelAesh(cx, ids, S.lundi, e.quoi === 'pole' || e.quoi === 'tous' ? (e.quoi === 'tous' ? POLES.map(x => x.id) : [p.id]) : null), nomF(`aesh-${titre}`) + '.xlsx');
     }
   }
-
   /* ─────────── avatar et humeur ─────────── */
   function publierHumeur() {
     /* L'humeur reste privée (décision du 17/09) : rien n'est écrit ni montré aux autres référents. */
@@ -1956,7 +1930,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       </div>
       <div class="barre-bas">${premiere ? '' : `<button type="button" class="btn" id="av-annuler" data-a="av-annuler">Annuler</button>`}<button type="button" class="btn valider" id="av-valider" data-a="av-valider" ${modifie || premiere ? '' : 'disabled'}>✓ C’est moi</button></div></div>`;
   }
-
   /* ─────────── mon code ─────────── */
   function ecranMonCode() {
     if (!S.form || S.form.kind !== 'code') S.form = { kind: 'code', voir: false, n1: '', n2: '', antoine1:'', antoine2:'' };
@@ -1972,7 +1945,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${autre ? `<div class="bandeau err">Ce code est déjà celui d’un autre pôle.</div>` : f.n2.length === 4 && f.n1 !== f.n2 ? `<div class="bandeau err">Les deux codes ne sont pas identiques.</div>` : ''}
       <div class="barre-bas"><button type="button" class="btn valider" id="mc-valider" data-a="valider-code" ${ok ? '' : 'disabled'}>✓ Changer le code</button></div>${p.id === 'PSR_MELEC' ? carteAccesAntoine(f) : ''}</div>`;
   }
-
   function carteAccesAntoine(f) {
     const acces = S.docs.get('pole_PSR_MELEC')?.accesPlanning;
     const ok = /^\d{4}$/.test(f.antoine1 || '') && f.antoine1 === f.antoine2
@@ -1987,7 +1959,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="actions"><button type="button" class="btn valider" data-a="antoine-activer" ${ok ? '' : 'disabled'}>Enregistrer et activer</button>
       ${acces?.actif ? '<button type="button" class="btn" data-a="antoine-desactiver">Désactiver cet accès</button>' : ''}</div></section>`;
   }
-
   /* ─────────── feuilles ─────────── */
   /* Toutes les fenêtres ont la même croix en haut à droite : on ouvre pour regarder, on referme d'un geste,
      sans rien valider (demande de Brahim, 17/09). Le titre et la croix restent visibles au défilement. */
@@ -2000,7 +1971,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(l.length<2)return '';
     return `<table><thead><tr><th>Horaire</th><th>Présents</th></tr></thead><tbody>${l.map(x=>`<tr><td>${K.hFr(K.hDe(x.debut))}–${K.hFr(K.hDe(x.fin))}</td><td>${x.n} / ${bes.nb}</td></tr>`).join('')}</tbody></table>`;
   }
-
   function feuille() {
     const f = S.feuille;
     let h = '', large = false;
@@ -2018,7 +1988,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         `<div class="bandeau ${manque?'err':'info'}">${resumeDemande(c,iso,bes)}</div>${bes?detailCouverture(c,iso,bes):''}`+
         (peutPlacer(f.classe)?`<button type="button" class="btn pri" data-a="besoin-placer" data-v="${esc(c.id)}">Placer un AESH sur ce cours</button>`:'')+
         editeurBesoin(f);
-
     }
     else if (f.type === 'lecture') {
       const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j), bes = K.besoinDuCours(S.est,f.classe,c,quand(iso));
@@ -2109,7 +2078,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       </div>
       <div class="ligne ecarte"><a class="lien" id="pt-voir" href="${esc(lienFiliere(p))}" target="_blank" rel="noopener">Voir la page des collègues ↗</a><button type="button" class="lien" id="pt-fermer" data-a="fermer">Fermer</button></div>`;
   }
-
   /* ═══════════════════ ACTIONS ═══════════════════ */
   async function confirmerPuis(f, travail) {
     S.feuille ? (S.feuille = { ...f, type: 'confirmer', travail }) : ouvrir({ ...f, type: 'confirmer', travail });
@@ -2128,7 +2096,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       S.envoi = false; if (!e || e.code !== 'conflit') console.error(e);   /* un conflit est un cas prévu, expliqué à l'écran */ toast(messageErreur(e), true); rendre();
     }
   }
-
   function validerFiche() {
     const f = S.form, p = P(), a = f.a, I = idx();
     a.sigle = K.normSigle(a.sigle);
@@ -2244,7 +2211,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      « On a une base, mais tout est modifiable. » Plus rien n'est interdit au moment de placer :
      tout ce qui coince est réuni dans « Vous confirmez ? », et le référent décide.
      Un AESH déjà pris ailleurs n'est pas dédoublé : on propose de le déplacer pour la période. */
-
   /* Libère un placement sur [du, au] sans rien effacer : il s'arrête avant, reprend après.
      Renvoie les documents à écrire — ils partent avec le reste de l'opération, dans le même lot. */
   function morceauxLiberes(x, du, au) {
@@ -2275,7 +2241,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     Object.keys(K.polesDesFilieres(doc, FILIERES, doc.rattachement)).forEach(q => { if (doc.equipes[q] == null) doc.equipes[q] = 1; });
     return { doc, info: `Fiche de ${a.sigle} : ${S.edt.classes[classe].court} ajouté` };
   }
-
   function validerPlacer() {
     const f = S.feuille, p = P(), c = S.edt.cours[f.coursId], I = idx(), du = f.du || S.lundi, au = finPeriode(f);
     if (!K.RE_DATE.test(du) || !K.RE_DATE.test(au) || au < du) return;
@@ -2344,7 +2309,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       travail:async () => { await ecrireLot(lot, f.base); S.flash = c.id; return {}; } };
     rendre({focus:'cf-oui'});
   }
-
   function gererClic(ev) {
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
@@ -2758,7 +2722,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   });
   document.addEventListener('keydown', ev => { if (ev.target && /^(INPUT|TEXTAREA|SELECT)$/.test(ev.target.tagName)) return; if ((S.route.e === 'code' || !S.session) && S.route.e !== 'humeur' && /^[0-9]$/.test(ev.key)) tapeCode(ev.key); else if (S.route.e === 'code' && ev.key === 'Backspace') tapeCode('⌫'); });
   document.addEventListener('click', ev => { if (S.menu && !ev.target.closest('.menu') && !ev.target.closest('#t-menu')) { S.menu = false; rendre(); } }, true);
-
   async function awaitSortirPlanning() {
     try { await droitsPlanning?.deconnecter?.(); } finally { location.reload(); }
   }
