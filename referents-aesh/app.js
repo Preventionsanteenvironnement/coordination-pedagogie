@@ -448,11 +448,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   /* ─────────── outils de calcul pour l'affichage ─────────── */
   function bilans(pid) { const c = ctx(); return K.aeshActifs(c.I, pid).map(a => ({ a, b: K.bilan(c, a.id, S.lundi) })); }
   /* Les placements en cours à cette date — pas ceux d'un AESH dont le contrat est fini (audit D01). */
-  function semainesDepart(c, coursId) {
-    if (c.sem === 'SA') return 'A';
-    if (c.sem === 'SB') return 'B';
-    const l = placesCours(coursId, K.ajoute(S.lundi, c.j)).map(x => String(x.semaines || 'AB'));
-    return l.length && l.every(x => x === l[0]) ? l[0] : 'AB';
+  /* 26/09/2026 — « A et B », toujours, pour tous les pôles. Seul un cours qui n'a lieu qu'en
+     A ou qu'en B impose la sienne, puisqu'il n'existe pas l'autre semaine. Le reste du temps
+     c'est au référent de restreindre s'il le veut, jamais à l'application de le supposer. */
+  function semainesDepart(c) {
+    return c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : 'AB';
   }
   function placesCours(coursId, iso) {
     const I = idx(); return I.places.filter(p => p.coursId === coursId && K.placementPrevu(S.C, S.edt.cours[coursId], p, iso) && (!p.renfortPfmp || K.placementALieu(ctx(), p, iso)) && !K.contratFini(I.aesh.get(p.aeshId), iso));
@@ -1338,7 +1338,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
          vouloir des placements d'une semaine sur deux. La parité de la semaine affichée ne dit
          rien de l'intention. Un cours qui n'a lieu qu'en A ou qu'en B impose la sienne ; sinon,
          on reprend ce que disent les placements déjà là, et « A et B » quand ils divergent. */
-      ouvrir({ type: 'placer', du: S.lundi, coursId: coursId, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', semaines: semainesDepart(c, coursId), semainesInit: semainesDepart(c, coursId), renforts: {}, base: new Map(S.docs), au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
+      ouvrir({ type: 'placer', du: S.lundi, coursId: coursId, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', semaines: semainesDepart(c), semainesInit: semainesDepart(c), renforts: {}, base: new Map(S.docs), au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
         if (S.aeshChoisi) {
           const id = S.aeshChoisi; S.aeshChoisi = null;
           const choix = document.getElementById('pa-' + id);
