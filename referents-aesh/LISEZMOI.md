@@ -409,3 +409,25 @@ coordonnateur en accès planning (ajouté à sa liste blanche d'actions).
 
 Piège rencontré : la classe CSS `.bes` existait déjà (`position:absolute`) et faisait disparaître
 les pastilles d'aménagement dans le coin du bloc. Les classes de ce lot sont préfixées `el-`.
+
+
+### 26 septembre 2026 — L'enregistrement d'un placement ne fait plus attendre
+Brahim : « pourquoi l'enregistrement prend du temps ». Mesuré : pour un placement sur un cours
+partagé entre quatre AESH, la transaction relisait **237 documents**, un par un, en attendant
+chaque réponse — environ **14 secondes**.
+
+Deux causes cumulées. `enregistrerPlanning` relit tous les placements des AESH concernés pour
+détecter une modification concurrente, et le faisait en boucle séquentielle. Et Timothée porte
+**189 documents « place »**, dont 166 au statut « retiré » : les doublons neutralisés lors de
+l'import du 25/09, qui ne servent plus à rien mais sont relus à chaque fois.
+
+Les relectures partent désormais ensemble (`Promise.all`). Même vérification, même verrou de
+transaction, même détection de conflit : seul le temps d'attente change — de l'ordre de la
+seconde au lieu de quinze.
+
+Piste laissée de côté : exclure les placements « retiré » des relectures. Ce serait plus rapide
+encore, mais c'est la logique de détection de conflit — un placement retiré peut être réactivé
+par un autre référent au même moment. Non touché.
+
+Fichiers : `enregistrement.js`, `app.js` (cache `2026-09-26a`), `index.html` (`2026-09-26e`).
+Dix fichiers de tests réussis.

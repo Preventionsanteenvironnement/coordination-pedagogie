@@ -12,7 +12,7 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-24b';
 import * as K from './calculs.js?v=2026-09-24f';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
-import { enregistrerPlanning } from './enregistrement.js?v=2026-09-24d';
+import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as AV from './avatars.js?v=2026-09-24b';
 
 const DELAI = 15000;

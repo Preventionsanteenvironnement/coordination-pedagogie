@@ -15,13 +15,19 @@ export async function enregistrerPlanning({FS, db, collection, historique, docs,
   // Contrats, absences, réunions et PFMP consultés doivent encore être identiques.
   for (const [id,d] of base) if (['pole','reunion','absence'].includes(d.type) || (d.type === 'place' && aeshIds.has(d.aeshId))) ids.add(id);
   return FS.runTransaction(db, async tx => {
+    /* 26/09/2026 — Les relectures partent ENSEMBLE, plus une par une. Un AESH qui porte
+       200 placements (dont beaucoup de retirés) faisait attendre quinze secondes à chaque
+       enregistrement : autant d'allers-retours que de documents. Même vérification, même
+       verrou de transaction — seul le temps d'attente change. */
+    const liste = [...ids];
+    const snaps = await Promise.all(liste.map(id => tx.get(FS.doc(db,collection,id))));
     const actuels = new Map();
-    for (const id of ids) {
-      const snap = await tx.get(FS.doc(db,collection,id));
+    liste.forEach((id,i) => {
+      const snap = snaps[i];
       const actuel = snap.exists() ? {...snap.data(),id} : null, attendu = base.get(id) || null;
       if (stable(actuel) !== stable(attendu)) throw conflit();
       actuels.set(id,actuel);
-    }
+    });
     const ecritures = new Map(souhaites);
     for (const id of aeshIds) {
       const a = ecritures.get(id) || actuels.get(id);
