@@ -323,3 +323,46 @@ Réserver une colonne fixe par personne sur toute la journée donnerait des bloc
 
 Fichiers : `app.js` (une ligne dans `grilleClasse`), `index.html` (cache `2026-09-26a`).
 Aucune donnée touchée, aucun calcul d'heures modifié. Neuf fichiers de tests réussis.
+
+
+### 26 septembre 2026 — Onglet « Élèves » : notifications, aide humaine, aménagements d'épreuve
+Demande de Brahim : qu'un AESH voie sur chaque créneau combien d'élèves y sont notifiés, et à
+quel titre, pour arbitrer entre deux cours qui réclament chacun un adulte. Puis, formulaire
+« Organisation des CCF » du lycée à l'appui, que les aménagements d'épreuve y soient aussi.
+
+**Un onglet, deux vues, une seule liste d'élèves.** Entre « Besoins » et « Messages ». On entre
+par classe — les 19, ouvertes à tout référent, comme l'accès planning. Une ligne par **CODE de
+suivi à 5 caractères** : aucun nom, aucun prénom ne passe en ligne, et la règle Firestore le
+garantit par liste blanche de champs.
+- *Aide humaine* : notification (notifiée / en cours / non), aide (individualisée / mutualisée /
+  aucune), heures, ULIS, date de fin. C'est ce qui sert à placer les AESH toute l'année.
+- *Aménagements d'épreuve* : PAP ou PPS, 1/3 temps, lecteur, scripteur, assistant, ordinateur,
+  sujet agrandi — les sept colonnes du formulaire du lycée. Bouton « Tableau pour le CCF » qui
+  sort la liste prête à recopier.
+
+**Le support d'épreuve ne se saisit pas ici.** Il vient du profil d'édition de l'Atelier (police,
+taille, version allégée ou braille, dispositif) et s'affiche en lecture seule. Le recopier à la
+main créerait deux vérités qui divergeraient au premier changement.
+
+**Sur la grille**, une seule marque par bloc : `3 notifiés · 1 ind · 2 mut · 1 ULIS`, à côté du
+cercle « besoin de l'enseignant ». Des nombres, rien d'autre — pas de code, pas de date. Une
+classe sans personne de notifié n'affiche rien.
+
+**Ce qui n'est pas fait :** le compte est celui de la CLASSE, reporté sur chacun de ses cours.
+Un cours en groupe (co-enseignement, atelier) n'a pas forcément tous les élèves notifiés. Le
+modèle d'emploi du temps aménagé existe déjà dans l'Atelier (`amenagementTemps.regles[]`) et
+permettra d'affiner : ce n'est pas dans ce lot.
+
+Fichiers : `app.js` (onglet, écran, saisie, marque sur les blocs), `vues-planning.js`
+(`comptesEleves`, `libelleEleves`), `index.html` (styles, caches `app` → `2026-09-26b`,
+`vues-planning` → `2026-09-26a`, `exports` → `2026-09-26a`), `tests/eleves-notifies.test.mjs`,
+`tests/eleves-exemple.json`. La liste des codes vient de `observation-besoins/roster.json`,
+déjà publié (19 classes, 143 codes) : elle sert de secours tant qu'une classe n'a pas de document.
+
+**Règle Firestore à publier avant tout enregistrement** — sans elle l'écriture est refusée et
+l'écran le dit. Texte complet dans `~/Documents/regles-firestore-2026-09-26.rules`.
+
+Tests : dix fichiers automatisés réussis, dont le nouveau (comptes, singulier/pluriel, heures
+« 15 h » ou « 2,5 », entrée sans code ignorée, et vérification que le document d'exemple ne
+porte que les neuf champs autorisés). L'écran lui-même n'a pas pu être exercé hors ligne :
+il demande Firebase et un code de pôle.

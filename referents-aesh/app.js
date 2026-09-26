@@ -1,4 +1,4 @@
-import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-25c';
+import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal, comptesEleves as comptesClasse, libelleEleves as libelleClasse } from './vues-planning.js?v=2026-09-26a';
 import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-24e';
 import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
@@ -46,6 +46,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   try { S.edt = await (await fetch('./edt-lycee.json?v=2026-09-24b')).json(); }
   catch (e) { racine.innerHTML = '<p style="padding:30px;text-align:center">Les emplois du temps n’ont pas pu se charger. Vérifiez la connexion puis rechargez la page.</p>'; return; }
   S.C = K.creerCalendrier(S.edt);
+  /* 26/09/2026 — Les codes de suivi (5 caractères, aucun nom) servent à ouvrir une classe
+     jamais renseignée. Dès qu'un référent enregistre, c'est le document qui fait foi. */
+  try { S.roster = await (await fetch('../observation-besoins/roster.json?v=2026-09-26a')).json(); }
+  catch (e) { S.roster = null; }
   S.lundi = semaineParDefaut();
   const cache = lsLit(K_CACHE, null);
   if (!modePlanning && cache && cache.annee === S.annee && Array.isArray(cache.docs)) cache.docs.forEach(d => d && d.id && S.docs.set(d.id, d));
@@ -66,7 +70,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      ne sont plus téléchargées non plus. Si Firebase réclame un index pour cette demande, on revient seul à
      l'ancienne (toute l'année) : la page continue de marcher. */
   const COL_HIST = COLLECTION + '_hist';
-  const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode', 'verification'];
+  const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode', 'verification', 'eleves'];
   let arretPlanning = null;
   function ecouter(simple) {
     if (arretPlanning) { arretPlanning(); arretPlanning = null; }
@@ -318,7 +322,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (o.haut) window.scrollTo(0, 0); else if (o.donnees || !o.focus) window.scrollTo(0, y);
     apresRendu();
   }
-  const TITRES = { humeur: 'Bonjour', code: 'Code', accueil: 'Accueil', aesh: 'Mes AESH', fiche: 'AESH', absence: 'Absences et formations', reunions: 'Réunions institutionnelles', edt: 'Emploi du temps', ensemble: 'Vue d’ensemble', besoins: 'Besoins', messages: 'Messages', exporter: 'Exporter', moncode: 'Mon code', avatar: 'Mon avatar' };
+  const TITRES = { humeur: 'Bonjour', code: 'Code', accueil: 'Accueil', aesh: 'Mes AESH', fiche: 'AESH', absence: 'Absences et formations', reunions: 'Réunions institutionnelles', edt: 'Emploi du temps', ensemble: 'Vue d’ensemble', besoins: 'Besoins', eleves: 'Élèves', messages: 'Messages', exporter: 'Exporter', moncode: 'Mon code', avatar: 'Mon avatar' };
   function apresRendu() {
     if (S.route.e === 'messages') { const f = document.getElementById('fil-fin'); if (f && !apresRendu.vu) { f.scrollIntoView({ block: 'end' }); apresRendu.vu = true; } marquerLus(); }
     else apresRendu.vu = false;
@@ -332,7 +336,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function entete() {
     if (modePlanning) return `<header class="tete"><div class="tete-in"><div class="marque"><b>Emplois du temps</b></div><button class="btn petit" data-a="sortir">Se déconnecter</button></div></header>`;
     const e = S.route.e, nonLus = messagesNonLus();
-    const ong = [['accueil', 'Accueil'], ['aesh', 'Mes AESH'], ['edt', 'Emploi du temps'], ['ensemble', 'Vue d’ensemble'], ['besoins', 'Besoins'], ['messages', 'Messages'], ['exporter', 'Exporter']];
+    const ong = [['accueil', 'Accueil'], ['aesh', 'Mes AESH'], ['edt', 'Emploi du temps'], ['ensemble', 'Vue d’ensemble'], ['besoins', 'Besoins'], ['eleves', 'Élèves'], ['messages', 'Messages'], ['exporter', 'Exporter']];
     const actif = { fiche: 'aesh', absence: 'aesh', reunions: 'aesh', moncode: 'accueil' }[e] || e;
     const coord = S.session && pole(S.session.pole).coordination;
     return `<header class="tete"><div class="tete-in">
@@ -486,6 +490,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
 
   /* ═══════════════════ ÉCRANS ═══════════════════ */
   const ECRANS = {
+    eleves: ecranEleves,
     accueil() {
       const p = P(), bs = bilans(p.id), alertes = [];
       bs.forEach(({ a, b }) => (b.alertes || []).forEach(x => alertes.push({ a, x })));
@@ -789,16 +794,21 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const decoupes = Array.from({length:Math.max(0,Math.ceil(minutes/30)-1)},(_,i)=>`<span class="presence-repere" style="top:${100*(i+1)*30/minutes}%"></span>`).join('');
       const etat=K.etatBesoin(ctx(),c,iso,bes),libEtat={inconnu:'Besoin non renseigné',zero:'Aucun AESH demandé',vide:'Besoin non couvert',partiel:'Besoin partiellement couvert',plein:'Besoin couvert'};
       const besHtml=`<span class="bes-cercle ${etat}" role="img" aria-label="${libEtat[etat]}" title="${libEtat[etat]}">${etat==='inconnu'?'?':etat==='zero'?'╱':''}</span>`;
+      /* 26/09/2026 — Le besoin des élèves, à côté du besoin de l'enseignant : c'est le croisement
+         qui permet à un AESH de choisir entre deux cours qui réclament chacun un adulte.
+         Des nombres seulement — aucun code, aucune date, aucun nom. */
+      const elv = libelleEleves(nom);
+      const elvHtml = elv ? `<span class="eleves-bloc" title="Élèves notifiés dans cette classe">${esc(elv)}</span>` : '';
 
       const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', ' + pl.map(x => (I.aesh.get(x.aeshId)?.sigle || '?')+' '+K.horairePlace(x,c).debut+'–'+K.horairePlace(x,c).fin).join(', ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
         return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
-          <button type="button" class="bloc-contenu" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}"><b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}${aeshs.length ? `<span class="presence-timeline" aria-hidden="true">${decoupes}${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
+          <button type="button" class="bloc-contenu" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}"><b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}${aeshs.length ? `<span class="presence-timeline" aria-hidden="true">${decoupes}${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span>${h > 54 ? elvHtml : ''}</button>${besHtml}</div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>
-        <span class="pills">${pills || '<span class="pill" style="opacity:.55">＋</span>'}</span></button>${besHtml}</div>`;
+        <span class="pills">${pills || '<span class="pill" style="opacity:.55">＋</span>'}</span>${elvHtml}</button>${besHtml}</div>`;
     };
     /* colonnes pour les cours qui se chevauchent (semaine A et B affichées séparément, donc rares) */
     [0, 1, 2, 3, 4].forEach(j => {
@@ -1278,6 +1288,114 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }));
     return { estimes, manque };
   }
+  /* ═══════════ Élèves notifiés (26/09/2026) ═══════════
+     Une entrée par classe, une ligne par CODE de suivi — jamais un nom, jamais un prénom.
+     Deux vues sur la même liste : « Aide humaine » sert à placer les AESH toute l'année ;
+     « Aménagements d'épreuve » remplit le formulaire d'organisation des CCF du lycée.
+     Le support d'épreuve vient de l'Atelier (profil d'édition de l'élève) : il s'affiche,
+     il ne se modifie pas ici — sinon deux vérités divergeraient au premier changement. */
+  const EL_AMEN = [['tiers', '1/3 temps'], ['lecteur', 'Lecteur'], ['scripteur', 'Scripteur'],
+    ['assistant', 'Assistant'], ['ordi', 'Ordinateur'], ['agrandi', 'Sujet agrandi']];
+  const EL_NOTIFS = [['oui', 'notifiée'], ['encours', 'en cours'], ['non', 'non']];
+  const EL_AIDES = [['individualisee', 'ind.'], ['mutualisee', 'mut.'], ['aucune', 'aucune']];
+  const EL_DOCS = [['PPS', 'PPS'], ['PAP', 'PAP'], ['', 'aucun']];
+
+  const docEleves = nom => S.docs.get('eleves_' + nom + '_' + S.annee) || null;
+  function elevesDe(nom) {
+    const d = docEleves(nom);
+    if (d && Array.isArray(d.eleves)) return d.eleves;
+    const r = (S.roster && S.roster.classes || []).find(c => c.nom === nom);
+    return (r ? r.codes : []).map(code => ({ code, notif: 'non', aide: 'aucune', heures: '', ulis: false, fin: '', doc: '', amenagements: [], support: '' }));
+  }
+  const comptesEleves = nom => comptesClasse(elevesDe(nom));
+  const libelleEleves = nom => libelleClasse(comptesClasse(elevesDe(nom)));
+
+  function ecranEleves() {
+    const vue = S.route.p.vueEleves === 'epreuve' ? 'epreuve' : 'aide';
+    const ouverte = S.route.p.classeEleves || '';
+    const seg = (act, v, opts) => `<div class="seg" role="group">${opts.map(([k, t]) =>
+      `<button type="button" data-a="${act}" data-v="${esc(k)}" aria-pressed="${v === k}" class="${v === k ? 'on' : ''}">${esc(t)}</button>`).join('')}</div>`;
+    const blocs = POLES.map(q => {
+      const classes = (S.edt.poles[q.id] || []);
+      return `<h2 class="tete-pole" style="border-left-color:${q.couleur}">${esc(q.nom)}</h2>` + classes.map(nom => {
+        const k = S.edt.classes[nom]; if (!k) return '';
+        const c = comptesEleves(nom), ouvert = ouverte === nom;
+        const liste = elevesDe(nom);
+        const resume = `${c.total} élève${c.total > 1 ? 's' : ''} · ${c.notifies} notifié${c.notifies > 1 ? 's' : ''}${c.ai ? ' · ' + c.ai + ' ind.' : ''}${c.am ? ' · ' + c.am + ' mut.' : ''}${c.ulis ? ' · ' + c.ulis + ' ULIS' : ''}`;
+        if (!ouvert) return `<button type="button" class="carte-classe" id="cle-${esc(nom)}" data-a="eleves-classe" data-v="${esc(nom)}"><b>${esc(k.court)}</b><span>${esc(resume)}</span></button>`;
+        const lignes = liste.map((e, i) => {
+          const am = Array.isArray(e.amenagements) ? e.amenagements : [];
+          if (vue === 'epreuve') return `<tr>
+            <td><span class="codeel">${esc(e.code)}</span></td>
+            <td>${seg('el-doc|' + nom + '|' + i, e.doc || '', EL_DOCS)}</td>
+            ${EL_AMEN.map(([cle]) => `<td class="ctr"><button type="button" class="case ${am.includes(cle) ? 'on' : ''}" data-a="el-amen" data-v="${esc(nom)}|${i}|${cle}" aria-pressed="${am.includes(cle)}" aria-label="${esc(cle)}">${am.includes(cle) ? '✓' : ''}</button></td>`).join('')}
+            <td class="sup">${e.support ? esc(e.support) : '<span class="muet">—</span>'}</td></tr>`;
+          return `<tr>
+            <td><span class="codeel">${esc(e.code)}</span></td>
+            <td>${seg('el-notif|' + nom + '|' + i, e.notif || 'non', EL_NOTIFS)}</td>
+            <td>${seg('el-aide|' + nom + '|' + i, e.aide || 'aucune', EL_AIDES)}</td>
+            <td><input class="petitchamp" id="elh-${esc(nom)}-${i}" data-i="el-heures" data-v="${esc(nom)}|${i}" value="${esc(e.heures || '')}" placeholder="—" inputmode="decimal" maxlength="6" aria-label="Heures notifiées"></td>
+            <td class="ctr"><button type="button" class="case ${e.ulis ? 'on' : ''}" data-a="el-ulis" data-v="${esc(nom)}|${i}" aria-pressed="${!!e.ulis}" aria-label="ULIS">${e.ulis ? '✓' : ''}</button></td>
+            <td><input class="datechamp" id="elf-${esc(nom)}-${i}" data-i="el-fin" data-v="${esc(nom)}|${i}" value="${esc(e.fin || '')}" placeholder="—" maxlength="10" aria-label="Notifiée jusqu’au"></td></tr>`;
+        }).join('');
+        const tete = vue === 'epreuve'
+          ? `<th>Code</th><th>PAP / PPS</th>${EL_AMEN.map(([, t]) => `<th class="ctr">${t}</th>`).join('')}<th>Support (Atelier)</th>`
+          : '<th>Code</th><th>Notification</th><th>Aide humaine</th><th>Heures</th><th class="ctr">ULIS</th><th>Notifiée jusqu’au</th>';
+        return `<section class="cl-ouverte">
+          <div class="ligne cl-tete"><button type="button" class="rond" id="cle-fermer" data-a="eleves-classe" data-v="" aria-label="Refermer">←</button>
+            <h3>${esc(k.court)}</h3></div>
+          <div class="totaux"><span><b>${c.total}</b> élèves</span><span><b>${c.notifies}</b> notifiés</span>
+            <span><b>${c.ai}</b> individualisée</span><span><b>${c.am}</b> mutualisée</span>
+            <span><b>${c.ulis}</b> ULIS</span><span><b>${K.fmtH(c.heures)}</b> notifiées</span></div>
+          <div class="ligne">${seg('eleves-vue', vue, [['aide', 'Aide humaine'], ['epreuve', 'Aménagements d’épreuve']])}
+            ${vue === 'epreuve' ? '<button type="button" class="btn petit" data-a="eleves-ccf" data-v="' + esc(nom) + '">⬇ Tableau pour le CCF</button>' : ''}</div>
+          <div class="defile-t"><table class="tel"><thead><tr>${tete}</tr></thead><tbody>${lignes}</tbody></table></div>
+          ${docEleves(nom) ? '' : '<p class="bandeau">Classe jamais renseignée : les codes viennent des codes de suivi. Le premier enregistrement crée la fiche.</p>'}
+        </section>`;
+      }).join('');
+    }).join('');
+    return `<div class="salut"><div><h1 id="titre" tabindex="-1">Élèves</h1>
+      <p class="sous">Codes de suivi uniquement · aucun nom en ligne</p></div></div>${blocs}`;
+  }
+
+  /* Enregistre sans faire attendre : l'écran suit tout de suite, le réseau derrière.
+     Une erreur remet la valeur d'avant et le dit — jamais de modification perdue en silence. */
+  function enregistrerEleve(nom, i, patch) {
+    const liste = elevesDe(nom).map(x => ({ ...x, amenagements: Array.isArray(x.amenagements) ? [...x.amenagements] : [] }));
+    if (!liste[i]) return;
+    const avant = S.docs.get('eleves_' + nom + '_' + S.annee);
+    Object.assign(liste[i], patch);
+    const d = { ...(avant || {}), id: 'eleves_' + nom + '_' + S.annee, type: 'eleves', classe: nom, eleves: liste };
+    S.docs.set(d.id, d); versionDocs++; rendre({ donnees: true });
+    ecrire(d).catch(e => {
+      if (avant) S.docs.set(d.id, avant); else S.docs.delete(d.id);
+      versionDocs++; rendre({ donnees: true });
+      toast(e && e.code === 'permission-denied' ? 'Règle Firestore « eleves » pas encore publiée.' : 'Enregistrement impossible. Réessayez.', true);
+    });
+  }
+
+  /* Le tableau que réclame le formulaire « Organisation des CCF » du lycée, prêt à recopier. */
+  function tableauCcf(nom) {
+    const k = S.edt.classes[nom] || { court: nom };
+    const l = elevesDe(nom).filter(e => (e.notif && e.notif !== 'non') || e.doc || (e.amenagements || []).length);
+    if (!l.length) { toast('Aucun élève à besoins particuliers dans cette classe.', true); return; }
+    const lignes = l.map(e => [e.code, e.doc || '', ...EL_AMEN.map(([c]) => (e.amenagements || []).includes(c) ? 'X' : ''), e.support || ''].join('\t')).join('\n');
+    const tete = ['Élève (code)', 'PAP ou PPS', ...EL_AMEN.map(([, t]) => t), 'Support'].join('\t');
+    const txt = `Organisation des CCF — élèves à besoins particuliers\n${k.court} · ${S.annee}\n\n${tete}\n${lignes}\n`;
+    import('./fichiers.js?v=2026-09-24i')
+      .then(F => F.telecharger(new Blob([txt], { type: 'text/plain;charset=utf-8' }), `CCF-${nom}-${S.annee}.txt`))
+      .catch(() => toast('Téléchargement impossible.', true));
+  }
+
+  /* Écrit une classe. Le document porte la liste entière : une seule version par classe. */
+  async function majEleve(nom, i, patch) {
+    const liste = elevesDe(nom).map(x => ({ ...x, amenagements: Array.isArray(x.amenagements) ? [...x.amenagements] : [] }));
+    if (!liste[i]) return;
+    Object.assign(liste[i], patch);
+    const d = docEleves(nom) || { id: 'eleves_' + nom + '_' + S.annee, type: 'eleves', classe: nom };
+    await ecrire({ ...d, id: 'eleves_' + nom + '_' + S.annee, type: 'eleves', classe: nom, eleves: liste });
+  }
+
   function ecranBesoins() {
     const p = P(), I = idx(), filtre = S.route.p.classe || '', fMat = S.route.p.mat || '';
     let lignes = '', demandees = 0, total = 0, estimes = 0, manque = 0; const comptes = new Set();
@@ -1389,7 +1507,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!a){toast('Choisissez d’abord un AESH.',true);return;}
     if(S.envoi)return; S.envoi=true; rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-25e'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-26a'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
       const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
       F.telecharger(blob,nom);
@@ -1412,7 +1530,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-25e'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-26a'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -1421,12 +1539,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-25e'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-26a'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-25e'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-26a'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
@@ -1874,6 +1992,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function gererClic(ev) {
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
+    if (typeof a === 'string' && /^el-(notif|aide|doc)\|/.test(a)) {
+      const [quoi, nom, i] = a.split('|');
+      enregistrerEleve(nom, +i, { [quoi.slice(3)]: v }); return;
+    }
     if(b.dataset.lundi && K.RE_DATE.test(b.dataset.lundi)){S.lundi=b.dataset.lundi;if(S.route.p.parite!=='AB')S.route.p.parite=S.C.parite(S.lundi);}
     if (modePlanning) {
       /* 25/09/2026 — Avec l'accès complet, le coordonnateur dispose des mêmes actions qu'un
@@ -1893,6 +2015,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'personne-cours': {const c=S.edt.cours[v];if(!c)return;const nom=c.cls.find(n=>classesDu(P().id).includes(n));if(nom && peutPlacer(nom))ouvrirPlacement(v,nom);else ouvrir({type:'lecture',coursId:v,classe:c.cls[0]});return;}
       case 'edt-parite': if(['A','B','AB'].includes(v)){if(v!=='AB')S.lundi=semainesAB(S.C,S.lundi)[v];aller('edt',{...S.route.p,parite:v});} return;
       case 'edt-type': aller('edt',{...S.route.p,edtType:!S.route.p.edtType});return;
+      /* ─── Élèves notifiés (26/09/2026) ─── */
+      case 'eleves-classe': aller('eleves', { ...S.route.p, classeEleves: v || '' }, { remplacer: true }); return;
+      case 'eleves-vue': aller('eleves', { ...S.route.p, vueEleves: v }, { remplacer: true }); return;
+      case 'eleves-ccf': tableauCcf(v); return;
+      case 'el-ulis': { const [nom, i] = v.split('|'); const e = elevesDe(nom)[+i]; if (e) enregistrerEleve(nom, +i, { ulis: !e.ulis }); return; }
+      case 'el-amen': { const [nom, i, cle] = v.split('|'); const e = elevesDe(nom)[+i]; if (!e) return;
+        const l = Array.isArray(e.amenagements) ? e.amenagements : [];
+        enregistrerEleve(nom, +i, { amenagements: l.includes(cle) ? l.filter(x => x !== cle) : [...l, cle] }); return; }
       case 'edt-vue': if(['jour','semaine'].includes(v)) aller('edt',{...S.route.p,affichage:v},{remplacer:true}); return;
       case 'edt-jour': if(/^[0-4]$/.test(v)) aller('edt',{...S.route.p,jour:v},{remplacer:true}); return;
       case 'besoin-placer': if(S.feuille?.type==='besoin-detail' && peutPlacer(S.feuille.classe)){const nom=S.feuille.classe; S.feuille=null; ouvrirPlacement(v,nom);} return;
@@ -2166,6 +2296,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const t = ev.target, k = t.dataset && t.dataset.i;
     if (!k) return;
     const f = S.form;
+    if (k === 'el-heures' || k === 'el-fin') {
+      const [nom, i] = String(t.dataset.v || '').split('|');
+      if (ev.type !== 'change') return;
+      enregistrerEleve(nom, +i, k === 'el-heures' ? { heures: t.value.trim().slice(0, 6) } : { fin: t.value.trim().slice(0, 10) });
+      return;
+    }
     if(k==='filtre-aesh'){if(ev.type==='change') aller('edt',{...S.route.p,aesh:t.value},{remplacer:true});return;}
     if(k==='service-champ') { const q=S.feuille; if(q?.type!=='service-horaire') return; q[t.dataset.champ]=t.dataset.champ==='jour'?+t.value:t.value; if(t.dataset.champ==='nom') { q.debut=q.nom==='Internat'?'18:00':'12:30'; q.fin=q.nom==='Internat'?'21:00':'13:00'; } if(ev.type==='change') rendre({focus:t.id}); return; }
     if (!f && !['per-au', 'per-edt-date', 'ph-debut', 'ph-fin', 'pl-du', 'msg', 'signature', 'pt-texte', 'pf-du', 'pf-au'].includes(k)) return;

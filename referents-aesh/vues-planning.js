@@ -73,3 +73,29 @@ export function totauxJours(K, occ) {
   });
 }
 export const libelleTotal = (K, t) => !t.a && !t.b ? '' : t.a === t.b ? K.fmtH(t.a) : `${K.fmtH(t.a)} / ${K.fmtH(t.b)}`;
+
+/* ─── Élèves notifiés d'une classe (26/09/2026) ───
+   Ce que la grille a le droit de montrer : des nombres. Le détail — code, dates,
+   aménagements d'épreuve — reste dans l'onglet « Élèves », jamais sur un bloc de cours. */
+export function comptesEleves(liste) {
+  const out = { total: 0, notifies: 0, ai: 0, am: 0, ulis: 0, heures: 0 };
+  (Array.isArray(liste) ? liste : []).forEach(e => {
+    if (!e || !e.code) return;
+    out.total++;
+    if (e.notif && e.notif !== 'non') out.notifies++;
+    if (e.aide === 'individualisee') out.ai++;
+    if (e.aide === 'mutualisee') out.am++;
+    if (e.ulis) out.ulis++;
+    const h = Number(String(e.heures == null ? '' : e.heures).replace(',', '.').replace(/[^0-9.]/g, ''));
+    if (Number.isFinite(h)) out.heures += h;
+  });
+  return out;
+}
+export function libelleEleves(c) {
+  if (!c || !c.notifies) return '';
+  const p = [];
+  if (c.ai) p.push(c.ai + ' ind');
+  if (c.am) p.push(c.am + ' mut');
+  if (c.ulis) p.push(c.ulis + ' ULIS');
+  return c.notifies + ' notifié' + (c.notifies > 1 ? 's' : '') + (p.length ? ' · ' + p.join(' · ') : '');
+}

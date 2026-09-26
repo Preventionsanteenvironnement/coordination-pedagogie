@@ -236,6 +236,33 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
    nombres séparés d'une barre quand la semaine A et la semaine B ne pèsent pas pareil. */
 .g-pied{background:var(--card-2);border-top:1px solid var(--line);border-right:1px solid var(--line-2);padding:7px 4px;text-align:center;font-weight:750;font-size:.82rem;font-variant-numeric:tabular-nums;color:var(--ink)}
 .g-pied:last-child{border-right:0}
+/* ─── Élèves notifiés (26/09/2026) ─── */
+.tete-pole{font-size:.95rem;border-left:5px solid;padding-left:10px;margin:22px 0 8px}
+.carte-classe{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 15px;margin:6px 0;font:inherit;cursor:pointer}
+.carte-classe b{font-size:.98rem}
+.carte-classe span{color:var(--muted);font-size:.85rem}
+.cl-ouverte{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:8px 0}
+.cl-tete h3{margin:0;font-size:1.05rem}
+.totaux{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.totaux span{background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.85rem;color:#475569}
+.defile-t{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:6px}
+.tel{width:100%;min-width:620px;border-collapse:collapse;font-size:.9rem}
+.tel th{text-align:left;color:var(--muted);font-size:.75rem;font-weight:650;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tel th.ctr,.tel td.ctr{text-align:center}
+.tel td{padding:7px 8px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.tel td.sup{color:var(--muted);font-size:.82rem;max-width:190px}
+.tel .muet{color:var(--line)}
+.codeel{font-family:ui-monospace,Menlo,monospace;font-weight:700;letter-spacing:.06em;background:var(--ink);color:var(--card);border-radius:6px;padding:3px 8px;font-size:.82rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;background:var(--card);padding:5px 10px;font:inherit;font-size:.82rem;color:#475569;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--pole,#0f766e);color:#fff;font-weight:700}
+.case{width:25px;height:25px;border-radius:7px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:800;color:var(--pole,#0f766e)}
+.case.on{background:var(--card-2);border-color:var(--pole,#0f766e)}
+.petitchamp,.datechamp{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:.85rem;width:84px;background:var(--card);color:var(--ink)}
+.datechamp{width:106px}
+/* la marque sur un bloc de cours : des nombres, rien d'autre */
+.eleves-bloc{display:block;margin-top:4px;font-size:.72rem;font-weight:700;color:#8a5a12;background:rgba(255,255,255,.72);border-radius:999px;padding:1px 7px;width:fit-content;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .g-pied:first-child{position:sticky;left:0;z-index:3;text-align:right;padding-right:7px;font-weight:600;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
 /* Au-delà de 18 h : hors grille, pour ne pas étirer la journée entière. */
 .bande-soiree{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;padding:9px 12px;background:var(--card-2);border:1px solid var(--line);border-radius:12px;font-size:.88rem}
@@ -506,7 +533,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26a');
+  const m = await import('./app.js?v=2026-09-26b');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

@@ -1,0 +1,79 @@
+[
+ {
+  "code": "43Y99",
+  "notif": "non",
+  "aide": "aucune",
+  "heures": "",
+  "ulis": true,
+  "fin": "",
+  "doc": "",
+  "amenagements": [],
+  "support": ""
+ },
+ {
+  "code": "8UYC5",
+  "notif": "encours",
+  "aide": "apreciser",
+  "heures": "",
+  "ulis": true,
+  "fin": "",
+  "doc": "PPS",
+  "amenagements": [],
+  "support": ""
+ },
+ {
+  "code": "99TUW",
+  "notif": "encours",
+  "aide": "individualisee",
+  "heures": "15 h",
+  "ulis": true,
+  "fin": "31/08/2027",
+  "doc": "PPS",
+  "amenagements": [],
+  "support": ""
+ },
+ {
+  "code": "C8A7N",
+  "notif": "encours",
+  "aide": "individualisee",
+  "heures": "non précisé",
+  "ulis": false,
+  "fin": "",
+  "doc": "PPS",
+  "amenagements": [],
+  "support": ""
+ },
+ {
+  "code": "GXVN7",
+  "notif": "encours",
+  "aide": "mutualisee",
+  "heures": "",
+  "ulis": true,
+  "fin": "31/08/2027",
+  "doc": "PPS",
+  "amenagements": [],
+  "support": ""
+ },
+ {
+  "code": "PYEWF",
+  "notif": "encours",
+  "aide": "apreciser",
+  "heures": "",
+  "ulis": true,
+  "fin": "",
+  "doc": "PPS",
+  "amenagements": [],
+  "support": ""
+ },
+ {
+  "code": "QXEQF",
+  "notif": "encours",
+  "aide": "mutualisee",
+  "heures": "",
+  "ulis": true,
+  "fin": "31/08/2027",
+  "doc": "PPS",
+  "amenagements": [],
+  "support": ""
+ }
+]
