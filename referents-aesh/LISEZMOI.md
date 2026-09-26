@@ -366,3 +366,35 @@ Tests : dix fichiers automatisés réussis, dont le nouveau (comptes, singulier/
 « 15 h » ou « 2,5 », entrée sans code ignorée, et vérification que le document d'exemple ne
 porte que les neuf champs autorisés). L'écran lui-même n'a pas pu être exercé hors ligne :
 il demande Firebase et un code de pôle.
+
+
+### 26 septembre 2026 — Onglet « Épreuves » : CCF et bac blanc posés par-dessus l'emploi du temps
+Demande de Brahim. Une épreuve n'est pas un cours : c'est un événement daté que le référent pose
+lui-même, et qui vient **par-dessus** la grille, comme une PFMP. Elle porte ce que l'enseignant a
+demandé — combien d'AESH — et ce qu'un AESH venu d'ailleurs doit savoir en arrivant.
+
+Onglet « Épreuves » entre Élèves et Messages. Un bouton « ＋ Une épreuve » : nature (CCF, bac
+blanc, test de positionnement, examen, autre), classe, date, créneau, discipline, salle, nombre
+d'AESH demandés, précision libre. Elle apparaît aussitôt sur l'emploi du temps de la classe, en
+surimpression hachurée, avec le nombre d'élèves et le nombre d'AESH. Un clic dessus la rouvre.
+
+**Les besoins des élèves ne se ressaisissent pas.** Ils viennent de l'onglet « Élèves » : la
+fiche d'une épreuve compte les élèves concernés, ceux qui sont notifiés, et détaille les
+aménagements cochés (1/3 temps, lecteur, scripteur, assistant, ordinateur, sujet agrandi) plus
+les supports particuliers. Bouton **« Fiche pour l'AESH »** : une feuille à lire en arrivant,
+pour quelqu'un qui ne connaît pas la classe.
+
+Le champ `codes` permettra de ne retenir qu'une partie de la classe (tous les élèves ne passent
+pas toujours) ; l'écran ne l'expose pas encore, une épreuve concerne toute la classe par défaut.
+La notion de **période** évoquée par Brahim est laissée pour plus tard.
+
+Retirer une épreuve la passe en `statut: 'retire'` : elle disparaît de la grille, rien n'est effacé.
+
+Fichiers : `app.js` (onglet, écran, feuille de saisie, surimpression dans `grilleClasse`, fiche
+AESH), `index.html` (styles, cache `2026-09-26c`).
+**Règle Firestore `epreuve` à publier** — texte complet dans
+`~/Documents/regles-firestore-2026-09-26b.rules`. Dix fichiers de tests réussis.
+
+À noter : une brique « épreuves » existait déjà dans `coordination_epreuves_aesh` (campagne de
+positionnement importée de RESANA le 14/09, espace edt-aesh). Brahim a confirmé que cet espace
+n'est pas utilisé : on ne s'y branche pas.

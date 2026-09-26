@@ -70,7 +70,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      ne sont plus téléchargées non plus. Si Firebase réclame un index pour cette demande, on revient seul à
      l'ancienne (toute l'année) : la page continue de marcher. */
   const COL_HIST = COLLECTION + '_hist';
-  const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode', 'verification', 'eleves'];
+  const TYPES_DOCS = ['pole', 'aesh', 'place', 'absence', 'reunion', 'message', 'periode', 'verification', 'eleves', 'epreuve'];
   let arretPlanning = null;
   function ecouter(simple) {
     if (arretPlanning) { arretPlanning(); arretPlanning = null; }
@@ -322,7 +322,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (o.haut) window.scrollTo(0, 0); else if (o.donnees || !o.focus) window.scrollTo(0, y);
     apresRendu();
   }
-  const TITRES = { humeur: 'Bonjour', code: 'Code', accueil: 'Accueil', aesh: 'Mes AESH', fiche: 'AESH', absence: 'Absences et formations', reunions: 'Réunions institutionnelles', edt: 'Emploi du temps', ensemble: 'Vue d’ensemble', besoins: 'Besoins', eleves: 'Élèves', messages: 'Messages', exporter: 'Exporter', moncode: 'Mon code', avatar: 'Mon avatar' };
+  const TITRES = { humeur: 'Bonjour', code: 'Code', accueil: 'Accueil', aesh: 'Mes AESH', fiche: 'AESH', absence: 'Absences et formations', reunions: 'Réunions institutionnelles', edt: 'Emploi du temps', ensemble: 'Vue d’ensemble', besoins: 'Besoins', eleves: 'Élèves', epreuves: 'Épreuves', messages: 'Messages', exporter: 'Exporter', moncode: 'Mon code', avatar: 'Mon avatar' };
   function apresRendu() {
     if (S.route.e === 'messages') { const f = document.getElementById('fil-fin'); if (f && !apresRendu.vu) { f.scrollIntoView({ block: 'end' }); apresRendu.vu = true; } marquerLus(); }
     else apresRendu.vu = false;
@@ -336,7 +336,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function entete() {
     if (modePlanning) return `<header class="tete"><div class="tete-in"><div class="marque"><b>Emplois du temps</b></div><button class="btn petit" data-a="sortir">Se déconnecter</button></div></header>`;
     const e = S.route.e, nonLus = messagesNonLus();
-    const ong = [['accueil', 'Accueil'], ['aesh', 'Mes AESH'], ['edt', 'Emploi du temps'], ['ensemble', 'Vue d’ensemble'], ['besoins', 'Besoins'], ['eleves', 'Élèves'], ['messages', 'Messages'], ['exporter', 'Exporter']];
+    const ong = [['accueil', 'Accueil'], ['aesh', 'Mes AESH'], ['edt', 'Emploi du temps'], ['ensemble', 'Vue d’ensemble'], ['besoins', 'Besoins'], ['eleves', 'Élèves'], ['epreuves', 'Épreuves'], ['messages', 'Messages'], ['exporter', 'Exporter']];
     const actif = { fiche: 'aesh', absence: 'aesh', reunions: 'aesh', moncode: 'accueil' }[e] || e;
     const coord = S.session && pole(S.session.pole).coordination;
     return `<header class="tete"><div class="tete-in">
@@ -491,6 +491,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   /* ═══════════════════ ÉCRANS ═══════════════════ */
   const ECRANS = {
     eleves: ecranEleves,
+    epreuves: ecranEpreuves,
     accueil() {
       const p = P(), bs = bilans(p.id), alertes = [];
       bs.forEach(({ a, b }) => (b.alertes || []).forEach(x => alertes.push({ a, x })));
@@ -770,6 +771,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const cours = k.cours.map(id => S.edt.cours[id]).filter(c => S.C.coursSemaine(c, S.lundi));
     const services=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})));
     const H0 = 8 * 60, H1 = Math.max(18*60,...services.map(o=>K.min(o.fin))), PX = 1.25;
+    /* 26/09/2026 — Une épreuve se pose PAR-DESSUS les cours : elle ne les remplace pas,
+       elle dit qu'à ce moment-là il se passe autre chose, et combien d'AESH sont demandés. */
+    const epreuveHtml = j => epreuvesDu(nom, K.ajoute(S.lundi, j)).map(e => {
+      const b = besoinsEpreuve(e), dt = (K.min(e.debut) - H0) * PX, ht = (K.min(e.fin) - K.min(e.debut)) * PX - 2;
+      return `<button type="button" class="epreuve-grille" data-a="epreuve-modifier" data-v="${esc(e.id)}"
+        style="top:${dt}px;height:${Math.max(16, ht)}px" title="${esc(libNature(e.nature) + ' · ' + (e.matiere || '') + ' · ' + b.total + ' élèves · ' + (e.nbAesh || 0) + ' AESH')}">
+        <b>${esc(libNature(e.nature))}</b>${e.matiere ? `<small>${esc(e.matiere)}</small>` : ''}
+        <span class="ep-chiffres">${b.total} él.${e.nbAesh ? ' · ' + e.nbAesh + ' AESH' : ''}</span></button>`;
+    }).join('');
     const serviceHtml=j=>{
       const groupes=new Map(); services.filter(o=>o.j===j).forEach(o=>{const key=[o.label,o.debut,o.fin].join('|');if(!groupes.has(key))groupes.set(key,{...o,personnes:[]});groupes.get(key).personnes.push(o.a);});
       const liste=[...groupes.values()].sort((a,b)=>a.debut.localeCompare(b.debut)), cols=[]; liste.forEach(o=>{let n=cols.findIndex(l=>l.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
@@ -821,7 +831,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60+1 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => {
       grille += `<div class="g-jour jour-col" data-j="${j}" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}
-        ${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : `<div class="cours-zone ${services.some(o=>o.j===j)?'avec-services':''}">${cours.filter(c => c.j === j).map(c => blocHtml(c, true)).join('')}</div>${serviceHtml(j)}`}
+        ${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : `<div class="cours-zone ${services.some(o=>o.j===j)?'avec-services':''}">${cours.filter(c => c.j === j).map(c => blocHtml(c, true)).join('')}</div>${serviceHtml(j)}${epreuveHtml(j)}`}
         ${!jr.off && K.enPfmp(k, jr.date) ? `<div class="g-filigrane" aria-hidden="true"><b>PFMP</b><small>classe en stage · AESH libres</small></div>` : ''}</div>`;
     });
     grille += `</div></div>`;
@@ -1288,6 +1298,99 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }));
     return { estimes, manque };
   }
+  /* ═══════════ Épreuves posées par-dessus l'emploi du temps (26/09/2026) ═══════════
+     Un CCF, un bac blanc, un test : ce n'est pas un cours, c'est un événement daté que le
+     référent pose lui-même. Il porte ce que l'enseignant a demandé — combien d'AESH — et ce
+     qu'un AESH venu d'ailleurs doit savoir en arrivant : combien d'élèves, et leurs besoins.
+     Les besoins ne se ressaisissent pas : ils viennent de l'onglet « Élèves ». */
+  const NATURES_EPREUVE = [['ccf', 'CCF'], ['bacblanc', 'Bac blanc'], ['positionnement', 'Test de positionnement'],
+    ['examen', 'Examen'], ['autre', 'Autre']];
+  const libNature = n => (NATURES_EPREUVE.find(x => x[0] === n) || ['', n || 'Épreuve'])[1];
+  const epreuves = () => [...S.docs.values()].filter(d => d.type === 'epreuve' && d.statut !== 'retire');
+  const epreuvesDu = (classe, iso) => epreuves().filter(e => e.classe === classe && e.date === iso);
+
+  /* Ce qu'il faut savoir des élèves qui passent : repris de l'onglet « Élèves », jamais ressaisi. */
+  function besoinsEpreuve(e) {
+    const tous = elevesDe(e.classe);
+    const choisis = Array.isArray(e.codes) && e.codes.length ? tous.filter(x => e.codes.includes(x.code)) : tous;
+    const out = { total: choisis.length, notifies: 0, parAmen: {}, supports: [] };
+    choisis.forEach(x => {
+      if (x.notif && x.notif !== 'non') out.notifies++;
+      (x.amenagements || []).forEach(a => { out.parAmen[a] = (out.parAmen[a] || 0) + 1; });
+      if (x.support) out.supports.push(x.code + ' : ' + x.support);
+    });
+    return out;
+  }
+  const resumeBesoins = b => EL_AMEN.filter(([c]) => b.parAmen[c]).map(([c, t]) => b.parAmen[c] + ' ' + t.toLowerCase()).join(' · ');
+
+  function ecranEpreuves() {
+    const l = epreuves().slice().sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.debut).localeCompare(String(b.debut)));
+    const cartes = l.map(e => {
+      const b = besoinsEpreuve(e), k = S.edt.classes[e.classe] || { court: e.classe };
+      const manque = (+e.nbAesh || 0);
+      return `<div class="carte pad carte-epreuve">
+        <div class="ligne ep-tete"><span class="ep-nature">${esc(libNature(e.nature))}</span>
+          <b>${esc(k.court)}</b><span class="muted">${esc(K.dateLongue(e.date))} · ${K.hFr(e.debut)}–${K.hFr(e.fin)}</span></div>
+        <p class="ep-det">${esc(e.matiere || 'Discipline à préciser')}${e.salle ? ' · ' + esc(e.salle) : ''}
+          · <b>${b.total}</b> élève${b.total > 1 ? 's' : ''}${b.notifies ? ` dont <b>${b.notifies}</b> notifié${b.notifies > 1 ? 's' : ''}` : ''}
+          · <b>${manque}</b> AESH demandé${manque > 1 ? 's' : ''}</p>
+        ${resumeBesoins(b) ? `<p class="ep-bes">${esc(resumeBesoins(b))}</p>` : ''}
+        <div class="ligne"><button type="button" class="btn petit" data-a="epreuve-fiche" data-v="${esc(e.id)}">📄 Fiche pour l’AESH</button>
+          <button type="button" class="btn petit" data-a="epreuve-modifier" data-v="${esc(e.id)}">Modifier</button>
+          <button type="button" class="btn petit" data-a="epreuve-retirer" data-v="${esc(e.id)}">Retirer</button></div></div>`;
+    }).join('');
+    return `<div class="salut"><div><h1 id="titre" tabindex="-1">Épreuves</h1>
+      <p class="sous">CCF, bac blanc, test — posés par-dessus l’emploi du temps</p></div>
+      <button type="button" class="btn valider" data-a="epreuve-nouvelle">＋ Une épreuve</button></div>
+      ${l.length ? cartes : '<div class="carte pad"><p>Aucune épreuve prévue. Le bouton ci-dessus en pose une : elle apparaîtra dans l’emploi du temps de la classe, par-dessus les cours.</p></div>'}`;
+  }
+
+  function feuilleEpreuve(f) {
+    const classes = POLES.flatMap(q => (S.edt.poles[q.id] || []));
+    const champ = (id, lab, html) => `<label class="ch-ep"><span>${lab}</span>${html}</label>`;
+    const b = f.classe ? besoinsEpreuve(f) : null;
+    return teteFeuille(f.idExistant ? 'Modifier l’épreuve' : 'Une épreuve',
+      'Elle apparaîtra dans l’emploi du temps de la classe, par-dessus les cours.') + `
+      <div class="presence-reglage">
+        ${champ('ep-nature', 'Épreuve', `<select id="ep-nature" data-i="ep-champ" data-champ="nature">${NATURES_EPREUVE.map(([v, t]) => `<option value="${v}" ${f.nature === v ? 'selected' : ''}>${t}</option>`).join('')}</select>`)}
+        ${champ('ep-classe', 'Classe', `<select id="ep-classe" data-i="ep-champ" data-champ="classe"><option value="">—</option>${classes.map(n => `<option value="${esc(n)}" ${f.classe === n ? 'selected' : ''}>${esc((S.edt.classes[n] || {}).court || n)}</option>`).join('')}</select>`)}
+        ${champ('ep-date', 'Date', `<input id="ep-date" type="date" data-i="ep-champ" data-champ="date" value="${esc(f.date || '')}">`)}
+        ${champ('ep-debut', 'De', `<select id="ep-debut" data-i="ep-champ" data-champ="debut">${CRENEAUX_H.map(h => `<option value="${h}" ${f.debut === h ? 'selected' : ''}>${K.hFr(h)}</option>`).join('')}</select>`)}
+        ${champ('ep-fin', 'À', `<select id="ep-fin" data-i="ep-champ" data-champ="fin">${CRENEAUX_H.map(h => `<option value="${h}" ${f.fin === h ? 'selected' : ''}>${K.hFr(h)}</option>`).join('')}</select>`)}
+        ${champ('ep-matiere', 'Discipline', `<input id="ep-matiere" data-i="ep-champ" data-champ="matiere" maxlength="40" value="${esc(f.matiere || '')}" placeholder="Maths, PSE…">`)}
+        ${champ('ep-salle', 'Salle', `<input id="ep-salle" data-i="ep-champ" data-champ="salle" maxlength="30" value="${esc(f.salle || '')}" placeholder="010_PSR">`)}
+        ${champ('ep-nb', 'AESH demandés', `<input id="ep-nb" data-i="ep-champ" data-champ="nbAesh" inputmode="numeric" maxlength="2" value="${esc(String(f.nbAesh == null ? '' : f.nbAesh))}" placeholder="0">`)}
+        ${champ('ep-note', 'Précision', `<input id="ep-note" data-i="ep-champ" data-champ="note" maxlength="120" value="${esc(f.note || '')}" placeholder="facultatif">`)}
+      </div>
+      ${b ? `<p class="bandeau">${b.total} élève${b.total > 1 ? 's' : ''} dans cette classe${b.notifies ? `, dont ${b.notifies} notifié${b.notifies > 1 ? 's' : ''}` : ''}${resumeBesoins(b) ? ' · ' + esc(resumeBesoins(b)) : ''}. Les besoins viennent de l’onglet « Élèves » : rien à ressaisir ici.</p>` : ''}
+      <div class="actions"><button type="button" class="btn" data-a="fermer">Annuler</button>
+        <button type="button" class="btn valider" id="ep-valider" data-a="epreuve-enregistrer" ${f.classe && K.RE_DATE.test(f.date || '') && K.min(f.fin) > K.min(f.debut) ? '' : 'disabled'}>✓ Enregistrer</button></div>`;
+  }
+
+  /* La feuille qu'un AESH venu d'ailleurs lit en arrivant : ce qu'il doit savoir, rien de plus. */
+  function ficheEpreuve(id) {
+    const e = S.docs.get(id); if (!e) return;
+    const b = besoinsEpreuve(e), k = S.edt.classes[e.classe] || { court: e.classe };
+    const lignes = [
+      `${libNature(e.nature)} — ${k.court}`,
+      `${K.dateLongue(e.date)} · ${K.hFr(e.debut)}–${K.hFr(e.fin)}${e.salle ? ' · salle ' + e.salle : ''}`,
+      e.matiere ? `Discipline : ${e.matiere}` : '',
+      `Élèves : ${b.total}${b.notifies ? ` · notifiés : ${b.notifies}` : ''}`,
+      `AESH demandés : ${e.nbAesh || 0}`,
+      '',
+      'Aménagements à prévoir :',
+      ...(resumeBesoins(b) ? EL_AMEN.filter(([c]) => b.parAmen[c]).map(([c, t]) => `  · ${t} : ${b.parAmen[c]} élève(s)`) : ['  · aucun aménagement coché dans l’onglet Élèves']),
+      '',
+      'Supports particuliers :',
+      ...(b.supports.length ? b.supports.map(x => '  · ' + x) : ['  · aucun']),
+      e.note ? '\n' + e.note : ''
+    ].filter(x => x !== '');
+    import('./fichiers.js?v=2026-09-24i')
+      .then(F => F.telecharger(new Blob([lignes.join('\n') + '\n'], { type: 'text/plain;charset=utf-8' }),
+        `Epreuve-${e.classe}-${e.date}.txt`))
+      .catch(() => toast('Téléchargement impossible.', true));
+  }
+
   /* ═══════════ Élèves notifiés (26/09/2026) ═══════════
      Une entrée par classe, une ligne par CODE de suivi — jamais un nom, jamais un prénom.
      Deux vues sur la même liste : « Aide humaine » sert à placer les AESH toute l'année ;
@@ -1372,6 +1475,25 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       versionDocs++; rendre({ donnees: true });
       toast(e && e.code === 'permission-denied' ? 'Règle Firestore « eleves » pas encore publiée.' : 'Enregistrement impossible. Réessayez.', true);
     });
+  }
+
+  function enregistrerEpreuve() {
+    const f = S.feuille; if (!f || f.type !== 'epreuve') return;
+    if (!f.classe || !K.RE_DATE.test(f.date || '') || K.min(f.fin) <= K.min(f.debut)) { toast('Vérifiez la classe, la date et les horaires.', true); return; }
+    const nb = Math.max(0, Math.min(12, parseInt(f.nbAesh, 10) || 0));
+    const doc = { id: f.idExistant || ('epreuve_' + alea()), type: 'epreuve', nature: f.nature || 'ccf',
+      classe: f.classe, date: f.date, debut: f.debut, fin: f.fin,
+      matiere: String(f.matiere || '').slice(0, 40), salle: String(f.salle || '').slice(0, 30),
+      nbAesh: nb, note: String(f.note || '').slice(0, 120), statut: 'active',
+      ...(Array.isArray(f.codes) && f.codes.length ? { codes: f.codes } : {}) };
+    const b = besoinsEpreuve(doc), k = S.edt.classes[f.classe] || { court: f.classe };
+    confirmerPuis({ titre: f.idExistant ? 'Enregistrer les modifications ?' : 'Poser cette épreuve ?',
+      grand: libNature(doc.nature) + ' · ' + k.court,
+      lignes: [['Quand', K.dateLongue(doc.date) + ' · ' + K.hFr(doc.debut) + '–' + K.hFr(doc.fin)],
+        ['Élèves', b.total + (b.notifies ? ` dont ${b.notifies} notifié${b.notifies > 1 ? 's' : ''}` : '')],
+        ['AESH demandés', String(nb)]],
+      avert: nb === 0 ? 'Aucun AESH demandé : l’épreuve apparaîtra quand même dans l’emploi du temps.' : '',
+      bouton: 'Enregistrer' }, async () => { await ecrire(doc); return {}; });
   }
 
   /* Le tableau que réclame le formulaire « Organisation des CCF » du lycée, prêt à recopier. */
@@ -1653,6 +1775,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(f.type==='export-grille') h=feuilleExportGrille(f);
     else if(f.type==='service-detail') h=teteFeuille('Réunions et services',K.dateLongue(K.ajoute(S.lundi,f.jour)))+K.aeshActifs(idx(),P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.j===f.jour && ['service','reunion','institution'].includes(o.type)).map(o=>`<p style="border-left:5px solid ${couleurAesh(a.id)};padding-left:10px"><b>${esc(a.sigle)}</b> · ${esc(libelleService(o.label))}<br>${K.hFr(o.debut)}–${K.hFr(o.fin)}</p>`)).join('');
     else if (f.type === 'service-horaire') { h = feuilleServiceHoraire(f); large=true; }
+    else if (f.type === 'epreuve') { h = feuilleEpreuve(f); large = true; }
     else if (f.type === 'placer') { h = feuillePlacer(f); large = true; }
     else if (f.type === 'besoin-detail') {
       const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j);
@@ -2019,6 +2142,20 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'eleves-classe': aller('eleves', { ...S.route.p, classeEleves: v || '' }, { remplacer: true }); return;
       case 'eleves-vue': aller('eleves', { ...S.route.p, vueEleves: v }, { remplacer: true }); return;
       case 'eleves-ccf': tableauCcf(v); return;
+      /* ─── Épreuves (26/09/2026) ─── */
+      case 'epreuve-nouvelle': S.feuille = { type: 'epreuve', nature: 'ccf', classe: classeCourante() || '',
+        date: K.isoLocal(), debut: '08:30', fin: '10:30', matiere: '', salle: '', nbAesh: '', note: '' }; rendre(); return;
+      case 'epreuve-modifier': { const e = S.docs.get(v); if (!e) return;
+        S.feuille = { type: 'epreuve', idExistant: e.id, nature: e.nature, classe: e.classe, date: e.date,
+          debut: e.debut, fin: e.fin, matiere: e.matiere || '', salle: e.salle || '',
+          nbAesh: e.nbAesh == null ? '' : String(e.nbAesh), note: e.note || '', codes: e.codes || [] };
+        rendre(); return; }
+      case 'epreuve-fiche': ficheEpreuve(v); return;
+      case 'epreuve-retirer': { const e = S.docs.get(v); if (!e) return;
+        confirmerPuis({ titre: 'Retirer cette épreuve ?', grand: libNature(e.nature) + ' · ' + ((S.edt.classes[e.classe] || {}).court || e.classe),
+          sous: K.dateLongue(e.date) + ' · ' + K.hFr(e.debut) + '–' + K.hFr(e.fin) + '. Elle disparaît de l’emploi du temps ; rien n’est effacé.',
+          bouton: 'Retirer' }, async () => { await ecrire({ ...e, statut: 'retire' }); return {}; }); return; }
+      case 'epreuve-enregistrer': enregistrerEpreuve(); return;
       case 'el-ulis': { const [nom, i] = v.split('|'); const e = elevesDe(nom)[+i]; if (e) enregistrerEleve(nom, +i, { ulis: !e.ulis }); return; }
       case 'el-amen': { const [nom, i, cle] = v.split('|'); const e = elevesDe(nom)[+i]; if (!e) return;
         const l = Array.isArray(e.amenagements) ? e.amenagements : [];
@@ -2296,6 +2433,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const t = ev.target, k = t.dataset && t.dataset.i;
     if (!k) return;
     const f = S.form;
+    if (k === 'ep-champ') {
+      const f = S.feuille; if (!f || f.type !== 'epreuve') return;
+      f[t.dataset.champ] = t.value;
+      if (t.dataset.champ === 'debut' && K.min(f.fin) <= K.min(f.debut)) f.fin = K.hDe(Math.min(21 * 60, K.min(f.debut) + 120));
+      if (ev.type === 'change') rendre({ focus: t.id });
+      return;
+    }
     if (k === 'el-heures' || k === 'el-fin') {
       const [nom, i] = String(t.dataset.v || '').split('|');
       if (ev.type !== 'change') return;
