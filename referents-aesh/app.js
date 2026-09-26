@@ -17,6 +17,7 @@ import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
 import * as AV from './avatars.js?v=2026-09-24b';
 
 const DELAI = 15000;
+const K_OPTIONS = 'referents-aesh-options-v1';
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
   K_FOND = 'referents-aesh-fond', K_SIGN = 'referents-aesh-signature', K_PENSEES = 'referents-aesh-pensees';
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -164,6 +165,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return `<div class="carte pad" style="display:grid;gap:8px"><div class="ligne ecarte"><div><h2>Mon emploi du temps</h2><span class="muted" style="font-size:.9rem">${c ? `Déclaré complet jusqu’au ${esc(K.dateCourte(c.jusquau))}. Les autres référents peuvent compter sur les heures libres de vos AESH.` : 'Quand vos AESH sont tous placés, dites-le : les autres référents sauront que les heures libres sont fiables.'}</span></div>
       ${c ? `<button type="button" class="btn" id="complet-non" data-a="complet-non">Reprendre la saisie</button>` : `<button type="button" class="btn pri" id="complet-oui" data-a="complet">✓ Mon emploi du temps est complet</button>`}</div></div>`;
   }
+  /* Ce qu'on montre sur les blocs, en plus du cours : deux interrupteurs gardés sur
+     l'appareil. Par défaut tout est montré — on cache quand on veut respirer. */
+  const OPTIONS_GRILLE = [['eleves', 'Élèves notifiés'], ['besoins', 'Besoins des enseignants']];
+  let optionsGrille = { eleves: true, besoins: true, ...(lsLit(K_OPTIONS, null) || {}) };
+  const montrer = k => optionsGrille[k] !== false;
   const classesDu = pid => modePlanning ? (droitsPlanning?.lectureClasses || []).filter(n => S.edt.classes[n]?.pole === pid) : (S.edt.poles[pid] || []);
   const peutPlacer = nom => !modePlanning || !!droitsPlanning?.ecritureClasses.includes(nom);
   /* 25/09/2026 — Le coordonnateur AESH n'est plus en consultation : il tient les fiches, les
@@ -495,14 +501,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     eleves: ecranEleves,
     epreuves: ecranEpreuves,
     accueil() {
-      const p = P(), bs = bilans(p.id), alertes = [];
-      bs.forEach(({ a, b }) => (b.alertes || []).forEach(x => alertes.push({ a, x })));
+      const p = P(), bs = bilans(p.id);
       const prevu = bs.reduce((s, { a }) => s + (nombre((a.heures || {})[p.id]) || 0), 0), place = bs.reduce((s, { b }) => s + (b.parPole[p.id] || 0), 0);
       const incomplets = bs.filter(({ a }) => aCompleter(a)).length;
       const nb = besoinsResume(p.id), nonLus = messagesNonLus();
       const d = new Date(), auj = `${K.JOURS[(d.getDay() + 6) % 7] || ['Samedi', 'Dimanche'][d.getDay() === 6 ? 0 : 1]} ${d.getDate()} ${K.MOIS[d.getMonth()]}`;
       return `<div class="salut"><div><h1 id="titre" tabindex="-1">Bonjour</h1><p class="sous">${esc(auj)} · pôle ${esc(p.nom)}</p></div>${selecteurSemaine()}</div>
-      ${alertes.length ? `<div class="alertes">${alertes.slice(0, 5).map(({ a, x }, i) => carteAlerte(a, x, i, 'al')).join('')}${alertes.length > 5 ? `<button type="button" class="lien" id="al-plus" data-a="aller" data-v="aesh">+ ${alertes.length - 5} autre${alertes.length - 5 > 1 ? 's' : ''}</button>` : ''}</div>` : ''}
+      ${/* 26/09/2026 — Brahim : plus de bandeau rouge sur l'accueil. Les alertes restent
+            sur la fiche de chaque AESH et sur sa ligne dans « Mes AESH », là où on les
+            regarde quand on s'occupe de cette personne — pas en ouvrant l'espace. */''}
       <div class="tuiles">
         <button type="button" class="tuile" id="tu-aesh" data-a="aller" data-v="aesh"><span class="ic">👥</span><span><b>Mes AESH</b><br><small>${bs.length} AESH · ${K.fmtH(prevu)} dans le pôle${incomplets ? ` · <span style="color:var(--warn);font-weight:700">${incomplets} à compléter</span>` : ''}</small></span></button>
         <button type="button" class="tuile forte" id="tu-edt" data-a="aller" data-v="edt"><span class="ic">🗓️</span><span><b>Emploi du temps</b><br><small>${prevu ? `${K.fmtH(place)} placées sur ${K.fmtH(prevu)} cette semaine` : `${K.fmtH(place)} placées · heures du pôle à compléter`}</small></span><div class="barre-p"><i style="width:${prevu ? Math.min(100, place / prevu * 100) : 0}%"></i></div></button>
@@ -805,12 +812,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       }).join('')).join('');
       const decoupes = Array.from({length:Math.max(0,Math.ceil(minutes/30)-1)},(_,i)=>`<span class="presence-repere" style="top:${100*(i+1)*30/minutes}%"></span>`).join('');
       const etat=K.etatBesoin(ctx(),c,iso,bes),libEtat={inconnu:'Besoin non renseigné',zero:'Aucun AESH demandé',vide:'Besoin non couvert',partiel:'Besoin partiellement couvert',plein:'Besoin couvert'};
-      const besHtml=`<span class="bes-cercle ${etat}" role="img" aria-label="${libEtat[etat]}" title="${libEtat[etat]}">${etat==='inconnu'?'?':etat==='zero'?'╱':''}</span>`;
+      const besHtml=montrer('besoins')?`<span class="bes-cercle ${etat}" role="img" aria-label="${libEtat[etat]}" title="${libEtat[etat]}">${etat==='inconnu'?'?':etat==='zero'?'╱':''}</span>`:'';
       /* 26/09/2026 — Le besoin des élèves, à côté du besoin de l'enseignant : c'est le croisement
          qui permet à un AESH de choisir entre deux cours qui réclament chacun un adulte.
          Des nombres seulement — aucun code, aucune date, aucun nom. */
       const elv = libelleEleves(nom);
-      const elvHtml = elv ? `<span class="eleves-bloc" title="Élèves notifiés dans cette classe">${esc(elv)}</span>` : '';
+      const elvHtml = elv && montrer('eleves') ? `<span class="eleves-bloc" title="Élèves notifiés dans cette classe">${esc(elv)}</span>` : '';
 
       const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', ' + pl.map(x => (I.aesh.get(x.aeshId)?.sigle || '?')+' '+K.horairePlace(x,c).debut+'–'+K.horairePlace(x,c).fin).join(', ') : ', aucun AESH'}`;
       if (large) {
@@ -934,7 +941,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${pf.length && accesComplet() ? carteLiberes(nom) : ''}${bandeauServices()}<div class="carte pad carte-reunions"><h2>Réunions</h2><button class="btn" data-a="edt-page" data-v="reunions">Réunion d’équipe · Réunion instit.</button></div><button class="btn" data-a="planning-excel">Exporter en Excel · A et B</button>`;
     const id=S.route.p.aesh, personne=K.aeshActifs(idx(),P().id).find(a=>a.id===id), bilan=personne?K.bilan(S.route.p.edtType?contexteType(ctx()):ctx(),id,S.lundi):null;
     return tete+(modePlanning && [...S.docs.values()].some(d=>d.type==='verification' && d.statut==='brouillon')?panneauVerification():'')+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)} · Toutes ses classes${S.route.p.parite==='AB'?'':` · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}`}</h2>`:classes)+`
-      <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label></div>
+      <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label>
+        <div class="opt-grille"><button type="button" class="rond" id="opt-bouton" data-a="opt-ouvrir" aria-expanded="${!!S.optOuvert}" aria-label="Ce qu'on affiche" title="Ce qu'on affiche">⋯</button>
+          ${S.optOuvert ? `<div class="opt-menu" role="group" aria-label="Ce qu'on affiche">${OPTIONS_GRILLE.map(([k, t]) =>
+            `<button type="button" data-a="opt-basculer" data-v="${k}" aria-pressed="${montrer(k)}"><span class="opt-case">${montrer(k) ? '✓' : ''}</span>${esc(t)}</button>`).join('')}</div>` : ''}</div></div>
       <div class="ligne"><div class="choix" role="group" aria-label="Alternance">${[['AB','Semaine type'],['A','Détail A'],['B','Détail B']].map(([v,t])=>`<button data-a="edt-parite" data-v="${v}" aria-pressed="${(S.route.p.parite || (personne?'AB':S.C.parite(S.lundi)))===v}">${t}</button>`).join('')}</div><button class="btn" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}">EDT type</button></div>
       ${S.route.p.affichage==='jour'?`<nav class="edt-jours" aria-label="Jour">${K.JOURS_C.map((j,i)=>`<button type="button" data-a="edt-jour" data-v="${i}" aria-pressed="${+(S.route.p.jour||0)===i}">${j}</button>`).join('')}</nav>`:''}
       ${personne && (S.route.p.parite||'AB')==='AB' ? '' : '<button class="btn" data-a="export-grille">Exporter la grille · PDF / Excel</button>'}
@@ -2247,6 +2257,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'personne-cours': {const c=S.edt.cours[v];if(!c)return;const nom=c.cls.find(n=>classesDu(P().id).includes(n));if(nom && peutPlacer(nom))ouvrirPlacement(v,nom);else ouvrir({type:'lecture',coursId:v,classe:c.cls[0]});return;}
       case 'edt-parite': if(['A','B','AB'].includes(v)){if(v!=='AB')S.lundi=semainesAB(S.C,S.lundi)[v];aller('edt',{...S.route.p,parite:v});} return;
       case 'edt-type': aller('edt',{...S.route.p,edtType:!S.route.p.edtType});return;
+      case 'opt-ouvrir': S.optOuvert = !S.optOuvert; rendre({ focus: 'opt-bouton' }); return;
+      case 'opt-basculer': optionsGrille = { ...optionsGrille, [v]: !montrer(v) };
+        lsEcrit(K_OPTIONS, optionsGrille); rendre({ focus: b.id }); return;
       /* ─── Élèves notifiés (26/09/2026) ─── */
       case 'eleves-classe': aller('eleves', { ...S.route.p, classeEleves: v || '' }, { remplacer: true }); return;
       case 'eleves-vue': aller('eleves', { ...S.route.p, vueEleves: v }, { remplacer: true }); return;

@@ -262,6 +262,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .petitchamp,.datechamp{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:.85rem;width:84px;background:var(--card);color:var(--ink)}
 .datechamp{width:106px}
 /* la marque sur un bloc de cours : des nombres, rien d'autre */
+/* Ce qu'on affiche sur les blocs : un petit bouton, un menu qui se déplie. */
+.opt-grille{position:relative}
+.opt-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.14);padding:6px;min-width:210px;display:flex;flex-direction:column;gap:2px}
+.opt-menu button{display:flex;align-items:center;gap:9px;border:0;background:none;padding:8px 10px;font:inherit;font-size:.9rem;color:var(--ink);cursor:pointer;border-radius:8px;text-align:left}
+.opt-menu button:hover{background:var(--card-2)}
+.opt-case{width:19px;height:19px;flex:none;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center;font-weight:800;font-size:.78rem;color:var(--pole,#0f766e)}
+.opt-menu button[aria-pressed="true"] .opt-case{background:var(--card-2);border-color:var(--pole,#0f766e)}
 /* Sauvegarde : l'aperçu de ce qui va changer, avant d'écrire quoi que ce soit. */
 .apercu{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .apercu span{background:var(--card-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.86rem;color:#475569}
@@ -567,7 +574,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26f');
+  const m = await import('./app.js?v=2026-09-26g');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
