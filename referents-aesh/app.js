@@ -948,7 +948,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
          le dit encore, parce que celle-là ne se devine pas. */
       const bandes = aeshs.map(a => {
         const x = parAesh.get(a.id), h = K.horairePlace(x, c), absent = K.absentLe(I, a.id, iso, h.debut, h.fin);
-        return `<span class="past-aesh ${absent ? 'abs' : ''}" style="background:${couleurAesh(a.id)}" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${absent ? ' · absence à vérifier' : ''}">${esc(a.sigle)}${h.partiel ? `<i>${K.hFr(h.debut)}–${K.hFr(h.fin)}</i>` : ''}</span>`;
+        /* 26/09/2026 — Un cours a lieu toutes les semaines, mais l'AESH n'y vient qu'en A ou
+           qu'en B : sans cette lettre, la grille le montrait présent chaque semaine. 27 cas
+           dans le pôle, dont Antoine au co-enseignement maths du mercredi. */
+        const sp = (x && x.semaines) || 'AB', une = sp !== 'AB' && c.sem === 'TOUTES';
+        return `<span class="past-aesh ${absent ? 'abs' : ''}" style="background:${couleurAesh(a.id)}" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${une ? ' · semaine ' + sp + ' seulement' : ''}${absent ? ' · absence à vérifier' : ''}">${esc(a.sigle)}${une ? `<i class="past-sem">${sp}</i>` : ''}${h.partiel ? `<i>${K.hFr(h.debut)}–${K.hFr(h.fin)}</i>` : ''}</span>`;
       }).join('');
       const decoupes = Array.from({length:Math.max(0,Math.ceil(minutes/30)-1)},(_,i)=>`<span class="presence-repere" style="top:${100*(i+1)*30/minutes}%"></span>`).join('');
       const etat=K.etatBesoin(ctx(),c,iso,bes),libEtat={inconnu:'Besoin non renseigné',zero:'Aucun AESH demandé',vide:'Besoin non couvert',partiel:'Besoin partiellement couvert',plein:'Besoin couvert'};

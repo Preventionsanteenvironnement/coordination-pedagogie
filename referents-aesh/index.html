@@ -276,6 +276,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
    quatre heures ils se retrouvaient à deux cents pixels du cours qu'ils accompagnent. */
 .past-ligne{display:flex;flex-wrap:nowrap;align-items:center;gap:3px;margin-top:3px;overflow:hidden}
 .past-ligne .bes-cercle{position:static;flex:0 0 auto;margin-right:2px}
+.past-sem{font-style:normal;background:rgba(255,255,255,.92);color:#10232a;border-radius:4px;padding:0 3px;margin-left:3px;font-size:.66rem;font-weight:800;line-height:1.35}
 .past-aesh{display:inline-flex;align-items:baseline;gap:3px;color:#fff;border-radius:6px;padding:1px 6px;font-size:.72rem;font-weight:800;letter-spacing:.02em;line-height:1.5;white-space:nowrap}
 .past-aesh.abs{outline:2px dashed var(--err);outline-offset:1px}
 .past-aesh i{font-style:normal;font-weight:600;font-size:.66rem;opacity:.9}
@@ -655,7 +656,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26ag');
+  const m = await import('./app.js?v=2026-09-26ah');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
