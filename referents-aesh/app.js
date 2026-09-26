@@ -448,6 +448,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   /* ─────────── outils de calcul pour l'affichage ─────────── */
   function bilans(pid) { const c = ctx(); return K.aeshActifs(c.I, pid).map(a => ({ a, b: K.bilan(c, a.id, S.lundi) })); }
   /* Les placements en cours à cette date — pas ceux d'un AESH dont le contrat est fini (audit D01). */
+  function semainesDepart(c, coursId) {
+    if (c.sem === 'SA') return 'A';
+    if (c.sem === 'SB') return 'B';
+    const l = placesCours(coursId, K.ajoute(S.lundi, c.j)).map(x => String(x.semaines || 'AB'));
+    return l.length && l.every(x => x === l[0]) ? l[0] : 'AB';
+  }
   function placesCours(coursId, iso) {
     const I = idx(); return I.places.filter(p => p.coursId === coursId && K.placementPrevu(S.C, S.edt.cours[coursId], p, iso) && (!p.renfortPfmp || K.placementALieu(ctx(), p, iso)) && !K.contratFini(I.aesh.get(p.aeshId), iso));
   }
@@ -1327,7 +1333,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         if (S.C.semaine(S.lundi).toute) return;
         const choisis = [...new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId))];
         const horaires = {}; choisis.forEach(id => { const ps = I.places.filter(y => y.aeshId === id && placeIci(y,c,S.lundi)).map(y => K.horairePlace(y,c)); if(ps.length>1 || ps[0]?.partiel) horaires[id]=ps.map(h => ({debut:h.debut,fin:h.fin})); });
-        ouvrir({ type: 'placer', du: S.lundi, coursId: coursId, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', semaines: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', semainesInit: c.sem === 'SA' ? 'A' : c.sem === 'SB' ? 'B' : choisis.length ? S.C.parite(S.lundi) : 'AB', renforts: {}, base: new Map(S.docs), au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
+        /* 26/09/2026 — « A et B » par défaut. Avant, ouvrir un cours depuis la semaine du 28/09
+         proposait « Semaine A » : on remplissait son emploi du temps type et on posait sans le
+         vouloir des placements d'une semaine sur deux. La parité de la semaine affichée ne dit
+         rien de l'intention. Un cours qui n'a lieu qu'en A ou qu'en B impose la sienne ; sinon,
+         on reprend ce que disent les placements déjà là, et « A et B » quand ils divergent. */
+      ouvrir({ type: 'placer', du: S.lundi, coursId: coursId, classe: nom, choisis, horaires, horairesInit: JSON.parse(JSON.stringify(horaires)), periode: 'annee', semaines: semainesDepart(c, coursId), semainesInit: semainesDepart(c, coursId), renforts: {}, base: new Map(S.docs), au: '', autres: choisis.some(id => !((I.aesh.get(id) || {}).equipes || {})[P().id]) });
         if (S.aeshChoisi) {
           const id = S.aeshChoisi; S.aeshChoisi = null;
           const choix = document.getElementById('pa-' + id);
@@ -2383,7 +2394,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const [quoi, nom, i] = a.split('|');
       enregistrerEleve(nom, +i, { [quoi.slice(3)]: v }); return;
     }
-    if(b.dataset.lundi && K.RE_DATE.test(b.dataset.lundi)){S.lundi=b.dataset.lundi;if(S.route.p.parite!=='AB')S.route.p.parite=S.C.parite(S.lundi);}
+    /* 26/09/2026 — Choisir une date ne doit pas faire sortir de la vue « A et B ». Sans cette
+     garde, la vue par défaut (parité non renseignée) basculait en « Semaine A » au premier clic. */
+    if(b.dataset.lundi && K.RE_DATE.test(b.dataset.lundi)){S.lundi=b.dataset.lundi;if(S.route.p.parite && S.route.p.parite!=='AB')S.route.p.parite=S.C.parite(S.lundi);}
     if (modePlanning) {
       /* 25/09/2026 — Avec l'accès complet, le coordonnateur dispose des mêmes actions qu'un
          référent. La liste blanche ne sert plus qu'à l'accès restreint ; dans les deux cas
