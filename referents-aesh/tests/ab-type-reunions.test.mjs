@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const uri=s=>'data:text/javascript;base64,'+Buffer.from(s).toString('base64');
 const ku=uri(fs.readFileSync(new URL('../calculs.js',import.meta.url),'utf8'));
 const K=await import(ku);
-const V=await import(uri(fs.readFileSync(new URL('../vues-planning.js',import.meta.url),'utf8').replace('./calculs.js?v=2026-09-24f',ku)));
+const V=await import(uri(fs.readFileSync(new URL('../vues-planning.js',import.meta.url),'utf8').replace(/\.\/calculs\.js\?v=[^'\"]+/,ku)));
 const C=K.creerCalendrier({semaine1:'2026-09-21',vacances:[{debut:'2026-10-05',fin:'2026-10-18',label:'Congés'}]});
 assert.deepEqual(V.semainesAB(C,'2026-09-28'),{A:'2026-09-21',B:'2026-09-28'});
 assert.deepEqual(V.semainesAB(C,'2026-10-05'),{A:'2026-10-19',B:'2026-10-26'});

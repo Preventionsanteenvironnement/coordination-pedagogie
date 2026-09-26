@@ -9,8 +9,8 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
                coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, plagesDe, libelleService, sigleService, SIGLES_SERVICE, logoService } from './presences.js?v=2026-09-26b';
-import * as K from './calculs.js?v=2026-09-24f';
+import { couleurAesh, plagesDe, libelleService, sigleService, SIGLES_SERVICE, SERVICES_TYPES, logoService, horsClasse } from './presences.js?v=2026-09-26c';
+import * as K from './calculs.js?v=2026-09-26a';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
@@ -167,8 +167,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   /* Ce qu'on montre sur les blocs, en plus du cours : deux interrupteurs gardés sur
      l'appareil. Par défaut tout est montré — on cache quand on veut respirer. */
-  const OPTIONS_GRILLE = [['eleves', 'Élèves notifiés'], ['besoins', 'Besoins des enseignants']];
-  let optionsGrille = { eleves: true, besoins: true, ...(lsLit(K_OPTIONS, null) || {}) };
+  const OPTIONS_GRILLE = [['eleves', 'Élèves notifiés'], ['besoins', 'Besoins des enseignants'], ['dispositifs', 'Dispositifs hors classe (PIAL, DAFI…)']];
+  let optionsGrille = { eleves: true, besoins: true, dispositifs: false, ...(lsLit(K_OPTIONS, null) || {}) };
   const montrer = k => optionsGrille[k] !== false;
   const classesDu = pid => modePlanning ? (droitsPlanning?.lectureClasses || []).filter(n => S.edt.classes[n]?.pole === pid) : (S.edt.poles[pid] || []);
   const peutPlacer = nom => !modePlanning || !!droitsPlanning?.ecritureClasses.includes(nom);
@@ -601,7 +601,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (!S.form || S.form.kind !== 'fiche' || S.form.cle !== id) { const f = initForm(id); if (!f) return null; S.form = { ...f, kind: 'fiche', cle: id }; }
     return S.form;
   }
-  const SERVICES_TYPES = ['Cantine', 'Internat', 'DAFI', 'PIAL', 'Vie scolaire', 'Étude', 'Périscolaire', 'Autre'];
   function changements(f) {
     const a = f.a, o = f.orig || {}, p = P().id, l = [];
     const v = x => nombre(x) == null ? '—' : K.fmtH(x);
@@ -808,10 +807,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        le même calcul de colonnes que les cours : quand le créneau est libre — midi, le plus
        souvent — elles prennent la largeur ; quand un TP l'occupe, elles se rangent à côté.
        Cadre en pointillé : ce n'est pas une présence en classe avec les élèves. */
-    const horsClasse=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})));
-    const services=horsClasse;
+    /* 26/09/2026 — Le PIAL, le DAFI, l'ESAT sont du temps de l'AESH, pas du temps de cette
+       classe : ils encombraient la grille du groupe sans rien lui apprendre. Ils restent
+       entiers dans la semaine de la personne, et une case du menu les rappelle ici. */
+    const services=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})))
+      .filter(o=>o.type!=='service' || montrer('dispositifs') || !horsClasse({nom:o.label,horsClasse:o.horsClasse}));
     const horsParCle=new Map();
-    horsClasse.forEach(o=>{
+    services.forEach(o=>{
       const sig=sigleService(o.label), cle=[sig,o.j,o.debut,o.fin].join('|');
       if(!horsParCle.has(cle)) horsParCle.set(cle,{cle,sig,j:o.j,d:o.debut,f:o.fin,label:o.label,gens:[]});
       const g=horsParCle.get(cle).gens; if(!g.some(x=>x.id===o.a.id)) g.push(o.a);
@@ -1100,7 +1102,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function feuilleServiceHoraire(f) {
     const champ=(key,label,values)=>`<label>${label} <select id="sh-${key}" data-i="service-champ" data-champ="${key}">${values.map(([v,l])=>`<option value="${esc(v)}" ${String(f[key])===String(v)?'selected':''}>${esc(l)}</option>`).join('')}</select></label>`;
     const services=K.servicesDe(idx().aesh.get(f.aeshId)||{});
-    return teteFeuille('Planifier un service','DP = Demi-pension · les horaires indiqués comptent dans la semaine choisie.')+`<div class="presence-reglage">${champ('aeshId','AESH',K.aeshActifs(idx(),P().id).map(a=>[a.id,a.sigle]))}${champ('nom','Activité',['Cantine','Internat','DAFI','PIAL','Autre'].map(n=>[n,libelleService(n)]))}${f.nom==='Autre'?`<label>Activité <input id="sh-libelle" data-i="service-champ" data-champ="libelle" maxlength="40" value="${esc(f.libelle||'')}" placeholder="Nom du service"></label>`:''}${champ('jour','Jour',K.JOURS.map((j,i)=>[i,j]))}${champ('debut','De',CRENEAUX_H.map(h=>[h,K.hFr(h)]))}${champ('fin','À',CRENEAUX_H.map(h=>[h,K.hFr(h)]))}${champ('semaines','Semaines',[['AB','A et B'],['A','A seulement'],['B','B seulement']])}${['du','au'].map(k=>`<label>${k==='du'?'À partir du':'Jusqu’au'} <input id="sh-${k}" type="date" data-i="service-champ" data-champ="${k}" value="${esc(f[k])}"></label>`).join('')}<p>Le calendrier précis remplace le volume forfaitaire de cette activité à partir de la date indiquée. Le passé est conservé.</p><button type="button" class="btn valider" data-a="service-enregistrer">Vérifier le créneau</button></div><h3>Créneaux déjà prévus</h3>${services.flatMap((s,si)=>(s.horaires||[]).map((h,hi)=>`<p>${esc(libelleService(s.nom))} · ${K.JOURS[h.jour]} ${h.debut}–${h.fin} · ${h.semaines} · ${K.jjmm(h.du)} → ${K.jjmm(h.au)} <button class="btn petit" data-a="service-fin" data-v="${si}|${hi}">Arrêter à partir du ${K.jjmm(f.du)}</button></p>`)).join('')}`;
+    return teteFeuille('Planifier un service','DP = Demi-pension · les horaires indiqués comptent dans la semaine choisie.')+`<div class="presence-reglage">${champ('aeshId','AESH',K.aeshActifs(idx(),P().id).map(a=>[a.id,a.sigle]))}${champ('nom','Activité',SERVICES_TYPES.map(n=>[n,libelleService(n)]))}${f.nom==='Autre'?`<label>Activité <input id="sh-libelle" data-i="service-champ" data-champ="libelle" maxlength="40" value="${esc(f.libelle||'')}" placeholder="Nom du service"></label>${champ('horsClasse','Ce temps-là',[['non','Avec les élèves · dans la grille de classe'],['oui','Hors classe · semaine de la personne seulement']])}`:''}${champ('jour','Jour',K.JOURS.map((j,i)=>[i,j]))}${champ('debut','De',CRENEAUX_H.map(h=>[h,K.hFr(h)]))}${champ('fin','À',CRENEAUX_H.map(h=>[h,K.hFr(h)]))}${champ('semaines','Semaines',[['AB','A et B'],['A','A seulement'],['B','B seulement']])}${['du','au'].map(k=>`<label>${k==='du'?'À partir du':'Jusqu’au'} <input id="sh-${k}" type="date" data-i="service-champ" data-champ="${k}" value="${esc(f[k])}"></label>`).join('')}<p>Le calendrier précis remplace le volume forfaitaire de cette activité à partir de la date indiquée. Le passé est conservé.</p><button type="button" class="btn valider" data-a="service-enregistrer">Vérifier le créneau</button></div><h3>Créneaux déjà prévus</h3>${services.flatMap((s,si)=>(s.horaires||[]).map((h,hi)=>`<p>${esc(libelleService(s.nom))} · ${K.JOURS[h.jour]} ${h.debut}–${h.fin} · ${h.semaines} · ${K.jjmm(h.du)} → ${K.jjmm(h.au)} <button class="btn petit" data-a="service-fin" data-v="${si}|${hi}">Arrêter à partir du ${K.jjmm(f.du)}</button></p>`)).join('')}`;
   }
   async function sauvegarderService(f,services) {
     const attendu=f.base.get(f.aeshId);
@@ -1114,9 +1116,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const f=S.feuille;
     if(!f.aeshId || !K.RE_DATE.test(f.du)||!K.RE_DATE.test(f.au)||f.au<f.du||K.min(f.fin)<=K.min(f.debut)) {toast('Vérifiez les dates et les horaires.',true);return;}
     const nom=f.nom==='Autre'?String(f.libelle||'').trim().slice(0,40):f.nom; if(!nom){toast('Indiquez le nom du service.',true);return;}
+    /* Un nom inventé par un référent : c'est lui qui dit si ce temps-là se voit dans la
+       grille d'une classe. Les dispositifs connus le savent déjà (table DISPOSITIFS). */
+    const rangement=f.nom==='Autre'?{horsClasse:f.horsClasse==='oui'}:{};
     const services=K.servicesDe(idx().aesh.get(f.aeshId)).map(x=>JSON.parse(JSON.stringify(x)));
     let x=services.find(x=>x.nom===nom);
-    if(!x){x={nom,h:K.duree(f.debut,f.fin),jours:[],horaires:[]};services.push(x);}
+    if(!x){x={nom,h:K.duree(f.debut,f.fin),jours:[],horaires:[],...rangement};services.push(x);}
+    else if('horsClasse' in rangement) x.horsClasse=rangement.horsClasse;
     x.calendrierDepuis=x.calendrierDepuis && x.calendrierDepuis<f.du ? x.calendrierDepuis:f.du;
     x.horaires=x.horaires||[];
     const h={jour:f.jour,debut:f.debut,fin:f.fin,du:f.du,au:f.au,semaines:f.semaines};
@@ -1846,7 +1852,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!a){toast('Choisissez d’abord un AESH.',true);return;}
     if(S.envoi)return; S.envoi=true; rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-26a'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-26b'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
       const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
       F.telecharger(blob,nom);
@@ -1869,7 +1875,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-26a'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-26b'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -1878,12 +1884,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-26a'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-26b'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-26a'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-26b'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }

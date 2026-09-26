@@ -354,7 +354,7 @@ export function occupations(ctx, aeshId, lundi) {
     reunionsEffectives(ctx,aeshId,lundi).filter(r=>r.date===iso).forEach(r=>out.push(r));
     if(a) servicesDe(a).forEach(x=>(x.horaires || []).filter(h=>serviceALieu(ctx,a,x,h,iso)).forEach(h=>{
       const manque=recouvrement(absencesDuJour(I,aeshId,iso),min(h.debut),min(h.fin))/60;
-      out.push({...h,j,date:iso,type:'service',label:x.nom,partiel:manque,absent:manque>=duree(h.debut,h.fin)});
+      out.push({...h,j,date:iso,type:'service',label:x.nom,horsClasse:x.horsClasse,partiel:manque,absent:manque>=duree(h.debut,h.fin)});
     }));
     I.absences.forEach(x => { if (x.aeshId === aeshId && iso >= x.du && iso <= x.au) out.push({ j, date: iso, type: 'absence', debut: x.journee === false ? x.debut : '08:00', fin: x.journee === false ? x.fin : '18:00', label: MOTIFS[x.motif] || 'Absence', absence: x }); });
   });
