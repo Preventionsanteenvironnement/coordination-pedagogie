@@ -460,6 +460,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   /* Placé ici, cette semaine : en cours le jour du cours. Un placement qui commence plus tard est « à venir » :
      il ne compte pas comme déjà placé et n'est jamais modifié sans le dire (audit D12). */
   const placeIci = (x, c, du) => x.coursId === c.id && K.placementPrevu(S.C, c, x, K.ajoute(du, c.j)) && (!x.renfortPfmp || K.placementALieu(ctx(),x,K.ajoute(du,c.j)));
+  /* La semaine où un cours a lieu : la semaine affichée, ou celle de sa parité quand la
+     grille montre A et B ensemble. La même règle que la grille, pour que les deux s'accordent. */
+  const lundiPourCours = c => {
+    if (S.route.p.parite && S.route.p.parite !== 'AB') return S.lundi;
+    const paire = semainesAB(S.C, S.lundi);
+    return c && c.sem === 'SB' ? paire.B : c && c.sem === 'SA' ? paire.A : S.lundi;
+  };
   const placeAVenir = (x, c, du) => x.coursId === c.id && x.du > K.ajoute(du, c.j);
   /* Présents au pire moment de la plage estimée : 30 min placées sur 3 h ne font pas « couvert » (audit D02). */
   const presents = (c, iso, bes) => K.presentsMin(ctx(), c, iso, bes && bes.plageDebut, bes && bes.plageFin);
@@ -1337,7 +1344,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function ouvrirPlacement(coursId,nom) {
     const c=S.edt.cours[coursId],I=idx(),iso=K.ajoute(S.lundi,c.j);
         if (S.C.semaine(S.lundi).toute) return;
-        const choisis = [...new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId))];
+        const choisis = [...new Set(I.places.filter(x => placeIci(x, c, lundiPourCours(c))).map(x => x.aeshId))];
         const horaires = {}; choisis.forEach(id => { const ps = I.places.filter(y => y.aeshId === id && placeIci(y,c,S.lundi)).map(y => K.horairePlace(y,c)); if(ps.length>1 || ps[0]?.partiel) horaires[id]=ps.map(h => ({debut:h.debut,fin:h.fin})); });
         /* 26/09/2026 — « A et B » par défaut. Avant, ouvrir un cours depuis la semaine du 28/09
          proposait « Semaine A » : on remplissait son emploi du temps type et on posait sans le
@@ -1356,7 +1363,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const p = P(), c = S.edt.cours[f.coursId], nom = f.classe, I = idx(), cx = ctx(), iso = K.ajoute(S.lundi, c.j);
     const au = finPeriode(f), du = f.du || S.lundi;
     const bes = K.besoinDuCours(S.est, nom, c, quand(iso));
-    const dejaIci = new Set(I.places.filter(x => placeIci(x, c, S.lundi)).map(x => x.aeshId));
+    /* 26/09/2026 — Dans la vue « A et B réunies », un cours de semaine B se lit sur la semaine
+       affichée, qui est la A : « déjà placé » répondait alors non pour tout le monde, et on ne
+       pouvait plus retirer personne. On regarde la semaine où le cours a vraiment lieu. */
+    const lundiDuCours = lundiPourCours(c);
+    const dejaIci = new Set(I.places.filter(x => placeIci(x, c, lundiDuCours)).map(x => x.aeshId));
     const aVenir = I.places.filter(x => placeAVenir(x, c, du) && I.aesh.get(x.aeshId));
     const prevuIci = a => K.prevuPourClasse(a, FILIERES, nom).prevu || !K.prevuPourClasse(a, FILIERES, nom).connu;
     const enContrat = a => !K.contratFini(a, du);
@@ -1369,7 +1380,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        Ce qui pose problème est écrit sur son bouton, puis rappelé dans « Vous confirmez ? ». */
     const bouton = (a, ailleurs) => {
       const d = K.disponibilite(cx, a.id, c.id, du, au, p.id, {semaines:f.semaines, ...plagesDe(f.horaires[a.id],c)[0]}), on = f.choisis.includes(a.id);
-      const cl = d.etat === 'pris' && !dejaIci.has(a.id) ? 'pris' : d.etat === 'trop' ? 'trop' : d.etat === 'reunion' ? 'reunion' : '';
+      const cl = d.etat === 'conflit' ? 'trop' : d.etat === 'pris' && !dejaIci.has(a.id) ? 'pris' : d.etat === 'trop' ? 'trop' : d.etat === 'reunion' ? 'reunion' : '';
       const b = K.bilan(cx, a.id, S.lundi), x = dispoDe[a.id];
       const pv = K.prevuPourClasse(a, FILIERES, nom);
       const ligne3 = ailleurs ? (x ? `${K.fmtH(x.dispo)} dispo · ${x.complets.map(q => nomPole(q.p) + (q.complet ? ' complet' : ' en cours')).join(', ')}` : `${Object.keys(a.equipes || {}).map(nomPole).join(', ')} · rien de disponible`) : (b ? `${K.fmtH(b.total)}${b.contrat==null?'':' / '+K.fmtH(b.contrat)}` : '');

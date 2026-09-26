@@ -627,7 +627,13 @@ export function disponibilite(ctx, aeshId, coursId, du, au, pole, choix = {}) {
   if (premierPris) {
     const oc = edt.cours[premierPris.p.coursId];
     const lieu = premierPris.p.pole !== pole ? (ctx.nomPole ? ctx.nomPole(premierPris.p.pole) : premierPris.p.pole) : (oc.cls || []).map(n => n.replace(/^(C[12]|B[12T])/, '$1 ')).join(' / ');
-    return { etat: 'pris', contrainte, texte: `pris · ${lieu}`, detail: `${dateCourte(premierPris.iso)} : ${oc.lib || oc.mat}`, deja };
+    /* 26/09/2026 — Être pris ailleurs ne fait pas disparaître d'ici. Quand les deux sont vrais,
+       la carte disait seulement « pris · 2de MELEC » : la grille montrait la personne sur ce
+       cours et le panneau la niait. On dit les deux, et le conflit se voit pour ce qu'il est. */
+    return deja
+      ? { etat: 'conflit', contrainte, texte: `placé ici · aussi pris · ${lieu}`,
+          detail: `${dateCourte(premierPris.iso)} : ${oc.lib || oc.mat}`, deja }
+      : { etat: 'pris', contrainte, texte: `pris · ${lieu}`, detail: `${dateCourte(premierPris.iso)} : ${oc.lib || oc.mat}`, deja };
   }
   if (nbSem === 0) return { etat: 'aucun', contrainte, texte: 'pas de cours sur cette période', deja };
   if (nbAbs === nbSem) return { etat: 'absent', contrainte, texte: MOTIFS[premierAbs.ab.motif] || 'absent', deja };

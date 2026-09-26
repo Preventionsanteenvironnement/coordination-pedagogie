@@ -274,7 +274,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
    chassaient le titre hors du bloc. Ce qui dépasse est coupé ; le détail est au clic. */
 /* 26/09/2026 — Les AESH se lisent sous le titre, pas au pied du bloc : dans un TP de
    quatre heures ils se retrouvaient à deux cents pixels du cours qu'ils accompagnent. */
-.past-ligne{display:flex;flex-wrap:nowrap;align-items:center;gap:3px;margin-top:3px;overflow:hidden}
+/* 26/09/2026 — La rangée coupait sans rien dire : sur un bloc étroit, le troisième AESH
+   disparaissait et on croyait qu'un autre avait pris sa place. Elle passe à la ligne. */
+.past-ligne{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin-top:3px;overflow:hidden}
 .past-ligne .bes-cercle{position:static;flex:0 0 auto;margin-right:2px}
 .past-sem{font-style:normal;background:rgba(255,255,255,.92);color:#10232a;border-radius:4px;padding:0 3px;margin-left:3px;font-size:.66rem;font-weight:800;line-height:1.35}
 .past-aesh{display:inline-flex;align-items:baseline;gap:3px;color:#fff;border-radius:6px;padding:1px 6px;font-size:.72rem;font-weight:800;letter-spacing:.02em;line-height:1.5;white-space:nowrap}
@@ -663,7 +665,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26an');
+  const m = await import('./app.js?v=2026-09-26ao');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
