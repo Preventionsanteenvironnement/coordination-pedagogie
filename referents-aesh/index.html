@@ -288,11 +288,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .hors-classe-bloc{position:absolute;z-index:3;display:flex;flex-wrap:wrap;gap:3px 6px;align-items:center;align-content:flex-start;
   border-radius:10px;padding:4px 8px;font:inherit;text-align:left;cursor:pointer;overflow:hidden}
 .hors-classe-bloc.presence{background:var(--card-2);border:1px solid var(--line);color:var(--ink);border-left:4px solid #64748b}
+.hors-classe-bloc.sans-eleves{background:var(--card);border:2px dashed var(--ink);color:var(--ink)}
 /* Le code couleur des classeurs d'Antoine, repris tel quel pour les blocs hors classe. */
 .hors-classe-bloc.fam-reunion{border-left-color:#a35205;background:color-mix(in srgb,#cc6600 8%,var(--card))}
 .hors-classe-bloc.fam-eleves{border-left-color:#5b5bd6;background:color-mix(in srgb,#9999ff 14%,var(--card))}
 .hors-classe-bloc.fam-hors{border-left-color:#c23a6d;background:color-mix(in srgb,#ff6699 12%,var(--card))}
-.hors-classe-bloc.sans-eleves{background:var(--card);border:2px dashed var(--ink);color:var(--ink)}
+/* Sans élèves : le pointillé reste, mais il prend la couleur de sa famille. */
+.hors-classe-bloc.sans-eleves.fam-reunion{border-color:#a35205}
+.hors-classe-bloc.sans-eleves.fam-hors{border-color:#c23a6d}
 .hors-classe-bloc b{display:flex;align-items:center;gap:3px;color:var(--ink);font-size:.78rem;letter-spacing:.02em}
 .hors-classe-bloc b svg{flex:none;opacity:.8}
 .hors-classe-bloc .serv-past{margin:0}
@@ -660,7 +663,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26ak');
+  const m = await import('./app.js?v=2026-09-26al');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
