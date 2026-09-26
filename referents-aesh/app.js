@@ -799,7 +799,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const lundiDe = c => !deuxSemaines ? S.lundi : (c.sem === 'SB' ? paireC.B : paireC.A);
     const cours = k.cours.map(id => S.edt.cours[id])
       .filter(c => deuxSemaines ? S.C.coursSemaine(c, lundiDe(c)) : S.C.coursSemaine(c, S.lundi));
-    const services=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})));
+    /* 26/09/2026 — La réunion d'équipe ne prend plus de place dans la grille : elle est au
+       même créneau pour tout le monde, toutes les semaines. Une ligne sous la grille suffit,
+       avec qui y est. La demi-pension, elle, reste dans la grille : elle varie d'un jour et
+       d'une personne à l'autre, on a besoin de la voir posée sur l'heure. */
+    const horsClasse=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})));
+    const services=horsClasse.filter(o=>o.type==='service');
+    const reunions=horsClasse.filter(o=>o.type!=='service');
     const H0 = 8 * 60, H1 = Math.max(18*60,...services.map(o=>K.min(o.fin))), PX = 1.25;
     /* 26/09/2026 — Une épreuve se pose PAR-DESSUS les cours : elle ne les remplace pas,
        elle dit qu'à ce moment-là il se passe autre chose, et combien d'AESH sont demandés. */
@@ -872,6 +878,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     grille += `</div></div>`;
     /* La légende des deux lettres, sous la grille : DP, RE… Écrite petit, une seule fois,
        plutôt que déroulée dans chaque bloc de trente minutes. */
+    const parReunion = new Map();
+    reunions.forEach(o => {
+      const cle = `${esc(libelleService(o.label))} · ${K.JOURS[o.j]} ${K.hFr(o.debut)}–${K.hFr(o.fin)}`;
+      if (!parReunion.has(cle)) parReunion.set(cle, []);
+      if (!parReunion.get(cle).some(x => x.id === o.a.id)) parReunion.get(cle).push(o.a);
+    });
+    if (parReunion.size) grille += `<div class="sous-grille">${[...parReunion].map(([cle, gens]) =>
+      `<p><b>${cle}</b> : ${gens.sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
+        .map(a => `<span class="past-aesh" style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</p>`).join('')}</div>`;
     const vus = [...new Set(services.map(o => sigleService(o.label)))];
     if (vus.length) grille += `<p class="legende-serv">${SIGLES_SERVICE.filter(([k]) => vus.includes(k))
       .map(([k, t]) => `<span><b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
