@@ -829,14 +829,33 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }).join('');
     /* Un bloc hors classe : le dessin, les deux lettres, et les sigles — sauf pour la
        réunion d'équipe, qui rassemble tout le pôle : y lister tout le monde n'apprend rien. */
-    const serviceHtml = j => horsBlocs.filter(o => o.j === j).map(o => {
+    /* Un service ne rétrécit jamais un cours. Quand le créneau est libre — midi, le plus
+       souvent — il prend toute la largeur ; quand un cours l'occupe, il se range dans la
+       bande de droite, comme avant. Les services qui se chevauchent entre eux se partagent
+       la place qui leur revient. */
+    const placeHors = j => {
+      const l = horsBlocs.filter(o => o.j === j).sort((a, b) => K.min(a.d) - K.min(b.d)), cols = [];
+      l.forEach(o => {
+        o.surCours = cours.some(c => c.j === j && K.chevauche(c.d, c.f, o.d, o.f));
+        let i = cols.findIndex(col => col.every(x => !K.chevauche(x.d, x.f, o.d, o.f)));
+        if (i < 0) { cols.push([]); i = cols.length - 1; }
+        cols[i].push(o); o._col = i;
+      });
+      l.forEach(o => { const g = l.filter(x => K.chevauche(x.d, x.f, o.d, o.f)); o._cols = Math.max(1, ...g.map(x => x._col + 1)); });
+      return l;
+    };
+    const serviceHtml = j => placeHors(j).map(o => {
       const top = (K.min(o.d) - H0) * PX, h = (K.min(o.f) - K.min(o.d)) * PX - 2;
       const large = o._cols || 1, avecSigles = o.sig !== 'RE' && o.sig !== 'RI';
+      const bande = o.surCours ? 34 : 100;
+      const pos = o.surCours
+        ? `right:calc(2px + ${o._col * bande / large}%);width:${bande / large}%`
+        : `left:${3 + o._col * (100 / large)}%;width:calc(${100 / large}% - 6px)`;
       const past = avecSigles ? o.gens.slice().sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
         .map(a => `<span style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('') : '';
-      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc"
+      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${avecSigles ? 'presence' : 'sans-eleves'}"
         title="${esc(libelleService(o.label))} · ${K.hFr(o.d)}–${K.hFr(o.f)} · ${o.gens.map(a => a.sigle).join(', ')}"
-        style="top:${top + 1}px;height:${Math.max(18, h)}px;left:${3 + (o._col || 0) * (100 / large)}%;width:calc(${100 / large}% - 6px)">
+        style="top:${top + 1}px;height:${Math.max(18, h)}px;${pos}">
         <b>${logoService(o.sig)}${esc(o.sig)}</b>${past ? `<span class="serv-past">${past}</span>` : ''}</button>`;
     }).join('');
 
@@ -882,7 +901,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     };
     /* colonnes pour les cours qui se chevauchent (semaine A et B affichées séparément, donc rares) */
     [0, 1, 2, 3, 4].forEach(j => {
-      const l = [...cours.filter(c => c.j === j), ...horsBlocs.filter(o => o.j === j)].sort((a, b) => K.min(a.d) - K.min(b.d)), cols = [];
+      const l = cours.filter(c => c.j === j).sort((a, b) => K.min(a.d) - K.min(b.d)), cols = [];
       l.forEach(c => { let i = cols.findIndex(col => col.every(x => !K.chevauche(x.d, x.f, c.d, c.f))); if (i < 0) { cols.push([]); i = cols.length - 1; } cols[i].push(c); c._col = i; });
       l.forEach(c => { const g = l.filter(x => K.chevauche(x.d, x.f, c.d, c.f)); c._cols = Math.max(1, ...g.map(x => x._col + 1)); });
     });
