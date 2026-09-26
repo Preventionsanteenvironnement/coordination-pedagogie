@@ -1173,7 +1173,34 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="choix"><button type="button" id="ph-tout-${esc(id)}" data-a="horaire-tout" data-v="${esc(id)}" aria-pressed="${!h}">Tout le cours</button><button type="button" id="ph-part-${esc(id)}" data-a="horaire-partie" data-v="${esc(id)}" aria-pressed="${!!h}">Une partie du cours</button></div>
       ${h ? plagesDe(h,c).map((v,i) => `<div class="ligne"><label>De <select id="ph-d-${esc(id)}-${i}" data-i="ph-debut" data-v="${esc(id)}" data-index="${i}">${pasH.slice(0,-1).map(x => `<option value="${x}" ${x===v.debut?'selected':''}>${K.hFr(x)}</option>`).join('')}</select></label><label>à <select id="ph-f-${esc(id)}-${i}" data-i="ph-fin" data-v="${esc(id)}" data-index="${i}">${pasH.slice(1).map(x => `<option value="${x}" ${x===v.fin?'selected':''}>${K.hFr(x)}</option>`).join('')}</select></label><span>${K.fmtH(K.duree(v.debut,v.fin))}</span>${plagesDe(h,c).length>1?`<button type="button" data-a="horaire-retirer" data-v="${esc(id)}" data-index="${i}">Retirer ce passage</button>`:''}</div>`).join('')+`<button type="button" class="btn petit" data-a="horaire-ajouter" data-v="${esc(id)}">＋ Un autre passage dans ce cours</button>` : `<span>${K.hFr(c.d)}–${K.hFr(c.f)} · ${K.fmtH(K.duree(c.d,c.f))}</span>`}</div>`; }).join('')}</div>` : '';
     const modifHoraire = f.choisis.some(id => dejaIci.has(id) && JSON.stringify(f.horaires[id] || null) !== JSON.stringify(f.horairesInit[id] || null));
-    return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}`) + `
+    /* 26/09/2026 — Deuxième volet : qui sont les élèves de ce cours et ce dont chacun a besoin.
+       On lit, on ne saisit pas : tout vient de l'onglet « Élèves ». Un AESH qu'on place ici
+       doit pouvoir savoir, avant d'entrer en classe, qu'il y a deux lecteurs et un scripteur. */
+    const volet = f.volet === 'eleves' ? 'eleves' : 'placer';
+    const notifiesCours = c.cls.flatMap(n => elevesDe(n).filter(e => e.notif && e.notif !== 'non').map(e => ({ ...e, classe: n })));
+    const ongletsPlacer = `<div class="volets" role="group" aria-label="Volet">
+      <button type="button" data-a="placer-volet" data-v="placer" aria-pressed="${volet === 'placer'}" class="${volet === 'placer' ? 'on' : ''}">Placer les AESH</button>
+      <button type="button" data-a="placer-volet" data-v="eleves" aria-pressed="${volet === 'eleves'}" class="${volet === 'eleves' ? 'on' : ''}">Élèves${notifiesCours.length ? ` <span class="volet-n">${notifiesCours.length}</span>` : ''}</button></div>`;
+    if (volet === 'eleves') {
+      const lignes = notifiesCours.map(e => {
+        const am = (e.amenagements || []).map(cle => (EL_AMEN.find(x => x[0] === cle) || [, cle])[1]);
+        const aide = { individualisee: 'individualisée', mutualisee: 'mutualisée', apreciser: 'à préciser' }[e.aide] || '';
+        return `<div class="el-ligne"><span class="codeel">${esc(e.code)}</span><div class="el-det">
+          <div class="el-h">${c.cls.length > 1 ? `<span class="el-tag">${esc((S.edt.classes[e.classe] || {}).court || e.classe)}</span>` : ''}
+            ${aide ? `<span class="el-tag aide">${esc(aide)}</span>` : ''}${e.ulis ? '<span class="el-tag ulis">ULIS</span>' : ''}
+            ${e.heures ? `<span class="el-tag h">${esc(e.heures)}</span>` : ''}${e.doc ? `<span class="el-tag">${esc(e.doc)}</span>` : ''}</div>
+          <div class="el-amen">${am.length ? am.map(t => `<span class="el-bes">${esc(t)}</span>`).join('') : '<span class="el-muet">aucun aménagement coché</span>'}</div>
+          ${e.support ? `<div class="el-sup">${esc(e.support)}</div>` : ''}</div></div>`;
+      }).join('');
+      return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}`)
+        + ongletsPlacer
+        + (notifiesCours.length
+          ? `<p class="bandeau">Renseigné dans l’onglet « Élèves ». Rien ne se saisit ici.</p>${lignes}`
+          : '<p class="bandeau">Aucun élève notifié dans cette classe, ou l’onglet « Élèves » n’est pas encore rempli.</p>')
+        + `<div class="actions"><button type="button" class="btn" data-a="fermer">Fermer</button>
+           <button type="button" class="btn valider" data-a="placer-volet" data-v="placer">← Revenir au placement</button></div>`;
+    }
+    return teteFeuille(`${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}`, `${esc(c.lib)} · ${esc(c.cls.map(n => S.edt.classes[n].court).join(' + '))}${c.salle.length ? ' · ' + esc(c.salle.join(' · ')) : ''}${c.sem === 'SA' ? ' · semaine A' : c.sem === 'SB' ? ' · semaine B' : ''}`) + ongletsPlacer + `
       <section class="demande-cours"><div class="bandeau ${bes && presents(c,iso,bes)<bes.nb?'err':'info'}">${resumeDemande(c,iso,bes)}</div>${peutEstimer(nom)?`<button type="button" class="lien" data-a="expliquer-besoin" data-v="${esc(c.id)}" data-classe="${esc(nom)}">Modifier la demande</button>`:''}</section>
       <div><b>Qui accompagne ?</b></div>
       ${aVenir.length ? `<div class="bandeau info">À venir : ${aVenir.map(x => `<b>${esc(I.aesh.get(x.aeshId).sigle)}</b> dès le ${esc(K.dateCourte(x.du))}`).join(', ')} <span class="muted">· vérifiez la période : une nouvelle présence peut remplacer ces prévisions</span></div>` : ''}
@@ -2124,7 +2151,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       /* 25/09/2026 — Avec l'accès complet, le coordonnateur dispose des mêmes actions qu'un
          référent. La liste blanche ne sert plus qu'à l'accès restreint ; dans les deux cas
          il ne touche jamais au code qui lui ouvre la porte (voir « antoine-activer »). */
-      const permis = ['export-grille','export-grille-choix','export-grille-telecharger','edt-parite','edt-type','verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
+      const permis = ['export-grille','export-grille-choix','export-grille-telecharger','edt-parite','edt-type','verification','personne-cours','edt-vue','edt-page','edt-jour','service-detail','besoin-placer','service-horaire','service-enregistrer','service-fin','planning-pole','planning-excel','expliquer-besoin','selection-aesh','placer-volet','touche','sortir','semaine','classe','placer','lecture','choix-aesh','pl-semaines','horaire-tout','horaire-partie','horaire-ajouter','horaire-retirer','periode','valider-placer','fermer','voile','confirmer-non','confirmer-oui'];
       if (!accesComplet() && !permis.includes(a)) return;
       if (a === 'sortir') { awaitSortirPlanning(); return; }
       if (['placer','valider-placer','choix-aesh','pl-semaines'].includes(a) && !peutPlacer(classeCourante())) return;
@@ -2151,6 +2178,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
           nbAesh: e.nbAesh == null ? '' : String(e.nbAesh), note: e.note || '', codes: e.codes || [] };
         rendre(); return; }
       case 'epreuve-fiche': ficheEpreuve(v); return;
+      case 'placer-volet': if (S.feuille && S.feuille.type === 'placer') { S.feuille.volet = v; rendre(); } return;
       case 'epreuve-retirer': { const e = S.docs.get(v); if (!e) return;
         confirmerPuis({ titre: 'Retirer cette épreuve ?', grand: libNature(e.nature) + ' · ' + ((S.edt.classes[e.classe] || {}).court || e.classe),
           sous: K.dateLongue(e.date) + ' · ' + K.hFr(e.debut) + '–' + K.hFr(e.fin) + '. Elle disparaît de l’emploi du temps ; rien n’est effacé.',

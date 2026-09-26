@@ -398,3 +398,14 @@ AESH), `index.html` (styles, cache `2026-09-26c`).
 À noter : une brique « épreuves » existait déjà dans `coordination_epreuves_aesh` (campagne de
 positionnement importée de RESANA le 14/09, espace edt-aesh). Brahim a confirmé que cet espace
 n'est pas utilisé : on ne s'y branche pas.
+
+**Complément du 26/09** — deux volets dans la fenêtre de placement. En cliquant un cours, on
+trouve désormais « Placer les AESH » (ce qui existait) et « Élèves », qui liste **un par un** les
+élèves notifiés de la classe : aide individualisée ou mutualisée, ULIS, heures, PAP/PPS, puis ses
+aménagements d'épreuve et son support. Rien ne s'y saisit — tout vient de l'onglet « Élèves ».
+Un AESH qu'on place peut ainsi savoir avant d'entrer qu'il y a deux lecteurs et un scripteur.
+Pour un cours à deux classes, chaque ligne porte sa classe. Volet accessible aussi au
+coordonnateur en accès planning (ajouté à sa liste blanche d'actions).
+
+Piège rencontré : la classe CSS `.bes` existait déjà (`position:absolute`) et faisait disparaître
+les pastilles d'aménagement dans le coin du bloc. Les classes de ce lot sont préfixées `el-`.
