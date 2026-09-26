@@ -895,8 +895,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const lib = `${bes ? `Besoin : ${bes.nb} AESH, présents : ${nbPresents}. ` : 'Besoin non renseigné. '}${K.JOURS[c.j]} ${K.hFr(c.d)}–${K.hFr(c.f)}, ${c.lib}${c.salle.length ? ', ' + c.salle.join(', ') : ''}${aeshs.length ? ', ' + pl.map(x => (I.aesh.get(x.aeshId)?.sigle || '?')+' '+K.horairePlace(x,c).debut+'–'+K.horairePlace(x,c).fin).join(', ') : ', aucun AESH'}`;
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
-        return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
-          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}"><b>${lettre ? `<i class="sem-lettre ${lettre === 'B' ? 'b' : ''}">${lettre}</i>` : ''}${esc(c.lib)}</b>${h > 96 && sallesCourtes(c.salle) ? `<span class="salle">${esc(sallesCourtes(c.salle))}</span>` : ''}${h > 116 ? elvHtml : ''}${aeshs.length ? `<span class="past-ligne" aria-hidden="true">${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
+        /* 26/09/2026 — La place rendue aux cours. Avant, un seul DP à midi rétrécissait
+           TOUS les cours du jour de 8 h à 18 h : le français de 15 h était étroit à cause
+           d'un repas à 12 h 30. Seul un cours que le service recouvre vraiment lui cède
+           la bande de droite. */
+        const dispo = horsBlocs.some(o => o.j === c.j && K.chevauche(c.d, c.f, o.d, o.f)) ? 64 : 100;
+        const nbc = c._cols || 1;
+        return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (dispo / nbc)}%;width:calc(${dispo / nbc}% - 6px)${lieu ? '' : ';opacity:.45'}">
+          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}"><b>${lettre ? `<i class="sem-lettre ${lettre === 'B' ? 'b' : ''}">${lettre}</i>` : ''}${esc(c.lib)}</b>${h > 116 && sallesCourtes(c.salle) ? `<span class="salle">${esc(sallesCourtes(c.salle))}</span>` : ''}${h > 96 ? elvHtml : ''}${aeshs.length ? `<span class="past-ligne" aria-hidden="true">${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${besHtml}</div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>
@@ -913,7 +919,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60+1 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => {
       grille += `<div class="g-jour jour-col" data-j="${j}" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}
-        ${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : `<div class="cours-zone ${services.some(o=>o.j===j)?'avec-services':''}">${cours.filter(c => c.j === j).map(c => blocHtml(c, true)).join('')}</div>${serviceHtml(j)}${epreuveHtml(j)}`}
+        ${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : `<div class="cours-zone">${cours.filter(c => c.j === j).map(c => blocHtml(c, true)).join('')}</div>${serviceHtml(j)}${epreuveHtml(j)}`}
         ${!jr.off && K.enPfmp(k, jr.date) ? `<div class="g-filigrane" aria-hidden="true"><b>PFMP</b><small>classe en stage · AESH libres</small></div>` : ''}</div>`;
     });
     grille += `</div></div>`;

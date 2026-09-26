@@ -540,7 +540,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .edt-pages,.edt-jours{display:flex;gap:6px}.edt-pages button,.edt-jours button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:12px 8px;border-radius:12px;font:inherit;cursor:pointer}
 .edt-pages [aria-current="page"],.edt-jours [aria-pressed="true"]{background:var(--pole);color:white}
 .edt-jours{display:none}.equipe-compacte{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}.equipe-compacte button{display:flex;justify-content:space-between}
-.cours-zone{position:absolute;inset:0}.cours-zone.avec-services{right:36%}.service-grille{position:absolute;right:2px;width:34%;padding:3px;background:#eef6f5;border:1px solid #578983;border-radius:7px;box-sizing:border-box;font-size:.7rem;overflow-wrap:anywhere;overflow:hidden;text-align:left;color:var(--ink);cursor:pointer;z-index:1}.service-grille b,.service-grille small{display:block}.service-grille span span{display:inline-block;padding:2px}
+.cours-zone{position:absolute;inset:0}.service-grille{position:absolute;right:2px;width:34%;padding:3px;background:#eef6f5;border:1px solid #578983;border-radius:7px;box-sizing:border-box;font-size:.7rem;overflow-wrap:anywhere;overflow:hidden;text-align:left;color:var(--ink);cursor:pointer;z-index:1}.service-grille b,.service-grille small{display:block}.service-grille span span{display:inline-block;padding:2px}
 .sans-presence .bes-action{top:auto;bottom:3px;left:6px;right:auto}.sans-presence .bloc-contenu b{max-width:100%}.besoin-chiffres{display:flex;gap:10px;justify-content:space-between;padding:12px 0}.besoin-chiffres span{text-align:center}.besoin-chiffres b{display:block;font-size:1.8rem}.besoin-titre{padding-left:12px}
 
 .edt-jours{display:flex}.filtre-grille{justify-content:space-between}.filtre-grille select{max-width:150px}/* 26/09/2026 — Le repère de semaine ne colle plus : en position fixe il passait par-dessus
@@ -628,7 +628,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26x');
+  const m = await import('./app.js?v=2026-09-26y');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
