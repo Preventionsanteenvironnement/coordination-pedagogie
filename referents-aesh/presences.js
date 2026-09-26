@@ -16,6 +16,16 @@ export function libelleService(nom) {
    la grille. « DP — Demi-pension » écrit en entier mangeait deux lignes d'un bloc de 30 min. */
 export const SIGLES_SERVICE = [['DP', 'Demi-pension'], ['RE', 'Réunion d’équipe'],
   ['RI', 'Réunion institutionnelle'], ['IN', 'Internat'], ['PI', 'PIAL'], ['ES', 'ESAT'], ['PE', 'Périscolaire']];
+/* 26/09/2026 — Un dessin au trait devant les deux services qu'on cherche le plus vite du
+   regard. Au trait, pas en émoji : il prend la couleur du texte, s'imprime en noir et blanc,
+   et ne crie pas sur un bloc de trente minutes. Les lettres restent : un remplaçant lit
+   « DP » plus vite qu'il ne décode un pictogramme. */
+const LOGOS = {
+  DP: '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><path d="M4 1v5a1.5 1.5 0 0 0 1 1.4V15h1.4V7.4A1.5 1.5 0 0 0 7.4 6V1H6.4v4H5.7V1H4.7v4H4V1Zm7.2 0c-1 0-1.8 1.6-1.8 3.6 0 1.5.5 2.7 1.2 3.1V15h1.4V1Z" fill="currentColor"/></svg>',
+  IN: '<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden="true"><rect x="1" y="3.5" width="2" height="9" rx=".8" fill="currentColor"/><rect x="1" y="8" width="14" height="2.8" rx="1.1" fill="currentColor"/><rect x="13" y="10.2" width="2" height="2.3" rx=".8" fill="currentColor"/><rect x="3.8" y="5.6" width="4" height="2.2" rx="1" fill="currentColor"/></svg>'
+};
+export const logoService = sigle => LOGOS[sigle] || '';
+
 export function sigleService(nom) {
   const t = String(nom || '').toLowerCase();
   if (['cantine', 'dp', 'demi-pension'].includes(t)) return 'DP';

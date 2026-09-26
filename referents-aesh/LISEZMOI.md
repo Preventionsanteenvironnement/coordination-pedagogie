@@ -543,3 +543,17 @@ droit (il se bat avec les pastilles AESH), et rien du tout (un cours seul en A, 
 n'aurait plus aucune indication).
 
 Même traitement dans la grille d'un AESH, où la lettre était aussi une pastille posée par-dessus.
+
+**Un dessin devant DP et IN (26/09)** — sept variantes montrées à la taille réelle d'un créneau
+de trente minutes : rien, couverts, assiette, bol, deux émojis, ou le logo seul sans lettres.
+Retenue : **couverts au trait devant DP**, et un **lit au trait devant IN**.
+
+Au trait plutôt qu'en émoji : le dessin prend la couleur du texte, s'imprime en noir et blanc, et
+ne crie pas sur un bloc de trente minutes. Les lettres restent — un remplaçant lit « DP » plus
+vite qu'il ne décode un pictogramme ; le dessin sert à repérer, les lettres à lever le doute.
+
+Le lit a été redessiné une fois : en traits fins il disparaissait à 11 px. Il est en formes
+pleines — tête de lit, matelas, oreiller, pied — et sa silhouette se lit à cette taille.
+
+Fichiers : `presences.js` (`logoService`), `app.js`, `exports.js` (version), `index.html`
+(cache `2026-09-26s`).

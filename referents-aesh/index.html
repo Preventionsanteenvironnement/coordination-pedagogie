@@ -276,6 +276,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .past-aesh{display:inline-flex;align-items:baseline;gap:3px;color:#fff;border-radius:6px;padding:1px 6px;font-size:.72rem;font-weight:800;letter-spacing:.02em;line-height:1.5;white-space:nowrap}
 .past-aesh.abs{outline:2px dashed var(--err);outline-offset:1px}
 .past-aesh i{font-style:normal;font-weight:600;font-size:.66rem;opacity:.9}
+.service-grille b{display:flex;align-items:center;gap:3px}
+.service-grille b svg{flex:none;opacity:.85}
 .serv-past{display:flex;flex-wrap:wrap;gap:2px;margin-top:2px}
 .serv-past span{color:#fff;border-radius:5px;padding:0 5px;font-size:.68rem;font-weight:800}
 .sous-grille{margin:10px 2px 0;display:flex;flex-direction:column;gap:5px}
@@ -611,7 +613,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26r');
+  const m = await import('./app.js?v=2026-09-26s');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

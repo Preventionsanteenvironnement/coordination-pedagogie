@@ -9,7 +9,7 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
                coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, plagesDe, libelleService, sigleService, SIGLES_SERVICE } from './presences.js?v=2026-09-26a';
+import { couleurAesh, plagesDe, libelleService, sigleService, SIGLES_SERVICE, logoService } from './presences.js?v=2026-09-26b';
 import * as K from './calculs.js?v=2026-09-24f';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
@@ -819,7 +819,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const serviceHtml=j=>{
       const groupes=new Map(); services.filter(o=>o.j===j).forEach(o=>{const key=[o.label,o.debut,o.fin].join('|');if(!groupes.has(key))groupes.set(key,{...o,personnes:[]});groupes.get(key).personnes.push(o.a);});
       const liste=[...groupes.values()].sort((a,b)=>a.debut.localeCompare(b.debut)), cols=[]; liste.forEach(o=>{let n=cols.findIndex(l=>l.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
-      return liste.map(o=>`<button type="button" data-a="service-detail" data-v="${j}" class="service-grille" style="width:${34/cols.length}%;right:calc(2px + ${o.col*34/cols.length}%);top:${(K.min(o.debut)-H0)*PX}px;height:${(K.min(o.fin)-K.min(o.debut))*PX-2}px"><b>${esc(sigleService(o.label))}</b><span class="serv-past">${o.personnes.map(a=>`<span style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</span></button>`).join('');
+      return liste.map(o=>`<button type="button" data-a="service-detail" data-v="${j}" class="service-grille" style="width:${34/cols.length}%;right:calc(2px + ${o.col*34/cols.length}%);top:${(K.min(o.debut)-H0)*PX}px;height:${(K.min(o.fin)-K.min(o.debut))*PX-2}px"><b>${logoService(sigleService(o.label))}${esc(sigleService(o.label))}</b><span class="serv-past">${o.personnes.map(a=>`<span style="background:${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</span></button>`).join('');
     };
     const blocHtml = (c, large) => {
       const iso = K.ajoute(lundiDe(c), c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
