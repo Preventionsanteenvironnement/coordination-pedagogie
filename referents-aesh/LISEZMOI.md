@@ -431,3 +431,31 @@ par un autre référent au même moment. Non touché.
 
 Fichiers : `enregistrement.js`, `app.js` (cache `2026-09-26a`), `index.html` (`2026-09-26e`).
 Dix fichiers de tests réussis.
+
+
+### 26 septembre 2026 — Sauvegarde et restauration
+Demande de Brahim : « au cas où il y a une panne, la possibilité de tout enregistrer en JSON ».
+Entrée « 💾 Sauvegarde et restauration » dans le menu « … », accessible à tout référent.
+
+**Enregistrer** : un seul fichier, tout dedans — fiches AESH, placements, absences, réunions,
+messages, période, codes de pôle, PFMP, élèves, épreuves. Une sauvegarde unique plutôt qu'une
+par pôle : trois fichiers sur quatre seraient périmés le jour où on en a besoin, et un AESH à
+cheval sur deux pôles (Cécile, CD) s'y retrouverait coupé en deux.
+
+**Restaurer** : on choisit le périmètre — *Tout*, *Mon pôle*, *Une classe* — et le mode :
+- *Compléter* : on écrit ce que contient le fichier, on laisse le reste tranquille. Ce qu'un
+  autre référent a ajouté depuis survit.
+- *Remettre à l'identique* : on écrit le fichier **et** on passe en « retiré » ce qui a été
+  ajouté depuis, dans le seul périmètre choisi.
+
+Rien ne s'écrit avant que l'écran ait dit ce qui change : *« 3 ajoutés · 12 modifiés ·
+128 inchangés · 2 retirés »*, puis « Vous confirmez ? ». Jamais d'écriture à l'aveugle.
+
+Deux garde-fous que la logique impose : la **période, les messages et les réunions
+institutionnelles** sont communs aux quatre pôles — ils ne sont donc jamais restaurés depuis un
+périmètre restreint, pour ne pas défaire le travail d'un autre référent. Et « remettre à
+l'identique » ne retire que des documents qui portent un statut (placement, absence, épreuve) :
+jamais une fiche AESH ni une classe d'élèves.
+
+Fichiers : `sauvegarde.js` (logique pure), `app.js`, `index.html` (cache `2026-09-26f`),
+`tests/sauvegarde.test.mjs`. Onze fichiers de tests réussis.

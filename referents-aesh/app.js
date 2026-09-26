@@ -13,6 +13,7 @@ import { couleurAesh, plagesDe, libelleService } from './presences.js?v=2026-09-
 import * as K from './calculs.js?v=2026-09-24f';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
+import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
 import * as AV from './avatars.js?v=2026-09-24b';
 
 const DELAI = 15000;
@@ -351,6 +352,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${S.vu && S.vu !== S.session.pole ? '' : `<button type="button" role="menuitem" id="m-avatar" data-a="aller" data-v="avatar">🙂 ${avatarDe(S.session.pole) ? 'Changer mon avatar' : 'Choisir mon avatar'}</button>`}
       <button type="button" role="menuitem" id="m-code" data-a="aller" data-v="moncode">🔑 Changer mon code</button>
       <button type="button" role="menuitem" id="m-lien" data-a="partager">✉️ Envoyer le lien à mes collègues</button>
+      <button type="button" role="menuitem" id="m-sauve" data-a="sauvegarde">💾 Sauvegarde et restauration</button>
       <button type="button" role="menuitem" id="m-fond" data-a="fond">${document.documentElement.dataset.fond === 'blanc' ? '◐ Fond clair' : '○ Fond blanc'}</button>
       ${coord ? `<hr><div style="padding:6px 12px 2px;font-size:.8rem;color:var(--muted);font-weight:700">Voir un pôle</div>${POLES.map(p => `<button type="button" role="menuitem" id="m-vu-${p.id}" data-a="vu" data-v="${p.id}"><span class="chip-pole" style="--pole:${p.couleur}"><i></i>${esc(p.nom)}</span>${P().id === p.id ? ' ✓' : ''}</button>`).join('')}` : ''}
       <hr><button type="button" role="menuitem" id="m-sortir" data-a="sortir">↩︎ Se déconnecter</button></div>` : ''}
@@ -1325,6 +1327,85 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }));
     return { estimes, manque };
   }
+  /* ═══════════ Sauvegarde et restauration (26/09/2026) ═══════════
+     Un fichier, tout dedans : fiches AESH, placements, absences, réunions, messages, période,
+     codes de pôle, PFMP, élèves, épreuves. Une seule sauvegarde plutôt qu'une par pôle : trois
+     fichiers sur quatre seraient périmés le jour où on en a besoin, et un AESH à cheval sur
+     deux pôles s'y retrouverait coupé en deux.
+     À la restauration, rien ne s'écrit avant que l'écran ait dit ce qui va changer. Et rien
+     ne s'efface jamais : les règles l'interdisent — « remettre à l'identique » passe en
+     « retiré » ce qui a été ajouté depuis, dans le seul périmètre choisi. */
+  const PERIMETRES = [['tout', 'Tout'], ['pole', 'Mon pôle'], ['classe', 'Une classe']];
+
+  function sauvegarder() {
+    const docs = [...S.docs.values()].filter(d => d && d.id && d.type !== 'hist');
+    const paquet = { format: SAUVE.FORMAT, version: 1, annee: S.annee,
+      faitLe: new Date().toISOString(), par: S.session ? S.session.pole : '', documents: docs };
+    import('./fichiers.js?v=2026-09-24i')
+      .then(F => F.telecharger(new Blob([JSON.stringify(paquet, null, 1)], { type: 'application/json' }),
+        `Referents-AESH-${S.annee}-${K.isoLocal()}.json`))
+      .catch(() => toast('Téléchargement impossible.', true));
+  }
+
+  const optsSauve = f => ({ perimetre: f.perimetre, pole: P().id, classe: f.classe, mode: f.mode,
+    classesDuPole: S.edt.poles[P().id] || [],
+    aeshDuPole: [...S.docs.values()].filter(d => d.type === 'aesh' && (d.equipes || {})[P().id]).map(d => d.id) });
+  const analyserRestauration = f => SAUVE.analyser(f.paquet, S.docs, optsSauve(f));
+
+  function feuilleSauvegarde(f) {
+    const a = f.paquet ? analyserRestauration(f) : null;
+    const seg = (champ, val, opts) => `<div class="seg">${opts.map(([k, t]) =>
+      `<button type="button" data-a="sauve-champ" data-v="${champ}|${esc(k)}" aria-pressed="${val === k}" class="${val === k ? 'on' : ''}">${esc(t)}</button>`).join('')}</div>`;
+    return teteFeuille('Sauvegarde et restauration',
+      'Un fichier contient tout : AESH, placements, absences, réunions, période, élèves, épreuves.') + `
+      <div class="carte pad"><h3>Enregistrer</h3>
+        <p class="muted">${[...S.docs.values()].filter(d => d.type !== 'hist').length} documents, les quatre pôles.
+          À garder de côté : en cas de panne, c'est ce fichier qui remet tout en place.</p>
+        <button type="button" class="btn valider" data-a="sauve-telecharger">💾 Enregistrer en JSON</button></div>
+      <div class="carte pad"><h3>Restaurer</h3>
+        ${f.paquet ? '' : '<p class="muted">Choisissez un fichier de sauvegarde. Rien ne sera écrit avant que vous ayez vu ce qui change.</p><button type="button" class="btn" data-a="sauve-choisir">📂 Choisir un fichier…</button>'}
+        ${f.paquet ? `<p class="muted">Fichier du ${esc(K.dateLongue(String(f.paquet.faitLe).slice(0, 10)))} · ${(f.paquet.documents || []).length} documents · année ${esc(f.paquet.annee || '?')}</p>
+          <label class="ch-ep"><span>Ce qu'on restaure</span>${seg('perimetre', f.perimetre, PERIMETRES)}</label>
+          ${f.perimetre === 'classe' ? `<label class="ch-ep"><span>Classe</span><select data-i="sauve-classe">${(S.edt.poles[P().id] || []).map(n => `<option value="${esc(n)}" ${f.classe === n ? 'selected' : ''}>${esc((S.edt.classes[n] || {}).court || n)}</option>`).join('')}</select></label>` : ''}
+          <label class="ch-ep"><span>Comment</span>${seg('mode', f.mode, [['completer', 'Compléter'], ['identique', 'Remettre à l’identique']])}</label>
+          <div class="apercu">
+            <span><b>${a.ajoutes.length}</b> ajoutés</span><span><b>${a.modifies.length}</b> modifiés</span>
+            <span><b>${a.inchanges.length}</b> inchangés</span>${a.enTrop.length ? `<span class="chaud"><b>${a.enTrop.length}</b> retirés</span>` : ''}</div>
+          ${f.mode === 'identique' && a.enTrop.length ? `<p class="bandeau err">« Remettre à l’identique » va retirer ${a.enTrop.length} élément${a.enTrop.length > 1 ? 's' : ''} ajouté${a.enTrop.length > 1 ? 's' : ''} depuis cette sauvegarde. Rien n’est effacé : ils passent en « retiré ».</p>` : ''}
+          ${a.ajoutes.length + a.modifies.length + a.enTrop.length === 0 ? '<p class="bandeau">Rien à changer : tout est déjà identique.</p>' : ''}` : ''}</div>
+      <div class="actions"><button type="button" class="btn" data-a="fermer">Fermer</button>
+        ${f.paquet ? `<button type="button" class="btn valider" data-a="sauve-restaurer" ${a.ajoutes.length + a.modifies.length + a.enTrop.length ? '' : 'disabled'}>✓ Restaurer</button>` : ''}</div>`;
+  }
+
+  function choisirSauvegarde() {
+    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json';
+    input.onchange = async () => {
+      try {
+        const file = input.files[0];
+        if (!file || file.size > 8000000) throw Error('Fichier absent ou trop volumineux.');
+        const paquet = SAUVE.verifierPaquet(JSON.parse(await file.text()), S.annee);
+        S.feuille = { ...(S.feuille || {}), type: 'sauvegarde', paquet, perimetre: 'pole', mode: 'completer', classe: (S.edt.poles[P().id] || [])[0] || '' };
+        rendre();
+      } catch (e) { toast(e.message || 'Fichier illisible.', true); }
+    };
+    input.click();
+  }
+
+  async function restaurer() {
+    const f = S.feuille; if (!f || !f.paquet || S.envoi) return;
+    const a = analyserRestauration(f);
+    const total = a.ajoutes.length + a.modifies.length + a.enTrop.length;
+    confirmerPuis({ titre: 'Restaurer ?', grand: total + ' document' + (total > 1 ? 's' : ''),
+      lignes: [['Ajoutés', String(a.ajoutes.length)], ['Modifiés', String(a.modifies.length)],
+        ['Retirés', String(a.enTrop.length)], ['Périmètre', (PERIMETRES.find(x => x[0] === f.perimetre) || [, ''])[1]]],
+      avert: a.enTrop.length ? 'Ce qui a été ajouté depuis la sauvegarde passera en « retiré ».' : '',
+      bouton: 'Restaurer' }, async () => {
+        for (const d of [...a.ajoutes, ...a.modifies]) await ecrire({ ...d });
+        for (const d of a.enTrop) await ecrire({ ...d, statut: 'retire' });
+        return { message: total + ' document' + (total > 1 ? 's restaurés' : ' restauré') };
+      });
+  }
+
   /* ═══════════ Épreuves posées par-dessus l'emploi du temps (26/09/2026) ═══════════
      Un CCF, un bac blanc, un test : ce n'est pas un cours, c'est un événement daté que le
      référent pose lui-même. Il porte ce que l'enseignant a demandé — combien d'AESH — et ce
@@ -1803,6 +1884,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     else if(f.type==='service-detail') h=teteFeuille('Réunions et services',K.dateLongue(K.ajoute(S.lundi,f.jour)))+K.aeshActifs(idx(),P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.j===f.jour && ['service','reunion','institution'].includes(o.type)).map(o=>`<p style="border-left:5px solid ${couleurAesh(a.id)};padding-left:10px"><b>${esc(a.sigle)}</b> · ${esc(libelleService(o.label))}<br>${K.hFr(o.debut)}–${K.hFr(o.fin)}</p>`)).join('');
     else if (f.type === 'service-horaire') { h = feuilleServiceHoraire(f); large=true; }
     else if (f.type === 'epreuve') { h = feuilleEpreuve(f); large = true; }
+    else if (f.type === 'sauvegarde') { h = feuilleSauvegarde(f); large = true; }
     else if (f.type === 'placer') { h = feuillePlacer(f); large = true; }
     else if (f.type === 'besoin-detail') {
       const c = S.edt.cours[f.coursId], iso = K.ajoute(S.lundi,c.j);
@@ -2178,6 +2260,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
           nbAesh: e.nbAesh == null ? '' : String(e.nbAesh), note: e.note || '', codes: e.codes || [] };
         rendre(); return; }
       case 'epreuve-fiche': ficheEpreuve(v); return;
+      /* ─── Sauvegarde et restauration (26/09/2026) ─── */
+      case 'sauvegarde': S.feuille = { type: 'sauvegarde', perimetre: 'pole', mode: 'completer' }; S.menu = false; rendre(); return;
+      case 'sauve-telecharger': sauvegarder(); return;
+      case 'sauve-choisir': choisirSauvegarde(); return;
+      case 'sauve-restaurer': restaurer(); return;
+      case 'sauve-champ': { const f = S.feuille; if (!f || f.type !== 'sauvegarde') return;
+        const [champ, val] = v.split('|'); f[champ] = val; rendre(); return; }
       case 'placer-volet': if (S.feuille && S.feuille.type === 'placer') { S.feuille.volet = v; rendre(); } return;
       case 'epreuve-retirer': { const e = S.docs.get(v); if (!e) return;
         confirmerPuis({ titre: 'Retirer cette épreuve ?', grand: libNature(e.nature) + ' · ' + ((S.edt.classes[e.classe] || {}).court || e.classe),
@@ -2461,6 +2550,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const t = ev.target, k = t.dataset && t.dataset.i;
     if (!k) return;
     const f = S.form;
+    if (k === 'sauve-classe') { const f = S.feuille; if (f && f.type === 'sauvegarde') { f.classe = t.value; rendre(); } return; }
     if (k === 'ep-champ') {
       const f = S.feuille; if (!f || f.type !== 'epreuve') return;
       f[t.dataset.champ] = t.value;
