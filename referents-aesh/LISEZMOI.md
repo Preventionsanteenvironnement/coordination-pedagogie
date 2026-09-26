@@ -459,3 +459,26 @@ jamais une fiche AESH ni une classe d'élèves.
 
 Fichiers : `sauvegarde.js` (logique pure), `app.js`, `index.html` (cache `2026-09-26f`),
 `tests/sauvegarde.test.mjs`. Onze fichiers de tests réussis.
+
+
+### 26 septembre 2026 — A et B dans une seule grille, et un panneau qui respire
+Brahim : « quand je donne l'emploi du temps à un enseignant, il a besoin de voir sur une seule
+feuille sa semaine A et sa semaine B. Et toi, tu as séparé les deux. »
+
+C'était vrai pour une **classe** : « Semaine type » y alignait deux grilles côte à côte, alors
+que pour une personne elles étaient bien fusionnées. Une classe montre désormais **une seule
+grille** : tous ses cours, ceux qui n'ont lieu qu'en A ou qu'en B portant leur lettre en coin et
+un cadre en pointillé. Deux cours qui alternent au même créneau se placent côte à côte — on voit
+d'un coup ce qui se passe à cette heure-là, semaine A comme semaine B.
+
+En A+B, **les colonnes ne portent plus de date** : le même lundi n'existe pas dans les deux
+semaines. Le jour suffit, et le repère du haut dit « Semaines A et B ».
+
+**Le panneau s'épure.** Ne restent visibles que *Semaine / Jour* et le filtre AESH. Le reste
+passe dans un petit bouton « ⋯ » qui déplie : A et B ensemble · voir la semaine A · voir la
+semaine B · élèves notifiés · besoins des enseignants · EDT type · exporter la grille. Le menu
+se referme dès qu'on choisit.
+
+A+B est désormais le défaut partout, pour une classe comme pour une personne.
+
+Fichiers : `app.js`, `index.html` (cache `2026-09-26h`). Onze fichiers de tests réussis.

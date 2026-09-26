@@ -777,7 +777,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   /* La grille d'une classe, comme sur les PDF : réutilisée par « Emploi du temps » (cliquable) et « Vue d'ensemble » (lecture). */
   function grilleClasse(nom, lectureSeule) {
     const k = S.edt.classes[nom], sem = S.C.semaine(S.lundi), I = idx();
-    const cours = k.cours.map(id => S.edt.cours[id]).filter(c => S.C.coursSemaine(c, S.lundi));
+    /* 26/09/2026 — Une classe se lit d'un seul coup d'œil : les deux semaines dans UNE grille.
+       Un cours qui n'a lieu qu'en A ou qu'en B porte sa lettre ; les autres sont là chaque
+       semaine. Quand on demande « voir A » ou « voir B », on retombe sur la semaine seule. */
+    const deuxSemaines = !S.route.p.parite || S.route.p.parite === 'AB';
+    const paireC = semainesAB(S.C, S.lundi);
+    const lundiDe = c => !deuxSemaines ? S.lundi : (c.sem === 'SB' ? paireC.B : paireC.A);
+    const cours = k.cours.map(id => S.edt.cours[id])
+      .filter(c => deuxSemaines ? S.C.coursSemaine(c, lundiDe(c)) : S.C.coursSemaine(c, S.lundi));
     const services=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})));
     const H0 = 8 * 60, H1 = Math.max(18*60,...services.map(o=>K.min(o.fin))), PX = 1.25;
     /* 26/09/2026 — Une épreuve se pose PAR-DESSUS les cours : elle ne les remplace pas,
@@ -795,7 +802,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       return liste.map(o=>`<button type="button" data-a="service-detail" data-v="${j}" class="service-grille" style="width:${34/cols.length}%;right:calc(2px + ${o.col*34/cols.length}%);top:${(K.min(o.debut)-H0)*PX}px;height:${(K.min(o.fin)-K.min(o.debut))*PX-2}px"><b>${esc(libelleService(o.label))}</b>${K.min(o.debut)%30||K.min(o.fin)%30?`<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>`:''}<span>${o.personnes.map(a=>`<span style="border-left:4px solid ${couleurAesh(a.id)}">${esc(a.sigle)}</span>`).join(' ')}</span></button>`).join('');
     };
     const blocHtml = (c, large) => {
-      const iso = K.ajoute(S.lundi, c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
+      const iso = K.ajoute(lundiDe(c), c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
+      const lettre = deuxSemaines && c.sem === 'SA' ? 'A' : deuxSemaines && c.sem === 'SB' ? 'B' : '';
       const pl = placesCours(c.id, iso), parAesh = new Map(); pl.forEach(x => { if (I.aesh.get(x.aeshId)) parAesh.set(x.aeshId, x); });
       /* 26/09/2026 — Même ordre d'un cours à l'autre. Sans tri, la colonne d'un AESH dépendait
          de l'ordre d'écriture de son placement : ST devant ANT sur un bloc, derrière sur le
@@ -823,7 +831,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if (large) {
         const top = (K.min(c.d) - H0) * PX, h = (K.min(c.f) - K.min(c.d)) * PX;
         return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (100 / (c._cols || 1))}%;width:calc(${100 / (c._cols || 1)}% - 6px)${lieu ? '' : ';opacity:.45'}">
-          <button type="button" class="bloc-contenu" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}"><b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}${aeshs.length ? `<span class="presence-timeline" aria-hidden="true">${decoupes}${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span>${h > 54 ? elvHtml : ''}</button>${besHtml}</div>`;
+          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}">${lettre ? `<span class="sem-lettre">${lettre}</span>` : ''}<b>${esc(c.lib)}</b>${h > 38 ? `<span class="salle">${esc(c.salle.join(' · '))}</span>` : ''}${aeshs.length ? `<span class="presence-timeline" aria-hidden="true">${decoupes}${bandes}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span>${h > 54 ? elvHtml : ''}</button>${besHtml}</div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>
@@ -836,7 +844,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       l.forEach(c => { const g = l.filter(x => K.chevauche(x.d, x.f, c.d, c.f)); c._cols = Math.max(1, ...g.map(x => x._col + 1)); });
     });
     /* même grille sur téléphone et ordinateur (les référents travaillent sur ce visuel) : sur téléphone, mode panoramique, on la déplace avec le doigt */
-    let grille = `<div class="semaine-repere">Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}<small>${K.jjmm(jr.date)}</small></div>`).join('')}
+    let grille = `<div class="semaine-repere">${deuxSemaines ? `Semaines A et B` : `Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}`}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}${deuxSemaines ? '' : `<small>${K.jjmm(jr.date)}</small>`}</div>`).join('')}
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60+1 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => {
       grille += `<div class="g-jour jour-col" data-j="${j}" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}
@@ -902,12 +910,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
 
   function grillesPlanning(personne,nom) {
-    const choix=S.route.p.parite || (personne?'AB':S.C.parite(S.lundi)), paire=semainesAB(S.C,S.lundi), type=!!S.route.p.edtType;
+    const choix=S.route.p.parite || 'AB', paire=semainesAB(S.C,S.lundi), type=!!S.route.p.edtType;
     /* 25/09/2026 : une personne, un seul document. « A+B » n'aligne plus deux grilles :
        il n'en montre qu'une, où chaque bloc dit s'il revient les deux semaines ou une seule.
        A et B restent accessibles pour entrer dans le détail. */
     if(choix==='AB' && personne) return grilleSemaineType(personne,paire,type);
-    const dates=choix==='AB'?[paire.A,paire.B]:[type && !S.C.parite(S.lundi)?paire.A:S.lundi];
+    /* 26/09/2026 — Plus jamais deux grilles côte à côte pour une classe : A et B tiennent
+       dans une seule, chaque cours disant s'il ne revient qu'une semaine sur deux. */
+    const dates=[choix==='AB'||type&&!S.C.parite(S.lundi)?paire.A:S.lundi];
     const contenu=dates.map(l=>{
       const cx=type?contexteType(ctx()):ctx(), ancien=S.lundi;let html;
       if(personne) html=grillePersonne(personne,l,cx,type);
@@ -923,7 +933,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         html=grillePersonne({id:'type-classe'},l,cx,true,[...occ,...horsCours.values()]);
       }else {try{S.lundi=l;html=grilleClasse(nom,!peutPlacer(nom));}finally{S.lundi=ancien;}}
       const b=personne?K.bilan(cx,personne.id,l):null;
-      return `<section class="comparaison-semaine">${dates.length>1 && b?`<h2>Semaine ${S.C.parite(l)} · ${K.fmtH(b.total)}${b.contrat==null?'':` / ${K.fmtH(b.contrat)}`}</h2>`:''}${html.replaceAll('data-a=',`data-lundi="${l}" data-a=`)}</section>`;
+      return `<section class="comparaison-semaine">${html.replaceAll('data-a=',`data-lundi="${l}" data-a=`)}</section>`;
     }).join('');
     const aide=type?'<p class="bandeau">EDT type · organisation habituelle pour la période affichée. Sans absences, vacances, PFMP ni réunions ponctuelles. Consultation.</p>':'';
     return aide+(dates.length>1?`<div class="planning-horizontal" tabindex="0" role="region" aria-label="Planning semaines A et B, défilement horizontal"><div class="planning-ab" data-affichage="${S.route.p.affichage==='jour'?'jour':'semaine'}">${contenu}</div></div>`:contenu);
@@ -943,11 +953,18 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return tete+(modePlanning && [...S.docs.values()].some(d=>d.type==='verification' && d.statut==='brouillon')?panneauVerification():'')+(personne?`<h2 style="border-left:5px solid ${couleurAesh(id)};padding-left:10px">${esc(personne.sigle)} · Toutes ses classes${S.route.p.parite==='AB'?'':` · ${K.fmtH(bilan.total)}${bilan.contrat==null?'':` / ${K.fmtH(bilan.contrat)}`}`}</h2>`:classes)+`
       <div class="ligne filtre-grille"><div class="choix" role="group" aria-label="Vue">${['semaine','jour'].map(v=>`<button type="button" data-a="edt-vue" data-v="${v}" aria-pressed="${(S.route.p.affichage||'semaine')===v}">${v==='semaine'?'Semaine':'Jour'}</button>`).join('')}</div><label>AESH <select data-i="filtre-aesh" id="filtre-aesh"><option value="">Tous</option>${K.aeshActifs(idx(),P().id).map(a=>`<option value="${esc(a.id)}" ${a.id===id?'selected':''}>${esc(a.sigle)}</option>`).join('')}</select></label>
         <div class="opt-grille"><button type="button" class="rond" id="opt-bouton" data-a="opt-ouvrir" aria-expanded="${!!S.optOuvert}" aria-label="Ce qu'on affiche" title="Ce qu'on affiche">⋯</button>
-          ${S.optOuvert ? `<div class="opt-menu" role="group" aria-label="Ce qu'on affiche">${OPTIONS_GRILLE.map(([k, t]) =>
-            `<button type="button" data-a="opt-basculer" data-v="${k}" aria-pressed="${montrer(k)}"><span class="opt-case">${montrer(k) ? '✓' : ''}</span>${esc(t)}</button>`).join('')}</div>` : ''}</div></div>
-      <div class="ligne"><div class="choix" role="group" aria-label="Alternance">${[['AB','Semaine type'],['A','Détail A'],['B','Détail B']].map(([v,t])=>`<button data-a="edt-parite" data-v="${v}" aria-pressed="${(S.route.p.parite || (personne?'AB':S.C.parite(S.lundi)))===v}">${t}</button>`).join('')}</div><button class="btn" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}">EDT type</button></div>
+          ${S.optOuvert ? `<div class="opt-menu" role="group" aria-label="Ce qu'on affiche">
+            <div class="opt-titre">Semaines</div>
+            ${[['AB','A et B ensemble'],['A','Voir la semaine A'],['B','Voir la semaine B']].map(([v,t])=>{
+              const on=(S.route.p.parite||'AB')===v;
+              return `<button type="button" data-a="edt-parite" data-v="${v}" aria-pressed="${on}"><span class="opt-case">${on?'✓':''}</span>${t}</button>`;}).join('')}
+            <div class="opt-titre">Ce qu'on affiche</div>
+            ${OPTIONS_GRILLE.map(([k, t]) =>
+              `<button type="button" data-a="opt-basculer" data-v="${k}" aria-pressed="${montrer(k)}"><span class="opt-case">${montrer(k) ? '✓' : ''}</span>${esc(t)}</button>`).join('')}
+            <button type="button" data-a="edt-type" aria-pressed="${!!S.route.p.edtType}"><span class="opt-case">${S.route.p.edtType?'✓':''}</span>EDT type · sans absences ni PFMP</button>
+            <button type="button" data-a="export-grille"><span class="opt-case">⬇</span>Exporter la grille · PDF / Excel</button>
+          </div>` : ''}</div></div>
       ${S.route.p.affichage==='jour'?`<nav class="edt-jours" aria-label="Jour">${K.JOURS_C.map((j,i)=>`<button type="button" data-a="edt-jour" data-v="${i}" aria-pressed="${+(S.route.p.jour||0)===i}">${j}</button>`).join('')}</nav>`:''}
-      ${personne && (S.route.p.parite||'AB')==='AB' ? '' : '<button class="btn" data-a="export-grille">Exporter la grille · PDF / Excel</button>'}
       ${grillesPlanning(personne,nom)}`;
   }
   function reunionsPole() {
@@ -965,7 +982,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function grillePersonne(a,lundi=S.lundi,cx=ctx(),type=false,liste=null) {
     const tous=(liste || K.occupations(cx,a.id,lundi)).filter(o=>!['repos','vacances'].includes(o.type)),px=1.25,fin=FIN_GRILLE;
     const occ=tous.filter(o=>K.min(o.debut)<fin), soir=tous.filter(o=>K.min(o.fin)>fin), tot=totauxJours(K,tous);
-    return `<div class="semaine-repere">${type?'EDT type · ':''}Semaine ${S.C.parite(lundi)||'—'} · ${K.jjmm(lundi)}–${K.jjmm(K.ajoute(lundi,4))}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}<small>${K.jjmm(K.ajoute(lundi,i))}</small></div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
+    const deuxSem = !S.route.p.parite || S.route.p.parite === 'AB';
+    return `<div class="semaine-repere">${type?'EDT type · ':''}${deuxSem?`Semaines A et B`:`Semaine ${S.C.parite(lundi)||'—'} · ${K.jjmm(lundi)}–${K.jjmm(K.ajoute(lundi,4))}`}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}${deuxSem ? '' : `<small>${K.jjmm(K.ajoute(lundi,i))}</small>`}</div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
       const l=occ.filter(o=>o.j===i),cols=[];l.forEach(o=>{let n=cols.findIndex(c=>c.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
       return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''} ${(K.min(o.fin)-K.min(o.debut))<45?'court':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(Math.min(K.min(o.fin),fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}">${o.sem&&o.sem!=='AB'?`<span class="pastille-sem">${o.sem}</span>`:''}<b>${esc(o.cours?.lib || libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
     }).join('')}<div class="g-pied">Total</div>${K.JOURS.map((j,i)=>`<div class="g-pied jour-col" data-j="${i}">${esc(libelleTotal(K,tot[i]))}</div>`).join('')}</div></div>${soir.length?`<div class="bande-soiree"><b>Soirée</b>${soir.map(o=>`<span>${esc(K.JOURS[o.j])} ${K.hFr(o.debut)}–${K.hFr(o.fin)} · ${esc(o.cours?.lib || libelleService(o.label))}</span>`).join('')}</div>`:''}`;
@@ -2255,8 +2273,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'service-detail': if(/^[0-4]$/.test(v)) ouvrir({type:'service-detail',jour:+v}); return;
       case 'edt-page': if(['planning','reglages','reunions'].includes(v)) aller('edt',{...S.route.p,vue:v}); return;
       case 'personne-cours': {const c=S.edt.cours[v];if(!c)return;const nom=c.cls.find(n=>classesDu(P().id).includes(n));if(nom && peutPlacer(nom))ouvrirPlacement(v,nom);else ouvrir({type:'lecture',coursId:v,classe:c.cls[0]});return;}
-      case 'edt-parite': if(['A','B','AB'].includes(v)){if(v!=='AB')S.lundi=semainesAB(S.C,S.lundi)[v];aller('edt',{...S.route.p,parite:v});} return;
-      case 'edt-type': aller('edt',{...S.route.p,edtType:!S.route.p.edtType});return;
+      case 'edt-parite': if(['A','B','AB'].includes(v)){if(v!=='AB')S.lundi=semainesAB(S.C,S.lundi)[v];S.optOuvert=false;aller('edt',{...S.route.p,parite:v});} return;
+      case 'edt-type': S.optOuvert=false; aller('edt',{...S.route.p,edtType:!S.route.p.edtType});return;
       case 'opt-ouvrir': S.optOuvert = !S.optOuvert; rendre({ focus: 'opt-bouton' }); return;
       case 'opt-basculer': optionsGrille = { ...optionsGrille, [v]: !montrer(v) };
         lsEcrit(K_OPTIONS, optionsGrille); rendre({ focus: b.id }); return;
