@@ -305,7 +305,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   });
   /* ─────────── rendu ─────────── */
   let toastT = null;
-  function toast(t, err) { S.toast = { t, err }; rendre(); clearTimeout(toastT); toastT = setTimeout(() => { S.toast = null; rendre(); }, err ? 4200 : 1800); annonce(t); }
+  /* 26/09/2026 — Un refus passait en rouge en bas de l'écran et disparaissait avant d'être lu :
+     on voyait une alarme sans savoir ce qu'elle disait. Ce qui bloque reste affiché en haut
+     jusqu'à ce qu'on le ferme. Ce qui est simplement fait garde son passage discret en bas. */
+  function toast(t, err) {
+    S.toast = { t, err }; rendre(); clearTimeout(toastT);
+    if (!err) toastT = setTimeout(() => { S.toast = null; rendre(); }, 1800);
+    annonce(t);
+  }
   function annonce(t) { const a = document.getElementById('annonce'); if (a) { a.textContent = ''; setTimeout(() => { a.textContent = t; }, 30); } }
   function rendre(o = {}) {
     const actif = document.activeElement, idActif = actif && racine.contains(actif) ? actif.id : null, y = window.scrollY;
@@ -317,7 +324,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     else if (e === 'code' || !S.session) html = ecranCode();
     else html = `${entete()}<main class="corps" id="contenu" ${S.feuille ? 'inert' : ''}>${bandeauEtat()}${(ECRANS[e] || ECRANS.accueil)()}</main>`;
     if (S.feuille) html += feuille();
-    if (S.toast) html += `<div class="toast ${S.toast.err ? 'err' : ''}" role="status">${esc(S.toast.t)}</div>`;
+    if (S.toast) html += S.toast.err
+      ? `<div class="alerte-haut" role="alert"><span>${esc(S.toast.t)}</span><button type="button" class="rond" data-a="toast-fermer" aria-label="Fermer ce message">✕</button></div>`
+      : `<div class="toast" role="status">${esc(S.toast.t)}</div>`;
     const decalages=[...racine.querySelectorAll('.planning-horizontal,.comparaison-semaine > .defile')].map(el=>el.scrollLeft);
     racine.innerHTML = html;
     racine.querySelectorAll('.planning-horizontal,.comparaison-semaine > .defile').forEach((el,i)=>{el.scrollLeft=decalages[i]||0;});
@@ -2336,6 +2345,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'edt-parite': if(['A','B','AB'].includes(v)){if(v!=='AB')S.lundi=semainesAB(S.C,S.lundi)[v];S.optOuvert=false;aller('edt',{...S.route.p,parite:v});} return;
       case 'edt-type': S.optOuvert=false; aller('edt',{...S.route.p,edtType:!S.route.p.edtType});return;
       case 'opt-ouvrir': S.optOuvert = !S.optOuvert; rendre({ focus: 'opt-bouton' }); return;
+      case 'toast-fermer': clearTimeout(toastT); S.toast = null; rendre(); break;
       case 'opt-basculer': optionsGrille = { ...optionsGrille, [v]: !montrer(v) };
         lsEcrit(K_OPTIONS, optionsGrille); rendre({ focus: b.id }); return;
       /* ─── Élèves notifiés (26/09/2026) ─── */

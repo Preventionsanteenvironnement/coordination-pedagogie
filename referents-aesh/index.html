@@ -522,6 +522,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .choix-aesh button.trop small,.choix-aesh button.reunion small{color:var(--warn)}
 .toast{position:fixed;left:50%;bottom:calc(24px + var(--safe-b));transform:translateX(-50%);z-index:80;background:#10232a;color:#fff;border-radius:999px;padding:11px 20px;font-weight:650;max-width:92vw;box-shadow:var(--sh-l)}
 .toast.err{background:#8a1c1c}
+/* 26/09/2026 — Le message qui bloque : en haut, lisible, et il ne part que sur la croix. */
+.alerte-haut{position:fixed;top:calc(12px + var(--safe-t,0px));left:50%;transform:translateX(-50%);z-index:90;
+  display:flex;align-items:flex-start;gap:10px;max-width:min(680px,94vw);box-sizing:border-box;
+  background:var(--card);color:var(--ink);border:2px solid #8a1c1c;border-left-width:8px;border-radius:12px;
+  padding:12px 12px 12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-size:.95rem;line-height:1.45}
+.alerte-haut>span{flex:1;min-width:0}
+.alerte-haut .rond{flex:0 0 auto;width:32px;height:32px;min-height:32px;font-size:1rem}
+@media(max-width:700px){.alerte-haut{max-width:calc(100vw - 20px)}}
 .lien-partage{display:block;text-align:center;font-weight:700;word-break:break-all;background:var(--card-2);border:1px dashed var(--line);border-radius:12px;padding:12px}
 .etat-vide{text-align:center;padding:40px 16px;color:var(--muted)}
 .etat-vide b{display:block;color:var(--ink);font-size:1.15rem;margin-bottom:6px}
@@ -637,7 +645,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26ac');
+  const m = await import('./app.js?v=2026-09-26ad');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
