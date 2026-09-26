@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { DISPOSITIFS, SERVICES_TYPES, SIGLES_SERVICE, sigleService, horsClasse } from '../presences.js';
+import { DISPOSITIFS, SERVICES_TYPES, SIGLES_SERVICE, sigleService, horsClasse } from '../calculs.js';
 /* Chaque dispositif a un sigle unique, sigles de réunion compris. */
 const sig = SIGLES_SERVICE.map(([s]) => s);
 assert.equal(new Set(sig).size, sig.length, 'sigles en double : ' + sig.join(' '));

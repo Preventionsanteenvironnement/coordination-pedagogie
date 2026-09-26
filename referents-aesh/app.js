@@ -9,8 +9,9 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
                coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, plagesDe, libelleService, sigleService, SIGLES_SERVICE, SERVICES_TYPES, logoService, horsClasse } from './presences.js?v=2026-09-26c';
-import * as K from './calculs.js?v=2026-09-26a';
+import { couleurAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-26c';
+import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-26b';
+import * as K from './calculs.js?v=2026-09-26b';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
@@ -188,6 +189,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     out.push({ id: 'annee', label: 'Fin de l’année scolaire', fin: ete ? avant(ete.debut) : '2027-07-02' });
     return out;
   }
+  /* 26/09/2026 — « Toute l'année » affichait la date du jour, qui ne veut rien dire.
+     La fin de l'année scolaire se lit dans le calendrier, veille des vacances d'été. */
+  const finAnneeScolaire = () => {
+    const l = periodesPossibles(), a = l.find(x => x.id === 'annee');
+    return a ? a.fin : '2027-07-02';
+  };
   const periodeDefaut = () => { const l = periodesPossibles(), noel = l.find(x => /noël/i.test(x.label)); return (noel || l[l.length - 1]).fin; };
   const periodeEdt = () => { const d = S.docs.get('periode_' + S.annee); return d && K.RE_DATE.test(d.jusquau || '') ? d.jusquau : periodeDefaut(); };
   const periodePar = () => { const d = S.docs.get('periode_' + S.annee); return d && d.par ? d.par : ''; };
@@ -647,13 +654,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <p class="sous">${[p.nom, ...autres.map(nomPole)].map(esc).join(' + ')}</p></div>${!nouveau ? selecteurSemaine() : ''}</div>
       ${b ? `<div class="stats"><div class="carte stat"><b>${K.fmtH(b.total)}</b><small>cette semaine</small></div><div class="carte stat"><b style="color:${b.reste == null ? 'inherit' : b.reste < 0 ? 'var(--err)' : 'var(--ok)'}">${b.reste == null ? '—' : K.fmtH(b.reste)}</b><small>reste sur le contrat</small></div><div class="carte stat"><b>${K.fmtH(b.parPole[p.id] || 0)}</b><small>placées dans ${esc(p.nom)}</small></div></div>
         <div class="carte pad" style="display:grid;gap:6px"><div class="ligne ecarte"><h2>Ses heures</h2><span class="puce ${b.rep.solde == null ? '' : b.rep.solde < -1e-9 ? 'err' : b.rep.solde > 1e-9 ? 'ok' : 'ok'}">${b.rep.solde == null ? 'contrat ?' : b.rep.solde < -1e-9 ? `${K.fmtH(-b.rep.solde)} de trop` : b.rep.solde > 1e-9 ? `${K.fmtH(b.rep.solde)} disponibles` : 'tout réparti'}</span></div>
+          ${b.rep.ecartFilieres ? `<p class="bandeau warn" style="margin:0">Ses filières déclarent ${K.fmtH(b.rep.declare)} alors que sa présence élève est de ${K.fmtH(b.rep.presence)} : ${K.fmtH(Math.abs(b.rep.ecartFilieres))} d’écart. Les deux doivent dire la même chose.</p>` : ''}
+          ${b.rep.presenceSaisie == null ? `<p class="bandeau" style="margin:0">Présence élève non renseignée : ses filières (${K.fmtH(b.rep.declare)}) en tiennent lieu.</p>` : ''}
           <span class="muted" style="font-size:.92rem">${esc(b.rep.texte)}</span>${jaugeAesh(a)}</div>
         ${b.alertes.length ? `<div class="alertes">${b.alertes.map((x, i) => carteAlerte(a, x, i, 'fa')).join('')}</div>` : ''}` : ''}
       ${f.alerte ? `<div class="bandeau err" role="alert">${esc(f.alerte)}</div>` : ''}
       <div class="champs">
         <div class="champ ${estModif((o.sigle || '') !== a.sigle)}"><span class="lib"><b>Sigle</b><small>initiales, jamais le prénom</small></span><input type="text" id="f-sigle" data-i="sigle" value="${esc(a.sigle)}" maxlength="6" style="width:110px;font-weight:800;text-transform:uppercase;text-align:center"></div>
         <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${parQui(a, 'contrat')}${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
-        <div class="champ ${estModif((o.finContrat || '') !== (a.finContrat || ''))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Durée du contrat ${aide('duree')}</b><small>${a.finContrat ? `jusqu’au ${esc(K.dateLongue(a.finContrat))}` : 'toute l’année'}</small>${aideTexte('duree')}</span>
+        <div class="champ ${estModif((o.finContrat || '') !== (a.finContrat || ''))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Durée du contrat ${aide('duree')}</b><small>${a.finContrat ? `jusqu’au ${esc(K.dateLongue(a.finContrat))}` : `toute l’année, jusqu’au ${esc(K.dateLongue(finAnneeScolaire()))}`}</small>${aideTexte('duree')}</span>
           <span class="ligne" style="gap:6px"><input type="date" id="f-fin" data-i="fin-contrat" value="${esc(a.finContrat || '')}" style="min-height:40px">${a.finContrat ? `<button type="button" class="lien" id="f-fin-non" data-a="fin-aucune">toute l’année</button>` : ''}</span></div>
         <div class="champ ${estModif(nombre(o.presence) !== nombre(a.presence))}"><span class="lib"><b>Présence élève ${aide('presence')}</b><small>heures par semaine</small>${parQui(a, 'presence')}${aideTexte('presence')}</span>${pas('presence', a.presence, 0.5, 'Présence élève')}</div>
         ${K.reunionFixePsr(a) ? '<div class="champ"><span class="lib"><b>Réunion d’équipe · 1 h</b><small>Lundi 13 h–14 h · automatique pour cette équipe. Une réunion institutionnelle programmée la remplace cette semaine-là.</small></span></div>' : `        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}

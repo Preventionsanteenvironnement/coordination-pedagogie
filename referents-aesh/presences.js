@@ -14,34 +14,10 @@ export function libelleService(nom) {
 }
 /* 26/09/2026 — Dans la grille, deux lettres suffisent : le sens est rappelé en légende, sous
    la grille. « DP — Demi-pension » écrit en entier mangeait deux lignes d'un bloc de 30 min. */
-/* 26/09/2026 — Une seule table des dispositifs. Chacun porte son sigle, son nom en clair et
-   la seule chose que la grille a besoin de savoir : est-ce du temps AUPRÈS D'ÉLÈVES ?
-   Le repas et l'internat en sont ; le PIAL, le DAFI et l'ESAT n'ont rien à faire dans la
-   grille d'une classe — ils appartiennent à la semaine de la personne, pas à celle du groupe.
-   Un nom inventé par un référent est montré par défaut : rien ne disparaît en silence.
-   Le formulaire permet de le ranger lui-même en « hors classe ». */
-export const DISPOSITIFS = [
-  { nom: 'Cantine',      sigle: 'DP', lib: 'Demi-pension',            avecEleves: true  },
-  { nom: 'Internat',     sigle: 'IN', lib: 'Internat',                avecEleves: true  },
-  { nom: 'Périscolaire', sigle: 'PE', lib: 'Périscolaire',            avecEleves: true  },
-  { nom: 'Étude',        sigle: 'ÉT', lib: 'Étude',                   avecEleves: true  },
-  { nom: 'Vie scolaire', sigle: 'VS', lib: 'Vie scolaire',            avecEleves: true  },
-  { nom: 'PIAL',         sigle: 'PI', lib: 'PIAL',                    avecEleves: false },
-  { nom: 'DAFI',         sigle: 'DA', lib: 'DAFI',                    avecEleves: false },
-  { nom: 'ESAT',         sigle: 'ES', lib: 'ESAT',                    avecEleves: false },
-];
-export const SERVICES_TYPES = [...DISPOSITIFS.map(d => d.nom), 'Autre'];
-const REUNIONS = [['RE', 'Réunion d’équipe'], ['RI', 'Réunion institutionnelle']];
-export const SIGLES_SERVICE = [...DISPOSITIFS.map(d => [d.sigle, d.lib]), ...REUNIONS];
-const cle = n => String(n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-const trouve = n => DISPOSITIFS.find(d => cle(d.nom) === cle(n));
-/* Un service est hors classe s'il le dit lui-même (choix du référent, qui prime), sinon
-   d'après la table. Un nom inconnu reste dans la grille. */
-export function horsClasse(service) {
-  if (service && typeof service.horsClasse === 'boolean') return service.horsClasse;
-  const d = trouve(service && service.nom !== undefined ? service.nom : service);
-  return d ? !d.avecEleves : false;
-}
+/* La table des dispositifs (DISPOSITIFS, SERVICES_TYPES, SIGLES_SERVICE, sigleService,
+   horsClasse, avecEleves) vit dans calculs.js : elle sert d'abord à compter des heures.
+   presences.js ne garde que ce qui se dessine — et n'importe rien, pour rester chargeable
+   seul par les tests. */
 /* 26/09/2026 — Un dessin au trait devant les deux services qu'on cherche le plus vite du
    regard. Au trait, pas en émoji : il prend la couleur du texte, s'imprime en noir et blanc,
    et ne crie pas sur un bloc de trente minutes. Les lettres restent : un remplaçant lit
@@ -52,15 +28,3 @@ const LOGOS = {
 };
 export const logoService = sigle => LOGOS[sigle] || '';
 
-export function sigleService(nom) {
-  const t = String(nom || '').toLowerCase();
-  const d = trouve(nom); if (d) return d.sigle;
-  if (['cantine', 'dp', 'demi-pension'].includes(t)) return 'DP';
-  if (t.startsWith('réunion d') || t.startsWith('reunion d')) return 'RE';
-  if (t.startsWith('réunion') || t.startsWith('reunion')) return 'RI';
-  if (t.startsWith('internat')) return 'IN';
-  if (t.startsWith('pial')) return 'PI';
-  if (t.startsWith('esat')) return 'ES';
-  if (t.startsWith('péri') || t.startsWith('peri')) return 'PE';
-  return String(nom || '').slice(0, 2).toUpperCase();
-}

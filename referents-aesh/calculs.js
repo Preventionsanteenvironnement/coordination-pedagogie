@@ -3,6 +3,56 @@
    Semaines A/B, vacances, PFMP, heures des AESH, conflits, disponibilités.
    Toutes les dates sont des chaînes « AAAA-MM-JJ », calculées en UTC.
    ═══════════════════════════════════════════════════════════════════ */
+/* 26/09/2026 — Une seule table des dispositifs. Chacun porte son sigle, son nom en clair et
+   la seule chose que la grille a besoin de savoir : est-ce du temps AUPRÈS D'ÉLÈVES ?
+   Le repas et l'internat en sont ; le PIAL, le DAFI et l'ESAT n'ont rien à faire dans la
+   grille d'une classe — ils appartiennent à la semaine de la personne, pas à celle du groupe.
+   Un nom inventé par un référent est montré par défaut : rien ne disparaît en silence.
+   Le formulaire permet de le ranger lui-même en « hors classe ». */
+export const DISPOSITIFS = [
+  /*  nom             sigle  libellé          grilleClasse  eleves
+      grilleClasse : se dessine-t-il dans la grille d'une classe ?
+      eleves       : ce temps-là compte-t-il comme présence auprès d'élèves ?
+      Les deux ne disent pas la même chose : un DAFI se passe avec des élèves — d'autres
+      élèves, ailleurs — donc il compte aux heures sans encombrer la grille du groupe.
+      Un PIAL, c'est de l'administratif : ni l'un ni l'autre. */
+  { nom: 'Cantine',      sigle: 'DP', lib: 'Demi-pension', grilleClasse: true,  eleves: true  },
+  { nom: 'Internat',     sigle: 'IN', lib: 'Internat',     grilleClasse: true,  eleves: true  },
+  { nom: 'Périscolaire', sigle: 'PE', lib: 'Périscolaire', grilleClasse: true,  eleves: true  },
+  { nom: 'Étude',        sigle: 'ÉT', lib: 'Étude',        grilleClasse: true,  eleves: true  },
+  { nom: 'Vie scolaire', sigle: 'VS', lib: 'Vie scolaire', grilleClasse: true,  eleves: true  },
+  { nom: 'DAFI',         sigle: 'DA', lib: 'DAFI',         grilleClasse: false, eleves: true  },
+  { nom: 'ESAT',         sigle: 'ES', lib: 'ESAT',         grilleClasse: false, eleves: true  },
+  { nom: 'PIAL',         sigle: 'PI', lib: 'PIAL',         grilleClasse: false, eleves: false },
+];
+export const SERVICES_TYPES = [...DISPOSITIFS.map(d => d.nom), 'Autre'];
+const REUNIONS = [['RE', 'Réunion d’équipe'], ['RI', 'Réunion institutionnelle']];
+export const SIGLES_SERVICE = [...DISPOSITIFS.map(d => [d.sigle, d.lib]), ...REUNIONS];
+const cle = n => String(n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const trouve = n => DISPOSITIFS.find(d => cle(d.nom) === cle(n));
+/* Un service est hors classe s'il le dit lui-même (choix du référent, qui prime), sinon
+   d'après la table. Un nom inconnu reste dans la grille. */
+/* Ce temps-là compte-t-il dans la présence auprès des élèves ? Question distincte de la
+   précédente : un DAFI se passe avec des élèves — d'autres élèves — donc il compte ici sans
+   entrer dans la grille d'une classe. Un PIAL ne compte ni ici ni là : c'est de l'administratif. */
+export function avecEleves(service) {
+  if (service && typeof service.avecEleves === 'boolean') return service.avecEleves;
+  const d = trouve(service && service.nom !== undefined ? service.nom : service);
+  return d ? !!d.eleves : true;
+}
+export function sigleService(nom) {
+  const d = trouve(nom); if (d) return d.sigle;
+  const t = String(nom || '').toLowerCase();
+  if (t.startsWith('réunion d') || t.startsWith('reunion d')) return 'RE';
+  if (t.startsWith('réunion') || t.startsWith('reunion')) return 'RI';
+  return String(nom || '').slice(0, 2).toUpperCase();
+}
+export function horsClasse(service) {
+  if (service && typeof service.horsClasse === 'boolean') return service.horsClasse;
+  const d = trouve(service && service.nom !== undefined ? service.nom : service);
+  return d ? !d.grilleClasse : false;
+}
+
 export const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
 export const JOURS_C = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
 export const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
@@ -428,15 +478,36 @@ export const joursDe = a => [0, 1, 2, 3, 4].filter(j => { const dp = disposDe(a)
 export function repartition(a, nomPole) {
   const contrat = Number.isFinite(+a.contrat) && a.contrat !== null && a.contrat !== '' ? +a.contrat : null;
   const parPole = {}; Object.keys(a.equipes || {}).forEach(p => { const h = +((a.heures || {})[p]); if (Number.isFinite(h)) parPole[p] = h; });
-  const services = totalServices(a), reunion = heuresReunion(a);
-  const declare = Object.values(parPole).reduce((s, v) => s + v, 0), somme = declare + services + reunion;
+  const declare = Object.values(parPole).reduce((s, v) => s + v, 0);
+  /* 26/09/2026 — La demi-pension, l'internat, le DAFI, l'ESAT sont du temps AUPRÈS D'ÉLÈVES :
+     ils sont DANS la présence élève, pas en plus. Les additionner comptait le repas deux fois
+     et donnait « 4 h de trop » à des contrats qui tombaient juste. Ne s'ajoutent au contrat
+     que les dispositifs sans élèves — le PIAL — et la réunion.
+     La présence saisie fait foi ; tant qu'elle est vide, la somme des filières en tient lieu. */
+  const services = servicesDe(a);
+  const eleves = services.filter(x => avecEleves(x)).reduce((s, x) => s + x.h, 0);
+  const hors = services.filter(x => !avecEleves(x)).reduce((s, x) => s + x.h, 0);
+  const presenceSaisie = Number.isFinite(+a.presence) && a.presence !== null && a.presence !== '' ? +a.presence : null;
+  const presence = presenceSaisie == null ? declare : presenceSaisie;
+  const reunion = heuresReunion(a);
+  const somme = presence + hors + reunion;
   const solde = contrat == null ? null : contrat - somme;
   const nom = p => nomPole ? nomPole(p) : p;
-  const parts = Object.entries(parPole).map(([p, h]) => `${nom(p)} ${fmtH(h)}`);
-  servicesDe(a).forEach(x => parts.push(`${x.nom.toLowerCase()} ${fmtH(x.h)}`)); if (reunion) parts.push(`réunion ${fmtH(reunion)}`);
-  const texte = contrat == null ? 'contrat à compléter' : solde < -1e-9 ? `${parts.join(' + ')} = ${fmtH(somme)}, pour un contrat de ${fmtH(contrat)} : ${fmtH(-solde)} de trop` : solde > 1e-9 ? `${fmtH(solde)} disponibles sur un contrat de ${fmtH(contrat)}` : `contrat de ${fmtH(contrat)} entièrement réparti`;
-  return { contrat, parPole, services, reunion, declare, somme, solde, texte, poles: Object.keys(parPole).filter(p => parPole[p] > 0) };
+  const parts = [`présence élève ${fmtH(presence)}`];
+  services.filter(x => !avecEleves(x)).forEach(x => parts.push(`${x.nom.toLowerCase()} ${fmtH(x.h)}`));
+  if (reunion) parts.push(`réunion ${fmtH(reunion)}`);
+  /* L'écart entre ce que disent les filières et la présence élève : c'est lui qui se cachait
+     derrière les « heures de trop », les deux nombres étant aux deux bouts de la fiche. */
+  const ecartFilieres = presenceSaisie == null || !Object.keys(parPole).length ? null : declare - presence;
+  const texte = contrat == null ? 'contrat à compléter'
+    : solde < -1e-9 ? `${parts.join(' + ')} = ${fmtH(somme)}, pour un contrat de ${fmtH(contrat)} : ${fmtH(-solde)} de trop`
+    : solde > 1e-9 ? `${fmtH(solde)} disponibles sur un contrat de ${fmtH(contrat)}`
+    : `contrat de ${fmtH(contrat)} entièrement réparti`;
+  return { contrat, parPole, presence, presenceSaisie, eleves, services: hors, hors, reunion, declare, somme, solde,
+    ecartFilieres, texte, poles: Object.keys(parPole).filter(p => parPole[p] > 0),
+    detailPoles: Object.entries(parPole).map(([p, h]) => `${nom(p)} ${fmtH(h)}`) };
 }
+
 
 /* Bilan d'un AESH pour une semaine réelle. */
 export function bilan(ctx, aeshId, lundi) {
