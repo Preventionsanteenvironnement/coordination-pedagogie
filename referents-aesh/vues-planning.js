@@ -1,4 +1,4 @@
-import * as K from './calculs.js?v=2026-09-27h';
+import * as K from './calculs.js?v=2026-09-27i';
 // Deux semaines scolaires consécutives, A puis B ; les vacances sont sautées.
 export function semainesAB(C,lundi) {
   let pivot=lundi;

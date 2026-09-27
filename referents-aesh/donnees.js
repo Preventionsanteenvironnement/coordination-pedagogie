@@ -36,8 +36,8 @@ export const filiereDeClasse = nom => FILIERES.find(f => f.classes.includes(nom)
 
 /* Équipes du 16/09/2026 (tableau transmis par la coordination). Contrat et heures : à compléter par les référents.
    27/09/2026 — Les sigles suivent la règle : deux lettres du prénom, plus l'initiale du nom
-   quand deux personnes se percutent (Antoine D. et Anne C, les deux Christine et Chrystel,
-   Gaëlle P et Gaëtan B.). Ces valeurs ne servent qu'au tout premier démarrage d'un pôle vide :
+   quand deux personnes se percutent — il y a plusieurs collisions dans l'établissement.
+   Ces valeurs ne servent qu'au tout premier démarrage d'un pôle vide :
    dès qu'un AESH existe dans la base, c'est son sigle à elle qui fait foi. */
 const A = (id, sigle, equipes) => ({ id, type: 'aesh', sigle, equipes, contrat: null, heures: {}, cantine: 0, internat: 0, service: 0, serviceLib: '', reunion: null, actif: true });
 export const EQUIPES_DEPART = [

@@ -11,10 +11,10 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
                coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27g';
-import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27h';
-import * as K from './calculs.js?v=2026-09-27h';
-import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-27g';
+import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27h';
+import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27i';
+import * as K from './calculs.js?v=2026-09-27i';
+import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-27h';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
 import * as AV from './avatars.js?v=2026-09-24b';
@@ -777,7 +777,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const pris = q && [...I.aesh.values()].some(a => a.actif !== false && K.cleSigle(a.sigle) === q);
     return `<div class="fiche"><h1 id="titre" tabindex="-1">Ajouter un AESH</h1>
       <div class="champs"><div class="champ" style="grid-template-columns:1fr"><label class="lib" for="n-sigle"><b>Sigle</b><small>les deux premières lettres du prénom ; ajoutez l’initiale du nom si le sigle est déjà pris</small></label>
-        <input type="text" id="n-sigle" data-i="recherche" class="gros-champ" maxlength="3" minlength="2" value="${esc(f.recherche)}" autocomplete="off" placeholder="ex. CÉ, ou CHD pour Christine D."></div></div>
+        <input type="text" id="n-sigle" data-i="recherche" class="gros-champ" maxlength="3" minlength="2" value="${esc(f.recherche)}" autocomplete="off" placeholder="ex. CÉ, ou trois lettres si deux prénoms se ressemblent"></div></div>
       ${q && q.length < 2 ? '<div class="bandeau warn">Un sigle fait deux lettres, ou trois quand il faut distinguer deux personnes.</div>' : ''}
       ${existants.length ? `<div style="display:grid;gap:8px"><h2>Déjà dans l’établissement</h2>${existants.map(a => `<button type="button" class="aesh" id="n-ex-${esc(a.id)}" data-a="choisir-existant" data-v="${esc(a.id)}"><span class="sigle" style="--pole:${pole(Object.keys(a.equipes || {})[0]) ? pole(Object.keys(a.equipes)[0]).couleur : 'var(--pole)'}">${esc(a.sigle)}</span><span class="det"><b>${esc(a.sigle)}</b><span class="muted">${Object.keys(a.equipes || {}).map(x => `${nomPole(x)} ${hOu((a.heures || {})[x])}`).join(' · ') || 'sans pôle'}${nombre(a.contrat) != null ? ` · contrat ${K.fmtH(a.contrat)}` : ''}</span></span><span class="droite"><span class="puce pole">l’ajouter à mon pôle ›</span></span></button>`).join('')}</div>` : ''}
       ${q && q.length >= 2 && !pris ? `<button type="button" class="aesh" id="n-nouveau" data-a="choisir-nouveau"><span class="sigle">${esc(K.normSigle(f.recherche))}</span><span class="det"><b>Nouvel AESH ${esc(K.normSigle(f.recherche))}</b><span class="muted">n’existe dans aucun pôle</span></span><span class="droite"><span class="puce ok">créer ›</span></span></button>` : ''}
@@ -944,7 +944,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         : `left:${3 + o._col * (100 / large)}%;width:calc(${100 / large}% - 6px)`;
       const past = avecSigles ? o.gens.slice().sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
         .map(a => `<span style="background:${couleurAesh(a.id)};color:${encreAesh(a.id)}">${esc(a.sigle)}</span>`).join('') : '';
-      /* 26/09/2026 — Le code couleur d'Antoine, celui de ses classeurs : orange pour les
+      /* 26/09/2026 — Le code couleur du coordonnateur, celui de ses classeurs : orange pour les
          réunions et la coordination, violet pour le repas et l'internat, rose pour ce qui se
          passe ailleurs (ESAT, PIAL, DAFI). Les AESH gardent leur couleur propre, la même d'un
          pôle à l'autre : c'est la personne qu'on doit reconnaître d'un coup d'œil. */
@@ -959,7 +959,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const blocHtml = (c, large) => {
       const iso = K.ajoute(lundiDe(c), c.j), lieu = K.coursALieu(S.C, S.edt, c, iso);
       const lettre = deuxSemaines && c.sem === 'SA' ? 'A' : deuxSemaines && c.sem === 'SB' ? 'B' : '';
-      const pl = placesCours(c.id, iso), parAesh = new Map(); pl.forEach(x => { if (I.aesh.get(x.aeshId)) parAesh.set(x.aeshId, x); });
+      /* 27/09/2026 — Un AESH peut revenir deux fois dans le même cours : deux passages,
+         deux barres. La carte ne gardait que le dernier placement rencontré, et le dessin
+         montrait alors une seule présence là où le calcul des heures en comptait deux. */
+      const pl = placesCours(c.id, iso).filter(x => I.aesh.get(x.aeshId));
+      const parAesh = new Map(); pl.forEach(x => { if (!parAesh.has(x.aeshId)) parAesh.set(x.aeshId, x); });
+      const passages = pl.slice().sort((x, y) => {
+        const sx = I.aesh.get(x.aeshId).sigle, sy = I.aesh.get(y.aeshId).sigle;
+        return String(sx).localeCompare(String(sy), 'fr') || String(K.horairePlace(x, c).debut).localeCompare(K.horairePlace(y, c).debut);
+      });
       /* 26/09/2026 — Même ordre d'un cours à l'autre. Sans tri, la colonne d'un AESH dépendait
          de l'ordre d'écriture de son placement : ST devant ANT sur un bloc, derrière sur le
          suivant. Le sigle est déjà l'ordre partout ailleurs (calculs.js) : l'œil suit la personne. */
@@ -974,13 +982,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
          et surtout la barre commence et finit à l'heure que l'AESH couvre vraiment — une
          présence de 13 h à 14 h sur un TP de 12 h à 15 h se voit, ce qu'une pastille au
          pied du bloc ne disait pas. La légende, sous la grille, dit à qui est la couleur. */
-      const bandes = aeshs.map(a => {
-        const x = parAesh.get(a.id), hp = K.horairePlace(x, c), absent = K.absentLe(I, a.id, iso, hp.debut, hp.fin);
+      const bandes = passages.map(x => {
+        const a = I.aesh.get(x.aeshId), h = K.horairePlace(x, c), absent = K.absentLe(I, a.id, iso, h.debut, h.fin);
         /* 26/09/2026 — Un cours a lieu toutes les semaines, mais l'AESH n'y vient qu'en A ou
            qu'en B : sans cette lettre, la grille le montrait présent chaque semaine. */
         const sp = (x && x.semaines) || 'AB', une = sp !== 'AB' && c.sem === 'TOUTES';
-        const t = 100 * (K.min(hp.debut) - K.min(c.d)) / minutes, ht = 100 * (K.min(hp.fin) - K.min(hp.debut)) / minutes;
-        return `<span class="bande ${absent ? 'abs' : ''}" title="${esc(a.sigle)} · ${K.hFr(hp.debut)}–${K.hFr(hp.fin)}${une ? ' · semaine ' + sp + ' seulement' : ''}${absent ? ' · absence à vérifier' : ''}"><i style="top:${t}%;height:${ht}%;background:${couleurAesh(a.id)}"></i>${une ? `<em>${sp}</em>` : ''}</span>`;
+        const t = 100 * (K.min(h.debut) - K.min(c.d)) / minutes, ht = 100 * (K.min(h.fin) - K.min(h.debut)) / minutes;
+        return `<span class="bande ${absent ? 'abs' : ''}" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${une ? ' · semaine ' + sp + ' seulement' : ''}${absent ? ' · absence à vérifier' : ''}"><i style="top:${t}%;height:${ht}%;background:${couleurAesh(a.id)}"></i>${une ? `<em>${sp}</em>` : ''}</span>`;
       }).join('');
       /* 27/09/2026 — Un carré par élève notifié présent à CE cours, rangés par deux pour
          tenir sur une demi-colonne, groupés par mesure. Le nombre est écrit au-dessus :
@@ -1011,9 +1019,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         /* 27/09/2026 — La réserve de droite se calcule, elle n'est plus devinée : la bande des
            barres vaut le nombre d'AESH, la colonne des carrés vingt pixels. Un bloc de trente
            minutes n'a la place que de son titre : il garde ses barres et perd ses carrés. */
-        const lb = aeshs.length ? aeshs.length * 8 + 6 : 6, avecCarres = h > 44 && montrer('eleves');
+        const lb = passages.length ? passages.length * 8 + 6 : 6, avecCarres = h > 44 && montrer('eleves');
         const pad = lb + (avecCarres ? 24 : 4) + 4;
-        return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${K.estPro(c.lib) ? 'pro' : 'gen'} ${nbc > 1 ? 'demi' : ''} ${S.flash === c.id ? 'flash' : ''}" style="top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (dispo / nbc)}%;width:calc(${dispo / nbc}% - 6px)${lieu ? '' : ';opacity:.45'}">
+        /* 27/09/2026 — La classe vient de la durée réelle. Elle était déduite du texte du style
+           inline — « height:5 » attrapait aussi bien 5 que 50, 53 ou 500 pixels, et ratait
+           « height: 53px » avec une espace. */
+        const taille = minutes < 45 ? ' court' : minutes < 60 ? ' mi-court' : '';
+        return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${K.estPro(c.lib) ? 'pro' : 'gen'} ${nbc > 1 ? 'demi' : ''}${taille} ${S.flash === c.id ? 'flash' : ''}" style="top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (dispo / nbc)}%;width:calc(${dispo / nbc}% - 6px)${lieu ? '' : ';opacity:.45'}">
           <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}" style="--pr:${pad}px"><b>${lettre ? `<i class="sem-lettre ${lettre === 'B' ? 'b' : ''}">${lettre}</i>` : ''}${esc(deuxSemaines ? K.libCourt(c.lib) : c.lib)}</b>${h > 44 && K.salleNumero(sallesCourtes(c.salle)) ? `<span class="salle">${esc(K.salleNumero(sallesCourtes(c.salle)))}</span>` : ''}${h > 58 ? `<span class="ligne-bes">${besHtml}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${avecCarres ? carresHtml(c, lb) : ''}<span class="bandes" aria-hidden="true">${bandes}</span></div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">

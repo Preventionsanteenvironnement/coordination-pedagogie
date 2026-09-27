@@ -292,7 +292,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
   border-radius:10px;padding:4px 8px;font:inherit;text-align:left;cursor:pointer;overflow:hidden}
 .hors-classe-bloc.presence{background:var(--card-2);border:1px solid var(--line);color:var(--ink);border-left:4px solid #64748b}
 .hors-classe-bloc.sans-eleves{background:var(--card);border:2px dashed var(--ink);color:var(--ink)}
-/* Le code couleur des classeurs d'Antoine, repris tel quel pour les blocs hors classe. */
+/* Le code couleur des classeurs du coordonnateur, repris tel quel pour les blocs hors classe. */
 .hors-classe-bloc.fam-reunion{border-left-color:#a35205;background:color-mix(in srgb,#cc6600 8%,var(--card))}
 .hors-classe-bloc.fam-eleves{border-left-color:#5b5bd6;background:color-mix(in srgb,#9999ff 14%,var(--card))}
 .hors-classe-bloc.fam-hors{border-left-color:#c23a6d;background:color-mix(in srgb,#ff6699 12%,var(--card))}
@@ -569,7 +569,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 /* 26/09/2026 — La lettre A ou B mangeait une des deux lignes du titre, qui s'arrêtait
    alors sur « A… » avec de la place en dessous. Trois lignes dès qu'un bloc fait une heure ;
    une seule sur les créneaux de trente minutes, où rien d'autre ne tiendrait. */
-.bloc[style*="height:5"] .bloc-contenu b,.bloc[style*="height:4"] .bloc-contenu b,.bloc[style*="height:3"] .bloc-contenu b{-webkit-line-clamp:1}
+/* 27/09/2026 — Remplacée par .bloc.court : voir plus bas. Le sélecteur lisait le texte
+   du style inline, il attrapait 5, 50, 53 et 500 pixels indifféremment. */
 .past-ligne{flex:0 0 auto}
 .bloc-contenu .salle,.bloc-contenu .eleves-bloc{flex:0 0 auto}
 .bloc.avec-presences.avec-besoin .bloc-contenu>b{padding-right:0}
@@ -753,10 +754,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
    de les prendre. Il garde sa hauteur, les carrés et la rangée du bas s'ajustent. */
 .bloc-contenu>b{flex:0 0 auto}
 .bloc-contenu .salle,.bloc-contenu .ligne-bes{flex:0 0 auto}
-/* Un bloc d'une heure a la place de trois lignes de titre. En dessous, une seule :
-   sur trente minutes, rien d'autre ne tiendrait de toute façon. */
-.bloc[style*="height:5"] .bloc-contenu>b,.bloc[style*="height:4"] .bloc-contenu>b,
-.bloc[style*="height:3"] .bloc-contenu>b,.bloc[style*="height:2"] .bloc-contenu>b{-webkit-line-clamp:2}
+/* 27/09/2026 — La durée décide, pas le texte du style. « court » = moins de 45 minutes,
+   « mi-court » = moins d'une heure. Un bloc d'une heure garde ses trois lignes de titre. */
+.bloc.court .bloc-contenu>b{-webkit-line-clamp:1}
+.bloc.mi-court .bloc-contenu>b{-webkit-line-clamp:2}
 
 /* 27/09/2026 — Sur le téléphone, la salle était masquée : les blocs étaient trop étroits
    quand elle s'écrivait « 008_PSR ». Elle tient maintenant — « salle 8 » — et la colonne
@@ -785,7 +786,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-27k');
+  const m = await import('./app.js?v=2026-09-27l');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

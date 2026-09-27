@@ -60,7 +60,7 @@ export function horsClasse(service) {
   return d ? !d.grilleClasse : false;
 }
 
-/* 26/09/2026 — Les noms courts de la grille, calés sur ce qu'Antoine écrit dans ses
+/* 26/09/2026 — Les noms courts de la grille, calés sur ce que le coordonnateur écrit dans ses
    classeurs : PSE, ENS PRO, AP FR, CO ENS MATHS. Un bloc d'une heure tient deux lignes, pas
    plus ; « Prévention santé environnement » n'y entrait jamais. Le nom entier reste au survol,
    sur les documents imprimés et dans les exports : un remplaçant lit une feuille, pas un code. */
@@ -238,7 +238,7 @@ export function normaliserAesh(d, polesAutorises, cat) {
   Object.entries(d.heures && typeof d.heures === 'object' ? d.heures : {}).forEach(([q, v]) => { if (ok(q) && nombreOk(v) != null) heures[q] = nombreOk(v); });
   /* 27/09/2026 — Une réunion due dont le jour n'est pas décidé n'a ni jour ni horaire : la
      normalisation la jetait, et le créneau automatique de l'équipe revenait par-dessus. Elle
-     survit maintenant telle quelle. C'est le cas de Nathalie, qui accompagne l'ULIS à l'heure
+     survit maintenant telle quelle. Le cas réel : un AESH qui accompagne l'ULIS à l'heure
      de la réunion. */
   const rd = d.reunion && typeof d.reunion === 'object' ? d.reunion : null;
   const r = rd && rd.aFixer ? { aFixer: true, pole: typeof rd.pole === 'string' ? rd.pole : '', heures: nombreOk(rd.heures) == null ? 1 : nombreOk(rd.heures) }
@@ -351,7 +351,7 @@ export function reunionsSupplementairesDe(a) {
    total — sinon le total ment — mais elle s'affiche en rouge partout, parce qu'une heure
    due et non posée n'est pas une heure posée.
    Et surtout : plus d'heure devinée. L'application créditait une heure de réunion à tout
-   membre de l'équipe PSR-MELEC sans vérifier qu'elle ait lieu ; Nathalie, qui n'en a
+   membre de l'équipe PSR-MELEC sans vérifier qu'elle ait lieu ; celui qui n'en a
    aucune, en comptait une. */
 /* 27/09/2026 — Une réunion qui porte À LA FOIS aFixer et des horaires était comptée
    deux fois : une fois posée, une fois due. Des horaires écrits l'emportent. */
@@ -439,12 +439,12 @@ export function horairePlace(p, c) {
    à le ressaisir. Mais il ne s'impose plus à qui ne peut pas y être. Une fiche qui porte
    { aFixer: true } dit « cette réunion est due, le jour n'est pas décidé » : rien ne se
    dessine alors dans l'emploi du temps, et l'écran l'écrit en rouge. C'est le cas de
-   Nathalie, qui accompagne l'ULIS à cette heure-là. */
+   d'un AESH qui accompagne l'ULIS à cette heure-là. */
 export function reunionDe(a) {
   const r = a && a.reunion;
   if (r && r.aFixer) return null;
   /* 27/09/2026 — Une réunion écrite dans la fiche l'emporte sur le créneau de l'équipe.
-     Cécile se réunit le jeudi avec les Métiers d'Art ; comme elle intervient aussi en
+     Un AESH à cheval sur deux pôles se réunit le jeudi avec l'un ; comme il intervient aussi en
      PSR-MELEC, la règle automatique lui imposait le lundi et effaçait son vrai jour.
      L'automatique ne vaut plus que pour une fiche qui ne dit rien. */
   if (r && RE_HEURE.test(r.debut || '') && RE_HEURE.test(r.fin || '')) {

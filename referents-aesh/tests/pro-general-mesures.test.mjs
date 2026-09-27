@@ -76,3 +76,36 @@ test('une liste vide ne casse rien', () => {
   assert.equal(c.notifies, 0);
   assert.deepEqual(carresMesures(c), []);
 });
+
+/* ─── 27/09/2026 — Deux passages du même AESH dans un cours ───
+   Le dessin gardait un seul placement par personne, le dernier rencontré : la grille
+   montrait une présence là où le calcul des heures en comptait deux. Ces deux fonctions
+   sont la part vérifiable du bloc — le reste est du HTML. */
+import { horairePlace, min } from '../calculs.js';
+
+test('deux passages dans le même cours donnent deux barres distinctes', () => {
+  const cours = { d: '12:00', f: '15:00', sem: 'TOUTES' };
+  const places = [
+    { aeshId: 'a1', debut: '12:00', fin: '13:00' },
+    { aeshId: 'a1', debut: '14:00', fin: '15:00' }
+  ];
+  const minutes = min(cours.f) - min(cours.d);
+  const barres = places.map(p => {
+    const h = horairePlace(p, cours);
+    return { top: 100 * (min(h.debut) - min(cours.d)) / minutes, hauteur: 100 * (min(h.fin) - min(h.debut)) / minutes };
+  });
+  assert.equal(barres.length, 2, 'deux passages, deux barres');
+  assert.deepEqual(barres[0], { top: 0, hauteur: 100 / 3 });
+  assert.deepEqual(barres[1], { top: 200 / 3, hauteur: 100 / 3 });
+  /* et la somme des barres vaut bien les heures comptées : 2 h sur 3 */
+  assert.equal(barres.reduce((t, b) => t + b.hauteur, 0), 200 / 3);
+});
+
+test('une présence partielle démarre au bon endroit', () => {
+  /* le cas réel : un TP de 12 h à 15 h, l'AESH de 13 h à 14 h */
+  const cours = { d: '12:00', f: '15:00', sem: 'TOUTES' };
+  const h = horairePlace({ debut: '13:00', fin: '14:00' }, cours);
+  const minutes = min(cours.f) - min(cours.d);
+  assert.equal(100 * (min(h.debut) - min(cours.d)) / minutes, 100 / 3, 'départ au tiers');
+  assert.equal(100 * (min(h.fin) - min(h.debut)) / minutes, 100 / 3, 'hauteur d’un tiers');
+});

@@ -1,12 +1,12 @@
 /* Repères partagés par la grille et les exports, sans données nominatives. */
 const couleurs = ['#2563eb','#c45c08','#64748b','#927000','#a32965','#087966','#814c2d','#6945bd','#047c9d','#a62d39','#344b80','#726f28','#8b4471','#316e31','#7c3b20','#445d68','#674575','#956106','#006774','#4d6440','#733b46','#3c5693','#654d30','#675f88'];
-/* 26/09/2026 — Les couleurs des tableaux d'Antoine, à l'identique.
+/* 26/09/2026 — Les couleurs des tableaux du coordonnateur, à l'identique.
    27/09/2026 — Étendue aux quatre pôles : même palette partout, aucune différence entre eux.
    La couleur calculée à partir de l'identifiant donnait quatre collisions — AC et GB en
    Métiers d'Art portaient le même bleu-gris, impossible de les distinguer dans une grille.
    Chacun a désormais la sienne, écrite une fois pour toutes : elle ne bouge plus si une
    fiche est retirée puis recréée, et elle est la même d'un pôle à l'autre pour qui, comme
-   Cécile, intervient dans deux. Un AESH nouveau garde la couleur calculée jusqu'à ce qu'on
+   certains, intervient dans deux. Un AESH nouveau garde la couleur calculée jusqu'à ce qu'on
    l'inscrive ici. */
 export const COULEURS_FIXES = {
   aesh_2f43acdgkl: '#445d68',   /* AC */
