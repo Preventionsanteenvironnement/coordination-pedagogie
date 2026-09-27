@@ -654,7 +654,10 @@ export function bilan(ctx, aeshId, lundi) {
   Object.keys(parPole).forEach(p => { const pr = +prevuPoles[p]; if (Number.isFinite(pr) && parPole[p] > pr + 1e-9) alertes.push({ type: 'pole', pole: p, texte: `${fmtH(parPole[p])} placées pour ${fmtH(pr)} prévues` }); });
   conflits(occ, ctx.nomPole).forEach(c => alertes.push({ type: 'conflit', texte: c.texte, j: c.j, poles: c.poles, cours: c.cours }));
   if (coursCouvrir) alertes.push({ type: 'couvrir', texte: `${coursCouvrir} cours à couvrir (absence${occ.some(o => o.partiel) ? ', en partie' : ''})` });
-  return { a, occ, cours, services, reunion, total, contrat, reste: contrat == null ? null : contrat - total, parPole, alertes, joursTravail, rep };
+  /* 27/09/2026 — doubleCompte sortait du calcul sans jamais en sortir : il explique
+     pourquoi le total est inférieur à la somme des pôles, et c'est la question qu'on se
+     pose en premier devant un AESH partagé. */
+  return { a, occ, cours, services, reunion, total, contrat, reste: contrat == null ? null : contrat - total, parPole, doubleCompte, alertes, joursTravail, rep };
 }
 
 /* Chevauchements dans une liste d'occupations (même jour). */

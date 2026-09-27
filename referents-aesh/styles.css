@@ -752,3 +752,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
    quand elle s'écrivait « 008_PSR ». Elle tient maintenant — « salle 8 » — et la colonne
    fait 260 px, qu'on atteint en balayant. On ne cache plus une information qui rentre. */
 @media(max-width:700px){.grille-edt[data-vue="semaine"] .salle{display:block}}
+
+/* 27/09/2026 — Où passent les heures d'un AESH partagé entre plusieurs pôles, et les
+   créneaux où deux pôles l'attendent en même temps. Le total ne compte jamais deux fois
+   la même minute : c'est la ligne rouge qui explique l'écart avec le contrat. */
+.st-poles{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 2px 0;font-size:.82rem;color:var(--ink-2)}
+.st-poles b{color:var(--ink)}
+.pole-part{display:inline-flex;align-items:center;gap:5px;font-weight:700;padding:2px 10px;border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--pc) 40%,var(--card));background:color-mix(in srgb,var(--pc) 10%,var(--card));color:var(--ink)}
+.pole-conflit{display:inline-flex;align-items:center;gap:5px;font-weight:700;padding:2px 10px;border-radius:999px;
+  border:1.5px solid var(--err);background:var(--err-l);color:#7f1d1d}
+.pole-ou{flex:1 1 100%;color:#7f1d1d;font-size:.78rem}

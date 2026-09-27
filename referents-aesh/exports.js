@@ -5,7 +5,7 @@ import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
 import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-24i';
-import * as K from './calculs.js?v=2026-09-27i';
+import * as K from './calculs.js?v=2026-09-27j';
 import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-27h';
 
 const H0 = 8 * 60, H1 = 21 * 60;
@@ -348,8 +348,19 @@ export function pdfSemaineType(ctx, ids, lundi) {
     const bA = K.bilan(ctx, id, ab.A), bB = K.bilan(ctx, id, ab.B);
     const moyenne = (bA.total + bB.total) / 2, deux = occ.some(o => o.sem !== 'AB');
     pdf.page();
+    /* 27/09/2026 — Le document que reçoit l'AESH porte TOUS ses pôles, parce que c'est sa
+       semaine à elle, pas celle d'un pôle. La répartition est écrite : sans elle, un
+       référent de Métiers d'Art recevait une feuille avec des cours MELEC sans savoir
+       d'où ils venaient. Et les heures où deux pôles l'attendent en même temps sont dites
+       en toutes lettres — elles ne sont comptées qu'une fois dans le total. */
+    const parts = {};
+    [bA, bB].forEach(b => Object.entries(b.parPole || {}).forEach(([q, h]) => { parts[q] = Math.max(parts[q] || 0, h); }));
+    const lp = Object.entries(parts).filter(([, h]) => h > 0).sort((x, y) => y[1] - x[1]);
+    const conflit = Math.max(bA.doubleCompte || 0, bB.doubleCompte || 0);
+    const detail = (lp.length > 1 ? ' · ' + lp.map(([q, h]) => `${ctx.nomPole ? ctx.nomPole(q) : q} ${K.fmtH(h)}`).join(' + ') : '')
+      + (conflit ? ` · ${K.fmtH(conflit)} attendue dans deux pôles en même temps` : '');
     entete(pdf, couleurAesh(id), `Emploi du temps · ${a.sigle}`,
-      `${ctx.exportType ? 'Organisation habituelle · ' : ''}Semaines A et B réunies · ${K.fmtH(moyenne)} par semaine en moyenne${bA.contrat == null ? '' : ' · contrat ' + K.fmtH(bA.contrat)}`);
+      `${ctx.exportType ? 'Organisation habituelle · ' : ''}Semaines A et B réunies · ${K.fmtH(moyenne)} par semaine en moyenne${bA.contrat == null ? '' : ' · contrat ' + K.fmtH(bA.contrat)}${detail}`);
     /* 25/09/2026 : la plage ne bouge plus, 8 h → 18 h. Une journée sans après-midi garde
        ses créneaux de midi, où se placent la demi-pension et la réunion hebdomadaire.
        Ce qui commence après 18 h — internat, soirée — s'écrit sous la grille. */

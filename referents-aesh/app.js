@@ -13,8 +13,8 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
 import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27h';
-import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27i';
-import * as K from './calculs.js?v=2026-09-27i';
+import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27j';
+import * as K from './calculs.js?v=2026-09-27j';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-27h';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
@@ -1176,6 +1176,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
           <div><b>${K.fmtH(bA.total)} / ${K.fmtH(bB.total)}</b><small>semaine A / semaine B</small></div>
         </div>
       </div>
+      ${repartitionPoles(cx,personne,bA,bB)}
       ${grillePersonne(personne,paire.A,cx,type,occ)}
       ${resume.length?`<div class="st-resume">${resume.map(([n,h])=>`<span><b>${esc(n)}</b> ${K.fmtH(h)}</span>`).join('')}</div>`:''}
       <div class="st-actions">
@@ -1280,6 +1281,24 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return `<p class="reunion-afixer" role="status"><b>Réunion à fixer</b>${l.map(r =>
       `<span>${esc(r.pole ? nomPole(r.pole) : P().nom)} · ${K.fmtH(r.heures)} · jour non décidé</span>`).join('')}
       <small>L'heure est comptée dans le total : elle est due. Le créneau reste à trouver avec l'équipe.</small></p>`;
+  }
+  /* 27/09/2026 — L'emploi du temps d'un AESH a toujours montré TOUS ses pôles : les
+     placements ne sont pas filtrés. Mais rien ne le disait, et un référent qui voyait
+     « Cannage-paillage » dans l'espace PSR pouvait croire à une erreur. La répartition est
+     donc écrite, et surtout : un AESH partagé peut être attendu au même moment dans deux
+     pôles, et chacun croit son créneau libre. Ces heures-là ne sont comptées qu'une fois —
+     on ne travaille pas deux fois la même minute — et elles s'écrivent en rouge. */
+  function repartitionPoles(cx, a, bA, bB) {
+    const parts = {};
+    ['A', 'B'].forEach(s => { const b = s === 'A' ? bA : bB; Object.entries(b.parPole || {}).forEach(([p, h]) => { parts[p] = Math.max(parts[p] || 0, h); }); });
+    const l = Object.entries(parts).filter(([, h]) => h > 0).sort((x, y) => y[1] - x[1]);
+    const conflit = Math.max(bA.doubleCompte || 0, bB.doubleCompte || 0);
+    const ou = [...new Set([...(bA.alertes || []), ...(bB.alertes || [])].filter(x => x.type === 'conflit').map(x => x.texte))];
+    if (l.length < 2 && !conflit) return '';
+    return `<p class="st-poles">${l.length > 1 ? `<b>Intervient dans ${l.length} pôles :</b>` : ''}${l.map(([p, h]) =>
+      `<span class="pole-part" style="--pc:${(pole(p) || {}).couleur || 'var(--muted)'}">${esc(nomPole(p))} · ${K.fmtH(h)}</span>`).join('')}
+      ${conflit ? `<span class="pole-conflit">⚠ ${K.fmtH(conflit)} attendue à deux endroits en même temps — comptée une seule fois</span>` : ''}
+      ${ou.length ? `<span class="pole-ou">${ou.map(t => esc(t)).join(' · ')}</span>` : ''}</p>`;
   }
   function palettePlanning() {
     const cx=ctx();
@@ -2075,7 +2094,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!a){toast('Choisissez d’abord un AESH.',true);return;}
     if(S.envoi)return; S.envoi=true; rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-27g'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27h'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
       const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
       F.telecharger(blob,nom);
@@ -2097,7 +2116,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-27g'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27h'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -2106,12 +2125,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-27g'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27h'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-27g'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-27h'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
