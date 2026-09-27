@@ -337,8 +337,37 @@ export const reunionFixePsr = a => ['aesh_d01','aesh_d02','aesh_d03','aesh_d04']
 export function reunionsSupplementairesDe(a) {
   return (Array.isArray(a?.reunionsSupplementaires)?a.reunionsSupplementaires:[]).filter(r=>r && Number.isInteger(r.jour) && r.jour>=0 && r.jour<5 && RE_HEURE.test(r.debut||'') && RE_HEURE.test(r.fin||'') && r.fin>r.debut && ['A','B','AB'].includes(r.semaines) && RE_DATE.test(r.du||'') && RE_DATE.test(r.au||'') && r.du<=r.au);
 }
-export const heuresReunion = a => (reunionFixePsr(a) ? 1 : Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 1)
-  + Math.max(...['A','B'].map(s=>reunionsSupplementairesDe(a).filter(r=>r.semaines==='AB'||r.semaines===s).reduce((t,r)=>t+duree(r.debut,r.fin),0)));
+/* ─── 27/09/2026 — Une réunion qu'on doit, mais dont le jour n'est pas décidé ───
+   Chaque filière choisit son créneau, souvent entre midi et deux, parce que c'est le seul
+   moment où tout le monde est libre. Quand l'équipe ne l'a pas encore trouvé, l'heure est
+   quand même due : elle se porte avec { aFixer: true } et sans jour. Elle compte dans le
+   total — sinon le total ment — mais elle s'affiche en rouge partout, parce qu'une heure
+   due et non posée n'est pas une heure posée.
+   Et surtout : plus d'heure devinée. L'application créditait une heure de réunion à tout
+   membre de l'équipe PSR-MELEC sans vérifier qu'elle ait lieu ; Nathalie, qui n'en a
+   aucune, en comptait une. */
+const aFixer = r => !!(r && r.aFixer);
+const heuresDe = r => aFixer(r) ? (Number.isFinite(+r.heures) ? +r.heures : 1) : duree(r.debut, r.fin);
+export function reunionsNonFixees(a) {
+  const out = [];
+  if (aFixer(a && a.reunion)) out.push({ ...a.reunion, heures: heuresDe(a.reunion), principale: true });
+  (Array.isArray(a && a.reunionsSupplementaires) ? a.reunionsSupplementaires : [])
+    .filter(aFixer).forEach(r => out.push({ ...r, heures: heuresDe(r) }));
+  return out;
+}
+export const heuresReunion = a => {
+  /* reunionDe, et non a.reunion : pour l'équipe PSR le créneau est normalisé à 13 h–14 h,
+     même quand une vieille fiche porte encore 13 h 30. L'heure due est celle de l'équipe. */
+  const r = aFixer(a && a.reunion) ? a.reunion : reunionDe(a);
+  /* une réunion à fixer ne se dessine pas, mais elle se compte : elle est due */
+  const principale = aFixer(r) ? heuresDe(r)
+    : (r && RE_HEURE.test(r.debut || '') && RE_HEURE.test(r.fin || '')) ? duree(r.debut, r.fin)
+    : Number.isFinite(+(a || {}).reunionH) ? +a.reunionH : 0;
+  const posees = Math.max(...['A', 'B'].map(s => reunionsSupplementairesDe(a)
+    .filter(x => x.semaines === 'AB' || x.semaines === s).reduce((t, x) => t + duree(x.debut, x.fin), 0)));
+  const dues = reunionsNonFixees(a).filter(x => !x.principale).reduce((t, x) => t + x.heures, 0);
+  return principale + posees + dues;
+};
 
 /* Fin de contrat d'un AESH : après cette date, il n'est plus là. Vide = toute l'année. */
 export const finContratDe = a => a && RE_DATE.test(a.finContrat || '') ? a.finContrat : '';
@@ -386,10 +415,16 @@ export function horairePlace(p, c) {
 }
 /* ─────────────── occupations d'une semaine ─────────────── */
 /* Toutes les occupations d'un AESH sur une semaine réelle : cours, réunion d'équipe, réunions institutionnelles, absences. */
+/* 27/09/2026 — Le créneau du lundi 13 h–14 h reste celui de l'équipe PSR-MELEC, et il
+   s'applique tout seul : c'est le seul moment où elle peut se retrouver, et personne n'a
+   à le ressaisir. Mais il ne s'impose plus à qui ne peut pas y être. Une fiche qui porte
+   { aFixer: true } dit « cette réunion est due, le jour n'est pas décidé » : rien ne se
+   dessine alors dans l'emploi du temps, et l'écran l'écrit en rouge. C'est le cas de
+   Nathalie, qui accompagne l'ULIS à cette heure-là. */
 export function reunionDe(a) {
-  if (reunionFixePsr(a))
-    return {jour:0,debut:'13:00',fin:'14:00'};
-  return a?.reunion || null;
+  if (a && a.reunion && a.reunion.aFixer) return null;
+  if (reunionFixePsr(a)) return { jour: 0, debut: '13:00', fin: '14:00' };
+  return (a && a.reunion) || null;
 }
 export function reunionsEffectives(ctx,aeshId,lundi) {
   const a=ctx.I.aesh.get(aeshId); if(!a) return [];

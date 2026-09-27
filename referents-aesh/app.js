@@ -12,8 +12,8 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
 import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27c';
-import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27f';
-import * as K from './calculs.js?v=2026-09-27f';
+import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27g';
+import * as K from './calculs.js?v=2026-09-27g';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
@@ -747,7 +747,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         ${ecart && ecart.ecart ? `<div class="champ" style="grid-template-columns:1fr"><span class="bandeau warn">${K.fmtH(ecart.presence)} de présence élève ${ecart.reunion ? `+ ${K.fmtH(ecart.reunion)} de réunion ` : ''}${ecart.services ? `+ ${K.fmtH(ecart.services)} de services ` : ''}= ${K.fmtH(ecart.somme)}, pour un contrat de ${K.fmtH(ecart.contrat)} : ${ecart.ecart > 0 ? `${K.fmtH(ecart.ecart)} de trop` : `${K.fmtH(-ecart.ecart)} qui manque${-ecart.ecart > 1 ? 'nt' : ''}`}.</span></div>` : ''}
         ${champPresence(a, o)}
         ${champHorsPresence(a, o)}
-        ${K.reunionFixePsr(a) ? '<div class="champ"><span class="lib"><b>Réunion d’équipe · 1 h</b><small>Lundi 13 h–14 h · automatique pour cette équipe. Une réunion institutionnelle programmée la remplace cette semaine-là.</small></span></div>' : `        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
+        ${K.reunionsNonFixees(a).length ? `<div class="champ"><span class="lib"><b>Réunion d’équipe · ${K.fmtH(K.reunionsNonFixees(a)[0].heures)}</b><small class="rouge">Le jour n’est pas décidé. L’heure est comptée dans le total, le créneau reste à trouver.</small></span></div>` :
+          K.reunionFixePsr(a) && a.reunion && a.reunion.debut ? '<div class="champ"><span class="lib"><b>Réunion d’équipe · 1 h</b><small>Lundi 13 h–14 h · le créneau de cette équipe. Une réunion institutionnelle programmée la remplace cette semaine-là.</small></span></div>' : `        <div class="champ ${estModif(nombre(o.reunionH) !== nombre(a.reunionH) || JSON.stringify(o.reunion || null) !== JSON.stringify(a.reunion || null))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Réunion ${aide('reunion')}</b><small>heures par semaine</small>${parQui(a, 'reunion')}${aideTexte('reunion')}</span>${pas('reunionH', a.reunionH === undefined ? 1 : a.reunionH, 0.5, 'Réunion')}
           <div class="ligne" style="grid-column:1/-1">${K.JOURS_C.map((j, i) => `<button type="button" class="jourc" id="rj-${i}" data-a="reu-jour" data-v="${i}" aria-pressed="${reu.jour === i && !!reu.debut}">${j}</button>`).join('')}
             <label class="sr" for="f-reu-h">Heure</label><select id="f-reu-h" data-i="reu-h" ${reu.debut ? '' : 'disabled'}>${reu.debut ? '' : '<option value="">heure</option>'}${CRENEAUX_H.slice(0, -2).map(h => `<option value="${h}" ${reu.debut === h ? 'selected' : ''}>${K.hFr(h)} – ${K.hFr(K.hDe(K.min(h) + 60))}</option>`).join('')}</select>
             ${reu.debut ? `<button type="button" class="lien" id="f-reu-non" data-a="reu-aucune">aucune</button>` : ''}</div>
@@ -1067,6 +1068,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         <span class="lg-cer"><span class="bes-cercle zero">╱</span>pas de demande</span>
         <span class="lg-cer"><span class="bes-cercle inconnu">?</span>pas de réponse</span></div>
       ${jaugeProGeneral(cours, lundiDe)}</div>`;
+    const sansCreneau = K.aeshActifs(I, P().id).map(a => [a, K.reunionsNonFixees(a)]).filter(x => x[1].length);
+    if (sansCreneau.length) grille += `<p class="reunion-afixer" role="status"><b>Réunion à fixer</b>${sansCreneau
+      .map(([a, l]) => `<span style="background:${couleurAesh(a.id)};color:${encreAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}
+      <small>${sansCreneau.length > 1 ? 'Ces AESH doivent' : 'Cet AESH doit'} une heure de réunion dont le jour n’est pas décidé.</small></p>`;
     if (reunionsBas.length) grille += `<div class="sous-grille">${reunionsBas
       .sort((a, b) => a.j - b.j || K.min(a.d) - K.min(b.d)).map(o =>
         `<p><b>${esc(libelleService(o.label))}</b><span class="quand">${K.JOURS[o.j]} ${K.hFr(o.d)}–${K.hFr(o.f)}</span>${o.gens
@@ -1236,7 +1241,18 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     return `<div class="semaine-repere">${type?'EDT type · ':''}${deuxSem?`Semaines A et B`:`Semaine ${S.C.parite(lundi)||'—'} · ${K.jjmm(lundi)}–${K.jjmm(K.ajoute(lundi,4))}`}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}${deuxSem ? '' : `<small>${K.jjmm(K.ajoute(lundi,i))}</small>`}</div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
       const l=occ.filter(o=>o.j===i),cols=[];l.forEach(o=>{let n=cols.findIndex(c=>c.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
       return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${personneReelle?fondPlages(tous,reposFond,i,px):''}${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${horsPresence(o,K)?'hors-presence':''} ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''} ${(K.min(o.fin)-K.min(o.debut))<45?'court':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(Math.min(K.min(o.fin),fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}"><b>${o.sem&&o.sem!=='AB'?`<i class="sem-lettre ${o.sem==='B'?'b':''}">${o.sem}</i>`:''}${esc(o.cours ? o.cours.lib : libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
-    }).join('')}<div class="g-pied">Total</div>${K.JOURS.map((j,i)=>`<div class="g-pied jour-col" data-j="${i}">${esc(libelleTotal(K,tot[i]))}</div>`).join('')}</div></div>${personneReelle?legendePlages:''}${soir.length?`<div class="bande-soiree"><b>Soirée</b>${soir.map(o=>`<span>${esc(K.JOURS[o.j])} ${K.hFr(o.debut)}–${K.hFr(o.fin)} · ${esc(o.cours?.lib || libelleService(o.label))}</span>`).join('')}</div>`:''}`;
+    }).join('')}<div class="g-pied">Total</div>${K.JOURS.map((j,i)=>`<div class="g-pied jour-col" data-j="${i}">${esc(libelleTotal(K,tot[i]))}</div>`).join('')}</div></div>${personneReelle?bandeauReunion(a):''}${personneReelle?legendePlages:''}${soir.length?`<div class="bande-soiree"><b>Soirée</b>${soir.map(o=>`<span>${esc(K.JOURS[o.j])} ${K.hFr(o.debut)}–${K.hFr(o.fin)} · ${esc(o.cours?.lib || libelleService(o.label))}</span>`).join('')}</div>`:''}`;
+  }
+  /* 27/09/2026 — Une réunion due dont le jour n'est pas décidé ne se dessine nulle part :
+     elle n'a pas d'heure. Elle disparaissait donc de l'écran tout en pesant dans le total,
+     et on ne pouvait pas comprendre le compte. Elle s'écrit maintenant en toutes lettres,
+     sous la grille, en rouge, avec le pôle qui la doit. */
+  function bandeauReunion(a) {
+    const l = K.reunionsNonFixees(a);
+    if (!l.length) return '';
+    return `<p class="reunion-afixer" role="status"><b>Réunion à fixer</b>${l.map(r =>
+      `<span>${esc(r.pole ? nomPole(r.pole) : P().nom)} · ${K.fmtH(r.heures)} · jour non décidé</span>`).join('')}
+      <small>L'heure est comptée dans le total : elle est due. Le créneau reste à trouver avec l'équipe.</small></p>`;
   }
   function palettePlanning() {
     const cx=ctx();

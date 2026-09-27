@@ -735,6 +735,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
    dans l'Atelier, et le portail ne connaît aucun prénom. */
 .sigle-fixe{display:inline-grid;place-items:center;min-width:54px;padding:6px 12px;border-radius:10px;
   background:var(--card-2);border:1px solid var(--line);font-weight:800;font-size:1.05rem;letter-spacing:.06em;color:var(--ink)}
+
+/* 27/09/2026 — Une réunion due dont le jour n'est pas décidé. Rouge, parce qu'elle manque ;
+   écrite, parce qu'elle compte dans le total et qu'un total qu'on ne peut pas expliquer
+   n'est pas un total. */
+.reunion-afixer{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:10px 2px 0;
+  padding:8px 12px;border:1.5px solid var(--err);border-left-width:5px;border-radius:12px;
+  background:var(--err-l);color:#7f1d1d;font-size:.84rem}
+.reunion-afixer b{font-weight:800}
+.reunion-afixer span{display:inline-flex;align-items:center;border-radius:6px;padding:1px 8px;
+  font-size:.76rem;font-weight:800;background:var(--card);color:#7f1d1d}
+.reunion-afixer small{flex:1 1 100%;color:#9a3412;font-size:.76rem}
+.rouge{color:var(--err)!important;font-weight:650}
 </style>
 </head>
 <body>
@@ -758,7 +770,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-27g');
+  const m = await import('./app.js?v=2026-09-27h');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
