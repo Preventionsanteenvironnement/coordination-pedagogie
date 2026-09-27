@@ -841,3 +841,56 @@ export function etatBesoin(ctx,c,iso,bes) {
   const b=[...bornes].sort((a,b)=>a-b),n=b.slice(1).map((fin,i)=>presentsMin(ctx,c,iso,hDe(b[i]),hDe(fin)));
   return n.length&&Math.min(...n)>=bes.nb?'plein':n.some(x=>x>0)?'partiel':'vide';
 }
+
+/* ─── 27/09/2026 — Professionnel ou général ───
+   Dix couleurs tirées du nom de la matière ne voulaient rien dire : deux matières sans
+   rapport tombaient sur la même teinte, et l'œil cherchait un sens qui n'existait pas.
+   Une seule distinction en porte un : l'atelier d'un côté, les disciplines générales de
+   l'autre. La règle lit le nom de la matière, elle n'est pas une liste de classes : elle
+   doit valoir pour les quatre pôles, aujourd'hui et pour une filière qu'on ouvrirait demain.
+   Le chef-d'œuvre est rangé en professionnel — c'est une réalisation d'atelier ; le
+   co-enseignement en général — l'heure reste une heure de maths ou de français. */
+const MOTS_PRO = /(\btp\b|production|service|réception|reception|chef[- ]d|sc(?:iences)?\.? ?appliqu|atelier|\bmp[1-4]\b|maintenance|cannage|vannerie|horticult|\bprod\b|cuisine|restaurat|salle et commercialisation)/i;
+export const estPro = lib => MOTS_PRO.test(String(lib || ''));
+
+/* ─── 27/09/2026 — « 008_PSR » → « salle 8 » ───
+   Le nom du plateau ne dit rien à qui cherche une porte, et il mangeait la largeur du bloc.
+   On garde le numéro, sans son zéro de tête ; une salle sans chiffre garde son nom. */
+export function salleNumero(s) {
+  const t = String(s || '').trim(); if (!t) return '';
+  const m = t.match(/\d+[A-Za-z]?/);
+  return m ? 'salle ' + m[0].replace(/^0+(?=\d)/, '') : t;
+}
+
+/* ─── 27/09/2026 — La mesure d'un élève, sans double compte ───
+   « 6 élèves · 2 AI · 5 ULIS » comptait deux fois l'élève ULIS qui a une aide individualisée,
+   et 2 + 5 ne faisait pas 6. Les sept mesures ci-dessous sont exclusives : un élève en porte
+   une et une seule. Même vocabulaire que la fiche élève de l'Atelier, pour que les deux
+   écrans disent le même mot de la même situation. */
+export const MESURES = ['ULIS + AI', 'ULIS + AM', 'ULIS + à préciser', 'ULIS', 'AI', 'AM', 'en attente'];
+export function mesureEleve(e) {
+  if (!e || !e.code) return '';
+  const ulis = !!e.ulis, aide = String(e.aide || '');
+  const aAide = aide === 'individualisee' || aide === 'mutualisee' || aide === 'apreciser';
+  if (!ulis && !aAide) return '';
+  if (!aAide) return 'ULIS';
+  if (aide === 'apreciser') return ulis ? 'ULIS + à préciser' : 'en attente';
+  const s = aide === 'individualisee' ? 'AI' : 'AM';
+  return ulis ? 'ULIS + ' + s : s;
+}
+/* Le compte par mesure d'une liste d'élèves, dans l'ordre de MESURES. */
+export function comptesMesures(liste) {
+  const out = { total: 0, notifies: 0, parMesure: {} };
+  MESURES.forEach(m => { out.parMesure[m] = 0; });
+  (Array.isArray(liste) ? liste : []).forEach(e => {
+    if (!e || !e.code) return;
+    out.total++;
+    const m = mesureEleve(e);
+    if (m) { out.notifies++; out.parMesure[m]++; }
+  });
+  return out;
+}
+/* Les carrés d'un bloc : un par élève notifié, groupés par mesure, dans l'ordre de MESURES. */
+export const carresMesures = c => MESURES
+  .map(m => [m, (c && c.parMesure ? c.parMesure[m] : 0) || 0])
+  .filter(x => x[1] > 0);

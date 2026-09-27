@@ -12,8 +12,8 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
 import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27c';
-import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-26b';
-import * as K from './calculs.js?v=2026-09-26b';
+import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27e';
+import * as K from './calculs.js?v=2026-09-27e';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
@@ -944,7 +944,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
          pôle à l'autre : c'est la personne qu'on doit reconnaître d'un coup d'œil. */
       const fam = (o.sig === 'RE' || o.sig === 'RI') ? 'fam-reunion'
         : K.avecEleves({ nom: o.label, avecEleves: o.avecEleves }) ? 'fam-eleves' : 'fam-hors';
-      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${fam} ${avecSigles ? 'presence' : 'sans-eleves'}"
+      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${fam} ${o.surCours ? 'serre' : ''} ${avecSigles ? 'presence' : 'sans-eleves'}"
         title="${esc(libelleService(o.label))} · ${K.hFr(o.d)}–${K.hFr(o.f)} · ${o.gens.map(a => a.sigle).join(', ')}"
         style="top:${top + 1}px;height:${Math.max(18, h)}px;${pos}">
         <b>${avecSigles ? logoService(o.sig) + esc(o.sig)
@@ -963,18 +963,28 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const nbPresents = presents(c, iso, bes);
       const pills = aeshs.map(a => { const hp = K.horairePlace(parAesh.get(a.id), c), ab = K.absentLe(I, a.id, iso, hp.debut, hp.fin), partiel = ab && ab.journee === false && !(K.min(ab.debut) <= K.min(hp.debut) && K.min(ab.fin) >= K.min(hp.fin)); return `<span class="pill ${ab && !partiel ? 'abs' : ''}" title="${ab ? (partiel ? `absent ${K.hFr(ab.debut)}–${K.hFr(ab.fin)} : à couvrir en partie` : 'absent : à couvrir') : (hp.partiel ? `${K.hFr(hp.debut)}–${K.hFr(hp.fin)} seulement` : '')}" style="background:${couleurAesh(a.id)};color:${encreAesh(a.id)};border-color:${couleurAesh(a.id)};${(a.equipes || {})[P().id] ? '' : 'border-style:dashed'}${partiel ? ';border-color:var(--warn);color:var(--warn)' : ''}">${esc(a.sigle)}${hp.partiel ? ` <small style="font-weight:600">${K.hFr(hp.debut)}–${K.hFr(hp.fin)}</small>` : ''}${partiel ? ' ·' : ''}</span>`; }).join('');
       const minutes = K.min(c.f)-K.min(c.d);
-      /* 26/09/2026 — Les AESH passent en pastilles au pied du bloc. En bandes verticales, ils
-         mangeaient la moitié de la largeur et le nom du cours finissait en « Acc pers mat ».
-         L'horaire n'y figure plus : il est autour de la grille. Seule une présence partielle
-         le dit encore, parce que celle-là ne se devine pas. */
+      /* 27/09/2026 — Les AESH reviennent en barres verticales, mais sans leur sigle écrit
+         dessus : c'est le sigle qui mangeait la largeur, pas la barre. Six pixels chacune,
+         et surtout la barre commence et finit à l'heure que l'AESH couvre vraiment — une
+         présence de 13 h à 14 h sur un TP de 12 h à 15 h se voit, ce qu'une pastille au
+         pied du bloc ne disait pas. La légende, sous la grille, dit à qui est la couleur. */
       const bandes = aeshs.map(a => {
-        const x = parAesh.get(a.id), h = K.horairePlace(x, c), absent = K.absentLe(I, a.id, iso, h.debut, h.fin);
+        const x = parAesh.get(a.id), hp = K.horairePlace(x, c), absent = K.absentLe(I, a.id, iso, hp.debut, hp.fin);
         /* 26/09/2026 — Un cours a lieu toutes les semaines, mais l'AESH n'y vient qu'en A ou
-           qu'en B : sans cette lettre, la grille le montrait présent chaque semaine. 27 cas
-           dans le pôle, dont Antoine au co-enseignement maths du mercredi. */
+           qu'en B : sans cette lettre, la grille le montrait présent chaque semaine. */
         const sp = (x && x.semaines) || 'AB', une = sp !== 'AB' && c.sem === 'TOUTES';
-        return `<span class="past-aesh ${absent ? 'abs' : ''}" style="background:${couleurAesh(a.id)};color:${encreAesh(a.id)}" title="${esc(a.sigle)} · ${K.hFr(h.debut)}–${K.hFr(h.fin)}${une ? ' · semaine ' + sp + ' seulement' : ''}${absent ? ' · absence à vérifier' : ''}">${esc(a.sigle)}${une ? `<i class="past-sem">${sp}</i>` : ''}${h.partiel ? `<i>${K.hFr(h.debut)}–${K.hFr(h.fin)}</i>` : ''}</span>`;
+        const t = 100 * (K.min(hp.debut) - K.min(c.d)) / minutes, ht = 100 * (K.min(hp.fin) - K.min(hp.debut)) / minutes;
+        return `<span class="bande ${absent ? 'abs' : ''}" title="${esc(a.sigle)} · ${K.hFr(hp.debut)}–${K.hFr(hp.fin)}${une ? ' · semaine ' + sp + ' seulement' : ''}${absent ? ' · absence à vérifier' : ''}"><i style="top:${t}%;height:${ht}%;background:${couleurAesh(a.id)}"></i>${une ? `<em>${sp}</em>` : ''}</span>`;
       }).join('');
+      /* 27/09/2026 — Un carré par élève notifié présent à CE cours, rangés par deux pour
+         tenir sur une demi-colonne, groupés par mesure. Le nombre est écrit au-dessus :
+         lui tient partout, même quand les carrés ne tiennent pas. */
+      const carresHtml = (cc, lb) => {
+        const m = mesuresCours(nom, cc), g = K.carresMesures(m);
+        if (!m.notifies) return '';
+        const carres = g.map(([mes, n]) => Array.from({ length: n }, () => `<span class="car ${classeMesure(mes)}"></span>`).join('')).join('');
+        return `<span class="colinfo" style="right:${lb}px" aria-hidden="true"><span class="n">${m.notifies}${m.estime ? '<i>?</i>' : ''}</span><span class="g2">${carres}</span></span>`;
+      };
       const decoupes = Array.from({length:Math.max(0,Math.ceil(minutes/30)-1)},(_,i)=>`<span class="presence-repere" style="top:${100*(i+1)*30/minutes}%"></span>`).join('');
       const etat=K.etatBesoin(ctx(),c,iso,bes),libEtat={inconnu:'Besoin non renseigné',zero:'Aucun AESH demandé',vide:'Besoin non couvert',partiel:'Besoin partiellement couvert',plein:'Besoin couvert'};
       const besHtml=montrer('besoins')?`<span class="bes-cercle ${etat}" role="img" aria-label="${libEtat[etat]}" title="${libEtat[etat]}">${etat==='inconnu'?'?':etat==='zero'?'╱':''}</span>`:'';
@@ -992,8 +1002,13 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
            la bande de droite. */
         const dispo = horsBlocs.some(o => o.j === c.j && K.chevauche(c.d, c.f, o.d, o.f)) ? 64 : 100;
         const nbc = c._cols || 1;
-        return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${S.flash === c.id ? 'flash' : ''}" style="--mc:${mc};top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (dispo / nbc)}%;width:calc(${dispo / nbc}% - 6px)${lieu ? '' : ';opacity:.45'}">
-          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}"><b>${lettre ? `<i class="sem-lettre ${lettre === 'B' ? 'b' : ''}">${lettre}</i>` : ''}${esc(deuxSemaines ? K.libCourt(c.lib) : c.lib)}</b>${h > 116 && sallesCourtes(c.salle) ? `<span class="salle">${esc(sallesCourtes(c.salle))}</span>` : ''}${h > 96 ? elvHtml : ''}<span class="past-ligne" aria-hidden="true">${besHtml}${bandes}</span><span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button></div>`;
+        /* 27/09/2026 — La réserve de droite se calcule, elle n'est plus devinée : la bande des
+           barres vaut le nombre d'AESH, la colonne des carrés vingt pixels. Un bloc de trente
+           minutes n'a la place que de son titre : il garde ses barres et perd ses carrés. */
+        const lb = aeshs.length ? aeshs.length * 8 + 6 : 6, avecCarres = h > 44 && montrer('eleves');
+        const pad = lb + (avecCarres ? 24 : 4) + 4;
+        return `<div class="bloc ${aeshs.length ? 'avec-presences' : 'sans-presence'} avec-besoin ${K.estPro(c.lib) ? 'pro' : 'gen'} ${nbc > 1 ? 'demi' : ''} ${S.flash === c.id ? 'flash' : ''}" style="top:${top + 1}px;height:${h - 2}px;left:${3 + (c._col || 0) * (dispo / nbc)}%;width:calc(${dispo / nbc}% - 6px)${lieu ? '' : ';opacity:.45'}">
+          <button type="button" class="bloc-contenu ${lettre ? 'une-sem' : ''}" id="c-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${lettre ? 'Semaine ' + lettre + '. ' : ''}${esc(lib)}" style="--pr:${pad}px"><b>${lettre ? `<i class="sem-lettre ${lettre === 'B' ? 'b' : ''}">${lettre}</i>` : ''}${esc(deuxSemaines ? K.libCourt(c.lib) : c.lib)}</b>${h > 44 && K.salleNumero(sallesCourtes(c.salle)) ? `<span class="salle">${esc(K.salleNumero(sallesCourtes(c.salle)))}</span>` : ''}${h > 58 ? `<span class="ligne-bes">${besHtml}</span>` : ''}<span class="sr">${aeshs.map(a=>esc(a.sigle)).join(", ")}</span></button>${avecCarres ? carresHtml(c, lb) : ''}<span class="bandes" aria-hidden="true">${bandes}</span></div>`;
       }
       return `<div class="cours-l" style="--mc:${mc}${lieu ? '' : ';opacity:.5'}"><button type="button" class="cours-contenu" id="cl-${esc(c.id)}" data-a="${lectureSeule ? 'lecture' : 'placer'}" data-v="${esc(c.id)}" aria-label="${esc(lib)}">
         <span class="h">${K.hFr(c.d)}–${K.hFr(c.f)}</span><span class="m"><b>${esc(c.lib)}</b><small>${esc(c.salle.join(' · '))}</small></span>
@@ -1006,7 +1021,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       l.forEach(c => { const g = l.filter(x => K.chevauche(x.d, x.f, c.d, c.f)); c._cols = Math.max(1, ...g.map(x => x._col + 1)); });
     });
     /* même grille sur téléphone et ordinateur (les référents travaillent sur ce visuel) : sur téléphone, mode panoramique, on la déplace avec le doigt */
-    let grille = `<div class="semaine-repere">${deuxSemaines ? `Semaines A et B` : `Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}`}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}${deuxSemaines ? '' : `<small>${K.jjmm(jr.date)}</small>`}</div>`).join('')}
+    /* 27/09/2026 — L'effectif et les mesures de la classe, au-dessus de la grille : c'est
+       la légende des carrés en même temps, elle n'est donc pas répétée en bas. Les mesures
+       à zéro ne sont pas écrites — quatre lignes sur sept qui ne disaient rien noyaient
+       les trois qui comptent. */
+    const mcl = mesuresClasse(nom), mgroupes = K.carresMesures(mcl);
+    const bandeauClasse = montrer('eleves') && mcl.total ? `<div class="bandeau-classe">
+      <span class="eff">${mcl.total} élève${mcl.total > 1 ? 's' : ''} · ${mcl.notifies} notifié${mcl.notifies > 1 ? 's' : ''}</span>
+      ${mgroupes.map(([m, n]) => `<span class="grp"><span class="car ${classeMesure(m)}"></span><b>${n}</b> ${esc(m)}</span>`).join('')}</div>` : '';
+    let grille = `<div class="semaine-repere">${deuxSemaines ? `Semaines A et B` : `Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}`}</div>${bandeauClasse}<div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}${deuxSemaines ? '' : `<small>${K.jjmm(jr.date)}</small>`}</div>`).join('')}
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60+1 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => {
       grille += `<div class="g-jour jour-col" data-j="${j}" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}
@@ -1021,6 +1044,24 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        qui y sont cette semaine-là : elle est au même créneau pour tout le pôle, une case vide
        dans la grille n'apprendrait rien. Le récapitulatif des activités hors grille, juste
        en dessous, répond à une autre question : où passent les heures qui ne sont pas ici. */
+    /* 27/09/2026 — Le pied de grille, en quatre lignes et pas une de plus : à qui est chaque
+       couleur et ce que pèse sa semaine, ce que veut dire le cercle, et la part des heures
+       passées en atelier. Tout le reste est déjà écrit ailleurs sur la page. */
+    const dansLaClasse = [...new Set(cours.flatMap(c => placesCours(c.id, K.ajoute(lundiDe(c), c.j)).map(x => x.aeshId)))]
+      .map(id => I.aesh.get(id)).filter(Boolean)
+      .sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'));
+    if (dansLaClasse.length) grille += `<div class="pied-grille">
+      <div class="lg-ligne">${dansLaClasse.map(a => {
+        const b = K.bilan(ctx(), a.id, S.lundi);
+        return `<span class="lg-aesh"><i style="background:${couleurAesh(a.id)}"></i>${esc(a.sigle)}${b.contrat == null ? '' : ` <small>${K.fmtH(b.contrat)}</small>`}</span>`;
+      }).join('')}</div>
+      <div class="lg-ligne"><b class="lg-lib">Demande de l’enseignant :</b>
+        <span class="lg-cer"><span class="bes-cercle plein"></span>couverte</span>
+        <span class="lg-cer"><span class="bes-cercle partiel"></span>en partie</span>
+        <span class="lg-cer"><span class="bes-cercle vide"></span>personne</span>
+        <span class="lg-cer"><span class="bes-cercle zero">╱</span>pas de demande</span>
+        <span class="lg-cer"><span class="bes-cercle inconnu">?</span>pas de réponse</span></div>
+      ${jaugeProGeneral(cours, lundiDe)}</div>`;
     if (reunionsBas.length) grille += `<div class="sous-grille">${reunionsBas
       .sort((a, b) => a.j - b.j || K.min(a.d) - K.min(b.d)).map(o =>
         `<p><b>${esc(libelleService(o.label))}</b><span class="quand">${K.JOURS[o.j]} ${K.hFr(o.d)}–${K.hFr(o.f)}</span>${o.gens
@@ -1032,6 +1073,24 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (vus.length) grille += `<p class="legende-serv">${SIGLES_SERVICE.filter(([k]) => vus.includes(k))
       .map(([k, t]) => `<span>${logoService(k)}<b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
     return grille;
+  }
+  /* 27/09/2026 — Où passent les heures d'accompagnement de cette classe : en atelier ou
+     devant une discipline générale. On additionne le temps réellement placé, pas la durée
+     des cours : un AESH présent une heure sur trois ne pèse qu'une heure. */
+  function jaugeProGeneral(cours, lundiDe) {
+    let pro = 0, gen = 0;
+    cours.forEach(c => {
+      const iso = K.ajoute(lundiDe(c), c.j);
+      placesCours(c.id, iso).forEach(x => {
+        const h = K.horairePlace(x, c), d = (K.min(h.fin) - K.min(h.debut)) / 60;
+        if (d > 0) { if (K.estPro(c.lib)) pro += d; else gen += d; }
+      });
+    });
+    const t = pro + gen; if (!t) return '';
+    const p = Math.round(100 * pro / t);
+    return `<div><div class="lg-lib">Présence AESH — enseignement professionnel / enseignement général</div>
+      <div class="jauge"><span class="p" style="width:${p}%">${p} %</span><span class="g" style="width:${100 - p}%">${100 - p} %</span></div>
+      <div class="jauge-lib"><span>${K.fmtH(pro)} en pro</span><span>${K.fmtH(gen)} en général</span></div></div>`;
   }
   function panneauVerification() {
     if(P().id!=='PSR_MELEC') return '';
@@ -1742,6 +1801,20 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   const comptesEleves = nom => comptesClasse(elevesDe(nom));
   const libelleEleves = nom => libelleClasse(comptesClasse(elevesDe(nom)));
+  /* 27/09/2026 — Les mesures d'une classe, sans double compte, et celles d'un cours précis.
+     Le nombre change d'un cours à l'autre dès qu'un élève a un emploi du temps aménagé :
+     tant que l'aménagement n'est pas saisi, on affiche l'effectif de la classe et on le dit. */
+  const mesuresClasse = nom => K.comptesMesures(elevesDe(nom));
+  /* La forme du carré dit la mesure : bord vert pour ULIS, plein pour une aide
+     individualisée, hachuré pour une mutualisée, pointillé tant qu'elle est à préciser. */
+  const classeMesure = m => (m.startsWith('ULIS') ? 'ulis ' : '') +
+    (/\+ AI$/.test(m) ? 'ai' : /\+ AM$/.test(m) ? 'am' : m === 'AI' ? 'ai' : m === 'AM' ? 'am' :
+     /préciser|attente/.test(m) ? 'flou' : '');
+  const mesuresCours = (nom, c) => {
+    const l = elevesDe(nom);
+    const abs = l.filter(e => Array.isArray(e.horsCours) && e.horsCours.includes(c.id));
+    return Object.assign(K.comptesMesures(l.filter(e => !abs.includes(e))), { estime: !l.some(e => Array.isArray(e.horsCours)) });
+  };
   function ecranEleves() {
     const vue = S.route.p.vueEleves === 'epreuve' ? 'epreuve' : 'aide';
     const ouverte = S.route.p.classeEleves || '';
