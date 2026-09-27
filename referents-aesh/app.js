@@ -1722,8 +1722,14 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      « Aménagements d'épreuve » remplit le formulaire d'organisation des CCF du lycée.
      Le support d'épreuve vient de l'Atelier (profil d'édition de l'élève) : il s'affiche,
      il ne se modifie pas ici — sinon deux vérités divergeraient au premier changement. */
-  const EL_AMEN = [['tiers', '1/3 temps'], ['lecteur', 'Lecteur'], ['scripteur', 'Scripteur'],
-    ['assistant', 'Assistant'], ['ordi', 'Ordinateur'], ['agrandi', 'Sujet agrandi']];
+  const EL_AMEN = [['dispense', 'Dispense'], ['tiers', '1/3 temps'], ['lecteur', 'Lecteur'],
+    ['scripteur', 'Scripteur'], ['assistant', 'Assistant'], ['ordi', 'Ordinateur'],
+    ['agrandi', 'Sujet agrandi'], ['isole', 'Isolé']];
+  /* 27/09/2026 — Le même vocabulaire que l'Atelier, mot pour mot : un type de sujet se
+     choisit (on n'en a qu'un), le matériel aussi. Deux outils qui nomment différemment la
+     même chose, c'est une saisie de plus et une divergence au premier changement. */
+  const EL_SUJETS = [['', '—'], ['Ordinaire', 'ordinaire'], ['Agrandi', 'agrandi'], ['Braille', 'braille'], ['Numérique', 'numérique']];
+  const EL_MPA = [['', '—'], ['PC du centre', 'PC centre'], ['PC du candidat', 'PC candidat']];
   const EL_NOTIFS = [['oui', 'notifiée'], ['encours', 'en cours'], ['non', 'non']];
   const EL_AIDES = [['individualisee', 'ind.'], ['mutualisee', 'mut.'], ['aucune', 'aucune']];
   const EL_DOCS = [['PPS', 'PPS'], ['PAP', 'PAP'], ['', 'aucun']];
@@ -1755,6 +1761,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
             <td><span class="codeel">${esc(e.code)}</span></td>
             <td>${seg('el-doc|' + nom + '|' + i, e.doc || '', EL_DOCS)}</td>
             ${EL_AMEN.map(([cle]) => `<td class="ctr"><button type="button" class="case ${am.includes(cle) ? 'on' : ''}" data-a="el-amen" data-v="${esc(nom)}|${i}|${cle}" aria-pressed="${am.includes(cle)}" aria-label="${esc(cle)}">${am.includes(cle) ? '✓' : ''}</button></td>`).join('')}
+            <td>${seg('el-sujet|' + nom + '|' + i, e.sujet || '', EL_SUJETS)}</td>
+            <td><input class="petitchamp" id="ela-${esc(nom)}-${i}" data-i="el-agrandissement" data-v="${esc(nom)}|${i}" value="${esc(e.agrandissement || '')}" placeholder="Arial 16" maxlength="40" aria-label="Agrandissement"></td>
+            <td>${seg('el-mpa|' + nom + '|' + i, e.mpa || '', EL_MPA)}</td>
             <td class="sup">${e.support ? esc(e.support) : '<span class="muet">—</span>'}</td></tr>`;
           return `<tr>
             <td><span class="codeel">${esc(e.code)}</span></td>
@@ -1765,7 +1774,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
             <td><input class="datechamp" id="elf-${esc(nom)}-${i}" data-i="el-fin" data-v="${esc(nom)}|${i}" value="${esc(e.fin || '')}" placeholder="—" maxlength="10" aria-label="Notifiée jusqu’au"></td></tr>`;
         }).join('');
         const tete = vue === 'epreuve'
-          ? `<th>Code</th><th>PAP / PPS</th>${EL_AMEN.map(([, t]) => `<th class="ctr">${t}</th>`).join('')}<th>Support (Atelier)</th>`
+          ? `<th>Code</th><th>PAP / PPS</th>${EL_AMEN.map(([, t]) => `<th class="ctr">${t}</th>`).join('')}<th>Sujet</th><th>Agrandi.</th><th>Matériel</th><th>Support (Atelier)</th>`
           : '<th>Code</th><th>Notification</th><th>Aide humaine</th><th>Heures</th><th class="ctr">ULIS</th><th>Notifiée jusqu’au</th>';
         return `<section class="cl-ouverte">
           <div class="ligne cl-tete"><button type="button" class="rond" id="cle-fermer" data-a="eleves-classe" data-v="" aria-label="Refermer">←</button>
@@ -1821,8 +1830,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const k = S.edt.classes[nom] || { court: nom };
     const l = elevesDe(nom).filter(e => (e.notif && e.notif !== 'non') || e.doc || (e.amenagements || []).length);
     if (!l.length) { toast('Aucun élève à besoins particuliers dans cette classe.', true); return; }
-    const lignes = l.map(e => [e.code, e.doc || '', ...EL_AMEN.map(([c]) => (e.amenagements || []).includes(c) ? 'X' : ''), e.support || ''].join('\t')).join('\n');
-    const tete = ['Élève (code)', 'PAP ou PPS', ...EL_AMEN.map(([, t]) => t), 'Support'].join('\t');
+    const lignes = l.map(e => [e.code, e.doc || '', ...EL_AMEN.map(([c]) => (e.amenagements || []).includes(c) ? 'X' : ''), e.sujet || '', e.agrandissement || '', e.mpa || '', e.support || ''].join('\t')).join('\n');
+    const tete = ['Élève (code)', 'PAP ou PPS', ...EL_AMEN.map(([, t]) => t), 'Sujet', 'Agrandissement', 'Matériel', 'Support'].join('\t');
     const txt = `Organisation des CCF — élèves à besoins particuliers\n${k.court} · ${S.annee}\n\n${tete}\n${lignes}\n`;
     import('./fichiers.js?v=2026-09-24i')
       .then(F => F.telecharger(new Blob([txt], { type: 'text/plain;charset=utf-8' }), `CCF-${nom}-${S.annee}.txt`))
@@ -2420,7 +2429,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function gererClic(ev) {
     const b = ev.target.closest('[data-a]'); if (!b || b.disabled || b.getAttribute('aria-disabled') === 'true') { if (b && b.getAttribute('aria-disabled') === 'true') toast(b.title || 'Pas disponible sur ce créneau', true); return; }
     const a = b.dataset.a, v = b.dataset.v;
-    if (typeof a === 'string' && /^el-(notif|aide|doc)\|/.test(a)) {
+    if (typeof a === 'string' && /^el-(notif|aide|doc|sujet|mpa)\|/.test(a)) {
       const [quoi, nom, i] = a.split('|');
       enregistrerEleve(nom, +i, { [quoi.slice(3)]: v }); return;
     }
@@ -2786,10 +2795,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       if (ev.type === 'change') rendre({ focus: t.id });
       return;
     }
-    if (k === 'el-heures' || k === 'el-fin') {
+    if (k === 'el-heures' || k === 'el-fin' || k === 'el-agrandissement') {
       const [nom, i] = String(t.dataset.v || '').split('|');
       if (ev.type !== 'change') return;
-      enregistrerEleve(nom, +i, k === 'el-heures' ? { heures: t.value.trim().slice(0, 6) } : { fin: t.value.trim().slice(0, 10) });
+      const champs = { 'el-heures': ['heures', 6], 'el-fin': ['fin', 10], 'el-agrandissement': ['agrandissement', 40] };
+      const [champ, max] = champs[k];
+      enregistrerEleve(nom, +i, { [champ]: t.value.trim().slice(0, max) });
       return;
     }
     if(k==='filtre-aesh'){if(ev.type==='change') aller('edt',{...S.route.p,aesh:t.value},{remplacer:true});return;}
