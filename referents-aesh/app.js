@@ -174,8 +174,6 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      feuille à lui. Chacun se coche à part, et le choix se retient. */
   const cleDisp = nom => 'disp:' + String(nom || '');
   const montrerDisp = o => {
-    if(horsClasse({nom:o.label,horsClasse:o.horsClasse}))return false;
-    if(['DP','IN'].includes(sigleService(o.label)))return true;
     const v = optionsGrille[cleDisp(o.label)];
     return typeof v === 'boolean' ? v : !horsClasse({ nom: o.label, horsClasse: o.horsClasse });
   };
@@ -891,7 +889,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        classe : ils encombraient la grille du groupe sans rien lui apprendre. Ils restent
        entiers dans la semaine de la personne ; ici, chacun a sa case dans le menu. */
     const tousServices=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.type==='service'));
-    S.dispoVus=[...new Map(tousServices.filter(o=>!horsClasse({nom:o.label,horsClasse:o.horsClasse})).map(o=>[String(o.label||''),o])).values()]
+    S.dispoVus=[...new Map(tousServices.map(o=>[String(o.label||''),o])).values()]
       .sort((x,y)=>String(x.label).localeCompare(String(y.label),'fr'));
     const services=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})))
       .filter(o=>o.type!=='service' || montrerDisp(o));
@@ -1019,6 +1017,15 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     /* La légende des deux lettres, sous la grille : DP, RE… Écrite petit, une seule fois,
        plutôt que déroulée dans chaque bloc de trente minutes. */
     const semainesRecap=deuxSemaines?[['A',paireC.A],['B',paireC.B]]:[[S.C.parite(S.lundi)||'—',S.lundi]];
+    /* 27/09/2026 — La réunion d'équipe reste écrite sous la grille, avec les sigles de ceux
+       qui y sont cette semaine-là : elle est au même créneau pour tout le pôle, une case vide
+       dans la grille n'apprendrait rien. Le récapitulatif des activités hors grille, juste
+       en dessous, répond à une autre question : où passent les heures qui ne sont pas ici. */
+    if (reunionsBas.length) grille += `<div class="sous-grille">${reunionsBas
+      .sort((a, b) => a.j - b.j || K.min(a.d) - K.min(b.d)).map(o =>
+        `<p><b>${esc(libelleService(o.label))}</b><span class="quand">${K.JOURS[o.j]} ${K.hFr(o.d)}–${K.hFr(o.f)}</span>${o.gens
+          .sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
+          .map(a => `<span class="past-aesh" style="background:${couleurAesh(a.id)};color:${encreAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</p>`).join('')}</div>`;
     const externes=K.aeshActifs(I,P().id).map(a=>({a,lignes:resumeExterne(K,ctx(),a,semainesRecap)})).filter(x=>x.lignes.length);
     if(externes.length)grille+=`<aside class="recap-externe"><h3>Activités hors grille</h3>${externes.map(({a,lignes})=>`<p><b>${esc(a.sigle)}</b>${lignes.map(x=>`<span class="dispositif ${x.eleves?'':'administratif'}">${esc(x.nom)} · ${semainesRecap.map(([s])=>`${deuxSemaines?s+' : ':''}${K.fmtH(x.heures[s]||0)}`).join(' · ')}</span>`).join('')}</p>`).join('')}<small>Heures déjà incluses dans les totaux. Couleur : présence élèves · Pointillés : hors présence élèves.</small></aside>`;
     const vus = [...new Set(horsBlocs.filter(o => !estReunion(o)).map(o => o.sig))];

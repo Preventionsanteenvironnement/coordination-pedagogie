@@ -23,4 +23,13 @@ assert.equal(choisi.montrerDisp({ label: 'PIAL' }), false);
 /* Un service rangé à la main par son référent garde son rangement. */
 assert.equal(d.montrerDisp({ label: 'ULIS piscine', horsClasse: true }), false);
 assert.equal(d.cleDisp('DAFI'), 'disp:DAFI');
+/* 27/09 — Deux acquis que la fusion avec le travail de Codex ne doit pas reperdre. */
+const app = fs.readFileSync(new URL('../app.js', import.meta.url), 'utf8');
+/* La réunion d'équipe reste écrite sous la grille, avec les sigles de la semaine. */
+assert.match(app, /reunionsBas\s*\n?\s*\.sort/, 'la ligne « Réunion d’équipe » sous la grille a disparu');
+assert.match(app, /class="sous-grille"/);
+/* Aucun dispositif n'est imposé avant le filtre : les cases du menu font foi. */
+assert.doesNotMatch(app, /\['DP','IN'\]\.includes\(sigleService/, 'DP et internat sont redevenus obligatoires');
+/* Les dispositifs hors classe restent proposés dans le menu, pour pouvoir les afficher. */
+assert.doesNotMatch(app, /S\.dispoVus=\[\.\.\.new Map\(tousServices\.filter/, 'PIAL, DAFI et ESAT ont été retirés du menu');
 console.log('filtre des dispositifs : ok');
