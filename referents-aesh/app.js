@@ -1181,7 +1181,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       ${resume.length?`<div class="st-resume">${resume.map(([n,h])=>`<span><b>${esc(n)}</b> ${K.fmtH(h)}</span>`).join('')}</div>`:''}
       <div class="st-actions">
         <button type="button" class="btn" data-a="export-grille">⬇ Enregistrer en PDF ou Excel</button>
-        <button type="button" class="btn ghost" data-a="envoyer-grille">✉️ Envoyer à ${esc(local?.libelle(personne)||personne.sigle)}</button>
+        <button type="button" class="btn ghost" data-a="ecrire-aesh" data-v="${esc(personne.id)}">✉️ Écrire à ${esc(local?.libelle(personne)||personne.sigle)}</button>
       </div></div>`;
   }
   function grillesPlanning(personne,nom) {
@@ -2088,6 +2088,126 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   /* Envoyer sa semaine type à l'AESH : le PDF est préparé et enregistré, puis le message
      s'ouvre, prêt à partir. Un navigateur ne sait pas joindre un fichier lui-même : la pièce
      jointe reste à glisser, et le message le dit. */
+  /* ─── 27/09/2026 — Le courrier qu'un AESH reçoit avec son emploi du temps ───
+     Chacun reçoit SES points, lus dans ses données : ses heures contre son contrat,
+     sa réunion si elle n'est pas fixée, ses chevauchements, ses pôles quand il en a
+     plusieurs. Écrits comme des questions, jamais comme des reproches : un emploi du
+     temps provisoire se corrige à deux, et l'erreur peut venir de la coordination. */
+  function pointsAesh(cx, a) {
+    const paire = semainesAB(cx.C, S.lundi);
+    const bA = K.bilan(cx, a.id, paire.A), bB = K.bilan(cx, a.id, paire.B);
+    const pts = [];
+    const ecart = (b, s) => {
+      if (b.contrat == null) return null;
+      const d = b.total - b.contrat;
+      if (Math.abs(d) < 0.01) return null;
+      return { s, d, total: b.total, contrat: b.contrat };
+    };
+    const eA = ecart(bA, 'A'), eB = ecart(bB, 'B');
+    if (eA || eB) {
+      const e = eA || eB, meme = eA && eB && Math.abs(eA.d - eB.d) < 0.01;
+      pts.push({ ton: e.d > 0 ? 'attention' : 'question',
+        titre: e.d > 0 ? 'Vos heures dépassent votre contrat' : 'Il manque des heures par rapport à votre contrat',
+        texte: `${meme || !eB ? '' : `Semaine ${e.s} : `}${K.fmtH(e.total)} pour un contrat de ${K.fmtH(e.contrat)}, soit ${K.fmtH(Math.abs(e.d))} ${e.d > 0 ? 'de trop' : 'qui manquent'}.`
+          + ` Si un créneau vous a été attribué à tort, ou s'il en manque un, dites-le-moi.` });
+    }
+    const nf = K.reunionsNonFixees(a);
+    if (nf.length) pts.push({ ton: 'attention', titre: 'Votre réunion d’équipe n’a pas encore de jour',
+      texte: `L’heure est bien prévue, mais le créneau reste à trouver. `
+        + `${creneauxLibres(cx).length ? 'D’après les emplois du temps de l’équipe, ' + creneauxLibres(cx).slice(0, 2).join(' ou ') + ' conviendraient à tout le monde — à vous de voir ce qui vous arrange.' : ''}` });
+    const conflits = [...new Set([...(bA.alertes || []), ...(bB.alertes || [])].filter(x => x.type === 'conflit').map(x => x.texte))];
+    if (conflits.length) pts.push({ ton: 'attention', titre: 'Vous êtes attendue à deux endroits en même temps',
+      texte: conflits.join(' · ') + ' — c’est très probablement une erreur de ma part, dites-moi lequel est le bon.' });
+    const poles = Object.entries(bA.parPole || {}).filter(([, h]) => h > 0);
+    if (poles.length > 1) pts.push({ ton: 'info', titre: 'Vous intervenez dans plusieurs pôles',
+      texte: `L’emploi du temps joint les réunit tous : ${poles.map(([q, h]) => `${nomPole(q)} ${K.fmtH(h)}`).join(', ')}. Vérifiez surtout les jours où les deux se croisent.` });
+    if (!pts.length) pts.push({ ton: 'info', titre: 'Rien ne coince de mon côté',
+      texte: 'Vos heures correspondent à votre contrat et je ne vois aucun chevauchement. Dites-moi tout de même si quelque chose ne colle pas avec ce que vous vivez sur le terrain.' });
+    return pts;
+  }
+  /* Les créneaux d'une heure où toute l'équipe du pôle est libre — pour proposer, pas pour imposer. */
+  function creneauxLibres(cx) {
+    const eq = K.aeshActifs(cx.I, P().id), occ = new Map();
+    eq.forEach(a => occ.set(a.id, K.occupations(cx, a.id, S.lundi).filter(o => !['repos', 'vacances'].includes(o.type))));
+    const out = [];
+    for (let j = 0; j < 5 && out.length < 4; j++) {
+      for (let d = 8 * 60; d <= 17 * 60; d += 30) {
+        const f = d + 60;
+        if (eq.every(a => !occ.get(a.id).some(o => o.j === j && K.min(o.debut) < f && K.min(o.fin) > d))) {
+          out.push(`${K.JOURS[j].toLowerCase()} ${K.hFr(`${String(Math.floor(d / 60)).padStart(2, '0')}:${String(d % 60).padStart(2, '0')}`)}`);
+          break;
+        }
+      }
+    }
+    return out;
+  }
+  function courrierAesh(cx, a, avecIndiv, avecCollectif) {
+    const pts = pointsAesh(cx, a), nom = local?.libelle(a) || a.sigle;
+    const pieces = [avecIndiv && 'votre emploi du temps', avecCollectif && 'celui de toute l’équipe'].filter(Boolean);
+    const intro = `Voici ${pieces.join(' et ')}, dans l’état où ${pieces.length > 1 ? 'ils sont' : 'il est'} aujourd’hui. C’est une version provisoire : elle va encore bouger.`;
+    const fin = `Regardez-la quand vous avez un moment et répondez-moi par retour de mail — même pour un détail. Il est très possible que je me sois trompé quelque part, et c’est bien plus facile à corriger maintenant qu’en novembre.`;
+    const objet = `Votre emploi du temps · ${nom}`;
+    const corps = [intro, '', ...pts.flatMap(p => [p.titre.toUpperCase(), p.texte, '']), fin, '', 'À bientôt.'].join('\n');
+    const coul = { attention: '#b42318', question: '#b45309', info: '#0f766e' };
+    const fond = { attention: '#fdecea', question: '#fdf1e2', info: '#e6f2f0' };
+    const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.55;color:#101828;max-width:620px">
+      <p>${esc(intro)}</p>
+      ${pts.map(p => `<div style="margin:14px 0;padding:12px 14px;border-left:4px solid ${coul[p.ton]};background:${fond[p.ton]};border-radius:0 10px 10px 0">
+        <b style="color:${coul[p.ton]}">${esc(p.titre)}</b><br><span style="color:#475467">${esc(p.texte)}</span></div>`).join('')}
+      <p>${esc(fin)}</p><p>À bientôt.</p></div>`;
+    return { objet, corps, html };
+  }
+  /* Le message s'ouvre dans Mail avec ses pièces déjà jointes. Il ne part jamais tout
+     seul : aucune adresse n'est enregistrée nulle part, c'est vous qui la tapez. */
+  async function ecrireAesh(f) {
+    const cx = ctx(), a = cx.I.aesh.get(f.aesh);
+    if (!a) { toast('Choisissez d’abord un AESH.', true); return; }
+    if (S.envoi) return; S.envoi = true; rendre();
+    try {
+      const X = await import('./exports.js?v=2026-09-27h'), F = await import('./fichiers.js?v=2026-09-24i');
+      const court = String(a.sigle).replace(/[^a-zA-Z0-9_-]/g, '-');
+      const pieces = [];
+      if (f.indiv) pieces.push({ nom: `emploi-du-temps-${court}.pdf`, blob: X.pdfSemaineType(cx, [a.id], S.lundi) });
+      if (f.collectif) pieces.push({ nom: `equipe-${String(P().nom).replace(/[^a-zA-Z0-9_-]/g, '-')}.pdf`, blob: X.pdfEquipe(cx, [P().id], K.aeshActifs(cx.I, P().id).map(x => x.id), S.lundi) });
+      if (!pieces.length) { toast('Choisissez au moins un document.', true); return; }
+      const m = courrierAesh(cx, a, f.indiv, f.collectif);
+      const api = window.mailAPI;
+      if (api && api.pieces && api.composer) {
+        const b64 = await Promise.all(pieces.map(p => new Promise((res, rej) => {
+          const r = new FileReader(); r.onload = () => res({ nom: p.nom, base64: String(r.result).split(',')[1] }); r.onerror = rej; r.readAsDataURL(p.blob);
+        })));
+        const pose = await api.pieces({ pieces: b64 });
+        if (!pose || !pose.ok) throw Error(pose && pose.error || 'Les pièces n’ont pas pu être préparées.');
+        const env = await api.composer({ objet: m.objet, corps: m.corps, html: m.html, pieces: pose.pieces });
+        if (!env || env.ok === false) throw Error(env && env.error || 'Mail n’a pas répondu.');
+        fermer(); toast('Message ouvert dans Mail : ajoutez l’adresse et relisez avant d’envoyer.');
+      } else {
+        /* Hors de l'Atelier : on enregistre les documents et on ouvre un message vide.
+           mailto: ne sait pas porter de pièce jointe — c'est le protocole, pas nous. */
+        pieces.forEach(p => F.telecharger(p.blob, p.nom));
+        window.open('mailto:?subject=' + encodeURIComponent(m.objet) + '&body=' + encodeURIComponent(m.corps + '\n\n' + pieces.map(p => `Document enregistré : ${p.nom}`).join('\n')), '_self');
+        fermer(); toast(`${pieces.length} document(s) enregistré(s) : joignez-les au message.`);
+      }
+    } catch (e) { toast(e.message || 'Envoi impossible.', true); }
+    finally { S.envoi = false; rendre(); }
+  }
+  function feuilleEcrire(f) {
+    const cx = ctx(), a = cx.I.aesh.get(f.aesh); if (!a) return '';
+    const m = courrierAesh(cx, a, f.indiv, f.collectif);
+    const coul = { attention: 'var(--err)', question: 'var(--warn)', info: 'var(--accent)' };
+    return teteFeuille(`Écrire à ${esc(local?.libelle(a) || a.sigle)}`, 'Le message s’ouvre dans Mail avec ses pièces jointes. Vous ajoutez l’adresse, vous relisez, vous envoyez.')
+      + `<div class="champs"><div class="champ" style="grid-template-columns:1fr"><span class="lib"><b>Ce que vous joignez</b></span>
+        <div class="choix" role="group" aria-label="Documents">
+          <button type="button" data-a="ecrire-piece" data-v="indiv" aria-pressed="${f.indiv}">Son emploi du temps</button>
+          <button type="button" data-a="ecrire-piece" data-v="collectif" aria-pressed="${f.collectif}">Celui de l’équipe</button>
+        </div></div></div>
+      <div class="carte pad" style="margin-top:12px"><b>Ce qu’elle lira</b>
+        <p class="doux" style="margin:8px 0">${esc(m.corps.split('\n')[0])}</p>
+        ${pointsAesh(cx, a).map(p => `<div style="margin:8px 0;padding:8px 12px;border-left:4px solid ${coul[p.ton]};background:var(--card-2);border-radius:0 10px 10px 0">
+          <b style="color:${coul[p.ton]}">${esc(p.titre)}</b><div class="doux petit">${esc(p.texte)}</div></div>`).join('')}
+      </div>
+      <div class="barre-bas"><button type="button" class="btn valider" data-a="ecrire-envoyer" ${S.envoi ? 'disabled' : ''}>✉️ Ouvrir le message</button></div>`;
+  }
   async function envoyerGrille() {
     const cx=S.route.p.edtType?{...contexteType(ctx()),exportType:true}:ctx();
     const a=cx.I.aesh.get(S.route.p.aesh);
@@ -2232,6 +2352,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const f = S.feuille;
     let h = '', large = false;
     if(f.type==='export-grille') h=feuilleExportGrille(f);
+    else if (f.type === 'ecrire') { h = feuilleEcrire(f); large = true; }
     else if(f.type==='service-detail') h=teteFeuille('Réunions et services',K.dateLongue(K.ajoute(S.lundi,f.jour)))+K.aeshActifs(idx(),P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.j===f.jour && ['service','reunion','institution'].includes(o.type)).map(o=>`<p style="border-left:5px solid ${couleurAesh(a.id)};padding-left:10px"><b>${esc(local?.libelle(a)||a.sigle)}</b> · ${esc(libelleService(o.label))}<br>${K.hFr(o.debut)}–${K.hFr(o.fin)}</p>`)).join('');
     else if (f.type === 'service-horaire') { h = feuilleServiceHoraire(f); large=true; }
     else if (f.type === 'epreuve') { h = feuilleEpreuve(f); large = true; }
@@ -2642,6 +2763,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       case 'service-fin': terminerService(b); return;
       case 'planning-pole': if(POLES.some(p=>p.id===v)){S.vu=v;S.route.p={};S.aeshChoisi=null;rendre();} return;
       case 'envoyer-grille': envoyerGrille(); return;
+      case 'ecrire-aesh': ouvrir({ type: 'ecrire', aesh: v, indiv: true, collectif: true }); return;
+      case 'ecrire-piece': S.feuille[v] = !S.feuille[v]; rendre(); return;
+      case 'ecrire-envoyer': ecrireAesh(S.feuille); return;
       case 'export-grille': ouvrir({type:'export-grille',qui:S.route.p.aesh?'personne':'equipe',semaines:S.route.p.aesh?'TYPE':(S.route.p.parite||S.C.parite(S.lundi)||'AB'),format:'pdf'});return;
       case 'export-grille-choix': if(S.feuille?.type==='export-grille'){S.feuille[b.dataset.champ]=v;rendre();}return;
       case 'export-grille-telecharger': telechargerGrille();return;
