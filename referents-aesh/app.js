@@ -22,7 +22,9 @@ import * as AV from './avatars.js?v=2026-09-24b';
 const DELAI = 15000;
 const K_OPTIONS = 'referents-aesh-options-v1';
 const K_SESSION = 'referents-aesh-session-v1', K_HUMEUR = 'referents-aesh-humeur', K_CACHE = 'referents-aesh-cache-v1', K_LU = 'referents-aesh-messages-lus',
-  K_FOND = 'referents-aesh-fond', K_SIGN = 'referents-aesh-signature', K_PENSEES = 'referents-aesh-pensees';
+  K_FOND = 'referents-aesh-fond', K_SIGN = 'referents-aesh-signature', K_PENSEES = 'referents-aesh-pensees',
+    /* 28/09/2026 — la dernière activité d'un autre pôle que l'on a déjà vue. */
+    K_VU_ACTIVITE = 'referents-aesh-activite-vue';
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const lsLit = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v ?? d; } catch (e) { return d; } };
 const lsEcrit = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } };
@@ -355,11 +357,44 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (S.route.e === 'messages') { const f = document.getElementById('fil-fin'); if (f && !apresRendu.vu) { f.scrollIntoView({ block: 'end' }); apresRendu.vu = true; } marquerLus(); }
     else apresRendu.vu = false;
   }
+  /* 28/09/2026 — « Quelqu'un est passé ». Dès qu'un autre pôle a modifié le planning, une
+     ligne discrète le dit, avec une croix pour la faire taire. Rien d'autre : aucun nom,
+     aucun détail, aucun chiffre. L'historique complet vit dans l'Atelier, sur le Mac. */
+  const NOM_POLE_COURT = { PSR_MELEC: 'PSR · MELEC', AGORA: 'AGOrA', CAPA: 'CAPa', MDA: 'Métiers d’art' };
+  function quandCourt(iso) {
+    const d = new Date(iso); if (isNaN(d)) return '';
+    const j = new Date(), hier = new Date(j.getTime() - 86400000);
+    const h = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    if (d.toDateString() === j.toDateString()) return 'aujourd’hui à ' + h;
+    if (d.toDateString() === hier.toDateString()) return 'hier à ' + h;
+    return 'le ' + d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' à ' + h;
+  }
+  function derniereActiviteAutre() {
+    const mien = S.session && S.session.pole;
+    let best = null;
+    for (const d of S.docs.values()) {
+      const p = d && d.par, q = d && d.majLe;
+      if (!p || !q || p === mien || !NOM_POLE_COURT[p]) continue;
+      if (!best || String(q) > String(best.quand)) best = { pole: p, quand: q };
+    }
+    return best;
+  }
+  function bandeauActivite() {
+    const a = derniereActiviteAutre(); if (!a) return '';
+    let vu = ''; try { vu = localStorage.getItem(K_VU_ACTIVITE) || ''; } catch (e) {}
+    if (vu && String(a.quand) <= vu) return '';
+    return '<div class="bandeau-activite" role="status"><span><b>' + esc(NOM_POLE_COURT[a.pole])
+      + '</b> a modifié le planning ' + esc(quandCourt(a.quand)) + '.</span>'
+      + '<button type="button" class="ba-x" data-a="activite-vue" data-v="' + esc(a.quand)
+      + '" aria-label="Fermer cette information" title="Fermer">✕</button></div>';
+  }
+
   function bandeauEtat() {
     if(local)return local.status();
-    if (S.etat === 'refus') return `<div class="bandeau warn" role="alert">Espace en cours d’ouverture par la coordination : consultation possible, enregistrement pas encore autorisé.</div>`;
-    if (S.etat === 'horsligne') return `<div class="bandeau warn" role="alert">Pas de connexion au serveur : les données affichées sont celles de la dernière visite.</div>`;
-    return '';
+    const act = bandeauActivite();
+    if (S.etat === 'refus') return act + `<div class="bandeau warn" role="alert">Espace en cours d’ouverture par la coordination : consultation possible, enregistrement pas encore autorisé.</div>`;
+    if (S.etat === 'horsligne') return act + `<div class="bandeau warn" role="alert">Pas de connexion au serveur : les données affichées sont celles de la dernière visite.</div>`;
+    return act;
   }
   function entete() {
     if(local)return local.entete(S,P());
@@ -2708,6 +2743,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     }
     if (a === 'voile') { if (ev.target === b && !S.envoi && !(S.feuille && S.feuille.type === 'confirmer' && !S.feuille.fait)) fermer(); return; }
     switch (a) {
+      case 'activite-vue': try { localStorage.setItem(K_VU_ACTIVITE, String(v)); } catch (e) {} rendre(); return;
       case 'verification': lancerVerification(v); return;
       case 'verification-import': importerVerification(); return;
       case 'service-detail': if(/^[0-4]$/.test(v)) ouvrir({type:'service-detail',jour:+v}); return;
