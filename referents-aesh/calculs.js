@@ -236,7 +236,14 @@ export function normaliserAesh(d, polesAutorises, cat) {
   const equipes = {}, heures = {};
   Object.entries(d.equipes && typeof d.equipes === 'object' ? d.equipes : {}).forEach(([q, v]) => { if (ok(q)) equipes[q] = Number.isFinite(+v) ? +v : 1; });
   Object.entries(d.heures && typeof d.heures === 'object' ? d.heures : {}).forEach(([q, v]) => { if (ok(q) && nombreOk(v) != null) heures[q] = nombreOk(v); });
-  const r = d.reunion && typeof d.reunion === 'object' && Number.isInteger(+d.reunion.jour) && +d.reunion.jour >= 0 && +d.reunion.jour <= 4 && RE_HEURE.test(d.reunion.debut || '') && RE_HEURE.test(d.reunion.fin || '') ? { jour: +d.reunion.jour, debut: d.reunion.debut, fin: d.reunion.fin } : null;
+  /* 27/09/2026 — Une réunion due dont le jour n'est pas décidé n'a ni jour ni horaire : la
+     normalisation la jetait, et le créneau automatique de l'équipe revenait par-dessus. Elle
+     survit maintenant telle quelle. C'est le cas de Nathalie, qui accompagne l'ULIS à l'heure
+     de la réunion. */
+  const rd = d.reunion && typeof d.reunion === 'object' ? d.reunion : null;
+  const r = rd && rd.aFixer ? { aFixer: true, pole: typeof rd.pole === 'string' ? rd.pole : '', heures: nombreOk(rd.heures) == null ? 1 : nombreOk(rd.heures) }
+    : rd && Number.isInteger(+rd.jour) && +rd.jour >= 0 && +rd.jour <= 4 && RE_HEURE.test(rd.debut || '') && RE_HEURE.test(rd.fin || '')
+    ? { jour: +rd.jour, debut: rd.debut, fin: rd.fin, ...(typeof rd.pole === 'string' && rd.pole ? { pole: rd.pole } : {}) } : null;
   const out = { ...d, sigle: String(d.sigle || '?').slice(0, 6), equipes, heures, contrat: nombreOk(d.contrat), reunion: r, actif: d.actif !== false,
     services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) !== null && (nombreOk(x.h) > 0 || (Array.isArray(x.horaires) && x.horaires.length > 0))).map(x => ({ ...x, horaires:Array.isArray(x.horaires)?x.horaires.filter(h=>h && Number.isInteger(h.jour) && h.jour>=0 && h.jour<5 && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'')):[], nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
       jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [] })) : undefined,
@@ -346,7 +353,9 @@ export function reunionsSupplementairesDe(a) {
    Et surtout : plus d'heure devinée. L'application créditait une heure de réunion à tout
    membre de l'équipe PSR-MELEC sans vérifier qu'elle ait lieu ; Nathalie, qui n'en a
    aucune, en comptait une. */
-const aFixer = r => !!(r && r.aFixer);
+/* 27/09/2026 — Une réunion qui porte À LA FOIS aFixer et des horaires était comptée
+   deux fois : une fois posée, une fois due. Des horaires écrits l'emportent. */
+const aFixer = r => !!(r && r.aFixer && !(RE_HEURE.test(r.debut || '') && RE_HEURE.test(r.fin || '')));
 const heuresDe = r => aFixer(r) ? (Number.isFinite(+r.heures) ? +r.heures : 1) : duree(r.debut, r.fin);
 export function reunionsNonFixees(a) {
   const out = [];
@@ -389,7 +398,17 @@ export function ecartContrat(a) {
 
 export function indexer(docs, depart, polesAutorises, cat) {
   const aesh = new Map(), places = [], absences = [], messages = [], reunions = [], poles = new Map();
-  (depart || []).forEach(a => aesh.set(a.id, { ...a, depart: true }));
+  /* 27/09/2026 — Les équipes de départ ne servent qu'à un pôle encore vide. Une fois les
+     vraies fiches créées, elles doublonnaient : après le renommage des sigles, les fantômes
+     SA, CA, SI et TH portaient les mêmes lettres que des personnes réelles, et l'index
+     annonçait 32 AESH pour 23 fiches. On ne les ajoute donc que pour un pôle dont aucune
+     fiche n'existe. */
+  const polesFiches = new Set();
+  (docs || []).forEach(d => { if (d && d.type === 'aesh' && d.equipes) Object.keys(d.equipes).forEach(q => polesFiches.add(q)); });
+  (depart || []).forEach(a => {
+    if (Object.keys(a.equipes || {}).some(q => polesFiches.has(q))) return;
+    aesh.set(a.id, { ...a, depart: true });
+  });
   (docs || []).forEach(d => {
     if (!d || !d.type) return;
     if (d.type === 'aesh') { if (typeof d.id !== 'string') return; aesh.set(d.id, normaliserAesh({ ...(aesh.get(d.id) || {}), ...d, depart: false }, polesAutorises, cat)); }
@@ -422,9 +441,19 @@ export function horairePlace(p, c) {
    dessine alors dans l'emploi du temps, et l'écran l'écrit en rouge. C'est le cas de
    Nathalie, qui accompagne l'ULIS à cette heure-là. */
 export function reunionDe(a) {
-  if (a && a.reunion && a.reunion.aFixer) return null;
+  const r = a && a.reunion;
+  if (r && r.aFixer) return null;
+  /* 27/09/2026 — Une réunion écrite dans la fiche l'emporte sur le créneau de l'équipe.
+     Cécile se réunit le jeudi avec les Métiers d'Art ; comme elle intervient aussi en
+     PSR-MELEC, la règle automatique lui imposait le lundi et effaçait son vrai jour.
+     L'automatique ne vaut plus que pour une fiche qui ne dit rien. */
+  if (r && RE_HEURE.test(r.debut || '') && RE_HEURE.test(r.fin || '')) {
+    /* Le lundi de l'équipe PSR garde son horaire de référence : d'anciennes fiches portent
+       encore 13 h 30. Un autre jour, lui, est le vrai jour de la personne : on n'y touche pas. */
+    return reunionFixePsr(a) && +r.jour === 0 ? { jour: 0, debut: '13:00', fin: '14:00' } : r;
+  }
   if (reunionFixePsr(a)) return { jour: 0, debut: '13:00', fin: '14:00' };
-  return (a && a.reunion) || null;
+  return null;
 }
 export function reunionsEffectives(ctx,aeshId,lundi) {
   const a=ctx.I.aesh.get(aeshId); if(!a) return [];
@@ -892,7 +921,13 @@ export function etatBesoin(ctx,c,iso,bes) {
    doit valoir pour les quatre pôles, aujourd'hui et pour une filière qu'on ouvrirait demain.
    Le chef-d'œuvre est rangé en professionnel — c'est une réalisation d'atelier ; le
    co-enseignement en général — l'heure reste une heure de maths ou de français. */
-const MOTS_PRO = /(\btp\b|production|service|réception|reception|chef[- ]d|sc(?:iences)?\.? ?appliqu|atelier|\bmp[1-4]\b|maintenance|cannage|vannerie|horticult|\bprod\b|cuisine|restaurat|salle et commercialisation)/i;
+/* 27/09/2026 — Liste revue contre les 36 matières réelles des 19 classes, après un audit :
+   « Réalisation MELEC », « Communication technique » et « Enseignement pro. » tombaient en
+   général. Chercher quelques mots dans le titre reste une approximation ; c'est la seule
+   qui vaille pour les quatre pôles sans écrire une liste par classe. Les cas restants —
+   « Projet BCP », le chef-d'œuvre — sont des choix, pas des oublis : dis-le si tu les veux
+   de l'autre côté. */
+const MOTS_PRO = /(\btp\b|production|service|réception|reception|chef[- ]d|sc(?:iences)?\.? ?appliqu|atelier|\bmp[0-9]|maintenance|cannage|vannerie|horticult|\bprod\b|cuisine|restaurat|salle et commercialisation|réalisation|realisation|communication technique|enseignement pro|techniques? prof|travaux pratiques|projet bcp|melec)/i;
 export const estPro = lib => MOTS_PRO.test(String(lib || ''));
 
 /* ─── 27/09/2026 — « 008_PSR » → « salle 8 » ───

@@ -1,7 +1,7 @@
 /* Vérification guidée : aucune proposition n'est un placement avant confirmation.
    Les brouillons vivent dans Firestore, jamais dans les fichiers publics du site. */
-import * as K from './calculs.js?v=2026-09-27g';
-import { POLES, FILIERES } from './donnees.js?v=2026-09-24b';
+import * as K from './calculs.js?v=2026-09-27h';
+import { POLES, FILIERES } from './donnees.js?v=2026-09-27g';
 
 export const PERSONNES = ['aesh_d01','aesh_d02','aesh_d03','aesh_d04'];
 const SERVICES = ['Cantine','Internat','PIAL','DAFI'];

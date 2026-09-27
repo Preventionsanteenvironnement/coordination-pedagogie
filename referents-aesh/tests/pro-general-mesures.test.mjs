@@ -6,12 +6,21 @@ import assert from 'node:assert/strict';
 import { estPro, salleNumero, mesureEleve, comptesMesures, carresMesures, MESURES } from '../calculs.js';
 
 test('professionnel : l’atelier, pas la discipline générale', () => {
+  /* 27/09/2026 — Les 16 matières professionnelles réelles des 19 classes, après un audit
+     qui a trouvé « Réalisation MELEC », « Communication technique » et « Enseignement pro. »
+     du mauvais côté. Ce test les tient toutes, pas trois exemples choisis. */
   ['TP production', 'TP service', 'Réception', 'Sciences appliquées production',
-   'Chef-d’œuvre', 'MP3 technologie', 'Maintenance', 'Cannage', 'Vannerie',
+   'Chef-d’œuvre', 'Cannage-paillage', 'Vannerie', 'Communication technique',
+   'Enseignement pro. (GA)', 'Réalisation MELEC', 'Projet BCP',
+   'MP1 Économie d’entreprise', 'MP2 Maintenance équipement', 'MP3 Techniques prof.',
+   'MP3/4 Technique pro.', 'MP3/4 Travaux pratiques',
    'Horticulture', 'Atelier cuisine'].forEach(l => assert.equal(estPro(l), true, l));
-  ['Français, histoire-géo', 'Anglais', 'Maths-sciences', 'EPS', 'Arts appliqués',
+  /* Et les 20 matières générales, celles-là aussi en entier. */
+  ['Français, histoire-géo', 'Anglais', 'Anglais DNL', 'Maths-sciences', 'Mathématiques',
+   'EPS', 'Arts appliqués', 'Espagnol', 'Français', 'Histoire-géo, EMC', 'Physique-chimie',
    'Prévention santé environnement', 'Co-enseignement maths', 'Co-enseignement français',
-   'Accompagnement perso. maths', 'Éco-droit'].forEach(l => assert.equal(estPro(l), false, l));
+   'Accompagnement perso. maths', 'Accompagnement perso. français', 'Accompagnement personnalisé',
+   'Soutien au parcours', 'Éco-gestion', 'Économie-droit'].forEach(l => assert.equal(estPro(l), false, l));
   assert.equal(estPro(''), false);
   assert.equal(estPro(null), false);
 });

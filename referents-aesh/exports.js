@@ -1,12 +1,12 @@
-import { horsPresence } from './services-visuels.mjs?v=2026-09-27';
-import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-26b';
-import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-27c';
+import { horsPresence } from './services-visuels.mjs?v=2026-09-27g';
+import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-27g';
+import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-27g';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
 import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-24i';
-import * as K from './calculs.js?v=2026-09-27g';
-import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-24b';
+import * as K from './calculs.js?v=2026-09-27h';
+import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-27g';
 
 const H0 = 8 * 60, H1 = 21 * 60;
 const GRIS = '#6b7280', LIGNE = '#e3e8ef', ENCRE = '#111827';
