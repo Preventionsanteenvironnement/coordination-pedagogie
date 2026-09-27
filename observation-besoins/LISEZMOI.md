@@ -8,7 +8,7 @@ la grille officielle soit remplie à partir d'observations réelles, et non de s
 
 C'est **la seule application d'observation**. Elle remplace les anciens `observation/` et
 `observation-suivi/` (outil d'autonomie de la coordination PSR MELEC, retirés) : les AESH PSR
-et MELEC l'ouvrent depuis l'onglet 👁️ de leur emploi du temps (`edt-aesh/`), avec le même code.
+et MELEC l'ouvrent directement : l'espace « emploi du temps AESH » a été retiré le 27/09/2026.
 Une modification faite ici vaut pour tout le monde.
 
 ## Les trois axes
@@ -54,7 +54,7 @@ L'application lit **deux listes**, sans aucun nom :
 - **Élèves mis en avant** : ceux de `eleves` s'ils sont renseignés, sinon les élèves notifiés.
   Les autres restent visibles, grisés, et peuvent toujours être observés.
 - Un document `intervenant` avec `actif:false` ferme l'accès, même pour un code de l'emploi du temps.
-- Dans l'emploi du temps, le code est déjà mémorisé (`edt-aesh-code`, même site) : l'onglet
+- L'ancien emploi du temps mémorisait le code (`edt-aesh-code`) ; cet espace n'existe plus : l'onglet
   Observation l'utilise sans le redemander. Aucun code ne passe dans l'adresse.
 - Les deux listes sont mises en cache : un code connu ouvre l'application sans réseau.
 - Les codes PSR/MELEC se gèrent dans **Coordination PSR MELEC** ; les autres, dans l'Atelier,

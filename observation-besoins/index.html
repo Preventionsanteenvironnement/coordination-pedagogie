@@ -520,16 +520,15 @@ const ANNEE = '2026-2027';
 let reglesOk = null;
 
 /* ═══ Les codes d'accès ═══
-   Un seul code par personne, lu dans deux listes :
-   · « coordination_edt_aesh_intervenants » : les AESH PSR et MELEC gardent le code
-     de leur emploi du temps ; le document « coordo » porte le code de coordination ;
-   · les documents « type: intervenant » de cette collection : les autres AESH, avec,
-     si la coordination les a choisis, leurs classes et leurs élèves (codes de suivi).
+   Un seul code par personne, dans UNE seule liste : les documents « type: intervenant »
+   de cette collection, avec, si la coordination les a choisis, leurs classes et leurs
+   élèves (codes de suivi). Un document dont « coordo » vaut true ouvre tout l'établissement.
+   27/09/2026 — Avant, une seconde liste venait de l'espace « emploi du temps AESH ».
+   Cet espace a été retiré et sa collection supprimée : il n'en reste rien ici.
    Aucun nom en ligne : le code seul. La liste est mise en cache pour qu'un code
    connu ouvre l'application même sans réseau. Un code inconnu est refusé.
    ⚠ Un code identifie, il ne protège pas : ces collections sont lisibles côté
    navigateur, comme tous les espaces coordination_*. */
-const COL_EDT = 'coordination_edt_aesh_intervenants';
 const K_CODES = 'obs-besoins-acces';
 const K_CODE_EDT = 'edt-aesh-code';   // code mémorisé par l'emploi du temps (même site)
 let ACCES = null;        // Map code → profil {code, coordo, section, classes, eleves}, ou null si on ne sait pas encore
@@ -566,23 +565,22 @@ function codesEnCache(){
   }catch(e){ return null; }
 }
 async function chargeCodes(){
-  const [edt, obs]=await Promise.allSettled([
-    getDocs(collection(db,COL_EDT)),
+  /* 27/09/2026 — L'espace « emploi du temps AESH » a été retiré et sa collection
+     coordination_edt_aesh_intervenants supprimée. Les codes de CET outil vivent ici,
+     et nulle part ailleurs : documents « type: intervenant » de coordination_besoins_eleves. */
+  const [obs]=await Promise.allSettled([
     getDocs(query(collection(db,COL),where('type','==','intervenant')))
   ]);
-  /* Une des deux listes illisible : on garde la dernière version connue plutôt que
+  /* Liste illisible : on garde la dernière version connue plutôt que
      de refuser quelqu'un à tort. */
-  if(edt.status!=='fulfilled'||obs.status!=='fulfilled'){ ACCES=codesEnCache(); return ACCES; }
+  if(obs.status!=='fulfilled'){ ACCES=codesEnCache(); return ACCES; }
   const m=new Map();
-  edt.value.forEach(d=>{
-    const o=d.data()||{}, code=normCode(o.code); if(!code||o.actif===false) return;
-    const coordo = d.id==='coordo' || o.id==='coordo' || o.role==='coordonnateur' || o.role==='coordinateur';
-    m.set(code,{code, coordo, section:coordo?'':String(o.section||'').toUpperCase(), classes:null, eleves:null});
-  });
   obs.value.forEach(d=>{
     const o=d.data()||{}, code=normCode(o.code); if(!code) return;
     if(o.actif===false){ m.delete(code); return; }
-    const p=m.get(code)||{code, coordo:false, section:'', classes:null, eleves:null};
+    const coordo = o.coordo===true || o.role==='coordonnateur' || o.role==='coordinateur';
+    const p=m.get(code)||{code, coordo, section:coordo?'':String(o.section||'').toUpperCase(), classes:null, eleves:null};
+    if(coordo) p.coordo=true;
     if(Array.isArray(o.classes)&&o.classes.length) p.classes=o.classes.map(String);
     if(Array.isArray(o.eleves)&&o.eleves.length) p.eleves=o.eleves.map(normCode);
     m.set(code,p);
@@ -1165,7 +1163,7 @@ function memeMatiere(a,b){
 let GRILLE=null;
 async function coursMaintenant(nomClasse){
   try{
-    if(!GRILLE) GRILLE=await fetch('../edt-aesh/grille.json',{cache:'no-store'}).then(r=>r.json());
+    if(!GRILLE) GRILLE=await fetch('./grille.json',{cache:'no-store'}).then(r=>r.json());
     const ci=GRILLE.classes.findIndex(c=>c.nom===nomClasse); if(ci<0) return null;
     const d=new Date(), jour=iso(d), mn=d.getHours()*60+d.getMinutes();
     const m=t=>{ const p=String(t).split(':'); return (+p[0])*60+(+p[1]); };
