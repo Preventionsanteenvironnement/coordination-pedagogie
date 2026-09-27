@@ -34,15 +34,19 @@ export const filieresDuPole = pid => FILIERES.filter(f => f.pole === pid);
 /* La filière d'une classe (une classe n'appartient qu'à une filière). */
 export const filiereDeClasse = nom => FILIERES.find(f => f.classes.includes(nom)) || null;
 
-/* Équipes du 16/09/2026 (tableau transmis par la coordination). Contrat et heures : à compléter par les référents. */
+/* Équipes du 16/09/2026 (tableau transmis par la coordination). Contrat et heures : à compléter par les référents.
+   27/09/2026 — Les sigles suivent la règle : deux lettres du prénom, plus l'initiale du nom
+   quand deux personnes se percutent (Antoine D. et Anne C, les deux Christine et Chrystel,
+   Gaëlle P et Gaëtan B.). Ces valeurs ne servent qu'au tout premier démarrage d'un pôle vide :
+   dès qu'un AESH existe dans la base, c'est son sigle à elle qui fait foi. */
 const A = (id, sigle, equipes) => ({ id, type: 'aesh', sigle, equipes, contrat: null, heures: {}, cantine: 0, internat: 0, service: 0, serviceLib: '', reunion: null, actif: true });
 export const EQUIPES_DEPART = [
-  A('aesh_d01', 'ANT', { PSR_MELEC: 1 }), A('aesh_d02', 'TI', { PSR_MELEC: 1 }), A('aesh_d03', 'F', { PSR_MELEC: 1 }),
-  A('aesh_d04', 'ST', { PSR_MELEC: 1 }), A('aesh_d05', 'CÉ', { PSR_MELEC: 0.5, MDA: 0.5 }), A('aesh_d06', 'N', { PSR_MELEC: 1 }),
+  A('aesh_d01', 'AND', { PSR_MELEC: 1 }), A('aesh_d02', 'TI', { PSR_MELEC: 1 }), A('aesh_d03', 'FI', { PSR_MELEC: 1 }),
+  A('aesh_d04', 'ST', { PSR_MELEC: 1 }), A('aesh_d05', 'CÉ', { PSR_MELEC: 0.5, MDA: 0.5 }), A('aesh_d06', 'NA', { PSR_MELEC: 1 }),
   A('aesh_d07', 'R', { AGORA: 1 }), A('aesh_d08', 'GL', { AGORA: 1 }), A('aesh_d09', 'SA', { AGORA: 1 }),
   A('aesh_d10', 'CA', { AGORA: 1 }), A('aesh_d11', 'CH·A', { AGORA: 1 }),
-  A('aesh_d12', 'B', { CAPA: 1 }), A('aesh_d13', 'M', { CAPA: 1 }), A('aesh_d14', 'CL', { CAPA: 1 }),
-  A('aesh_d15', 'CH·C', { CAPA: 1 }), A('aesh_d16', 'D', { CAPA: 1 }),
+  A('aesh_d12', 'BO', { CAPA: 1 }), A('aesh_d13', 'MA', { CAPA: 1 }), A('aesh_d14', 'CHL', { CAPA: 1 }),
+  A('aesh_d15', 'CHC', { CAPA: 1 }), A('aesh_d16', 'DA', { CAPA: 1 }),
   A('aesh_d17', 'ANN', { MDA: 1 }), A('aesh_d18', 'SI', { MDA: 1 }), A('aesh_d19', 'L', { MDA: 1 }),
   A('aesh_d20', 'TH', { MDA: 1 }), A('aesh_d21', 'GT', { MDA: 1 })
 ];

@@ -730,6 +730,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 
 /* ═══ La largeur ne coûte rien : la grille défile déjà de gauche à droite. ═══ */
 .grille-edt{grid-template-columns:54px repeat(5,minmax(240px,1fr));min-width:1254px}
+
+/* 27/09/2026 — Le sigle se lit, il ne se saisit plus : il est calculé sur le prénom,
+   dans l'Atelier, et le portail ne connaît aucun prénom. */
+.sigle-fixe{display:inline-grid;place-items:center;min-width:54px;padding:6px 12px;border-radius:10px;
+  background:var(--card-2);border:1px solid var(--line);font-weight:800;font-size:1.05rem;letter-spacing:.06em;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -753,7 +758,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-27e');
+  const m = await import('./app.js?v=2026-09-27f');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

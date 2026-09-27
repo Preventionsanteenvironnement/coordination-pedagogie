@@ -735,7 +735,11 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         ${b.alertes.length ? `<div class="alertes">${b.alertes.map((x, i) => carteAlerte(a, x, i, 'fa')).join('')}</div>` : ''}` : ''}
       ${f.alerte ? `<div class="bandeau err" role="alert">${esc(f.alerte)}</div>` : ''}
       <div class="champs">
-        <div class="champ ${estModif((o.sigle || '') !== a.sigle)}"><span class="lib"><b>Sigle</b><small>initiales, jamais le prénom</small></span><input type="text" id="f-sigle" data-i="sigle" value="${esc(a.sigle)}" maxlength="6" style="width:110px;font-weight:800;text-transform:uppercase;text-align:center"></div>
+        <!-- 27/09/2026 — Le sigle ne se choisit plus : il se calcule. Deux lettres du prénom,
+             et l'initiale du nom quand deux personnes se percutent. Le prénom n'existe que dans
+             l'Atelier, jamais ici : c'est donc là-bas que le sigle est arrêté, et le référent le lit. -->
+        <div class="champ"><span class="lib"><b>Sigle</b><small>calculé sur le prénom — se change depuis l’Atelier</small></span>
+          <span class="sigle-fixe">${esc(a.sigle)}</span></div>
         <div class="champ ${estModif(nombre(o.contrat) !== nombre(a.contrat))}"><span class="lib"><b>Contrat ${aide('contrat')}</b><small>heures par semaine</small>${parQui(a, 'contrat')}${aideTexte('contrat')}</span>${pas('contrat', a.contrat, 0.5, 'Contrat')}</div>
         <div class="champ ${estModif((o.finContrat || '') !== (a.finContrat || ''))}" style="grid-template-columns:minmax(0,1fr) auto"><span class="lib"><b>Durée du contrat ${aide('duree')}</b><small>${a.finContrat ? `jusqu’au ${esc(K.dateLongue(a.finContrat))}` : `toute l’année, jusqu’au ${esc(K.dateLongue(finAnneeScolaire()))}`}</small>${aideTexte('duree')}</span>
           <span class="ligne" style="gap:6px"><input type="date" id="f-fin" data-i="fin-contrat" value="${esc(a.finContrat || '')}" style="min-height:40px">${a.finContrat ? `<button type="button" class="lien" id="f-fin-non" data-a="fin-aucune">toute l’année</button>` : ''}</span></div>
@@ -771,11 +775,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const existants = [...I.aesh.values()].filter(a => a.actif !== false && !(a.equipes || {})[p.id] && (!q || K.cleSigle(a.sigle).startsWith(q)));
     const pris = q && [...I.aesh.values()].some(a => a.actif !== false && K.cleSigle(a.sigle) === q);
     return `<div class="fiche"><h1 id="titre" tabindex="-1">Ajouter un AESH</h1>
-      <div class="champs"><div class="champ" style="grid-template-columns:1fr"><label class="lib" for="n-sigle"><b>Sigle</b><small>initiales, jamais le prénom</small></label>
-        <input type="text" id="n-sigle" data-i="recherche" class="gros-champ" maxlength="6" value="${esc(f.recherche)}" autocomplete="off" placeholder="ex. CÉ"></div></div>
+      <div class="champs"><div class="champ" style="grid-template-columns:1fr"><label class="lib" for="n-sigle"><b>Sigle</b><small>les deux premières lettres du prénom ; ajoutez l’initiale du nom si le sigle est déjà pris</small></label>
+        <input type="text" id="n-sigle" data-i="recherche" class="gros-champ" maxlength="3" minlength="2" value="${esc(f.recherche)}" autocomplete="off" placeholder="ex. CÉ, ou CHD pour Christine D."></div></div>
+      ${q && q.length < 2 ? '<div class="bandeau warn">Un sigle fait deux lettres, ou trois quand il faut distinguer deux personnes.</div>' : ''}
       ${existants.length ? `<div style="display:grid;gap:8px"><h2>Déjà dans l’établissement</h2>${existants.map(a => `<button type="button" class="aesh" id="n-ex-${esc(a.id)}" data-a="choisir-existant" data-v="${esc(a.id)}"><span class="sigle" style="--pole:${pole(Object.keys(a.equipes || {})[0]) ? pole(Object.keys(a.equipes)[0]).couleur : 'var(--pole)'}">${esc(a.sigle)}</span><span class="det"><b>${esc(a.sigle)}</b><span class="muted">${Object.keys(a.equipes || {}).map(x => `${nomPole(x)} ${hOu((a.heures || {})[x])}`).join(' · ') || 'sans pôle'}${nombre(a.contrat) != null ? ` · contrat ${K.fmtH(a.contrat)}` : ''}</span></span><span class="droite"><span class="puce pole">l’ajouter à mon pôle ›</span></span></button>`).join('')}</div>` : ''}
-      ${q && !pris ? `<button type="button" class="aesh" id="n-nouveau" data-a="choisir-nouveau"><span class="sigle">${esc(K.normSigle(f.recherche))}</span><span class="det"><b>Nouvel AESH ${esc(K.normSigle(f.recherche))}</b><span class="muted">n’existe dans aucun pôle</span></span><span class="droite"><span class="puce ok">créer ›</span></span></button>` : ''}
-      ${pris && !existants.some(a => K.cleSigle(a.sigle) === q) ? `<div class="bandeau warn">Ce sigle est déjà dans votre pôle.</div>` : ''}
+      ${q && q.length >= 2 && !pris ? `<button type="button" class="aesh" id="n-nouveau" data-a="choisir-nouveau"><span class="sigle">${esc(K.normSigle(f.recherche))}</span><span class="det"><b>Nouvel AESH ${esc(K.normSigle(f.recherche))}</b><span class="muted">n’existe dans aucun pôle</span></span><span class="droite"><span class="puce ok">créer ›</span></span></button>` : ''}
+      ${pris && !existants.some(a => K.cleSigle(a.sigle) === q) ? `<div class="bandeau warn">Le sigle <b>${esc(K.normSigle(f.recherche))}</b> est déjà pris dans l’établissement. Ajoutez l’initiale du nom pour distinguer.</div>` : ''}
     </div>`;
   }
   /* Cours du pôle où le besoin estimé dépasse les AESH placés, cette semaine, et où l'AESH est libre. */
@@ -2880,7 +2885,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(k==='service-champ') { const q=S.feuille; if(q?.type!=='service-horaire') return; q[t.dataset.champ]=t.dataset.champ==='jour'?+t.value:t.value; if(t.dataset.champ==='nom') { q.debut=q.nom==='Internat'?'18:00':'12:30'; q.fin=q.nom==='Internat'?'21:00':'13:00'; } if(ev.type==='change') rendre({focus:t.id}); return; }
     if (!f && !['per-au', 'per-edt-date', 'ph-debut', 'ph-fin', 'pl-du', 'msg', 'signature', 'pt-texte', 'pf-du', 'pf-au'].includes(k)) return;
     if (k === 'recherche') { f.recherche = t.value; rendre({ focus: t.id }); return; }
-    if (k === 'sigle') { f.a.sigle = t.value; const en = document.getElementById('f-enregistrer'); if (en) en.disabled = false; const ch = t.closest('.champ'); if (ch) ch.classList.add('modif'); return; }
+    /* 27/09/2026 — Le sigle d'une fiche n'est plus saisissable : on ignore toute frappe. */
+    if (k === 'sigle') { return; }
     if (k === 'crn-debut' || k === 'crn-fin' || k === 'crn-sem') {
       const c = f.creneau; if (!c || c.i !== +t.dataset.v) return;
       if (k === 'crn-sem') c.semaines = t.value;
