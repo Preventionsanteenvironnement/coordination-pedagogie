@@ -647,6 +647,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
   .semaine-type{border:none;box-shadow:none}
   @page{size:A4 landscape;margin:10mm}
 }
+
+/* Fond du planning individuel : information passive, aucun clic intercepté. */
+.plage-hachuree,.legende-plages i{background:repeating-linear-gradient(135deg,transparent 0,transparent 7px,rgba(95,111,128,.10) 7px,rgba(95,111,128,.10) 8px)}
+.plage-hachuree{position:absolute;left:0;right:0;pointer-events:none;border:0;z-index:0}
+.plage-hachuree.non-travaillee,.legende-plages .non-travaillee{background-color:#e9edf1;background-image:repeating-linear-gradient(135deg,transparent 0,transparent 7px,rgba(95,111,128,.17) 7px,rgba(95,111,128,.17) 8px)}
+.occupation-aesh{z-index:1}.legende-plages{display:flex;flex-wrap:wrap;gap:16px;padding:8px 4px;color:#596579;font-size:.76rem}.legende-plages span{display:inline-flex;align-items:center;gap:6px}.legende-plages i{display:inline-block;width:20px;height:13px;border:1px solid #cdd5de;border-radius:3px}
+@media print{.plage-hachuree,.legende-plages i{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 </style>
 </head>
 <body>
@@ -670,7 +677,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-26aq');
+  const m = await import('./app.js?v=2026-09-27-hachures');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });
