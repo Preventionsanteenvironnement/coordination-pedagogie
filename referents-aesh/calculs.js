@@ -22,6 +22,13 @@ export const DISPOSITIFS = [
   { nom: 'Étude',        sigle: 'ÉT', lib: 'Étude',        grilleClasse: true,  eleves: true  },
   { nom: 'Vie scolaire', sigle: 'VS', lib: 'Vie scolaire', grilleClasse: true,  eleves: true  },
   { nom: 'DAFI',         sigle: 'DA', lib: 'DAFI',         grilleClasse: false, eleves: true  },
+  /* 27/09/2026 — Les deux ULIS de l'établissement. Même famille que le DAFI : l'AESH est
+     bien avec des élèves, donc ces heures comptent dans sa présence — mais l'élève, à ce
+     moment-là, n'est pas dans sa classe, il est dans le dispositif. Les dessiner dans la
+     grille de la classe dirait le contraire de ce qui se passe. Elles apparaissent dans
+     l'emploi du temps de l'AESH et dans le récapitulatif « Activités hors grille ». */
+  { nom: 'ULIS TSA',     sigle: 'UT', lib: 'ULIS TSA',     grilleClasse: false, eleves: true  },
+  { nom: 'ULIS TFC',     sigle: 'UF', lib: 'ULIS TFC',     grilleClasse: false, eleves: true  },
   { nom: 'ESAT',         sigle: 'ES', lib: 'ESAT',         grilleClasse: false, eleves: true  },
   { nom: 'PIAL',         sigle: 'PI', lib: 'PIAL',         grilleClasse: false, eleves: false },
 ];
