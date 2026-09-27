@@ -1,6 +1,6 @@
 /* ============================================================================
    Chef-d'œuvre CAP — dossier de pilotage collaboratif sur DEUX ANS.
-   (devoirs-pse / coordination_chefdoeuvre)
+   (coordination-pedagogie / coordination_chefdoeuvre)
    • 1 dossier = 1 promotion qui vit 2 ans ; l'équipe change, le dossier reste.
    • Timeline 2 ans (périodes Sept→Juin) au centre + passage de témoin (A1→A2).
    • Co-disciplines colorées, acteurs, jury, jalons, évaluation/oral — modulable.
@@ -12,7 +12,7 @@ import { getFirestore, collection, doc, addDoc, getDocs, getDoc, onSnapshot, upd
   serverTimestamp, query, orderBy }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = { apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com", projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app", messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55" };
+const firebaseConfig = { apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain:"coordination-pedagogie.firebaseapp.com", projectId:"coordination-pedagogie", storageBucket:"coordination-pedagogie.firebasestorage.app", messagingSenderId:"526058585010", appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const COL = "coordination_chefdoeuvre";

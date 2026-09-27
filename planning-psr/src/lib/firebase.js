@@ -1,15 +1,15 @@
 // Couche Firebase (messagerie AESH ↔ coordinateur).
 // Utilise le SDK "compat" chargé en <script> classique dans index.html (global `firebase`).
-// Projet : devoirs-pse · collection dédiée coordination_* (jamais les données élèves).
+// Projet : coordination-pedagogie · collection dédiée coordination_* (jamais les données élèves).
 //
 // ⚠️ À REMPLIR avant déploiement (les « codes » : apiKey, appId, messagingSenderId).
 // Tant que la config n'est pas remplie, la messagerie s'affiche en mode « à configurer ».
 
 export const FIREBASE_CONFIG = {
   apiKey: 'A_REMPLIR',
-  authDomain: 'devoirs-pse.firebaseapp.com',
-  projectId: 'devoirs-pse',
-  storageBucket: 'devoirs-pse.appspot.com',
+  authDomain: 'coordination-pedagogie.firebaseapp.com',
+  projectId: 'coordination-pedagogie',
+  storageBucket: 'coordination-pedagogie.firebasestorage.app',
   messagingSenderId: 'A_REMPLIR',
   appId: 'A_REMPLIR',
 };

@@ -35,7 +35,7 @@ export function MessagesView() {
         <div><div class="alert-title">Messagerie ${fbConfigured() ? 'indisponible' : 'à configurer'}</div>
         <div class="alert-desc">${fbConfigured()
           ? 'Connexion au service impossible pour le moment.'
-          : 'À activer à la mise en ligne : renseigner la config Firebase dans src/lib/firebase.js (projet devoirs-pse, collection coordination_planning_messages).'}</div></div>
+          : 'À activer à la mise en ligne : renseigner la config Firebase dans src/lib/firebase.js (projet coordination-pedagogie, collection coordination_planning_messages).'}</div></div>
       </div>`
     : msgs === undefined ? html`<div class="empty">Chargement…</div>`
     : !msgs || msgs.length === 0 ? html`<div class="empty"><div class="empty-ico">${Icon.inbox({ size: 28 })}</div>Aucun message pour l'instant.</div>`

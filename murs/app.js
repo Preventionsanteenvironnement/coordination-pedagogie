@@ -1,5 +1,5 @@
 /* ============================================================================
-   Mur d'idées — brainstorming d'équipe (devoirs-pse / coordination_murs).
+   Mur d'idées — brainstorming d'équipe (coordination-pedagogie / coordination_murs).
    Temps réel, RGPD (initiales + rôle). Plusieurs murs, votes, pilote, bilan.
 ============================================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -7,7 +7,7 @@ import { getFirestore, collection, doc, addDoc, getDocs, getDoc, onSnapshot, upd
   serverTimestamp, query, orderBy, arrayUnion, arrayRemove }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = { apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com", projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app", messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55" };
+const firebaseConfig = { apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain:"coordination-pedagogie.firebaseapp.com", projectId:"coordination-pedagogie", storageBucket:"coordination-pedagogie.firebasestorage.app", messagingSenderId:"526058585010", appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const COL = "coordination_murs";

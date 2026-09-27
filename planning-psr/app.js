@@ -1163,16 +1163,16 @@ function pickICS() {
 // ───── lib/firebase.js ─────
 // Couche Firebase (messagerie AESH ↔ coordinateur).
 // Utilise le SDK "compat" chargé en <script> classique dans index.html (global `firebase`).
-// Projet : devoirs-pse · collection dédiée coordination_* (jamais les données élèves).
+// Projet : coordination-pedagogie · collection dédiée coordination_* (jamais les données élèves).
 //
 // ⚠️ À REMPLIR avant déploiement (les « codes » : apiKey, appId, messagingSenderId).
 // Tant que la config n'est pas remplie, la messagerie s'affiche en mode « à configurer ».
 
 const FIREBASE_CONFIG = {
   apiKey: 'A_REMPLIR',
-  authDomain: 'devoirs-pse.firebaseapp.com',
-  projectId: 'devoirs-pse',
-  storageBucket: 'devoirs-pse.appspot.com',
+  authDomain: 'coordination-pedagogie.firebaseapp.com',
+  projectId: 'coordination-pedagogie',
+  storageBucket: 'coordination-pedagogie.firebasestorage.app',
   messagingSenderId: 'A_REMPLIR',
   appId: 'A_REMPLIR',
 };
@@ -2937,7 +2937,7 @@ function MessagesView() {
         <div><div class="alert-title">Messagerie ${fbConfigured() ? 'indisponible' : 'à configurer'}</div>
         <div class="alert-desc">${fbConfigured()
           ? 'Connexion au service impossible pour le moment.'
-          : 'À activer à la mise en ligne : renseigner la config Firebase dans src/lib/firebase.js (projet devoirs-pse, collection coordination_planning_messages).'}</div></div>
+          : 'À activer à la mise en ligne : renseigner la config Firebase dans src/lib/firebase.js (projet coordination-pedagogie, collection coordination_planning_messages).'}</div></div>
       </div>`
     : msgs === undefined ? html`<div class="empty">Chargement…</div>`
     : !msgs || msgs.length === 0 ? html`<div class="empty"><div class="empty-ico">${Icon.inbox({ size: 28 })}</div>Aucun message pour l'instant.</div>`

@@ -1,7 +1,7 @@
 /* ============================================================
    PULSE — compteur de visites anonyme, ultra-léger (monde PSE)
    Pour : portail Coordination & pédagogie (site = 'coordination')
-   - 1 écriture Firestore atomique par pageview (projet devoirs-pse)
+   - 1 écriture Firestore atomique par pageview (projet coordination-pedagogie)
    - Visiteur unique = 1 ID anonyme en localStorage, compté 1 fois par jour
    - Aucune donnée perso, aucun cookie, aucun pistage
    - Ne compte QUE la production (github.io), jamais localhost/aperçu
@@ -12,12 +12,12 @@ import { getFirestore, doc, setDoc, increment, serverTimestamp }
 
 const SITE = 'coordination';
 const FIRE_CFG = {
-  apiKey: "AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI",
-  authDomain: "devoirs-pse.firebaseapp.com",
-  projectId: "devoirs-pse",
-  storageBucket: "devoirs-pse.firebasestorage.app",
-  messagingSenderId: "614730413904",
-  appId: "1:614730413904:web:a5dd478af5de30f6bede55"
+  apiKey: "AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA",
+  authDomain: "coordination-pedagogie.firebaseapp.com",
+  projectId: "coordination-pedagogie",
+  storageBucket: "coordination-pedagogie.firebasestorage.app",
+  messagingSenderId: "526058585010",
+  appId: "1:526058585010:web:ba4dd6d9c8281ba5bf02ab"
 };
 
 // App Firebase NOMMÉE ('pulse') pour ne jamais entrer en conflit avec

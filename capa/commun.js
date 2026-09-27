@@ -14,9 +14,9 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 const firebaseConfig = {
-  apiKey:"AIzaSyAWdCMvOiAJln3eT9LIAQD3RWJUD0lQcLI", authDomain:"devoirs-pse.firebaseapp.com",
-  projectId:"devoirs-pse", storageBucket:"devoirs-pse.firebasestorage.app",
-  messagingSenderId:"614730413904", appId:"1:614730413904:web:a5dd478af5de30f6bede55"
+  apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain:"coordination-pedagogie.firebaseapp.com",
+  projectId:"coordination-pedagogie", storageBucket:"coordination-pedagogie.firebasestorage.app",
+  messagingSenderId:"526058585010", appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab"
 };
 export const COL = 'coordination_capa_cours';
 export const DELAI_MS = 15000;
