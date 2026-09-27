@@ -654,6 +654,11 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .plage-hachuree.non-travaillee,.legende-plages .non-travaillee{background-color:#e9edf1;background-image:repeating-linear-gradient(135deg,transparent 0,transparent 7px,rgba(95,111,128,.17) 7px,rgba(95,111,128,.17) 8px)}
 .occupation-aesh{z-index:1}.legende-plages{display:flex;flex-wrap:wrap;gap:16px;padding:8px 4px;color:#596579;font-size:.76rem}.legende-plages span{display:inline-flex;align-items:center;gap:6px}.legende-plages i{display:inline-block;width:20px;height:13px;border:1px solid #cdd5de;border-radius:3px}
 @media print{.plage-hachuree,.legende-plages i{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+
+/* Réunions : travail hors présence élèves, visible dans la grille, neutre. */
+.hors-classe-bloc.fam-reunion,.hors-classe-bloc.sans-eleves.fam-reunion,.occupation-aesh.hors-presence{background:var(--card,#fff)!important;border:1.5px dashed #7d8794!important;color:var(--ink,#243244);box-shadow:none}
+.recap-externe{margin:12px 0;padding:12px 15px;border:1px solid var(--line,#dce3e9);border-radius:12px;font-size:.8rem;background:var(--card,#fff)}
+.recap-externe h3{font-size:.85rem;margin:0 0 8px}.recap-externe p{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:7px 0}.recap-externe .dispositif{padding:4px 8px;border-radius:6px;background:#e8f5ef;color:#23604c}.recap-externe .administratif{background:transparent;color:var(--ink,#243244);border:1px dashed #89919b}.recap-externe small{color:var(--muted,#667085);display:block;margin-top:8px}
 </style>
 </head>
 <body>
@@ -677,7 +682,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-27-hachures');
+  const m = await import('./app.js?v=2026-09-27-services');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

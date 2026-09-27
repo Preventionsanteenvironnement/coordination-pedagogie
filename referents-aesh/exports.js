@@ -1,3 +1,4 @@
+import { horsPresence } from './services-visuels.mjs?v=2026-09-27';
 import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-26b';
 import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-26d';
 /* ═══════════════════════════════════════════════════════════════════
@@ -111,6 +112,7 @@ function blocsDepuis(ctx, occ) {
       b = { j: o.j, debut: o.debut, fin: o.fin, fond: '#eef1f4', trait: '#64748b',
         l1: libelleService(o.label), l2: '', l3: (K.min(o.debut) % 30 || K.min(o.fin) % 30) ? K.hFr(o.debut) + '–' + K.hFr(o.fin) : '' };
     }
+    if(horsPresence(o,K)){b.fond='#ffffff';b.pointille=true;}
     if (une) {
       b.l1 = o.sem + ' · ' + b.l1;                       /* le titre reste lisible */
       b.pointille = true;
@@ -127,7 +129,7 @@ function blocsAesh(ctx, aeshId, lundi) {
         l1: o.cours.lib || o.cours.mat, l2: `${o.cours.cls.map(n => (ctx.edt.classes[n] || {}).court || n).join(' · ')}${o.absent ? ' · à couvrir' : ''}`, l3: (o.cours.salle || []).join(' · ') };
     }
     if (o.type === 'absence') return { j: o.j, debut: o.debut, fin: o.fin, fond: '#fff4f2', trait: '#b42318', l1: o.label, l2: o.absence && o.absence.note ? o.absence.note : '', encre: '#8a1c1c' };
-    return { j: o.j, debut: o.debut, fin: o.fin, fond: o.type === 'institution' ? '#e6e9ef' : '#eef1f4', trait: '#64748b', l1: libelleService(o.label), l2: '' };
+    return { j: o.j, debut: o.debut, fin: o.fin, fond: horsPresence(o,K) ? '#ffffff' : '#eef1f4', pointille: horsPresence(o,K), trait: '#64748b', l1: libelleService(o.label), l2: '' };
   }));
 }
 

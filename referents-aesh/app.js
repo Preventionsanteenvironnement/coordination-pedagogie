@@ -1,3 +1,4 @@
+import { horsPresence, resumeExterne } from './services-visuels.mjs?v=2026-09-27';
 import { fondPlages, legendePlages } from './plages-vides.mjs?v=2026-09-27';
 import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal, comptesEleves as comptesClasse, libelleEleves as libelleClasse } from './vues-planning.js?v=2026-09-26b';
 import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-24e';
@@ -173,6 +174,8 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
      feuille à lui. Chacun se coche à part, et le choix se retient. */
   const cleDisp = nom => 'disp:' + String(nom || '');
   const montrerDisp = o => {
+    if(horsClasse({nom:o.label,horsClasse:o.horsClasse}))return false;
+    if(['DP','IN'].includes(sigleService(o.label)))return true;
     const v = optionsGrille[cleDisp(o.label)];
     return typeof v === 'boolean' ? v : !horsClasse({ nom: o.label, horsClasse: o.horsClasse });
   };
@@ -888,7 +891,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
        classe : ils encombraient la grille du groupe sans rien lui apprendre. Ils restent
        entiers dans la semaine de la personne ; ici, chacun a sa case dans le menu. */
     const tousServices=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>o.type==='service'));
-    S.dispoVus=[...new Map(tousServices.map(o=>[String(o.label||''),o])).values()]
+    S.dispoVus=[...new Map(tousServices.filter(o=>!horsClasse({nom:o.label,horsClasse:o.horsClasse})).map(o=>[String(o.label||''),o])).values()]
       .sort((x,y)=>String(x.label).localeCompare(String(y.label),'fr'));
     const services=K.aeshActifs(I,P().id).flatMap(a=>K.occupations(ctx(),a.id,S.lundi).filter(o=>['service','reunion','institution'].includes(o.type)).map(o=>({...o,a})))
       .filter(o=>o.type!=='service' || montrerDisp(o));
@@ -1015,11 +1018,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     grille += `</div></div>`;
     /* La légende des deux lettres, sous la grille : DP, RE… Écrite petit, une seule fois,
        plutôt que déroulée dans chaque bloc de trente minutes. */
-    if (reunionsBas.length) grille += `<div class="sous-grille">${reunionsBas
-      .sort((a, b) => a.j - b.j || K.min(a.d) - K.min(b.d)).map(o =>
-        `<p><b>${esc(libelleService(o.label))}</b><span class="quand">${K.JOURS[o.j]} ${K.hFr(o.d)}–${K.hFr(o.f)}</span>${o.gens
-          .sort((x, y) => String(x.sigle).localeCompare(String(y.sigle), 'fr'))
-          .map(a => `<span class="past-aesh" style="background:${couleurAesh(a.id)};color:${encreAesh(a.id)}">${esc(a.sigle)}</span>`).join('')}</p>`).join('')}</div>`;
+    const semainesRecap=deuxSemaines?[['A',paireC.A],['B',paireC.B]]:[[S.C.parite(S.lundi)||'—',S.lundi]];
+    const externes=K.aeshActifs(I,P().id).map(a=>({a,lignes:resumeExterne(K,ctx(),a,semainesRecap)})).filter(x=>x.lignes.length);
+    if(externes.length)grille+=`<aside class="recap-externe"><h3>Activités hors grille</h3>${externes.map(({a,lignes})=>`<p><b>${esc(a.sigle)}</b>${lignes.map(x=>`<span class="dispositif ${x.eleves?'':'administratif'}">${esc(x.nom)} · ${semainesRecap.map(([s])=>`${deuxSemaines?s+' : ':''}${K.fmtH(x.heures[s]||0)}`).join(' · ')}</span>`).join('')}</p>`).join('')}<small>Heures déjà incluses dans les totaux. Couleur : présence élèves · Pointillés : hors présence élèves.</small></aside>`;
     const vus = [...new Set(horsBlocs.filter(o => !estReunion(o)).map(o => o.sig))];
     if (vus.length) grille += `<p class="legende-serv">${SIGLES_SERVICE.filter(([k]) => vus.includes(k))
       .map(([k, t]) => `<span>${logoService(k)}<b>${k}</b> ${esc(t)}</span>`).join('')}</p>`;
@@ -1163,7 +1164,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
 
     return `<div class="semaine-repere">${type?'EDT type · ':''}${deuxSem?`Semaines A et B`:`Semaine ${S.C.parite(lundi)||'—'} · ${K.jjmm(lundi)}–${K.jjmm(K.ajoute(lundi,4))}`}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${K.JOURS.map((j,i)=>`<div class="g-tete jour-col" data-j="${i}">${j}${deuxSem ? '' : `<small>${K.jjmm(K.ajoute(lundi,i))}</small>`}</div>`).join('')}<div class="g-heures" style="height:${(fin-480)*px}px">${Array.from({length:(fin-480)/60+1},(_,i)=>`<span style="top:${i*60*px}px">${8+i}h</span>`).join('')}</div>${K.JOURS.map((j,i)=>{
       const l=occ.filter(o=>o.j===i),cols=[];l.forEach(o=>{let n=cols.findIndex(c=>c.every(x=>!K.chevauche(x.debut,x.fin,o.debut,o.fin)));if(n<0){n=cols.length;cols.push([]);}cols[n].push(o);o.col=n;});
-      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${personneReelle?fondPlages(tous,reposFond,i,px):''}${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''} ${(K.min(o.fin)-K.min(o.debut))<45?'court':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(Math.min(K.min(o.fin),fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}"><b>${o.sem&&o.sem!=='AB'?`<i class="sem-lettre ${o.sem==='B'?'b':''}">${o.sem}</i>`:''}${esc(o.cours ? o.cours.lib : libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
+      return `<div class="g-jour jour-col" data-j="${i}" style="height:${(fin-480)*px}px">${personneReelle?fondPlages(tous,reposFond,i,px):''}${l.map(o=>`<button type="button" ${type?'disabled':''} data-a="${o.cours?'personne-cours':'service-detail'}" data-v="${o.cours?esc(o.cours.id):i}" class="occupation-aesh ${horsPresence(o,K)?'hors-presence':''} ${o.absent?'abs':''} ${o.sem&&o.sem!=='AB'?'une-semaine':''} ${(K.min(o.fin)-K.min(o.debut))<45?'court':''}" style="top:${(K.min(o.debut)-480)*px}px;height:${(Math.min(K.min(o.fin),fin)-K.min(o.debut))*px-2}px;left:${o.col*100/cols.length}%;width:${100/cols.length}%;border-left:5px solid ${couleurAesh(a.id)}"><b>${o.sem&&o.sem!=='AB'?`<i class="sem-lettre ${o.sem==='B'?'b':''}">${o.sem}</i>`:''}${esc(o.cours ? o.cours.lib : libelleService(o.label))}</b>${o.cours?`<small>${esc(o.cours.cls.map(c=>S.edt.classes[c]?.court||c).join(' / '))}</small>`:''}<small>${K.hFr(o.debut)}–${K.hFr(o.fin)}</small>${o.detail?`<small>${esc(o.detail)}</small>`:''}${o.absent?'<small>Absent</small>':''}</button>`).join('')}</div>`;
     }).join('')}<div class="g-pied">Total</div>${K.JOURS.map((j,i)=>`<div class="g-pied jour-col" data-j="${i}">${esc(libelleTotal(K,tot[i]))}</div>`).join('')}</div></div>${personneReelle?legendePlages:''}${soir.length?`<div class="bande-soiree"><b>Soirée</b>${soir.map(o=>`<span>${esc(K.JOURS[o.j])} ${K.hFr(o.debut)}–${K.hFr(o.fin)} · ${esc(o.cours?.lib || libelleService(o.label))}</span>`).join('')}</div>`:''}`;
   }
   function palettePlanning() {
@@ -1937,7 +1938,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!a){toast('Choisissez d’abord un AESH.',true);return;}
     if(S.envoi)return; S.envoi=true; rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-26c'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27-services'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
       const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
       F.telecharger(blob,nom);
@@ -1959,7 +1960,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-26c'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27-services'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -1968,12 +1969,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-26c'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27-services'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-26c'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-27-services'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }
