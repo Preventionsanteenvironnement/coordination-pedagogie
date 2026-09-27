@@ -1026,6 +1026,16 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       l.forEach(c => { let i = cols.findIndex(col => col.every(x => !K.chevauche(x.d, x.f, c.d, c.f))); if (i < 0) { cols.push([]); i = cols.length - 1; } cols[i].push(c); c._col = i; });
       l.forEach(c => { const g = l.filter(x => K.chevauche(x.d, x.f, c.d, c.f)); c._cols = Math.max(1, ...g.map(x => x._col + 1)); });
     });
+    /* 27/09/2026 — Un jour où deux cours se partagent la colonne — la semaine A d'un côté,
+       la B de l'autre — n'a pas besoin de la même largeur que les autres : il en a besoin
+       de deux fois plus, sinon chaque moitié étouffe et le titre s'abrège. La grille défile
+       de gauche à droite : cette largeur ne coûte rien. On la donne au jour qui en a besoin,
+       et à lui seul, plutôt que d'élargir les cinq. */
+    const largeurJour = j => {
+      const n = Math.max(1, ...cours.filter(c => c.j === j).map(c => c._cols || 1));
+      return n > 1 ? `minmax(${170 * n}px,${n}fr)` : 'minmax(240px,1fr)';
+    };
+    const colonnes = `54px ${[0, 1, 2, 3, 4].map(largeurJour).join(' ')}`;
     /* même grille sur téléphone et ordinateur (les référents travaillent sur ce visuel) : sur téléphone, mode panoramique, on la déplace avec le doigt */
     /* 27/09/2026 — L'effectif et les mesures de la classe, au-dessus de la grille : c'est
        la légende des carrés en même temps, elle n'est donc pas répétée en bas. Les mesures
@@ -1035,7 +1045,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     const bandeauClasse = montrer('eleves') && mcl.total ? `<div class="bandeau-classe">
       <span class="eff">${mcl.total} élève${mcl.total > 1 ? 's' : ''} · ${mcl.notifies} notifié${mcl.notifies > 1 ? 's' : ''}</span>
       ${mgroupes.map(([m, n]) => `<span class="grp"><span class="car ${classeMesure(m)}"></span><b>${n}</b> ${esc(m)}</span>`).join('')}</div>` : '';
-    let grille = `<div class="semaine-repere">${deuxSemaines ? `Semaines A et B` : `Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}`}</div>${bandeauClasse}<div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}${deuxSemaines ? '' : `<small>${K.jjmm(jr.date)}</small>`}</div>`).join('')}
+    let grille = `<div class="semaine-repere">${deuxSemaines ? `Semaines A et B` : `Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}`}</div>${bandeauClasse}<div class="defile"><div class="grille-edt" style="grid-template-columns:${colonnes}" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}${deuxSemaines ? '' : `<small>${K.jjmm(jr.date)}</small>`}</div>`).join('')}
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60+1 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => {
       grille += `<div class="g-jour jour-col" data-j="${j}" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}
@@ -1595,7 +1605,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
       const coul = o.type === 'absence' ? 'var(--err)' : '#64748b';
       return `<div class="bloc" style="--mc:${coul};top:${top + 1}px;height:${h - 2}px;left:${left};width:${w};cursor:default"><b>${esc(o.label)}</b>${o.type === 'absence' && o.absence && o.absence.note && h > 30 ? `<span class="salle">${esc(o.absence.note)}</span>` : ''}</div>`;
     };
-    let grille = `<div class="semaine-repere">Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}</div><div class="defile"><div class="grille-edt" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}<small>${K.jjmm(jr.date)}</small></div>`).join('')}
+    let grille = `<div class="semaine-repere">Semaine ${esc(sem.parite||'—')} · ${K.jjmm(S.lundi)}–${K.jjmm(K.ajoute(S.lundi,4))}</div><div class="defile"><div class="grille-edt" style="grid-template-columns:${colonnes}" data-vue="${S.route.p.affichage==='jour'?'jour':'semaine'}" data-jour="${+(S.route.p.jour||0)}"><div class="g-tete"></div>${sem.jours.map((jr, j) => `<div class="g-tete jour-col" data-j="${j}">${K.JOURS[j]}<small>${K.jjmm(jr.date)}</small></div>`).join('')}
       <div class="g-heures" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60+1 }, (_, i) => `<span style="top:${i * 60 * PX}px">${8 + i}h</span>`).join('')}</div>`;
     sem.jours.forEach((jr, j) => { const repos = occ.find(o => o.j === j && o.type === 'repos');
       grille += `<div class="g-jour jour-col" data-j="${j}" style="height:${(H1 - H0) * PX}px">${Array.from({ length: (H1-H0)/60 }, (_, i) => `<div class="g-ligne" style="top:${(i + 1) * 60 * PX}px"></div>`).join('')}${jr.off ? `<div class="g-vac">${esc(jr.off)}</div>` : repos ? `<div class="g-vac">Ne travaille pas</div>` : occ.filter(o => o.j === j && o.type !== 'repos').map(bloc).join('')}</div>`; });
