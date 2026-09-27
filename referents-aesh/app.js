@@ -11,7 +11,7 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
                coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-26d';
+import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27c';
 import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-26b';
 import * as K from './calculs.js?v=2026-09-26b';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-24b';
@@ -1945,7 +1945,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!a){toast('Choisissez d’abord un AESH.',true);return;}
     if(S.envoi)return; S.envoi=true; rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-27-services'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27c'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
       const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
       F.telecharger(blob,nom);
@@ -1967,7 +1967,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-27-services'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27c'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -1976,12 +1976,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-27-services'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-27c'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-27-services'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-27c'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }

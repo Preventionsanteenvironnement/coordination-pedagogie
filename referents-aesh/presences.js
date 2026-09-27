@@ -1,13 +1,36 @@
 /* Repères partagés par la grille et les exports, sans données nominatives. */
 const couleurs = ['#2563eb','#c45c08','#64748b','#927000','#a32965','#087966','#814c2d','#6945bd','#047c9d','#a62d39','#344b80','#726f28','#8b4471','#316e31','#7c3b20','#445d68','#674575','#956106','#006774','#4d6440','#733b46','#3c5693','#654d30','#675f88'];
-/* 26/09/2026 — Les couleurs des tableaux d'Antoine, à l'identique. Elles priment sur la
-   couleur calculée : celle-ci dépend du rang de création de la fiche, donc elle changerait
-   si quelqu'un était retiré puis recréé. Ici, la personne garde la sienne, quoi qu'il arrive. */
+/* 26/09/2026 — Les couleurs des tableaux d'Antoine, à l'identique.
+   27/09/2026 — Étendue aux quatre pôles : même palette partout, aucune différence entre eux.
+   La couleur calculée à partir de l'identifiant donnait quatre collisions — AC et GB en
+   Métiers d'Art portaient le même bleu-gris, impossible de les distinguer dans une grille.
+   Chacun a désormais la sienne, écrite une fois pour toutes : elle ne bouge plus si une
+   fiche est retirée puis recréée, et elle est la même d'un pôle à l'autre pour qui, comme
+   Cécile, intervient dans deux. Un AESH nouveau garde la couleur calculée jusqu'à ce qu'on
+   l'inscrive ici. */
 export const COULEURS_FIXES = {
-  aesh_d01: '#a3c1e3',  /* Antoine  */
-  aesh_d02: '#ebb38b',  /* Timothée */
-  aesh_d03: '#c9c9c9',  /* Fiona    */
-  aesh_d04: '#f8da78',  /* Stella   */
+  aesh_2f43acdgkl: '#445d68',   /* AC */
+  aesh_78fl336kth: '#7c3b20',   /* SIT */
+  aesh_d01: '#a3c1e3',          /* ANT */
+  aesh_d02: '#ebb38b',          /* TI */
+  aesh_d03: '#c9c9c9',          /* F */
+  aesh_d04: '#f8da78',          /* ST */
+  aesh_d05: '#a32965',          /* CÉ */
+  aesh_d06: '#087966',          /* N */
+  aesh_d12: '#726f28',          /* B */
+  aesh_d13: '#8b4471',          /* M */
+  aesh_d14: '#316e31',          /* CL */
+  aesh_d15: '#2563eb',          /* CC — déplacé */
+  aesh_d16: '#c45c08',          /* D — déplacé */
+  aesh_d4fd9zh74q: '#64748b',   /* CR — déplacé */
+  aesh_fvt6gj9cpu: '#006774',   /* GP */
+  aesh_hz242t3lkk: '#927000',   /* LO — déplacé */
+  aesh_kju56v9ci1: '#814c2d',   /* GB — déplacé */
+  aesh_m3rr225zpr: '#6945bd',   /* CD — déplacé */
+  aesh_qxd5yvinsu: '#344b80',   /* SAT */
+  aesh_s3bar9onqp: '#047c9d',   /* TB — déplacé */
+  aesh_uwnh7n0d0n: '#a62d39',   /* EM — déplacé */
+  aesh_xjgk9d03xr: '#733b46',   /* RF */
 };
 /* Un sigle blanc sur un fond clair ne se lit pas, et disparaît à l'impression en noir et
    blanc. L'encre suit la clarté du fond, calculée, jamais devinée. */

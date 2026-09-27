@@ -1,6 +1,6 @@
 import { horsPresence } from './services-visuels.mjs?v=2026-09-27';
 import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-26b';
-import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-26d';
+import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-27c';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
