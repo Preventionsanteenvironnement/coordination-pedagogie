@@ -697,7 +697,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function champsReunionsSupplementaires(a) {
     const lignes=a.reunionsSupplementaires||[];
     const champ=(r,i,k,label,type='text')=>`<label>${label}<input id="rs-${i}-${k}" type="${type}" data-i="reu-extra-champ" data-index="${i}" data-champ="${k}" value="${esc(r[k])}"></label>`;
-    return `<div class="champ" style="grid-template-columns:1fr"><h3>Réunions supplémentaires</h3>${lignes.map((r,i)=>`<fieldset><legend>Réunion ${i+2}</legend><div class="ligne"><label>Pôle <select data-i="reu-extra-champ" data-index="${i}" data-champ="pole">${POLES.map(p=>`<option value="${p.id}" ${p.id===r.pole?'selected':''}>${p.nom}</option>`).join('')}</select></label><label>Jour <select data-i="reu-extra-champ" data-index="${i}" data-champ="jour">${K.JOURS.map((j,n)=>`<option value="${n}" ${n===r.jour?'selected':''}>${j}</option>`).join('')}</select></label>${champ(r,i,'debut','De','time')}${champ(r,i,'fin','À','time')}<label>Semaines <select data-i="reu-extra-champ" data-index="${i}" data-champ="semaines">${['AB','A','B'].map(v=>`<option value="${v}" ${v===r.semaines?'selected':''}>${v==='AB'?'A et B':v}</option>`).join('')}</select></label>${champ(r,i,'du','À partir du','date')}${champ(r,i,'au','Jusqu’au','date')}</div><small>Conservée même lorsqu’une réunion institutionnelle remplace la réunion principale.</small><button class="btn petit" data-a="reu-extra-retirer" data-v="${i}">Retirer cette réunion</button></fieldset>`).join('')}<button class="btn" data-a="reu-extra-ajouter">+ Ajouter une réunion</button></div>`;
+    return `<div class="champ" style="grid-template-columns:1fr"><h3>Réunions supplémentaires</h3>${lignes.map((r,i)=>`<fieldset class="${r.aFixer?'reunion-afixer':''}"><legend>Réunion ${i+2}${r.aFixer?' · à fixer':''}</legend>${r.aFixer?`<p class="bandeau warn" style="margin:0 0 10px">Le jour n’est pas décidé. L’heure (${esc(r.heures||1)} h) est comptée dans le total ; le créneau reste à trouver. <button type="button" class="btn petit" data-a="reu-extra-poser" data-v="${i}">Poser un créneau</button></p>`:''}<div class="ligne"><label>Pôle <select data-i="reu-extra-champ" data-index="${i}" data-champ="pole">${POLES.map(p=>`<option value="${p.id}" ${p.id===r.pole?'selected':''}>${p.nom}</option>`).join('')}</select></label><label>Jour <select data-i="reu-extra-champ" data-index="${i}" data-champ="jour">${K.JOURS.map((j,n)=>`<option value="${n}" ${n===r.jour?'selected':''}>${j}</option>`).join('')}</select></label>${champ(r,i,'debut','De','time')}${champ(r,i,'fin','À','time')}<label>Semaines <select data-i="reu-extra-champ" data-index="${i}" data-champ="semaines">${['AB','A','B'].map(v=>`<option value="${v}" ${v===r.semaines?'selected':''}>${v==='AB'?'A et B':v}</option>`).join('')}</select></label>${champ(r,i,'du','À partir du','date')}${champ(r,i,'au','Jusqu’au','date')}</div><small>Conservée même lorsqu’une réunion institutionnelle remplace la réunion principale.</small><button class="btn petit" data-a="reu-extra-retirer" data-v="${i}">Retirer cette réunion</button></fieldset>`).join('')}<button class="btn" data-a="reu-extra-ajouter">+ Ajouter une réunion</button></div>`;
   }
   function ecranFiche() {
     const f = formFiche(), p = P();
@@ -2525,7 +2525,21 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (!a.sigle) { toast('Le sigle est vide.', true); return; }
     const doublon = [...I.aesh.values()].find(x => x.id !== a.id && x.actif !== false && K.cleSigle(x.sigle) === K.cleSigle(a.sigle));
     if (doublon) { toast(`Le sigle ${a.sigle} est déjà utilisé.`, true); return; }
-    if((a.reunionsSupplementaires||[]).length>12 || K.reunionsSupplementairesDe(a).length!==(a.reunionsSupplementaires||[]).length || (a.reunionsSupplementaires||[]).some(r=>!POLES.some(p=>p.id===r.pole))){toast('Vérifiez les dates et horaires des réunions supplémentaires (12 maximum).',true);return;}
+    /* 28/09/2026 — Une réunion « à fixer » n'a NI jour NI horaire : c'est sa définition.
+         Le contrôle les comptait comme incomplètes et refusait d'enregistrer toute la fiche.
+         CÉ, qui doit une heure à MELEC sans créneau décidé, était donc impossible à modifier.
+         On ne contrôle donc que les réunions réellement posées, et on dit ce qui manque. */
+      const rsup = a.reunionsSupplementaires || [];
+      const posees = rsup.filter(r => !r.aFixer);
+      const mauvaisPole = rsup.filter(r => !POLES.some(p => p.id === r.pole));
+      const incompletes = posees.filter(r => !K.reunionsSupplementairesDe({ reunionsSupplementaires: [r] }).length);
+      if (rsup.length > 12) { toast('Douze réunions supplémentaires au maximum.', true); return; }
+      if (mauvaisPole.length) { toast('Choisissez le pôle de chaque réunion supplémentaire.', true); return; }
+      if (incompletes.length) {
+        const n = incompletes.map(r => 'Réunion ' + (rsup.indexOf(r) + 2)).join(', ');
+        toast(`${n} : il manque le jour, les horaires ou les dates. Laissez-la « à fixer » si le créneau n’est pas décidé.`, true);
+        return;
+      }
     const nouveau = f.id === 'nouveau' && !f.existant;
     const cx={...ctx(),I:{...idx(),aesh:new Map(idx().aesh)}};cx.I.aesh.set(a.id,a);
     const alertesReunions=[...new Set((a.reunionsSupplementaires||[]).flatMap(r=>K.lundisEntre(S.C,r.du,r.au).flatMap(l=>(K.bilan(cx,a.id,l)?.alertes||[]).filter(x=>['conflit','contrat'].includes(x.type)).map(x=>`${K.dateCourte(l)} : ${x.texte}`))))];
@@ -2843,6 +2857,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
         clearTimeout(gererClic.t); gererClic.t = setTimeout(() => { if (S.route.e === 'fiche' && S.form === f && !S.feuille) rendre({ focus: document.activeElement && document.activeElement.id }); }, 900);
         return;
       }
+      case 'reu-extra-poser': {/* 28/09/2026 — on transforme l'heure due en créneau réel : le référent n'a plus qu'à corriger l'horaire. */
+        const a=S.form.a,r=(a.reunionsSupplementaires||[])[+v]; if(!r)return;
+        delete r.aFixer; delete r.heures;
+        r.jour=Number.isInteger(r.jour)?r.jour:0; r.debut=r.debut||'13:00'; r.fin=r.fin||'14:00';
+        r.semaines=r.semaines||'AB'; r.du=r.du||K.isoLocal(); r.au=r.au||raccourcis().find(x=>x.id==='annee').fin;
+        rendre(); return;}
       case 'reu-extra-ajouter': {const a=S.form.a;a.reunionsSupplementaires=a.reunionsSupplementaires||[];a.reunionsSupplementaires.push({pole:P().id,jour:0,debut:'13:00',fin:'14:00',semaines:'AB',du:K.isoLocal(),au:raccourcis().find(x=>x.id==='annee').fin});rendre();return;}
       case 'reu-extra-retirer': S.form.a.reunionsSupplementaires.splice(+v,1);rendre();return;
       case 'reu-jour': { const f = S.form, r = f.a.reunion || {}; f.a.reunion = { jour: +v, debut: r.debut || '13:00', fin: r.fin || '14:00' }; rendre({ focus: b.id }); return; }
