@@ -41,6 +41,13 @@ function puces(pdf, y, liste) {
     x += larg + 8;
   });
 }
+/* 28/09/2026 — Le nom sur la fiche imprimée.
+   En ligne, un AESH est un sigle : c'est la règle, et elle ne bouge pas. Mais la fiche
+   que Brahim imprime depuis son Mac est remise en main propre à la personne — elle doit
+   porter son nom. La couche locale fournit « CÉ · Cécile » ; partout ailleurs, ctx.nomAesh
+   n'existe pas et l'on retombe sur le sigle seul. */
+const nomDe = (ctx, a) => (ctx && ctx.nomAesh ? ctx.nomAesh(a) : null) || a.sigle;
+
 /* Grille lundi → vendredi, 8 h → 18 h. blocs : [{j, debut, fin, fond, trait, l1, l2, l3, hachure}] */
 function grille(pdf, top, C, lundi, blocs, cadre = {}) {
   /* 25/09/2026 : la plage horaire et le bas de la grille sont réglables, pour que la
@@ -149,7 +156,7 @@ function aeshDans(pdf, ctx, ids, lundi) {
     const b = K.bilan(ctx, id, lundi); if (!b) return;
     const a = b.a, polesA = Object.keys(a.equipes || {}), p = pole(polesA[0]) || POLES[0];
     pdf.page();
-    entete(pdf, p.couleur, `Emploi du temps · ${a.sigle}`, `${polesA.map(nomPole).join(' + ')} · ${titreSemaine(ctx.C, lundi)}`);
+    entete(pdf, p.couleur, `Emploi du temps · ${nomDe(ctx, a)}`, `${polesA.map(nomPole).join(' + ')} · ${titreSemaine(ctx.C, lundi)}`);
     const pc = [['Contrat', b.contrat != null ? K.fmtH(b.contrat) : '—']];
     polesA.forEach(q => pc.push([nomPole(q), (a.heures || {})[q] != null && a.heures[q] !== '' ? K.fmtH(a.heures[q]) : '—', [pole(q).couleur, pole(q).clair]]));
     pc.push(['Cette semaine', K.fmtH(b.total)]);
@@ -263,7 +270,7 @@ function feuilleGrille(nom, titre, sous, C, lundi, blocs) {
 export function excelAesh(ctx, ids, lundi, polesSynthese) {
   const f = [];
   (polesSynthese || []).forEach(p => f.push(feuilleSynthese(ctx, p, lundi)));
-  ids.forEach(id => { const a = ctx.I.aesh.get(id); if (!a) return; f.push(feuilleGrille(a.sigle, `Emploi du temps · ${a.sigle}`, `${Object.keys(a.equipes || {}).map(nomPole).join(' + ')} · ${titreSemaine(ctx.C, lundi)}`, ctx.C, lundi, blocsAesh(ctx, id, lundi))); });
+  ids.forEach(id => { const a = ctx.I.aesh.get(id); if (!a) return; f.push(feuilleGrille(nomDe(ctx, a), `Emploi du temps · ${nomDe(ctx, a)}`, `${Object.keys(a.equipes || {}).map(nomPole).join(' + ')} · ${titreSemaine(ctx.C, lundi)}`, ctx.C, lundi, blocsAesh(ctx, id, lundi))); });
   return xlsx(f);
 }
 export function excelClasses(ctx, noms, lundi) {
@@ -367,7 +374,7 @@ export function pdfSemaineType(ctx, ids, lundi) {
     const conflit = Math.max(bA.doubleCompte || 0, bB.doubleCompte || 0);
     const detail = (lp.length > 1 ? ' · ' + lp.map(([q, h]) => `${ctx.nomPole ? ctx.nomPole(q) : q} ${K.fmtH(h)}`).join(' + ') : '')
       + (conflit ? ` · ${K.fmtH(conflit)} attendue dans deux pôles en même temps` : '');
-    entete(pdf, couleurAesh(id), `Emploi du temps · ${a.sigle}`,
+    entete(pdf, couleurAesh(id), `Emploi du temps · ${nomDe(ctx, a)}`,
       `${ctx.exportType ? 'Organisation habituelle · ' : ''}Semaines A et B réunies · ${K.fmtH(moyenne)} par semaine en moyenne${bA.contrat == null ? '' : ' · contrat ' + K.fmtH(bA.contrat)}${detail}`);
     /* 25/09/2026 : la plage ne bouge plus, 8 h → 18 h. Une journée sans après-midi garde
        ses créneaux de midi, où se placent la demi-pension et la réunion hebdomadaire.
@@ -402,7 +409,7 @@ export function pdfGrillesAesh(ctx,ids,lundi,mode='AB') {
     const a=ctx.I.aesh.get(id);if(!a)continue;
     for(const lot of groupe?[dates]:dates.map(d=>[d])){
       pdf.page();
-      entete(pdf,couleurAesh(id),`Emploi du temps · ${a.sigle}`,`${ctx.exportType?'EDT type · ':''}Toutes ses classes · ${lot.map(d=>'Semaine '+ctx.C.parite(d)).join(' + ')}`);
+      entete(pdf,couleurAesh(id),`Emploi du temps · ${nomDe(ctx, a)}`,`${ctx.exportType?'EDT type · ':''}Toutes ses classes · ${lot.map(d=>'Semaine '+ctx.C.parite(d)).join(' + ')}`);
       lot.forEach((d,i)=>{
         const b=K.bilan(ctx,id,d),x=28+i*(pdf.W/2),droite=groupe?(i?pdf.W-28:pdf.W/2-12):pdf.W-28;
         pdf.text(x,108,`Semaine ${ctx.C.parite(d)} · ${K.jjmm(d)}–${K.jjmm(K.ajoute(d,4))} · ${K.fmtH(b.total)}${b.contrat==null?'':' / '+K.fmtH(b.contrat)}`,{size:12,bold:true});
@@ -422,7 +429,7 @@ export function feuillesSemaineType(ctx, ids, lundi) {
     const bA = K.bilan(ctx, id, ab.A), bB = K.bilan(ctx, id, ab.B);
     const blocs = blocsDepuis(ctx, occ).map(b => ({ ...b, l3: b.l3 || '' }));
     const f = feuilleGrille(`${a.sigle} type`,
-      `${a.sigle} · Semaine type · ${K.fmtH((bA.total + bB.total) / 2)} par semaine en moyenne`,
+      `${nomDe(ctx, a)} · Semaine type · ${K.fmtH((bA.total + bB.total) / 2)} par semaine en moyenne`,
       `${ctx.exportType ? 'Organisation habituelle · ' : ''}Semaines A et B réunies · A : ${K.fmtH(bA.total)} · B : ${K.fmtH(bB.total)}`,
       ctx.C, ab.A, blocs);
     f.fusions.push('A1:F1', 'A2:F2');
