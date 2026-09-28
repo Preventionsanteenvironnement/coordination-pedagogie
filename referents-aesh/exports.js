@@ -386,8 +386,8 @@ export function pdfSemaineType(ctx, ids, lundi) {
        disparu : on lit une fiche pour savoir combien d'heures et où, pas pour apprendre
        une règle de lecture. Reste le total de la semaine, son détail, et les deux semaines. */
     const r = resumeSemaine(K, occ);
-    const moyenne = (bA.total + bB.total) / 2;
-    pdf.text(28, y, `Total de la semaine : ${K.fmtH(moyenne)}`, { size: 11, bold: true, color: '#1d2b33' });
+    const totalSemaine = (bA.total + bB.total) / 2;
+    pdf.text(28, y, `Total de la semaine : ${K.fmtH(totalSemaine)}`, { size: 11, bold: true, color: '#1d2b33' });
     if (r.length) pdf.text(28, y + 15, r.map(([n, h]) => `${n} : ${K.fmtH(h)}`).join('   ·   '), { size: 9.5, color: '#475569' });
     if (deux) pdf.text(28, y + 29, `Semaine A : ${K.fmtH(bA.total)}   ·   Semaine B : ${K.fmtH(bB.total)}`, { size: 9.5, color: '#475569' });
   }
