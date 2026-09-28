@@ -382,15 +382,14 @@ export function pdfSemaineType(ctx, ids, lundi) {
         { size: 9, bold: true, color: '#334155' });
       y += 14;
     }
-    /* La clé de lecture tient sur deux lignes : une seule déborde de la page en paysage. */
-    if (deux) {
-      pdf.text(28, y, 'Les créneaux en pointillé, précédés de « A · » ou « B · », ne reviennent qu’une semaine sur deux ; les autres sont identiques chaque semaine.', { size: 9, color: '#475569' });
-      pdf.text(28, y + 12, 'En pied de colonne, un total donné en deux nombres se lit semaine A / semaine B.', { size: 9, color: '#475569' });
-      y += 12;
-    } else pdf.text(28, y, 'Toutes les semaines sont identiques : il n’y a pas d’alternance A / B.', { size: 9, color: '#475569' });
+    /* 28/09/2026 — Pied de page épuré. Les deux phrases sur la convention A / B ont
+       disparu : on lit une fiche pour savoir combien d'heures et où, pas pour apprendre
+       une règle de lecture. Reste le total de la semaine, son détail, et les deux semaines. */
     const r = resumeSemaine(K, occ);
-    if (r.length) pdf.text(28, y + 14, r.map(([n, h]) => `${n} : ${K.fmtH(h)}`).join('   ·   '), { size: 9, color: '#475569' });
-    pdf.text(28, y + 28, `Semaine A : ${K.fmtH(bA.total)}   ·   Semaine B : ${K.fmtH(bB.total)}`, { size: 9, color: '#475569' });
+    const moyenne = (bA.total + bB.total) / 2;
+    pdf.text(28, y, `Total de la semaine : ${K.fmtH(moyenne)}`, { size: 11, bold: true, color: '#1d2b33' });
+    if (r.length) pdf.text(28, y + 15, r.map(([n, h]) => `${n} : ${K.fmtH(h)}`).join('   ·   '), { size: 9.5, color: '#475569' });
+    if (deux) pdf.text(28, y + 29, `Semaine A : ${K.fmtH(bA.total)}   ·   Semaine B : ${K.fmtH(bB.total)}`, { size: 9.5, color: '#475569' });
   }
   return numeroter(pdf);
 }
