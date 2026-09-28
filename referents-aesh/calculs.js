@@ -456,12 +456,27 @@ export function reunionDe(a) {
   if (reunionFixePsr(a)) return { jour: 0, debut: '13:00', fin: '14:00' };
   return null;
 }
+/* 28/09/2026 — De QUEL pôle est la réunion principale ?
+   Une AESH partagée peut en avoir deux : CÉ a celle des Métiers d'Art le jeudi et
+   celle de MELEC le lundi. Sur sa fiche, « Réunion d'équipe » tout court ne suffit pas.
+
+   On ne devine JAMAIS à partir du rattachement administratif : celui de CÉ dit
+   PSR-MELEC alors que sa réunion du jeudi est celle des Métiers d'Art. On répond
+   seulement quand la réponse est certaine — pôle écrit sur la réunion, ou AESH
+   d'un seul pôle. Sinon on ne dit rien, et le référent le précise lui-même. */
+export function poleReunion(a) {
+  if (a && a.reunion && typeof a.reunion === 'object' && a.reunion.pole) return a.reunion.pole;
+  const eq = Object.keys((a && a.equipes) || {}).filter(p => (a.equipes || {})[p]);
+  return eq.length === 1 ? eq[0] : '';
+}
+
 export function reunionsEffectives(ctx,aeshId,lundi) {
   const a=ctx.I.aesh.get(aeshId); if(!a) return [];
   const inst=ctx.I.reunions.filter(r=>lundiDe(r.date)===lundi && !ctx.C.off(r.date) && !contratFini(a,r.date) && joursDe(a).includes(jourSemaine(r.date)));
   const r=reunionDe(a), date=r ? ajoute(lundi,r.jour) : '';
   const reunions=inst.length ? inst.map(r=>({...r,type:'institution',label:r.libelle || 'Réunion institutionnelle'}))
-    : r && !ctx.C.off(date) && !contratFini(a,date) && joursDe(a).includes(r.jour) ? [{...r,date,type:'reunion',label:'Réunion d’équipe'}] : [];
+    : r && !ctx.C.off(date) && !contratFini(a,date) && joursDe(a).includes(r.jour) ? [{...r,date,type:'reunion',pole:poleReunion(a),
+        label:'Réunion d’équipe'+(poleReunion(a)?' · '+(ctx.nomPole?ctx.nomPole(poleReunion(a)):poleReunion(a)):'')}] : [];
   // Une institutionnelle remplace la réunion principale, pas celles des autres pôles.
   reunions.push(...reunionsSupplementairesDe(a).filter(r=>{
     const d=ajoute(lundi,r.jour);

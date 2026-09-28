@@ -47,3 +47,18 @@ test('serviceALieu accepte les deux écritures du jour', () => {
   assert.equal(K.serviceALieu(ctx, a, {}, creneau('0'), lundi), true, 'jour en texte');
   assert.equal(K.serviceALieu(ctx, a, {}, creneau(1), lundi), false, 'un autre jour ne passe pas');
 });
+
+/* 28/09/2026 — Le pôle de la réunion, sur la fiche individuelle.
+   CÉ a deux réunions : Métiers d'Art le jeudi, MELEC le lundi. « Réunion d'équipe »
+   tout court ne permettait pas de les distinguer à l'impression. */
+test('le pôle de la réunion : certain, ou rien', () => {
+  const r = { jour: 3, debut: '13:00', fin: '14:00' };
+  assert.equal(K.poleReunion({ equipes: { MDA: true }, reunion: r }), 'MDA',
+    'un seul pôle : la réponse est certaine');
+  assert.equal(K.poleReunion({ equipes: { MDA: true, PSR_MELEC: true }, rattachement: 'PSR_MELEC', reunion: r }), '',
+    'deux pôles sans précision : on ne devine pas, même avec un rattachement');
+  assert.equal(K.poleReunion({ equipes: { MDA: true, PSR_MELEC: true }, rattachement: 'PSR_MELEC', reunion: { ...r, pole: 'MDA' } }), 'MDA',
+    'le pôle écrit sur la réunion l’emporte sur le rattachement');
+  assert.equal(K.poleReunion({ equipes: {}, reunion: r }), '', 'aucune équipe : rien');
+  assert.equal(K.poleReunion(null), '', 'pas de fiche : rien');
+});
