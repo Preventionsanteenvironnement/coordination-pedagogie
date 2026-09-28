@@ -16,7 +16,7 @@
   Firestore : coordination_referents_aesh (écriture) + coordination_estimation_aesh (lecture des besoins).
   Aucun prénom en ligne : les AESH sont des sigles. Aucune suppression : retraits datés + historique.
 -->
-<link rel="stylesheet" href="./styles.css?v=2026-09-28c">
+<link rel="stylesheet" href="./styles.css?v=2026-09-28g">
 </head>
 <body>
 <div id="app" class="app"><p style="padding:30px;text-align:center;color:#667085">Chargement…</p></div>
@@ -39,7 +39,7 @@ try {
   db = FS.getFirestore(app);
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-09-28f');
+  const m = await import('./app.js?v=2026-09-28g');
   const {authentifierPlanning} = await import('./acces-planning.js?v=2026-09-25b');
   m.demarrer({ FS, db, erreur, modePlanning:new URLSearchParams(location.search).get('espace') === 'planning',
     ouvrirAccesPlanning:code => window.__FIRESTORE_SHIM__?.ouvrirAccesPlanning ? window.__FIRESTORE_SHIM__.ouvrirAccesPlanning(code) : authentifierPlanning(code,FS,db) });

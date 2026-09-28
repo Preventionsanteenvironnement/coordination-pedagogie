@@ -12,7 +12,7 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
                coordination_estimation_aesh (cadre en lecture ; besoins partagés enseignants/référents)
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
-import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27h';
+import { couleurAesh, encreAesh, plagesDe, libelleService, logoService, estDemiPension } from './presences.js?v=2026-09-28g';
 import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-28d';
 import * as K from './calculs.js?v=2026-09-28d';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-27h';
@@ -1002,7 +1002,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
          pôle à l'autre : c'est la personne qu'on doit reconnaître d'un coup d'œil. */
       const fam = (o.sig === 'RE' || o.sig === 'RI') ? 'fam-reunion'
         : K.avecEleves({ nom: o.label, avecEleves: o.avecEleves }) ? 'fam-eleves' : 'fam-hors';
-      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${fam} ${o.surCours ? 'serre' : ''} ${avecSigles ? 'presence' : 'sans-eleves'}"
+      return `<button type="button" data-a="service-detail" data-v="${j}" class="hors-classe-bloc ${fam} ${estDemiPension(o.label)?'fam-dp':''} ${o.surCours ? 'serre' : ''} ${avecSigles ? 'presence' : 'sans-eleves'}"
         title="${esc(libelleService(o.label))} · ${K.hFr(o.d)}–${K.hFr(o.f)} · ${o.gens.map(a => a.sigle).join(', ')}"
         style="top:${top + 1}px;height:${Math.max(18, h)}px;${pos}">
         <b>${avecSigles ? logoService(o.sig) + esc(o.sig)
@@ -2211,7 +2211,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (!a) { toast('Choisissez d’abord un AESH.', true); return; }
     if (S.envoi) return; S.envoi = true; rendre();
     try {
-      const X = await import('./exports.js?v=2026-09-27h'), F = await import('./fichiers.js?v=2026-09-24i');
+      const X = await import('./exports.js?v=2026-09-28g'), F = await import('./fichiers.js?v=2026-09-24i');
       const court = String(a.sigle).replace(/[^a-zA-Z0-9_-]/g, '-');
       const pieces = [];
       if (f.indiv) pieces.push({ nom: `emploi-du-temps-${court}.pdf`, blob: X.pdfSemaineType(cx, [a.id], S.lundi) });
@@ -2261,7 +2261,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!a){toast('Choisissez d’abord un AESH.',true);return;}
     if(S.envoi)return; S.envoi=true; rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-27h'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-28g'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=X.pdfGrillesAesh(cx,[a.id],S.lundi,'TYPE');
       const nom=`emploi-du-temps-${String(a.sigle).replace(/[^a-zA-Z0-9_-]/g,'-')}.pdf`;
       F.telecharger(blob,nom);
@@ -2283,7 +2283,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if(!ids.length){toast('Aucun AESH à exporter.',true);return;}
     S.envoi=true;rendre();
     try{
-      const X=await import('./exports.js?v=2026-09-27h'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-28g'),F=await import('./fichiers.js?v=2026-09-24i');
       const blob=f.format==='pdf'?X.pdfGrillesAesh(cx,ids,S.lundi,f.semaines):X.excelGrillesAesh(cx,ids,S.lundi,f.semaines);
       const nom=(f.qui==='personne'?cx.I.aesh.get(ids[0]).sigle:P().slug).replace(/[^a-zA-Z0-9_-]/g,'-');
       F.telecharger(blob,`EDT-${nom}-${S.lundi}-${f.semaines}${cx.exportType?'-type':''}.${f.format==='pdf'?'pdf':'xlsx'}`);
@@ -2292,12 +2292,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   }
   async function exporterPlanningSimple() {
     try {
-      const X=await import('./exports.js?v=2026-09-27h'),F=await import('./fichiers.js?v=2026-09-24i');
+      const X=await import('./exports.js?v=2026-09-28g'),F=await import('./fichiers.js?v=2026-09-24i');
       F.telecharger(X.excelPlanning(ctx(),classesDu(P().id),K.aeshActifs(idx(),P().id).map(a=>a.id),S.lundi),`planning-${P().slug}-${S.lundi}-A-B.xlsx`);
     } catch(e){toast('L’export n’a pas pu être créé. '+e.message,true);}
   }
   async function lancerExport() {
-    const X = await import('./exports.js?v=2026-09-27h'), F = await import('./fichiers.js?v=2026-09-24i');
+    const X = await import('./exports.js?v=2026-09-28g'), F = await import('./fichiers.js?v=2026-09-24i');
     const p = P(), cx = ctx(), e = S.exp, s = S.C.semaine(S.lundi), suffixe = `${S.lundi}${s.parite ? '-sem' + s.parite : ''}`;
     const nomF = t => `${t}-${suffixe}`.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9._-]+/g, '-');
     if (e.format === 'json') { F.telecharger(X.json(cx, [...S.docs.values()]), `referents-aesh-sauvegarde-${K.isoLocal()}.json`); return; }

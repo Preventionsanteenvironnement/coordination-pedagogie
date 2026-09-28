@@ -52,6 +52,12 @@ export function couleurAesh(id) {
 export function plagesDe(valeur, cours) {
   return valeur ? (Array.isArray(valeur) ? valeur : [valeur]) : [{debut:cours.d, fin:cours.f}];
 }
+/* 28/09/2026 — Reconnaître la demi-pension, quel que soit le mot employé.
+   sigleService('Cantine') donne DP mais sigleService('Demi-pension') donne DE :
+   se fier au sigle aurait fait disparaître la trame grise le jour où quelqu'un
+   écrit le nom en entier. On teste donc le nom, comme libelleService juste en dessous. */
+export const estDemiPension = nom => ['Cantine','DP','Demi-pension','Demi pension'].includes(String(nom||'').trim());
+
 export function libelleService(nom) {
   return ['Cantine','DP','Demi-pension'].includes(nom) ? 'DP — Demi-pension' : nom;
 }

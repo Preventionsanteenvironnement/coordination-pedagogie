@@ -1,6 +1,6 @@
 import { horsPresence } from './services-visuels.mjs?v=2026-09-27g';
 import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-28c';
-import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-27h';
+import { couleurAesh, encreSur, libelleService, estDemiPension } from './presences.js?v=2026-09-28g';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
@@ -75,6 +75,13 @@ function grille(pdf, top, C, lundi, blocs, cadre = {}) {
     const a = Math.max(h0, K.min(b.debut)), z = Math.min(h1, K.min(b.fin)); if (z <= a) return;
     const x = xt + b.j * lc + (b.col || 0) * ((lc - 6) / (b.cols || 1)) + 3, w = (lc - 6) / (b.cols || 1) - 2, y = y0 + (a - h0) / 60 * hPx + 1, h = (z - a) / 60 * hPx - 2;
     pdf.rect(x, y, w, h, { fill: b.fond, r: 5, stroke: b.hachure ? '#b42318' : (b.pointille ? (b.trait || '#94a3b8') : null), dash: !!b.hachure || !!b.pointille, lw: 0.8 });
+    /* 28/09/2026 — La demi-pension n'a pas de couleur : une trame grise, légère, tracée
+       à 45° dans le bloc. Elle la distingue d'un cours sans lui en donner le poids. */
+    if (b.trame) for (let d = -h; d < w; d += 5) {
+     const x1 = x + Math.max(0, d), y1 = y + Math.max(0, -d);
+     const lg = Math.min(w - Math.max(0, d), h - Math.max(0, -d));
+     if (lg > 0.5) pdf.line(x1, y1, x1 + lg, y1 + lg, { color: '#cbd3da', lw: 0.5 });
+    }
     if (b.trait) pdf.rect(x, y, 3.2, h, { fill: b.trait, r: 1.5 });
     const tx = x + 7, tw = w - 11; let ty = y + 11;
     if (h < 14) { pdf.text(tx, y + h - 3.5, b.l1, { size: 7, bold: true, color: b.encre || ENCRE, max: tw }); return; }
@@ -129,7 +136,8 @@ function blocsAesh(ctx, aeshId, lundi) {
         l1: o.cours.lib || o.cours.mat, l2: `${o.cours.cls.map(n => (ctx.edt.classes[n] || {}).court || n).join(' · ')}${o.absent ? ' · à couvrir' : ''}`, l3: (o.cours.salle || []).join(' · ') };
     }
     if (o.type === 'absence') return { j: o.j, debut: o.debut, fin: o.fin, fond: '#fff4f2', trait: '#b42318', l1: o.label, l2: o.absence && o.absence.note ? o.absence.note : '', encre: '#8a1c1c' };
-    return { j: o.j, debut: o.debut, fin: o.fin, fond: horsPresence(o,K) ? '#ffffff' : '#eef1f4', pointille: horsPresence(o,K), trait: '#64748b', l1: libelleService(o.label), l2: '' };
+    /* La DP perd son aplat gris au profit de la trame ; les autres services le gardent. */
+    return { j: o.j, debut: o.debut, fin: o.fin, fond: (horsPresence(o,K) || estDemiPension(o.label)) ? '#ffffff' : '#eef1f4', trame: estDemiPension(o.label), pointille: horsPresence(o,K), trait: estDemiPension(o.label) ? '#8a949e' : '#64748b', l1: libelleService(o.label), l2: '' };
   }));
 }
 

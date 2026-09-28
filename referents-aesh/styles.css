@@ -776,3 +776,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pole)}
 .bandeau-activite .ba-x:hover{background:var(--line);color:var(--ink)}
 .bandeau-activite .ba-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media print{.bandeau-activite{display:none}}
+
+/* ═══ 28/09/2026 — LA DEMI-PENSION N'A PAS DE COULEUR ═══
+   Brahim : « je ne veux pas de fond de couleur pour demi-pension, un fond
+   légèrement hachuré en couleur gris ». Elle surveille un repas : ce n'est ni un
+   cours ni une réunion, et ça ne doit pas peser dans la grille. Donc pas de teinte —
+   une trame grise très claire, qui se lit à l'écran comme à l'impression, et qui
+   laisse toute la couleur aux cours. */
+.hors-classe-bloc.fam-dp,
+.hors-classe-bloc.sans-eleves.fam-dp{
+  background:repeating-linear-gradient(45deg,
+    transparent 0 5px,
+    color-mix(in srgb,#64748b 13%, transparent) 5px 6px) , var(--card,#fff);
+  border:1px solid #c3cbd3;
+  border-left:4px solid #8a949e;
+  color:#3f4a55;
+}
+.hors-classe-bloc.fam-dp b{color:#3f4a55}
+.hors-classe-bloc.fam-dp span{background:transparent}
