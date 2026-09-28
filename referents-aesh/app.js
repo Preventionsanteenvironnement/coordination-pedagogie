@@ -337,7 +337,7 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     let html;
     if (e === 'humeur') html = ecranHumeur();
     else if (e === 'code' || !S.session) html = ecranCode();
-    else html = `${entete()}<main class="corps" id="contenu" ${S.feuille ? 'inert' : ''}>${bandeauEtat()}${(ECRANS[e] || ECRANS.accueil)()}</main>`;
+    else html = `${entete()}<main class="corps" id="contenu" ${S.feuille ? 'inert' : ''}>${bandeauEtat()}${(local?.ecran?.(e)) ?? (ECRANS[e] || ECRANS.accueil)()}</main>`;
     if (S.feuille) html += feuille();
     if (S.toast) html += S.toast.err
       ? `<div class="alerte-haut" role="alert"><span>${esc(S.toast.t)}</span><button type="button" class="rond" data-a="toast-fermer" aria-label="Fermer ce message">✕</button></div>`
@@ -401,6 +401,10 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (modePlanning) return `<header class="tete"><div class="tete-in"><div class="marque"><b>Emplois du temps</b></div><button class="btn petit" data-a="sortir">Se déconnecter</button></div></header>`;
     const e = S.route.e, nonLus = messagesNonLus();
     const ong = [['accueil', 'Accueil'], ['aesh', 'Mes AESH'], ['edt', 'Emploi du temps'], ['ensemble', 'Vue d’ensemble'], ['besoins', 'Besoins'], ['eleves', 'Élèves'], ['epreuves', 'Épreuves'], ['messages', 'Messages'], ['exporter', 'Exporter']];
+    /* 28/09/2026 — Crochet des espaces locaux. L'Atelier peut ajouter ses propres
+   onglets — notes de réunion, courrier — à côté de ceux du planning. En ligne,
+   « local » n'existe pas : la barre reste exactement celle du site. */
+    (local?.onglets?.() || []).forEach(o => ong.push(o));
     const actif = { fiche: 'aesh', absence: 'aesh', reunions: 'aesh', moncode: 'accueil' }[e] || e;
     const coord = S.session && pole(S.session.pole).coordination;
     return `<header class="tete"><div class="tete-in">
