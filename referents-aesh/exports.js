@@ -1,11 +1,11 @@
 import { horsPresence } from './services-visuels.mjs?v=2026-09-27g';
-import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-27g';
+import { semainesAB, occupationsAB, resumeSemaine, totauxJours, libelleTotal } from './vues-planning.js?v=2026-09-28c';
 import { couleurAesh, encreSur, libelleService } from './presences.js?v=2026-09-27h';
 /* ═══════════════════════════════════════════════════════════════════
    Référents de pôle AESH — exports PDF, Excel et JSON
    ═══════════════════════════════════════════════════════════════════ */
 import { PDF, lignes, coupe, xlsx, colonne } from './fichiers.js?v=2026-09-24i';
-import * as K from './calculs.js?v=2026-09-27j';
+import * as K from './calculs.js?v=2026-09-28c';
 import { POLES, pole, couleurMatiere } from './donnees.js?v=2026-09-27h';
 
 const H0 = 8 * 60, H1 = 21 * 60;

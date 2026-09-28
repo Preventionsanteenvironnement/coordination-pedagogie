@@ -245,7 +245,7 @@ export function normaliserAesh(d, polesAutorises, cat) {
     : rd && Number.isInteger(+rd.jour) && +rd.jour >= 0 && +rd.jour <= 4 && RE_HEURE.test(rd.debut || '') && RE_HEURE.test(rd.fin || '')
     ? { jour: +rd.jour, debut: rd.debut, fin: rd.fin, ...(typeof rd.pole === 'string' && rd.pole ? { pole: rd.pole } : {}) } : null;
   const out = { ...d, sigle: String(d.sigle || '?').slice(0, 6), equipes, heures, contrat: nombreOk(d.contrat), reunion: r, actif: d.actif !== false,
-    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) !== null && (nombreOk(x.h) > 0 || (Array.isArray(x.horaires) && x.horaires.length > 0))).map(x => ({ ...x, horaires:Array.isArray(x.horaires)?x.horaires.filter(h=>h && Number.isInteger(h.jour) && h.jour>=0 && h.jour<5 && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'')):[], nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
+    services: Array.isArray(d.services) ? d.services.filter(x => x && typeof x === 'object' && nombreOk(x.h) !== null && (nombreOk(x.h) > 0 || (Array.isArray(x.horaires) && x.horaires.length > 0))).map(x => ({ ...x, horaires:Array.isArray(x.horaires)?x.horaires.map(normaliserHoraireService).filter(h=>{const bon=!!(h && Number.isInteger(h.jour) && h.jour>=0 && h.jour<5 && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||''));if(!bon)noterRejet(d.sigle,x.nom,h);return bon;}):[], nom: String(x.nom || 'Service').slice(0, 40), h: nombreOk(x.h),
       jours: Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [] })) : undefined,
     jours: Array.isArray(d.jours) ? d.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4) : undefined };
   if (out.services === undefined) delete out.services; if (out.jours === undefined) delete out.jours;
@@ -397,6 +397,7 @@ export function ecartContrat(a) {
 }
 
 export function indexer(docs, depart, polesAutorises, cat) {
+  remettreCompteurRejets();
   const aesh = new Map(), places = [], absences = [], messages = [], reunions = [], poles = new Map();
   /* 27/09/2026 — Les équipes de départ ne servent qu'à un pôle encore vide. Une fois les
      vraies fiches créées, elles doublonnaient : après le renommage des sigles, les fantômes
@@ -469,7 +470,12 @@ export function reunionsEffectives(ctx,aeshId,lundi) {
   return reunions.map(r=>({...r,j:jourSemaine(r.date),partiel:recouvrement(absencesDuJour(ctx.I,aeshId,r.date),min(r.debut),min(r.fin))/60})).filter(r=>duree(r.debut,r.fin)>r.partiel);
 }
 export function serviceALieu(ctx,a,x,h,iso) {
-  return Number.isInteger(h.jour) && jourSemaine(iso)===h.jour && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'') && iso>=h.du && iso<=h.au
+  /* 28/09/2026 — « jour » arrivait en TEXTE des imports d'emploi du temps ("0" et non 0).
+     Number.isInteger("0") vaut false : les demi-pensions, internats et ULIS ne se
+     dessinaient ni ne se comptaient, sur la grille comme à l'impression. 19 créneaux
+     sur 23 étaient invisibles. On accepte les deux écritures. */
+  const jr = Number(h.jour);
+  return Number.isInteger(jr) && jourSemaine(iso)===jr && RE_DATE.test(h.du||'') && RE_DATE.test(h.au||'') && iso>=h.du && iso<=h.au
     && RE_HEURE.test(h.debut||'') && RE_HEURE.test(h.fin||'') && min(h.fin)>min(h.debut)
     && !ctx.C.off(iso) && !contratFini(a,iso) && (!h.semaines || h.semaines==='AB' || h.semaines===ctx.C.parite(lundiDe(iso)));
 }
@@ -527,6 +533,28 @@ export const absencesDuJour = (I, aeshId, iso) => I.absences.filter(x => x.aeshI
 export const institutionCetteSemaine = (I, lundi) => I.reunions.some(r => lundiDe(r.date) === lundi);
 
 /* Services d'un AESH : liste {nom, h}. Les anciennes fiches (cantine / internat / service) sont lues telles quelles. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   28/09/2026 — CE QUI EST JETÉ DOIT SE VOIR.
+
+   Un créneau de demi-pension portait « jour » en texte ("0" et non 0). Le filtre
+   de normaliserAesh l'éliminait sans un mot : la base était juste, la grille et la
+   fiche imprimée avaient un trou, et rien ne le signalait. 19 créneaux sur 23.
+
+   Désormais tout rejet est compté ici. La page le lit et le dit ; les tests le
+   vérifient. Une donnée peut être refusée — elle ne peut plus disparaître en silence.
+   ═══════════════════════════════════════════════════════════════════════════ */
+export const REJETS = { services: 0, details: [] };
+export function remettreCompteurRejets(){ REJETS.services = 0; REJETS.details = []; }
+function noterRejet(sigle, nom, h){
+  REJETS.services++;
+  if (REJETS.details.length < 50) REJETS.details.push({ sigle, service: nom, horaire: h });
+}
+
+/* Un créneau de service, remis d'équerre : le jour en nombre, quelle que soit
+   la façon dont il a été écrit à l'import. */
+export const normaliserHoraireService = h => (h && typeof h === 'object')
+  ? { ...h, jour: Number.isInteger(+h.jour) ? +h.jour : h.jour } : h;
+
 export function servicesDe(a) {
   const jours = x => Array.isArray(x.jours) ? [...new Set(x.jours.map(Number).filter(j => Number.isInteger(j) && j >= 0 && j <= 4))].sort() : [];
   if (Array.isArray(a.services)) return a.services.filter(x => x && Number.isFinite(+x.h) && +x.h >= 0 && (+x.h > 0 || (Array.isArray(x.horaires) && x.horaires.length > 0))).map(x => ({ ...x, nom: String(x.nom || 'Service'), h: +x.h, jours: jours(x) }));

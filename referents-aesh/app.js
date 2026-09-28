@@ -1,7 +1,7 @@
 import { horsPresence, resumeExterne } from './services-visuels.mjs?v=2026-09-27g';
 import { fondPlages, legendePlages } from './plages-vides.mjs?v=2026-09-27g';
 import { disposerOccupations, styleOccupation, iconeOccupation } from './vue-personne.mjs';
-import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal, comptesEleves as comptesClasse, libelleEleves as libelleClasse } from './vues-planning.js?v=2026-09-27g';
+import { semainesAB, contexteType, occupationsAB, resumeSemaine, totauxJours, libelleTotal, comptesEleves as comptesClasse, libelleEleves as libelleClasse } from './vues-planning.js?v=2026-09-28c';
 import { ouvrirVerification, PERSONNES, lireBrouillon } from './verification.js?v=2026-09-27g';
 import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
 /* ═══════════════════════════════════════════════════════════════════
@@ -13,8 +13,8 @@ import { cibleBesoin, enregistrerBesoin } from './besoins.js?v=2026-09-24b';
    Rien ne s'efface : un retrait est un statut ou une date de fin, et chaque écriture laisse une copie hist_.
    ═══════════════════════════════════════════════════════════════════ */
 import { couleurAesh, encreAesh, plagesDe, libelleService, logoService } from './presences.js?v=2026-09-27h';
-import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-27j';
-import * as K from './calculs.js?v=2026-09-27j';
+import { sigleService, SIGLES_SERVICE, SERVICES_TYPES, horsClasse } from './calculs.js?v=2026-09-28c';
+import * as K from './calculs.js?v=2026-09-28c';
 import { POLES, pole, FILIERES, filiere, filieresDuPole, filiereDeClasse, EQUIPES_DEPART, COLLECTION, COL_ESTIMATION, couleurMatiere, HUMEURS, PENSEES } from './donnees.js?v=2026-09-27h';
 import { enregistrerPlanning } from './enregistrement.js?v=2026-09-26a';
 import * as SAUVE from './sauvegarde.js?v=2026-09-26a';
@@ -392,6 +392,12 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
   function bandeauEtat() {
     if(local)return local.status();
     const act = bandeauActivite();
+    /* 28/09/2026 — Si des créneaux ont été refusés à la lecture, on le dit. C'est
+       ce silence qui a fait imprimer une fiche incomplète à CÉ. */
+    if (K.REJETS && K.REJETS.services > 0) {
+     const d = K.REJETS.details.slice(0, 3).map(x => `${x.sigle} · ${x.service}`).join(', ');
+     return act + `<div class="bandeau err" role="alert"><b>${K.REJETS.services} créneau(x) de service refusé(s) à la lecture</b> — ils ne sont ni dessinés ni comptés${d ? ' : ' + esc(d) : ''}${K.REJETS.services > 3 ? '…' : ''}. Vérifiez ces fiches avant d’imprimer.</div>`;
+    }
     if (S.etat === 'refus') return act + `<div class="bandeau warn" role="alert">Espace en cours d’ouverture par la coordination : consultation possible, enregistrement pas encore autorisé.</div>`;
     if (S.etat === 'horsligne') return act + `<div class="bandeau warn" role="alert">Pas de connexion au serveur : les données affichées sont celles de la dernière visite.</div>`;
     return act;
@@ -401,9 +407,9 @@ export async function demarrer({ FS, db, erreur, modePlanning = false, ouvrirAcc
     if (modePlanning) return `<header class="tete"><div class="tete-in"><div class="marque"><b>Emplois du temps</b></div><button class="btn petit" data-a="sortir">Se déconnecter</button></div></header>`;
     const e = S.route.e, nonLus = messagesNonLus();
     const ong = [['accueil', 'Accueil'], ['aesh', 'Mes AESH'], ['edt', 'Emploi du temps'], ['ensemble', 'Vue d’ensemble'], ['besoins', 'Besoins'], ['eleves', 'Élèves'], ['epreuves', 'Épreuves'], ['messages', 'Messages'], ['exporter', 'Exporter']];
-    /* 28/09/2026 — Crochet des espaces locaux. L'Atelier peut ajouter ses propres
-   onglets — notes de réunion, courrier — à côté de ceux du planning. En ligne,
-   « local » n'existe pas : la barre reste exactement celle du site. */
+    /* 28/09/2026 — Crochet des espaces locaux, pour une entête qui viendrait d'ici.
+   L'Atelier, lui, fabrique sa propre entête (local.entete) et y place ses onglets :
+   c'est « ecran » plus bas qui lui rend la main. En ligne, « local » n'existe pas. */
     (local?.onglets?.() || []).forEach(o => ong.push(o));
     const actif = { fiche: 'aesh', absence: 'aesh', reunions: 'aesh', moncode: 'accueil' }[e] || e;
     const coord = S.session && pole(S.session.pole).coordination;
