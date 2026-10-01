@@ -84,6 +84,14 @@ textarea{min-height:90px;resize:vertical}
 .modifiable{display:inline-block;background:#fff;border:1.5px solid var(--e4);color:var(--e4);border-radius:99px;padding:1px 9px;font-size:.78rem;font-weight:750;margin-left:6px}
 .carte h3{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .tag{font-size:.75rem;font-weight:750;border-radius:99px;padding:2px 9px;background:var(--e2l);color:var(--e2)}
+.carte-t{display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:6px}
+.carte-t h3{font-size:1.12rem}.carte-t .eff{font-weight:600;color:var(--muted)}
+.l3{margin:6px 0;font-size:1rem;display:flex;gap:6px 10px;flex-wrap:wrap;align-items:baseline}
+.l3-n{min-width:170px;color:var(--ink-2);font-weight:650}
+.detail{margin-top:10px;border-top:1px solid var(--line-2);padding-top:8px}
+.detail summary{cursor:pointer;color:var(--e2);font-weight:700}
+.detail ul{margin:8px 0 0;padding-left:20px;color:var(--ink-2);font-size:.93rem}.detail li{margin:4px 0}
+@media (max-width:640px){.l3-n{min-width:100%}}
 .nbs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 .nb{border-radius:12px;padding:7px 12px;font-size:.88rem;line-height:1.25;min-width:118px}
 .nb b{display:block;font-size:1.35rem}
@@ -500,32 +508,35 @@ function htmlSemaine(g, avecBouton){
     const p = avecBouton ? prochaine(c, g) : '';
     return `<span class="creneau-info"><span><b>${JOURS[c.j]} ${hFr(c.d)}–${hFr(c.f)}</b>${SEM[c.sem] ? ' · ' + SEM[c.sem] : ''}${c.salle && c.salle.length ? ' · ' + esc(c.salle.join(', ')) : ''}</span>${avecBouton && p ? `<button type="button" class="btn pt" data-a="sur-cours" data-v="${esc(g.id)}|${esc(c.id)}|${p}">＋ Ajouter le ${esc(dateLongue(p).replace(/^\S+ /, ''))}</button>` : ''}</span>`; }).join('')}</div>${note}</div>`;
 }
+/* Carte de classe épurée (Brahim, 01/10) : trois lignes, le détail replié. Une seule couleur, celle de l'étape. */
 function htmlGroupe(g){
   const cls = g.classes, etats = cls.map(k => S.elevesEtat[k]), c = cls.length ? comptesGroupe(cls) : null, k = idc(g.id);
-  const aides = (ai, am) => [ai ? `${ai} AESH individualisée` : '', am ? `${am} AESH mutualisée` : ''].filter(Boolean).join(' · ');
-  const nb = (cl, v, t, d) => v ? `<div class="nb ${cl}"><b>${v}</b>${t}${d ? `<br><span style="font-size:.8rem">${d}</span>` : ''}</div>` : '';
-  const pole = poleDe(g);
+  const pole = poleDe(g), cours = coursSemaineG(g), m = matiereF();
+  const ligneCours = !cls.length ? '' : `<p class="l3"><span class="l3-n">Votre cours</span><span>${cours.length ? cours.map(x => `<b>${JOURS[x.j]} ${hFr(x.d)}–${hFr(x.f)}</b>${SEM[x.sem] ? ' (' + SEM[x.sem] + ')' : ''}`).join(' · ') : `<span class="aide">pas de cours de ${esc(m)} avec cette classe dans l’emploi du temps</span>`} <span class="aide">(modifiable à l’étape 4)</span></span></p>`;
   let corps;
   if (g.autre) corps = '<p class="aide">Classe saisie à la main : la coordination complétera.</p>';
   else if (etats.some(e => !e || e === 'chargement')) corps = '<p class="aide">Lecture des besoins de la classe…</p>';
-  else if (!c.total) corps = '<p class="vide">La coordination n’a pas encore publié les besoins de cette classe : vous indiquerez vous-même le nombre d’AESH à l’étape 4.</p>';
-  else corps = `<p class="lig" style="font-size:1.05rem"><b>${pluriel(c.effectif, 'élève', 'élèves')}</b> dans ${cls.length > 1 ? 'ces classes' : 'la classe'}.</p>
-      <div class="nbs">
-        ${nb('nb-ai', c.ai, ' en AESH individualisée')}
-        ${nb('nb-am', c.am, ' en AESH mutualisée')}
-        ${nb('nb-ulis', c.ulis, ' en ULIS')}
-        ${nb('nb-off', c.notifies, ' notification officielle')}
-        ${nb('nb-enc', c.encours, ' notification en cours ou à vérifier')}
-        ${nb('nb-sans', c.pap, ' PAP', 'souvent non renouvelés : à vérifier')}
-        ${c.suivis ? '' : '<p class="aide">Aucun élève suivi dans cette classe.</p>'}</div>
-      ${AMEN.some(([a]) => c.amen[a]) ? `<p class="lig"><b>Aménagements d’épreuve :</b> ${AMEN.filter(([a]) => c.amen[a]).map(([a, n]) => `${n} ×${c.amen[a]}`).join(' · ')}</p>` : ''}
-      ${c.besoins.length ? `<p class="lig"><b>Besoins essentiels :</b> ${c.besoins.map(([n, v]) => `${esc(n)} ×${v}`).join(' · ')}</p>` : ''}`;
-  const prop = g.autre || (c && c.total) ? `<div class="prop">${c && c.total ? `<div class="gros">Estimation proposée : <b>${c.propose}</b> AESH par séance</div>
-      <div class="aide">${c.ai ? `${pluriel(c.ai, 'élève', 'élèves')} en AESH individualisée = ${c.ai} AESH` : ''}${c.ai && c.autres ? ' · ' : ''}${c.autres ? `${pluriel(c.autres, 'autre élève suivi', 'autres élèves suivis')} = ${Math.ceil(c.autres / 3)} AESH (1 pour 3)` : ''}</div>` : ''}
-      <div class="aide" style="margin-top:6px">👉 Vous confirmerez le nombre d’AESH pour chaque séance à l’étape 4.</div></div>` : '';
-  return `<div class="carte"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h3>${esc(libGroupe(g))}${cls.length > 1 ? ' <span class="tag">ensemble</span>' : ''}${pole ? ` <span class="tag" style="background:var(--e3l);color:var(--e3)">pôle ${esc(libPole(pole))}</span>` : ''}</h3><button type="button" class="btn lien" data-a="retirer-groupe" data-v="${esc(g.id)}">✕ Retirer</button></div>
-    <div class="champ" style="margin-top:8px;max-width:340px"><label for="dip-${k}">Diplôme</label><input type="text" id="dip-${k}" data-g="${esc(g.id)}" data-gk="diplome" maxlength="60" value="${esc(g.diplome)}"></div>
-    ${corps}${prop}${majTxt(cls) ? `<p class="aide" style="margin:6px 0 0">Besoins mis à jour par la coordination le ${majTxt(cls)}.</p>` : ''}${htmlSemaine(g, false)}</div>`;
+  else if (!c.total) corps = `<p class="vide">La coordination n’a pas encore publié les besoins de cette classe : vous indiquerez le nombre d’AESH à l’étape 4.</p>${ligneCours}`;
+  else {
+    const acc = [c.ai ? `<b>${c.ai}</b> AI` : '', c.am ? `<b>${c.am}</b> AM` : '', c.ulis ? `<b>${c.ulis}</b> ULIS` : ''].filter(Boolean);
+    corps = `<p class="l3"><span class="l3-n">Élèves accompagnés</span><span>${acc.length ? acc.join(' · ') : '<span class="aide">aucun</span>'}</span></p>
+      <p class="l3"><span class="l3-n">Estimation</span><span><b>${c.propose} AESH</b> par séance <span class="aide">(modifiable à l’étape 4)</span></span></p>
+      ${ligneCours}
+      <details class="detail"><summary>Voir le détail</summary>
+        <ul>
+          <li>Notification officielle : <b>${c.notifies}</b> · en cours ou à vérifier : <b>${c.encours}</b></li>
+          ${c.pap ? `<li>PAP : <b>${c.pap}</b> <span class="aide">(souvent non renouvelés : à vérifier)</span></li>` : ''}
+          <li>AI = AESH individualisée · AM = AESH mutualisée</li>
+          <li>Estimation : ${c.ai ? `${c.ai} AESH pour ${pluriel(c.ai, 'élève', 'élèves')} en AI` : ''}${c.ai && c.autres ? ' + ' : ''}${c.autres ? `${Math.ceil(c.autres / 3)} AESH pour ${pluriel(c.autres, 'autre élève suivi', 'autres élèves suivis')} (1 pour 3)` : ''}${!c.ai && !c.autres ? 'aucun élève suivi' : ''}</li>
+          ${AMEN.some(([a]) => c.amen[a]) ? `<li>Aménagements d’épreuve : ${AMEN.filter(([a]) => c.amen[a]).map(([a, n]) => `${n} ×${c.amen[a]}`).join(' · ')}</li>` : ''}
+          ${c.besoins.length ? `<li>Besoins essentiels : ${c.besoins.map(([n, v]) => `${esc(n)} ×${v}`).join(' · ')}</li>` : ''}
+          ${majTxt(cls) ? `<li>Besoins mis à jour par la coordination le ${majTxt(cls)}</li>` : ''}
+        </ul>
+        <div class="champ" style="max-width:340px;margin:8px 0 0"><label for="dip-${k}">Diplôme</label><input type="text" id="dip-${k}" data-g="${esc(g.id)}" data-gk="diplome" maxlength="60" value="${esc(g.diplome)}"></div>
+      </details>`;
+  }
+  return `<div class="carte"><div class="carte-t"><h3>${esc(libGroupe(g))}${c && c.total ? ` <span class="eff">· ${pluriel(c.effectif, 'élève', 'élèves')}</span>` : ''}</h3><button type="button" class="btn lien" data-a="retirer-groupe" data-v="${esc(g.id)}">✕ Retirer</button></div>
+    ${corps}</div>`;
 }
 /* — 3. Épreuve — */
 function corps3(){
@@ -535,7 +546,7 @@ function corps3(){
     <div class="champ"><span class="leg">Forme <span class="aide">(écrit, oral, pratique — facultatif)</span></span><div class="puces">${FORMES.map(([k, n]) => `<button type="button" class="puce" id="fo-${k}" data-a="forme" data-v="${k}" aria-pressed="${f.forme === k}">${n}</button>`).join('')}</div></div>
     ${f.forme === 'autre' ? `<div class="champ"><label for="forme-autre">Précisez <span class="aide">(facultatif)</span></label><input type="text" id="forme-autre" data-c="formeAutre" maxlength="80" value="${esc(f.formeAutre)}"></div>` : ''}
     <div class="champ" style="margin-top:6px"><span class="leg">Nommez l’épreuve <span class="aide">(facultatif — le nom peut changer d’une classe à l’autre)</span></span></div>
-    ${f.groupes.map((g, i) => `<div class="champ"><label for="int-${idc(g.id)}">${esc(libGroupe(g))}</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="int-${idc(g.id)}" data-g="${esc(g.id)}" data-gk="intitule" maxlength="120" value="${esc(g.intitule)}" style="flex:1;min-width:220px">${i === 0 && f.groupes.length > 1 ? '<button type="button" class="btn pt" data-a="int-tous">Même nom pour toutes les classes</button>' : ''}</div></div>`).join('')}`;
+    ${f.groupes.map((g, i) => `<div class="champ"><label for="int-${idc(g.id)}">${esc(libGroupe(g))}</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="int-${idc(g.id)}" data-g="${esc(g.id)}" data-gk="intitule" maxlength="120" placeholder="Ex. : CCF EP2 – Accueil, ou Évaluation n°2" value="${esc(g.intitule)}" style="flex:1;min-width:220px">${i === 0 && f.groupes.length > 1 ? '<button type="button" class="btn pt" data-a="int-tous">Même nom pour toutes les classes</button>' : ''}</div></div>`).join('')}`;
 }
 /* — 4. Modalités de l'épreuve : un mini-parcours, classe par classe ————————————————
    Pour la classe en cours : une séance déjà proposée (son prochain cours), « À vérifier » (durée, tiers temps,
