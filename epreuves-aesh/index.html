@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f766e">
+<title>Besoin AESH pour une épreuve</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Besoin AESH pour une épreuve — page en ligne, enseignants (01/10/2026)
+   Reprend la fiche du lycée « Organisation des CCF — informations et demande
+   d'aide humaine » (bureau DDF + coordination PIAL).
+
+   Lit   : edt-lycee.json et calculs.js de referents-aesh (emploi du temps,
+           semaines A/B, vacances, PFMP) ;
+           coordination_referents_aesh / eleves_<CLASSE>_<année> (codes de suivi,
+           notification, PAP/PPS, aménagements d'épreuve) — n'en affiche QUE des nombres.
+   Écrit : coordination_demandes_aesh / epreuve_<id> (création seule).
+
+   AUCUN NOM : ni élève, ni enseignant, ni AESH. L'enseignant ne coche aucun
+   aménagement : ils viennent de la base de la coordination.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#f4f6f8;--card:#fff;--card-2:#f8fafb;--ink:#111827;--ink-2:#374151;--muted:#4b5563;
+  --line:#c9d1da;--line-2:#e3e8ee;--accent:#0f766e;--accent-d:#0b5f59;--accent-l:#e3f3ef;
+  --focus:#1d4ed8;--warn-bg:#fff4d6;--warn-ink:#6b3b00;--warn-line:#b45309;
+  --err-bg:#fdecec;--err-ink:#8f1d1d;--err-line:#b91c1c;--ok-bg:#e5f4ea;--ok-ink:#14532d;--ok-line:#15803d;
+  --info-bg:#e8f0fe;--info-ink:#1e3a8a;--r:14px;--r-s:10px;--sh:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.05);
+  color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:1rem;line-height:1.5}
+h1,h2,h3{margin:0;line-height:1.25}h1{font-size:1.6rem;font-weight:800}h2{font-size:1.2rem;font-weight:750}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+[hidden]{display:none!important}
+.haut{background:var(--accent);color:#fff;padding:12px 16px}
+.haut a{color:#fff;font-weight:700;text-decoration:none}
+main{max-width:860px;margin:0 auto;padding:18px 16px 60px;display:flex;flex-direction:column;gap:16px}
+.intro p{color:var(--muted);margin:6px 0 0}
+.rgpd{background:var(--info-bg);color:var(--info-ink);border-radius:var(--r-s);padding:9px 12px;font-size:.92rem}
+.bloc{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh)}
+.bloc h2{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.num{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:.95rem;flex:none}
+.champ{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.champ>label,.leg{font-weight:650;font-size:.95rem}
+.aide{color:var(--muted);font-size:.88rem}
+input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{border:1.5px solid var(--line);border-radius:var(--r-s);padding:9px 11px;background:#fff;min-height:44px}
+textarea{min-height:70px;resize:vertical}
+.puces{display:flex;flex-wrap:wrap;gap:6px}
+.puce{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;min-height:40px}
+.puce[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.puce .ici{font-size:.78rem;opacity:.85;margin-left:4px}
+.pole{margin:10px 0 4px;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+.classe-carte{border:1.5px solid var(--accent);border-radius:var(--r-s);padding:12px 14px;margin-top:10px;background:var(--card-2)}
+.classe-carte h3{font-size:1.05rem;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.classe-carte h3 small{font-weight:500;color:var(--muted)}
+.nbs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.nb{background:#fff;border:1px solid var(--line-2);border-radius:8px;padding:4px 10px;font-size:.9rem}
+.nb b{font-size:1.05rem}
+.prop{display:flex;align-items:center;gap:10px;background:var(--ok-bg);color:var(--ok-ink);border-radius:var(--r-s);padding:8px 12px;font-weight:650}
+.prop b{font-size:1.3rem}
+.vide{background:var(--warn-bg);color:var(--warn-ink);border-radius:var(--r-s);padding:8px 12px;font-size:.92rem}
+.seance{border:1px solid var(--line);border-radius:var(--r-s);padding:12px;margin-bottom:10px;background:#fff}
+.seance-t{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
+.grille .large{grid-column:span 2}
+@media (max-width:640px){.grille{grid-template-columns:1fr 1fr}.grille .large{grid-column:span 2}}
+.suggest{background:var(--accent-l);border-radius:8px;padding:6px 10px;font-size:.9rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.tiers{display:flex;align-items:center;gap:8px;font-size:.92rem;margin-top:6px}
+.tiers input{width:20px;height:20px}
+.alerte{background:var(--warn-bg);color:var(--warn-ink);border-left:4px solid var(--warn-line);border-radius:6px;padding:6px 10px;font-size:.9rem;margin-top:6px}
+.btn{border:1.5px solid var(--line);background:#fff;border-radius:var(--r-s);padding:9px 16px;font-weight:650;min-height:44px}
+.btn.prim{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.lien{border:0;background:none;color:var(--accent-d);text-decoration:underline;padding:4px;min-height:0}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.recap dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}
+.recap dt{font-weight:700;color:var(--ink-2)}.recap dd{margin:0}
+.recap ul{margin:4px 0 0;padding-left:20px}
+.msg{border-radius:var(--r-s);padding:10px 14px}
+.msg.ok{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
+.msg.err{background:var(--err-bg);color:var(--err-ink);border:1px solid var(--err-line)}
+.msg.info{background:var(--info-bg);color:var(--info-ink)}
+.erreurs{background:var(--err-bg);color:var(--err-ink);border-radius:var(--r-s);padding:10px 14px}
+.erreurs ul{margin:4px 0 0;padding-left:18px}
+.envoi{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="haut"><a href="../">← Coordination pédagogie</a></div>
+<main id="vue" tabindex="-1"><p>Chargement…</p></main>
+<script type="module">
+import { creerCalendrier, lundiDe, ajoute, jourSemaine } from '../referents-aesh/calculs.js?v=2026-09-28d';
+
+/* ═══════════════ Firebase ═══════════════ */
+const firebaseConfig = { apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain:"coordination-pedagogie.firebaseapp.com",
+  projectId:"coordination-pedagogie", storageBucket:"coordination-pedagogie.firebasestorage.app", messagingSenderId:"526058585010", appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab" };
+const COL = 'coordination_demandes_aesh', COL_REF = 'coordination_referents_aesh', SOURCE = 'epreuves-aesh', DELAI = 15000;
+const K_BROUILLON = 'epreuves-aesh-brouillon-v1';
+const anneeScolaire = (d = new Date()) => { const y = d.getFullYear(); return d.getMonth() >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`; };
+const ANNEE = anneeScolaire();
+let FS = null, db = null, erreurFS = null;
+try {
+  FS = window.__FIRESTORE_SHIM__ || await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+  let app = null;
+  if (!window.__FIRESTORE_SHIM__) { const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js'); app = initializeApp(firebaseConfig, 'epreuves-aesh'); }
+  db = FS.getFirestore(app);
+} catch (e) { erreurFS = e; }
+
+/* ═══════════════ outils ═══════════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nettoie = (v, max) => String(v ?? '').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').trim().slice(0, max);
+const RE_DATE = /^\d{4}-\d{2}-\d{2}$/, RE_HEURE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const z2 = n => String(n).padStart(2, '0');
+const min = h => { const [a, b] = String(h).split(':').map(Number); return a * 60 + b; };
+const hDe = m => `${z2(Math.floor(m / 60))}:${z2(m % 60)}`;
+const hFr = h => RE_HEURE.test(h || '') ? `${parseInt(h, 10)}h${h.slice(3) === '00' ? '' : h.slice(3)}` : '';
+const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const JOURS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'];
+const dateLongue = iso => RE_DATE.test(iso || '') ? `${JOURS[jourSemaine(iso)]} ${parseInt(iso.slice(8), 10)} ${MOIS[+iso.slice(5, 7) - 1]}` : '';
+const isoLocal = (d = new Date()) => `${d.getFullYear()}-${z2(d.getMonth() + 1)}-${z2(d.getDate())}`;
+const pluriel = (n, un, plus) => `${n} ${n > 1 ? plus : un}`;
+const nouvelId = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = crypto.getRandomValues(new Uint8Array(6)); return 'epreuve_' + Date.now().toString(36) + [...r].map(x => a[x % 36]).join(''); };
+const avecDelai = (p, ms) => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('délai'), { code: 'delai' })), ms); })]).finally(() => clearTimeout(t)); };
+const typeErreur = e => { const t = `${e?.code || ''} ${e?.message || ''}`; return /permission|PERMISSION_DENIED|insufficient/i.test(t) ? 'refus' : (navigator.onLine === false || /unavailable|offline|network|delai|fetch/i.test(t)) ? 'horsligne' : 'autre'; };
+
+const NATURES = [['ccf', 'CCF'], ['ccfblanc', 'CCF blanc'], ['bacblanc', 'Bac blanc'], ['evaluation', 'Évaluation'], ['sortie', 'Sortie'], ['autre', 'Autre']];
+const FORMES = [['ecrit', 'Écrit'], ['oral', 'Oral'], ['pratique', 'Pratique'], ['autre', 'Autre']];
+const AMEN = [['tiers', '⅓ temps'], ['lecteur', 'lecteur'], ['scripteur', 'scripteur'], ['assistant', 'assistant'], ['ordi', 'ordinateur'], ['agrandi', 'sujet agrandi'], ['isole', 'salle à part'], ['dispense', 'dispense']];
+const DUREES = [30, 45, 60, 90, 120, 150, 180, 240];
+const POLES = [['PSR_MELEC', 'PSR · MELEC'], ['AGORA', 'AGOrA'], ['CAPA', 'CAPa'], ['MDA', 'Métiers d’art']];
+/* Le diplôme se lit dans le nom court de la classe : « 2de MELEC » → Bac pro MELEC, « CAP 1 PSR » → CAP PSR. */
+function diplomeDe(k){
+  const c = (k && k.court) || '';
+  if (/^CAPa/i.test(c)) return 'CAPa ' + c.replace(/^CAPa\s*\d\s*/i, '');
+  if (/^CAP/i.test(c)) return 'CAP ' + c.replace(/^CAP\s*\d\s*/i, '');
+  if (/^(2de|1re|Tle)/i.test(c)) return 'Bac pro ' + c.replace(/^(2de|1re|Tle)\s*/i, '').replace(/\s*\d$/, '');
+  return c;
+}
+
+/* ═══════════════ état ═══════════════ */
+const S = {
+  edt: null, C: null, eleves: {}, elevesEtat: {}, chargement: true, erreur: '',
+  f: { matiere: '', matiereAutre: '', classes: [], diplomes: {}, nature: '', natureAutre: '', forme: '', formeAutre: '', intitule: '', seances: [], observations: '', autreDemande: '' },
+  erreurs: [], envoi: null, envoye: null
+};
+let uid = 0;
+
+/* ═══════════════ chargement ═══════════════ */
+async function charger(){
+  try {
+    S.edt = window.__EDT__ || await (await fetch('../referents-aesh/edt-lycee.json?v=2026-09-24b')).json();
+    S.C = creerCalendrier({ semaine1: S.edt.semaine1, vacances: S.edt.vacances, s1Fin: S.edt.s1Fin, s2Debut: S.edt.s2Debut });
+  } catch (e) { S.erreur = 'L’emploi du temps n’a pas pu se charger. Vérifiez la connexion, puis rechargez la page.'; }
+  S.chargement = false; rendre();
+}
+/* Les élèves d'une classe : codes et aménagements, publiés par la coordination. Seuls des NOMBRES s'affichent. */
+async function chargerEleves(classe){
+  if (S.elevesEtat[classe]) return;
+  S.elevesEtat[classe] = 'chargement';
+  try {
+    const snap = await avecDelai(FS.getDoc(FS.doc(db, COL_REF, `eleves_${classe}_${ANNEE}`)), DELAI);
+    S.eleves[classe] = snap.exists() && Array.isArray(snap.data().eleves) ? snap.data().eleves : [];
+    S.elevesEtat[classe] = snap.exists() ? 'ok' : 'absent';
+  } catch (e) { S.elevesEtat[classe] = typeErreur(e); S.eleves[classe] = []; }
+  rendre();
+}
+function comptes(classe){
+  const l = S.eleves[classe] || [];
+  const a = k => l.filter(e => Array.isArray(e.amenagements) && e.amenagements.includes(k)).length;
+  const suivis = l.filter(e => (e.notif && e.notif !== 'non') || e.doc || e.ulis || (e.aide && e.aide !== 'aucune') || (e.amenagements || []).length);
+  const aide = l.filter(e => ['lecteur', 'scripteur', 'assistant'].some(k => (e.amenagements || []).includes(k))).length;
+  return { total: l.length, suivis: suivis.length, notifies: l.filter(e => e.notif === 'oui').length, encours: l.filter(e => e.notif === 'encours').length,
+    pps: l.filter(e => e.doc === 'PPS').length, pap: l.filter(e => e.doc === 'PAP').length, ulis: l.filter(e => e.ulis).length,
+    ai: l.filter(e => e.aide === 'individualisee').length, am: l.filter(e => e.aide === 'mutualisee').length,
+    amen: Object.fromEntries(AMEN.map(([k]) => [k, a(k)])), propose: aide,
+    sansAmen: suivis.filter(e => !(e.amenagements || []).length && (e.notif === 'oui' || e.doc)).length };
+}
+const matieres = () => [...new Set(Object.values(S.edt.cours).map(c => c.lib))].sort((a, b) => a.localeCompare(b, 'fr'));
+const matiereF = () => S.f.matiere === '__autre' ? nettoie(S.f.matiereAutre, 60) : S.f.matiere;
+const coursDe = (classe, lib) => Object.values(S.edt.cours).filter(c => (c.cls || []).includes(classe) && c.lib === lib);
+/* Le cours de cette matière, dans cette classe, à cette date (jour, semaine A/B, semestre). */
+function coursDuJour(classe, date){
+  if (!RE_DATE.test(date || '')) return null;
+  const j = jourSemaine(date), l = lundiDe(date);
+  return coursDe(classe, matiereF()).filter(c => c.j === j && S.C.coursSemaine(c, l)).sort((a, b) => min(a.d) - min(b.d))[0] || null;
+}
+function alertesDate(classe, date){
+  const out = [];
+  if (!RE_DATE.test(date || '')) return out;
+  if (jourSemaine(date) > 4) out.push('Cette date tombe un week-end.');
+  const off = S.C.off(date); if (off) out.push(`Cette date tombe pendant : ${off}.`);
+  const pf = ((S.edt.classes[classe] || {}).pfmp || []).find(p => date >= p.debut && date <= p.fin);
+  if (pf) out.push(`La classe est en ${pf.label || 'PFMP'} à cette date (du ${dateLongue(pf.debut)} au ${dateLongue(pf.fin)}).`);
+  if (date < isoLocal()) out.push('Cette date est déjà passée.');
+  return out;
+}
+function nouvelleSeance(classe){
+  const c = comptes(classe);
+  return { uid: ++uid, classe, date: '', debut: '', duree: 60, tiers: c.amen.tiers > 0, fin: '', finManuelle: false, salle: '', nbAesh: String(c.propose) };
+}
+function finCalculee(s){
+  if (!RE_HEURE.test(s.debut)) return '';
+  const d = Number(s.duree) || 0, t = s.tiers ? Math.ceil(d / 3 / 5) * 5 : 0;
+  const m = min(s.debut) + d + t; return m < 24 * 60 ? hDe(m) : '';
+}
+const finS = s => s.finManuelle ? s.fin : finCalculee(s);
+
+/* ═══════════════ rendu ═══════════════ */
+const vue = $('#vue');
+function rendre(){
+  const a = document.activeElement, id = a && a.id && vue.contains(a) ? a.id : null;
+  let sel = null; try { if (id && typeof a.selectionStart === 'number') sel = [a.selectionStart, a.selectionEnd]; } catch (_) { }
+  vue.innerHTML = erreurFS ? `<div class="msg err">Pas de connexion au serveur : la page n’a pas pu charger ses outils en ligne. Rechargez la page.</div>`
+    : S.chargement ? '<p>Chargement de l’emploi du temps…</p>' : S.erreur ? `<div class="msg err">${esc(S.erreur)}</div>`
+    : S.envoye ? htmlEnvoye() : htmlForm();
+  if (id){ const el = document.getElementById(id); if (el){ el.focus({ preventScroll: true }); if (sel) try { el.setSelectionRange(...sel); } catch (_) { } } }
+}
+function htmlForm(){
+  const f = S.f, mats = matieres(), m = matiereF(), E = S.erreurs;
+  const parPole = POLES.map(([p, n]) => {
+    const cls = (S.edt.poles[p] || []).filter(k => S.edt.classes[k]);
+    return `<p class="pole">${esc(n)}</p><div class="puces">${cls.map(k => { const ici = m && coursDe(k, m).length;
+      return `<button type="button" class="puce" id="cl-${k}" data-a="classe" data-v="${k}" aria-pressed="${f.classes.includes(k)}">${esc(S.edt.classes[k].court)}${ici ? '<span class="ici">· a cours de ' + esc(m) + '</span>' : ''}</button>`; }).join('')}</div>`;
+  }).join('');
+  return `<div class="intro"><h1 id="titre">Besoin AESH pour une épreuve</h1>
+      <p>CCF, CCF blanc, bac blanc, évaluation, sortie… Indiquez l’épreuve, la classe et les séances : la coordination reçoit votre demande et organise les AESH. Vous n’avez rien à cocher sur les élèves : leurs aménagements sont déjà connus de la coordination.</p></div>
+    <p class="rgpd"><b>Aucun nom</b> : ni élève, ni enseignant, ni AESH. Vous verrez seulement des nombres.</p>
+    ${E.length ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>${pluriel(E.length, 'point à corriger', 'points à corriger')}</b><ul>${E.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+
+    <section class="bloc"><h2><span class="num">1</span>La matière</h2>
+      <div class="champ"><label for="matiere">Matière</label>
+        <select id="matiere" data-c="matiere"><option value="">— choisir —</option>${mats.map(x => `<option ${f.matiere === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}<option value="__autre" ${f.matiere === '__autre' ? 'selected' : ''}>Autre…</option></select></div>
+      ${f.matiere === '__autre' ? `<div class="champ"><label for="matiere-autre">Nom de la matière</label><input type="text" id="matiere-autre" data-c="matiereAutre" maxlength="60" value="${esc(f.matiereAutre)}"></div>` : ''}
+    </section>
+
+    <section class="bloc"><h2><span class="num">2</span>La ou les classes</h2>
+      <p class="aide">Touchez une ou plusieurs classes.</p>${parPole}
+      ${f.classes.map(htmlClasse).join('')}
+    </section>
+
+    <section class="bloc"><h2><span class="num">3</span>L’épreuve</h2>
+      <div class="champ"><span class="leg">Nature</span><div class="puces">${NATURES.map(([k, n]) => `<button type="button" class="puce" id="na-${k}" data-a="nature" data-v="${k}" aria-pressed="${f.nature === k}">${n}</button>`).join('')}</div></div>
+      ${f.nature === 'autre' ? `<div class="champ"><label for="nature-autre">Précisez</label><input type="text" id="nature-autre" data-c="natureAutre" maxlength="80" value="${esc(f.natureAutre)}"></div>` : ''}
+      <div class="champ"><span class="leg">Forme</span><div class="puces">${FORMES.map(([k, n]) => `<button type="button" class="puce" id="fo-${k}" data-a="forme" data-v="${k}" aria-pressed="${f.forme === k}">${n}</button>`).join('')}</div></div>
+      ${f.forme === 'autre' ? `<div class="champ"><label for="forme-autre">Précisez</label><input type="text" id="forme-autre" data-c="formeAutre" maxlength="80" value="${esc(f.formeAutre)}"></div>` : ''}
+      <div class="champ"><label for="intitule">Intitulé exact de l’épreuve <span class="aide">(règlement d’examen, facultatif)</span></label><input type="text" id="intitule" data-c="intitule" maxlength="120" value="${esc(f.intitule)}"></div>
+    </section>
+
+    <section class="bloc"><h2><span class="num">4</span>Les séances</h2>
+      ${f.classes.length ? '' : '<p class="aide">Choisissez d’abord une classe.</p>'}
+      ${f.seances.map(htmlSeance).join('')}
+      ${f.classes.length ? `<div class="puces">${f.classes.map(k => `<button type="button" class="btn" id="aj-${k}" data-a="ajout" data-v="${k}">＋ Une séance ${f.classes.length > 1 ? 'pour ' + esc(S.edt.classes[k].court) : ''}</button>`).join('')}</div>
+        <p class="aide" style="margin-top:6px">Autant de séances que nécessaire : plusieurs dans la semaine, ou sur plusieurs semaines.</p>` : ''}
+    </section>
+
+    <section class="bloc"><h2><span class="num">5</span>Compléments <span class="aide" style="font-weight:400">(facultatif)</span></h2>
+      <div class="champ"><label for="observations">Observations</label><span class="aide">Nombre de salles, aménagement de l’emploi du temps, intervention d’un tiers…</span><textarea id="observations" data-c="observations" maxlength="600">${esc(f.observations)}</textarea></div>
+      <div class="champ"><label for="autre-demande">Autre demande</label><span class="aide">Déplacement de cours, par exemple. Sans nom.</span><textarea id="autre-demande" data-c="autreDemande" maxlength="600">${esc(f.autreDemande)}</textarea></div>
+    </section>
+
+    ${f.seances.length ? htmlRecap() : ''}
+    <div class="envoi"><button type="button" class="btn prim" id="envoyer" data-a="envoyer" ${S.envoi && S.envoi.etat === 'encours' ? 'disabled' : ''}>Envoyer à la coordination</button>
+      <span class="aide">Vous pourrez la compléter par mail si quelque chose change.</span></div>
+    ${S.envoi && S.envoi.message ? `<div class="msg err" role="alert">${esc(S.envoi.message)} <button type="button" class="btn lien" data-a="renvoyer">${S.envoi.etat === 'attente' ? 'L’envoyer maintenant' : 'Réessayer'}</button></div>` : ''}`;
+}
+function htmlClasse(k){
+  const kk = S.edt.classes[k], et = S.elevesEtat[k], c = comptes(k), dip = S.f.diplomes[k] ?? diplomeDe(kk);
+  const nb = (v, t) => v ? `<span class="nb"><b>${v}</b> ${t}</span>` : '';
+  let corps;
+  if (!et || et === 'chargement') corps = '<p class="aide">Lecture des besoins de la classe…</p>';
+  else if (et === 'absent' || !c.total) corps = '<p class="vide">La coordination n’a pas encore renseigné les élèves de cette classe : indiquez vous-même le nombre d’AESH souhaité.</p>';
+  else if (et !== 'ok') corps = `<p class="vide">${et === 'refus' ? 'Lecture non autorisée pour le moment.' : 'Pas de connexion : les besoins de la classe n’ont pas pu être lus.'} Indiquez vous-même le nombre d’AESH souhaité.</p>`;
+  else corps = `<div class="nbs">${nb(c.suivis, 'élève(s) suivi(s)')}${nb(c.notifies, 'notifié(s)')}${nb(c.encours, 'notification en cours')}${nb(c.pps, 'PPS')}${nb(c.pap, 'PAP')}${nb(c.ulis, 'ULIS')}${nb(c.ai, 'AESH individuelle')}${nb(c.am, 'AESH mutualisée')}</div>
+      ${AMEN.some(([a]) => c.amen[a]) ? `<p class="aide">Aménagements d’épreuve connus : ${AMEN.filter(([a]) => c.amen[a]).map(([a, n]) => `<b>${c.amen[a]}</b> ${n}`).join(' · ')}</p>` : '<p class="aide">Aucun aménagement d’épreuve renseigné pour cette classe.</p>'}
+      ${c.sansAmen ? `<p class="aide">${pluriel(c.sansAmen, 'élève notifié ou avec un plan dont les aménagements ne sont pas encore renseignés', 'élèves notifiés ou avec un plan dont les aménagements ne sont pas encore renseignés')}.</p>` : ''}
+      <p class="prop">Proposition : <b>${c.propose}</b> AESH par séance <span class="aide" style="color:inherit;font-weight:400">(un élève avec lecteur, scripteur ou assistant = une AESH) — vous choisissez à chaque séance</span></p>`;
+  return `<div class="classe-carte"><h3>${esc(kk.court)} <small>${esc(k)}</small></h3>
+    <div class="champ" style="margin-top:6px"><label for="dip-${k}">Diplôme</label><input type="text" id="dip-${k}" data-c="diplome" data-k="${k}" maxlength="60" value="${esc(dip)}"></div>${corps}</div>`;
+}
+function htmlSeance(s, i){
+  const kk = S.edt.classes[s.classe], cours = coursDuJour(s.classe, s.date), c = comptes(s.classe), al = alertesDate(s.classe, s.date);
+  const fin = finS(s), t = Math.ceil((Number(s.duree) || 0) / 3 / 5) * 5, id = x => `s${s.uid}-${x}`;
+  return `<div class="seance"><div class="seance-t"><b>Séance ${i + 1} · ${esc(kk.court)}</b><button type="button" class="btn lien" id="${id('x')}" data-a="retirer" data-v="${s.uid}">Retirer</button></div>
+    <div class="grille">
+      <div class="champ large"><label for="${id('date')}">Date</label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
+      <div class="champ"><label for="${id('debut')}">Début</label><input type="time" id="${id('debut')}" data-s="${s.uid}" data-k="debut" value="${esc(s.debut)}" step="300"></div>
+      <div class="champ"><label for="${id('duree')}">Durée de l’épreuve</label><select id="${id('duree')}" data-s="${s.uid}" data-k="duree">${DUREES.map(d => `<option value="${d}" ${+s.duree === d ? 'selected' : ''}>${d < 60 ? d + ' min' : Math.floor(d / 60) + ' h' + (d % 60 ? d % 60 : '')}</option>`).join('')}</select></div>
+      <div class="champ"><label for="${id('fin')}">Fin</label><input type="time" id="${id('fin')}" data-s="${s.uid}" data-k="fin" value="${esc(fin)}" step="300"></div>
+      <div class="champ"><label for="${id('salle')}">Salle <span class="aide">(facultatif)</span></label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
+      <div class="champ large"><label for="${id('nb')}">Nombre d’AESH souhaité</label><input type="number" id="${id('nb')}" data-s="${s.uid}" data-k="nbAesh" min="0" max="12" value="${esc(s.nbAesh)}" inputmode="numeric"><span class="aide">Proposition pour cette classe : ${c.propose}</span></div>
+    </div>
+    ${cours ? `<div class="suggest">Ce jour-là, ${esc(kk.court)} a ${esc(cours.lib)} de <b>${hFr(cours.d)} à ${hFr(cours.f)}</b>${cours.salle && cours.salle.length ? ' en ' + esc(cours.salle.join(', ')) : ''}. <button type="button" class="btn" id="${id('cours')}" data-a="cours" data-v="${s.uid}">Reprendre ce créneau</button></div>` : s.date && matiereF() ? `<div class="suggest">Pas de cours de ${esc(matiereF())} en ${esc(kk.court)} ce jour-là : choisissez l’heure.</div>` : ''}
+    ${c.amen.tiers ? `<label class="tiers"><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> Prévoir le tiers temps (${pluriel(c.amen.tiers, 'élève', 'élèves')}) : +${t} min${RE_HEURE.test(s.debut) ? ` → fin à ${hFr(finCalculee({ ...s, tiers: true }))}` : ''}</label>` : ''}
+    ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}
+    ${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}</div>`;
+}
+function htmlRecap(){
+  const f = S.f, l = [...f.seances].sort((a, b) => (a.date || '9').localeCompare(b.date || '9') || (a.debut || '').localeCompare(b.debut || ''));
+  const nat = NATURES.find(x => x[0] === f.nature), fo = FORMES.find(x => x[0] === f.forme);
+  return `<section class="bloc recap" aria-labelledby="h-recap"><h2 id="h-recap">Récapitulatif</h2><dl>
+    <dt>Matière</dt><dd>${esc(matiereF() || '—')}</dd>
+    <dt>Épreuve</dt><dd>${esc(nat ? (f.nature === 'autre' ? f.natureAutre || 'Autre' : nat[1]) : '—')}${fo ? ' · ' + esc(f.forme === 'autre' ? f.formeAutre || 'Autre' : fo[1]) : ''}${f.intitule ? ' · ' + esc(f.intitule) : ''}</dd>
+    <dt>Séances</dt><dd><ul>${l.map(s => `<li>${esc(dateLongue(s.date) || 'date à choisir')} · ${hFr(s.debut) || '?'}–${hFr(finS(s)) || '?'}${s.tiers ? ' (tiers temps compris)' : ''} · ${esc(S.edt.classes[s.classe].court)}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh || '0')} AESH</b></li>`).join('')}</ul></dd></dl></section>`;
+}
+function htmlEnvoye(){
+  const d = S.envoye;
+  return `<div class="msg ok" role="status" id="ok" tabindex="-1"><h1 style="font-size:1.3rem">✓ Demande envoyée</h1>
+    <p>La coordination la reçoit : ${pluriel(d.seances.length, 'séance', 'séances')}, ${esc(d.matiere)}, ${esc(d.classes.map(c => S.edt.classes[c.classe].court).join(', '))}. Elle organise les AESH et vous répond.</p></div>
+    <p><button type="button" class="btn" data-a="nouvelle">Faire une autre demande</button></p>`;
+}
+
+/* ═══════════════ actions ═══════════════ */
+const seance = u => S.f.seances.find(s => s.uid === +u);
+vue.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-a]'); if (!b) return;
+  const a = b.dataset.a, v = b.dataset.v, f = S.f;
+  if (a === 'classe'){
+    if (f.classes.includes(v)){ f.classes = f.classes.filter(x => x !== v); f.seances = f.seances.filter(s => s.classe !== v); }
+    else { f.classes.push(v); chargerEleves(v); }
+  }
+  else if (a === 'nature') f.nature = v;
+  else if (a === 'forme') f.forme = v;
+  else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.debut = p.debut; s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } f.seances.push(s); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); }
+  else if (a === 'retirer') f.seances = f.seances.filter(s => s.uid !== +v);
+  else if (a === 'cours'){ const s = seance(v), c = s && coursDuJour(s.classe, s.date); if (c){ s.debut = c.d; s.duree = DUREES.includes(min(c.f) - min(c.d)) ? min(c.f) - min(c.d) : s.duree; s.finManuelle = false; if (!s.salle && c.salle && c.salle[0]) s.salle = String(c.salle[0]).slice(0, 20); } }
+  else if (a === 'fin-auto'){ const s = seance(v); if (s) s.finManuelle = false; }
+  else if (a === 'envoyer'){ envoyer(); return; }
+  else if (a === 'renvoyer'){ envoyer(true); return; }
+  else if (a === 'nouvelle'){ S.envoye = null; S.f = { ...S.f, seances: [], observations: '', autreDemande: '', intitule: '' }; }
+  rendre();
+});
+vue.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.dataset.c){ if (t.dataset.c === 'diplome') S.f.diplomes[t.dataset.k] = t.value; else S.f[t.dataset.c] = t.value; return; }
+  const s = t.dataset.s && seance(t.dataset.s); if (!s) return;
+  const k = t.dataset.k;
+  if (k === 'fin'){ s.fin = t.value; s.finManuelle = true; }
+  else if (k === 'tiers') s.tiers = t.checked;
+  else s[k] = t.value;
+});
+vue.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.dataset.c === 'matiere' || (t.dataset.s && ['date', 'debut', 'duree', 'tiers', 'fin'].includes(t.dataset.k))){
+    const s = t.dataset.s && seance(t.dataset.s);
+    if (s && t.dataset.k === 'date' && !s.debut){ const c = coursDuJour(s.classe, s.date); if (c){ s.debut = c.d; if (DUREES.includes(min(c.f) - min(c.d))) s.duree = min(c.f) - min(c.d); if (!s.salle && c.salle && c.salle[0]) s.salle = String(c.salle[0]).slice(0, 20); } }
+    rendre();
+  }
+});
+
+/* ═══════════════ contrôle et envoi ═══════════════ */
+function valider(){
+  const f = S.f, e = [];
+  if (!matiereF()) e.push('Choisissez la matière (ou « Autre » et écrivez-la).');
+  if (!f.classes.length) e.push('Choisissez au moins une classe.');
+  if (!f.nature) e.push('Choisissez la nature de l’épreuve.');
+  else if (f.nature === 'autre' && !nettoie(f.natureAutre, 80)) e.push('Précisez la nature de l’épreuve.');
+  if (f.forme === 'autre' && !nettoie(f.formeAutre, 80)) e.push('Précisez la forme de l’épreuve.');
+  if (!f.seances.length) e.push('Ajoutez au moins une séance.');
+  if (f.seances.length > 40) e.push('Au plus 40 séances par demande.');
+  f.seances.forEach((s, i) => {
+    const p = `Séance ${i + 1} (${S.edt.classes[s.classe].court}) : `, fin = finS(s);
+    if (!RE_DATE.test(s.date)) e.push(p + 'la date manque.');
+    else if (jourSemaine(s.date) > 4) e.push(p + 'la date tombe un week-end.');
+    else if (s.date < isoLocal()) e.push(p + 'la date est déjà passée.');
+    if (!RE_HEURE.test(s.debut)) e.push(p + 'l’heure de début manque.');
+    if (!RE_HEURE.test(fin) || (RE_HEURE.test(s.debut) && min(fin) <= min(s.debut))) e.push(p + 'l’heure de fin doit être après le début.');
+    if (!/^\d+$/.test(String(s.nbAesh).trim()) || +s.nbAesh > 12) e.push(p + 'le nombre d’AESH doit être un nombre entier de 0 à 12.');
+  });
+  return e;
+}
+function construire(){
+  const f = S.f, now = new Date().toISOString();
+  const seances = [...f.seances].sort((a, b) => a.date.localeCompare(b.date) || a.debut.localeCompare(b.debut)).map(s => {
+    const c = comptes(s.classe);
+    return { classe: s.classe, date: s.date, debut: s.debut, fin: finS(s), duree: Number(s.duree) || 0, tiersTemps: !!s.tiers, salle: nettoie(s.salle, 20), nbAesh: parseInt(String(s.nbAesh).trim(), 10), nbPropose: c.propose };
+  });
+  return { id: nouvelId(), type: 'epreuve', annee: ANNEE, matiere: matiereF(),
+    nature: f.nature, natureAutre: f.nature === 'autre' ? nettoie(f.natureAutre, 80) : '',
+    forme: f.forme || '', formeAutre: f.forme === 'autre' ? nettoie(f.formeAutre, 80) : '', intitule: nettoie(f.intitule, 120),
+    classes: f.classes.map(k => ({ classe: k, diplome: nettoie(f.diplomes[k] ?? diplomeDe(S.edt.classes[k]), 60), comptes: (({ amen, sansAmen, ...r }) => ({ ...r, ...amen, sansAmen }))(comptes(k)) })),
+    seances, observations: nettoie(f.observations, 600), autreDemande: nettoie(f.autreDemande, 600),
+    statut: 'nouvelle', reponse: { statut: '', texte: '', majLe: '' }, creeLe: now, majLe: now, source: SOURCE };
+}
+async function envoyer(renvoi){
+  if (!(renvoi && S.envoi && S.envoi.doc)){
+    S.erreurs = valider();
+    if (S.erreurs.length){ rendre(); $('#erreurs')?.focus(); return; }
+  }
+  const d = renvoi && S.envoi && S.envoi.doc ? S.envoi.doc : construire();
+  S.envoi = { etat: 'encours', doc: d }; rendre();
+  try {
+    await avecDelai(FS.setDoc(FS.doc(db, COL, d.id), d), DELAI);
+    try { localStorage.removeItem(K_BROUILLON); } catch (_) { }
+    S.envoye = d; S.envoi = null; rendre(); $('#ok')?.focus();
+  } catch (e) {
+    try { localStorage.setItem(K_BROUILLON, JSON.stringify(d)); } catch (_) { }
+    const t = typeErreur(e);
+    S.envoi = { etat: t, doc: d, message: t === 'refus' ? 'Envoi pas encore autorisé : la coordination ouvre cet espace. Votre demande est gardée sur cet appareil.' : 'Pas de connexion au serveur : votre demande est gardée sur cet appareil.' };
+    rendre();
+  }
+}
+/* Une demande restée en attente sur cet appareil (envoi échoué) : on la propose à nouveau. */
+try { const b = JSON.parse(localStorage.getItem(K_BROUILLON) || 'null'); if (b && b.id && b.type === 'epreuve') S.envoi = { etat: 'attente', doc: b, message: 'Une demande préparée sur cet appareil n’est pas encore partie.' }; } catch (_) { }
+rendre(); charger();
+</script>
+</body>
+</html>

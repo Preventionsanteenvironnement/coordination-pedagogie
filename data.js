@@ -200,6 +200,14 @@ const THEMATIQUES = [
         badge: "Nouveau",
       },
       {
+        titre: "Besoin AESH pour une épreuve",
+        desc: "Pour les enseignants : CCF, CCF blanc, bac blanc, évaluation, sortie. Choisissez la matière, la classe et les séances — le créneau du cours et le tiers temps sont proposés. Vous voyez combien d'élèves ont des aménagements, sans aucun nom, et la coordination organise les AESH.",
+        lien: "epreuves-aesh/",
+        type: "Formulaire",
+        icon: "calendar",
+        badge: "Nouveau",
+      },
+      {
         titre: "Planning Antoine",
         desc: "Grilles PSR et MELEC : positionner les AESH en PSR, consulter MELEC. Accès par code à quatre chiffres.",
         lien: "planning-equipe/",
