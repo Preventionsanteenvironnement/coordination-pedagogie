@@ -79,7 +79,9 @@ textarea{min-height:90px;resize:vertical}
 .puces{display:flex;flex-wrap:wrap;gap:6px}
 .puce{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;min-height:40px}
 .puce[aria-pressed=true]{background:var(--c);border-color:var(--c);color:#fff;font-weight:750}
-.carte{border:1.5px solid var(--line-2);border-radius:14px;padding:13px 15px;margin-top:10px;background:#fff}
+.carte{border:2.5px solid var(--e2);border-radius:16px;padding:14px 16px;margin-top:12px;background:#f7faff;box-shadow:0 2px 10px rgba(29,78,216,.08)}
+.ajout-classe{border:2px dashed var(--line);border-radius:16px;padding:12px 14px;margin-top:14px;background:#fff}
+.modifiable{display:inline-block;background:#fff;border:1.5px solid var(--e4);color:var(--e4);border-radius:99px;padding:1px 9px;font-size:.78rem;font-weight:750;margin-left:6px}
 .carte h3{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .tag{font-size:.75rem;font-weight:750;border-radius:99px;padding:2px 9px;background:var(--e2l);color:var(--e2)}
 .nbs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
@@ -99,10 +101,19 @@ textarea{min-height:90px;resize:vertical}
 .groupe4{border:1.5px solid var(--line-2);border-radius:14px;padding:12px 14px;margin-bottom:12px}
 .groupe4>h3{margin-bottom:8px}
 .seance{border:1.5px solid #f2c9ad;border-radius:14px;padding:12px;margin:10px 0;background:#fffaf6}
-.seance-t{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.seance-t{display:flex;align-items:flex-start;gap:12px}
+.seance:not(.ferme) .seance-t{margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed #f2c9ad}
+.seance-r{font-size:.95rem;color:var(--ink-2);margin-top:2px}.seance-r .manque{color:var(--err-ink);font-weight:700}
+.seance-b{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.num-ep{width:38px;height:38px;border-radius:12px;background:var(--e4);color:#fff;font-weight:850;font-size:1.15rem;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.seance{border-left:6px solid var(--e4)}
+.seance.ferme{background:#fff}
+.seance.en-erreur{border-color:var(--err-line);background:#fff6f6}
+.seance.en-erreur .num-ep{background:var(--err-line)}
 .grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
 .grille .large{grid-column:span 2}
 @media (max-width:640px){.grille{grid-template-columns:1fr 1fr}}
+.mo{font-weight:600;font-size:.78rem;color:var(--e4);margin-left:4px}
 .auto{background:var(--e4l);border-radius:10px;padding:7px 11px;font-size:.92rem;margin-top:6px}
 .tiers{display:flex;align-items:center;gap:8px;font-size:.93rem;margin-top:8px;flex-wrap:wrap}
 .tiers input{width:20px;height:20px}
@@ -187,15 +198,15 @@ function diplomeDe(k){
 
 /* ═══════════════ état ═══════════════ */
 const ETAPES = [
-  { n: 1, t: 'La matière', c: '--e1', g: 'Choisissez la matière de l’épreuve, puis validez.' },
-  { n: 2, t: 'La ou les classes', c: '--e2', g: 'Choisissez la classe. Vous voyez aussitôt ses besoins (des nombres, jamais des noms) et ses cours de la semaine.' },
-  { n: 3, t: 'L’épreuve', c: '--e3', g: 'Indiquez la nature et la forme. Le nom de l’épreuve peut être différent pour chaque classe.' },
-  { n: 4, t: 'Les séances', c: '--e4', g: 'Choisissez la date de chaque séance : le créneau du cours s’affiche tout seul. Ajustez ensuite l’heure, la durée, +30 min ou le tiers temps.' },
-  { n: 5, t: 'Observations', c: '--e5', g: 'Facultatif : salles, organisation, autre demande. Jamais de nom d’élève.' },
-  { n: 6, t: 'Récapitulatif et envoi', c: '--e6', g: 'Relisez. Chaque partie peut encore être modifiée. Puis envoyez.' }
+  { n: 1, t: 'Sélectionnez votre matière', c: '--e1', g: 'Sélectionnez votre matière, puis validez.' },
+  { n: 2, t: 'Sélectionnez la ou les classes', c: '--e2', g: 'Sélectionnez une classe. Ajoutez-en une autre si besoin.' },
+  { n: 3, t: 'Indiquez l’épreuve', c: '--e3', g: 'Choisissez le type d’épreuve. Le reste est facultatif.' },
+  { n: 4, t: 'Programmez les dates', c: '--e4', g: 'Vérifiez la date proposée. Modifiez-la si besoin. Ajoutez une séance pour une autre date.' },
+  { n: 5, t: 'Ajoutez une observation', c: '--e5', g: 'Facultatif. Aucun nom d’élève.' },
+  { n: 6, t: 'Vérifiez et envoyez', c: '--e6', g: 'Relisez. Modifiez si besoin. Envoyez.' }
 ];
 const S = {
-  edt: null, C: null, eleves: {}, elevesEtat: {}, chargement: true, erreur: '',
+  edt: null, C: null, eleves: {}, elevesEtat: {}, majEleves: {}, chargement: true, erreur: '',
   f: { matiere: '', matiereAutre: '', groupes: [], choix: '', classeAutre: '', nature: '', natureAutre: '', forme: '', formeAutre: '', seances: [], observations: '', autreDemande: '' },
   etape: 1, ok: {}, snap: null, erreurs: [], nomConfirme: '', envoi: null, envoye: null
 };
@@ -217,6 +228,7 @@ async function chargerEleves(classe){
   try {
     const snap = await avecDelai(FS.getDoc(FS.doc(db, COL_REF, `eleves_${classe}_${ANNEE}`)), DELAI);
     S.eleves[classe] = snap.exists() && Array.isArray(snap.data().eleves) ? snap.data().eleves : [];
+    S.majEleves[classe] = snap.exists() ? String(snap.data().majLe || '') : '';
     S.elevesEtat[classe] = snap.exists() ? 'ok' : 'absent';
   } catch (e) { S.elevesEtat[classe] = typeErreur(e); S.eleves[classe] = []; }
   S.f.groupes.forEach(g => { if (g.classes.includes(classe) && !g.nbTouche) g.nb = String(cG(g).propose); });
@@ -293,40 +305,54 @@ function finCalculee(s){
 const finS = s => s.finManuelle ? s.fin : finCalculee(s);
 const natureTxt = () => { const n = NATURES.find(x => x[0] === S.f.nature); return n ? (S.f.nature === 'autre' ? nettoie(S.f.natureAutre, 80) || 'Autre' : n[1]) : ''; };
 const formeTxt = () => { const n = FORMES.find(x => x[0] === S.f.forme); return n ? (S.f.forme === 'autre' ? nettoie(S.f.formeAutre, 80) || 'Autre' : n[1]) : ''; };
+const majTxt = cls => { const l = cls.map(k => S.majEleves[k]).filter(Boolean).sort(); return l.length ? new Date(l[0]).toLocaleDateString('fr-FR') : ''; };
+const nomEpreuve = g => nettoie(g && g.intitule, 120) || [natureTxt(), matiereF()].filter(Boolean).join(' · ') || 'Épreuve';
 const idc = id => String(id).replace(/\W/g, '_');
 
 /* ═══════════════ étapes : ouvrir, valider, annuler ═══════════════ */
 const suivante = () => { for (let n = 1; n <= 5; n++) if (!S.ok[n]) return n; return 6; };
-function ouvrir(n){ S.snap = clone(S.f); S.etape = n; S.erreurs = []; S.nomConfirme = ''; }
+function ouvrir(n){ if (n === 4) proposerSeances(); S.snap = clone(S.f); S.etape = n; S.erreurs = []; S.nomConfirme = ''; }
 function controle(n){
   const f = S.f, e = [];
   if (n === 1 && !matiereF()) e.push('Choisissez la matière (ou « Autre… » et écrivez-la).');
   if (n === 2 && !f.groupes.length) e.push('Choisissez au moins une classe.');
   if (n === 2) f.groupes.forEach(g => { if (!/^\d+$/.test(String(g.nb ?? '').trim()) || +g.nb > 12) e.push(`${libGroupe(g)} : le nombre d’AESH souhaité doit être un nombre entier de 0 à 12.`); });
   if (n === 3){
-    if (!f.nature) e.push('Choisissez la nature de l’épreuve.');
-    else if (f.nature === 'autre' && !nettoie(f.natureAutre, 80)) e.push('Précisez la nature de l’épreuve.');
-    if (f.forme === 'autre' && !nettoie(f.formeAutre, 80)) e.push('Précisez la forme de l’épreuve.');
+    if (!f.nature) e.push('Choisissez le type d’épreuve.');
   }
   if (n === 4){
     if (!f.seances.length) e.push('Ajoutez au moins une séance.');
     if (f.seances.length > 40) e.push('Au plus 40 séances par demande.');
     f.groupes.forEach(g => { if (!f.seances.some(s => s.classe === g.id)) e.push(`${libGroupe(g)} : aucune séance. Ajoutez-en une, ou retirez cette classe à l’étape 2.`); });
-    f.seances.forEach((s, i) => {
-      const p = `Séance ${i + 1} (${libGroupe(groupe(s.classe))}) : `, fin = finS(s);
-      if (!RE_DATE.test(s.date)) e.push(p + 'la date manque.');
-      else if (jourSemaine(s.date) > 4) e.push(p + 'la date tombe un week-end.');
-      else if (s.date < isoLocal()) e.push(p + 'la date est déjà passée.');
-      if (!RE_HEURE.test(s.debut)) e.push(p + 'l’heure de début manque.');
-      if (!RE_HEURE.test(fin) || (RE_HEURE.test(s.debut) && min(fin) <= min(s.debut))) e.push(p + 'l’heure de fin doit être après le début.');
-      if (!/^\d+$/.test(String(s.nbAesh).trim()) || +s.nbAesh > 12) e.push(p + 'le nombre d’AESH doit être un nombre entier de 0 à 12.');
-    });
+    f.seances.forEach(s => { const g = groupe(s.classe), k = numero(s); controleSeance(s).forEach(x => e.push(`${libGroupe(g)}, épreuve n°${k} : ${x}`)); });
   }
   if (n === 5){
     const t = `${f.observations} ${f.autreDemande}`, m = nomSuspect(t);
     if (m && S.nomConfirme !== m) e.push(`« ${m} » ressemble à un nom. Retirez-le. Si ce n’est pas un nom, cliquez une seconde fois sur « Valider ».`), S.nomConfirme = m;
   }
   return e;
+}
+/* Ce qui manque à UNE séance : affiché sur sa carte même, et dans la liste des points à corriger. */
+function controleSeance(s){
+  const e = [], fin = finS(s);
+  if (!RE_DATE.test(s.date)) e.push('choisissez la date.');
+  else if (jourSemaine(s.date) > 4) e.push('la date tombe un week-end.');
+  else if (s.date < isoLocal()) e.push('la date est déjà passée.');
+  if (!RE_HEURE.test(s.debut)) e.push('indiquez l’heure de début.');
+  if (!(+s.duree >= 5 && +s.duree <= 600)) e.push('la durée doit être entre 5 et 600 minutes.');
+  if (RE_HEURE.test(s.debut) && (!RE_HEURE.test(fin) || min(fin) <= min(s.debut))) e.push('l’heure de fin doit être après le début.');
+  if (!/^\d+$/.test(String(s.nbAesh).trim()) || +s.nbAesh > 12) e.push('le nombre d’AESH doit être un nombre entier de 0 à 12.');
+  return e;
+}
+const numero = s => S.f.seances.filter(x => x.classe === s.classe).indexOf(s) + 1;
+/* À l'ouverture de l'étape 4, chaque classe sans épreuve en reçoit une, posée sur son prochain cours de la matière. */
+function proposerSeances(){
+  S.f.groupes.forEach(g => {
+    if (S.f.seances.some(s => s.classe === g.id)) return;
+    const s = nouvelleSeance(g.id), c = coursSemaineG(g).map(x => [x, prochaine(x, g)]).filter(x => x[1]).sort((a, b) => a[1].localeCompare(b[1]))[0];
+    if (c){ s.date = c[1]; poserCours(s, c[0]); s.propose = true; } else s.ouvert = true;
+    S.f.seances.push(s);
+  });
 }
 /* Un mot tout en capitales (hors sigles connus) ressemble à un NOM de famille. */
 const SIGLES = new Set('AESH AED CCF PFMP ULIS PAP PPS PAI MDPH EPS CAP CAPA BAC PSE PSR MELEC AGORA VAN CAN HORT SST DDF PIAL CPE TP TD EDT CDI DNB QCM PC RDC MPA BTS ASSR ASH PE OK'.split(' '));
@@ -394,26 +420,27 @@ const triees = () => [...S.f.seances].sort((a, b) => (a.date || '9').localeCompa
 function corps1(){
   const f = S.f;
   return `<div class="champ"><label for="matiere">Matière</label>
-      <select id="matiere" data-c="matiere"><option value="">— choisir —</option>${matieres().map(x => `<option ${f.matiere === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}<option value="__autre" ${f.matiere === '__autre' ? 'selected' : ''}>Autre…</option></select></div>
+      <select id="matiere" data-c="matiere"><option value="">— sélectionner votre matière —</option>${matieres().map(x => `<option ${f.matiere === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}<option value="__autre" ${f.matiere === '__autre' ? 'selected' : ''}>Autre…</option></select></div>
     ${f.matiere === '__autre' ? `<div class="champ"><label for="matiere-autre">Nom de la matière</label><input type="text" id="matiere-autre" data-c="matiereAutre" maxlength="60" value="${esc(f.matiereAutre)}"></div>` : ''}`;
 }
 /* — 2. Classes — */
 function corps2(){
   const f = S.f, m = matiereF(), pris = new Set(f.groupes.map(g => g.id));
-  const menu = `<select id="classe-choix" data-c="choix"><option value="">— choisir une classe —</option>${CHOIX_CLASSES.filter(l => l.every(k => S.edt.classes[k])).map(l => { const id = idChoix(l), ici = m && l.some(k => coursDe(k, m).length);
+  const menu = `<select id="classe-choix" data-c="choix"><option value="">— sélectionner une classe —</option>${CHOIX_CLASSES.filter(l => l.every(k => S.edt.classes[k])).map(l => { const id = idChoix(l), ici = m && l.some(k => coursDe(k, m).length);
       return `<option value="${id}" ${pris.has(id) ? 'disabled' : ''}>${esc(l.map(k => S.edt.classes[k].court).join(' + '))}${l.length > 1 ? ' (ensemble)' : ''}${ici ? ' · a cours de ' + esc(m) : ''}</option>`; }).join('')}<option value="__autre">Autre…</option></select>`;
   return `${f.groupes.map(htmlGroupe).join('')}
-    <div class="champ" style="margin-top:${f.groupes.length ? '14px' : '0'}"><label for="classe-choix">${f.groupes.length ? '＋ Ajouter une autre classe' : 'Classe'}</label>${menu}
+    <div class="champ ${f.groupes.length ? 'ajout-classe' : ''}"><label for="classe-choix">${f.groupes.length ? '＋ Ajoutez une autre classe (facultatif)' : 'Sélectionnez la classe'}</label>${menu}
       <span class="aide">Les classes qui ont cours ensemble (AGOrA, Vannerie) sont proposées ensemble et séparément.</span></div>
     ${f.choix === '__autre' ? `<div class="champ"><label for="classe-autre">Quelle classe ou quel groupe ?</label><div style="display:flex;gap:8px"><input type="text" id="classe-autre" data-c="classeAutre" maxlength="60" value="${esc(f.classeAutre)}" style="flex:1"><button type="button" class="btn" data-a="ajout-autre">Ajouter</button></div></div>` : ''}`;
 }
 function htmlSemaine(g, avecBouton){
   if (!g.classes.length) return '';
   const l = coursSemaineG(g);
-  if (!l.length) return `<div class="semaine"><span class="leg">Cours de ${esc(matiereF())} dans la semaine</span><p class="aide">Aucun cours de ${esc(matiereF())} dans l’emploi du temps de cette classe : vous choisirez l’heure vous-même.</p></div>`;
+  const note = avecBouton ? '' : '<p class="aide" style="margin:6px 0 0">ℹ️ <b>Créneau proposé, pas imposé.</b> À l’étape 4, vous pourrez choisir un autre jour, une autre heure ou une autre salle.</p>';
+  if (!l.length) return `<div class="semaine"><span class="leg">Cours de ${esc(matiereF())} dans la semaine</span><p class="aide">Aucun cours de ${esc(matiereF())} dans l’emploi du temps de cette classe : vous choisirez l’heure vous-même.</p>${note}</div>`;
   return `<div class="semaine"><span class="leg">🗓 Cours de ${esc(matiereF())} dans la semaine</span><div class="cr">${l.map(c => {
     const p = avecBouton ? prochaine(c, g) : '';
-    return `<span class="creneau"><span><b>${JOURS[c.j]} ${hFr(c.d)}–${hFr(c.f)}</b>${SEM[c.sem] ? ' · ' + SEM[c.sem] : ''}${c.salle && c.salle.length ? ' · ' + esc(c.salle.join(', ')) : ''}</span>${avecBouton && p ? `<button type="button" class="btn pt" data-a="sur-cours" data-v="${esc(g.id)}|${esc(c.id)}|${p}">＋ Le ${esc(dateLongue(p).replace(/^\S+ /, ''))}</button>` : ''}</span>`; }).join('')}</div></div>`;
+    return `<span class="creneau"><span><b>${JOURS[c.j]} ${hFr(c.d)}–${hFr(c.f)}</b>${SEM[c.sem] ? ' · ' + SEM[c.sem] : ''}${c.salle && c.salle.length ? ' · ' + esc(c.salle.join(', ')) : ''}${avecBouton ? '' : '<span class="modifiable">modifiable plus tard</span>'}</span>${avecBouton && p ? `<button type="button" class="btn pt" data-a="sur-cours" data-v="${esc(g.id)}|${esc(c.id)}|${p}">＋ Ajouter le ${esc(dateLongue(p).replace(/^\S+ /, ''))}</button>` : ''}</span>`; }).join('')}</div>${note}</div>`;
 }
 function htmlGroupe(g){
   const cls = g.classes, etats = cls.map(k => S.elevesEtat[k]), c = cls.length ? comptesGroupe(cls) : null, k = idc(g.id);
@@ -438,16 +465,16 @@ function htmlGroupe(g){
       <input type="number" id="nb-${k}" data-g="${esc(g.id)}" min="0" max="12" inputmode="numeric" value="${esc(g.nb)}" aria-label="Nombre d’AESH souhaité pour ${esc(libGroupe(g))}"></div></div>` : '';
   return `<div class="carte"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h3>${esc(libGroupe(g))}${cls.length > 1 ? ' <span class="tag">ensemble</span>' : ''}${pole ? ` <span class="tag" style="background:var(--e3l);color:var(--e3)">pôle ${esc(libPole(pole))}</span>` : ''}</h3><button type="button" class="btn lien" data-a="retirer-groupe" data-v="${esc(g.id)}">✕ Retirer</button></div>
     <div class="champ" style="margin-top:8px;max-width:340px"><label for="dip-${k}">Diplôme</label><input type="text" id="dip-${k}" data-g="${esc(g.id)}" data-gk="diplome" maxlength="60" value="${esc(g.diplome)}"></div>
-    ${corps}${prop}${htmlSemaine(g, false)}</div>`;
+    ${corps}${prop}${majTxt(cls) ? `<p class="aide" style="margin:6px 0 0">Besoins mis à jour par la coordination le ${majTxt(cls)}.</p>` : ''}${htmlSemaine(g, false)}</div>`;
 }
 /* — 3. Épreuve — */
 function corps3(){
   const f = S.f;
-  return `<div class="champ"><span class="leg">Nature</span><div class="puces">${NATURES.map(([k, n]) => `<button type="button" class="puce" id="na-${k}" data-a="nature" data-v="${k}" aria-pressed="${f.nature === k}">${n}</button>`).join('')}</div></div>
-    ${f.nature === 'autre' ? `<div class="champ"><label for="nature-autre">Précisez</label><input type="text" id="nature-autre" data-c="natureAutre" maxlength="80" value="${esc(f.natureAutre)}"></div>` : ''}
-    <div class="champ"><span class="leg">Forme</span><div class="puces">${FORMES.map(([k, n]) => `<button type="button" class="puce" id="fo-${k}" data-a="forme" data-v="${k}" aria-pressed="${f.forme === k}">${n}</button>`).join('')}</div></div>
-    ${f.forme === 'autre' ? `<div class="champ"><label for="forme-autre">Précisez</label><input type="text" id="forme-autre" data-c="formeAutre" maxlength="80" value="${esc(f.formeAutre)}"></div>` : ''}
-    <div class="champ" style="margin-top:6px"><span class="leg">Nom exact de l’épreuve <span class="aide">(règlement d’examen, facultatif — il peut changer d’une classe à l’autre)</span></span></div>
+  return `<div class="champ"><span class="leg">Type d’épreuve <span class="aide">(CCF, bac blanc, évaluation…)</span></span><div class="puces">${NATURES.map(([k, n]) => `<button type="button" class="puce" id="na-${k}" data-a="nature" data-v="${k}" aria-pressed="${f.nature === k}">${n}</button>`).join('')}</div></div>
+    ${f.nature === 'autre' ? `<div class="champ"><label for="nature-autre">Précisez <span class="aide">(facultatif)</span></label><input type="text" id="nature-autre" data-c="natureAutre" maxlength="80" value="${esc(f.natureAutre)}"></div>` : ''}
+    <div class="champ"><span class="leg">Forme <span class="aide">(écrit, oral, pratique — facultatif)</span></span><div class="puces">${FORMES.map(([k, n]) => `<button type="button" class="puce" id="fo-${k}" data-a="forme" data-v="${k}" aria-pressed="${f.forme === k}">${n}</button>`).join('')}</div></div>
+    ${f.forme === 'autre' ? `<div class="champ"><label for="forme-autre">Précisez <span class="aide">(facultatif)</span></label><input type="text" id="forme-autre" data-c="formeAutre" maxlength="80" value="${esc(f.formeAutre)}"></div>` : ''}
+    <div class="champ" style="margin-top:6px"><span class="leg">Nommez l’épreuve <span class="aide">(facultatif — le nom peut changer d’une classe à l’autre)</span></span></div>
     ${f.groupes.map((g, i) => `<div class="champ"><label for="int-${idc(g.id)}">${esc(libGroupe(g))}</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="int-${idc(g.id)}" data-g="${esc(g.id)}" data-gk="intitule" maxlength="120" value="${esc(g.intitule)}" style="flex:1;min-width:220px">${i === 0 && f.groupes.length > 1 ? '<button type="button" class="btn pt" data-a="int-tous">Même nom pour toutes les classes</button>' : ''}</div></div>`).join('')}`;
 }
 /* — 4. Séances — */
@@ -455,7 +482,7 @@ function corps4(){
   const f = S.f;
   return f.groupes.map(g => `<div class="groupe4"><h3>${esc(libGroupe(g))}</h3>${htmlSemaine(g, true)}
       ${f.seances.filter(s => s.classe === g.id).map(htmlSeance).join('')}
-      <button type="button" class="btn" style="margin-top:8px" id="aj-${idc(g.id)}" data-a="ajout" data-v="${esc(g.id)}">＋ Une séance à une autre date</button></div>`).join('')
+      <button type="button" class="btn" style="margin-top:8px" id="aj-${idc(g.id)}" data-a="ajout" data-v="${esc(g.id)}">＋ Ajouter une séance à une autre date</button></div>`).join('')
     + '<p class="aide">Autant de séances que nécessaire : plusieurs dans la semaine, ou sur plusieurs semaines.</p>';
 }
 function htmlSeance(s){
@@ -466,17 +493,25 @@ function htmlSeance(s){
   if (s.date && cs.length === 1) auto = `<div class="auto">🕘 Ce jour-là, cours de ${esc(cs[0].lib)} de <b>${hFr(cs[0].d)} à ${hFr(cs[0].f)}</b>${cs[0].salle && cs[0].salle.length ? ' en ' + esc(cs[0].salle.join(', ')) : ''}${s.heureManuelle ? ` <button type="button" class="btn lien" data-a="cours" data-v="${s.uid}|0">Reprendre ce créneau</button>` : ' : créneau repris.'}</div>`;
   else if (s.date && cs.length > 1) auto = `<div class="auto">🕘 Ce jour-là, ${cs.length} cours de ${esc(cs[0].lib)} : ${cs.map((x, j) => `<button type="button" class="btn pt ${!s.heureManuelle && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="cours" data-v="${s.uid}|${j}">${hFr(x.d)}–${hFr(x.f)}</button>`).join(' ')}</div>`;
   else if (s.date && matiereF() && g && g.classes.length) auto = `<div class="auto">Pas de cours de ${esc(matiereF())} ce jour-là : indiquez l’heure.</div>`;
-  return `<div class="seance"><div class="seance-t"><b>Séance ${i + 1}${s.date ? ' · ' + esc(dateLongue(s.date)) : ''}</b><button type="button" class="btn lien" style="--c:var(--err-ink)" id="${id('x')}" data-a="retirer" data-v="${s.uid}">✕ Retirer</button></div>
+  const err = S.erreurs.length ? controleSeance(s) : [], ouvert = s.ouvert || err.length, k = numero(s), n = S.f.seances.filter(x => x.classe === s.classe).length;
+  const tete = `<div class="seance-t"><span class="num-ep" aria-hidden="true">${k}</span><div style="flex:1;min-width:0"><b>Épreuve n°${k}${n > 1 ? ' sur ' + n : ''} · ${esc(nomEpreuve(g))}</b>
+      <div class="seance-r">${s.date ? `<b>${esc(dateLongue(s.date))}</b>` : '<span class="manque">date à choisir</span>'}${RE_HEURE.test(s.debut) ? ` · ${hFr(s.debut)}–${hFr(fin)}` : ''}${dur ? ` · ${libDuree(dur)}${s.tiers ? ' + tiers temps' : ''}` : ''}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh || 0)} AESH</b></div>
+      ${s.propose && !ouvert ? '<div class="aide">Date proposée d’après votre prochain cours. Vous préférez un autre jour ? Cliquez « Modifier cette date ».</div>' : ''}</div>
+    <div class="seance-b">${ouvert ? (err.length ? '' : `<button type="button" class="btn pt ok" style="--c:var(--e4)" data-a="replier" data-v="${s.uid}">✓ Valider cette date</button>`) : `<button type="button" class="btn pt mod" style="--c:var(--e4)" id="${id('m')}" data-a="deplier" data-v="${s.uid}">✎ Modifier cette date</button>`}<button type="button" class="btn lien" style="--c:var(--err-ink)" id="${id('x')}" data-a="retirer" data-v="${s.uid}">✕ Retirer</button></div></div>
+    ${err.length ? `<div class="erreurs" style="margin:8px 0">À compléter : ${err.map(esc).join(' ')}</div>` : ''}`;
+  if (!ouvert) return `<div class="seance ferme">${tete}${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}</div>`;
+  return `<div class="seance ${err.length ? 'en-erreur' : ''}">${tete}
     <div class="grille">
-      <div class="champ large"><label for="${id('date')}">Date</label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
-      <div class="champ"><label for="${id('debut')}">Début</label><input type="time" id="${id('debut')}" data-s="${s.uid}" data-k="debut" value="${esc(s.debut)}" step="300"></div>
-      <div class="champ"><label for="${id('duree')}">Durée de l’épreuve</label><select id="${id('duree')}" data-s="${s.uid}" data-k="duree">${durees.map(d => `<option value="${d}" ${dur === d ? 'selected' : ''}>${libDuree(d)}</option>`).join('')}</select></div>
-      <div class="champ"><label for="${id('fin')}">Fin</label><input type="time" id="${id('fin')}" data-s="${s.uid}" data-k="fin" value="${esc(fin)}" step="300"></div>
-      <div class="champ"><label for="${id('salle')}">Salle <span class="aide">(facultatif)</span></label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
-      <div class="champ large"><label for="${id('nb')}">Nombre d’AESH</label><input type="number" id="${id('nb')}" data-s="${s.uid}" data-k="nbAesh" min="0" max="12" value="${esc(s.nbAesh)}" inputmode="numeric"><span class="aide">Proposition : ${c.total ? c.propose : '—'}</span></div>
+      <div class="champ large"><label for="${id('date')}">Date <span class="mo">✎ modifiable</span></label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
+      <div class="champ"><label for="${id('debut')}">Début <span class="mo">✎</span></label><input type="time" id="${id('debut')}" data-s="${s.uid}" data-k="debut" value="${esc(s.debut)}" step="300"></div>
+      <div class="champ"><label for="${id('duree')}">Durée en minutes <span class="mo">✎</span></label><input type="number" id="${id('duree')}" data-s="${s.uid}" data-k="duree" min="5" max="600" step="5" inputmode="numeric" value="${esc(s.duree)}"><span class="aide">${dur ? '= ' + libDuree(dur) : ''}</span></div>
+      <div class="champ"><label for="${id('fin')}">Fin <span class="mo">✎</span></label><input type="time" id="${id('fin')}" data-s="${s.uid}" data-k="fin" value="${esc(fin)}" step="300"></div>
+      <div class="champ"><label for="${id('salle')}">Salle <span class="mo">✎</span></label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
+      <div class="champ large"><label for="${id('nb')}">Nombre d’AESH <span class="mo">✎</span></label><input type="number" id="${id('nb')}" data-s="${s.uid}" data-k="nbAesh" min="0" max="12" value="${esc(s.nbAesh)}" inputmode="numeric"><span class="aide">Proposition : ${c.total ? c.propose : '—'}</span></div>
     </div>
     ${auto}
-    <div class="tiers"><button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>
+    <div class="tiers"><span class="aide">Durée rapide :</span>${[60, 90, 120, 180, 240].map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button></div>
+    <div class="tiers">
       <label><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> Tiers temps : +${tiersDe(dur)} min${c.amen && c.amen.tiers ? ` <span class="aide">(${pluriel(c.amen.tiers, 'élève concerné', 'élèves concernés')})</span>` : ''}</label></div>
     ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}
     ${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}</div>`;
@@ -532,10 +567,13 @@ vue.addEventListener('click', ev => {
   else if (a === 'nature') f.nature = v;
   else if (a === 'forme') f.forme = v;
   else if (a === 'int-tous'){ const t = f.groupes[0] && f.groupes[0].intitule; f.groupes.forEach(g => { g.intitule = t || ''; }); }
-  else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } f.seances.push(s); rendre(); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); return; }
+  else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } s.ouvert = true; f.seances.push(s); rendre(); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); return; }
   else if (a === 'sur-cours'){ const [gid, cid, date] = v.split('|'), c = S.edt.cours[cid] || Object.values(S.edt.cours).find(x => x.id === cid), s = nouvelleSeance(gid); s.date = date; if (c) poserCours(s, c); f.seances.push(s); }
+  else if (a === 'deplier'){ const s = seance(v); if (s) s.ouvert = true; }
+  else if (a === 'replier'){ const s = seance(v); if (s){ s.ouvert = false; s.propose = false; } }
   else if (a === 'retirer') f.seances = f.seances.filter(s => s.uid !== +v);
   else if (a === 'cours'){ const [u, j] = v.split('|'), s = seance(u), c = s && coursDuJourG(groupe(s.classe), s.date)[+j]; if (c) poserCours(s, c); }
+  else if (a === 'duree'){ const [u, d] = v.split('|'), s = seance(u); if (s){ s.duree = +d; s.finManuelle = false; } }
   else if (a === 'plus30'){ const s = seance(v); if (s){ s.duree = (Number(s.duree) || 0) + 30; s.finManuelle = false; } }
   else if (a === 'fin-auto'){ const s = seance(v); if (s) s.finManuelle = false; }
   else if (a === 'envoyer'){ envoyer(); return; }

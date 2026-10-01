@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1e1b4b">
+<title>Renfort AESH — épreuve</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Renfort AESH pour une épreuve — page en ligne, AESH (01/10/2026)
+   La coordination envoie le lien (…/renforts-aesh/?d=epreuve_xxx) ; l'AESH donne
+   SON PRÉNOM et dit, séance par séance : disponible / sous réserve / pas disponible.
+   Lit   : coordination_demandes_aesh / epreuve_<id> (matière, classes, séances — aucun élève).
+   Écrit : coordination_demandes_aesh / reponse_<id> (création seule).
+   AUCUN NOM D'ÉLÈVE, aucun nom de famille d'AESH.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{--bg:#f3f4f9;--ink:#111827;--muted:#4b5563;--line:#c9d1da;--line-2:#e5e7ef;--focus:#1d4ed8;
+  --ok:#15803d;--okl:#e7f6ec;--res:#b45309;--resl:#fff4d6;--non:#b91c1c;--nonl:#fdecec;--r:18px;--sh:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(30,27,75,.07);color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+button,input,textarea{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.bandeau{background:linear-gradient(120deg,#1e1b4b,#312e81 55%,#0f766e);color:#fff;padding:18px 16px 30px}
+.bandeau .in{max-width:760px;margin:0 auto}.bandeau h1{margin:0;font-size:1.6rem}.bandeau p{margin:6px 0 0;opacity:.92}
+main{max-width:760px;margin:-16px auto 0;padding:0 16px 60px;display:flex;flex-direction:column;gap:14px}
+.carte{background:#fff;border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--line-2);padding:16px 18px}
+.carte h2{margin:0 0 8px;font-size:1.15rem}
+.aide{color:var(--muted);font-size:.9rem}
+.champ{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.champ label{font-weight:700}
+input[type=text],textarea{border:1.5px solid var(--line);border-radius:11px;padding:10px 12px;min-height:46px;width:100%;background:#fff}
+textarea{min-height:80px;resize:vertical}
+.seance{border:1.5px solid var(--line-2);border-radius:14px;padding:12px 14px;margin-top:10px}
+.seance .t{font-weight:800;font-size:1.05rem}.seance .s{color:var(--muted);font-size:.93rem;margin-top:2px}
+.choix{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.choix button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;font-weight:700;min-height:44px}
+.choix button[aria-pressed=true][data-v=oui]{background:var(--ok);border-color:var(--ok);color:#fff}
+.choix button[aria-pressed=true][data-v=reserve]{background:var(--res);border-color:var(--res);color:#fff}
+.choix button[aria-pressed=true][data-v=non]{background:var(--non);border-color:var(--non);color:#fff}
+.interdit{background:#fde8e8;color:#991b1b;border:2px solid #dc2626;border-radius:12px;padding:9px 12px;font-weight:700;margin-bottom:6px}
+.envoi{background:linear-gradient(120deg,#15803d,#0f766e);color:#fff;border:0;border-radius:14px;padding:14px 22px;font-size:1.05rem;font-weight:800;min-height:52px}
+.envoi:disabled{opacity:.6}
+.msg{border-radius:11px;padding:10px 14px}.msg.ok{background:var(--okl);color:#14532d;border:1px solid var(--ok)}.msg.err{background:var(--nonl);color:#8f1d1d;border:1px solid var(--non)}
+.erreurs{background:var(--nonl);color:#8f1d1d;border:1px solid var(--non);border-radius:11px;padding:10px 14px}.erreurs ul{margin:4px 0 0;padding-left:18px}
+.pill{display:inline-block;border-radius:99px;padding:2px 10px;font-size:.8rem;font-weight:750;background:#eef2ff;color:#312e81;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="bandeau"><div class="in"><h1>Renfort AESH pour une épreuve</h1><p>Indiquez votre prénom et, pour chaque séance, si vous êtes disponible. La coordination vous confirme ensuite qui vient.</p></div></div>
+<main id="vue" tabindex="-1"><p>Chargement…</p></main>
+<script type="module">
+const firebaseConfig = { apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain:"coordination-pedagogie.firebaseapp.com",
+  projectId:"coordination-pedagogie", storageBucket:"coordination-pedagogie.firebasestorage.app", messagingSenderId:"526058585010", appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab" };
+const COL = 'coordination_demandes_aesh', SOURCE = 'renforts-aesh', DELAI = 15000, K_PRENOM = 'renforts-aesh-prenom';
+let FS = null, db = null, erreurFS = null;
+try {
+  FS = window.__FIRESTORE_SHIM__ || await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+  let app = null;
+  if (!window.__FIRESTORE_SHIM__) { const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js'); app = initializeApp(firebaseConfig, 'renforts-aesh'); }
+  db = FS.getFirestore(app);
+} catch (e) { erreurFS = e; }
+
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nettoie = (v, max) => String(v ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max);
+const hFr = h => /^\d\d:\d\d$/.test(h || '') ? `${parseInt(h, 10)}h${h.slice(3) === '00' ? '' : h.slice(3)}` : '';
+const dateLongue = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+const avecDelai = (p, ms) => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('délai'), { code: 'delai' })), ms); })]).finally(() => clearTimeout(t)); };
+const nouvelId = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = crypto.getRandomValues(new Uint8Array(8)); return 'reponse_' + Date.now().toString(36) + [...r].map(x => a[x % 36]).join(''); };
+const NATURES = { ccf: 'CCF', ccfblanc: 'CCF blanc', bacblanc: 'Bac blanc', evaluation: 'Évaluation', sortie: 'Sortie' };
+const LIB = { oui: '✓ Disponible', reserve: '≈ Sous réserve', non: '✕ Pas disponible' };
+/* Le prénom seul : lettres, espace, tiret, apostrophe. */
+const RE_PRENOM = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ' -]{1,29}$/;
+
+const ID = new URLSearchParams(location.search).get('d') || '';
+const S = { etat: 'chargement', d: null, prenom: '', rep: {}, commentaire: '', erreurs: [], envoi: '', envoye: null };
+try { S.prenom = localStorage.getItem(K_PRENOM) || ''; } catch (_) { }
+
+async function charger(){
+  if (erreurFS){ S.etat = 'Pas de connexion au serveur. Rechargez la page.'; return rendre(); }
+  if (!/^epreuve_[a-z0-9]{8,24}$/.test(ID)){ S.etat = 'Lien incomplet : demandez le lien à la coordination.'; return rendre(); }
+  try {
+    const snap = await avecDelai(FS.getDoc(FS.doc(db, COL, ID)), DELAI);
+    if (!snap.exists()){ S.etat = 'Cette demande n’existe plus. Demandez le lien à la coordination.'; return rendre(); }
+    S.d = snap.data(); S.etat = 'ok';
+  } catch (e) { S.etat = 'Lecture impossible : vérifiez la connexion, puis rechargez la page.'; }
+  rendre();
+}
+const seances = () => (S.d && Array.isArray(S.d.seances) ? S.d.seances : []);
+function rendre(){
+  const v = $('#vue'), a = document.activeElement, id = a && a.id;
+  if (S.etat !== 'ok'){ v.innerHTML = S.etat === 'chargement' ? '<p>Chargement…</p>' : `<div class="msg err">${esc(S.etat)}</div>`; return; }
+  if (S.envoye){ v.innerHTML = `<div class="msg ok" role="status" id="ok" tabindex="-1"><h2 style="margin:0 0 4px">✓ Merci ${esc(S.envoye.prenom)}</h2><p>Votre réponse est arrivée à la coordination : ${S.envoye.seances.map(s => `${esc(dateLongue(s.date))} ${hFr(s.debut)} — ${LIB[s.dispo]}`).join(' ; ')}.</p><p>Vous serez prévenu(e) si vous êtes retenu(e).</p></div><p><button class="envoi" style="background:#fff;color:#1e1b4b;border:1.5px solid #c9d1da" data-a="encore">Modifier ma réponse</button></p>`; return; }
+  const d = S.d, nat = NATURES[d.nature] || d.natureAutre || 'Épreuve';
+  v.innerHTML = `<section class="carte"><h2>${esc(nat)} · ${esc(d.matiere || '')}</h2>
+      <p style="margin:0">${(d.classes || []).map(c => `<span class="pill">${esc(c.libelle || c.classe)}</span>${c.intitule ? `<span class="aide">« ${esc(c.intitule)} »</span> ` : ''}`).join(' ')}</p></section>
+    ${S.erreurs.length ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>À compléter</b><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+    <section class="carte"><h2>1. Votre prénom</h2>
+      <div class="champ"><label for="prenom">Prénom</label><input type="text" id="prenom" data-c="prenom" maxlength="30" autocomplete="given-name" value="${esc(S.prenom)}"><span class="aide">Le prénom seul, sans nom de famille.</span></div></section>
+    <section class="carte"><h2>2. Vos disponibilités</h2><p class="aide" style="margin:0">Pour chaque séance, choisissez une réponse.</p>
+      ${seances().map((s, i) => `<div class="seance"><div class="t">${esc(dateLongue(s.date))} · ${hFr(s.debut)}–${hFr(s.fin)}</div>
+        <div class="s">${esc(s.libelle || s.classe)}${s.intitule ? ' · ' + esc(s.intitule) : ''}${s.salle ? ' · salle ' + esc(s.salle) : ''}${s.tiersTemps ? ' · tiers temps compris' : ''} · ${esc(s.nbAesh)} AESH demandé${+s.nbAesh > 1 ? 's' : ''}</div>
+        <div class="choix" role="group" aria-label="Disponibilité pour le ${esc(dateLongue(s.date))}">${Object.entries(LIB).map(([k, l]) => `<button type="button" id="r${i}-${k}" data-a="dispo" data-i="${i}" data-v="${k}" aria-pressed="${S.rep[i] === k}">${l}</button>`).join('')}</div></div>`).join('')}</section>
+    <section class="carte"><h2>3. Un mot pour la coordination <span class="aide" style="font-weight:400">(facultatif)</span></h2>
+      <div class="interdit">⛔ Aucun nom ni prénom d’élève.</div>
+      <div class="champ"><label for="commentaire">Commentaire</label><textarea id="commentaire" data-c="commentaire" maxlength="300">${esc(S.commentaire)}</textarea><span class="aide">Par exemple : « disponible seulement jusqu’à 10h ».</span></div></section>
+    <div><button type="button" class="envoi" id="envoyer" data-a="envoyer" ${S.envoi === 'encours' ? 'disabled' : ''}>📨 Envoyer ma réponse à la coordination</button></div>
+    ${S.envoi && S.envoi !== 'encours' ? `<div class="msg err" role="alert">${esc(S.envoi)}</div>` : ''}`;
+  if (id){ const el = document.getElementById(id); if (el) el.focus({ preventScroll: true }); }
+}
+function controle(){
+  const e = [];
+  if (!RE_PRENOM.test(nettoie(S.prenom, 30))) e.push('Écrivez votre prénom (lettres seulement).');
+  seances().forEach((s, i) => { if (!S.rep[i]) e.push(`Répondez pour le ${dateLongue(s.date)} à ${hFr(s.debut)}.`); });
+  return e;
+}
+async function envoyer(){
+  S.erreurs = controle(); if (S.erreurs.length){ rendre(); $('#erreurs')?.focus(); return; }
+  const now = new Date().toISOString(), prenom = nettoie(S.prenom, 30), id = nouvelId();
+  const doc = { id, type: 'reponse', annee: String(S.d.annee || ''), epreuve: ID, prenom,
+    seances: seances().map((s, i) => ({ n: i, date: s.date, debut: s.debut, fin: s.fin, classe: s.classe, dispo: S.rep[i] })),
+    commentaire: nettoie(S.commentaire, 300), creeLe: now, source: SOURCE };
+  S.envoi = 'encours'; rendre();
+  try {
+    await avecDelai(FS.setDoc(FS.doc(db, COL, id), doc), DELAI);
+    try { localStorage.setItem(K_PRENOM, prenom); } catch (_) { }
+    S.envoye = doc; S.envoi = ''; rendre(); $('#ok')?.focus();
+  } catch (e) {
+    const t = `${e?.code || ''} ${e?.message || ''}`;
+    S.envoi = /permission|insufficient/i.test(t) ? 'Envoi pas encore autorisé : prévenez la coordination.' : 'Pas de connexion au serveur : réessayez dans un instant.';
+    rendre();
+  }
+}
+const vue = $('#vue');
+vue.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-a]'); if (!b) return;
+  if (b.dataset.a === 'dispo'){ S.rep[+b.dataset.i] = b.dataset.v; if (S.erreurs.length) S.erreurs = controle(); rendre(); }
+  else if (b.dataset.a === 'envoyer') envoyer();
+  else if (b.dataset.a === 'encore'){ S.envoye = null; rendre(); }
+});
+vue.addEventListener('input', ev => { const c = ev.target.dataset.c; if (c) S[c] = ev.target.value; });
+charger();
+</script>
+</body>
+</html>
