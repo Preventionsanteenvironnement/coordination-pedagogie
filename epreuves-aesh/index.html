@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" content="#1e1b4b">
 <title>Besoin AESH pour une épreuve</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
    Besoin AESH pour une épreuve — page en ligne, enseignants (01/10/2026)
+   Parcours guidé en 6 étapes : chacune se valide (✓) ou s'annule (✕),
+   et se rouvre à tout moment (✎ Modifier).
    Reprend la fiche du lycée « Organisation des CCF — informations et demande
    d'aide humaine » (bureau DDF + coordination PIAL).
 
@@ -23,75 +25,110 @@
    aménagement : ils viennent de la base de la coordination.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
-  --bg:#f4f6f8;--card:#fff;--card-2:#f8fafb;--ink:#111827;--ink-2:#374151;--muted:#4b5563;
-  --line:#c9d1da;--line-2:#e3e8ee;--accent:#0f766e;--accent-d:#0b5f59;--accent-l:#e3f3ef;
-  --focus:#1d4ed8;--warn-bg:#fff4d6;--warn-ink:#6b3b00;--warn-line:#b45309;
-  --err-bg:#fdecec;--err-ink:#8f1d1d;--err-line:#b91c1c;--ok-bg:#e5f4ea;--ok-ink:#14532d;--ok-line:#15803d;
-  --info-bg:#e8f0fe;--info-ink:#1e3a8a;--r:14px;--r-s:10px;--sh:0 1px 2px rgba(16,24,40,.06),0 2px 8px rgba(16,24,40,.05);
-  color-scheme:light}
+  --bg:#f3f4f9;--card:#fff;--ink:#111827;--ink-2:#374151;--muted:#4b5563;--line:#c9d1da;--line-2:#e5e7ef;
+  --focus:#1d4ed8;--err-bg:#fdecec;--err-ink:#8f1d1d;--err-line:#b91c1c;--ok-bg:#e5f4ea;--ok-ink:#14532d;--ok-line:#15803d;
+  --warn-bg:#fff4d6;--warn-ink:#6b3b00;--warn-line:#b45309;--info-bg:#eef2ff;--info-ink:#312e81;
+  --e1:#6d28d9;--e1l:#f3edff;--e2:#1d4ed8;--e2l:#eaf1ff;--e3:#0f766e;--e3l:#e3f5f2;--e4:#c2410c;--e4l:#fff1e8;--e5:#be185d;--e5l:#fdecf4;--e6:#15803d;--e6l:#e7f6ec;
+  --r:18px;--r-s:11px;--sh:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(30,27,75,.07);color-scheme:light}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:1rem;line-height:1.5}
-h1,h2,h3{margin:0;line-height:1.25}h1{font-size:1.6rem;font-weight:800}h2{font-size:1.2rem;font-weight:750}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-[hidden]{display:none!important}
-.haut{background:var(--accent);color:#fff;padding:12px 16px}
+h1,h2,h3{margin:0;line-height:1.25}h1{font-size:1.7rem;font-weight:850;letter-spacing:-.01em}h2{font-size:1.15rem;font-weight:780}h3{font-size:1.02rem}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}[hidden]{display:none!important}
+.haut{background:linear-gradient(120deg,#1e1b4b,#312e81 55%,#0f766e);color:#fff;padding:12px 16px}
 .haut a{color:#fff;font-weight:700;text-decoration:none}
-main{max-width:860px;margin:0 auto;padding:18px 16px 60px;display:flex;flex-direction:column;gap:16px}
-.intro p{color:var(--muted);margin:6px 0 0}
-.rgpd{background:var(--info-bg);color:var(--info-ink);border-radius:var(--r-s);padding:9px 12px;font-size:.92rem}
-.bloc{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh)}
-.bloc h2{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.num{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:.95rem;flex:none}
+.bandeau{background:linear-gradient(120deg,#1e1b4b,#312e81 55%,#0f766e);color:#fff;padding:6px 16px 26px}
+.bandeau .in{max-width:900px;margin:0 auto}.bandeau p{margin:8px 0 0;opacity:.92;max-width:720px}
+main{max-width:900px;margin:-14px auto 0;padding:0 16px 70px;display:flex;flex-direction:column;gap:14px}
+.rgpd{background:#fff;border:1px solid var(--line-2);border-radius:var(--r-s);padding:9px 13px;font-size:.93rem;box-shadow:var(--sh)}
+/* barre de progression */
+.prog{background:#fff;border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh);position:sticky;top:0;z-index:5}
+.prog-t{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--muted);margin-bottom:8px;flex-wrap:wrap}.prog-t b{color:var(--ink)}
+.segs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.seg{border:0;background:none;padding:0;text-align:left;font-size:.78rem;color:var(--muted);min-width:0}
+.seg i{display:block;height:8px;border-radius:99px;background:var(--line-2);margin-bottom:4px;transition:background .3s}
+.seg span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg.fait i{background:var(--c)}.seg.cour i{background:linear-gradient(90deg,var(--c) 50%,var(--line-2) 50%)}.seg.cour span{color:var(--ink);font-weight:750}
+@media (max-width:560px){.seg span{display:none}}
+/* étapes */
+.etape{scroll-margin-top:130px;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--line-2);overflow:hidden;border-top:5px solid var(--c)}
+.etape.avenir{opacity:.6;border-top-color:var(--line)}
+.et-t{display:flex;align-items:center;gap:12px;padding:14px 18px}
+.rond{width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.avenir .rond{background:var(--line)}
+.et-t h2{flex:1}
+.pastille{font-size:.78rem;font-weight:750;border-radius:99px;padding:3px 10px;white-space:nowrap}
+.p-ok{background:var(--ok-bg);color:var(--ok-ink)}.p-cour{background:var(--cl);color:var(--c)}.p-av{background:var(--line-2);color:var(--muted)}
+.et-c{padding:0 18px 16px}
+.guide{background:var(--cl);color:var(--ink);border-left:4px solid var(--c);border-radius:8px;padding:9px 12px;margin:0 0 12px;font-weight:600}
+.resume{padding:0 18px 14px;color:var(--ink-2);display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.resume .txt{flex:1;min-width:220px}
+.pied{display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line-2);padding:12px 18px;background:#fafbfd}
+.btn{border:1.5px solid var(--line);background:#fff;border-radius:var(--r-s);padding:9px 16px;font-weight:700;min-height:44px}
+.btn.ok{background:var(--c,var(--ok-line));border-color:var(--c,var(--ok-line));color:#fff}
+.btn.non{color:var(--err-ink);border-color:#e7b4b4}
+.btn.mod{color:var(--c);border-color:var(--c);background:#fff;min-height:38px;padding:6px 12px}
+.btn.lien{border:0;background:none;color:var(--c,#1d4ed8);text-decoration:underline;padding:4px;min-height:0}
+.btn.pt{min-height:36px;padding:5px 11px;font-size:.92rem}
+.btn:disabled{opacity:.55;cursor:not-allowed}
 .champ{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.champ>label,.leg{font-weight:650;font-size:.95rem}
+.champ>label,.leg{font-weight:680;font-size:.95rem}
 .aide{color:var(--muted);font-size:.88rem}
-input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{border:1.5px solid var(--line);border-radius:var(--r-s);padding:9px 11px;background:#fff;min-height:44px}
-textarea{min-height:70px;resize:vertical}
+input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{border:1.5px solid var(--line);border-radius:var(--r-s);padding:9px 11px;background:#fff;min-height:44px;width:100%}
+textarea{min-height:90px;resize:vertical}
 .puces{display:flex;flex-wrap:wrap;gap:6px}
-.puce{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;min-height:40px}
-.puce[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
-.puce .ici{font-size:.78rem;opacity:.85;margin-left:4px}
-.pole{margin:10px 0 4px;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
-.classe-carte{border:1.5px solid var(--accent);border-radius:var(--r-s);padding:12px 14px;margin-top:10px;background:var(--card-2)}
-.classe-carte h3{font-size:1.05rem;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
-.classe-carte h3 small{font-weight:500;color:var(--muted)}
-.nbs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.nb{background:#fff;border:1px solid var(--line-2);border-radius:8px;padding:4px 10px;font-size:.9rem}
-.nb b{font-size:1.05rem}
-.prop{display:block;background:var(--ok-bg);color:var(--ok-ink);border-radius:var(--r-s);padding:8px 12px;font-weight:650}
-.prop b{font-size:1.3rem}
+.puce{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;min-height:40px}
+.puce[aria-pressed=true]{background:var(--c);border-color:var(--c);color:#fff;font-weight:750}
+.carte{border:1.5px solid var(--line-2);border-radius:14px;padding:13px 15px;margin-top:10px;background:#fff}
+.carte h3{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:.75rem;font-weight:750;border-radius:99px;padding:2px 9px;background:var(--e2l);color:var(--e2)}
+.nbs{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.nb{border-radius:12px;padding:7px 12px;font-size:.88rem;line-height:1.25;min-width:118px}
+.nb b{display:block;font-size:1.35rem}
+.nb-off{background:#e7f6ec;color:#14532d}.nb-enc{background:#fff4d6;color:#6b3b00}.nb-sans{background:#eef2f7;color:#334155}.nb-ulis{background:#eaf1ff;color:#1e3a8a}
+.lig{margin:6px 0;font-size:.94rem}
+.prop{background:linear-gradient(120deg,#e7f6ec,#eaf8f5);border:1.5px solid #9fd8b4;border-radius:14px;padding:11px 14px;margin-top:10px}
+.prop .gros{font-size:1.08rem;font-weight:750;color:#14532d}.prop .gros b{font-size:1.6rem}
+.prop .q{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.prop input{width:90px;min-height:38px}
 .vide{background:var(--warn-bg);color:var(--warn-ink);border-radius:var(--r-s);padding:8px 12px;font-size:.92rem}
-.seance{border:1px solid var(--line);border-radius:var(--r-s);padding:12px;margin-bottom:10px;background:#fff}
+.semaine{margin-top:10px}.semaine .leg{display:block;margin-bottom:4px}
+.cr{display:flex;flex-wrap:wrap;gap:8px}
+.creneau{border:1.5px solid var(--e4);background:var(--e4l);color:#7c2d12;border-radius:12px;padding:7px 12px;font-size:.9rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.creneau b{color:#431407}
+.groupe4{border:1.5px solid var(--line-2);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+.groupe4>h3{margin-bottom:8px}
+.seance{border:1.5px solid #f2c9ad;border-radius:14px;padding:12px;margin:10px 0;background:#fffaf6}
 .seance-t{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
 .grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
 .grille .large{grid-column:span 2}
-@media (max-width:640px){.grille{grid-template-columns:1fr 1fr}.grille .large{grid-column:span 2}}
-.suggest{background:var(--accent-l);border-radius:8px;padding:6px 10px;font-size:.9rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
-.tiers{display:flex;align-items:center;gap:8px;font-size:.92rem;margin-top:6px}
+@media (max-width:640px){.grille{grid-template-columns:1fr 1fr}}
+.auto{background:var(--e4l);border-radius:10px;padding:7px 11px;font-size:.92rem;margin-top:6px}
+.tiers{display:flex;align-items:center;gap:8px;font-size:.93rem;margin-top:8px;flex-wrap:wrap}
 .tiers input{width:20px;height:20px}
 .alerte{background:var(--warn-bg);color:var(--warn-ink);border-left:4px solid var(--warn-line);border-radius:6px;padding:6px 10px;font-size:.9rem;margin-top:6px}
-.btn{border:1.5px solid var(--line);background:#fff;border-radius:var(--r-s);padding:9px 16px;font-weight:650;min-height:44px}
-.btn.prim{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.lien{border:0;background:none;color:var(--accent-d);text-decoration:underline;padding:4px;min-height:0}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-.recap dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:0}
-.recap dt{font-weight:700;color:var(--ink-2)}.recap dd{margin:0}
-.recap ul{margin:4px 0 0;padding-left:20px}
+.interdit{background:#fde8e8;color:#991b1b;border:2px solid #dc2626;border-radius:12px;padding:10px 13px;font-weight:750;margin:2px 0 10px}
+.interdit span{display:block;font-weight:500;color:#7f1d1d;margin-top:2px}
+.erreurs{background:var(--err-bg);color:var(--err-ink);border:1px solid var(--err-line);border-radius:var(--r-s);padding:10px 14px;margin-bottom:12px}
+.erreurs ul{margin:4px 0 0;padding-left:18px}
+.recap{display:flex;flex-direction:column;gap:10px}
+.rbloc{border:1.5px solid var(--line-2);border-radius:14px;padding:11px 14px;border-left:6px solid var(--c)}
+.rbloc .rt{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px}
+.rbloc .rt b{color:var(--c)}
+.rbloc ul{margin:4px 0 0;padding-left:20px}.rbloc li{margin:2px 0}
+.dest{background:var(--info-bg);color:var(--info-ink);border-radius:12px;padding:10px 13px;font-size:.95rem}
+.envoi{background:linear-gradient(120deg,#15803d,#0f766e);color:#fff;border:0;border-radius:14px;padding:14px 22px;font-size:1.08rem;font-weight:800;min-height:54px;box-shadow:0 6px 18px rgba(21,128,61,.3)}
+.envoi:disabled{opacity:.6}
 .msg{border-radius:var(--r-s);padding:10px 14px}
 .msg.ok{background:var(--ok-bg);color:var(--ok-ink);border:1px solid var(--ok-line)}
 .msg.err{background:var(--err-bg);color:var(--err-ink);border:1px solid var(--err-line)}
-.msg.info{background:var(--info-bg);color:var(--info-ink)}
-.erreurs{background:var(--err-bg);color:var(--err-ink);border-radius:var(--r-s);padding:10px 14px}
-.erreurs ul{margin:4px 0 0;padding-left:18px}
-.envoi{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.stat{margin:8px 0;padding-left:20px}.stat li{margin:2px 0}
-.lig{margin:6px 0;font-size:.95rem}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="haut"><a href="../">← Coordination pédagogie</a></div>
+<div class="bandeau"><div class="in"><h1 id="titre">Besoin AESH pour une épreuve</h1>
+  <p>CCF, CCF blanc, bac blanc, évaluation, sortie… Six étapes courtes : chacune se valide, se corrige ou s’annule. La coordination et le référent du pôle reçoivent votre demande.</p></div></div>
 <main id="vue" tabindex="-1"><p>Chargement…</p></main>
 <script type="module">
 import { creerCalendrier, lundiDe, ajoute, jourSemaine } from '../referents-aesh/calculs.js?v=2026-09-28d';
@@ -149,12 +186,21 @@ function diplomeDe(k){
 }
 
 /* ═══════════════ état ═══════════════ */
+const ETAPES = [
+  { n: 1, t: 'La matière', c: '--e1', g: 'Choisissez la matière de l’épreuve, puis validez.' },
+  { n: 2, t: 'La ou les classes', c: '--e2', g: 'Choisissez la classe. Vous voyez aussitôt ses besoins (des nombres, jamais des noms) et ses cours de la semaine.' },
+  { n: 3, t: 'L’épreuve', c: '--e3', g: 'Indiquez la nature et la forme. Le nom de l’épreuve peut être différent pour chaque classe.' },
+  { n: 4, t: 'Les séances', c: '--e4', g: 'Choisissez la date de chaque séance : le créneau du cours s’affiche tout seul. Ajustez ensuite l’heure, la durée, +30 min ou le tiers temps.' },
+  { n: 5, t: 'Observations', c: '--e5', g: 'Facultatif : salles, organisation, autre demande. Jamais de nom d’élève.' },
+  { n: 6, t: 'Récapitulatif et envoi', c: '--e6', g: 'Relisez. Chaque partie peut encore être modifiée. Puis envoyez.' }
+];
 const S = {
   edt: null, C: null, eleves: {}, elevesEtat: {}, chargement: true, erreur: '',
-  f: { matiere: '', matiereAutre: '', groupes: [], choix: '', classeAutre: '', classes: [], diplomes: {}, nature: '', natureAutre: '', forme: '', formeAutre: '', intitule: '', seances: [], observations: '', autreDemande: '' },
-  erreurs: [], envoi: null, envoye: null
+  f: { matiere: '', matiereAutre: '', groupes: [], choix: '', classeAutre: '', nature: '', natureAutre: '', forme: '', formeAutre: '', seances: [], observations: '', autreDemande: '' },
+  etape: 1, ok: {}, snap: null, erreurs: [], nomConfirme: '', envoi: null, envoye: null
 };
 let uid = 0;
+const clone = o => JSON.parse(JSON.stringify(o));
 
 /* ═══════════════ chargement ═══════════════ */
 async function charger(){
@@ -162,7 +208,7 @@ async function charger(){
     S.edt = window.__EDT__ || await (await fetch('../referents-aesh/edt-lycee.json?v=2026-09-24b')).json();
     S.C = creerCalendrier({ semaine1: S.edt.semaine1, vacances: S.edt.vacances, s1Fin: S.edt.s1Fin, s2Debut: S.edt.s2Debut });
   } catch (e) { S.erreur = 'L’emploi du temps n’a pas pu se charger. Vérifiez la connexion, puis rechargez la page.'; }
-  S.chargement = false; rendre();
+  S.chargement = false; ouvrir(1); rendre();
 }
 /* Les élèves d'une classe : codes et aménagements, publiés par la coordination. Seuls des NOMBRES s'affichent. */
 async function chargerEleves(classe){
@@ -173,43 +219,45 @@ async function chargerEleves(classe){
     S.eleves[classe] = snap.exists() && Array.isArray(snap.data().eleves) ? snap.data().eleves : [];
     S.elevesEtat[classe] = snap.exists() ? 'ok' : 'absent';
   } catch (e) { S.elevesEtat[classe] = typeErreur(e); S.eleves[classe] = []; }
+  S.f.groupes.forEach(g => { if (g.classes.includes(classe) && !g.nbTouche) g.nb = String(cG(g).propose); });
   rendre();
 }
-function comptes(classe){
-  const l = S.eleves[classe] || [];
+/* Estimation (règle de la coordination, 01/10/2026) :
+   1 AESH par élève en AESH individualisée + 1 AESH pour 3 autres élèves suivis
+   (AESH mutualisée, notification officielle ou en cours, ULIS). */
+function comptesListe(l){
   const a = k => l.filter(e => Array.isArray(e.amenagements) && e.amenagements.includes(k)).length;
   const suivis = l.filter(e => (e.notif && e.notif !== 'non') || e.doc || e.ulis || (e.aide && e.aide !== 'aucune') || (e.amenagements || []).length);
-  const seul = e => e.aide === 'individualisee' || ['lecteur', 'scripteur', 'assistant'].some(k => (e.amenagements || []).includes(k));
-  const aide = l.filter(seul).length + (l.some(e => !seul(e) && e.aide === 'mutualisee') ? 1 : 0);
+  const ai = l.filter(e => e.aide === 'individualisee').length;
+  const autres = l.filter(e => e.aide !== 'individualisee' && (e.aide === 'mutualisee' || e.notif === 'oui' || e.notif === 'encours' || e.ulis)).length;
   const tags = {}; suivis.forEach(e => (Array.isArray(e.besoins) ? e.besoins : []).forEach(t => { tags[t] = (tags[t] || 0) + 1; }));
   const officiel = l.filter(e => e.notif === 'oui'), encours = l.filter(e => e.notif === 'encours');
   return { total: l.length, suivis: suivis.length, notifies: officiel.length, encours: encours.length,
     sansNotif: suivis.filter(e => e.notif !== 'oui' && e.notif !== 'encours').length,
     aiOff: officiel.filter(e => e.aide === 'individualisee').length, amOff: officiel.filter(e => e.aide === 'mutualisee').length,
     aiEnc: encours.filter(e => e.aide === 'individualisee').length, amEnc: encours.filter(e => e.aide === 'mutualisee').length,
-    besoins: Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 5),
+    besoins: Object.entries(tags).sort((x, y) => y[1] - x[1]).slice(0, 5),
     pps: l.filter(e => e.doc === 'PPS').length, pap: l.filter(e => e.doc === 'PAP').length, ulis: l.filter(e => e.ulis).length,
-    ai: l.filter(e => e.aide === 'individualisee').length, am: l.filter(e => e.aide === 'mutualisee').length,
-    amen: Object.fromEntries(AMEN.map(([k]) => [k, a(k)])), propose: aide,
-    sansAmen: suivis.filter(e => !(e.amenagements || []).length && (e.notif === 'oui' || e.doc)).length };
+    ai, am: l.filter(e => e.aide === 'mutualisee').length, autres,
+    amen: Object.fromEntries(AMEN.map(([k]) => [k, a(k)])), propose: ai + Math.ceil(autres / 3) };
 }
-function comptesGroupe(cls){
-  const t = cls.map(comptes), add = k => t.reduce((s, x) => s + (x[k] || 0), 0), tags = {};
-  t.forEach(x => x.besoins.forEach(([n, v]) => { tags[n] = (tags[n] || 0) + v; }));
-  const r = {}; ['total','suivis','notifies','encours','sansNotif','pps','pap','ulis','ai','am','aiOff','amOff','aiEnc','amEnc','propose','sansAmen'].forEach(k => r[k] = add(k));
-  r.amen = Object.fromEntries(AMEN.map(([k]) => [k, t.reduce((s, x) => s + (x.amen[k] || 0), 0)]));
-  r.besoins = Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  return r;
-}
-const libGroupe = g => g.autre ? g.autre : g.classes.map(k => (S.edt.classes[k] || {}).court || k).join(' + ');
+const comptesGroupe = cls => comptesListe(cls.flatMap(k => S.eleves[k] || []));
+const libGroupe = g => g ? (g.autre ? g.autre : g.classes.map(k => (S.edt.classes[k] || {}).court || k).join(' + ')) : '';
 const matieres = () => [...new Set(Object.values(S.edt.cours).map(c => c.lib))].sort((a, b) => a.localeCompare(b, 'fr'));
 const matiereF = () => S.f.matiere === '__autre' ? nettoie(S.f.matiereAutre, 60) : S.f.matiere;
 const coursDe = (classe, lib) => Object.values(S.edt.cours).filter(c => (c.cls || []).includes(classe) && c.lib === lib);
-/* Le cours de cette matière, dans cette classe, à cette date (jour, semaine A/B, semestre). */
-function coursDuJour(classe, date){
-  if (!RE_DATE.test(date || '')) return null;
+const SEM = { TOUTES: '', SA: 'semaine A', SB: 'semaine B', S1: '1er semestre', S2: '2e semestre' };
+const groupe = id => S.f.groupes.find(g => g.id === id);
+const cG = g => g && g.classes.length ? comptesGroupe(g.classes) : { propose: 0, amen: {}, total: 0 };
+const poleDe = g => { const k = g && g.classes[0], p = k && (S.edt.classes[k] || {}).pole; return p || ''; };
+const libPole = p => (POLES.find(x => x[0] === p) || [p, p])[1];
+/* Les cours de la matière dans la semaine type de la classe (le 1er de chaque classe d'un groupe suffit : ils ont cours ensemble). */
+const coursSemaineG = g => g && g.classes.length && matiereF() ? coursDe(g.classes[0], matiereF()).sort((a, b) => a.j - b.j || min(a.d) - min(b.d)) : [];
+/* Tous les cours de cette matière ce jour-là (jour, semaine A/B, semestre). */
+function coursDuJourG(g, date){
+  if (!RE_DATE.test(date || '') || !g || !g.classes.length) return [];
   const j = jourSemaine(date), l = lundiDe(date);
-  return coursDe(classe, matiereF()).filter(c => c.j === j && S.C.coursSemaine(c, l)).sort((a, b) => min(a.d) - min(b.d))[0] || null;
+  return coursDe(g.classes[0], matiereF()).filter(c => c.j === j && S.C.coursSemaine(c, l)).sort((a, b) => min(a.d) - min(b.d));
 }
 function alertesDate(classe, date){
   const out = [];
@@ -221,214 +269,328 @@ function alertesDate(classe, date){
   if (date < isoLocal()) out.push('Cette date est déjà passée.');
   return out;
 }
-const groupe = id => S.f.groupes.find(g => g.id === id);
-const cG = g => g && g.classes.length ? comptesGroupe(g.classes) : { propose: 0, amen: {} };
-function coursDuJourG(g, date){ return g && g.classes.length ? coursDuJour(g.classes[0], date) : null; }
-function alertesDateG(g, date){ return g && g.classes.length ? [...new Set(g.classes.flatMap(k => alertesDate(k, date)))] : alertesDate('', date); }
+const alertesDateG = (g, date) => g && g.classes.length ? [...new Set(g.classes.flatMap(k => alertesDate(k, date)))] : alertesDate('', date);
+/* Prochaine date où ce cours a lieu (hors vacances et PFMP), à partir d'aujourd'hui. */
+function prochaine(c, g){
+  let d = isoLocal();
+  for (let i = 0; i < 200; i++, d = ajoute(d, 1)) if (jourSemaine(d) === c.j && S.C.coursSemaine(c, lundiDe(d)) && !alertesDateG(g, d).length) return d;
+  return '';
+}
+const libDuree = d => d < 60 ? d + ' min' : Math.floor(d / 60) + ' h' + (d % 60 ? z2(d % 60) : '');
+const tiersDe = d => Math.ceil((Number(d) || 0) / 3 / 5) * 5;
 function nouvelleSeance(id){
-  const c = cG(groupe(id));
-  return { uid: ++uid, classe: id, date: '', debut: '', duree: 60, tiers: (c.amen.tiers || 0) > 0, fin: '', finManuelle: false, salle: '', nbAesh: String(c.propose) };
+  const g = groupe(id), c = cG(g);
+  return { uid: ++uid, classe: id, date: '', debut: '', duree: 60, tiers: (c.amen.tiers || 0) > 0, fin: '', finManuelle: false, heureManuelle: false, salle: '', nbAesh: g ? String(g.nb ?? c.propose) : '0' };
+}
+function poserCours(s, c){
+  s.debut = c.d; s.duree = Math.max(15, min(c.f) - min(c.d)); s.finManuelle = false; s.heureManuelle = false;
+  if (!s.salle && c.salle && c.salle[0]) s.salle = String(c.salle[0]).replace(/^salle\s+/i, '').slice(0, 20);
 }
 function finCalculee(s){
   if (!RE_HEURE.test(s.debut)) return '';
-  const d = Number(s.duree) || 0, t = s.tiers ? Math.ceil(d / 3 / 5) * 5 : 0;
-  const m = min(s.debut) + d + t; return m < 24 * 60 ? hDe(m) : '';
+  const m = min(s.debut) + (Number(s.duree) || 0) + (s.tiers ? tiersDe(s.duree) : 0); return m < 24 * 60 ? hDe(m) : '';
 }
 const finS = s => s.finManuelle ? s.fin : finCalculee(s);
+const natureTxt = () => { const n = NATURES.find(x => x[0] === S.f.nature); return n ? (S.f.nature === 'autre' ? nettoie(S.f.natureAutre, 80) || 'Autre' : n[1]) : ''; };
+const formeTxt = () => { const n = FORMES.find(x => x[0] === S.f.forme); return n ? (S.f.forme === 'autre' ? nettoie(S.f.formeAutre, 80) || 'Autre' : n[1]) : ''; };
+const idc = id => String(id).replace(/\W/g, '_');
+
+/* ═══════════════ étapes : ouvrir, valider, annuler ═══════════════ */
+const suivante = () => { for (let n = 1; n <= 5; n++) if (!S.ok[n]) return n; return 6; };
+function ouvrir(n){ S.snap = clone(S.f); S.etape = n; S.erreurs = []; S.nomConfirme = ''; }
+function controle(n){
+  const f = S.f, e = [];
+  if (n === 1 && !matiereF()) e.push('Choisissez la matière (ou « Autre… » et écrivez-la).');
+  if (n === 2 && !f.groupes.length) e.push('Choisissez au moins une classe.');
+  if (n === 2) f.groupes.forEach(g => { if (!/^\d+$/.test(String(g.nb ?? '').trim()) || +g.nb > 12) e.push(`${libGroupe(g)} : le nombre d’AESH souhaité doit être un nombre entier de 0 à 12.`); });
+  if (n === 3){
+    if (!f.nature) e.push('Choisissez la nature de l’épreuve.');
+    else if (f.nature === 'autre' && !nettoie(f.natureAutre, 80)) e.push('Précisez la nature de l’épreuve.');
+    if (f.forme === 'autre' && !nettoie(f.formeAutre, 80)) e.push('Précisez la forme de l’épreuve.');
+  }
+  if (n === 4){
+    if (!f.seances.length) e.push('Ajoutez au moins une séance.');
+    if (f.seances.length > 40) e.push('Au plus 40 séances par demande.');
+    f.groupes.forEach(g => { if (!f.seances.some(s => s.classe === g.id)) e.push(`${libGroupe(g)} : aucune séance. Ajoutez-en une, ou retirez cette classe à l’étape 2.`); });
+    f.seances.forEach((s, i) => {
+      const p = `Séance ${i + 1} (${libGroupe(groupe(s.classe))}) : `, fin = finS(s);
+      if (!RE_DATE.test(s.date)) e.push(p + 'la date manque.');
+      else if (jourSemaine(s.date) > 4) e.push(p + 'la date tombe un week-end.');
+      else if (s.date < isoLocal()) e.push(p + 'la date est déjà passée.');
+      if (!RE_HEURE.test(s.debut)) e.push(p + 'l’heure de début manque.');
+      if (!RE_HEURE.test(fin) || (RE_HEURE.test(s.debut) && min(fin) <= min(s.debut))) e.push(p + 'l’heure de fin doit être après le début.');
+      if (!/^\d+$/.test(String(s.nbAesh).trim()) || +s.nbAesh > 12) e.push(p + 'le nombre d’AESH doit être un nombre entier de 0 à 12.');
+    });
+  }
+  if (n === 5){
+    const t = `${f.observations} ${f.autreDemande}`, m = nomSuspect(t);
+    if (m && S.nomConfirme !== m) e.push(`« ${m} » ressemble à un nom. Retirez-le. Si ce n’est pas un nom, cliquez une seconde fois sur « Valider ».`), S.nomConfirme = m;
+  }
+  return e;
+}
+/* Un mot tout en capitales (hors sigles connus) ressemble à un NOM de famille. */
+const SIGLES = new Set('AESH AED CCF PFMP ULIS PAP PPS PAI MDPH EPS CAP CAPA BAC PSE PSR MELEC AGORA VAN CAN HORT SST DDF PIAL CPE TP TD EDT CDI DNB QCM PC RDC MPA BTS ASSR ASH PE OK'.split(' '));
+function nomSuspect(t){ const m = String(t).match(/\b[A-ZÀ-ÖØ-Ý]{3,}(?:-[A-ZÀ-ÖØ-Ý]{2,})?\b/g) || []; return m.find(x => !SIGLES.has(x.replace(/-.*/, '')) && !/^\d/.test(x)) || ''; }
+function valider(n){
+  S.erreurs = controle(n);
+  if (S.erreurs.length){ rendre(); $('#erreurs')?.focus(); return; }
+  S.ok[n] = true;
+  /* Une classe ajoutée ou retirée peut rendre les séances incomplètes : on les rouvre. */
+  if (n === 2 && S.ok[4] && controle(4).length) S.ok[4] = false;
+  if (n === 1 && S.ok[4]) S.f.seances.forEach(s => { if (!s.heureManuelle && s.date){ const c = coursDuJourG(groupe(s.classe), s.date)[0]; if (c) poserCours(s, c); } });
+  ouvrir(suivante()); rendre(); focusEtape();
+}
+function annuler(n){
+  if (S.snap) S.f = S.snap;
+  S.erreurs = [];
+  if (S.ok[n] || n === 1) ouvrir(S.ok[n] ? suivante() : 1); else ouvrir(n - 1);
+  rendre(); focusEtape();
+}
+const focusEtape = () => setTimeout(() => { const el = document.getElementById('et-' + S.etape); if (el){ el.scrollIntoView({ block: 'start', behavior: 'smooth' }); el.querySelector('h2')?.focus({ preventScroll: true }); } }, 0);
 
 /* ═══════════════ rendu ═══════════════ */
 const vue = $('#vue');
 function rendre(){
+  /* Les points à corriger se mettent à jour dès qu'on corrige (sauf l'étape 5, dont le contrôle du nom se confirme d'un second clic). */
+  if (S.erreurs.length && S.etape < 5 && !S.envoye) S.erreurs = controle(S.etape);
   const a = document.activeElement, id = a && a.id && vue.contains(a) ? a.id : null;
   let sel = null; try { if (id && typeof a.selectionStart === 'number') sel = [a.selectionStart, a.selectionEnd]; } catch (_) { }
   vue.innerHTML = erreurFS ? `<div class="msg err">Pas de connexion au serveur : la page n’a pas pu charger ses outils en ligne. Rechargez la page.</div>`
     : S.chargement ? '<p>Chargement de l’emploi du temps…</p>' : S.erreur ? `<div class="msg err">${esc(S.erreur)}</div>`
-    : S.envoye ? htmlEnvoye() : htmlForm();
+    : S.envoye ? htmlEnvoye() : htmlParcours();
   if (id){ const el = document.getElementById(id); if (el){ el.focus({ preventScroll: true }); if (sel) try { el.setSelectionRange(...sel); } catch (_) { } } }
 }
-function htmlForm(){
-  const f = S.f, mats = matieres(), m = matiereF(), E = S.erreurs;
-  const pris = new Set(f.groupes.map(g => g.id));
+function htmlParcours(){
+  const faits = ETAPES.filter(e => S.ok[e.n]).length;
+  return `<p class="rgpd">🔒 <b>Aucun nom</b> : ni élève, ni enseignant, ni AESH. Vous voyez seulement des nombres. Vous ne cochez aucun aménagement : la coordination les connaît déjà.</p>
+    ${S.envoi && S.envoi.etat === 'attente' ? `<div class="msg err" role="alert">${esc(S.envoi.message)} <button type="button" class="btn lien" data-a="renvoyer">L’envoyer maintenant</button></div>` : ''}
+    <nav class="prog" aria-label="Avancement"><div class="prog-t"><span>Étape <b>${S.etape}</b> sur 6 · ${esc(ETAPES[S.etape - 1].t)}</span><span>${faits} / 6 validée${faits > 1 ? 's' : ''}</span></div>
+      <div class="segs">${ETAPES.map(e => `<button type="button" class="seg ${S.ok[e.n] ? 'fait' : ''} ${S.etape === e.n ? 'cour' : ''}" style="--c:var(${e.c})" data-a="aller" data-v="${e.n}" ${S.ok[e.n] || e.n === S.etape || e.n <= suivante() ? '' : 'disabled'} aria-label="Étape ${e.n} : ${esc(e.t)}${S.ok[e.n] ? ' (validée)' : ''}"><i></i><span>${e.n}. ${esc(e.t)}</span></button>`).join('')}</div></nav>
+    ${ETAPES.map(htmlEtape).join('')}`;
+}
+function htmlEtape(E){
+  const n = E.n, cour = S.etape === n, fait = !!S.ok[n], avenir = !cour && !fait;
+  const st = `style="--c:var(${E.c});--cl:var(${E.c}l)"`;
+  const past = cour ? `<span class="pastille p-cour">${fait ? 'en modification' : 'à remplir'}</span>` : fait ? '<span class="pastille p-ok">✓ validée</span>' : '<span class="pastille p-av">à venir</span>';
+  const tete = `<div class="et-t"><span class="rond" aria-hidden="true">${fait && !cour ? '✓' : n}</span><h2 tabindex="-1">${esc(E.t)}</h2>${past}</div>`;
+  if (cour) return `<section class="etape" id="et-${n}" ${st} aria-current="step">${tete}<div class="et-c"><p class="guide">${esc(E.g)}</p>
+      ${S.erreurs.length ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>${pluriel(S.erreurs.length, 'point à corriger', 'points à corriger')}</b><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+      ${[corps1, corps2, corps3, corps4, corps5, corps6][n - 1]()}</div>
+      ${n < 6 ? `<div class="pied"><button type="button" class="btn ok" id="valider-${n}" data-a="valider" data-v="${n}">✓ Valider cette étape</button><button type="button" class="btn non" id="annuler-${n}" data-a="annuler" data-v="${n}">✕ ${fait ? 'Annuler les changements' : n === 1 ? 'Effacer' : 'Annuler et revenir'}</button></div>` : ''}</section>`;
+  return `<section class="etape ${avenir ? 'avenir' : ''}" id="et-${n}" ${st}>${tete}${fait ? `<div class="resume"><div class="txt">${resume(n)}</div><button type="button" class="btn mod" data-a="aller" data-v="${n}">✎ Modifier</button></div>` : ''}</section>`;
+}
+function resume(n){
+  const f = S.f;
+  if (n === 1) return `<b>${esc(matiereF())}</b>`;
+  if (n === 2) return f.groupes.map(g => `<b>${esc(libGroupe(g))}</b> · ${esc(g.nb)} AESH souhaité${+g.nb > 1 ? 's' : ''}`).join('<br>');
+  if (n === 3) return `<b>${esc(natureTxt())}</b>${formeTxt() ? ' · ' + esc(formeTxt()) : ''}${f.groupes.some(g => nettoie(g.intitule, 120)) ? '<br>' + f.groupes.filter(g => nettoie(g.intitule, 120)).map(g => `${esc(libGroupe(g))} : « ${esc(nettoie(g.intitule, 120))} »`).join('<br>') : ''}`;
+  if (n === 4) return pluriel(f.seances.length, 'séance', 'séances') + ' : ' + triees().map(s => `${esc(dateLongue(s.date))} ${hFr(s.debut)}–${hFr(finS(s))}`).join(' · ');
+  if (n === 5) return f.observations || f.autreDemande ? esc((f.observations + ' ' + f.autreDemande).trim().slice(0, 140)) + ((f.observations + f.autreDemande).length > 140 ? '…' : '') : '<span class="aide">Aucune observation.</span>';
+  return '';
+}
+const triees = () => [...S.f.seances].sort((a, b) => (a.date || '9').localeCompare(b.date || '9') || (a.debut || '').localeCompare(b.debut || ''));
+
+/* — 1. Matière — */
+function corps1(){
+  const f = S.f;
+  return `<div class="champ"><label for="matiere">Matière</label>
+      <select id="matiere" data-c="matiere"><option value="">— choisir —</option>${matieres().map(x => `<option ${f.matiere === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}<option value="__autre" ${f.matiere === '__autre' ? 'selected' : ''}>Autre…</option></select></div>
+    ${f.matiere === '__autre' ? `<div class="champ"><label for="matiere-autre">Nom de la matière</label><input type="text" id="matiere-autre" data-c="matiereAutre" maxlength="60" value="${esc(f.matiereAutre)}"></div>` : ''}`;
+}
+/* — 2. Classes — */
+function corps2(){
+  const f = S.f, m = matiereF(), pris = new Set(f.groupes.map(g => g.id));
   const menu = `<select id="classe-choix" data-c="choix"><option value="">— choisir une classe —</option>${CHOIX_CLASSES.filter(l => l.every(k => S.edt.classes[k])).map(l => { const id = idChoix(l), ici = m && l.some(k => coursDe(k, m).length);
       return `<option value="${id}" ${pris.has(id) ? 'disabled' : ''}>${esc(l.map(k => S.edt.classes[k].court).join(' + '))}${l.length > 1 ? ' (ensemble)' : ''}${ici ? ' · a cours de ' + esc(m) : ''}</option>`; }).join('')}<option value="__autre">Autre…</option></select>`;
-  return `<div class="intro"><h1 id="titre">Besoin AESH pour une épreuve</h1>
-      <p>CCF, CCF blanc, bac blanc, évaluation, sortie… Indiquez l’épreuve, la classe et les séances : la coordination reçoit votre demande et organise les AESH. Vous n’avez rien à cocher sur les élèves : leurs aménagements sont déjà connus de la coordination.</p></div>
-    <p class="rgpd"><b>Aucun nom</b> : ni élève, ni enseignant, ni AESH. Vous verrez seulement des nombres.</p>
-    ${E.length ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>${pluriel(E.length, 'point à corriger', 'points à corriger')}</b><ul>${E.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
-
-    <section class="bloc"><h2><span class="num">1</span>La matière</h2>
-      <div class="champ"><label for="matiere">Matière</label>
-        <select id="matiere" data-c="matiere"><option value="">— choisir —</option>${mats.map(x => `<option ${f.matiere === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}<option value="__autre" ${f.matiere === '__autre' ? 'selected' : ''}>Autre…</option></select></div>
-      ${f.matiere === '__autre' ? `<div class="champ"><label for="matiere-autre">Nom de la matière</label><input type="text" id="matiere-autre" data-c="matiereAutre" maxlength="60" value="${esc(f.matiereAutre)}"></div>` : ''}
-    </section>
-
-    <section class="bloc"><h2><span class="num">2</span>La classe</h2>
-      ${f.groupes.map(htmlGroupe).join('')}
-      <div class="champ" style="margin-top:${f.groupes.length ? '12px' : '0'}"><label for="classe-choix">${f.groupes.length ? '＋ Ajouter une autre classe' : 'Classe'}</label>${menu}
-        <span class="aide">Les classes qui ont cours ensemble (AGOrA, Vannerie) sont proposées ensemble et séparément.</span></div>
-      ${f.choix === '__autre' ? `<div class="champ"><label for="classe-autre">Quelle classe ou quel groupe ?</label><div style="display:flex;gap:8px"><input type="text" id="classe-autre" data-c="classeAutre" maxlength="60" value="${esc(f.classeAutre)}" style="flex:1"><button type="button" class="btn" data-a="ajout-autre">Ajouter</button></div></div>` : ''}
-    </section>
-
-    <section class="bloc"><h2><span class="num">3</span>L’épreuve</h2>
-      <div class="champ"><span class="leg">Nature</span><div class="puces">${NATURES.map(([k, n]) => `<button type="button" class="puce" id="na-${k}" data-a="nature" data-v="${k}" aria-pressed="${f.nature === k}">${n}</button>`).join('')}</div></div>
-      ${f.nature === 'autre' ? `<div class="champ"><label for="nature-autre">Précisez</label><input type="text" id="nature-autre" data-c="natureAutre" maxlength="80" value="${esc(f.natureAutre)}"></div>` : ''}
-      <div class="champ"><span class="leg">Forme</span><div class="puces">${FORMES.map(([k, n]) => `<button type="button" class="puce" id="fo-${k}" data-a="forme" data-v="${k}" aria-pressed="${f.forme === k}">${n}</button>`).join('')}</div></div>
-      ${f.forme === 'autre' ? `<div class="champ"><label for="forme-autre">Précisez</label><input type="text" id="forme-autre" data-c="formeAutre" maxlength="80" value="${esc(f.formeAutre)}"></div>` : ''}
-      <div class="champ"><label for="intitule">Intitulé exact de l’épreuve <span class="aide">(règlement d’examen, facultatif)</span></label><input type="text" id="intitule" data-c="intitule" maxlength="120" value="${esc(f.intitule)}"></div>
-    </section>
-
-    <section class="bloc"><h2><span class="num">4</span>Les séances</h2>
-      ${f.groupes.length ? '' : '<p class="aide">Choisissez d’abord une classe.</p>'}
-      ${f.seances.map(htmlSeance).join('')}
-      ${f.groupes.length ? `<div class="puces">${f.groupes.map(g => `<button type="button" class="btn" id="aj-${esc(g.id.replace(/\W/g, '_'))}" data-a="ajout" data-v="${esc(g.id)}">＋ Une séance ${f.groupes.length > 1 ? 'pour ' + esc(libGroupe(g)) : ''}</button>`).join('')}</div>
-        <p class="aide" style="margin-top:6px">Autant de séances que nécessaire : plusieurs dans la semaine, ou sur plusieurs semaines.</p>` : ''}
-    </section>
-
-    <section class="bloc"><h2><span class="num">5</span>Compléments <span class="aide" style="font-weight:400">(facultatif)</span></h2>
-      <div class="champ"><label for="observations">Observations</label><span class="aide">Nombre de salles, aménagement de l’emploi du temps, intervention d’un tiers…</span><textarea id="observations" data-c="observations" maxlength="600">${esc(f.observations)}</textarea></div>
-      <div class="champ"><label for="autre-demande">Autre demande</label><span class="aide">Déplacement de cours, par exemple. Sans nom.</span><textarea id="autre-demande" data-c="autreDemande" maxlength="600">${esc(f.autreDemande)}</textarea></div>
-    </section>
-
-    ${f.seances.length ? htmlRecap() : ''}
-    <div class="envoi"><button type="button" class="btn prim" id="envoyer" data-a="envoyer" ${S.envoi && S.envoi.etat === 'encours' ? 'disabled' : ''}>Envoyer à la coordination</button>
-      <span class="aide">Vous pourrez la compléter par mail si quelque chose change.</span></div>
-    ${S.envoi && S.envoi.message ? `<div class="msg err" role="alert">${esc(S.envoi.message)} <button type="button" class="btn lien" data-a="renvoyer">${S.envoi.etat === 'attente' ? 'L’envoyer maintenant' : 'Réessayer'}</button></div>` : ''}`;
+  return `${f.groupes.map(htmlGroupe).join('')}
+    <div class="champ" style="margin-top:${f.groupes.length ? '14px' : '0'}"><label for="classe-choix">${f.groupes.length ? '＋ Ajouter une autre classe' : 'Classe'}</label>${menu}
+      <span class="aide">Les classes qui ont cours ensemble (AGOrA, Vannerie) sont proposées ensemble et séparément.</span></div>
+    ${f.choix === '__autre' ? `<div class="champ"><label for="classe-autre">Quelle classe ou quel groupe ?</label><div style="display:flex;gap:8px"><input type="text" id="classe-autre" data-c="classeAutre" maxlength="60" value="${esc(f.classeAutre)}" style="flex:1"><button type="button" class="btn" data-a="ajout-autre">Ajouter</button></div></div>` : ''}`;
+}
+function htmlSemaine(g, avecBouton){
+  if (!g.classes.length) return '';
+  const l = coursSemaineG(g);
+  if (!l.length) return `<div class="semaine"><span class="leg">Cours de ${esc(matiereF())} dans la semaine</span><p class="aide">Aucun cours de ${esc(matiereF())} dans l’emploi du temps de cette classe : vous choisirez l’heure vous-même.</p></div>`;
+  return `<div class="semaine"><span class="leg">🗓 Cours de ${esc(matiereF())} dans la semaine</span><div class="cr">${l.map(c => {
+    const p = avecBouton ? prochaine(c, g) : '';
+    return `<span class="creneau"><span><b>${JOURS[c.j]} ${hFr(c.d)}–${hFr(c.f)}</b>${SEM[c.sem] ? ' · ' + SEM[c.sem] : ''}${c.salle && c.salle.length ? ' · ' + esc(c.salle.join(', ')) : ''}</span>${avecBouton && p ? `<button type="button" class="btn pt" data-a="sur-cours" data-v="${esc(g.id)}|${esc(c.id)}|${p}">＋ Le ${esc(dateLongue(p).replace(/^\S+ /, ''))}</button>` : ''}</span>`; }).join('')}</div></div>`;
 }
 function htmlGroupe(g){
-  const cls = g.classes, etats = cls.map(k => S.elevesEtat[k]), c = cls.length ? comptesGroupe(cls) : null;
-  const dip = S.f.diplomes[g.id] ?? (cls.length ? diplomeDe(S.edt.classes[cls[0]]) : '');
-  const ligne = (n, t, d) => n ? `<li><b>${n}</b> ${t}${d ? ` <span class="aide">(${d})</span>` : ''}</li>` : '';
-  const aides = (ai, am) => [ai ? `${ai} AESH individualisée` : '', am ? `${am} AESH mutualisée` : ''].filter(Boolean).join(', ');
+  const cls = g.classes, etats = cls.map(k => S.elevesEtat[k]), c = cls.length ? comptesGroupe(cls) : null, k = idc(g.id);
+  const aides = (ai, am) => [ai ? `${ai} AESH individualisée` : '', am ? `${am} AESH mutualisée` : ''].filter(Boolean).join(' · ');
+  const nb = (cl, v, t, d) => v ? `<div class="nb ${cl}"><b>${v}</b>${t}${d ? `<br><span style="font-size:.8rem">${d}</span>` : ''}</div>` : '';
+  const pole = poleDe(g);
   let corps;
-  if (g.autre) corps = '<p class="aide">Classe saisie à la main : la coordination complétera. Indiquez le nombre d’AESH souhaité à chaque séance.</p>';
+  if (g.autre) corps = '<p class="aide">Classe saisie à la main : la coordination complétera.</p>';
   else if (etats.some(e => !e || e === 'chargement')) corps = '<p class="aide">Lecture des besoins de la classe…</p>';
   else if (!c.total) corps = '<p class="vide">La coordination n’a pas encore renseigné les élèves de cette classe : indiquez vous-même le nombre d’AESH souhaité.</p>';
-  else corps = `<ul class="stat">
-        ${ligne(c.notifies, 'élève(s) avec une notification officielle', aides(c.aiOff, c.amOff))}
-        ${ligne(c.encours, 'élève(s) avec une notification en cours ou à vérifier', aides(c.aiEnc, c.amEnc))}
-        ${ligne(c.sansNotif, 'élève(s) suivi(s) sans notification', [c.pap ? c.pap + ' PAP' : '', 'besoin repéré par l’équipe'].filter(Boolean).join(', '))}
-        ${ligne(c.ulis, 'élève(s) en ULIS')}
-        ${c.suivis ? '' : '<li>Aucun élève suivi dans cette classe.</li>'}</ul>
+  else corps = `<div class="nbs">
+        ${nb('nb-off', c.notifies, ' notification officielle', aides(c.aiOff, c.amOff))}
+        ${nb('nb-enc', c.encours, ' notification en cours ou à vérifier', aides(c.aiEnc, c.amEnc))}
+        ${nb('nb-sans', c.sansNotif, ' suivi sans notification', c.pap ? c.pap + ' PAP' : 'besoin repéré')}
+        ${nb('nb-ulis', c.ulis, ' en ULIS')}
+        ${c.suivis ? '' : '<p class="aide">Aucun élève suivi dans cette classe.</p>'}</div>
       ${AMEN.some(([a]) => c.amen[a]) ? `<p class="lig"><b>Aménagements d’épreuve :</b> ${AMEN.filter(([a]) => c.amen[a]).map(([a, n]) => `${n} ×${c.amen[a]}`).join(' · ')}</p>` : ''}
-      ${c.besoins.length ? `<p class="lig"><b>Besoins essentiels :</b> ${c.besoins.map(([n, v]) => `${esc(n)} ×${v}`).join(' · ')}</p>` : ''}
-      <p class="prop">Estimation proposée : <b>${c.propose}</b> AESH par séance. <span style="font-weight:400">Cela vous convient-il ? Vous pouvez changer le nombre à chaque séance.</span></p>
-      <p class="aide">Estimation : un élève en AESH individualisée, ou avec lecteur, scripteur ou assistant = une AESH ; les élèves en AESH mutualisée partagent une AESH.</p>`;
-  return `<div class="classe-carte"><div style="display:flex;justify-content:space-between;gap:8px"><h3>${esc(libGroupe(g))}${cls.length > 1 ? ' <small>ensemble</small>' : ''}</h3><button type="button" class="btn lien" data-a="retirer-groupe" data-v="${esc(g.id)}">Retirer</button></div>
-    <div class="champ" style="margin-top:6px"><label for="dip-${esc(g.id.replace(/\W/g, '_'))}">Diplôme</label><input type="text" id="dip-${esc(g.id.replace(/\W/g, '_'))}" data-c="diplome" data-k="${esc(g.id)}" maxlength="60" value="${esc(dip)}"></div>${corps}</div>`;
+      ${c.besoins.length ? `<p class="lig"><b>Besoins essentiels :</b> ${c.besoins.map(([n, v]) => `${esc(n)} ×${v}`).join(' · ')}</p>` : ''}`;
+  const prop = g.autre || (c && c.total) ? `<div class="prop">${c && c.total ? `<div class="gros">Estimation proposée : <b>${c.propose}</b> AESH par séance</div>
+      <div class="aide">${c.ai ? `${pluriel(c.ai, 'élève', 'élèves')} en AESH individualisée = ${c.ai} AESH` : ''}${c.ai && c.autres ? ' · ' : ''}${c.autres ? `${pluriel(c.autres, 'autre élève suivi', 'autres élèves suivis')} = ${Math.ceil(c.autres / 3)} AESH (1 pour 3)` : ''}</div>` : ''}
+      <div class="q"><b>${c && c.total ? 'Cela vous convient-il ?' : 'Combien d’AESH souhaitez-vous ?'}</b>${c && c.total ? `<button type="button" class="btn pt ${String(g.nb) === String(c.propose) ? 'ok' : ''}" style="--c:var(--e6)" data-a="nb-oui" data-v="${esc(g.id)}">Oui</button><span class="aide">ou un autre nombre :</span>` : ''}
+      <input type="number" id="nb-${k}" data-g="${esc(g.id)}" min="0" max="12" inputmode="numeric" value="${esc(g.nb)}" aria-label="Nombre d’AESH souhaité pour ${esc(libGroupe(g))}"></div></div>` : '';
+  return `<div class="carte"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h3>${esc(libGroupe(g))}${cls.length > 1 ? ' <span class="tag">ensemble</span>' : ''}${pole ? ` <span class="tag" style="background:var(--e3l);color:var(--e3)">pôle ${esc(libPole(pole))}</span>` : ''}</h3><button type="button" class="btn lien" data-a="retirer-groupe" data-v="${esc(g.id)}">✕ Retirer</button></div>
+    <div class="champ" style="margin-top:8px;max-width:340px"><label for="dip-${k}">Diplôme</label><input type="text" id="dip-${k}" data-g="${esc(g.id)}" data-gk="diplome" maxlength="60" value="${esc(g.diplome)}"></div>
+    ${corps}${prop}${htmlSemaine(g, false)}</div>`;
 }
-function htmlSeance(s, i){
-  const g = groupe(s.classe), kk = { court: libGroupe(g) }, cours = coursDuJourG(g, s.date), c = cG(g), al = alertesDateG(g, s.date);
-  const fin = finS(s), t = Math.ceil((Number(s.duree) || 0) / 3 / 5) * 5, id = x => `s${s.uid}-${x}`;
-  return `<div class="seance"><div class="seance-t"><b>Séance ${i + 1} · ${esc(kk.court)}</b><button type="button" class="btn lien" id="${id('x')}" data-a="retirer" data-v="${s.uid}">Retirer</button></div>
+/* — 3. Épreuve — */
+function corps3(){
+  const f = S.f;
+  return `<div class="champ"><span class="leg">Nature</span><div class="puces">${NATURES.map(([k, n]) => `<button type="button" class="puce" id="na-${k}" data-a="nature" data-v="${k}" aria-pressed="${f.nature === k}">${n}</button>`).join('')}</div></div>
+    ${f.nature === 'autre' ? `<div class="champ"><label for="nature-autre">Précisez</label><input type="text" id="nature-autre" data-c="natureAutre" maxlength="80" value="${esc(f.natureAutre)}"></div>` : ''}
+    <div class="champ"><span class="leg">Forme</span><div class="puces">${FORMES.map(([k, n]) => `<button type="button" class="puce" id="fo-${k}" data-a="forme" data-v="${k}" aria-pressed="${f.forme === k}">${n}</button>`).join('')}</div></div>
+    ${f.forme === 'autre' ? `<div class="champ"><label for="forme-autre">Précisez</label><input type="text" id="forme-autre" data-c="formeAutre" maxlength="80" value="${esc(f.formeAutre)}"></div>` : ''}
+    <div class="champ" style="margin-top:6px"><span class="leg">Nom exact de l’épreuve <span class="aide">(règlement d’examen, facultatif — il peut changer d’une classe à l’autre)</span></span></div>
+    ${f.groupes.map((g, i) => `<div class="champ"><label for="int-${idc(g.id)}">${esc(libGroupe(g))}</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="int-${idc(g.id)}" data-g="${esc(g.id)}" data-gk="intitule" maxlength="120" value="${esc(g.intitule)}" style="flex:1;min-width:220px">${i === 0 && f.groupes.length > 1 ? '<button type="button" class="btn pt" data-a="int-tous">Même nom pour toutes les classes</button>' : ''}</div></div>`).join('')}`;
+}
+/* — 4. Séances — */
+function corps4(){
+  const f = S.f;
+  return f.groupes.map(g => `<div class="groupe4"><h3>${esc(libGroupe(g))}</h3>${htmlSemaine(g, true)}
+      ${f.seances.filter(s => s.classe === g.id).map(htmlSeance).join('')}
+      <button type="button" class="btn" style="margin-top:8px" id="aj-${idc(g.id)}" data-a="ajout" data-v="${esc(g.id)}">＋ Une séance à une autre date</button></div>`).join('')
+    + '<p class="aide">Autant de séances que nécessaire : plusieurs dans la semaine, ou sur plusieurs semaines.</p>';
+}
+function htmlSeance(s){
+  const g = groupe(s.classe), i = S.f.seances.indexOf(s), cs = coursDuJourG(g, s.date), c = cG(g), al = alertesDateG(g, s.date);
+  const fin = finS(s), id = x => `s${s.uid}-${x}`, dur = +s.duree || 0;
+  const durees = [...new Set([...DUREES, dur].filter(Boolean))].sort((a, b) => a - b);
+  let auto = '';
+  if (s.date && cs.length === 1) auto = `<div class="auto">🕘 Ce jour-là, cours de ${esc(cs[0].lib)} de <b>${hFr(cs[0].d)} à ${hFr(cs[0].f)}</b>${cs[0].salle && cs[0].salle.length ? ' en ' + esc(cs[0].salle.join(', ')) : ''}${s.heureManuelle ? ` <button type="button" class="btn lien" data-a="cours" data-v="${s.uid}|0">Reprendre ce créneau</button>` : ' : créneau repris.'}</div>`;
+  else if (s.date && cs.length > 1) auto = `<div class="auto">🕘 Ce jour-là, ${cs.length} cours de ${esc(cs[0].lib)} : ${cs.map((x, j) => `<button type="button" class="btn pt ${!s.heureManuelle && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="cours" data-v="${s.uid}|${j}">${hFr(x.d)}–${hFr(x.f)}</button>`).join(' ')}</div>`;
+  else if (s.date && matiereF() && g && g.classes.length) auto = `<div class="auto">Pas de cours de ${esc(matiereF())} ce jour-là : indiquez l’heure.</div>`;
+  return `<div class="seance"><div class="seance-t"><b>Séance ${i + 1}${s.date ? ' · ' + esc(dateLongue(s.date)) : ''}</b><button type="button" class="btn lien" style="--c:var(--err-ink)" id="${id('x')}" data-a="retirer" data-v="${s.uid}">✕ Retirer</button></div>
     <div class="grille">
       <div class="champ large"><label for="${id('date')}">Date</label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
       <div class="champ"><label for="${id('debut')}">Début</label><input type="time" id="${id('debut')}" data-s="${s.uid}" data-k="debut" value="${esc(s.debut)}" step="300"></div>
-      <div class="champ"><label for="${id('duree')}">Durée de l’épreuve</label><select id="${id('duree')}" data-s="${s.uid}" data-k="duree">${DUREES.map(d => `<option value="${d}" ${+s.duree === d ? 'selected' : ''}>${d < 60 ? d + ' min' : Math.floor(d / 60) + ' h' + (d % 60 ? d % 60 : '')}</option>`).join('')}</select></div>
+      <div class="champ"><label for="${id('duree')}">Durée de l’épreuve</label><select id="${id('duree')}" data-s="${s.uid}" data-k="duree">${durees.map(d => `<option value="${d}" ${dur === d ? 'selected' : ''}>${libDuree(d)}</option>`).join('')}</select></div>
       <div class="champ"><label for="${id('fin')}">Fin</label><input type="time" id="${id('fin')}" data-s="${s.uid}" data-k="fin" value="${esc(fin)}" step="300"></div>
       <div class="champ"><label for="${id('salle')}">Salle <span class="aide">(facultatif)</span></label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
-      <div class="champ large"><label for="${id('nb')}">Nombre d’AESH souhaité</label><input type="number" id="${id('nb')}" data-s="${s.uid}" data-k="nbAesh" min="0" max="12" value="${esc(s.nbAesh)}" inputmode="numeric"><span class="aide">Proposition pour cette classe : ${c.propose}</span></div>
+      <div class="champ large"><label for="${id('nb')}">Nombre d’AESH</label><input type="number" id="${id('nb')}" data-s="${s.uid}" data-k="nbAesh" min="0" max="12" value="${esc(s.nbAesh)}" inputmode="numeric"><span class="aide">Proposition : ${c.total ? c.propose : '—'}</span></div>
     </div>
-    ${cours ? `<div class="suggest">Ce jour-là, ${esc(kk.court)} a ${esc(cours.lib)} de <b>${hFr(cours.d)} à ${hFr(cours.f)}</b>${cours.salle && cours.salle.length ? ' en ' + esc(cours.salle.join(', ')) : ''}. <button type="button" class="btn" id="${id('cours')}" data-a="cours" data-v="${s.uid}">Reprendre ce créneau</button></div>` : s.date && matiereF() ? `<div class="suggest">Pas de cours de ${esc(matiereF())} en ${esc(kk.court)} ce jour-là : choisissez l’heure.</div>` : ''}
-    ${(c.amen.tiers || 0) ? `<label class="tiers"><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> Prévoir le tiers temps (${pluriel(c.amen.tiers, 'élève', 'élèves')}) : +${t} min${RE_HEURE.test(s.debut) ? ` → fin à ${hFr(finCalculee({ ...s, tiers: true }))}` : ''}</label>` : ''}
+    ${auto}
+    <div class="tiers"><button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>
+      <label><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> Tiers temps : +${tiersDe(dur)} min${c.amen && c.amen.tiers ? ` <span class="aide">(${pluriel(c.amen.tiers, 'élève concerné', 'élèves concernés')})</span>` : ''}</label></div>
     ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}
     ${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}</div>`;
 }
-function htmlRecap(){
-  const f = S.f, l = [...f.seances].sort((a, b) => (a.date || '9').localeCompare(b.date || '9') || (a.debut || '').localeCompare(b.debut || ''));
-  const nat = NATURES.find(x => x[0] === f.nature), fo = FORMES.find(x => x[0] === f.forme);
-  return `<section class="bloc recap" aria-labelledby="h-recap"><h2 id="h-recap">Récapitulatif</h2><dl>
-    <dt>Matière</dt><dd>${esc(matiereF() || '—')}</dd>
-    <dt>Épreuve</dt><dd>${esc(nat ? (f.nature === 'autre' ? f.natureAutre || 'Autre' : nat[1]) : '—')}${fo ? ' · ' + esc(f.forme === 'autre' ? f.formeAutre || 'Autre' : fo[1]) : ''}${f.intitule ? ' · ' + esc(f.intitule) : ''}</dd>
-    <dt>Séances</dt><dd><ul>${l.map(s => `<li>${esc(dateLongue(s.date) || 'date à choisir')} · ${hFr(s.debut) || '?'}–${hFr(finS(s)) || '?'}${s.tiers ? ' (tiers temps compris)' : ''} · ${esc(libGroupe(groupe(s.classe)))}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh || '0')} AESH</b></li>`).join('')}</ul></dd></dl></section>`;
+/* — 5. Observations — */
+function corps5(){
+  const f = S.f;
+  return `<div class="interdit" role="note">⛔ Interdiction d’écrire le nom ou le prénom d’un élève — ni initiales.
+      <span>Écrivez par exemple : « 2 élèves composent en salle à part », « prévoir un ordinateur ».</span></div>
+    <div class="champ"><label for="observations">Observations</label><span class="aide">Nombre de salles, aménagement de l’emploi du temps, intervention d’un tiers…</span><textarea id="observations" data-c="observations" maxlength="600">${esc(f.observations)}</textarea></div>
+    <div class="champ"><label for="autre-demande">Autre demande</label><span class="aide">Déplacement de cours, par exemple.</span><textarea id="autre-demande" data-c="autreDemande" maxlength="600">${esc(f.autreDemande)}</textarea></div>`;
+}
+/* — 6. Récapitulatif — */
+function corps6(){
+  const f = S.f, poles = [...new Set(f.groupes.map(poleDe).filter(Boolean))].map(libPole);
+  const bloc = (n, titre, html) => `<div class="rbloc" style="--c:var(${ETAPES[n - 1].c})"><div class="rt"><b>${titre}</b><button type="button" class="btn mod" style="--c:var(${ETAPES[n - 1].c})" data-a="aller" data-v="${n}">✎ Modifier</button></div>${html}</div>`;
+  return `<div class="recap">
+    ${bloc(1, 'Matière', esc(matiereF()))}
+    ${bloc(2, 'Classes', `<ul>${f.groupes.map(g => { const c = cG(g); return `<li><b>${esc(libGroupe(g))}</b>${g.diplome ? ' · ' + esc(g.diplome) : ''} · ${esc(g.nb)} AESH souhaité${+g.nb > 1 ? 's' : ''}${c.total ? ` <span class="aide">(estimation ${c.propose} ; ${c.notifies} notif. officielle, ${c.encours} en cours, ${c.sansNotif} sans notif.)</span>` : ''}</li>`; }).join('')}</ul>`)}
+    ${bloc(3, 'Épreuve', `${esc(natureTxt())}${formeTxt() ? ' · ' + esc(formeTxt()) : ''}<ul>${f.groupes.map(g => `<li>${esc(libGroupe(g))} : ${nettoie(g.intitule, 120) ? '« ' + esc(nettoie(g.intitule, 120)) + ' »' : '<span class="aide">nom non précisé</span>'}</li>`).join('')}</ul>`)}
+    ${bloc(4, 'Séances', `<ul>${triees().map(s => `<li><b>${esc(dateLongue(s.date))}</b> · ${hFr(s.debut)}–${hFr(finS(s))}${s.tiers ? ' (tiers temps compris)' : ''} · ${esc(libGroupe(groupe(s.classe)))}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh)} AESH</b></li>`).join('')}</ul>`)}
+    ${bloc(5, 'Observations', f.observations || f.autreDemande ? `${f.observations ? '<p style="margin:2px 0">' + esc(f.observations) + '</p>' : ''}${f.autreDemande ? '<p style="margin:2px 0"><b>Autre demande :</b> ' + esc(f.autreDemande) + '</p>' : ''}` : '<span class="aide">Aucune.</span>')}
+    <p class="dest">📨 Destinataires : <b>la coordination AESH</b> et <b>le référent du pôle${poles.length > 1 ? 's' : ''} ${esc(poles.join(', ') || '(selon la classe)')}</b>. Ils organisent les AESH et vous répondent.</p>
+    <div><button type="button" class="envoi" id="envoyer" data-a="envoyer" ${S.envoi && S.envoi.etat === 'encours' ? 'disabled' : ''}>📨 Envoyer à la coordination et au référent du pôle</button></div>
+    ${S.envoi && S.envoi.message && S.envoi.etat !== 'attente' ? `<div class="msg err" role="alert">${esc(S.envoi.message)} <button type="button" class="btn lien" data-a="renvoyer">Réessayer</button></div>` : ''}
+    </div>`;
 }
 function htmlEnvoye(){
   const d = S.envoye;
-  return `<div class="msg ok" role="status" id="ok" tabindex="-1"><h1 style="font-size:1.3rem">✓ Demande envoyée</h1>
-    <p>La coordination la reçoit : ${pluriel(d.seances.length, 'séance', 'séances')}, ${esc(d.matiere)}, ${esc(d.classes.map(c => c.libelle).join(', '))}. Elle organise les AESH et vous répond.</p></div>
+  return `<div class="msg ok" role="status" id="ok" tabindex="-1"><h2 style="font-size:1.3rem">✓ Demande envoyée</h2>
+    <p>La coordination et le référent du pôle la reçoivent : ${pluriel(d.seances.length, 'séance', 'séances')}, ${esc(d.matiere)}, ${esc(d.classes.map(c => c.libelle).join(', '))}. Ils organisent les AESH et vous répondent.</p>
+    <p>Un changement ? Écrivez à la coordination, ou faites une nouvelle demande.</p></div>
     <p><button type="button" class="btn" data-a="nouvelle">Faire une autre demande</button></p>`;
 }
 
 /* ═══════════════ actions ═══════════════ */
 const seance = u => S.f.seances.find(s => s.uid === +u);
+function ajouterGroupe(id, classes, autre){
+  const g = { id, classes, autre: autre || '', diplome: classes.length ? diplomeDe(S.edt.classes[classes[0]]) : '', intitule: '', nb: '0', nbTouche: false };
+  if (classes.length) g.nb = String(cG(g).propose);
+  const autreInt = S.f.groupes.find(x => nettoie(x.intitule, 120)); if (autreInt) g.intitule = autreInt.intitule;
+  S.f.groupes.push(g); classes.forEach(chargerEleves);
+}
 vue.addEventListener('click', ev => {
-  const b = ev.target.closest('[data-a]'); if (!b) return;
+  const b = ev.target.closest('[data-a]'); if (!b || b.disabled) return;
   const a = b.dataset.a, v = b.dataset.v, f = S.f;
+  if (a === 'valider'){ valider(+v); return; }
+  if (a === 'annuler'){ annuler(+v); return; }
+  if (a === 'aller'){ if (+v !== S.etape){ if (S.etape !== 6 && S.snap && JSON.stringify(S.snap) !== JSON.stringify(S.f) && S.ok[S.etape]){ /* changements non validés d'une étape déjà validée : on les garde, l'étape reste à valider */ S.ok[S.etape] = false; } ouvrir(+v); } rendre(); focusEtape(); return; }
   if (a === 'retirer-groupe'){ f.groupes = f.groupes.filter(g => g.id !== v); f.seances = f.seances.filter(s => s.classe !== v); }
-  else if (a === 'ajout-autre'){ const t = nettoie(f.classeAutre, 60); if (!t) return; const id = 'autre:' + t; if (!groupe(id)) f.groupes.push({ id, classes: [], autre: t }); f.choix = ''; f.classeAutre = ''; }
+  else if (a === 'ajout-autre'){ const t = nettoie(f.classeAutre, 60); if (!t) return; const id = 'autre:' + t; if (!groupe(id)) ajouterGroupe(id, [], t); f.choix = ''; f.classeAutre = ''; }
+  else if (a === 'nb-oui'){ const g = groupe(v); if (g){ g.nb = String(cG(g).propose); g.nbTouche = true; f.seances.forEach(s => { if (s.classe === g.id) s.nbAesh = g.nb; }); } }
   else if (a === 'nature') f.nature = v;
   else if (a === 'forme') f.forme = v;
-  else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.debut = p.debut; s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } f.seances.push(s); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); }
+  else if (a === 'int-tous'){ const t = f.groupes[0] && f.groupes[0].intitule; f.groupes.forEach(g => { g.intitule = t || ''; }); }
+  else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } f.seances.push(s); rendre(); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); return; }
+  else if (a === 'sur-cours'){ const [gid, cid, date] = v.split('|'), c = S.edt.cours[cid] || Object.values(S.edt.cours).find(x => x.id === cid), s = nouvelleSeance(gid); s.date = date; if (c) poserCours(s, c); f.seances.push(s); }
   else if (a === 'retirer') f.seances = f.seances.filter(s => s.uid !== +v);
-  else if (a === 'cours'){ const s = seance(v), c = s && coursDuJourG(groupe(s.classe), s.date); if (c){ s.debut = c.d; s.duree = DUREES.includes(min(c.f) - min(c.d)) ? min(c.f) - min(c.d) : s.duree; s.finManuelle = false; if (!s.salle && c.salle && c.salle[0]) s.salle = String(c.salle[0]).slice(0, 20); } }
+  else if (a === 'cours'){ const [u, j] = v.split('|'), s = seance(u), c = s && coursDuJourG(groupe(s.classe), s.date)[+j]; if (c) poserCours(s, c); }
+  else if (a === 'plus30'){ const s = seance(v); if (s){ s.duree = (Number(s.duree) || 0) + 30; s.finManuelle = false; } }
   else if (a === 'fin-auto'){ const s = seance(v); if (s) s.finManuelle = false; }
   else if (a === 'envoyer'){ envoyer(); return; }
   else if (a === 'renvoyer'){ envoyer(true); return; }
-  else if (a === 'nouvelle'){ S.envoye = null; S.f = { ...S.f, groupes: [], seances: [], observations: '', autreDemande: '', intitule: '' }; }
+  else if (a === 'nouvelle'){ S.envoye = null; S.ok = { 1: true }; S.f = { ...S.f, groupes: [], seances: [], observations: '', autreDemande: '', nature: '', natureAutre: '', forme: '', formeAutre: '' }; ouvrir(2); }
   rendre();
 });
 vue.addEventListener('input', ev => {
   const t = ev.target;
-  if (t.dataset.c){ if (t.dataset.c === 'diplome') S.f.diplomes[t.dataset.k] = t.value; else S.f[t.dataset.c] = t.value; return; }
+  if (t.dataset.c){ S.f[t.dataset.c] = t.value; return; }
+  if (t.dataset.g){ const g = groupe(t.dataset.g); if (!g) return; if (t.dataset.gk) g[t.dataset.gk] = t.value; else { g.nb = t.value; g.nbTouche = true; S.f.seances.forEach(s => { if (s.classe === g.id) s.nbAesh = t.value; }); } return; }
   const s = t.dataset.s && seance(t.dataset.s); if (!s) return;
   const k = t.dataset.k;
   if (k === 'fin'){ s.fin = t.value; s.finManuelle = true; }
   else if (k === 'tiers') s.tiers = t.checked;
+  else if (k === 'debut'){ s.debut = t.value; s.heureManuelle = true; }
   else s[k] = t.value;
 });
 vue.addEventListener('change', ev => {
   const t = ev.target;
   if (t.dataset.c === 'choix'){
     const v = t.value; S.f.choix = v === '__autre' ? '__autre' : '';
-    if (v && v !== '__autre' && !groupe(v)){ const cls = v.split('+'); S.f.groupes.push({ id: v, classes: cls }); cls.forEach(chargerEleves); }
+    if (v && v !== '__autre' && !groupe(v)) ajouterGroupe(v, v.split('+'));
     rendre(); return;
   }
+  if (t.dataset.g && !t.dataset.gk){ rendre(); return; }
   if (t.dataset.c === 'matiere' || (t.dataset.s && ['date', 'debut', 'duree', 'tiers', 'fin'].includes(t.dataset.k))){
     const s = t.dataset.s && seance(t.dataset.s);
-    if (s && t.dataset.k === 'date' && !s.debut){ const c = coursDuJourG(groupe(s.classe), s.date); if (c){ s.debut = c.d; if (DUREES.includes(min(c.f) - min(c.d))) s.duree = min(c.f) - min(c.d); if (!s.salle && c.salle && c.salle[0]) s.salle = String(c.salle[0]).slice(0, 20); } }
+    /* Dès que la date est choisie, le créneau du cours de ce jour-là s'installe (sauf heure posée à la main). */
+    if (s && t.dataset.k === 'date' && !s.heureManuelle){ const c = coursDuJourG(groupe(s.classe), s.date)[0]; if (c) poserCours(s, c); }
+    if (s && t.dataset.k === 'duree') s.finManuelle = false;
     rendre();
   }
 });
 
-/* ═══════════════ contrôle et envoi ═══════════════ */
-function valider(){
-  const f = S.f, e = [];
-  if (!matiereF()) e.push('Choisissez la matière (ou « Autre » et écrivez-la).');
-  if (!f.groupes.length) e.push('Choisissez au moins une classe.');
-  if (!f.nature) e.push('Choisissez la nature de l’épreuve.');
-  else if (f.nature === 'autre' && !nettoie(f.natureAutre, 80)) e.push('Précisez la nature de l’épreuve.');
-  if (f.forme === 'autre' && !nettoie(f.formeAutre, 80)) e.push('Précisez la forme de l’épreuve.');
-  if (!f.seances.length) e.push('Ajoutez au moins une séance.');
-  if (f.seances.length > 40) e.push('Au plus 40 séances par demande.');
-  f.seances.forEach((s, i) => {
-    const p = `Séance ${i + 1} (${libGroupe(groupe(s.classe))}) : `, fin = finS(s);
-    if (!RE_DATE.test(s.date)) e.push(p + 'la date manque.');
-    else if (jourSemaine(s.date) > 4) e.push(p + 'la date tombe un week-end.');
-    else if (s.date < isoLocal()) e.push(p + 'la date est déjà passée.');
-    if (!RE_HEURE.test(s.debut)) e.push(p + 'l’heure de début manque.');
-    if (!RE_HEURE.test(fin) || (RE_HEURE.test(s.debut) && min(fin) <= min(s.debut))) e.push(p + 'l’heure de fin doit être après le début.');
-    if (!/^\d+$/.test(String(s.nbAesh).trim()) || +s.nbAesh > 12) e.push(p + 'le nombre d’AESH doit être un nombre entier de 0 à 12.');
-  });
-  return e;
-}
+/* ═══════════════ envoi ═══════════════ */
 function construire(){
   const f = S.f, now = new Date().toISOString();
-  const seances = [...f.seances].sort((a, b) => a.date.localeCompare(b.date) || a.debut.localeCompare(b.debut)).map(s => {
+  const seances = triees().map(s => {
     const g = groupe(s.classe), c = cG(g);
-    return { classe: s.classe, libelle: libGroupe(g), date: s.date, debut: s.debut, fin: finS(s), duree: Number(s.duree) || 0, tiersTemps: !!s.tiers, salle: nettoie(s.salle, 20), nbAesh: parseInt(String(s.nbAesh).trim(), 10), nbPropose: c.propose };
+    return { classe: s.classe, libelle: libGroupe(g), intitule: nettoie(g && g.intitule, 120), date: s.date, debut: s.debut, fin: finS(s), duree: Number(s.duree) || 0, tiersTemps: !!s.tiers, salle: nettoie(s.salle, 20), nbAesh: parseInt(String(s.nbAesh).trim(), 10), nbPropose: c.propose || 0 };
   });
+  const ints = [...new Set(f.groupes.map(g => nettoie(g.intitule, 120)))];
   return { id: nouvelId(), type: 'epreuve', annee: ANNEE, matiere: matiereF(),
     nature: f.nature, natureAutre: f.nature === 'autre' ? nettoie(f.natureAutre, 80) : '',
-    forme: f.forme || '', formeAutre: f.forme === 'autre' ? nettoie(f.formeAutre, 80) : '', intitule: nettoie(f.intitule, 120),
-    classes: f.groupes.map(g => ({ classe: g.id, classes: g.classes, libelle: libGroupe(g), autre: !!g.autre,
-      diplome: nettoie(f.diplomes[g.id] ?? (g.classes.length ? diplomeDe(S.edt.classes[g.classes[0]]) : ''), 60),
+    forme: f.forme || '', formeAutre: f.forme === 'autre' ? nettoie(f.formeAutre, 80) : '', intitule: ints.length === 1 ? ints[0] : '',
+    classes: f.groupes.map(g => ({ classe: g.id, classes: g.classes, libelle: libGroupe(g), autre: !!g.autre, intitule: nettoie(g.intitule, 120),
+      diplome: nettoie(g.diplome, 60), pole: poleDe(g), nbSouhaite: parseInt(String(g.nb).trim(), 10) || 0,
       comptes: g.classes.length ? (({ amen, besoins, ...r }) => ({ ...r, ...amen, besoins: besoins.map(([n, v]) => n + ' ×' + v) }))(comptesGroupe(g.classes)) : {} })),
     seances, observations: nettoie(f.observations, 600), autreDemande: nettoie(f.autreDemande, 600),
     statut: 'nouvelle', reponse: { statut: '', texte: '', majLe: '' }, creeLe: now, majLe: now, source: SOURCE };
 }
 async function envoyer(renvoi){
   if (!(renvoi && S.envoi && S.envoi.doc)){
-    S.erreurs = valider();
-    if (S.erreurs.length){ rendre(); $('#erreurs')?.focus(); return; }
+    for (let n = 1; n <= 5; n++) if (!S.ok[n] || controle(n).length){ S.ok[n] = false; ouvrir(n); S.erreurs = controle(n); rendre(); focusEtape(); return; }
   }
   const d = renvoi && S.envoi && S.envoi.doc ? S.envoi.doc : construire();
   S.envoi = { etat: 'encours', doc: d }; rendre();
