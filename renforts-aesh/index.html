@@ -6,49 +6,90 @@
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#1e1b4b">
-<title>Renfort AESH — épreuve</title>
+<title>Renfort AESH</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
-   Renfort AESH pour une épreuve — page en ligne, AESH (01/10/2026)
+   Renfort AESH pour une épreuve — page en ligne, AESH (01/10/2026, version premium)
    La coordination envoie le lien (…/renforts-aesh/?d=epreuve_xxx) ; l'AESH donne
    SON PRÉNOM et dit, séance par séance : disponible / sous réserve / pas disponible.
+   Chaque séance dit tout de suite si une AESH est déjà présente à ce cours
+   (réponse de l'enseignant), ou s'il n'y en a aucune.
    Lit   : coordination_demandes_aesh / epreuve_<id> (matière, classes, séances — aucun élève).
    Écrit : coordination_demandes_aesh / reponse_<id> (création seule).
    AUCUN NOM D'ÉLÈVE, aucun nom de famille d'AESH.
    ═══════════════════════════════════════════════════════════════════════════ */
-:root{--bg:#f3f4f9;--ink:#111827;--muted:#4b5563;--line:#c9d1da;--line-2:#e5e7ef;--focus:#1d4ed8;
-  --ok:#15803d;--okl:#e7f6ec;--res:#b45309;--resl:#fff4d6;--non:#b91c1c;--nonl:#fdecec;--r:18px;--sh:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(30,27,75,.07);color-scheme:light}
+:root{--bg:#f4f3fb;--ink:#151431;--ink-2:#3f3d63;--muted:#6b6a8a;--line:#dcdaf0;--card:#fff;--focus:#4f46e5;
+  --indigo:#4338ca;--indigo-l:#eef0ff;--ok:#0f8a5f;--ok-l:#e3f6ee;--res:#c26a06;--res-l:#fff3e2;--non:#c0263a;--non-l:#fdebee;
+  --r:22px;--sh:0 1px 2px rgba(21,20,49,.05),0 12px 32px rgba(67,56,202,.10);color-scheme:light}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.5;font-size:16px}
 button,input,textarea{font:inherit;color:inherit}button{cursor:pointer}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.bandeau{background:linear-gradient(120deg,#1e1b4b,#312e81 55%,#0f766e);color:#fff;padding:18px 16px 30px}
-.bandeau .in{max-width:760px;margin:0 auto}.bandeau h1{margin:0;font-size:1.6rem}.bandeau p{margin:6px 0 0;opacity:.92}
-main{max-width:760px;margin:-16px auto 0;padding:0 16px 60px;display:flex;flex-direction:column;gap:14px}
-.carte{background:#fff;border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--line-2);padding:16px 18px}
-.carte h2{margin:0 0 8px;font-size:1.15rem}
-.aide{color:var(--muted);font-size:.9rem}
-.champ{display:flex;flex-direction:column;gap:4px;margin:8px 0}
-.champ label{font-weight:700}
-input[type=text],textarea{border:1.5px solid var(--line);border-radius:11px;padding:10px 12px;min-height:46px;width:100%;background:#fff}
-textarea{min-height:80px;resize:vertical}
-.seance{border:1.5px solid var(--line-2);border-radius:14px;padding:12px 14px;margin-top:10px}
-.seance .t{font-weight:800;font-size:1.05rem}.seance .s{color:var(--muted);font-size:.93rem;margin-top:2px}
-.choix{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.choix button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;font-weight:700;min-height:44px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.tete{background:radial-gradient(120% 140% at 0% 0%,#6d5efc 0%,#4338ca 45%,#0f766e 100%);color:#fff;padding:26px 18px 64px}
+.tete .in{max-width:640px;margin:0 auto}
+.tete .sur{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;opacity:.8;font-weight:700}
+.tete h1{margin:6px 0 0;font-size:1.65rem;line-height:1.2;font-weight:850;letter-spacing:-.01em}
+.tete p{margin:10px 0 0;font-size:1.02rem;opacity:.95;max-width:540px}
+main{max-width:640px;margin:-44px auto 0;padding:0 14px 120px;display:flex;flex-direction:column;gap:14px}
+.carte{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:18px}
+.epreuve{display:flex;gap:14px;align-items:center}
+.epreuve .ic{width:48px;height:48px;border-radius:14px;background:var(--indigo-l);color:var(--indigo);display:flex;align-items:center;justify-content:center;font-weight:850;font-size:1.05rem;flex:none}
+.epreuve b{display:block;font-size:1.1rem}
+.epreuve span{color:var(--muted);font-size:.93rem}
+.etq{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0 0 10px}
+.prenom input{width:100%;border:2px solid var(--line);border-radius:14px;padding:13px 15px;font-size:1.08rem;background:#fbfbff;transition:border-color .15s}
+.prenom input:focus{border-color:var(--indigo);background:#fff;outline:none;box-shadow:0 0 0 4px rgba(79,70,229,.15)}
+.prenom .aide{color:var(--muted);font-size:.85rem;margin-top:6px}
+.seance{border:2px solid var(--line);border-radius:18px;padding:14px;margin-top:12px;transition:border-color .15s,background .15s}
+.seance.oui{border-color:var(--ok);background:linear-gradient(0deg,#fff,var(--ok-l))}
+.seance.reserve{border-color:var(--res);background:linear-gradient(0deg,#fff,var(--res-l))}
+.seance.non{border-color:var(--non);background:linear-gradient(0deg,#fff,var(--non-l))}
+.s-t{display:flex;gap:12px;align-items:flex-start}
+.cal{width:56px;flex:none;border-radius:14px;overflow:hidden;text-align:center;background:#fff;border:1.5px solid var(--line)}
+.cal i{display:block;font-style:normal;background:var(--indigo);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:2px 0}
+.cal b{display:block;font-size:1.45rem;line-height:1.35}
+.s-i{flex:1;min-width:0}
+.s-i .h{font-weight:800;font-size:1.08rem}
+.s-i .d{color:var(--ink-2);font-size:.93rem}
+.pres{display:inline-flex;align-items:center;gap:8px;margin-top:8px;border-radius:999px;padding:5px 12px;font-size:.88rem;font-weight:750}
+.pres::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor}
+.pres.deja{background:var(--ok-l);color:#0b6b49}.pres.aucune{background:#fff1f2;color:#9f1239}.pres.inc{background:#f1f0f8;color:var(--muted)}
+.besoin{font-size:.88rem;color:var(--ink-2);margin-top:6px}
+.choix{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.choix button{border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 6px;font-weight:800;font-size:.93rem;min-height:52px;transition:transform .08s,background .15s,border-color .15s,color .15s}
+.choix button:active{transform:scale(.97)}
+.choix button[data-v=oui]:hover{border-color:var(--ok)}.choix button[data-v=reserve]:hover{border-color:var(--res)}.choix button[data-v=non]:hover{border-color:var(--non)}
 .choix button[aria-pressed=true][data-v=oui]{background:var(--ok);border-color:var(--ok);color:#fff}
 .choix button[aria-pressed=true][data-v=reserve]{background:var(--res);border-color:var(--res);color:#fff}
 .choix button[aria-pressed=true][data-v=non]{background:var(--non);border-color:var(--non);color:#fff}
-.interdit{background:#fde8e8;color:#991b1b;border:2px solid #dc2626;border-radius:12px;padding:9px 12px;font-weight:700;margin-bottom:6px}
-.envoi{background:linear-gradient(120deg,#15803d,#0f766e);color:#fff;border:0;border-radius:14px;padding:14px 22px;font-size:1.05rem;font-weight:800;min-height:52px}
-.envoi:disabled{opacity:.6}
-.msg{border-radius:11px;padding:10px 14px}.msg.ok{background:var(--okl);color:#14532d;border:1px solid var(--ok)}.msg.err{background:var(--nonl);color:#8f1d1d;border:1px solid var(--non)}
-.erreurs{background:var(--nonl);color:#8f1d1d;border:1px solid var(--non);border-radius:11px;padding:10px 14px}.erreurs ul{margin:4px 0 0;padding-left:18px}
-.pill{display:inline-block;border-radius:99px;padding:2px 10px;font-size:.8rem;font-weight:750;background:#eef2ff;color:#312e81;margin-right:4px}
+@media (max-width:420px){.choix{grid-template-columns:1fr}.choix button{min-height:48px}}
+textarea{width:100%;min-height:76px;border:2px solid var(--line);border-radius:14px;padding:12px 14px;resize:vertical;background:#fbfbff}
+textarea:focus{border-color:var(--indigo);outline:none;box-shadow:0 0 0 4px rgba(79,70,229,.15)}
+.interdit{color:#9f1239;font-size:.85rem;font-weight:700;margin:0 0 8px}
+.barre{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:rgba(244,243,251,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.barre .in{max-width:640px;margin:0 auto;display:flex;gap:12px;align-items:center}
+.barre .etat{flex:1;font-size:.88rem;color:var(--muted)}.barre .etat b{color:var(--ink)}
+.envoi{background:linear-gradient(120deg,#4f46e5,#0f766e);color:#fff;border:0;border-radius:16px;padding:14px 22px;font-size:1.02rem;font-weight:850;min-height:52px;box-shadow:0 8px 20px rgba(67,56,202,.28)}
+.envoi:disabled{opacity:.55;box-shadow:none}
+.erreurs{background:var(--non-l);color:#8f1d2c;border-radius:16px;padding:12px 16px;font-weight:600}
+.erreurs ul{margin:4px 0 0;padding-left:18px;font-weight:500}
+.msg{border-radius:16px;padding:12px 16px;background:var(--non-l);color:#8f1d2c}
+.merci{text-align:center;padding:26px 18px}
+.merci .rond{width:64px;height:64px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,#22c55e,#0f766e);display:flex;align-items:center;justify-content:center}
+.merci .rond svg{width:32px;height:32px}
+.merci h2{margin:0;font-size:1.5rem}
+.merci p{color:var(--ink-2);margin:8px auto 0;max-width:440px}
+.recap{display:flex;flex-direction:column;gap:8px;margin-top:16px;text-align:left}
+.recap div{display:flex;justify-content:space-between;gap:10px;align-items:center;border-radius:14px;padding:11px 14px;font-weight:650}
+.recap .oui{background:var(--ok-l);color:#0b6b49}.recap .reserve{background:var(--res-l);color:#8a4b03}.recap .non{background:var(--non-l);color:#8f1d2c}
+.recap em{font-style:normal;font-weight:850;white-space:nowrap}
+.lien{background:none;border:0;color:var(--indigo);font-weight:700;text-decoration:underline;margin-top:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div class="bandeau"><div class="in"><h1>Renfort AESH pour une épreuve</h1><p>Indiquez votre prénom et, pour chaque séance, si vous êtes disponible. La coordination vous confirme ensuite qui vient.</p></div></div>
+<header class="tete"><div class="in"><div class="sur">Renfort AESH</div><h1 id="titre">Bonjour,</h1><p id="intro">Chargement de la demande…</p></div></header>
 <main id="vue" tabindex="-1"><p>Chargement…</p></main>
 <script type="module">
 const firebaseConfig = { apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain:"coordination-pedagogie.firebaseapp.com",
@@ -70,7 +111,7 @@ const dateLongue = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? new Date(iso +
 const avecDelai = (p, ms) => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('délai'), { code: 'delai' })), ms); })]).finally(() => clearTimeout(t)); };
 const nouvelId = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = crypto.getRandomValues(new Uint8Array(8)); return 'reponse_' + Date.now().toString(36) + [...r].map(x => a[x % 36]).join(''); };
 const NATURES = { ccf: 'CCF', ccfblanc: 'CCF blanc', bacblanc: 'Bac blanc', evaluation: 'Évaluation', sortie: 'Sortie' };
-const LIB = { oui: '✓ Disponible', reserve: '≈ Sous réserve', non: '✕ Pas disponible' };
+const LIB = { oui: 'Disponible', reserve: 'Sous réserve', non: 'Pas disponible' };
 /* Le prénom seul : lettres, espace, tiret, apostrophe. */
 const RE_PRENOM = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ' -]{1,29}$/;
 
@@ -89,25 +130,49 @@ async function charger(){
   rendre();
 }
 const seances = () => (S.d && Array.isArray(S.d.seances) ? S.d.seances : []);
+const JOURS_C = ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'];
+const jourC = iso => JOURS_C[(new Date(iso + 'T12:00:00').getDay() + 6) % 7];
+/* Ce que l'enseignant a dit de la présence habituelle d'une AESH à ce cours. */
+function presence(s){
+  const n = s.dejaPresentes;
+  if (n == null || n < 0) return '<span class="pres inc">Présence habituelle d’une AESH non précisée</span>';
+  if (n === 0) return '<span class="pres aucune">Aucune AESH à ce cours sur ce créneau</span>';
+  return `<span class="pres deja">${n === 1 ? 'Une AESH est déjà présente' : n + ' AESH sont déjà présentes'} à ce cours</span>`;
+}
+const besoin = s => { const r = s.renfort ?? s.nbAesh; return +r > 0 ? `${r} AESH en renfort ${+r > 1 ? 'sont demandées' : 'est demandée'}` : 'Renfort à confirmer'; };
+const nomEp = d => [NATURES[d.nature] || d.natureAutre || 'Épreuve', d.matiere].filter(Boolean).join(' · ');
+const COCHE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function rendre(){
   const v = $('#vue'), a = document.activeElement, id = a && a.id;
-  if (S.etat !== 'ok'){ v.innerHTML = S.etat === 'chargement' ? '<p>Chargement…</p>' : `<div class="msg err">${esc(S.etat)}</div>`; return; }
-  if (S.envoye){ v.innerHTML = `<div class="msg ok" role="status" id="ok" tabindex="-1"><h2 style="margin:0 0 4px">✓ Merci ${esc(S.envoye.prenom)}</h2><p>Votre réponse est arrivée à la coordination : ${S.envoye.seances.map(s => `${esc(dateLongue(s.date))} ${hFr(s.debut)} — ${LIB[s.dispo]}`).join(' ; ')}.</p><p>Vous serez prévenu(e) si vous êtes retenu(e).</p></div><p><button class="envoi" style="background:#fff;color:#1e1b4b;border:1.5px solid #c9d1da" data-a="encore">Modifier ma réponse</button></p>`; return; }
-  const d = S.d, nat = NATURES[d.nature] || d.natureAutre || 'Épreuve';
-  v.innerHTML = `<section class="carte"><h2>${esc(nat)} · ${esc(d.matiere || '')}</h2>
-      <p style="margin:0">${(d.classes || []).map(c => `<span class="pill">${esc(c.libelle || c.classe)}</span>${c.intitule ? `<span class="aide">« ${esc(c.intitule)} »</span> ` : ''}`).join(' ')}</p></section>
-    ${S.erreurs.length ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>À compléter</b><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
-    <section class="carte"><h2>1. Votre prénom</h2>
-      <div class="champ"><label for="prenom">Prénom</label><input type="text" id="prenom" data-c="prenom" maxlength="30" autocomplete="given-name" value="${esc(S.prenom)}"><span class="aide">Le prénom seul, sans nom de famille.</span></div></section>
-    <section class="carte"><h2>2. Vos disponibilités</h2><p class="aide" style="margin:0">Pour chaque séance, choisissez une réponse.</p>
-      ${seances().map((s, i) => `<div class="seance"><div class="t">${esc(dateLongue(s.date))} · ${hFr(s.debut)}–${hFr(s.fin)}</div>
-        <div class="s">${esc(s.libelle || s.classe)}${s.intitule ? ' · ' + esc(s.intitule) : ''}${s.salle ? ' · salle ' + esc(s.salle) : ''}${s.tiersTemps ? ' · tiers temps compris' : ''} · ${esc(s.nbAesh)} AESH demandé${+s.nbAesh > 1 ? 's' : ''}</div>
-        <div class="choix" role="group" aria-label="Disponibilité pour le ${esc(dateLongue(s.date))}">${Object.entries(LIB).map(([k, l]) => `<button type="button" id="r${i}-${k}" data-a="dispo" data-i="${i}" data-v="${k}" aria-pressed="${S.rep[i] === k}">${l}</button>`).join('')}</div></div>`).join('')}</section>
-    <section class="carte"><h2>3. Un mot pour la coordination <span class="aide" style="font-weight:400">(facultatif)</span></h2>
-      <div class="interdit">⛔ Aucun nom ni prénom d’élève.</div>
-      <div class="champ"><label for="commentaire">Commentaire</label><textarea id="commentaire" data-c="commentaire" maxlength="300">${esc(S.commentaire)}</textarea><span class="aide">Par exemple : « disponible seulement jusqu’à 10h ».</span></div></section>
-    <div><button type="button" class="envoi" id="envoyer" data-a="envoyer" ${S.envoi === 'encours' ? 'disabled' : ''}>📨 Envoyer ma réponse à la coordination</button></div>
-    ${S.envoi && S.envoi !== 'encours' ? `<div class="msg err" role="alert">${esc(S.envoi)}</div>` : ''}`;
+  if (S.etat !== 'ok'){ $('#intro').textContent = S.etat === 'chargement' ? 'Chargement de la demande…' : ''; v.innerHTML = S.etat === 'chargement' ? '' : `<div class="carte msg">${esc(S.etat)}</div>`; return; }
+  const d = S.d, cls = (d.classes || []).map(c => c.libelle || c.classe).join(', ');
+  if (S.envoye){
+    $('#titre').textContent = 'Merci ' + S.envoye.prenom;
+    $('#intro').textContent = 'Votre réponse est bien arrivée à la coordination.';
+    v.innerHTML = `<section class="carte merci" role="status" id="ok" tabindex="-1"><div class="rond">${COCHE}</div><h2>Merci ${esc(S.envoye.prenom)}</h2>
+      <p>Votre aide compte beaucoup pour les élèves. Vous serez prévenu(e) prochainement si vous êtes retenu(e).</p><p style="margin-top:6px">Prenez soin de vous.</p>
+      <div class="recap">${S.envoye.seances.map(s => `<div class="${s.dispo}"><span>${esc(dateLongue(s.date))} · ${hFr(s.debut)}–${hFr(s.fin)}</span><em>${LIB[s.dispo]}</em></div>`).join('')}</div>
+      ${S.envoye.commentaire ? `<p style="margin-top:12px"><b>Votre mot :</b> ${esc(S.envoye.commentaire)}</p>` : ''}
+      <button type="button" class="lien" data-a="encore">Modifier ma réponse</button></section>`;
+    return;
+  }
+  $('#titre').textContent = 'Bonjour,';
+  $('#intro').textContent = `Pour l’épreuve ${nomEp(d)} (${cls}), nous avons besoin d’un renfort AESH. Pouvez-vous nous indiquer vos disponibilités ?`;
+  const l = seances(), faits = l.filter((_, i) => S.rep[i]).length;
+  v.innerHTML = `<section class="carte epreuve"><div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg></div><div><b>${esc(nomEp(d))}</b><span>${esc(cls)}${(d.classes || []).some(c => c.intitule) ? ' · ' + esc((d.classes || []).map(c => c.intitule).filter(Boolean).join(' / ')) : ''}</span></div></section>
+    ${S.erreurs.length ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1">À compléter<ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+    <section class="carte prenom"><p class="etq">Votre prénom</p><input type="text" id="prenom" data-c="prenom" maxlength="30" autocomplete="given-name" placeholder="Votre prénom" value="${esc(S.prenom)}" aria-label="Votre prénom"><div class="aide">Le prénom seul suffit.</div></section>
+    <section class="carte"><p class="etq">Vos disponibilités</p>
+      ${l.map((s, i) => `<div class="seance ${S.rep[i] || ''}"><div class="s-t"><div class="cal" aria-hidden="true"><i>${esc(jourC(s.date))}</i><b>${parseInt(String(s.date).slice(8), 10)}</b></div>
+        <div class="s-i"><div class="h">${esc(dateLongue(s.date))} · ${hFr(s.debut)}–${hFr(s.fin)}</div>
+          <div class="d">${esc(s.libelle || s.classe)}${s.salle ? ' · salle ' + esc(s.salle) : ''}${s.tiersTemps ? ' · tiers temps compris' : ''}</div>
+          ${presence(s)}<div class="besoin">${esc(besoin(s))}</div></div></div>
+        <div class="choix" role="group" aria-label="Disponibilité pour le ${esc(dateLongue(s.date))}">${Object.entries(LIB).map(([k, t]) => `<button type="button" id="r${i}-${k}" data-a="dispo" data-i="${i}" data-v="${k}" aria-pressed="${S.rep[i] === k}">${t}</button>`).join('')}</div></div>`).join('')}</section>
+    <section class="carte"><p class="etq">Un mot pour la coordination <span style="text-transform:none;letter-spacing:0;font-weight:500">(facultatif)</span></p>
+      <p class="interdit">Aucun nom ni prénom d’élève.</p><textarea id="commentaire" data-c="commentaire" maxlength="300" placeholder="Par exemple : disponible seulement jusqu’à 10h" aria-label="Commentaire">${esc(S.commentaire)}</textarea></section>
+    ${S.envoi && S.envoi !== 'encours' ? `<div class="msg" role="alert">${esc(S.envoi)}</div>` : ''}
+    <div class="barre"><div class="in"><span class="etat"><b>${faits} / ${l.length}</b> séance${l.length > 1 ? 's' : ''} renseignée${l.length > 1 ? 's' : ''}</span>
+      <button type="button" class="envoi" id="envoyer" data-a="envoyer" ${S.envoi === 'encours' ? 'disabled' : ''}>Envoyer ma réponse</button></div></div>`;
   if (id){ const el = document.getElementById(id); if (el) el.focus({ preventScroll: true }); }
 }
 function controle(){
