@@ -113,6 +113,27 @@ textarea{min-height:90px;resize:vertical}
 .grille{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px}
 .grille .large{grid-column:span 2}
 @media (max-width:640px){.grille{grid-template-columns:1fr 1fr}}
+.creneau-info{display:inline-flex;gap:6px;align-items:center;background:#f3f4f6;border-radius:10px;padding:6px 11px;font-size:.92rem;color:var(--ink-2)}
+.info-ind{background:#eef6ff;color:#1e3a8a;border-radius:10px;padding:6px 10px;font-size:.9rem;margin-top:6px}
+.classe4{border:2px solid var(--line-2);border-radius:16px;padding:12px 14px;margin-bottom:12px;background:#fff}
+.classe4.courante{border-color:var(--e4);box-shadow:0 4px 16px rgba(194,65,12,.12)}
+.classe4.faite{background:#f6fbf7;border-color:#9fd8b4}.classe4.avenir4{opacity:.6}
+.classe4-t{display:flex;gap:12px;align-items:center}
+.num-cl{width:36px;height:36px;border-radius:50%;background:var(--e4);color:#fff;font-weight:850;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.faite .num-cl{background:var(--ok-line)}.avenir4 .num-cl{background:var(--line)}
+.seance-ok{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#f6fbf7;border:1px solid #cfe9d8;border-radius:10px;padding:7px 11px;margin-top:8px;font-size:.93rem}
+.question{background:var(--e4l);border:2px dashed var(--e4);border-radius:14px;padding:12px 14px;margin-top:10px}
+.question .aide{display:block}
+.gros-mod{font-size:.95rem;min-height:42px;align-self:center}
+.editeur{border-top:1px dashed #f2c9ad;margin-top:10px;padding-top:10px}
+.guide-p{margin:0 0 8px;font-weight:650}
+.verifier{background:#fff;border:1.5px solid #f2c9ad;border-radius:12px;padding:10px 12px;margin-top:10px}
+.ver-l{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.ver-n{min-width:120px;font-weight:650;font-size:.93rem}
+.interrupteur{display:inline-flex;gap:6px;align-items:center;font-weight:650}.interrupteur input{width:20px;height:20px}
+.rond-b{width:40px;padding:0;font-size:1.2rem}.nb-aff{min-width:30px;text-align:center;font-size:1.25rem}
+.pied-s{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.oubli{border:1.5px dashed var(--line);border-radius:12px;padding:9px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .mo{font-weight:600;font-size:.78rem;color:var(--e4);margin-left:4px}
 .auto{background:var(--e4l);border-radius:10px;padding:7px 11px;font-size:.92rem;margin-top:6px}
 .tiers{display:flex;align-items:center;gap:8px;font-size:.93rem;margin-top:8px;flex-wrap:wrap}
@@ -198,11 +219,11 @@ function diplomeDe(k){
 
 /* ═══════════════ état ═══════════════ */
 const ETAPES = [
-  { n: 1, t: 'Sélectionnez votre matière', c: '--e1', g: 'Sélectionnez votre matière, puis validez.' },
-  { n: 2, t: 'Sélectionnez la ou les classes', c: '--e2', g: 'Sélectionnez une classe. Ajoutez-en une autre si besoin.' },
-  { n: 3, t: 'Indiquez l’épreuve', c: '--e3', g: 'Choisissez le type d’épreuve. Le reste est facultatif.' },
-  { n: 4, t: 'Programmez les dates', c: '--e4', g: 'Vérifiez la date proposée. Modifiez-la si besoin. Ajoutez une séance pour une autre date.' },
-  { n: 5, t: 'Ajoutez une observation', c: '--e5', g: 'Facultatif. Aucun nom d’élève.' },
+  { n: 1, t: 'Indiquez la matière', c: '--e1', g: 'Sélectionnez votre matière. Elle n’est pas dans la liste ? Choisissez « Autre… ».' },
+  { n: 2, t: 'Indiquez la ou les classes concernées', c: '--e2', g: 'Sélectionnez une classe. Ajoutez-en une autre si besoin.' },
+  { n: 3, t: 'Indiquez le type d’épreuve', c: '--e3', g: 'Choisissez le type. Le nom de l’épreuve est facultatif.' },
+  { n: 4, t: 'Définissez les modalités de l’épreuve', c: '--e4', g: 'Classe par classe : vérifiez la séance proposée, modifiez si besoin, validez.' },
+  { n: 5, t: 'Indiquez vos observations', c: '--e5', g: 'Facultatif. Aucun nom d’élève.' },
   { n: 6, t: 'Vérifiez et envoyez', c: '--e6', g: 'Relisez. Modifiez si besoin. Envoyez.' }
 ];
 const S = {
@@ -316,7 +337,6 @@ function controle(n){
   const f = S.f, e = [];
   if (n === 1 && !matiereF()) e.push('Choisissez la matière (ou « Autre… » et écrivez-la).');
   if (n === 2 && !f.groupes.length) e.push('Choisissez au moins une classe.');
-  if (n === 2) f.groupes.forEach(g => { if (!/^\d+$/.test(String(g.nb ?? '').trim()) || +g.nb > 12) e.push(`${libGroupe(g)} : le nombre d’AESH souhaité doit être un nombre entier de 0 à 12.`); });
   if (n === 3){
     if (!f.nature) e.push('Choisissez le type d’épreuve.');
   }
@@ -361,6 +381,7 @@ function valider(n){
   S.erreurs = controle(n);
   if (S.erreurs.length){ rendre(); $('#erreurs')?.focus(); return; }
   S.ok[n] = true;
+  if (n === 4){ S.f.seances.forEach(x => { x.valide = true; x.ouvert = false; x.propose = false; }); S.f.groupes.forEach(g => { g.fini = true; }); }
   /* Une classe ajoutée ou retirée peut rendre les séances incomplètes : on les rouvre. */
   if (n === 2 && S.ok[4] && controle(4).length) S.ok[4] = false;
   if (n === 1 && S.ok[4]) S.f.seances.forEach(s => { if (!s.heureManuelle && s.date){ const c = coursDuJourG(groupe(s.classe), s.date)[0]; if (c) poserCours(s, c); } });
@@ -408,7 +429,7 @@ function htmlEtape(E){
 function resume(n){
   const f = S.f;
   if (n === 1) return `<b>${esc(matiereF())}</b>`;
-  if (n === 2) return f.groupes.map(g => `<b>${esc(libGroupe(g))}</b> · ${esc(g.nb)} AESH souhaité${+g.nb > 1 ? 's' : ''}`).join('<br>');
+  if (n === 2) return f.groupes.map(g => { const c = cG(g); return `<b>${esc(libGroupe(g))}</b>${c.total ? ` · estimation ${c.propose} AESH` : ''}`; }).join('<br>');
   if (n === 3) return `<b>${esc(natureTxt())}</b>${formeTxt() ? ' · ' + esc(formeTxt()) : ''}${f.groupes.some(g => nettoie(g.intitule, 120)) ? '<br>' + f.groupes.filter(g => nettoie(g.intitule, 120)).map(g => `${esc(libGroupe(g))} : « ${esc(nettoie(g.intitule, 120))} »`).join('<br>') : ''}`;
   if (n === 4) return pluriel(f.seances.length, 'séance', 'séances') + ' : ' + triees().map(s => `${esc(dateLongue(s.date))} ${hFr(s.debut)}–${hFr(finS(s))}`).join(' · ');
   if (n === 5) return f.observations || f.autreDemande ? esc((f.observations + ' ' + f.autreDemande).trim().slice(0, 140)) + ((f.observations + f.autreDemande).length > 140 ? '…' : '') : '<span class="aide">Aucune observation.</span>';
@@ -436,11 +457,11 @@ function corps2(){
 function htmlSemaine(g, avecBouton){
   if (!g.classes.length) return '';
   const l = coursSemaineG(g);
-  const note = avecBouton ? '' : '<p class="aide" style="margin:6px 0 0">ℹ️ <b>Créneau proposé, pas imposé.</b> À l’étape 4, vous pourrez choisir un autre jour, une autre heure ou une autre salle.</p>';
+  const note = '<p class="info-ind" style="margin:6px 0 0">ℹ️ Créneau indiqué <b>à titre informatif</b>, modifiable à l’étape 4 : autre jour, autre heure ou autre salle.</p>';
   if (!l.length) return `<div class="semaine"><span class="leg">Cours de ${esc(matiereF())} dans la semaine</span><p class="aide">Aucun cours de ${esc(matiereF())} dans l’emploi du temps de cette classe : vous choisirez l’heure vous-même.</p>${note}</div>`;
-  return `<div class="semaine"><span class="leg">🗓 Cours de ${esc(matiereF())} dans la semaine</span><div class="cr">${l.map(c => {
+  return `<div class="semaine"><span class="leg">🗓 Vos cours de ${esc(matiereF())} avec cette classe</span><div class="cr">${l.map(c => {
     const p = avecBouton ? prochaine(c, g) : '';
-    return `<span class="creneau"><span><b>${JOURS[c.j]} ${hFr(c.d)}–${hFr(c.f)}</b>${SEM[c.sem] ? ' · ' + SEM[c.sem] : ''}${c.salle && c.salle.length ? ' · ' + esc(c.salle.join(', ')) : ''}${avecBouton ? '' : '<span class="modifiable">modifiable plus tard</span>'}</span>${avecBouton && p ? `<button type="button" class="btn pt" data-a="sur-cours" data-v="${esc(g.id)}|${esc(c.id)}|${p}">＋ Ajouter le ${esc(dateLongue(p).replace(/^\S+ /, ''))}</button>` : ''}</span>`; }).join('')}</div>${note}</div>`;
+    return `<span class="creneau-info"><span><b>${JOURS[c.j]} ${hFr(c.d)}–${hFr(c.f)}</b>${SEM[c.sem] ? ' · ' + SEM[c.sem] : ''}${c.salle && c.salle.length ? ' · ' + esc(c.salle.join(', ')) : ''}</span>${avecBouton && p ? `<button type="button" class="btn pt" data-a="sur-cours" data-v="${esc(g.id)}|${esc(c.id)}|${p}">＋ Ajouter le ${esc(dateLongue(p).replace(/^\S+ /, ''))}</button>` : ''}</span>`; }).join('')}</div>${note}</div>`;
 }
 function htmlGroupe(g){
   const cls = g.classes, etats = cls.map(k => S.elevesEtat[k]), c = cls.length ? comptesGroupe(cls) : null, k = idc(g.id);
@@ -461,8 +482,7 @@ function htmlGroupe(g){
       ${c.besoins.length ? `<p class="lig"><b>Besoins essentiels :</b> ${c.besoins.map(([n, v]) => `${esc(n)} ×${v}`).join(' · ')}</p>` : ''}`;
   const prop = g.autre || (c && c.total) ? `<div class="prop">${c && c.total ? `<div class="gros">Estimation proposée : <b>${c.propose}</b> AESH par séance</div>
       <div class="aide">${c.ai ? `${pluriel(c.ai, 'élève', 'élèves')} en AESH individualisée = ${c.ai} AESH` : ''}${c.ai && c.autres ? ' · ' : ''}${c.autres ? `${pluriel(c.autres, 'autre élève suivi', 'autres élèves suivis')} = ${Math.ceil(c.autres / 3)} AESH (1 pour 3)` : ''}</div>` : ''}
-      <div class="q"><b>${c && c.total ? 'Cela vous convient-il ?' : 'Combien d’AESH souhaitez-vous ?'}</b>${c && c.total ? `<button type="button" class="btn pt ${String(g.nb) === String(c.propose) ? 'ok' : ''}" style="--c:var(--e6)" data-a="nb-oui" data-v="${esc(g.id)}">Oui</button><span class="aide">ou un autre nombre :</span>` : ''}
-      <input type="number" id="nb-${k}" data-g="${esc(g.id)}" min="0" max="12" inputmode="numeric" value="${esc(g.nb)}" aria-label="Nombre d’AESH souhaité pour ${esc(libGroupe(g))}"></div></div>` : '';
+      <div class="aide" style="margin-top:6px">👉 Vous confirmerez le nombre d’AESH pour chaque séance à l’étape 4.</div></div>` : '';
   return `<div class="carte"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h3>${esc(libGroupe(g))}${cls.length > 1 ? ' <span class="tag">ensemble</span>' : ''}${pole ? ` <span class="tag" style="background:var(--e3l);color:var(--e3)">pôle ${esc(libPole(pole))}</span>` : ''}</h3><button type="button" class="btn lien" data-a="retirer-groupe" data-v="${esc(g.id)}">✕ Retirer</button></div>
     <div class="champ" style="margin-top:8px;max-width:340px"><label for="dip-${k}">Diplôme</label><input type="text" id="dip-${k}" data-g="${esc(g.id)}" data-gk="diplome" maxlength="60" value="${esc(g.diplome)}"></div>
     ${corps}${prop}${majTxt(cls) ? `<p class="aide" style="margin:6px 0 0">Besoins mis à jour par la coordination le ${majTxt(cls)}.</p>` : ''}${htmlSemaine(g, false)}</div>`;
@@ -477,44 +497,76 @@ function corps3(){
     <div class="champ" style="margin-top:6px"><span class="leg">Nommez l’épreuve <span class="aide">(facultatif — le nom peut changer d’une classe à l’autre)</span></span></div>
     ${f.groupes.map((g, i) => `<div class="champ"><label for="int-${idc(g.id)}">${esc(libGroupe(g))}</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="int-${idc(g.id)}" data-g="${esc(g.id)}" data-gk="intitule" maxlength="120" value="${esc(g.intitule)}" style="flex:1;min-width:220px">${i === 0 && f.groupes.length > 1 ? '<button type="button" class="btn pt" data-a="int-tous">Même nom pour toutes les classes</button>' : ''}</div></div>`).join('')}`;
 }
-/* — 4. Séances — */
+/* — 4. Modalités de l'épreuve : un mini-parcours, classe par classe ————————————————
+   Pour la classe en cours : une séance déjà proposée (son prochain cours), « À vérifier » (durée, tiers temps,
+   nombre d'AESH) toujours visible, « ✎ Modifier » pour la date, l'heure et la salle, puis « ✓ Valider cette séance ».
+   Ensuite : « Souhaitez-vous ajouter une autre séance pour cette classe ? » → oui / classe suivante.
+   Rien ne bloque : les classes déjà faites restent modifiables, une classe oubliée s'ajoute à part. */
+const seancesDe = g => S.f.seances.filter(s => s.classe === g.id);
+const classeCourante = () => S.f.groupes.find(g => !g.fini);
 function corps4(){
-  const f = S.f;
-  return f.groupes.map(g => `<div class="groupe4"><h3>${esc(libGroupe(g))}</h3>${htmlSemaine(g, true)}
-      ${f.seances.filter(s => s.classe === g.id).map(htmlSeance).join('')}
-      <button type="button" class="btn" style="margin-top:8px" id="aj-${idc(g.id)}" data-a="ajout" data-v="${esc(g.id)}">＋ Ajouter une séance à une autre date</button></div>`).join('')
-    + '<p class="aide">Autant de séances que nécessaire : plusieurs dans la semaine, ou sur plusieurs semaines.</p>';
+  const gs = S.f.groupes, cur = classeCourante();
+  return gs.map((g, i) => g === cur ? blocClasseCourante(g, i) : blocClasseResume(g, i, !!g.fini)).join('')
+    + `<div class="oubli"><b>Une classe oubliée ?</b> <button type="button" class="btn pt" data-a="aller" data-v="2">＋ Ajouter une classe</button></div>`;
 }
-function htmlSeance(s){
-  const g = groupe(s.classe), i = S.f.seances.indexOf(s), cs = coursDuJourG(g, s.date), c = cG(g), al = alertesDateG(g, s.date);
-  const fin = finS(s), id = x => `s${s.uid}-${x}`, dur = +s.duree || 0;
-  const durees = [...new Set([...DUREES, dur].filter(Boolean))].sort((a, b) => a - b);
+function ligneSeance(s){
+  const fin = finS(s), dur = +s.duree || 0;
+  return `${s.date ? `<b>${esc(dateLongue(s.date))}</b>` : '<span class="manque">date à choisir</span>'}${RE_HEURE.test(s.debut) ? ` · ${hFr(s.debut)}–${hFr(fin)}` : ''}${dur ? ` · ${libDuree(dur)}${s.tiers ? ' + tiers temps' : ''}` : ''}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh || 0)} AESH</b>`;
+}
+function blocClasseResume(g, i, fait){
+  const l = seancesDe(g), n = S.f.groupes.length;
+  return `<div class="classe4 ${fait ? 'faite' : 'avenir4'}"><div class="classe4-t"><span class="num-cl">${fait ? '✓' : i + 1}</span><div style="flex:1"><b>Classe ${i + 1} sur ${n} · ${esc(libGroupe(g))}</b>
+      <div class="aide">${fait ? l.map((s, k) => `Séance ${k + 1} : ${ligneSeance(s)}`).join('<br>') : 'À faire ensuite.'}</div></div>
+      ${fait ? `<button type="button" class="btn pt mod" style="--c:var(--e4)" data-a="classe-rouvrir" data-v="${esc(g.id)}">✎ Modifier</button>` : ''}</div></div>`;
+}
+function blocClasseCourante(g, i){
+  const l = seancesDe(g), n = S.f.groupes.length, active = l.find(s => !s.valide);
+  const faites = l.filter(s => s.valide && s !== active);
+  return `<div class="classe4 courante"><div class="classe4-t"><span class="num-cl">${i + 1}</span><div style="flex:1"><b>Classe ${i + 1} sur ${n} · ${esc(libGroupe(g))}</b>
+      <div class="aide">${esc(nomEpreuve(g))}</div></div></div>
+    ${faites.map(s => `<div class="seance-ok"><span>✓ Séance ${l.indexOf(s) + 1} : ${ligneSeance(s)}</span><button type="button" class="btn lien" style="--c:var(--e4)" data-a="seance-rouvrir" data-v="${s.uid}">✎ Modifier</button></div>`).join('')}
+    ${active ? carteSeance(active, l.indexOf(active) + 1) : `<div class="question"><b>Souhaitez-vous ajouter une autre séance pour ${esc(libGroupe(g))} ?</b>
+      <span class="aide">Dans la même semaine ou à une autre date.</span>
+      <div class="puces" style="margin-top:8px"><button type="button" class="btn pt" data-a="ajout" data-v="${esc(g.id)}">＋ Oui, ajouter une séance</button>
+      <button type="button" class="btn pt ok" style="--c:var(--e4)" data-a="classe-finie" data-v="${esc(g.id)}">${i + 1 < n ? `Non, passer à ${esc(libGroupe(S.f.groupes[i + 1]))} →` : 'Non, c’est terminé ✓'}</button></div></div>`}</div>`;
+}
+/* Les 3 prochaines dates de cours de la matière (hors vacances et PFMP) : un clic suffit. */
+function prochainesDates(g){
+  const out = [];
+  coursSemaineG(g).forEach(c => { let d = isoLocal();
+    for (let i = 0, n = 0; i < 120 && n < 3; i++, d = ajoute(d, 1)) if (jourSemaine(d) === c.j && S.C.coursSemaine(c, lundiDe(d)) && !alertesDateG(g, d).length){ out.push([d, c]); n++; } });
+  return out.sort((a, b) => a[0].localeCompare(b[0]) || a[1].d.localeCompare(b[1].d)).slice(0, 4);
+}
+function carteSeance(s, k){
+  const g = groupe(s.classe), cs = coursDuJourG(g, s.date), c = cG(g), al = alertesDateG(g, s.date), fin = finS(s), id = x => `s${s.uid}-${x}`, dur = +s.duree || 0;
+  const err = S.erreurs.length || s.essai ? controleSeance(s) : [], edit = s.ouvert || err.length || !s.date;
   let auto = '';
-  if (s.date && cs.length === 1) auto = `<div class="auto">🕘 Ce jour-là, cours de ${esc(cs[0].lib)} de <b>${hFr(cs[0].d)} à ${hFr(cs[0].f)}</b>${cs[0].salle && cs[0].salle.length ? ' en ' + esc(cs[0].salle.join(', ')) : ''}${s.heureManuelle ? ` <button type="button" class="btn lien" data-a="cours" data-v="${s.uid}|0">Reprendre ce créneau</button>` : ' : créneau repris.'}</div>`;
-  else if (s.date && cs.length > 1) auto = `<div class="auto">🕘 Ce jour-là, ${cs.length} cours de ${esc(cs[0].lib)} : ${cs.map((x, j) => `<button type="button" class="btn pt ${!s.heureManuelle && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="cours" data-v="${s.uid}|${j}">${hFr(x.d)}–${hFr(x.f)}</button>`).join(' ')}</div>`;
-  else if (s.date && matiereF() && g && g.classes.length) auto = `<div class="auto">Pas de cours de ${esc(matiereF())} ce jour-là : indiquez l’heure.</div>`;
-  const err = S.erreurs.length ? controleSeance(s) : [], ouvert = s.ouvert || err.length, k = numero(s), n = S.f.seances.filter(x => x.classe === s.classe).length;
-  const tete = `<div class="seance-t"><span class="num-ep" aria-hidden="true">${k}</span><div style="flex:1;min-width:0"><b>Épreuve n°${k}${n > 1 ? ' sur ' + n : ''} · ${esc(nomEpreuve(g))}</b>
-      <div class="seance-r">${s.date ? `<b>${esc(dateLongue(s.date))}</b>` : '<span class="manque">date à choisir</span>'}${RE_HEURE.test(s.debut) ? ` · ${hFr(s.debut)}–${hFr(fin)}` : ''}${dur ? ` · ${libDuree(dur)}${s.tiers ? ' + tiers temps' : ''}` : ''}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh || 0)} AESH</b></div>
-      ${s.propose && !ouvert ? '<div class="aide">Date proposée d’après votre prochain cours. Vous préférez un autre jour ? Cliquez « Modifier cette date ».</div>' : ''}</div>
-    <div class="seance-b">${ouvert ? (err.length ? '' : `<button type="button" class="btn pt ok" style="--c:var(--e4)" data-a="replier" data-v="${s.uid}">✓ Valider cette date</button>`) : `<button type="button" class="btn pt mod" style="--c:var(--e4)" id="${id('m')}" data-a="deplier" data-v="${s.uid}">✎ Modifier cette date</button>`}<button type="button" class="btn lien" style="--c:var(--err-ink)" id="${id('x')}" data-a="retirer" data-v="${s.uid}">✕ Retirer</button></div></div>
-    ${err.length ? `<div class="erreurs" style="margin:8px 0">À compléter : ${err.map(esc).join(' ')}</div>` : ''}`;
-  if (!ouvert) return `<div class="seance ferme">${tete}${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}</div>`;
-  return `<div class="seance ${err.length ? 'en-erreur' : ''}">${tete}
-    <div class="grille">
-      <div class="champ large"><label for="${id('date')}">Date <span class="mo">✎ modifiable</span></label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
-      <div class="champ"><label for="${id('debut')}">Début <span class="mo">✎</span></label><input type="time" id="${id('debut')}" data-s="${s.uid}" data-k="debut" value="${esc(s.debut)}" step="300"></div>
-      <div class="champ"><label for="${id('duree')}">Durée en minutes <span class="mo">✎</span></label><input type="number" id="${id('duree')}" data-s="${s.uid}" data-k="duree" min="5" max="600" step="5" inputmode="numeric" value="${esc(s.duree)}"><span class="aide">${dur ? '= ' + libDuree(dur) : ''}</span></div>
-      <div class="champ"><label for="${id('fin')}">Fin <span class="mo">✎</span></label><input type="time" id="${id('fin')}" data-s="${s.uid}" data-k="fin" value="${esc(fin)}" step="300"></div>
-      <div class="champ"><label for="${id('salle')}">Salle <span class="mo">✎</span></label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
-      <div class="champ large"><label for="${id('nb')}">Nombre d’AESH <span class="mo">✎</span></label><input type="number" id="${id('nb')}" data-s="${s.uid}" data-k="nbAesh" min="0" max="12" value="${esc(s.nbAesh)}" inputmode="numeric"><span class="aide">Proposition : ${c.total ? c.propose : '—'}</span></div>
-    </div>
-    ${auto}
-    <div class="tiers"><span class="aide">Durée rapide :</span>${[60, 90, 120, 180, 240].map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button></div>
-    <div class="tiers">
-      <label><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> Tiers temps : +${tiersDe(dur)} min${c.amen && c.amen.tiers ? ` <span class="aide">(${pluriel(c.amen.tiers, 'élève concerné', 'élèves concernés')})</span>` : ''}</label></div>
-    ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}
-    ${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}</div>`;
+  if (s.date && cs.length === 1) auto = `🕘 Ce jour-là, cours de ${esc(cs[0].lib)} de ${hFr(cs[0].d)} à ${hFr(cs[0].f)}${s.heureManuelle ? ` <button type="button" class="btn lien" data-a="cours" data-v="${s.uid}|0">Reprendre ce créneau</button>` : ' : créneau repris.'}`;
+  else if (s.date && cs.length > 1) auto = `🕘 Ce jour-là, ${cs.length} cours : ${cs.map((x, j) => `<button type="button" class="btn pt ${!s.heureManuelle && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="cours" data-v="${s.uid}|${j}">${hFr(x.d)}–${hFr(x.f)}</button>`).join(' ')}`;
+  else if (s.date && g && g.classes.length) auto = `Pas de cours de ${esc(matiereF())} ce jour-là : indiquez l’heure.`;
+  const pd = g && g.classes.length ? prochainesDates(g) : [];
+  return `<div class="seance ${err.length ? 'en-erreur' : ''}" id="carte-${s.uid}"><div class="seance-t"><span class="num-ep">${k}</span><div style="flex:1;min-width:0"><b>Séance ${k}</b>
+      <div class="seance-r">${ligneSeance(s)}</div>
+      ${s.propose && !s.ouvert ? '<div class="info-ind">ℹ️ Proposée d’après votre cours, <b>à titre indicatif</b> : modifiable.</div>' : ''}</div>
+    ${edit ? '' : `<button type="button" class="btn mod gros-mod" style="--c:var(--e4)" id="${id('m')}" data-a="deplier" data-v="${s.uid}">✎ Modifier la date, l’heure ou la salle</button>`}</div>
+    ${edit ? `<div class="editeur"><p class="guide-p">${s.date ? 'Modifiez ce qui doit changer.' : 'Choisissez la date : le créneau du cours se remplit tout seul.'}</p>
+      ${pd.length ? `<div class="puces" style="margin-bottom:8px"><span class="aide" style="align-self:center">Vos prochains cours :</span>${pd.map(([d, x]) => `<button type="button" class="btn pt ${s.date === d && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="date-cours" data-v="${s.uid}|${d}|${esc(x.id)}">${esc(dateLongue(d).replace(/^(\S+) (\d+) (\S+)$/, (m0, j, n, mo) => j.slice(0, 3) + '. ' + n + ' ' + mo.slice(0, 4) + (mo.length > 4 ? '.' : '')))} ${hFr(x.d)}</button>`).join('')}</div>` : ''}
+      <div class="grille">
+        <div class="champ large"><label for="${id('date')}">Date</label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
+        <div class="champ"><label for="${id('debut')}">Début</label><input type="time" id="${id('debut')}" data-s="${s.uid}" data-k="debut" value="${esc(s.debut)}" step="300"></div>
+        <div class="champ"><label for="${id('fin')}">Fin</label><input type="time" id="${id('fin')}" data-s="${s.uid}" data-k="fin" value="${esc(fin)}" step="300"></div>
+        <div class="champ large"><label for="${id('salle')}">Salle</label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
+        <div class="champ large"><label for="${id('duree')}">Durée en minutes</label><input type="number" id="${id('duree')}" data-s="${s.uid}" data-k="duree" min="5" max="600" step="5" inputmode="numeric" value="${esc(s.duree)}"></div>
+      </div>
+      ${auto ? `<div class="auto">${auto}</div>` : ''}
+      ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}</div>` : ''}
+    <div class="verifier"><b>À vérifier</b>
+      <div class="ver-l"><span class="ver-n">Durée</span>${[60, 90, 120, 180, 240].map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>${[60, 90, 120, 180, 240].includes(dur) ? '' : `<span class="aide">${libDuree(dur)}</span>`}</div>
+      <div class="ver-l"><span class="ver-n">Tiers temps</span><label class="interrupteur"><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> ${s.tiers ? `oui, +${tiersDe(dur)} min` : 'non'}</label>${c.amen && c.amen.tiers ? `<span class="aide">${pluriel(c.amen.tiers, 'élève a', 'élèves ont')} droit au tiers temps</span>` : ''}</div>
+      <div class="ver-l"><span class="ver-n">Nombre d’AESH</span><button type="button" class="btn pt rond-b" data-a="nb-moins" data-v="${s.uid}" aria-label="Une AESH de moins">−</button><b class="nb-aff" aria-live="polite">${esc(s.nbAesh || 0)}</b><button type="button" class="btn pt rond-b" data-a="nb-plus" data-v="${s.uid}" aria-label="Une AESH de plus">+</button>${c.total ? `<span class="aide">estimation : ${c.propose}</span>` : ''}</div></div>
+    ${err.length ? `<div class="erreurs" style="margin:8px 0">À compléter : ${err.map(esc).join(' ')}</div>` : ''}
+    ${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}
+    <div class="pied-s"><button type="button" class="btn ok" style="--c:var(--e4)" id="${id('v')}" data-a="seance-ok" data-v="${s.uid}">✓ Valider cette séance</button>${seancesDe(g).length > 1 ? `<button type="button" class="btn lien" style="--c:var(--err-ink)" id="${id('x')}" data-a="retirer" data-v="${s.uid}">✕ Retirer cette séance</button>` : ''}</div></div>`;
 }
 /* — 5. Observations — */
 function corps5(){
@@ -530,7 +582,7 @@ function corps6(){
   const bloc = (n, titre, html) => `<div class="rbloc" style="--c:var(${ETAPES[n - 1].c})"><div class="rt"><b>${titre}</b><button type="button" class="btn mod" style="--c:var(${ETAPES[n - 1].c})" data-a="aller" data-v="${n}">✎ Modifier</button></div>${html}</div>`;
   return `<div class="recap">
     ${bloc(1, 'Matière', esc(matiereF()))}
-    ${bloc(2, 'Classes', `<ul>${f.groupes.map(g => { const c = cG(g); return `<li><b>${esc(libGroupe(g))}</b>${g.diplome ? ' · ' + esc(g.diplome) : ''} · ${esc(g.nb)} AESH souhaité${+g.nb > 1 ? 's' : ''}${c.total ? ` <span class="aide">(estimation ${c.propose} ; ${c.notifies} notif. officielle, ${c.encours} en cours, ${c.sansNotif} sans notif.)</span>` : ''}</li>`; }).join('')}</ul>`)}
+    ${bloc(2, 'Classes', `<ul>${f.groupes.map(g => { const c = cG(g); return `<li><b>${esc(libGroupe(g))}</b>${g.diplome ? ' · ' + esc(g.diplome) : ''} ${c.total ? ` <span class="aide">(estimation ${c.propose} ; ${c.notifies} notif. officielle, ${c.encours} en cours, ${c.sansNotif} sans notif.)</span>` : ''}</li>`; }).join('')}</ul>`)}
     ${bloc(3, 'Épreuve', `${esc(natureTxt())}${formeTxt() ? ' · ' + esc(formeTxt()) : ''}<ul>${f.groupes.map(g => `<li>${esc(libGroupe(g))} : ${nettoie(g.intitule, 120) ? '« ' + esc(nettoie(g.intitule, 120)) + ' »' : '<span class="aide">nom non précisé</span>'}</li>`).join('')}</ul>`)}
     ${bloc(4, 'Séances', `<ul>${triees().map(s => `<li><b>${esc(dateLongue(s.date))}</b> · ${hFr(s.debut)}–${hFr(finS(s))}${s.tiers ? ' (tiers temps compris)' : ''} · ${esc(libGroupe(groupe(s.classe)))}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh)} AESH</b></li>`).join('')}</ul>`)}
     ${bloc(5, 'Observations', f.observations || f.autreDemande ? `${f.observations ? '<p style="margin:2px 0">' + esc(f.observations) + '</p>' : ''}${f.autreDemande ? '<p style="margin:2px 0"><b>Autre demande :</b> ' + esc(f.autreDemande) + '</p>' : ''}` : '<span class="aide">Aucune.</span>')}
@@ -567,8 +619,14 @@ vue.addEventListener('click', ev => {
   else if (a === 'nature') f.nature = v;
   else if (a === 'forme') f.forme = v;
   else if (a === 'int-tous'){ const t = f.groupes[0] && f.groupes[0].intitule; f.groupes.forEach(g => { g.intitule = t || ''; }); }
-  else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } s.ouvert = true; f.seances.push(s); rendre(); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); return; }
+  else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } s.ouvert = true; s.nbAesh = p ? p.nbAesh : s.nbAesh; f.seances.push(s); rendre(); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); return; }
   else if (a === 'sur-cours'){ const [gid, cid, date] = v.split('|'), c = S.edt.cours[cid] || Object.values(S.edt.cours).find(x => x.id === cid), s = nouvelleSeance(gid); s.date = date; if (c) poserCours(s, c); f.seances.push(s); }
+  else if (a === 'seance-ok'){ const s = seance(v); if (s){ s.essai = true; if (!controleSeance(s).length){ s.valide = true; s.ouvert = false; s.propose = false; s.essai = false; } } }
+  else if (a === 'seance-rouvrir'){ const s = seance(v); if (s){ s.valide = false; s.ouvert = true; } }
+  else if (a === 'classe-finie'){ const g = groupe(v); if (g){ g.fini = true; if (!classeCourante()){ valider(4); return; } } }
+  else if (a === 'classe-rouvrir'){ const g = groupe(v); if (g){ g.fini = false; S.f.groupes.forEach(x => { if (S.f.groupes.indexOf(x) < S.f.groupes.indexOf(g) && !x.fini) x.fini = true; }); } }
+  else if (a === 'nb-moins' || a === 'nb-plus'){ const s = seance(v); if (s) s.nbAesh = String(Math.max(0, Math.min(12, (parseInt(s.nbAesh, 10) || 0) + (a === 'nb-plus' ? 1 : -1)))); }
+  else if (a === 'date-cours'){ const [u, d, cid] = v.split('|'), s = seance(u), c = S.edt.cours[cid] || Object.values(S.edt.cours).find(x => x.id === cid); if (s){ s.date = d; if (c) poserCours(s, c); } }
   else if (a === 'deplier'){ const s = seance(v); if (s) s.ouvert = true; }
   else if (a === 'replier'){ const s = seance(v); if (s){ s.ouvert = false; s.propose = false; } }
   else if (a === 'retirer') f.seances = f.seances.filter(s => s.uid !== +v);
@@ -621,7 +679,7 @@ function construire(){
     nature: f.nature, natureAutre: f.nature === 'autre' ? nettoie(f.natureAutre, 80) : '',
     forme: f.forme || '', formeAutre: f.forme === 'autre' ? nettoie(f.formeAutre, 80) : '', intitule: ints.length === 1 ? ints[0] : '',
     classes: f.groupes.map(g => ({ classe: g.id, classes: g.classes, libelle: libGroupe(g), autre: !!g.autre, intitule: nettoie(g.intitule, 120),
-      diplome: nettoie(g.diplome, 60), pole: poleDe(g), nbSouhaite: parseInt(String(g.nb).trim(), 10) || 0,
+      diplome: nettoie(g.diplome, 60), pole: poleDe(g), nbSouhaite: Math.max(0, ...S.f.seances.filter(s => s.classe === g.id).map(s => parseInt(s.nbAesh, 10) || 0)),
       comptes: g.classes.length ? (({ amen, besoins, ...r }) => ({ ...r, ...amen, besoins: besoins.map(([n, v]) => n + ' ×' + v) }))(comptesGroupe(g.classes)) : {} })),
     seances, observations: nettoie(f.observations, 600), autreDemande: nettoie(f.autreDemande, 600),
     statut: 'nouvelle', reponse: { statut: '', texte: '', majLe: '' }, creeLe: now, majLe: now, source: SOURCE };
