@@ -787,7 +787,11 @@ async function envoyer(renvoi){
   const d = renvoi && S.envoi && S.envoi.doc ? S.envoi.doc : construire();
   S.envoi = { etat: 'encours', doc: d }; rendre();
   try {
-    await avecDelai(FS.setDoc(FS.doc(db, COL, d.id), d), DELAI);
+    /* Réessai : un premier envoi lent a pu arriver après le délai. Si la demande est déjà en ligne, elle est reçue :
+       on ne la réécrit pas (la règle refuserait la réécriture et la page annoncerait à tort un échec). */
+    let deja = false;
+    if (renvoi){ try { const snap = await avecDelai(FS.getDoc(FS.doc(db, COL, d.id)), DELAI); deja = snap.exists(); } catch (_) { } }
+    if (!deja) await avecDelai(FS.setDoc(FS.doc(db, COL, d.id), d), DELAI);
     try { localStorage.removeItem(K_BROUILLON); } catch (_) { }
     S.envoye = d; S.envoi = null; rendre(); $('#ok')?.focus();
   } catch (e) {
