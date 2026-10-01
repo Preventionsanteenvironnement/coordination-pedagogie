@@ -134,6 +134,11 @@ textarea{min-height:90px;resize:vertical}
 .interrupteur{display:inline-flex;gap:6px;align-items:center;font-weight:650}.interrupteur input{width:20px;height:20px}
 .rond-b{width:40px;padding:0;font-size:1.2rem}.nb-aff{min-width:30px;text-align:center;font-size:1.25rem}
 .renfort{margin-top:8px;background:var(--e4l);border-radius:10px;padding:7px 11px;font-size:.98rem}
+.avert{background:#fffbeb;border:1.5px solid #f2c97d;border-left:7px solid #b45309;border-radius:14px;padding:14px 18px;margin:12px 0;color:#3b1d02;font-size:1rem;line-height:1.6}
+.avert-t{margin:0 0 6px;font-weight:850;font-size:1.05rem;color:#7c2d12}
+.avert ul{margin:0 0 10px;padding-left:20px}.avert li{margin:4px 0}
+.avert-q{margin:6px 0 10px;font-weight:750}
+.heure{display:flex;gap:6px}.heure select{flex:1;min-width:0}
 .pied-s{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
 .oubli{border:1.5px dashed var(--line);border-radius:12px;padding:9px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .mo{font-weight:600;font-size:.78rem;color:var(--e4);margin-left:4px}
@@ -222,10 +227,10 @@ function diplomeDe(k){
 /* ═══════════════ état ═══════════════ */
 const ETAPES = [
   { n: 1, t: 'Indiquez la matière', c: '--e1', g: 'Sélectionnez votre matière. Elle n’est pas dans la liste ? Choisissez « Autre… ».' },
-  { n: 2, t: 'Indiquez la ou les classes concernées', c: '--e2', g: 'Sélectionnez une classe. Ajoutez-en une autre si besoin.' },
-  { n: 3, t: 'Indiquez le type d’épreuve', c: '--e3', g: 'Choisissez le type. Le nom de l’épreuve est facultatif.' },
-  { n: 4, t: 'Définissez les modalités de l’épreuve', c: '--e4', g: 'Classe par classe : vérifiez la séance proposée, modifiez si besoin, validez.' },
-  { n: 5, t: 'Indiquez vos observations', c: '--e5', g: 'Facultatif. Aucun nom d’élève.' },
+  { n: 2, t: 'Indiquez la ou les classes concernées', c: '--e2', g: 'À présent, sélectionnez uniquement les classes concernées par l’épreuve. Ajoutez-en une autre si besoin.' },
+  { n: 3, t: 'Indiquez le type d’épreuve', c: '--e3', g: 'À présent, indiquez le type d’épreuve et son nom pour chaque classe. Tout est facultatif.' },
+  { n: 4, t: 'Définissez les modalités de l’épreuve', c: '--e4', g: 'À présent, définissez le déroulement de l’épreuve, classe par classe : vérifiez la séance proposée, modifiez si besoin, validez.' },
+  { n: 5, t: 'Indiquez vos observations', c: '--e5', g: 'Presque terminé : une observation pour la coordination ? Facultatif. Aucun nom d’élève.' },
   { n: 6, t: 'Vérifiez et envoyez', c: '--e6', g: 'Relisez. Modifiez si besoin. Envoyez.' }
 ];
 const S = {
@@ -334,7 +339,6 @@ function controle(n){
   if (n === 1 && !matiereF()) e.push('Choisissez la matière (ou « Autre… » et écrivez-la).');
   if (n === 2 && !f.groupes.length) e.push('Choisissez au moins une classe.');
   if (n === 3){
-    if (!f.nature) e.push('Choisissez le type d’épreuve.');
   }
   if (n === 4){
     if (!f.seances.length) e.push('Ajoutez au moins une séance.');
@@ -360,6 +364,13 @@ function controleSeance(s){
   if (!/^\d+$/.test(String(s.nbAesh).trim()) || +s.nbAesh > 12) e.push('le nombre d’AESH doit être un nombre entier de 0 à 12.');
   return e;
 }
+/* Ce qui ne bloque pas, mais mérite d'être signalé avant de valider une séance. */
+function avertSeance(s){
+  const a = [];
+  if (!s.deja) a.push('Vous n’avez pas indiqué si une AESH est déjà présente à ce cours.');
+  if (!nettoie(s.salle, 20)) a.push('La salle n’est pas indiquée.');
+  return a;
+}
 const numero = s => S.f.seances.filter(x => x.classe === s.classe).indexOf(s) + 1;
 /* À l'ouverture de l'étape 4, chaque classe sans épreuve en reçoit une, posée sur son prochain cours de la matière. */
 function proposerSeances(){
@@ -373,9 +384,13 @@ function proposerSeances(){
 /* Un mot tout en capitales (hors sigles connus) ressemble à un NOM de famille. */
 const SIGLES = new Set('AESH AED CCF PFMP ULIS PAP PPS PAI MDPH EPS CAP CAPA BAC PSE PSR MELEC AGORA VAN CAN HORT SST DDF PIAL CPE TP TD EDT CDI DNB QCM PC RDC MPA BTS ASSR ASH PE OK'.split(' '));
 function nomSuspect(t){ const m = String(t).match(/\b[A-ZÀ-ÖØ-Ý]{3,}(?:-[A-ZÀ-ÖØ-Ý]{2,})?\b/g) || []; return m.find(x => !SIGLES.has(x.replace(/-.*/, '')) && !/^\d/.test(x)) || ''; }
-function valider(n){
+/* Rien ne bloque (Brahim, 01/10) : ce qui manque est signalé, puis « Continuer quand même » passe.
+   Seules exceptions : au moins une classe (étape 2), et le nom repéré à l'étape 5 (second clic). */
+function valider(n, force){
   S.erreurs = controle(n);
-  if (S.erreurs.length){ rendre(); $('#erreurs')?.focus(); return; }
+  const bloquant = (n === 2 && !S.f.groupes.length) || n === 5 || (n === 4 && S.f.seances.some(x => controleSeance(x).length));
+  if (S.erreurs.length && !(force && !bloquant)){ rendre(); $('#erreurs')?.focus(); return; }
+  S.erreurs = [];
   S.ok[n] = true;
   if (n === 4){ S.f.seances.forEach(x => { x.valide = true; x.ouvert = false; x.propose = false; }); S.f.groupes.forEach(g => { g.fini = true; }); }
   /* Une classe ajoutée ou retirée peut rendre les séances incomplètes : on les rouvre. */
@@ -417,7 +432,10 @@ function htmlEtape(E){
   const past = cour ? `<span class="pastille p-cour">${fait ? 'en modification' : 'à remplir'}</span>` : fait ? '<span class="pastille p-ok">✓ validée</span>' : '<span class="pastille p-av">à venir</span>';
   const tete = `<div class="et-t"><span class="rond" aria-hidden="true">${fait && !cour ? '✓' : n}</span><h2 tabindex="-1">${esc(E.t)}</h2>${past}</div>`;
   if (cour) return `<section class="etape" id="et-${n}" ${st} aria-current="step">${tete}<div class="et-c"><p class="guide">${esc(E.g)}</p>
-      ${S.erreurs.length ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>${pluriel(S.erreurs.length, 'point à corriger', 'points à corriger')}</b><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+      ${S.erreurs.length ? (n === 5 || (n === 2 && !S.f.groupes.length) || (n === 4 && S.f.seances.some(x => controleSeance(x).length))
+        ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>${n === 4 ? 'Indispensable pour prévenir les AESH : la date, l’heure et la durée de chaque séance.' : 'À compléter'}</b><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>`
+        : `<div class="avert" role="alert" id="erreurs" tabindex="-1"><p class="avert-t">Avant de valider</p><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul>
+          <p class="avert-q">Voulez-vous quand même valider cette étape ?</p><div class="puces"><button type="button" class="btn pt" data-a="avert-fermer">Compléter</button><button type="button" class="btn pt ok" style="--c:#b45309" data-a="forcer" data-v="${n}">Valider quand même</button></div></div>`) : ''}
       ${[corps1, corps2, corps3, corps4, corps5, corps6][n - 1]()}</div>
       ${n < 6 ? `<div class="pied"><button type="button" class="btn ok" id="valider-${n}" data-a="valider" data-v="${n}">✓ Valider cette étape</button><button type="button" class="btn non" id="annuler-${n}" data-a="annuler" data-v="${n}">✕ ${fait ? 'Annuler les changements' : n === 1 ? 'Effacer' : 'Annuler et revenir'}</button></div>` : ''}</section>`;
   return `<section class="etape ${avenir ? 'avenir' : ''}" id="et-${n}" ${st}>${tete}${fait ? `<div class="resume"><div class="txt">${resume(n)}</div><button type="button" class="btn mod" data-a="aller" data-v="${n}">✎ Modifier</button></div>` : ''}</section>`;
@@ -531,6 +549,14 @@ function blocClasseCourante(g, i){
       <div class="puces" style="margin-top:8px"><button type="button" class="btn pt" data-a="ajout" data-v="${esc(g.id)}">＋ Oui, ajouter une séance</button>
       <button type="button" class="btn pt ok" style="--c:var(--e4)" data-a="classe-finie" data-v="${esc(g.id)}">${i + 1 < n ? `Non, passer à ${esc(libGroupe(S.f.groupes[i + 1]))} →` : 'Non, c’est terminé ✓'}</button></div></div>`}</div>`;
 }
+/* L'heure se choisit dans deux listes (heure, minutes) : pas de saisie piège. */
+function choixHeure(s, k, val, id){
+  const h = RE_HEURE.test(val || '') ? val.slice(0, 2) : '', m = RE_HEURE.test(val || '') ? val.slice(3) : '';
+  const hs = []; for (let x = 7; x <= 19; x++) hs.push(z2(x));
+  const ms = []; for (let x = 0; x < 60; x += 5) ms.push(z2(x));
+  return `<div class="heure"><select id="${id(k)}" data-s="${s.uid}" data-k="${k}-h" aria-label="${k === 'debut' ? 'Heure de début' : 'Heure de fin'}"><option value="">--</option>${hs.map(x => `<option value="${x}" ${x === h ? 'selected' : ''}>${parseInt(x, 10)} h</option>`).join('')}</select>
+    <select id="${id(k + 'm')}" data-s="${s.uid}" data-k="${k}-m" aria-label="Minutes"><option value="">--</option>${ms.map(x => `<option value="${x}" ${x === m ? 'selected' : ''}>${x}</option>`).join('')}</select></div>`;
+}
 /* Les 3 prochaines dates de cours de la matière (hors vacances et PFMP) : un clic suffit. */
 function prochainesDates(g){
   const out = [];
@@ -554,8 +580,8 @@ function carteSeance(s, k){
       ${pd.length ? `<div class="puces" style="margin-bottom:8px"><span class="aide" style="align-self:center">Vos prochains cours :</span>${pd.map(([d, x]) => `<button type="button" class="btn pt ${s.date === d && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="date-cours" data-v="${s.uid}|${d}|${esc(x.id)}">${esc(dateLongue(d).replace(/^(\S+) (\d+) (\S+)$/, (m0, j, n, mo) => j.slice(0, 3) + '. ' + n + ' ' + mo.slice(0, 4) + (mo.length > 4 ? '.' : '')))} ${hFr(x.d)}</button>`).join('')}</div>` : ''}
       <div class="grille">
         <div class="champ large"><label for="${id('date')}">Date</label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
-        <div class="champ"><label for="${id('debut')}">Début</label><input type="time" id="${id('debut')}" data-s="${s.uid}" data-k="debut" value="${esc(s.debut)}" step="300"></div>
-        <div class="champ"><label for="${id('fin')}">Fin</label><input type="time" id="${id('fin')}" data-s="${s.uid}" data-k="fin" value="${esc(fin)}" step="300"></div>
+        <div class="champ"><span class="leg">Début</span>${choixHeure(s, 'debut', s.debut, id)}</div>
+        <div class="champ"><span class="leg">Fin</span>${choixHeure(s, 'fin', fin, id)}</div>
         <div class="champ large"><label for="${id('salle')}">Salle</label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
         <div class="champ large"><label for="${id('duree')}">Durée en minutes</label><input type="number" id="${id('duree')}" data-s="${s.uid}" data-k="duree" min="5" max="600" step="5" inputmode="numeric" value="${esc(s.duree)}"></div>
       </div>
@@ -564,11 +590,13 @@ function carteSeance(s, k){
     <div class="verifier"><b>À vérifier</b>
       <div class="ver-l"><span class="ver-n">Durée</span>${[60, 90, 120, 180, 240].map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>${[60, 90, 120, 180, 240].includes(dur) ? '' : `<span class="aide">${libDuree(dur)}</span>`}</div>
       <div class="ver-l"><span class="ver-n">Tiers temps</span><label class="interrupteur"><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> ${s.tiers ? `oui, +${tiersDe(dur)} min` : 'non'}</label>${c.amen && c.amen.tiers ? `<span class="aide">${pluriel(c.amen.tiers, 'élève a', 'élèves ont')} droit au tiers temps</span>` : ''}</div>
-      <div class="ver-l"><span class="ver-n">AESH nécessaires</span><button type="button" class="btn pt rond-b" data-a="nb-moins" data-v="${s.uid}" aria-label="Une AESH de moins">−</button><b class="nb-aff" aria-live="polite">${esc(s.nbAesh || 0)}</b><button type="button" class="btn pt rond-b" data-a="nb-plus" data-v="${s.uid}" aria-label="Une AESH de plus">+</button>${c.total ? `<span class="aide">estimation : ${c.propose}</span>` : ''}</div>
+      <div class="ver-l"><span class="ver-n">AESH au total</span><button type="button" class="btn pt rond-b" data-a="nb-moins" data-v="${s.uid}" aria-label="Une AESH de moins">−</button><b class="nb-aff" aria-live="polite">${esc(s.nbAesh || 0)}</b><button type="button" class="btn pt rond-b" data-a="nb-plus" data-v="${s.uid}" aria-label="Une AESH de plus">+</button><span class="aide">AESH habituelle comprise${c.total ? ` · estimation : ${c.propose}` : ''}</span></div>
       <div class="ver-l"><span class="ver-n">Déjà présente(s) ?</span><span class="aide" style="flex-basis:100%;margin:-2px 0 2px">Sur ce créneau, aurez-vous déjà une AESH (celle qui vient habituellement à ce cours) ?</span>
         ${[['0', 'Non'], ['1', 'Oui, 1'], ['2', 'Oui, 2'], ['3', 'Oui, 3'], ['nsp', 'Je ne sais pas']].map(([v, l]) => `<button type="button" class="btn pt ${s.deja === v ? 'ok' : ''}" style="--c:var(--e4)" data-a="deja" data-v="${s.uid}|${v}">${l}</button>`).join('')}</div>
-      <div class="renfort">→ Renfort demandé : <b>${renfortDe(s)}</b> AESH${/^\d$/.test(s.deja || '') && +s.deja > 0 ? ` <span class="aide">(${esc(s.nbAesh || 0)} nécessaires − ${s.deja} déjà présente${+s.deja > 1 ? 's' : ''})</span>` : ''}</div></div>
-    ${err.length ? `<div class="erreurs" style="margin:8px 0">À compléter : ${err.map(esc).join(' ')}</div>` : ''}
+      <div class="renfort">→ Renfort demandé : <b>${renfortDe(s)} AESH</b> ${/^\d$/.test(s.deja || '') && +s.deja > 0 ? `<b>en plus de l’AESH habituelle</b> <span class="aide">(${esc(s.nbAesh || 0)} AESH au total, dont ${s.deja} déjà présente${+s.deja > 1 ? 's' : ''})</span>` : s.deja === '0' ? '<span class="aide">(aucune AESH habituelle à ce cours)</span>' : '<span class="aide">(présence habituelle d’une AESH à préciser)</span>'}</div></div>
+    ${err.length ? `<div class="erreurs" style="margin:10px 0"><b>Indispensable pour prévenir les AESH :</b> ${err.map(esc).join(' ')}</div>` : ''}
+    ${!err.length && s.avert && avertSeance(s).length ? `<div class="avert" role="alert"><p class="avert-t">Avant de valider</p><ul>${avertSeance(s).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      <p class="avert-q">Voulez-vous quand même valider cette séance ?</p><div class="puces"><button type="button" class="btn pt" data-a="seance-completer" data-v="${s.uid}">Compléter</button><button type="button" class="btn pt ok" style="--c:#b45309" data-a="seance-force" data-v="${s.uid}">Valider quand même</button></div></div>` : ''}
     ${al.map(x => `<p class="alerte">⚠ ${esc(x)}</p>`).join('')}
     <div class="pied-s"><button type="button" class="btn ok" style="--c:var(--e4)" id="${id('v')}" data-a="seance-ok" data-v="${s.uid}">✓ Valider cette séance</button>${seancesDe(g).length > 1 ? `<button type="button" class="btn lien" style="--c:var(--err-ink)" id="${id('x')}" data-a="retirer" data-v="${s.uid}">✕ Retirer cette séance</button>` : ''}</div></div>`;
 }
@@ -616,6 +644,8 @@ vue.addEventListener('click', ev => {
   const b = ev.target.closest('[data-a]'); if (!b || b.disabled) return;
   const a = b.dataset.a, v = b.dataset.v, f = S.f;
   if (a === 'valider'){ valider(+v); return; }
+  if (a === 'forcer'){ valider(+v, true); return; }
+  if (a === 'avert-fermer'){ S.erreurs = []; rendre(); return; }
   if (a === 'annuler'){ annuler(+v); return; }
   if (a === 'aller'){ if (+v !== S.etape){ if (S.etape !== 6 && S.snap && JSON.stringify(S.snap) !== JSON.stringify(S.f) && S.ok[S.etape]){ /* changements non validés d'une étape déjà validée : on les garde, l'étape reste à valider */ S.ok[S.etape] = false; } ouvrir(+v); } rendre(); focusEtape(); return; }
   if (a === 'retirer-groupe'){ f.groupes = f.groupes.filter(g => g.id !== v); f.seances = f.seances.filter(s => s.classe !== v); }
@@ -626,7 +656,9 @@ vue.addEventListener('click', ev => {
   else if (a === 'int-tous'){ const t = f.groupes[0] && f.groupes[0].intitule; f.groupes.forEach(g => { g.intitule = t || ''; }); }
   else if (a === 'ajout'){ const p = [...f.seances].reverse().find(s => s.classe === v), s = nouvelleSeance(v); if (p){ s.duree = p.duree; s.salle = p.salle; s.tiers = p.tiers; s.nbAesh = p.nbAesh; } s.ouvert = true; s.nbAesh = p ? p.nbAesh : s.nbAesh; f.seances.push(s); rendre(); setTimeout(() => $(`#s${s.uid}-date`)?.focus(), 0); return; }
   else if (a === 'sur-cours'){ const [gid, cid, date] = v.split('|'), c = S.edt.cours[cid] || Object.values(S.edt.cours).find(x => x.id === cid), s = nouvelleSeance(gid); s.date = date; if (c) poserCours(s, c); f.seances.push(s); }
-  else if (a === 'seance-ok'){ const s = seance(v); if (s){ s.essai = true; if (!controleSeance(s).length){ s.valide = true; s.ouvert = false; s.propose = false; s.essai = false; } } }
+  else if (a === 'seance-ok' || a === 'seance-force'){ const s = seance(v); if (s){ s.essai = true;
+    if (!controleSeance(s).length){ if (a === 'seance-ok' && avertSeance(s).length) s.avert = true; else { s.valide = true; s.ouvert = false; s.propose = false; s.essai = false; s.avert = false; } } } }
+  else if (a === 'seance-completer'){ const s = seance(v); if (s){ s.avert = false; s.ouvert = true; } }
   else if (a === 'seance-rouvrir'){ const s = seance(v); if (s){ s.valide = false; s.ouvert = true; } }
   else if (a === 'classe-finie'){ const g = groupe(v); if (g){ g.fini = true; if (!classeCourante()){ valider(4); return; } } }
   else if (a === 'classe-rouvrir'){ const g = groupe(v); if (g){ g.fini = false; S.f.groupes.forEach(x => { if (S.f.groupes.indexOf(x) < S.f.groupes.indexOf(g) && !x.fini) x.fini = true; }); } }
@@ -664,6 +696,15 @@ vue.addEventListener('change', ev => {
     rendre(); return;
   }
   if (t.dataset.g && !t.dataset.gk){ rendre(); return; }
+  if (t.dataset.s && /^(debut|fin)-(h|m)$/.test(t.dataset.k || '')){
+    const s = seance(t.dataset.s); if (!s) return;
+    const [k, p] = t.dataset.k.split('-'), cur = k === 'debut' ? s.debut : finS(s);
+    let h = RE_HEURE.test(cur || '') ? cur.slice(0, 2) : '', m = RE_HEURE.test(cur || '') ? cur.slice(3) : '';
+    if (p === 'h') h = t.value; else m = t.value;
+    const v = h ? `${h}:${m || '00'}` : '';
+    if (k === 'debut'){ s.debut = v; s.heureManuelle = true; } else { s.fin = v; s.finManuelle = true; }
+    rendre(); return;
+  }
   if (t.dataset.c === 'matiere' || (t.dataset.s && ['date', 'debut', 'duree', 'tiers', 'fin'].includes(t.dataset.k))){
     const s = t.dataset.s && seance(t.dataset.s);
     /* Dès que la date est choisie, le créneau du cours de ce jour-là s'installe (sauf heure posée à la main). */
@@ -693,7 +734,8 @@ function construire(){
 }
 async function envoyer(renvoi){
   if (!(renvoi && S.envoi && S.envoi.doc)){
-    for (let n = 1; n <= 5; n++) if (!S.ok[n] || controle(n).length){ S.ok[n] = false; ouvrir(n); S.erreurs = controle(n); rendre(); focusEtape(); return; }
+    if (!S.f.groupes.length){ ouvrir(2); S.erreurs = controle(2); rendre(); focusEtape(); return; }
+    if (!S.f.seances.length){ ouvrir(4); S.erreurs = ['Ajoutez au moins une séance.']; rendre(); focusEtape(); return; }
   }
   const d = renvoi && S.envoi && S.envoi.doc ? S.envoi.doc : construire();
   S.envoi = { etat: 'encours', doc: d }; rendre();
