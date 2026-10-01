@@ -147,6 +147,12 @@ textarea{min-height:90px;resize:vertical}
 .avert ul{margin:0 0 10px;padding-left:20px}.avert li{margin:4px 0}
 .avert-q{margin:6px 0 10px;font-weight:750}
 .heure{display:flex;gap:6px}.heure select{flex:1;min-width:0}
+.classe4.courante .s4{border:0;border-top:1px dashed #f2c9ad;border-radius:0;background:transparent;padding:12px 0 0;margin-top:10px}
+.classe4.courante .s4.en-erreur{background:#fff6f6;border-radius:12px;padding:12px}
+.s4-t{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.s4-l{flex:1;min-width:220px;font-size:1.02rem}
+.q4{margin-top:14px}.q4-t{margin:0 0 8px;font-weight:700;line-height:1.4}
+.q4-n{width:24px;height:24px;border-radius:50%;background:var(--e4);color:#fff;font-size:.85rem;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;vertical-align:2px}
 .pied-s{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
 .oubli{border:1.5px dashed var(--line);border-radius:12px;padding:9px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .mo{font-weight:600;font-size:.78rem;color:var(--e4);margin-left:4px}
@@ -392,13 +398,13 @@ function controleSeance(s){
   if (!RE_HEURE.test(s.debut)) e.push('indiquez l’heure de début.');
   if (!(+s.duree >= 5 && +s.duree <= 600)) e.push('la durée doit être entre 5 et 600 minutes.');
   if (RE_HEURE.test(s.debut) && (!RE_HEURE.test(fin) || min(fin) <= min(s.debut))) e.push('l’heure de fin doit être après le début.');
-  if (!/^\d+$/.test(String(s.nbAesh).trim()) || +s.nbAesh > 12) e.push('le nombre d’AESH doit être un nombre entier de 0 à 12.');
+  if (totalDe(s) > 12) e.push('au plus 12 AESH par séance.');
   return e;
 }
 /* Ce qui ne bloque pas, mais mérite d'être signalé avant de valider une séance. */
 function avertSeance(s){
   const a = [];
-  if (!s.deja) a.push('Vous n’avez pas indiqué si une AESH est déjà présente à ce cours.');
+  if (!s.deja) a.push('Vous n’avez pas répondu à la question 1 : une AESH est-elle déjà présente à ce cours ?');
   if (!nettoie(s.salle, 20)) a.push('La salle n’est pas indiquée.');
   return a;
 }
@@ -554,7 +560,11 @@ function corps3(){
    Ensuite : « Souhaitez-vous ajouter une autre séance pour cette classe ? » → oui / classe suivante.
    Rien ne bloque : les classes déjà faites restent modifiables, une classe oubliée s'ajoute à part. */
 /* Renfort = AESH nécessaires − AESH déjà présentes habituellement (si l'enseignant le sait). */
-const renfortDe = s => Math.max(0, (parseInt(s.nbAesh, 10) || 0) - (/^\d$/.test(s.deja || '') ? +s.deja : 0));
+const dejaN = s => /^\d$/.test(s.deja || '') ? +s.deja : 0;
+const estimationDe = s => { const g = groupe(s.classe), n = parseInt(g && g.nb, 10); return Number.isFinite(n) ? n : (cG(g).propose || 0); };
+/* Renfort = « AESH en plus » : choisi par l'enseignant, sinon estimation − AESH déjà présentes. */
+const renfortDe = s => s.plus != null ? s.plus : Math.max(0, estimationDe(s) - dejaN(s));
+const totalDe = s => dejaN(s) + renfortDe(s);
 const seancesDe = g => S.f.seances.filter(s => s.classe === g.id);
 const classeCourante = () => S.f.groupes.find(g => !g.fini);
 function corps4(){
@@ -562,9 +572,10 @@ function corps4(){
   return gs.map((g, i) => g === cur ? blocClasseCourante(g, i) : blocClasseResume(g, i, !!g.fini)).join('')
     + `<div class="oubli"><b>Une classe oubliée ?</b> <button type="button" class="btn pt" data-a="aller" data-v="2">＋ Ajouter une classe</button></div>`;
 }
+const ligneDate = s => { const fin = finS(s), dur = +s.duree || 0;
+  return `${s.date ? `<b>${esc(dateLongue(s.date))}</b>` : '<span class="manque">date à choisir</span>'}${RE_HEURE.test(s.debut) ? ` · ${hFr(s.debut)}–${hFr(fin)}` : ''}${dur ? ` · ${libDuree(dur)}${s.tiers ? ' + tiers temps' : ''}` : ''}${s.salle ? ' · salle ' + esc(s.salle) : ''}`; };
 function ligneSeance(s){
-  const fin = finS(s), dur = +s.duree || 0;
-  return `${s.date ? `<b>${esc(dateLongue(s.date))}</b>` : '<span class="manque">date à choisir</span>'}${RE_HEURE.test(s.debut) ? ` · ${hFr(s.debut)}–${hFr(fin)}` : ''}${dur ? ` · ${libDuree(dur)}${s.tiers ? ' + tiers temps' : ''}` : ''}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh || 0)} AESH</b>${/^\d$/.test(s.deja || '') && +s.deja > 0 ? ` (dont ${s.deja} déjà présente${+s.deja > 1 ? 's' : ''} → renfort ${renfortDe(s)})` : ''}`;
+  return `${ligneDate(s)} · <b>${renfortDe(s)} AESH en renfort</b>${dejaN(s) ? ` (en plus de ${dejaN(s) > 1 ? dejaN(s) + ' AESH habituelles' : 'l’AESH habituelle'})` : ''}`;
 }
 function blocClasseResume(g, i, fait){
   const l = seancesDe(g), n = S.f.groupes.length;
@@ -575,8 +586,7 @@ function blocClasseResume(g, i, fait){
 function blocClasseCourante(g, i){
   const l = seancesDe(g), n = S.f.groupes.length, active = l.find(s => !s.valide);
   const faites = l.filter(s => s.valide && s !== active);
-  return `<div class="classe4 courante"><div class="classe4-t"><span class="num-cl">${i + 1}</span><div style="flex:1"><b>Classe ${i + 1} sur ${n} · ${esc(libGroupe(g))}</b>
-      <div class="aide">${esc(nomEpreuve(g))}</div></div></div>
+  return `<div class="classe4 courante"><div class="classe4-t"><span class="num-cl">${i + 1}</span><div style="flex:1"><b>Classe ${i + 1} sur ${n} · ${esc(libGroupe(g))} · ${esc(nomEpreuve(g))}</b></div></div>
     ${faites.map(s => `<div class="seance-ok"><span>✓ Séance ${l.indexOf(s) + 1} : ${ligneSeance(s)}</span><button type="button" class="btn lien" style="--c:var(--e4)" data-a="seance-rouvrir" data-v="${s.uid}">✎ Modifier</button></div>`).join('')}
     ${active ? carteSeance(active, l.indexOf(active) + 1) : `<div class="question"><b>Souhaitez-vous ajouter une autre séance pour ${esc(libGroupe(g))} ?</b>
       <span class="aide">Dans la même semaine ou à une autre date.</span>
@@ -606,11 +616,11 @@ function carteSeance(s, k){
   else if (s.date && cs.length > 1) auto = `🕘 Ce jour-là, ${cs.length} cours : ${cs.map((x, j) => `<button type="button" class="btn pt ${!s.heureManuelle && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="cours" data-v="${s.uid}|${j}">${hFr(x.d)}–${hFr(x.f)}</button>`).join(' ')}`;
   else if (s.date && g && g.classes.length) auto = `Pas de cours de ${esc(matiereF())} ce jour-là : indiquez l’heure.`;
   const pd = g && g.classes.length ? prochainesDates(g) : [];
-  return `<div class="seance ${err.length ? 'en-erreur' : ''}" id="carte-${s.uid}"><div class="seance-t"><span class="num-ep">${k}</span><div style="flex:1;min-width:0"><b>Séance ${k}</b>
-      <div class="seance-r">${ligneSeance(s)}</div>
-      ${s.propose && !s.ouvert ? '<div class="info-ind">ℹ️ Proposée d’après votre cours, <b>à titre indicatif</b> : modifiable.</div>' : ''}</div>
-    ${edit ? '' : `<button type="button" class="btn mod gros-mod" style="--c:var(--e4)" id="${id('m')}" data-a="deplier" data-v="${s.uid}">✎ Modifier la date, l’heure ou la salle</button>`}</div>
-    ${edit ? `<div class="editeur"><p class="guide-p">${s.date ? 'Modifiez ce qui doit changer.' : 'Choisissez la date : le créneau du cours se remplit tout seul.'}</p>
+  const est = estimationDe(s), Q = (n, t, h) => `<div class="q4"><p class="q4-t"><span class="q4-n">${n}</span>${t}</p>${h}</div>`;
+  return `<div class="seance s4 ${err.length ? 'en-erreur' : ''}" id="carte-${s.uid}">
+    <div class="s4-t"><div class="s4-l"><b>Séance ${k}</b> · ${ligneDate(s)}${s.propose && !s.ouvert ? '<div class="aide">proposée d’après votre cours, modifiable</div>' : ''}</div>
+      ${edit ? '' : `<button type="button" class="btn pt mod" style="--c:var(--e4)" id="${id('m')}" data-a="deplier" data-v="${s.uid}">✎ Modifier</button>`}</div>
+    ${edit ? `<div class="editeur"><p class="guide-p">${s.date ? 'Modifiez ce qui doit changer : date, heure, salle.' : 'Choisissez la date : le créneau du cours se remplit tout seul.'}</p>
       ${pd.length ? `<div class="puces" style="margin-bottom:8px"><span class="aide" style="align-self:center">Vos prochains cours :</span>${pd.map(([d, x]) => `<button type="button" class="btn pt ${s.date === d && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="date-cours" data-v="${s.uid}|${d}|${esc(x.id)}">${esc(dateLongue(d).replace(/^(\S+) (\d+) (\S+)$/, (m0, j, n, mo) => j.slice(0, 3) + '. ' + n + ' ' + mo.slice(0, 4) + (mo.length > 4 ? '.' : '')))} ${hFr(x.d)}</button>`).join('')}</div>` : ''}
       <div class="grille">
         <div class="champ large"><label for="${id('date')}">Date</label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
@@ -620,14 +630,17 @@ function carteSeance(s, k){
         <div class="champ large"><label for="${id('duree')}">Durée en minutes</label><input type="number" id="${id('duree')}" data-s="${s.uid}" data-k="duree" min="5" max="600" step="5" inputmode="numeric" value="${esc(s.duree)}"></div>
       </div>
       ${auto ? `<div class="auto">${auto}</div>` : ''}
-      ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}</div>` : ''}
-    <div class="verifier"><b>À vérifier</b>
-      <div class="ver-l"><span class="ver-n">Durée</span>${[60, 90, 120, 180, 240].map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>${[60, 90, 120, 180, 240].includes(dur) ? '' : `<span class="aide">${libDuree(dur)}</span>`}</div>
-      <div class="ver-l"><span class="ver-n">Tiers temps</span><label class="interrupteur"><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> ${s.tiers ? `oui, +${tiersDe(dur)} min` : 'non'}</label>${c.amen && c.amen.tiers ? `<span class="aide">${pluriel(c.amen.tiers, 'élève a', 'élèves ont')} droit au tiers temps</span>` : ''}</div>
-      <div class="ver-l"><span class="ver-n">AESH au total</span><button type="button" class="btn pt rond-b" data-a="nb-moins" data-v="${s.uid}" aria-label="Une AESH de moins">−</button><b class="nb-aff" aria-live="polite">${esc(s.nbAesh || 0)}</b><button type="button" class="btn pt rond-b" data-a="nb-plus" data-v="${s.uid}" aria-label="Une AESH de plus">+</button><span class="aide">AESH habituelle comprise${c.total ? ` · estimation : ${c.propose}` : ''}</span></div>
-      <div class="ver-l"><span class="ver-n">Déjà présente(s) ?</span><span class="aide" style="flex-basis:100%;margin:-2px 0 2px">Sur ce créneau, aurez-vous déjà une AESH (celle qui vient habituellement à ce cours) ?</span>
-        ${[['0', 'Non'], ['1', 'Oui, 1'], ['2', 'Oui, 2'], ['3', 'Oui, 3'], ['nsp', 'Je ne sais pas']].map(([v, l]) => `<button type="button" class="btn pt ${s.deja === v ? 'ok' : ''}" style="--c:var(--e4)" data-a="deja" data-v="${s.uid}|${v}">${l}</button>`).join('')}</div>
-      <div class="renfort">→ Renfort demandé : <b>${renfortDe(s)} AESH</b> ${/^\d$/.test(s.deja || '') && +s.deja > 0 ? `<b>en plus de l’AESH habituelle</b> <span class="aide">(${esc(s.nbAesh || 0)} AESH au total, dont ${s.deja} déjà présente${+s.deja > 1 ? 's' : ''})</span>` : s.deja === '0' ? '<span class="aide">(aucune AESH habituelle à ce cours)</span>' : '<span class="aide">(présence habituelle d’une AESH à préciser)</span>'}</div></div>
+      ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}
+      <button type="button" class="btn pt" style="margin-top:8px" data-a="replier" data-v="${s.uid}">✓ Fermer</button></div>` : ''}
+    ${Q(1, 'Une AESH est-elle déjà présente à ce cours ? <span class="aide">(celle qui vient habituellement)</span>',
+      `<div class="puces">${[['0', 'Non'], ['1', 'Oui, 1'], ['2', 'Oui, 2'], ['3', 'Oui, 3'], ['nsp', 'Je ne sais pas']].map(([v, l]) => `<button type="button" class="btn pt ${s.deja === v ? 'ok' : ''}" style="--c:var(--e4)" data-a="deja" data-v="${s.uid}|${v}">${l}</button>`).join('')}</div>`)}
+    ${Q(2, 'Combien d’AESH en plus ?',
+      `<div class="ver-l"><button type="button" class="btn pt rond-b" data-a="nb-moins" data-v="${s.uid}" aria-label="Une AESH de moins">−</button><b class="nb-aff" aria-live="polite">${renfortDe(s)}</b><button type="button" class="btn pt rond-b" data-a="nb-plus" data-v="${s.uid}" aria-label="Une AESH de plus">+</button>
+        <span class="aide">${dejaN(s) ? `soit ${totalDe(s)} AESH au total avec ${dejaN(s) > 1 ? 'les AESH habituelles' : 'l’AESH habituelle'} · ` : ''}estimation : ${est} au total</span></div>`)}
+    ${Q(3, 'Durée de l’épreuve',
+      `<div class="puces">${[60, 90, 120, 180, 240].map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>${[60, 90, 120, 180, 240].includes(dur) ? '' : `<span class="aide" style="align-self:center">${libDuree(dur)}</span>`}</div>`)}
+    ${Q(4, 'Tiers temps',
+      `<label class="interrupteur"><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> ${s.tiers ? `oui, +${tiersDe(dur)} min` : 'non'}</label>${c.amen && c.amen.tiers ? ` <span class="aide">${pluriel(c.amen.tiers, 'élève a', 'élèves ont')} droit au tiers temps</span>` : ''}`)}
     ${err.length ? `<div class="erreurs" style="margin:10px 0"><b>Indispensable pour prévenir les AESH :</b> ${err.map(esc).join(' ')}</div>` : ''}
     ${!err.length && s.avert && avertSeance(s).length ? `<div class="avert" role="alert"><p class="avert-t">Avant de valider</p><ul>${avertSeance(s).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
       <p class="avert-q">Voulez-vous quand même valider cette séance ?</p><div class="puces"><button type="button" class="btn pt" data-a="seance-completer" data-v="${s.uid}">Compléter</button><button type="button" class="btn pt ok" style="--c:#b45309" data-a="seance-force" data-v="${s.uid}">Valider quand même</button></div></div>` : ''}
@@ -650,7 +663,7 @@ function corps6(){
     ${bloc(1, 'Matière', esc(matiereF()))}
     ${bloc(2, 'Classes', `<ul>${f.groupes.map(g => { const c = cG(g); return `<li><b>${esc(libGroupe(g))}</b>${g.diplome ? ' · ' + esc(g.diplome) : ''} ${c.total ? ` <span class="aide">(estimation ${c.propose} ; ${c.notifies} notif. officielle, ${c.encours} en cours, ${c.sansNotif} sans notif.)</span>` : ''}</li>`; }).join('')}</ul>`)}
     ${bloc(3, 'Épreuve', `${esc(natureTxt())}${formeTxt() ? ' · ' + esc(formeTxt()) : ''}<ul>${f.groupes.map(g => `<li>${esc(libGroupe(g))} : ${nettoie(g.intitule, 120) ? '« ' + esc(nettoie(g.intitule, 120)) + ' »' : '<span class="aide">nom non précisé</span>'}</li>`).join('')}</ul>`)}
-    ${bloc(4, 'Séances', `<ul>${triees().map(s => `<li><b>${esc(dateLongue(s.date))}</b> · ${hFr(s.debut)}–${hFr(finS(s))}${s.tiers ? ' (tiers temps compris)' : ''} · ${esc(libGroupe(groupe(s.classe)))}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${esc(s.nbAesh)} AESH nécessaires</b>${/^\d$/.test(s.deja || '') ? ` · ${s.deja} déjà présente${+s.deja > 1 ? 's' : ''}` : s.deja === 'nsp' ? ' · présence habituelle inconnue' : ''} · <b>renfort ${renfortDe(s)}</b></li>`).join('')}</ul>`)}
+    ${bloc(4, 'Séances', `<ul>${triees().map(s => `<li><b>${esc(dateLongue(s.date))}</b> · ${hFr(s.debut)}–${hFr(finS(s))}${s.tiers ? ' (tiers temps compris)' : ''} · ${esc(libGroupe(groupe(s.classe)))}${s.salle ? ' · salle ' + esc(s.salle) : ''} · <b>${renfortDe(s)} AESH en renfort</b>${dejaN(s) ? ` en plus de ${dejaN(s) > 1 ? dejaN(s) + ' AESH habituelles' : 'l’AESH habituelle'}` : s.deja === '0' ? ' (aucune AESH habituelle)' : s.deja === 'nsp' ? ' (présence habituelle inconnue)' : ''}</li>`).join('')}</ul>`)}
     ${bloc(5, 'Observations', f.observations || f.autreDemande ? `${f.observations ? '<p style="margin:2px 0">' + esc(f.observations) + '</p>' : ''}${f.autreDemande ? '<p style="margin:2px 0"><b>Autre demande :</b> ' + esc(f.autreDemande) + '</p>' : ''}` : '<span class="aide">Aucune.</span>')}
     <p class="dest">📨 Destinataires : <b>la coordination AESH</b> et <b>le référent du pôle${poles.length > 1 ? 's' : ''} ${esc(poles.join(', ') || '(selon la classe)')}</b>. Ils organisent les AESH et vous répondent.</p>
     <div><button type="button" class="envoi" id="envoyer" data-a="envoyer" ${S.envoi && S.envoi.etat === 'encours' ? 'disabled' : ''}>📨 Envoyer à la coordination et au référent du pôle</button></div>
@@ -696,8 +709,8 @@ vue.addEventListener('click', ev => {
   else if (a === 'seance-rouvrir'){ const s = seance(v); if (s){ s.valide = false; s.ouvert = true; } }
   else if (a === 'classe-finie'){ const g = groupe(v); if (g){ g.fini = true; if (!classeCourante()){ valider(4); return; } } }
   else if (a === 'classe-rouvrir'){ const g = groupe(v); if (g){ g.fini = false; S.f.groupes.forEach(x => { if (S.f.groupes.indexOf(x) < S.f.groupes.indexOf(g) && !x.fini) x.fini = true; }); } }
-  else if (a === 'nb-moins' || a === 'nb-plus'){ const s = seance(v); if (s) s.nbAesh = String(Math.max(0, Math.min(12, (parseInt(s.nbAesh, 10) || 0) + (a === 'nb-plus' ? 1 : -1)))); }
-  else if (a === 'deja'){ const [u, x] = v.split('|'), s = seance(u); if (s) s.deja = s.deja === x ? '' : x; }
+  else if (a === 'nb-moins' || a === 'nb-plus'){ const s = seance(v); if (s){ s.plus = Math.max(0, Math.min(12, renfortDe(s) + (a === 'nb-plus' ? 1 : -1))); s.plusTouche = true; s.nbAesh = String(totalDe(s)); } }
+  else if (a === 'deja'){ const [u, x] = v.split('|'), s = seance(u); if (s){ s.deja = s.deja === x ? '' : x; if (!s.plusTouche) s.plus = null; s.nbAesh = String(totalDe(s)); } }
   else if (a === 'date-cours'){ const [u, d, cid] = v.split('|'), s = seance(u), c = S.edt.cours[cid] || Object.values(S.edt.cours).find(x => x.id === cid); if (s){ s.date = d; if (c) poserCours(s, c); } }
   else if (a === 'deplier'){ const s = seance(v); if (s) s.ouvert = true; }
   else if (a === 'replier'){ const s = seance(v); if (s){ s.ouvert = false; s.propose = false; } }
@@ -753,7 +766,7 @@ function construire(){
   const f = S.f, now = new Date().toISOString();
   const seances = triees().map(s => {
     const g = groupe(s.classe), c = cG(g);
-    return { classe: s.classe, libelle: libGroupe(g), intitule: nettoie(g && g.intitule, 120), date: s.date, debut: s.debut, fin: finS(s), duree: Number(s.duree) || 0, tiersTemps: !!s.tiers, salle: nettoie(s.salle, 20), nbAesh: parseInt(String(s.nbAesh).trim(), 10), nbPropose: c.propose || 0,
+    return { classe: s.classe, libelle: libGroupe(g), intitule: nettoie(g && g.intitule, 120), date: s.date, debut: s.debut, fin: finS(s), duree: Number(s.duree) || 0, tiersTemps: !!s.tiers, salle: nettoie(s.salle, 20), nbAesh: totalDe(s), nbPropose: c.propose || 0,
       dejaPresentes: /^\d$/.test(s.deja || '') ? +s.deja : (s.deja === 'nsp' ? -1 : null), renfort: renfortDe(s) };
   });
   const ints = [...new Set(f.groupes.map(g => nettoie(g.intitule, 120)))];
@@ -761,7 +774,7 @@ function construire(){
     nature: f.nature, natureAutre: f.nature === 'autre' ? nettoie(f.natureAutre, 80) : '',
     forme: f.forme || '', formeAutre: f.forme === 'autre' ? nettoie(f.formeAutre, 80) : '', intitule: ints.length === 1 ? ints[0] : '',
     classes: f.groupes.map(g => ({ classe: g.id, classes: g.classes, libelle: libGroupe(g), autre: !!g.autre, intitule: nettoie(g.intitule, 120),
-      diplome: nettoie(g.diplome, 60), pole: poleDe(g), nbSouhaite: Math.max(0, ...S.f.seances.filter(s => s.classe === g.id).map(s => parseInt(s.nbAesh, 10) || 0)),
+      diplome: nettoie(g.diplome, 60), pole: poleDe(g), nbSouhaite: Math.max(0, ...S.f.seances.filter(s => s.classe === g.id).map(s => totalDe(s) || 0)),
       comptes: g.classes.length ? (({ amen, besoins, ...r }) => ({ ...r, ...amen, besoins: besoins.map(([n, v]) => n + ' ×' + v) }))(comptesGroupe(g.classes)) : {} })),
     seances, observations: nettoie(f.observations, 600), autreDemande: nettoie(f.autreDemande, 600),
     statut: 'nouvelle', reponse: { statut: '', texte: '', majLe: '' }, creeLe: now, majLe: now, source: SOURCE };
