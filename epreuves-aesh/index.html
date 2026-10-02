@@ -803,7 +803,12 @@ async function envoyer(renvoi){
 }
 /* Une demande restée en attente sur cet appareil (envoi échoué) : on la propose à nouveau. */
 try { const b = JSON.parse(localStorage.getItem(K_BROUILLON) || 'null'); if (b && b.id && b.type === 'epreuve') S.envoi = { etat: 'attente', doc: b, message: 'Une demande préparée sur cet appareil n’est pas encore partie.' }; } catch (_) { }
-rendre(); charger();
+rendre(); await charger();
+const { installerSorties } = await import('./sorties.mjs?v=2026-10-02');
+installerSorties({ edt: () => S.edt, choix: CHOIX_CLASSES, annee: ANNEE, id: nouvelId,
+  effectif: async k => { if (erreurFS) throw erreurFS; const snap = await avecDelai(FS.getDoc(FS.doc(db, COL, `classe_${k}_${ANNEE}`)), DELAI); return snap.exists() ? snap.data() : null; },
+  envoyer: async d => { if (erreurFS) throw erreurFS; const ref = FS.doc(db, COL, d.id); const snap = await avecDelai(FS.getDoc(ref), DELAI); if (snap.exists()) { const existant = snap.data(); if (existant.intitule !== d.intitule || existant.creeLe !== d.creeLe) throw new Error('Identifiant déjà utilisé'); return; } await avecDelai(FS.setDoc(ref, d), DELAI); }
+});
 </script>
 </body>
 </html>

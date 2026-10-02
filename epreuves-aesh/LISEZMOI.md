@@ -58,3 +58,16 @@ Banc Electron hors dépôt, avec données fictives et faux Firestore : 15/15. Il
 - la fin modifiable ;
 - le refus Firestore, avec demande gardée puis renvoyée ;
 - un seul document écrit, sans aucun code élève.
+
+## 02/10/2026 — Sorties et autres mobilisations (candidate locale)
+
+Accord utilisateur « ok vas y », après validation du formulaire et des deux réponses AESH.
+À la même adresse, les boutons Épreuve / CCF, Sortie, Autre besoin sélectionnent deux parcours indépendants. Le parcours d'épreuves et sa construction de document sont conservés. `sorties.mjs` apporte le parcours simple : matière/prénom, objet, classes regroupées ou séparées, estimation corrigible, enseignants, autres adultes, AESH souhaitées au total, date/horaire complet, lieu/transport et commentaire.
+
+Les regroupements sont ceux de `CHOIX_CLASSES` existant (AGORA/GATL 1+2, Vannerie 1re+2e année, classes individuelles). L'estimation additionne une fois chaque classe et lit les documents anonymes `classe_<CLASSE>_<année>` publiés depuis les fiches Classes–élèves d'Atelier. Aucun dossier nominal local n'est transmis au site. Donnée manquante : à préciser, sans empêcher la saisie. Une correction de participants ne modifie pas l'effectif de la classe ni les besoins individuels.
+
+La demande garde `type:'epreuve'`, `nature:'sortie'` (ou autre) et la collection `coordination_demandes_aesh` du projet réellement configuré `coordination-pedagogie`. Champs de premier niveau inchangés ; métadonnées pratiques ajoutées dans la séance (`mobilisation`, `transport`, `transportAutre`, `enseignants`, `autresAdultes`, `effectifPrevu`) et les comptes du groupe. Un seul créneau couvre toutes les classes pour éviter de demander plusieurs fois les mêmes AESH. Préparation conservée sur l'appareil avec une clé distincte ; répétition après erreur d'envoi reprend le même identifiant.
+
+Réponse AESH : prénom, participation déjà convenue / disponible / non disponible ; commentaire facultatif. Disponibilité sur toute la plage obligatoire dans le libellé. La réponse garde `dispo:'oui'` pour les deux situations positives, avec `participation:'convenue'|'disponible'` et `engagementComplet`. Une réponse positive n'affecte pas automatiquement le planning. Les anciennes épreuves gardent Disponible / Sous réserve / Pas disponible et leur format de réponse.
+
+Tests fictifs isolés : regroupements/déduplication, estimation absente, correction, dates invalides, horaires, échec d'envoi/reprise, envoi unique, maintien des épreuves et anciennes réponses, deux statuts nouveaux, largeur 390 px, absence d'erreurs JS. Aperçus inspectés. Aucun nom d'élève dans les tests, aucune écriture Firestore, aucune règle changée, aucun commit/push/déploiement. Vérification des règles actives et essai d'envoi réel restant à faire après autorisation distincte. Les effectifs en ligne restent ceux du dernier envoi confirmé des fiches ; pas de publication automatique.
