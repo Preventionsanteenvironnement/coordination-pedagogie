@@ -8,7 +8,7 @@
        { titre:"...", desc:"...", enfants:[ ... ] }
 
    • UN DOCUMENT → possède un "lien" (on l'ouvre).
-       { titre:"...", desc:"...", lien:"fichiers/x.pdf", type:"PDF", badge:"Nouveau" }
+       { titre:"...", desc:"...", lien:"fichiers/mon-document.pdf", type:"PDF", badge:"Nouveau" }
 
    👉 Pour ajouter du contenu, vous ne touchez QUE ce fichier.
    ⚠️ RGPD : jamais le nom du lycée ni le nom d'élèves.
