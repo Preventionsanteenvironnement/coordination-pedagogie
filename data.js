@@ -66,6 +66,13 @@ const THEMATIQUES = [
         type: "Cadre",
       },
       {
+        titre: "Suivre mes élèves en PFMP",
+        desc: "Pour l'enseignant référent : avec votre code à 6 chiffres, vos élèves étape par étape, de la recherche de l'entreprise à l'attestation — ce que l'élève a déclaré à vérifier, ce qu'il vous reste à faire, les documents et où les trouver, la visite et les messages.",
+        lien: "suivi-pfmp/",
+        type: "Outil",
+        badge: "Nouveau",
+      },
+      {
         titre: "Visite de stage — proposer une date au tuteur",
         desc: "Tu proposes des jours et des plages horaires ; le tuteur choisit le créneau qui l'arrange, sans rien écrire ni créer de compte. Les réponses arrivent dans l'Espace de gestion.",
         lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/",

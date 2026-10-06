@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#b45309">
+<meta name="robots" content="noindex">
+<title>Suivre mes élèves en PFMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!--
+  Suivre mes élèves en PFMP (coordination-pedagogie/suivi-pfmp/)
+  L'enseignant référent entre son code à 6 chiffres et suit ses élèves étape par étape.
+  Firestore « coordination-pedagogie » : coordination_pfmp_suivi (+ messages, journal),
+  coordination_pfmp_referents (lecture), coordination_rdv (lecture du rendez-vous de visite).
+  Aucun nom : les élèves sont des codes. Le professeur principal relie les codes aux noms dans l'Atelier.
+-->
+<link rel="stylesheet" href="./styles.css?v=2026-10-06a">
+</head>
+<body>
+<div id="app" class="app"><p class="chargement">Chargement…</p></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:20px">Cette page a besoin de JavaScript.</p></noscript>
+<script src="./pfmp-commun.js?v=2026-10-06a"></script>
+<script type="module">
+const firebaseConfig = {
+  apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain:"coordination-pedagogie.firebaseapp.com",
+  projectId:"coordination-pedagogie", storageBucket:"coordination-pedagogie.firebasestorage.app",
+  messagingSenderId:"526058585010", appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab"
+};
+let F = null, db = null, erreur = null;
+try {
+  if (window.__FIRESTORE_SHIM__) { F = window.__FIRESTORE_SHIM__.F; db = window.__FIRESTORE_SHIM__.db; }
+  else {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
+    F = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+    db = F.getFirestore(initializeApp(firebaseConfig, 'suivi-pfmp'));
+  }
+} catch (e) { erreur = e; }
+try {
+  const m = await import('./app.js?v=2026-10-06a');
+  m.demarrer({ F, db, erreur });
+} catch (e) {
+  document.getElementById('app').innerHTML = '<p class="chargement">La page n’a pas pu se charger. Vérifiez la connexion puis rechargez.</p>';
+  console.error(e);
+}
+</script>
+</body>
+</html>

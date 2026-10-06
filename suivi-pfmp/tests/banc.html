@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Banc d'essai — Suivre mes élèves en PFMP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<!-- Banc d'essai local : base en mémoire, codes fictifs (classe TEST). Aucune connexion à Firestore. -->
+<div id="app" class="app"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="../pfmp-commun.js"></script>
+<script type="module">
+import { fauxModulaire } from './faux-firestore.mjs';
+const { F, db, base } = fauxModulaire();
+const P = globalThis.PFMP_COMMUN;
+const s = P.service(P.depotModulaire(F, db));
+const A = P.anneeScolaire();
+const per = { debut: '2027-01-04', fin: '2027-01-17', dernierJour: '2026-12-18' };
+const codes = ['Z9T1', 'Z9T2', 'Z9T3'];
+for (const c of codes) await s.publierSuivi({ annee: A, code: c, periode: 1, classe: 'TEST', libelle: 'PFMP 1', ...per, refSigle: 'T. R.' });
+await s.publierReferent(A, '900001', 'T. R.', codes.map(c => P.suiviId(A, c, 1)));
+const id1 = P.suiviId(A, 'Z9T1', 1), id2 = P.suiviId(A, 'Z9T2', 1);
+await s.agir(id1, 'referent', 'faire', 'pp');
+await s.majPistes(id1, l => l.concat([{ structure: 'Cabinet comptable', secteur: 'Services', moyen: 'appel', date: '2026-10-05', reponse: 'refus' }, { structure: 'Mairie', secteur: 'Administration', moyen: 'visite', date: '2026-10-06', reponse: 'entretien' }]));
+await s.declarerTrouve(id1, { structure: 'Mairie (service accueil)', secteur: 'Administration' });
+await s.envoyerMessage(id1, 'eleve', '', 'Bonjour, j’ai trouvé une mairie pour mon stage !');
+await s.agir(id2, 'search', 'declarer', 'eleve');
+await s.agir(id2, 'search', 'valider', 'referent');
+await s.agir(id2, 'pre_given', 'remettre', 'referent');
+await s.agir(id2, 'pre_given', 'recevoir', 'eleve');
+await s.agir(id2, 'pre_return', 'remettre', 'eleve');
+base.ecrire('coordination_rdv/rdvTEST', { entreprise: 'Mairie', filiere: 'AGOrA', type: 'Visite sur site', statut: 'confirme', confirme: { dateStr: '2027-01-14', jour: 'jeudi', d: '14', m: 'janv.', label: '10:00 – 10:45' } });
+await s.majVisite(id2, { rdv: 'rdvTEST', statut: 'attente', type: 'Visite sur site' }, 'referent');
+try { localStorage.setItem('pfmp-referent-code', '900001'); } catch (e) {}
+Object.assign(window, { __base: base, __svc: s, __P: P, __ids: { id1, id2 } });
+const m = await import('../app.js');
+m.demarrer({ F, db });
+</script>
+</body>
+</html>
