@@ -11,10 +11,12 @@ const ATELIER = ['search', 'pre_given', 'pre_return', 'pronote', 'convention', '
   'accommodation', 'arrival', 'installed', 'evaluation_sent', 'visit', 'assessment', 'attestation', 'attestation_bde', 'appreciation', 'evaluation_pro'];
 ATELIER.forEach(id => assert.ok(P.PAR_ID[id], 'étape Atelier absente : ' + id));
 assert.equal(new Set(P.ETAPES.map(e => e.id)).size, P.ETAPES.length, 'identifiants en double');
-assert.equal(P.ETAPES.length, 39);
+assert.equal(P.ETAPES.length, 44);
+assert.deepEqual(P.ETAPES.filter(e => e.ph === 2).map(e => e.id), ['neg_visit', 'neg_company', 'neg_family', 'neg_pro', 'neg_return', 'neg_signed']);
+assert.ok(P.PAR_ID.pre_visa && !P.ETAPES.includes(P.PAR_ID.pre_visa), 'pre_visa retirée mais reconnue');
 assert.deepEqual(P.ETAPES.filter(e => e.flag).map(e => e.id), ['search', 'conv_return', 'attestation', 'student_eval']);
 P.ETAPES.filter(e => e.ah).forEach(e => assert.ok(e.local, 'aide humaine en ligne : ' + e.id));
-console.log('Étapes : 39, les 21 de l’Atelier conservées, aide humaine jamais en ligne.');
+console.log('Étapes : 44 (fiche de négociation en phase 3), les 21 de l’Atelier conservées, aide humaine jamais en ligne.');
 
 /* 2. Dernier jour de cours et échéances, sur les vraies vacances 2026-2027. */
 const VAC = [{ d: '2026-10-17', f: '2026-11-02' }, { d: '2026-12-19', f: '2027-01-04' }, { d: '2027-02-13', f: '2027-03-01' },
@@ -25,7 +27,8 @@ assert.equal(P.dernierJourDeCours('2027-05-31', VAC, FER), '2027-05-28');
 const p1 = { debut: '2027-01-04', fin: '2027-01-17', dernierJour: '2026-12-18' };
 const p2 = { debut: '2027-05-31', fin: '2027-06-27', dernierJour: '2027-05-28' };
 assert.equal(P.echeance(P.PAR_ID.copies, p1).date, '2026-12-18');
-assert.equal(P.echeance(P.PAR_ID.search, p1).date, '2026-11-20');
+assert.equal(P.echeance(P.PAR_ID.search, p1).date, '2026-11-13');
+assert.equal(P.echeance(P.PAR_ID.neg_signed, p1).date, '2026-11-18');
 assert.equal(P.echeance(P.PAR_ID.conv_return, p1).date, '2026-12-07');
 assert.equal(P.echeance(P.PAR_ID.arrival, p1).date, '2026-12-18', 'PFMP 1 : appel avant les vacances');
 assert.equal(P.echeance(P.PAR_ID.arrival, p2).date, '2027-05-24');

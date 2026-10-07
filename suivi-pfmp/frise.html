@@ -12,9 +12,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <!--
-  Démonstration (07/10/2026) : la frise d'un élève en PFMP, vue par son enseignant référent.
+  La frise d'un élève en PFMP, vue par son enseignant référent (07/10/2026).
   L'élève à gauche, l'enseignant à droite ; la ligne serpente de l'un à l'autre, étape par étape,
-  jusqu'au bilan qu'ils font ensemble. Données fictives, aucune base, aucun code d'accès.
+  jusqu'au bilan qu'ils font ensemble.
+    frise.html?f=2026-2027_K4A7_p1   la fiche réelle de l'élève (lien envoyé par le professeur principal)
+    frise.html                       la démonstration, données fictives
+  Firestore « coordination-pedagogie » : coordination_pfmp_suivi/{f} (+ eleve/parcours), lecture ;
+  écriture des seuls gestes du référent, par le socle commun (pfmp-commun.js). Aucun nom d'élève.
 -->
 <style>
 :root{--ink:#172738;--muted:#66768a;--line:#e3e9ee;--accent:#176d66;--accent-s:#e2f1ef;--el:#2d63b8;--el-s:#eaf0fb;--green:#1f9d6b;--green-s:#e8f6ef;--orange:#c46f1c;--orange-s:#fff3e6;--bg:#f5f7f9}
@@ -82,29 +86,223 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
   .g .noeud{right:-30px}.d .noeud{left:-30px}
   .tete .info{display:none}
 }
+
+[hidden]{display:none!important}
+.avenir .carte .acts{display:none}
+.nouveau .carte{animation:clignote 1.6s ease-in-out infinite}
+@keyframes clignote{0%,100%{box-shadow:0 0 0 0 rgba(45,99,184,0)}50%{box-shadow:0 0 0 6px rgba(45,99,184,.28)}}
+.nouveau .q::after{content:"Nouveau";margin-left:8px;background:var(--el);color:#fff;border-radius:6px;padding:1px 6px;font-size:10px;letter-spacing:.06em}
+.carte .acts{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.g .carte .acts{justify-content:flex-start}
+.carte .acts button{border:0;background:var(--accent);color:#fff;border-radius:9px;padding:7px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.carte .acts button.lien{background:none;color:var(--muted);padding:4px 2px;font-weight:600}
+.sous{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.sous li{display:flex;align-items:center;gap:8px;font-size:13.5px}
+.sous button{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #cfd8e0;background:#fff;color:#fff;font-size:12px;font-weight:800;cursor:pointer;display:grid;place-items:center;padding:0}
+.sous li.ok button{background:var(--green);border-color:var(--green)}
+.sous li.ok span{color:var(--muted)}
+.vide-msg{text-align:center;color:var(--muted);padding:60px 20px}
+#voile:empty{display:none}
+.voile{position:fixed;inset:0;background:rgba(20,30,40,.4);display:grid;place-items:center;z-index:20;padding:20px}
+.fen{background:#fff;border-radius:20px;padding:22px;max-width:380px;width:100%;text-align:center}
+.fen h2{margin:4px 0 6px;font-size:20px}.fen p{margin:0 0 16px;color:var(--muted)}
+.fen .b2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fen button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px;font:inherit;font-weight:700;cursor:pointer}
+.fen button.oui{background:var(--accent);border-color:var(--accent);color:#fff}
 </style>
 </head>
 <body>
 <main class="shell">
- <div class="haut"><a href="../">← Coordination & Pédagogie</a>
-  <div class="demo">Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
-
- <section class="tete"><div class="code">K4A7</div>
-  <div><h1>PFMP 1 · B2GATL2</h1><div class="info">Du lundi 23 novembre au vendredi 18 décembre · élève fictif</div></div>
-  <div class="j"><b id="jx">J-47</b><span>avant le départ</span></div></section>
-
- <div class="maint" id="maint"></div>
-
- <div class="couloirs"><div class="g"><span class="av"><i class="ti ti-fish"></i></span>L’élève</div><div class="d">L’enseignant<span class="av prof"><i class="ti ti-school"></i></span></div></div>
+ <div class="haut"><a href="../">← Coordination & Pédagogie</a><div class="demo" id="demo" hidden>Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
+ <section class="tete"><div class="code" id="code">—</div><div><h1 id="titre">Chargement…</h1><div class="info" id="info"></div></div><div class="j"><b id="jx"></b><span id="jxl"></span></div></section>
+ <div class="maint" id="maint" hidden></div>
+ <div class="couloirs"><div class="g"><span class="av" id="avEl"><i class="ti ti-user"></i></span>L’élève</div><div class="d">L’enseignant<span class="av prof"><i class="ti ti-school"></i></span></div></div>
  <section class="frise" id="frise"></section>
-
  <div class="leg"><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
 </main>
-<script>
-/* qui : g = l'élève, d = l'enseignant (référent, sauf mention), c = ensemble. */
-/* [côté, étape, précision, date, qui] — g : l'élève · d : l'enseignant · c : ensemble.
-   Ordre : procédure de l'établissement (R26CSRP-LP), check-list du référent, fiche de négociation, convention-type. */
-const ETAPES = [
+<div id="voile"></div>
+<script src="./pfmp-commun.js?v=2026-10-07a"></script>
+<script type="module">
+const P = window.PFMP_COMMUN;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const AVATARS = [['cat', '#D85A30'], ['dog', '#BA7517'], ['butterfly', '#D4537E'], ['fish', '#378ADD'], ['plant-2', '#639922'], ['rocket', '#534AB7'], ['feather', '#1D9E75'], ['planet', '#7F77DD'], ['bike', '#185FA5'], ['music', '#993556'], ['star', '#EF9F27'], ['paw', '#854F0B'], ['ball-football', '#3B6D11'], ['palette', '#A32D2D'], ['camera', '#5F5E5A'], ['bolt', '#C2410C'], ['leaf', '#0F6E56'], ['moon', '#3C3489']];
+const auj = () => new Date().toLocaleDateString('sv-SE');
+const fr = s => s ? new Date(s.slice(0, 10) + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
+const frLong = s => s ? new Date(s + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+let avatar = ['user', '#9aa8b6'];
+
+/* ── Dessin commun : une liste de cartes [{phase} | {cote, titre, detail, date, etat, qui, nouveau, acts, sous}] ── */
+function dessiner(items, maint) {
+  let h = '';
+  items.forEach(x => {
+    if (x.phase) { h += `<div class="phase ${x.etat || ''}"><span>${x.etat === 'ok' ? '✓ ' : ''}${esc(x.phase)}</span></div>`; return; }
+    const mini = x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>` : '';
+    h += `<div class="et ${x.cote} ${x.etat}${x.nouveau ? ' nouveau' : ''}" data-n="${x.n}"><div class="carte"><i class="noeud"></i><div class="q">${mini}${esc(x.qui)}</div><b>${esc(x.titre)}</b>${x.detail ? `<p>${esc(x.detail)}</p>` : ''}`
+      + (x.sous ? `<ul class="sous">${x.sous.map(s => `<li class="${s.ok ? 'ok' : ''}">${s.geste ? `<button data-geste="${s.id}" data-action="${s.action}" aria-label="${esc(s.t)}">${s.ok ? '✓' : ''}</button>` : `<span>${s.ok ? '✓' : '○'}</span>`}<span>${esc(s.t)}</span></li>`).join('')}</ul>` : '')
+      + `<span class="dt">${x.etat === 'fait' ? '✓ ' : ''}${esc(x.date || '')}</span>`
+      + (x.acts && x.acts.length ? `<div class="acts">${x.acts.map(a => `<button class="${a.lien ? 'lien' : ''}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('')}</div>` : '')
+      + `</div></div>`;
+  });
+  h += `<div class="ens"><span class="av" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
+  $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
+  $('avEl').style.background = avatar[1]; $('avEl').innerHTML = `<i class="ti ti-${avatar[0]}"></i>`;
+  const m = $('maint');
+  if (maint) { m.hidden = false; m.className = 'maint' + (maint.cote === 'g' ? ' el' : ''); m.innerHTML = `<div class="x"><small>${esc(maint.qui)}</small><b>${esc(maint.titre)}</b>${maint.date ? ' · ' + esc(maint.date) : ''}</div>${maint.bouton ? `<button data-geste="${maint.bouton.id}" data-action="${maint.bouton.action}">${esc(maint.bouton.t)}</button>` : ''}`; }
+  else m.hidden = true;
+  requestAnimationFrame(ligne);
+}
+/* La ligne serpente d'un point à l'autre ; elle est verte jusqu'à l'étape en cours. */
+let iciN = 0;
+function ligne() {
+  const f = $('frise'), svg = f.querySelector('svg'); if (!svg) return;
+  const b = f.getBoundingClientRect();
+  const pts = [...f.querySelectorAll('.et')].map(el => {
+    const nd = el.querySelector('.noeud'), r = (getComputedStyle(nd).display === 'none' ? el.querySelector('.carte') : nd).getBoundingClientRect();
+    return { x: r.left + r.width / 2 - b.left, y: (el.classList.contains('c') ? r.top : r.top + r.height / 2) - b.top, fait: el.classList.contains('fait') || el.classList.contains('ici') };
+  });
+  const seg = (a, c) => { const m = (a.y + c.y) / 2; return `M${a.x},${a.y} C${a.x},${m} ${c.x},${m} ${c.x},${c.y}`; };
+  let s = '';
+  for (let i = 1; i < pts.length; i++) {
+    const v = pts[i].fait;
+    s += `<path d="${seg(pts[i - 1], pts[i])}" fill="none" stroke="${v ? '#1f9d6b' : '#d8e0e7'}" stroke-width="${v ? 4 : 3}" stroke-linecap="round" ${v ? '' : 'stroke-dasharray="1 8"'}/>`;
+  }
+  svg.innerHTML = s;
+}
+addEventListener('resize', () => requestAnimationFrame(ligne));
+document.fonts && document.fonts.ready.then(() => requestAnimationFrame(ligne));
+
+/* ── Confirmation ── */
+function confirmer(texte, oui) {
+  $('voile').innerHTML = `<div class="voile"><div class="fen" role="dialog" aria-modal="true"><h2>Vous confirmez ?</h2><p>${esc(texte)}</p><div class="b2"><button id="non">Non</button><button class="oui" id="oui">Oui</button></div></div></div>`;
+  $('non').onclick = () => { $('voile').innerHTML = ''; };
+  $('oui').onclick = () => { $('voile').innerHTML = ''; oui(); };
+}
+
+const f = new URLSearchParams(location.search).get('f');
+if (!f) demo(); else reel(f);
+
+/* ═══ La fiche réelle ═══════════════════════════════════════════════════ */
+async function reel(sid) {
+  if (!/^20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4]$/.test(sid)) { $('frise').innerHTML = '<p class="vide-msg">Lien incomplet.</p>'; $('titre').textContent = 'PFMP'; return; }
+  let F, db;
+  try {
+    if (window.__FIRESTORE_SHIM__) ({ F, db } = window.__FIRESTORE_SHIM__);
+    else {
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
+      F = await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+      db = F.getFirestore(initializeApp({ apiKey: 'AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA', authDomain: 'coordination-pedagogie.firebaseapp.com', projectId: 'coordination-pedagogie', storageBucket: 'coordination-pedagogie.firebasestorage.app', messagingSenderId: '526058585010', appId: '1:526058585010:web:ba4dd6d9c8281ba5bf02ab' }, 'pfmp-frise'));
+    }
+  } catch (e) { $('frise').innerHTML = '<p class="vide-msg">Connexion impossible. Rechargez la page.</p>'; return; }
+  const svc = P.service(P.depotModulaire(F, db));
+  let s = null, p = null, pret = 0;
+  /* « Nouveau » : ce que l'élève a validé depuis la dernière visite du référent sur cet appareil. */
+  const cleVu = 'pfmp-frise-vu:' + sid;
+  let vu = ''; try { vu = localStorage.getItem(cleVu) || ''; } catch (e) {}
+  const noterVu = () => { try { localStorage.setItem(cleVu, new Date().toISOString()); } catch (e) {} };
+  addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') noterVu(); });
+  addEventListener('pagehide', noterVu);
+  svc.ecouterSuivi(sid, d => { s = d; pret |= 1; if (pret === 3) rendre(); }, () => { $('frise').innerHTML = '<p class="vide-msg">Lecture impossible.</p>'; });
+  F.onSnapshot(F.doc(db, ...('coordination_pfmp_suivi/' + sid + '/eleve/parcours').split('/')), x => { p = x.exists() ? x.data() : null; pret |= 2; if (pret === 3) rendre(); }, () => { pret |= 2; if (pret === 3) rendre(); });
+
+  function rendre() {
+    if (!s) { $('titre').textContent = 'PFMP'; $('frise').innerHTML = '<p class="vide-msg">Cette fiche n’existe pas encore. L’élève l’ouvre en déclarant son stage sur mapse.fr.</p>'; return; }
+    const pr = (p && p.prepa) || {}, R = (p && p.recherches) || [], ent = pr.trouveR && R.find(r => r.id === pr.trouveR);
+    if (p && p.avatar != null && AVATARS[p.avatar]) avatar = AVATARS[p.avatar];
+    $('code').textContent = s.code; $('titre').textContent = (s.libelle || 'PFMP ' + s.periode) + (s.classe ? ' · ' + s.classe : '');
+    $('info').textContent = [s.debut ? 'Du ' + frLong(s.debut) + ' au ' + frLong(s.fin) : '', ent ? ent.nom + (ent.adresse ? ', ' + ent.adresse : '') : ''].filter(Boolean).join(' · ');
+    const t = auj(), j = s.debut && s.debut > t ? Math.round((new Date(s.debut + 'T12:00:00') - new Date(t + 'T12:00:00')) / 864e5) : null;
+    $('jx').textContent = j != null ? 'J-' + j : ''; $('jxl').textContent = j != null ? 'avant le départ' : '';
+    const items = construire(s, p, ent);
+    let n = 0; items.forEach(x => { if (!x.phase) x.n = n++; });
+    const ici = items.find(x => !x.phase && x.etat !== 'fait');
+    if (ici) ici.etat = 'ici';
+    // Les phases : faite, en cours, à venir
+    items.forEach((x, i) => { if (!x.phase) return; const suite = []; for (let k = i + 1; k < items.length && !items[k].phase; k++) suite.push(items[k]); x.etat = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : ''; });
+    const maint = ici ? { cote: ici.cote, qui: ici.cote === 'g' ? 'L’élève, maintenant' : 'À vous, maintenant', titre: ici.titre, date: ici.date, bouton: ici.acts && ici.acts.find(a => !a.lien) } : null;
+    dessiner(items, maint);
+  }
+  const quand = (en, et) => en && en.le && en.e ? fr(en.le) : ((P.echeance(et, s) || {}).date ? 'avant le ' + fr(P.echeance(et, s).date) : '');
+  const neuf = en => en && en.par === 'eleve' && en.le && en.le > vu;
+  function construire(s, p, ent) {
+    const pr = (p && p.prepa) || {}, R = (p && p.recherches) || [], items = [];
+    const E = id => P.entree(s, id);
+    /* Les gestes du référent, dits comme on les fait. */
+    const DIT = { neg_pro: 'Fiche validée par l’enseignant professionnel', neg_signed: 'Signer la fiche de négociation et la garder', pre_given: 'Remettre la pré-convention', conv_given: 'Remettre la convention pour les signatures',
+      copies: 'Remettre les exemplaires signés', pre_return: 'Recevoir et vérifier la pré-convention', conv_return: 'Recevoir et vérifier la convention signée', arrival: 'Appeler le tuteur : arrivée confirmée',
+      assessment: 'Visite-bilan chez le tuteur', archive: 'Archiver la convention (DDF et Pronote)', student_eval: 'Faire le bilan avec l’élève' };
+    const dit = et => DIT[et.id] || et.t;
+    const acte = (id, action, texte, lien) => ({ id, action, t: texte, lien });
+    P.PHASES.forEach((nom, ph) => {
+      if (ph === 0) {
+        items.push({ phase: 'Préparation' });
+        items.push({ cote: 'g', qui: 'Élève', titre: 'CV et lettre de motivation', detail: 'CV : ' + (pr.cv || '—') + ' · lettre : ' + (pr.lettre || '—'), etat: pr.cv === 'À jour' && pr.lettre === 'Prête' ? 'fait' : 'avenir' });
+        const fini = R.filter(r => r.statut !== 'prevu').length;
+        items.push({ cote: 'g', qui: 'Élève', titre: 'Chercher une entreprise', detail: R.length ? R.length + ' démarche' + (R.length > 1 ? 's' : '') + ' notée' + (R.length > 1 ? 's' : '') + ' · ' + fini + ' faite' + (fini > 1 ? 's' : '') : 'Aucune démarche notée', etat: R.length ? 'fait' : 'avenir', date: R.length ? fr(R.map(r => r.date || '').filter(Boolean).sort()[0]) : '' });
+        return;
+      }
+      items.push({ phase: nom });
+      let groupe = null;
+      P.EN_LIGNE.filter(et => et.ph === ph && et.ty !== 'journal' && !et.opt && !(et.ty === 'tache' && !et.by.includes('referent')) && !(et.ty === 'remise' && et.from === 'pp')).forEach(et => {
+        const en = E(et.id), e = en.e;
+        if (et.ty === 'tache' || et.ty === 'info') {
+          const ok = e === 'fait', sous = { id: et.id, t: et.t, ok, geste: et.ty === 'tache', action: ok ? 'annuler' : 'faire' };
+          if (et.id === 'visit') { const v = s.visite || {}; items.push({ cote: 'd', qui: 'Enseignant référent', titre: 'Programmer la visite avec le tuteur', detail: v.le ? 'Visite : ' + v.le : v.rdv ? 'Rendez-vous proposé au tuteur' : 'Le tuteur reçoit un lien et choisit un créneau', etat: v.le || ok ? 'fait' : 'avenir' }); groupe = null; return; }
+          if (groupe) { groupe.sous.push(sous); groupe.etat = groupe.sous.every(x => x.ok) ? 'fait' : 'avenir'; const ec = P.echeance(et, s); if (ec && !groupe.dateBrute) { groupe.dateBrute = ec.date; } groupe.date = groupe.etat === 'fait' ? '' : (groupe.dateBrute ? 'avant le ' + fr(groupe.dateBrute) : ''); return; }
+          const ec = P.echeance(et, s);
+          groupe = { cote: 'd', qui: et.id === 'neg_pro' ? 'Enseignant professionnel · coché par vous' : 'Enseignant référent', titre: dit(et), sous: [sous], etat: ok ? 'fait' : 'avenir', dateBrute: ec && ec.date, date: ok ? fr(en.le) : (ec ? 'avant le ' + fr(ec.date) : '') };
+          groupe.acts = [];
+          items.push(groupe);
+          if (et.id === 'neg_pro') groupe = null;
+          return;
+        }
+        groupe = null;
+        if (et.ty === 'declare') {
+          items.push({ cote: 'g', qui: 'Élève', titre: et.te || et.t, detail: et.id === 'search' && ent ? ent.nom : (et.id === 'midpoint' && en.v ? (en.v === 'difficulte' ? 'Difficulté signalée' : 'Tout va bien') : ''), etat: ['declare', 'fait', 'valide'].includes(e) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en) });
+          if (et.verif) items.push({ cote: 'd', qui: 'Enseignant référent', titre: et.id === 'search' ? 'Valider l’entreprise' : et.id === 'midpoint' ? 'Faire le point avec l’élève et le tuteur' : dit(et), detail: et.id === 'search' ? 'Conditions de travail adaptées et sécurisées' : '', etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : '',
+            acts: e === 'declare' || e === 'corriger' || e === '' ? (e === 'declare' ? [acte(et.id, 'valider', 'Valider')] : []) : e === 'valide' ? [acte(et.id, 'annuler', 'Annuler', true)] : [] });
+          return;
+        }
+        if (et.ty === 'remise' && et.from === 'eleve') {
+          items.push({ cote: 'g', qui: 'Élève', titre: et.te || et.t, etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en) });
+          if (!et.verif) return;
+          items.push({ cote: 'd', qui: 'Enseignant référent', titre: dit(et), etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : '',
+            acts: e === 'valide' ? [acte(et.id, 'annuler', 'Annuler', true)] : e === 'remis' ? [acte(et.id, 'recevoir', 'Reçu')] : [] });
+          return;
+        }
+        if (et.ty === 'remise' && et.from === 'referent') {
+          items.push({ cote: 'd', qui: 'Enseignant référent', titre: dit(et), detail: et.ou ? et.ou.replace('Pronote › Communication › Casier numérique', 'Casier numérique de Pronote') : (e === 'valide' ? 'Reçue par l’élève' : ''), etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', date: quand(en, et),
+            acts: e === '' || e === 'corriger' ? [acte(et.id, 'remettre', 'Remis')] : e === 'remis' ? [acte(et.id, 'annuler', 'Annuler', true)] : [] });
+        }
+      });
+    });
+    items.push({ cote: 'c', qui: 'Ensemble', titre: 'Le bilan du stage', detail: 'L’élève et son enseignant référent', etat: P.estFaite(s, 'student_eval') ? 'fait' : 'avenir' });
+    // Les tâches groupées : cocher une à une
+    const TITRES = { pronote: 'Préparer la convention', bde: 'Transmettre la convention', installed: 'Début du stage', attestation_bde: 'Après le stage' };
+    items.forEach(x => {
+      if (!x.sous) return;
+      if (x.sous.length > 1) { x.titre = TITRES[x.sous[0].id] || x.titre; return; }
+      const y = x.sous[0]; x.acts = [acte(y.id, y.action, y.ok ? 'Annuler' : 'C’est fait', y.ok)]; delete x.sous;
+    });
+    return items;
+  }
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-geste]'); if (!b || !s) return;
+    const id = b.dataset.geste, action = b.dataset.action, et = P.PAR_ID[id];
+    confirmer((action === 'annuler' ? 'Annuler : ' : '') + et.t, () => {
+      b.disabled = true;
+      svc.agir(sid, id, action, 'referent').catch(e => { b.disabled = false; alert(e.message); });
+    });
+  });
+}
+
+/* ═══ La démonstration (aucun lien d'élève) ══════════════════════════════ */
+function demo() {
+  $('demo').hidden = false; avatar = ['fish', '#378ADD'];
+  $('code').textContent = 'K4A7'; $('titre').textContent = 'PFMP 1 · B2GATL2'; $('info').textContent = 'Du lundi 23 novembre au vendredi 18 décembre · élève fictif';
+  $('jx').textContent = 'J-47'; $('jxl').textContent = 'avant le départ';
+  /* [côté, étape, précision, date, qui] — g : l'élève · d : l'enseignant · c : ensemble. */
+  const ETAPES = [
  ['Préparation'],
  ['g','Mon CV et ma lettre de motivation sont prêts','','2 oct.'],
  ['g','Chercher une entreprise','Chaque démarche notée : appel, visite, mail','3 → 7 oct.'],
@@ -144,57 +342,23 @@ const ETAPES = [
  ['d','Attestation au bureau des entreprises','Gratification · appréciation du tuteur dans Pronote · compte rendu au professeur de spécialité','avant le 30 déc.'],
  ['c','Le bilan du stage, ensemble','L’élève fait l’évaluation de son stage avec son enseignant référent','janvier']
 ];
-const etapes = ETAPES.filter(x => x.length > 1);
-let ici = etapes.findIndex(x => x[4] === 'Enseignant professionnel');
-const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-
-function rendre() {
-  let n = -1, h = '';
-  ETAPES.forEach(x => {
-    if (x.length === 1) {
-      const debut = n + 1, fin = etapes.length && ETAPES.slice(ETAPES.indexOf(x) + 1).findIndex(y => y.length === 1);
-      const nb = fin < 0 ? etapes.length - debut : fin;
-      const cls = debut + nb - 1 < ici ? 'ok' : debut <= ici ? 'ici' : '';
-      h += `<div class="phase ${cls}"><span>${cls === 'ok' ? '✓ ' : ''}${esc(x[0])}</span></div>`;
-      return;
-    }
-    n++;
-    const [cote, titre, detail, date] = x, etat = n < ici ? 'fait' : n === ici ? 'ici' : 'avenir';
-    const qui = x[4] || (cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : 'Enseignant référent');
-    h += `<div class="et ${cote} ${etat}" data-n="${n}"><div class="carte"><i class="noeud"></i><div class="q">${cote === 'g' ? '<span class="mini"><i class="ti ti-fish"></i></span>' : ''}${qui}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}<span class="dt">${etat === 'fait' ? '✓ ' : ''}${esc(date)}</span></div></div>`;
-  });
-  h += `<div class="ens"><span class="av"><i class="ti ti-fish"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
-  $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
-  const e = etapes[ici];
-  const pro = e && !!e[4];
-  const qui = !e ? '' : e[0] === 'g' ? 'L’élève, maintenant' : e[0] === 'c' ? 'Ensemble, maintenant' : pro ? (e[4] === 'Établissement' ? 'L’établissement, maintenant' : 'L’enseignant professionnel, maintenant') : 'À vous, maintenant';
-  $('maint').className = 'maint' + (e && e[0] === 'g' ? ' el' : '');
-  $('maint').innerHTML = e ? `<div class="x"><small>${qui}</small><b>${esc(e[1])}</b> · ${esc(e[3])}</div>${e[0] === 'd' && !pro ? '<button id="fait">C’est fait</button>' : ''}` : '<div class="x"><small>Parcours terminé</small><b>Stage validé, bilan fait</b></div>';
-  if ($('fait')) $('fait').onclick = () => { ici = Math.min(ici + 1, etapes.length); rendre(); };
-  requestAnimationFrame(ligne);
+  const etapes = ETAPES.filter(x => x.length > 1);
+  let ici = etapes.findIndex(x => x[4] === 'Enseignant professionnel');
+  const go = () => {
+    let n = -1; const items = [];
+    ETAPES.forEach(x => {
+      if (x.length === 1) { items.push({ phase: x[0] }); return; }
+      n++; const [cote, titre, detail, date, qui] = x;
+      items.push({ n, cote, titre, detail, date, etat: n < ici ? 'fait' : n === ici ? 'ici' : 'avenir', qui: qui || (cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : 'Enseignant référent') });
+    });
+    items.forEach((x, i) => { if (!x.phase) return; const suite = []; for (let k = i + 1; k < items.length && !items[k].phase; k++) suite.push(items[k]); x.etat = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : ''; });
+    const e = etapes[ici], pro = e && !!e[4];
+    dessiner(items, e ? { cote: e[0], qui: e[0] === 'g' ? 'L’élève, maintenant' : pro ? (e[4] === 'Établissement' ? 'L’établissement, maintenant' : 'L’enseignant professionnel, maintenant') : 'À vous, maintenant', titre: e[1], date: e[3] } : null);
+  };
+  $('plus').onclick = () => { ici = Math.min(ici + 1, etapes.length); go(); };
+  $('moins').onclick = () => { ici = Math.max(ici - 1, 0); go(); };
+  go();
 }
-
-/* La ligne serpente d'un point à l'autre ; elle est verte jusqu'à l'étape en cours. */
-function ligne() {
-  const f = $('frise'), svg = f.querySelector('svg'), b = f.getBoundingClientRect();
-  const pts = [...f.querySelectorAll('.et')].map(el => {
-    const nd = el.querySelector('.noeud'), r = (getComputedStyle(nd).display === 'none' ? el.querySelector('.carte') : nd).getBoundingClientRect();
-    return { x: r.left + r.width / 2 - b.left, y: (el.classList.contains('c') ? r.top : r.top + r.height / 2) - b.top, n: +el.dataset.n };
-  });
-  const seg = (a, c) => { const m = (a.y + c.y) / 2; return `M${a.x},${a.y} C${a.x},${m} ${c.x},${m} ${c.x},${c.y}`; };
-  let s = '';
-  for (let i = 1; i < pts.length; i++) {
-    const fait = pts[i].n <= ici;
-    s += `<path d="${seg(pts[i - 1], pts[i])}" fill="none" stroke="${fait ? '#1f9d6b' : '#d8e0e7'}" stroke-width="${fait ? 4 : 3}" stroke-linecap="round" ${fait ? '' : 'stroke-dasharray="1 8"'}/>`;
-  }
-  svg.innerHTML = s;
-}
-$('plus').onclick = () => { ici = Math.min(ici + 1, etapes.length); rendre(); };
-$('moins').onclick = () => { ici = Math.max(ici - 1, 0); rendre(); };
-addEventListener('resize', () => requestAnimationFrame(ligne));
-document.fonts && document.fonts.ready.then(() => requestAnimationFrame(ligne));
-rendre();
 </script>
 </body>
 </html>

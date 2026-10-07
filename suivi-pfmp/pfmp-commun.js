@@ -17,12 +17,13 @@
 (function (racine) {
   'use strict';
 
-  const VERSION = '2026-10-06';
+  const VERSION = '2026-10-07';
   const COL_SUIVI = 'coordination_pfmp_suivi';
   const COL_REFERENTS = 'coordination_pfmp_referents';
   const ROLES = ['eleve', 'referent', 'pp'];
 
-  const PHASES = ['Préparer', 'Trouver l’entreprise', 'Pré-convention', 'Convention',
+  /* 07/10/2026 : la fiche de négociation devient une phase, avant la pré-convention (ordre validé par Brahim). */
+  const PHASES = ['Préparer', 'Trouver l’entreprise', 'Fiche de négociation', 'Pré-convention', 'Convention',
     'Avant le départ', 'Pendant le stage', 'Retour'];
 
   /* Une étape :
@@ -46,46 +47,56 @@
     { id: 'accommodation', ph: 0, t: 'Besoin d’accompagnement examiné en équipe', ty: 'tache', by: ['pp'], local: true, opt: true, ah: true, src: 'Protocole AH étape 1', due: ['dernier', -42, true] },
 
     { id: 'pistes', ph: 1, t: 'Pistes d’entreprises', te: 'Mes pistes d’entreprises', ty: 'journal', src: 'P §2' },
-    { id: 'search', ph: 1, t: 'Entreprise trouvée : conditions adaptées et sécurisées', te: 'J’ai trouvé mon entreprise', ty: 'declare', verif: true, flag: 'Drapeau 1', src: 'P §2', due: ['dernier', -28, true] },
+    { id: 'search', ph: 1, t: 'Entreprise trouvée : conditions adaptées et sécurisées', te: 'J’ai trouvé mon entreprise', ty: 'declare', verif: true, flag: 'Drapeau 1', src: 'P §2', due: ['dernier', -35, true] },
     { id: 'ah_pole', ph: 1, t: 'Pôle AESH informé · accord des responsables · entreprise informée', ty: 'tache', by: ['referent', 'pp'], local: true, opt: true, ah: true, src: 'P §2 et §5', due: ['dernier', -28, true] },
 
-    { id: 'pre_given', ph: 2, t: 'Pré-convention remise à l’élève', te: 'J’ai reçu ma pré-convention', ty: 'remise', from: 'referent', to: 'eleve', doc: 'Pré-convention', ou: 'Pronote › Communication › Casier numérique › « PFMP - Mini stage »', src: 'P mémento 2', due: ['dernier', -26, true] },
-    { id: 'pre_filled', ph: 2, t: 'Pré-convention remplie par l’entreprise', te: 'L’entreprise a rempli ma pré-convention', ty: 'declare', src: 'P §3' },
-    { id: 'pre_visa', ph: 2, t: 'Pré-convention visée par le professeur de spécialité', te: 'Mon professeur de spécialité l’a visée', ty: 'declare', src: 'C' },
-    { id: 'pre_return', ph: 2, t: 'Pré-convention rapportée et entièrement renseignée', te: 'J’ai rapporté ma pré-convention', ty: 'remise', from: 'eleve', to: 'referent', verif: true, doc: 'Pré-convention', src: 'P §3 · C', due: ['dernier', -21, true] },
+    { id: 'neg_visit', ph: 2, t: 'Fiche de négociation présentée à l’entreprise · activités cochées par le tuteur', te: 'Je suis allé à l’entreprise avec ma fiche de négociation', ty: 'declare', doc: 'Fiche de négociation', src: 'Fiche de négociation' },
+    { id: 'neg_company', ph: 2, t: 'Fiche de négociation signée et tamponnée par l’entreprise', te: 'L’entreprise a signé et tamponné ma fiche', ty: 'declare', src: 'Fiche de négociation' },
+    { id: 'neg_family', ph: 2, t: 'Fiche de négociation signée par l’élève majeur ou le responsable légal', te: 'J’ai signé ma fiche (ou mon responsable légal)', ty: 'declare', src: 'Fiche de négociation' },
+    { id: 'neg_pro', ph: 2, t: 'Fiche de négociation validée par l’enseignant professionnel', ty: 'tache', by: ['referent'], src: 'C', due: ['dernier', -32, true], voit: 'Votre enseignant professionnel a validé votre fiche de négociation.' },
+    { id: 'neg_return', ph: 2, t: 'Fiche de négociation remise au référent', te: 'J’ai remis ma fiche de négociation à mon référent', ty: 'remise', from: 'eleve', to: 'referent', due: ['dernier', -31, true] },
+    { id: 'neg_signed', ph: 2, t: 'Fiche de négociation signée par le référent · gardée au dossier', ty: 'tache', by: ['referent'], src: 'Fiche de négociation', due: ['dernier', -30, true] },
 
-    { id: 'pronote', ph: 3, t: 'Stage saisi dans Pronote', ty: 'tache', by: ['referent'], ou: 'Pronote › Stages › Stagiaires', src: 'P mémento 4 · C', due: ['dernier', -18, true], voit: 'Convention en préparation (saisie dans Pronote).' },
-    { id: 'convention', ph: 3, t: 'Convention imprimée · attestation mise de côté jusqu’à la signature complète', ty: 'tache', by: ['referent'], doc: 'Convention (modèle « R26CSRP-LP convention de stage PFMP »)', ou: 'Pronote › fiche de stage › publipostage', src: 'C', due: ['dernier', -18, true] },
-    { id: 'pedagogy', ph: 3, t: 'Annexe pédagogique jointe', ty: 'tache', by: ['referent'], doc: 'Annexe pédagogique', src: 'P §3', due: ['dernier', -18, true] },
-    { id: 'ah_docs', ph: 3, t: 'Annexe handicap remplie · PIAL sollicité si besoin (étape 2bis)', ty: 'tache', by: ['pp', 'referent'], local: true, opt: true, ah: true, doc: 'Annexe handicap · Demande AH étape 2bis', ou: 'Pronote › Casier numérique', src: 'Protocole AH 2 et 2bis', due: ['dernier', -14, true] },
-    { id: 'conv_given', ph: 3, t: 'Convention remise à l’élève pour les signatures', te: 'J’ai reçu ma convention à faire signer', ty: 'remise', from: 'referent', to: 'eleve', due: ['dernier', -18, true] },
-    { id: 'family', ph: 3, t: 'Signature de l’élève majeur ou du représentant légal', te: 'Signée par moi (ou par mon représentant légal si je suis mineur)', ty: 'declare', src: 'P · C' },
-    { id: 'company', ph: 3, t: 'Signatures de l’entreprise et du tuteur, cachet', te: 'Signée par l’entreprise et le tuteur, avec le cachet', ty: 'declare', src: 'P (C : entreprise ou tuteur)' },
-    { id: 'conv_return', ph: 3, t: 'Convention rapportée, conforme, signée par le référent', te: 'J’ai rapporté ma convention signée', ty: 'remise', from: 'eleve', to: 'referent', verif: true, flag: 'Drapeau 2', src: 'P §3 · C', due: ['dernier', -11, true] },
-    { id: 'bde', ph: 3, t: 'Convention transmise au bureau des entreprises (+ annexes)', ty: 'tache', by: ['referent'], src: 'P mémento 6 · C', due: ['dernier', -10, true], voit: 'Convention en signature au lycée.' },
-    { id: 'head', ph: 3, t: 'Exemplaires signés par la direction récupérés (casier)', ty: 'tache', by: ['referent'], src: 'P mémento 7' },
-    { id: 'copies', ph: 3, t: 'Exemplaires remis à la famille et à l’entreprise (avec l’attestation)', te: 'J’ai remis l’exemplaire de la convention à mes parents', ty: 'remise', from: 'referent', to: 'eleve', src: 'P mémento 8 · C', due: ['dernier', 0, false] },
-    { id: 'archive', ph: 3, t: 'Archivage : papier au bureau du DDF, numérique dans Pronote', ty: 'tache', by: ['referent'], src: 'P mémento 9' },
-    { id: 'intendance', ph: 3, t: 'Intendance prévenue (demi-pensionnaire, dates décalées, retour au repas)', ty: 'tache', by: ['referent'], opt: true, src: 'P §5', due: ['dernier', 0, false] },
+    { id: 'pre_given', ph: 3, t: 'Pré-convention remise à l’élève', te: 'J’ai reçu ma pré-convention', ty: 'remise', from: 'referent', to: 'eleve', doc: 'Pré-convention', ou: 'Pronote › Communication › Casier numérique › « PFMP - Mini stage »', src: 'P mémento 2', due: ['dernier', -26, true] },
+    { id: 'pre_filled', ph: 3, t: 'Pré-convention remplie par l’entreprise', te: 'L’entreprise a rempli ma pré-convention', ty: 'declare', src: 'P §3' },
+    { id: 'pre_return', ph: 3, t: 'Pré-convention rapportée et entièrement renseignée', te: 'J’ai rapporté ma pré-convention', ty: 'remise', from: 'eleve', to: 'referent', verif: true, doc: 'Pré-convention', src: 'P §3 · C', due: ['dernier', -21, true] },
 
-    { id: 'arrival', ph: 4, t: 'Tuteur appelé : arrivée confirmée', ty: 'tache', by: ['referent'], src: 'C', due: ['arrivee', 0, false], voit: 'Arrivée confirmée avec le tuteur.' },
-    { id: 'visit', ph: 4, t: 'Visite programmée avec le tuteur', te: 'Visite de l’enseignant référent', ty: 'info', by: ['referent'], ou: 'Visite de stage (RDV PFMP)', src: 'C' },
+    { id: 'pronote', ph: 4, t: 'Pré-convention saisie dans le client Pronote', ty: 'tache', by: ['referent'], ou: 'Pronote › Stages › Stagiaires', src: 'P mémento 4 · C', due: ['dernier', -18, true], voit: 'Convention en préparation (saisie dans Pronote).' },
+    { id: 'convention', ph: 4, t: 'Convention et attestation éditées · attestation mise de côté jusqu’à la signature complète', ty: 'tache', by: ['referent'], doc: 'Convention (modèle « R26CSRP-LP convention de stage PFMP »)', ou: 'Pronote › fiche de stage › publipostage', src: 'C', due: ['dernier', -18, true] },
+    { id: 'pedagogy', ph: 4, t: 'Annexe pédagogique jointe', ty: 'tache', by: ['referent'], doc: 'Annexe pédagogique', src: 'P §3', due: ['dernier', -18, true] },
+    { id: 'ah_docs', ph: 4, t: 'Annexe handicap remplie · PIAL sollicité si besoin (étape 2bis)', ty: 'tache', by: ['pp', 'referent'], local: true, opt: true, ah: true, doc: 'Annexe handicap · Demande AH étape 2bis', ou: 'Pronote › Casier numérique', src: 'Protocole AH 2 et 2bis', due: ['dernier', -14, true] },
+    { id: 'conv_given', ph: 4, t: 'Convention remise à l’élève pour les signatures', te: 'J’ai reçu ma convention à faire signer', ty: 'remise', from: 'referent', to: 'eleve', due: ['dernier', -18, true] },
+    { id: 'company', ph: 4, t: 'Signatures de l’entreprise et du tuteur, cachet', te: 'Signée par l’entreprise et le tuteur, avec le cachet', ty: 'declare', src: 'P (C : entreprise ou tuteur)' },
+    { id: 'family', ph: 4, t: 'Signature de l’élève majeur ou du représentant légal', te: 'Signée par moi (ou par mon représentant légal si je suis mineur)', ty: 'declare', src: 'P · C' },
+    { id: 'conv_return', ph: 4, t: 'Convention rapportée, conforme, signée par le référent', te: 'J’ai rapporté ma convention signée', ty: 'remise', from: 'eleve', to: 'referent', verif: true, flag: 'Drapeau 2', src: 'P §3 · C', due: ['dernier', -11, true] },
+    { id: 'bde', ph: 4, t: 'Convention transmise au bureau des entreprises (+ annexes)', ty: 'tache', by: ['referent'], src: 'P mémento 6 · C', due: ['dernier', -10, true], voit: 'Convention en signature au lycée.' },
+    { id: 'head', ph: 4, t: 'Signée par la cheffe d’établissement · exemplaires récupérés au casier', ty: 'tache', by: ['referent'], src: 'P mémento 7' },
+    { id: 'copies', ph: 4, t: 'Exemplaires remis à la famille et à l’entreprise (avec l’attestation)', te: 'J’ai remis l’exemplaire de la convention à mes parents', ty: 'remise', from: 'referent', to: 'eleve', src: 'P mémento 8 · C', due: ['dernier', 0, false] },
+    { id: 'archive', ph: 4, t: 'Archivage : papier au bureau du DDF, numérique dans Pronote', ty: 'tache', by: ['referent'], src: 'P mémento 9' },
+    { id: 'intendance', ph: 4, t: 'Intendance prévenue (demi-pensionnaire, dates décalées, retour au repas)', ty: 'tache', by: ['referent'], opt: true, src: 'P §5', due: ['dernier', 0, false] },
 
-    { id: 'here', ph: 5, t: 'Arrivée de l’élève', te: 'Je suis arrivé dans mon entreprise', ty: 'declare', due: ['debut', 0, false] },
-    { id: 'installed', ph: 5, t: 'Installation et conditions d’accueil vérifiées', ty: 'tache', by: ['referent'], ou: 'Pronote › Créer un suivi', src: 'P §4 · C', due: ['debut', 1, false] },
-    { id: 'evaluation_sent', ph: 5, t: 'Compte rendu d’évaluation envoyé au tuteur', ty: 'tache', by: ['referent'], doc: 'Compte rendu d’évaluation', ou: 'Pronote › Casier numérique', src: 'C', due: ['debut', 1, false] },
-    { id: 'midpoint', ph: 5, t: 'Point d’étape de l’élève · contact du référent', te: 'Comment se passe mon stage ?', ty: 'declare', verif: true, ou: 'Pronote › Créer un suivi', src: 'P §4', due: ['milieu', 0, false] },
-    { id: 'assessment', ph: 5, t: 'Visite-bilan faite, compte rendu d’évaluation récupéré', ty: 'tache', by: ['referent'], doc: 'Livret de formation · grille de notation', src: 'P §4 · C', due: ['fin', -3, false] },
+    { id: 'arrival', ph: 5, t: 'Tuteur appelé : arrivée confirmée', ty: 'tache', by: ['referent'], src: 'C', due: ['arrivee', 0, false], voit: 'Arrivée confirmée avec le tuteur.' },
+    { id: 'visit', ph: 5, t: 'Visite programmée avec le tuteur', te: 'Visite de l’enseignant référent', ty: 'info', by: ['referent'], ou: 'Visite de stage (RDV PFMP)', src: 'C' },
 
-    { id: 'attest_in', ph: 6, t: 'Attestation remise à l’élève par l’entreprise', te: 'L’entreprise m’a remis mon attestation', ty: 'declare', src: 'C', due: ['fin', -3, false] },
-    { id: 'attestation', ph: 6, t: 'Attestation rapportée au référent', te: 'J’ai rapporté mon attestation', ty: 'remise', from: 'eleve', to: 'referent', flag: 'Drapeau 3', src: 'P mémento 11 · C', due: ['fin', 5, true] },
-    { id: 'attestation_bde', ph: 6, t: 'Attestation transmise au bureau des entreprises (allocation)', ty: 'tache', by: ['referent'], src: 'P mémento 11', due: ['fin', 5, true] },
-    { id: 'appreciation', ph: 6, t: 'Appréciation du tuteur saisie dans Pronote', ty: 'tache', by: ['referent'], ou: 'Pronote › suivi du stage', src: 'C', due: ['fin', 12, true] },
-    { id: 'evaluation_pro', ph: 6, t: 'Compte rendu remis au professeur de spécialité', ty: 'tache', by: ['referent'], src: 'C', due: ['fin', 12, true] },
-    { id: 'student_eval', ph: 6, t: 'Évaluation du stage par l’élève', te: 'J’ai fait le bilan de mon stage (carnet)', ty: 'declare', verif: true, flag: 'Arrivée', src: 'P mémento 10', due: ['fin', 12, true] },
-    { id: 'ah_bilan', ph: 6, t: 'Bilan de l’accompagnement : renforcer, maintenir, réduire', ty: 'tache', by: ['pp'], local: true, opt: true, ah: true, src: 'Protocole AH étape 3', due: ['fin', 12, true] }
+    { id: 'here', ph: 6, t: 'Arrivée de l’élève', te: 'Je suis arrivé dans mon entreprise', ty: 'declare', due: ['debut', 0, false] },
+    { id: 'installed', ph: 6, t: 'Installation et conditions d’accueil vérifiées', ty: 'tache', by: ['referent'], ou: 'Pronote › Créer un suivi', src: 'P §4 · C', due: ['debut', 1, false] },
+    { id: 'evaluation_sent', ph: 6, t: 'Compte rendu d’évaluation envoyé au tuteur', ty: 'tache', by: ['referent'], doc: 'Compte rendu d’évaluation', ou: 'Pronote › Casier numérique', src: 'C', due: ['debut', 1, false] },
+    { id: 'midpoint', ph: 6, t: 'Point d’étape de l’élève · contact du référent', te: 'Comment se passe mon stage ?', ty: 'declare', verif: true, ou: 'Pronote › Créer un suivi', src: 'P §4', due: ['milieu', 0, false] },
+    { id: 'assessment', ph: 6, t: 'Visite-bilan faite, compte rendu d’évaluation récupéré', ty: 'tache', by: ['referent'], doc: 'Livret de formation · grille de notation', src: 'P §4 · C', due: ['fin', -3, false] },
+
+    { id: 'attest_in', ph: 7, t: 'Attestation remise à l’élève par l’entreprise', te: 'L’entreprise m’a remis mon attestation', ty: 'declare', src: 'C', due: ['fin', -3, false] },
+    { id: 'attestation', ph: 7, t: 'Attestation rapportée au référent', te: 'J’ai rapporté mon attestation', ty: 'remise', from: 'eleve', to: 'referent', flag: 'Drapeau 3', src: 'P mémento 11 · C', due: ['fin', 5, true] },
+    { id: 'attestation_bde', ph: 7, t: 'Attestation transmise au bureau des entreprises (allocation)', ty: 'tache', by: ['referent'], src: 'P mémento 11', due: ['fin', 5, true] },
+    { id: 'appreciation', ph: 7, t: 'Appréciation du tuteur saisie dans Pronote', ty: 'tache', by: ['referent'], ou: 'Pronote › suivi du stage', src: 'C', due: ['fin', 12, true] },
+    { id: 'evaluation_pro', ph: 7, t: 'Compte rendu remis au professeur de spécialité', ty: 'tache', by: ['referent'], src: 'C', due: ['fin', 12, true] },
+    { id: 'student_eval', ph: 7, t: 'Évaluation du stage par l’élève', te: 'J’ai fait le bilan de mon stage (carnet)', ty: 'declare', verif: true, flag: 'Arrivée', src: 'P mémento 10', due: ['fin', 12, true] },
+    { id: 'ah_bilan', ph: 7, t: 'Bilan de l’accompagnement : renforcer, maintenir, réduire', ty: 'tache', by: ['pp'], local: true, opt: true, ah: true, src: 'Protocole AH étape 3', due: ['fin', 12, true] }
   ];
-  const PAR_ID = Object.fromEntries(ETAPES.map(e => [e.id, e]));
+  /* Étapes retirées : plus affichées, mais encore reconnues pour que les fiches déjà en ligne restent valides. */
+  const RETIREES = [
+    { id: 'pre_visa', ph: 3, t: 'Pré-convention visée par le professeur de spécialité', ty: 'declare', retiree: true }
+  ];
+  const PAR_ID = Object.fromEntries(ETAPES.concat(RETIREES).map(e => [e.id, e]));
   const EN_LIGNE = ETAPES.filter(e => !e.local);
 
   /* ── Dates ─────────────────────────────────────────────────────────────── */

@@ -29,6 +29,16 @@ export function regles(chemin, avant, apres) {
     if (!ok || !['eleve', 'referent', 'pp'].includes(apres.de) || !apres.texte || apres.texte.length > 1000) refuse('message');
     return;
   }
+  if (p[0] === 'coordination_pfmp_suivi' && p.length === 4 && p[2] === 'eleve') {
+    if (p[3] !== 'parcours') refuse('eleve');
+    const ok = Object.keys(apres).every(k => ['avatar', 'declaration', 'prepa', 'fiche', 'depart', 'recherches', 'majLe'].includes(k));
+    if (!ok || typeof apres.majLe !== 'string') refuse('parcours');
+    return;
+  }
+  if (p[0] === 'coordination_pfmp_suivi' && p.length === 4 && p[2] === 'jeux') {
+    if (avant) refuse('jeu modifié');
+    return;
+  }
   if (p[0] === 'coordination_pfmp_suivi' && p.length === 4 && p[2] === 'journal') {
     if (avant) refuse('journal modifié');
     return;
