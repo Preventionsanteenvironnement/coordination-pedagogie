@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <!--
   Démonstration (07/10/2026) : la frise d'un élève en PFMP, vue par son enseignant référent.
   L'élève à gauche, l'enseignant à droite ; la ligne serpente de l'un à l'autre, étape par étape,
@@ -39,7 +40,11 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .maint button{border:0;background:#fff;color:var(--accent);border-radius:10px;padding:9px 15px;font:inherit;font-weight:700;cursor:pointer}
 /* Couloirs */
 .couloirs{display:grid;grid-template-columns:1fr 1fr;margin:0 0 4px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-.couloirs .g{color:var(--el);text-align:left;padding-left:4px}.couloirs .d{color:var(--accent);text-align:right;padding-right:4px}
+.couloirs>div{display:flex;align-items:center;gap:10px}
+.couloirs .g{color:var(--el);padding-left:4px}.couloirs .d{color:var(--accent);justify-content:flex-end;padding-right:4px}
+.av{width:38px;height:38px;border-radius:50%;background:#378ADD;color:#fff;display:grid;place-items:center;font-size:20px;box-shadow:0 0 0 4px #fff,0 4px 14px -6px rgba(0,0,0,.35)}
+.av.prof{background:var(--accent)}
+.carte .mini{width:22px;height:22px;border-radius:50%;background:#378ADD;color:#fff;display:inline-grid;place-items:center;font-size:12px;vertical-align:-6px;margin-right:6px}
 /* Frise */
 .frise{position:relative;padding:6px 0 10px}
 .frise svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
@@ -90,52 +95,56 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 
  <div class="maint" id="maint"></div>
 
- <div class="couloirs"><div class="g">L’élève</div><div class="d">L’enseignant</div></div>
+ <div class="couloirs"><div class="g"><span class="av"><i class="ti ti-fish"></i></span>L’élève</div><div class="d">L’enseignant<span class="av prof"><i class="ti ti-school"></i></span></div></div>
  <section class="frise" id="frise"></section>
 
  <div class="leg"><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
 </main>
 <script>
 /* qui : g = l'élève, d = l'enseignant (référent, sauf mention), c = ensemble. */
+/* [côté, étape, précision, date, qui] — g : l'élève · d : l'enseignant · c : ensemble.
+   Ordre : procédure de l'établissement (R26CSRP-LP), check-list du référent, fiche de négociation, convention-type. */
 const ETAPES = [
  ['Préparation'],
- ['g','Préparer mon CV et ma lettre de motivation','','2 oct.'],
- ['g','Chercher une entreprise','Noter chaque démarche : appel, visite, mail','3 → 7 oct.'],
+ ['g','Mon CV et ma lettre de motivation sont prêts','','2 oct.'],
+ ['g','Chercher une entreprise','Chaque démarche notée : appel, visite, mail','3 → 7 oct.'],
  ['g','J’ai trouvé mon stage','Agence Rhône Immobilier','7 oct.'],
  ['Entreprise'],
- ['d','Valider l’entreprise','Conditions adaptées et sécurisées','7 oct.'],
+ ['d','Valider l’entreprise','Conditions de travail adaptées et sécurisées','7 oct.'],
  ['Fiche de négociation'],
- ['g','Demander la fiche de négociation','Auprès de mon enseignant professionnel','8 oct.'],
- ['g','La faire remplir par l’entreprise','Le tuteur coche 2 ou 3 activités · signature et cachet','9 oct.'],
- ['d','Valider la fiche de négociation','Enseignant professionnel','avant le 16 oct.'],
+ ['g','Aller à l’entreprise avec la fiche de négociation','Le tuteur coche les activités prévues (colonne a) et ajoute ses observations','9 oct.'],
+ ['g','Signature et cachet de l’entreprise','Responsable ou tuteur','9 oct.'],
+ ['d','Valider la fiche de négociation','Les activités correspondent à la formation','avant le 14 oct.','Enseignant professionnel'],
+ ['d','Signer la fiche de négociation','Puis la garder dans le dossier de l’élève','avant le 16 oct.'],
+ ['g','Signer la fiche de négociation','L’élève majeur, ou son responsable légal','avant le 16 oct.'],
  ['Pré-convention'],
- ['d','Saisir les informations du stage dans Pronote','','avant le 20 oct.'],
- ['d','Déposer la pré-convention vierge dans le casier numérique de Pronote','Fonction « Remettre à l’élève »','avant le 20 oct.'],
- ['g','Recevoir la pré-convention','Avec la fiche de négociation validée','avant le 21 oct.'],
- ['g','Retourner à l’entreprise','Pré-convention remplie, signée et tamponnée','avant le 28 oct.'],
- ['g','Rapporter la pré-convention','À mon enseignant référent','avant le 30 oct.'],
- ['d','Vérifier et valider la pré-convention','Entièrement renseignée','avant le 30 oct.'],
+ ['d','Remettre la pré-convention','Casier numérique de Pronote · « Remettre à l’élève »','avant le 19 oct.'],
+ ['g','Faire remplir la pré-convention par l’entreprise','Dates, adresse, horaires, tuteur, assurance · cachet et signature','avant le 26 oct.'],
+ ['g','Rapporter la pré-convention','À l’enseignant référent','avant le 28 oct.'],
  ['Convention'],
- ['d','Préparer la convention','Pronote · annexe pédagogique · remise à l’élève','avant le 2 nov.'],
- ['g','Faire signer la convention','Entreprise, tuteur, famille','avant le 7 nov.'],
- ['g','Rapporter la convention signée','À mon enseignant référent','avant le 9 nov.'],
- ['d','Vérifier, signer, transmettre','Bureau des entreprises · signature de la direction','avant le 13 nov.'],
- ['d','Remettre les exemplaires','À la famille et à l’entreprise, avec l’attestation','avant le 20 nov.'],
+ ['d','Saisir le stage dans Pronote','Édition de la convention et de l’attestation · l’attestation est mise de côté','avant le 2 nov.'],
+ ['d','Remettre la convention pour les signatures','Avec l’annexe pédagogique','avant le 2 nov.'],
+ ['g','Faire signer la convention','Responsable de l’entreprise, tuteur et cachet · élève majeur ou responsable légal','avant le 6 nov.'],
+ ['g','Rapporter la convention signée','À l’enseignant référent','avant le 9 nov.'],
+ ['d','Vérifier, signer, transmettre','Au bureau des entreprises, avec l’annexe pédagogique (et l’annexe handicap si besoin)','avant le 10 nov.'],
+ ['d','Signature de la cheffe d’établissement','Bureau des entreprises → DDF → cheffe d’établissement · deux exemplaires déposés dans le casier du référent','avant le 17 nov.','Établissement'],
+ ['d','Remettre les exemplaires signés','Un à la famille, un à l’entreprise avec l’attestation · archivage DDF et Pronote','avant le 20 nov.'],
  ['Départ'],
- ['d','Appeler le tuteur · programmer la visite','Le tuteur reçoit un lien et choisit un créneau','avant le 23 nov.'],
- ['g','Préparer mon départ','Adresse, horaires, trajet, nom du tuteur','avant le 23 nov.'],
+ ['d','Appeler le tuteur','La semaine d’avant : arrivée confirmée · intendance prévenue si demi-pensionnaire','16 → 20 nov.'],
+ ['g','Prêt à partir','Adresse, horaires, trajet, nom du tuteur','avant le 23 nov.'],
  ['En stage'],
- ['g','Je suis arrivé','','23 nov.'],
- ['d','Vérifier l’installation','Compte rendu d’évaluation envoyé au tuteur','24 nov.'],
+ ['g','Premier jour de stage','','23 nov.'],
+ ['d','Vérifier l’installation','Dans les deux premiers jours · compte rendu d’évaluation envoyé au tuteur','avant le 25 nov.'],
  ['g','Point d’étape','Comment se passe mon stage','7 déc.'],
- ['d','Visite-bilan chez le tuteur','Compte rendu d’évaluation récupéré','avant le 15 déc.'],
+ ['d','Nouveau contact avec le tuteur','Le stage se déroule bien · organiser le rendez-vous du bilan','7 déc.'],
+ ['d','Visite-bilan chez le tuteur','Compte rendu d’évaluation récupéré · attestation à faire établir par l’entreprise','avant le 18 déc.'],
  ['Retour'],
- ['g','Rapporter mon attestation de stage','','avant le 23 déc.'],
- ['d','Attestation au bureau des entreprises','Appréciation du tuteur dans Pronote','avant le 30 déc.'],
- ['c','Le bilan du stage, ensemble','L’élève et son enseignant référent','janvier']
+ ['g','Récupérer mon attestation de stage','Remise par l’entreprise','18 déc.'],
+ ['d','Attestation au bureau des entreprises','Gratification · appréciation du tuteur dans Pronote · compte rendu au professeur de spécialité','avant le 30 déc.'],
+ ['c','Le bilan du stage, ensemble','L’élève fait l’évaluation de son stage avec son enseignant référent','janvier']
 ];
 const etapes = ETAPES.filter(x => x.length > 1);
-let ici = etapes.findIndex(x => x[1] === 'Valider la fiche de négociation');
+let ici = etapes.findIndex(x => x[4] === 'Enseignant professionnel');
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -151,14 +160,14 @@ function rendre() {
     }
     n++;
     const [cote, titre, detail, date] = x, etat = n < ici ? 'fait' : n === ici ? 'ici' : 'avenir';
-    const qui = cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : (detail === 'Enseignant professionnel' ? 'Enseignant professionnel' : 'Enseignant référent');
-    h += `<div class="et ${cote} ${etat}" data-n="${n}"><div class="carte"><i class="noeud"></i><div class="q">${qui}</div><b>${esc(titre)}</b>${detail && detail !== 'Enseignant professionnel' ? `<p>${esc(detail)}</p>` : ''}<span class="dt">${etat === 'fait' ? '✓ ' : ''}${esc(date)}</span></div></div>`;
+    const qui = x[4] || (cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : 'Enseignant référent');
+    h += `<div class="et ${cote} ${etat}" data-n="${n}"><div class="carte"><i class="noeud"></i><div class="q">${cote === 'g' ? '<span class="mini"><i class="ti ti-fish"></i></span>' : ''}${qui}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}<span class="dt">${etat === 'fait' ? '✓ ' : ''}${esc(date)}</span></div></div>`;
   });
-  h += `<div class="ens"><span>🎓</span><span>🤝</span><span>🧑‍🏫</span></div>`;
+  h += `<div class="ens"><span class="av"><i class="ti ti-fish"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
   $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
   const e = etapes[ici];
-  const pro = e && e[2] === 'Enseignant professionnel';
-  const qui = !e ? '' : e[0] === 'g' ? 'L’élève, maintenant' : e[0] === 'c' ? 'Ensemble, maintenant' : pro ? 'L’enseignant professionnel, maintenant' : 'À vous, maintenant';
+  const pro = e && !!e[4];
+  const qui = !e ? '' : e[0] === 'g' ? 'L’élève, maintenant' : e[0] === 'c' ? 'Ensemble, maintenant' : pro ? (e[4] === 'Établissement' ? 'L’établissement, maintenant' : 'L’enseignant professionnel, maintenant') : 'À vous, maintenant';
   $('maint').className = 'maint' + (e && e[0] === 'g' ? ' el' : '');
   $('maint').innerHTML = e ? `<div class="x"><small>${qui}</small><b>${esc(e[1])}</b> · ${esc(e[3])}</div>${e[0] === 'd' && !pro ? '<button id="fait">C’est fait</button>' : ''}` : '<div class="x"><small>Parcours terminé</small><b>Stage validé, bilan fait</b></div>';
   if ($('fait')) $('fait').onclick = () => { ici = Math.min(ici + 1, etapes.length); rendre(); };
