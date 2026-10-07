@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#176d66">
+<meta name="robots" content="noindex">
+<title>PFMP — la frise de l’élève et du référent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!--
+  Démonstration (07/10/2026) : la frise d'un élève en PFMP, vue par son enseignant référent.
+  L'élève à gauche, l'enseignant à droite ; la ligne serpente de l'un à l'autre, étape par étape,
+  jusqu'au bilan qu'ils font ensemble. Données fictives, aucune base, aucun code d'accès.
+-->
+<style>
+:root{--ink:#172738;--muted:#66768a;--line:#e3e9ee;--accent:#176d66;--accent-s:#e2f1ef;--el:#2d63b8;--el-s:#eaf0fb;--green:#1f9d6b;--green-s:#e8f6ef;--orange:#c46f1c;--orange-s:#fff3e6;--bg:#f5f7f9}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+.shell{max-width:1020px;margin:auto;padding:22px 20px 80px}
+.haut{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.haut a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px}
+.demo{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.demo button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer}
+/* En-tête */
+.tete{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px 20px}
+.code{width:56px;height:56px;border-radius:16px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:.06em}
+.tete h1{margin:0;font-size:20px;letter-spacing:-.02em}
+.tete .info{color:var(--muted);font-size:13.5px}
+.tete .j{margin-left:auto;text-align:right}.tete .j b{display:block;font-size:26px;line-height:1;letter-spacing:-.03em}.tete .j span{font-size:12px;color:var(--muted)}
+/* Maintenant */
+.maint{display:flex;align-items:center;gap:14px;border-radius:16px;padding:13px 18px;margin:14px 0 22px;background:var(--accent);color:#fff}
+.maint.el{background:var(--el)}
+.maint small{display:block;opacity:.85;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.maint b{font-size:16px}
+.maint .x{flex:1}
+.maint button{border:0;background:#fff;color:var(--accent);border-radius:10px;padding:9px 15px;font:inherit;font-weight:700;cursor:pointer}
+/* Couloirs */
+.couloirs{display:grid;grid-template-columns:1fr 1fr;margin:0 0 4px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.couloirs .g{color:var(--el);text-align:left;padding-left:4px}.couloirs .d{color:var(--accent);text-align:right;padding-right:4px}
+/* Frise */
+.frise{position:relative;padding:6px 0 10px}
+.frise svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.phase{position:relative;z-index:2;text-align:center;margin:22px 0 10px}
+.phase span{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 14px;font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.phase.ok span{color:var(--green);background:var(--green-s);border-color:#c4e6d6}
+.phase.ici span{color:#fff;background:var(--ink);border-color:var(--ink)}
+.et{position:relative;z-index:2;display:flex;margin:10px 0}
+.et.g{justify-content:flex-start}.et.d{justify-content:flex-end}.et.c{justify-content:center}
+.carte{position:relative;width:min(400px,44%);background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;transition:transform .2s}
+.et.c .carte{width:min(460px,80%);text-align:center;border:2px solid var(--accent);background:linear-gradient(135deg,#fff,var(--accent-s))}
+.carte .q{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.g .q{color:var(--el)}.d .q{color:var(--accent)}.c .q{color:var(--accent)}
+.carte b{display:block;font-size:15px;font-weight:650;line-height:1.35;margin-top:1px}
+.carte p{margin:3px 0 0;font-size:13px;color:var(--muted)}
+.carte .dt{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.carte .noeud{position:absolute;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:#fff;border:3px solid #d3dbe2}
+.g .noeud{right:-34px}.d .noeud{left:-34px}.c .noeud{display:none}
+.fait .carte{background:#fbfdfc}
+.fait .carte b{color:#3f5366}
+.fait .noeud{background:var(--green);border-color:var(--green)}
+.fait .dt{color:var(--green)}
+.ici .carte{border:2px solid var(--orange);box-shadow:0 10px 26px -14px rgba(196,111,28,.55)}
+.ici .noeud{border-color:var(--orange);box-shadow:0 0 0 7px var(--orange-s)}
+.ici .dt{color:var(--orange)}
+.avenir .carte{opacity:.62}
+.ens{position:relative;z-index:2;display:flex;justify-content:center;gap:8px;margin-top:6px;font-size:22px}
+.leg{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:28px}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid #d3dbe2;background:#fff}
+.leg .f{background:var(--green);border-color:var(--green)}.leg .o{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-s)}
+@media (max-width:640px){
+  .carte{width:calc(50% - 26px);padding:10px 12px}
+  .carte b{font-size:13.5px}.carte p{display:none}
+  .g .noeud{right:-30px}.d .noeud{left:-30px}
+  .tete .info{display:none}
+}
+</style>
+</head>
+<body>
+<main class="shell">
+ <div class="haut"><a href="../">← Coordination & Pédagogie</a>
+  <div class="demo">Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
+
+ <section class="tete"><div class="code">K4A7</div>
+  <div><h1>PFMP 1 · B2GATL2</h1><div class="info">Du lundi 23 novembre au vendredi 18 décembre · élève fictif</div></div>
+  <div class="j"><b id="jx">J-47</b><span>avant le départ</span></div></section>
+
+ <div class="maint" id="maint"></div>
+
+ <div class="couloirs"><div class="g">L’élève</div><div class="d">L’enseignant</div></div>
+ <section class="frise" id="frise"></section>
+
+ <div class="leg"><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
+</main>
+<script>
+/* qui : g = l'élève, d = l'enseignant (référent, sauf mention), c = ensemble. */
+const ETAPES = [
+ ['Préparation'],
+ ['g','Préparer mon CV et ma lettre de motivation','','2 oct.'],
+ ['g','Chercher une entreprise','Noter chaque démarche : appel, visite, mail','3 → 7 oct.'],
+ ['g','J’ai trouvé mon stage','Agence Rhône Immobilier','7 oct.'],
+ ['Entreprise'],
+ ['d','Valider l’entreprise','Conditions adaptées et sécurisées','7 oct.'],
+ ['Fiche de négociation'],
+ ['g','Demander la fiche de négociation','Auprès de mon enseignant professionnel','8 oct.'],
+ ['g','La faire remplir par l’entreprise','Le tuteur coche 2 ou 3 activités · signature et cachet','9 oct.'],
+ ['d','Valider la fiche de négociation','Enseignant professionnel','avant le 16 oct.'],
+ ['Pré-convention'],
+ ['d','Saisir les informations du stage dans Pronote','','avant le 20 oct.'],
+ ['d','Déposer la pré-convention vierge dans le casier numérique de Pronote','Fonction « Remettre à l’élève »','avant le 20 oct.'],
+ ['g','Recevoir la pré-convention','Avec la fiche de négociation validée','avant le 21 oct.'],
+ ['g','Retourner à l’entreprise','Pré-convention remplie, signée et tamponnée','avant le 28 oct.'],
+ ['g','Rapporter la pré-convention','À mon enseignant référent','avant le 30 oct.'],
+ ['d','Vérifier et valider la pré-convention','Entièrement renseignée','avant le 30 oct.'],
+ ['Convention'],
+ ['d','Préparer la convention','Pronote · annexe pédagogique · remise à l’élève','avant le 2 nov.'],
+ ['g','Faire signer la convention','Entreprise, tuteur, famille','avant le 7 nov.'],
+ ['g','Rapporter la convention signée','À mon enseignant référent','avant le 9 nov.'],
+ ['d','Vérifier, signer, transmettre','Bureau des entreprises · signature de la direction','avant le 13 nov.'],
+ ['d','Remettre les exemplaires','À la famille et à l’entreprise, avec l’attestation','avant le 20 nov.'],
+ ['Départ'],
+ ['d','Appeler le tuteur · programmer la visite','Le tuteur reçoit un lien et choisit un créneau','avant le 23 nov.'],
+ ['g','Préparer mon départ','Adresse, horaires, trajet, nom du tuteur','avant le 23 nov.'],
+ ['En stage'],
+ ['g','Je suis arrivé','','23 nov.'],
+ ['d','Vérifier l’installation','Compte rendu d’évaluation envoyé au tuteur','24 nov.'],
+ ['g','Point d’étape','Comment se passe mon stage','7 déc.'],
+ ['d','Visite-bilan chez le tuteur','Compte rendu d’évaluation récupéré','avant le 15 déc.'],
+ ['Retour'],
+ ['g','Rapporter mon attestation de stage','','avant le 23 déc.'],
+ ['d','Attestation au bureau des entreprises','Appréciation du tuteur dans Pronote','avant le 30 déc.'],
+ ['c','Le bilan du stage, ensemble','L’élève et son enseignant référent','janvier']
+];
+const etapes = ETAPES.filter(x => x.length > 1);
+let ici = etapes.findIndex(x => x[1] === 'Valider la fiche de négociation');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function rendre() {
+  let n = -1, h = '';
+  ETAPES.forEach(x => {
+    if (x.length === 1) {
+      const debut = n + 1, fin = etapes.length && ETAPES.slice(ETAPES.indexOf(x) + 1).findIndex(y => y.length === 1);
+      const nb = fin < 0 ? etapes.length - debut : fin;
+      const cls = debut + nb - 1 < ici ? 'ok' : debut <= ici ? 'ici' : '';
+      h += `<div class="phase ${cls}"><span>${cls === 'ok' ? '✓ ' : ''}${esc(x[0])}</span></div>`;
+      return;
+    }
+    n++;
+    const [cote, titre, detail, date] = x, etat = n < ici ? 'fait' : n === ici ? 'ici' : 'avenir';
+    const qui = cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : (detail === 'Enseignant professionnel' ? 'Enseignant professionnel' : 'Enseignant référent');
+    h += `<div class="et ${cote} ${etat}" data-n="${n}"><div class="carte"><i class="noeud"></i><div class="q">${qui}</div><b>${esc(titre)}</b>${detail && detail !== 'Enseignant professionnel' ? `<p>${esc(detail)}</p>` : ''}<span class="dt">${etat === 'fait' ? '✓ ' : ''}${esc(date)}</span></div></div>`;
+  });
+  h += `<div class="ens"><span>🎓</span><span>🤝</span><span>🧑‍🏫</span></div>`;
+  $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
+  const e = etapes[ici];
+  const pro = e && e[2] === 'Enseignant professionnel';
+  const qui = !e ? '' : e[0] === 'g' ? 'L’élève, maintenant' : e[0] === 'c' ? 'Ensemble, maintenant' : pro ? 'L’enseignant professionnel, maintenant' : 'À vous, maintenant';
+  $('maint').className = 'maint' + (e && e[0] === 'g' ? ' el' : '');
+  $('maint').innerHTML = e ? `<div class="x"><small>${qui}</small><b>${esc(e[1])}</b> · ${esc(e[3])}</div>${e[0] === 'd' && !pro ? '<button id="fait">C’est fait</button>' : ''}` : '<div class="x"><small>Parcours terminé</small><b>Stage validé, bilan fait</b></div>';
+  if ($('fait')) $('fait').onclick = () => { ici = Math.min(ici + 1, etapes.length); rendre(); };
+  requestAnimationFrame(ligne);
+}
+
+/* La ligne serpente d'un point à l'autre ; elle est verte jusqu'à l'étape en cours. */
+function ligne() {
+  const f = $('frise'), svg = f.querySelector('svg'), b = f.getBoundingClientRect();
+  const pts = [...f.querySelectorAll('.et')].map(el => {
+    const nd = el.querySelector('.noeud'), r = (getComputedStyle(nd).display === 'none' ? el.querySelector('.carte') : nd).getBoundingClientRect();
+    return { x: r.left + r.width / 2 - b.left, y: (el.classList.contains('c') ? r.top : r.top + r.height / 2) - b.top, n: +el.dataset.n };
+  });
+  const seg = (a, c) => { const m = (a.y + c.y) / 2; return `M${a.x},${a.y} C${a.x},${m} ${c.x},${m} ${c.x},${c.y}`; };
+  let s = '';
+  for (let i = 1; i < pts.length; i++) {
+    const fait = pts[i].n <= ici;
+    s += `<path d="${seg(pts[i - 1], pts[i])}" fill="none" stroke="${fait ? '#1f9d6b' : '#d8e0e7'}" stroke-width="${fait ? 4 : 3}" stroke-linecap="round" ${fait ? '' : 'stroke-dasharray="1 8"'}/>`;
+  }
+  svg.innerHTML = s;
+}
+$('plus').onclick = () => { ici = Math.min(ici + 1, etapes.length); rendre(); };
+$('moins').onclick = () => { ici = Math.max(ici - 1, 0); rendre(); };
+addEventListener('resize', () => requestAnimationFrame(ligne));
+document.fonts && document.fonts.ready.then(() => requestAnimationFrame(ligne));
+rendre();
+</script>
+</body>
+</html>
