@@ -73,6 +73,13 @@ const THEMATIQUES = [
         badge: "Nouveau",
       },
       {
+        titre: "Accompagnement PFMP",
+        desc: "Pour l'équipe, avec le code d'équipe : les stages de chaque classe jour par jour, matin et après-midi, et qui accompagne quel élève. Enregistrement automatique, impression par élève.",
+        lien: "accompagnement-pfmp/",
+        type: "Outil",
+        badge: "Nouveau",
+      },
+      {
         titre: "Visite de stage — proposer une date au tuteur",
         desc: "Tu proposes des jours et des plages horaires ; le tuteur choisit le créneau qui l'arrange, sans rien écrire ni créer de compte. Les réponses arrivent dans l'Espace de gestion.",
         lien: "https://preventionsanteenvironnement.github.io/rdv-pfmp/",
