@@ -84,6 +84,25 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .ici .noeud{border-color:var(--orange);box-shadow:0 0 0 7px var(--orange-s)}
 .ici .dt{color:var(--orange)}
 .avenir .carte,.avenir .etape-m{opacity:.6}
+.statut{display:flex;gap:6px;margin:14px 0 0;flex-wrap:wrap}
+.statut span{flex:1;min-width:110px;text-align:center;font-size:12px;font-weight:700;padding:8px 6px;border-radius:10px;background:#fff;border:1px solid var(--line);color:#9aa8b6}
+.statut span.ok{color:var(--green);background:var(--green-s);border-color:#c4e6d6}
+.statut span.ici{color:#fff;background:var(--accent);border-color:var(--accent)}
+.bal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin:12px 0 0}
+.bal h2{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);display:flex;align-items:center;gap:8px}
+.bal .l{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #eef2f5;font-size:14px}
+.bal .l:first-of-type{border-top:0}
+.bal .l i{font-size:18px;color:var(--el)}
+.bal .l span{flex:1}
+.bal .l em{font-style:normal;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--accent);color:#fff}
+.bal .l em.ok{background:var(--green-s);color:var(--green)}
+.signe{display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:10.5px;letter-spacing:.04em}
+.relais{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.relais .tk{letter-spacing:-2px;font-weight:800;color:#c3ccd5}
+.relais .tk.un{color:var(--muted)}.relais .tk.deux{color:var(--green)}
+.lu{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--el-s);color:var(--el)}
+.lu.ok{background:var(--green-s);color:var(--green)}
+.etape-m .relais{margin-top:2px;font-size:11px}
 .leg{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:28px}
 .leg span{display:inline-flex;align-items:center;gap:6px}
 .leg i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid #d3dbe2;background:#fff}
@@ -99,7 +118,9 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 <body>
 <main class="shell">
  <div class="haut"><a href="../">← Coordination & Pédagogie</a><div class="demo">Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
- <section class="tete"><div class="code">K4A7</div><div><h1>PFMP 1 · B2GATL2</h1><div class="info">Du lundi 4 au dimanche 17 janvier · élève fictif</div></div><div class="j"><b>J-88</b><span>avant le départ</span></div></section>
+ <section class="tete" style="margin-bottom:0"><div class="code">K4A7</div><div><h1>PFMP 1 · B2GATL2</h1><div class="info">Du lundi 4 au dimanche 17 janvier · élève fictif</div></div><div class="j"><b>J-88</b><span>avant le départ</span></div></section>
+ <div class="statut" id="statut"></div>
+ <section class="bal" id="bal"></section>
  <div class="maint" id="maint"></div>
  <div class="couloirs">
   <div class="g"><div class="t"><span class="av"><i class="ti ti-fish"></i></span>L’élève</div></div>
@@ -107,7 +128,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
   <div class="d"><div class="t">L’enseignant référent<span class="av prof"><i class="ti ti-school"></i></span></div></div>
  </div>
  <section class="frise" id="frise"></section>
- <div class="leg"><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
+ <div class="leg"><span>● action</span><span>✉ information · « Lu »</span><span><b style="color:var(--green)">✓✓</b> document remis et reçu</span><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
 </main>
 <script>
 /* Les intervenants, au milieu. */
@@ -119,61 +140,68 @@ const ACT = {
   ddf: ['DDF', 'id-badge-2', 'var(--ddf)'],
   int: ['Intendance', 'tools-kitchen-2', 'var(--int)']
 };
-/* [couloir, étape, précision, date] — g : l'élève · m:<acteur> : un intervenant · d : le référent · c : ensemble. */
+/* [couloir, signe, étape, précision, date, { a: destinataire, s: statut atteint }]
+   couloir : g l'élève · d le référent · m:<acteur> un intervenant · c ensemble
+   signe   : a action · i information (« Lu ») · r remise d'un document (✓ remis, ✓✓ reçu) */
 const ETAPES = [
- ['Préparation'],
- ['g', 'Mon CV et ma lettre sont prêts', '', '2 oct.'],
- ['g', 'Chercher une entreprise', 'Chaque démarche notée', '3 → 7 oct.'],
- ['g', 'J’ai trouvé mon stage', 'Agence Rhône Immobilier', '7 oct.'],
- ['d', 'Valider l’entreprise', 'Conditions de travail adaptées et sécurisées', '8 oct.'],
+ ['Recherche'],
+ ['g', 'a', 'CV et lettre de motivation prêts', '', '2 oct.'],
+ ['g', 'a', 'Démarches de recherche', '5 démarches notées', '3 → 7 oct.'],
+ ['g', 'a', 'J’ai une proposition de stage', 'Agence Rhône Immobilier · 48 cours Lafayette, Lyon 3e', '7 oct.', { s: 1 }],
+ ['d', 'i', 'Proposition de stage reçue', 'En cours de validation · fiche de négociation', '7 oct.'],
  ['Fiche de négociation'],
- ['g', 'Demander la fiche de négociation', 'À mon enseignant professionnel', '9 oct.'],
- ['m:pro', 'Remet la fiche de négociation à l’élève', '', '9 oct.'],
- ['g', 'J’ai bien ma fiche', '', '9 oct.'],
- ['m:ent', 'Coche les activités prévues · signe et tamponne', '', 'avant le 13 nov.'],
- ['g', 'Signer ma fiche', 'Moi, ou mon responsable légal', 'avant le 13 nov.'],
- ['m:pro', 'Valide la fiche de négociation', '', 'avant le 16 nov.'],
- ['g', 'Remettre la fiche à mon référent', '', 'avant le 17 nov.'],
- ['d', 'Signer la fiche et la garder', 'Dans le dossier de l’élève', 'avant le 17 nov.'],
+ ['g', 'a', 'Réclamer la fiche de négociation', 'À mon enseignant professionnel', '8 oct.'],
+ ['m:pro', 'r', 'Remet la fiche de négociation', '', '8 oct.', { a: 'l’élève' }],
+ ['m:ent', 'a', 'Coche les activités · signe et tamponne', 'Confirmé par l’élève', '12 oct.'],
+ ['g', 'a', 'Faire signer mes parents', 'Ou moi, si je suis majeur', '13 oct.'],
+ ['g', 'r', 'Remettre la fiche à mon enseignant professionnel', '', '14 oct.', { a: 'l’enseignant professionnel' }],
+ ['m:pro', 'a', 'Signe et valide la fiche', '', 'avant le 16 oct.'],
+ ['g', 'r', 'Remettre la fiche à mon référent', '', 'avant le 17 oct.', { a: 'le référent' }],
+ ['d', 'a', 'Signer la fiche et la garder', 'Conditions de travail adaptées et sécurisées', 'avant le 17 oct.', { s: 2 }],
  ['Pré-convention'],
- ['d', 'Remettre la pré-convention', 'Casier numérique de Pronote · « Remettre à l’élève »', 'avant le 19 nov.'],
- ['m:ent', 'Remplit, signe et tamponne la pré-convention', '', 'avant le 26 nov.'],
- ['g', 'Rapporter la pré-convention', '', 'avant le 27 nov.'],
- ['d', 'Saisir la pré-convention dans le client Pronote', 'Convention et attestation éditées · l’attestation est gardée de côté', 'avant le 30 nov.'],
+ ['d', 'r', 'Remettre la pré-convention', 'Casier numérique de Pronote · « Remettre à l’élève »', 'avant le 19 oct.', { a: 'l’élève' }],
+ ['m:ent', 'a', 'Remplit, signe et tamponne la pré-convention', 'Confirmé par l’élève', 'avant le 26 nov.'],
+ ['g', 'r', 'Rapporter la pré-convention', '', 'avant le 27 nov.', { a: 'le référent' }],
+ ['d', 'a', 'Saisir la pré-convention dans le client Pronote', 'Convention et attestation éditées · l’attestation est gardée de côté', 'avant le 30 nov.'],
  ['Convention'],
- ['d', 'Remettre la convention pour les signatures', 'Avec l’annexe pédagogique', 'avant le 30 nov.'],
- ['m:ent', 'Signe la convention · cachet', 'Le responsable ou le tuteur', 'avant le 4 déc.'],
- ['g', 'Faire signer ma famille, puis rapporter la convention', 'Ou moi, si je suis majeur', 'avant le 7 déc.'],
- ['d', 'Vérifier la conformité · transmettre au bureau des entreprises', 'Annexe pédagogique, annexe handicap si besoin', 'avant le 8 déc.'],
- ['m:bde', 'Vérifie la convention · la transmet au DDF', '', 'avant le 10 déc.'],
- ['m:chef', 'Signe la convention', '', 'avant le 14 déc.'],
- ['m:ddf', 'Dépose deux exemplaires dans le casier du référent', '', 'avant le 15 déc.'],
- ['d', 'Remettre les exemplaires', 'Un à la famille (par l’élève), un à l’entreprise avec l’attestation', 'avant le 18 déc.'],
- ['m:int', 'Prévenue si l’élève est demi-pensionnaire', '', 'avant le 18 déc.'],
+ ['d', 'r', 'Remettre la convention pour les signatures', 'Avec l’annexe pédagogique', 'avant le 30 nov.', { a: 'l’élève' }],
+ ['m:ent', 'a', 'Signe la convention · cachet', 'Le responsable ou le tuteur · confirmé par l’élève', 'avant le 4 déc.'],
+ ['g', 'a', 'Faire signer mes parents', 'Ou moi, si je suis majeur', 'avant le 6 déc.'],
+ ['g', 'r', 'Rapporter la convention signée', '', 'avant le 7 déc.', { a: 'le référent' }],
+ ['d', 'a', 'Vérifier la conformité · transmettre', 'Au bureau des entreprises, avec l’annexe pédagogique (et l’annexe handicap si besoin)', 'avant le 8 déc.'],
+ ['m:bde', 'a', 'Vérifie la convention · la transmet', 'Coché par le référent', 'avant le 10 déc.'],
+ ['m:chef', 'a', 'Signe la convention', 'Coché par le référent', 'avant le 14 déc.'],
+ ['m:ddf', 'r', 'Dépose deux exemplaires', 'Dans le casier du référent', 'avant le 15 déc.', { a: 'le référent' }],
+ ['d', 'r', 'Remettre les exemplaires signés', 'Un pour la famille, un pour l’entreprise avec l’attestation', 'avant le 18 déc.', { a: 'l’élève', s: 3 }],
+ ['m:int', 'i', 'Prévenue', 'Si l’élève est demi-pensionnaire', 'avant le 18 déc.'],
  ['Départ'],
- ['d', 'Appeler le tuteur', 'La semaine d’avant : arrivée confirmée', 'avant le 18 déc.'],
- ['g', 'Prêt à partir', 'Adresse, horaires, trajet', 'avant le 4 janv.'],
+ ['d', 'a', 'Appeler le tuteur', 'La semaine d’avant : arrivée confirmée', 'avant le 18 déc.'],
+ ['g', 'a', 'Prêt à partir', 'Adresse, horaires, trajet', 'avant le 4 janv.'],
  ['En stage'],
- ['g', 'Premier jour de stage', '', '4 janv.'],
- ['d', 'Vérifier l’installation · envoyer le compte rendu d’évaluation', 'Dans les deux premiers jours (casier numérique)', 'avant le 6 janv.'],
- ['m:ent', 'Le tuteur prend connaissance du compte rendu', '', 'avant la visite'],
- ['g', 'Point d’étape', 'Comment se passe mon stage', '10 janv.'],
- ['d', 'Visite-bilan · récupérer le compte rendu', 'Rendez-vous avec le tuteur · échanges notés dans Pronote', 'avant le 14 janv.'],
- ['m:ent', 'Établit l’attestation de stage · la remet à l’élève', '', 'fin du stage'],
+ ['g', 'a', 'Je suis arrivé', 'Le référent est prévenu', '4 janv.', { s: 4 }],
+ ['d', 'a', 'Vérifier l’installation', 'Compte rendu d’évaluation envoyé au tuteur · deux premiers jours', 'avant le 6 janv.'],
+ ['g', 'a', 'Point d’étape', 'Comment se passe mon stage', '10 janv.'],
+ ['d', 'a', 'Visite-bilan chez le tuteur', 'Récupérer le compte rendu · échanges notés dans Pronote', 'avant le 14 janv.'],
+ ['m:ent', 'r', 'Établit l’attestation de stage', '', 'fin du stage', { a: 'l’élève' }],
  ['Après le stage'],
- ['g', 'Rapporter mon attestation', '', 'avant le 22 janv.'],
- ['d', 'Transmettre l’attestation au bureau des entreprises', '', 'avant le 22 janv.'],
- ['m:bde', 'Gratification versée à l’élève', '', ''],
- ['d', 'Appréciation du tuteur dans Pronote · compte rendu à l’enseignant professionnel', '', 'avant le 29 janv.'],
- ['m:pro', 'Reçoit le compte rendu d’évaluation', '', 'avant le 29 janv.'],
- ['c', 'Le bilan du stage, ensemble', 'L’élève fait l’évaluation de son stage avec son enseignant référent', 'fin janvier']
+ ['g', 'r', 'Rapporter mon attestation', '', 'avant le 22 janv.', { a: 'le référent' }],
+ ['d', 'r', 'Transmettre l’attestation', 'Pour la gratification', 'avant le 22 janv.', { a: 'le bureau des entreprises' }],
+ ['d', 'a', 'Saisir l’appréciation du tuteur dans Pronote', '', 'avant le 29 janv.'],
+ ['d', 'r', 'Remettre le compte rendu d’évaluation', '', 'avant le 29 janv.', { a: 'l’enseignant professionnel' }],
+ ['c', 'a', 'Le bilan du stage, ensemble', 'L’élève fait l’évaluation de son stage avec son enseignant référent', 'fin janvier', { s: 5 }]
 ];
+const STATUTS = ['Recherche', 'Proposition de stage', 'Stage validé', 'Convention signée', 'En stage', 'Terminé'];
 const etapes = ETAPES.filter(x => x.length > 1);
-let ici = etapes.findIndex(x => x[1] === 'Valide la fiche de négociation');
+let ici = etapes.findIndex(x => x[2] === 'Signe et valide la fiche');
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 $('acteurs').innerHTML = Object.values(ACT).map(([n, ic, c]) => `<span><i style="background:${c}" class="ti ti-${ic}"></i>${esc(n)}</span>`).join('');
 
+function relais(it) {
+  const [, signe, , , , o] = it.x; if (signe !== 'r') return '';
+  const n = it.etat === 'fait' ? 2 : it.etat === 'ici' ? 1 : 0;
+  return `<div class="relais"><span class="tk ${n === 2 ? 'deux' : n === 1 ? 'un' : ''}">${n === 2 ? '✓✓' : '✓'}</span>→ ${esc((o && o.a) || '')}${n === 2 ? ' · reçu' : n === 1 ? ' · remis' : ''}</div>`;
+}
 function rendre() {
   let n = -1, h = '';
   const items = [];
@@ -187,21 +215,33 @@ function rendre() {
       const cls = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : '';
       h += `<div class="phase ${cls}"><span>${cls === 'ok' ? '✓ ' : ''}${esc(it.phase)}</span></div>`; return;
     }
-    const [cote, titre, detail, date] = it.x;
+    const [cote, signe, titre, detail, date] = it.x;
+    const marque = signe === 'i' ? '<span class="signe">✉</span>' : '';
     if (cote.startsWith('m:')) {
       const [nom, ic, c] = ACT[cote.slice(2)];
-      h += `<div class="et m ${it.etat}"><div class="etape-m" style="border-left-color:${c}"><span class="ic" style="background:${c}"><i class="ti ti-${it.etat === 'fait' ? 'check' : ic}"></i></span><div class="x"><small style="color:${c}">${esc(nom)}</small><b>${esc(titre)}</b></div></div></div>`;
+      h += `<div class="et m ${it.etat}"><div class="etape-m"><span class="ic" style="background:${c}"><i class="ti ti-${it.etat === 'fait' ? 'check' : ic}"></i></span><div class="x"><small style="color:${c}">${esc(nom)}${marque}</small><b>${esc(titre)}</b>${relais(it) || (detail ? `<div class="relais">${esc(detail)}</div>` : '')}</div></div></div>`;
       return;
     }
     const qui = cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : 'Enseignant référent';
-    h += `<div class="et ${cote} ${it.etat}"><div class="carte"><i class="noeud"></i><div class="q">${qui}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}${date ? `<span class="dt">${it.etat === 'fait' ? '✓ ' : ''}${esc(date)}</span>` : ''}</div></div>`;
+    const lu = signe === 'i' ? `<span class="lu ${it.etat === 'fait' ? 'ok' : ''}">${it.etat === 'fait' ? '✓ Lu' : 'Lu'}</span>` : '';
+    h += `<div class="et ${cote} ${it.etat}"><div class="carte"><i class="noeud"></i><div class="q">${qui}${marque}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}${relais(it)}${lu}${date ? `<span class="dt">${it.etat === 'fait' ? '✓ ' : ''}${esc(date)}</span>` : ''}</div></div>`;
   });
   h += `<div class="ens"><span class="av"><i class="ti ti-fish"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
   $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
+  /* Le statut du stage avance tout seul. */
+  let st = 0; etapes.forEach((x, k) => { if (k < ici && x[5] && x[5].s) st = Math.max(st, x[5].s); });
+  $('statut').innerHTML = STATUTS.map((s, k) => `<span class="${k < st ? 'ok' : k === st ? 'ici' : ''}">${k < st ? '✓ ' : ''}${esc(s)}</span>`).join('');
+  /* La boîte aux lettres du référent : ce qu'on lui signale et ce qu'on lui remet. */
+  const pourLui = etapes.map((x, k) => ({ x, k })).filter(({ x }) => (x[0] === 'd' && x[1] === 'i') || (x[1] === 'r' && x[5] && x[5].a === 'le référent')).filter(({ k }) => k <= ici).slice(-3).reverse();
+  $('bal').innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + (pourLui.length ? pourLui.map(({ x, k }) => {
+    const info = x[1] === 'i', fait = k < ici;
+    const t = info ? 'K4A7 · ' + x[2].toLowerCase() + ' : ' + etapes[2][3].split(' · ')[0] + ' — ' + x[3] : 'K4A7 · ' + x[2].replace('Remettre', 'remet').replace('Rapporter', 'rapporte').replace(/\bmon\b/, 'sa').replace(/\bma\b/, 'sa').replace(/\bmes\b/, 'ses');
+    return `<div class="l"><i class="ti ti-${info ? 'mail-opened' : 'file-arrow-right'}"></i><span>${esc(t)}</span><em class="${fait ? 'ok' : ''}">${fait ? (info ? '✓ Lu' : '✓✓ Reçu') : (info ? 'Lu' : 'Reçu')}</em></div>`;
+  }).join('') : '<div class="l"><span style="color:var(--muted)">Rien pour le moment.</span></div>');
   const e = etapes[ici];
   if (e) {
     const m = e[0].startsWith('m:') ? ACT[e[0].slice(2)][0] : e[0] === 'g' ? 'L’élève' : e[0] === 'c' ? 'Ensemble' : 'Vous';
-    $('maint').innerHTML = `<div><small>${esc(m)}, maintenant</small><b>${esc(e[1])}</b>${e[3] ? ' · ' + esc(e[3]) : ''}</div>`;
+    $('maint').innerHTML = `<div><small>${esc(m)}, maintenant</small><b>${esc(e[2])}</b>${e[4] ? ' · ' + esc(e[4]) : ''}</div>`;
     $('maint').style.background = e[0].startsWith('m:') ? ACT[e[0].slice(2)][2] : e[0] === 'g' ? 'var(--el)' : 'var(--accent)';
   } else { $('maint').innerHTML = '<div><small>Parcours terminé</small><b>Stage validé, bilan fait</b></div>'; $('maint').style.background = 'var(--green)'; }
   requestAnimationFrame(ligne);
