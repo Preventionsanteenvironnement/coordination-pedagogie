@@ -38,7 +38,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .maint small{display:block;opacity:.85;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
 .maint b{font-size:16px}
 /* Les trois couloirs */
-.couloirs{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:end;gap:10px;margin:0 0 6px;padding:8px 0 14px}
+.couloirs{display:grid;grid-template-columns:37% 26% 37%;align-items:end;gap:10px;margin:0 0 6px;padding:8px 0 14px}
 .couloirs .t{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
 .couloirs .g .t{color:var(--el)}.couloirs .d .t{color:var(--accent);justify-content:flex-end}
 .couloirs .m{text-align:center}.couloirs .m .t{justify-content:center;color:var(--muted)}
@@ -103,6 +103,15 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .lu{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--el-s);color:var(--el)}
 .lu.ok{background:var(--green-s);color:var(--green)}
 .etape-m .relais{margin-top:2px;font-size:11px}
+/* Les couloirs en couleur : bleu pour l'élève, vert pour le référent, le milieu reste neutre. */
+.frise::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:22px;
+  background:linear-gradient(90deg,rgba(45,99,184,.07) 0 37%,transparent 37% 63%,rgba(23,109,102,.08) 63% 100%)}
+.couloirs .g{background:rgba(45,99,184,.09);border-radius:14px 0 0 0;padding:10px 12px}
+.couloirs .d{background:rgba(23,109,102,.10);border-radius:0 14px 0 0;padding:10px 12px}
+.couloirs{gap:0}
+.et.g .carte{border-left:4px solid var(--el)}
+.et.d .carte{border-right:4px solid var(--accent)}
+.avenir.g .carte{border-left-color:#b9cbe8}.avenir.d .carte{border-right-color:#b3d3cf}
 .prop{margin:6px 0 2px;padding:8px 12px;border-radius:10px;background:var(--el-s);color:var(--ink);font-weight:700;font-size:14px;display:flex;gap:8px;align-items:center}
 .prop i{color:var(--el)}
 .suite{margin-top:8px;padding-top:8px;border-top:1px dashed #dfe6ec;font-size:13px}
