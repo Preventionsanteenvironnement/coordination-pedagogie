@@ -12,100 +12,154 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <!--
-  La frise d'un élève en PFMP, vue par son enseignant référent (07/10/2026).
-  L'élève à gauche, l'enseignant à droite ; la ligne serpente de l'un à l'autre, étape par étape,
-  jusqu'au bilan qu'ils font ensemble.
+  La frise d'un élève en PFMP, vue par son enseignant référent (09/10/2026, trois couloirs).
+  À gauche l'élève, à droite l'enseignant référent ; au milieu, en transit, ceux qui interviennent.
+  Tout est tiré de la chronologie commune (pfmp-commun.js) : étapes, acteurs, consignes « Comment faire », sources.
     frise.html?f=2026-2027_K4A7_p1   la fiche réelle de l'élève (lien envoyé par le professeur principal)
-    frise.html                       la démonstration, données fictives
+    frise.html                       renvoie vers la démonstration (frise-acteurs.html)
   Firestore « coordination-pedagogie » : coordination_pfmp_suivi/{f} (+ eleve/parcours), lecture ;
-  écriture des seuls gestes du référent, par le socle commun (pfmp-commun.js). Aucun nom d'élève.
+  écriture des seuls gestes du référent, par le socle commun. Aucun nom d'élève.
 -->
 <style>
-:root{--ink:#172738;--muted:#66768a;--line:#e3e9ee;--accent:#176d66;--accent-s:#e2f1ef;--el:#2d63b8;--el-s:#eaf0fb;--green:#1f9d6b;--green-s:#e8f6ef;--orange:#c46f1c;--orange-s:#fff3e6;--bg:#f5f7f9}
+:root{--ink:#172738;--muted:#66768a;--line:#e3e9ee;--accent:#176d66;--accent-s:#e2f1ef;--el:#2d63b8;--el-s:#eaf0fb;--green:#1f9d6b;--green-s:#e8f6ef;--orange:#c46f1c;--orange-s:#fff3e6;--bg:#f5f7f9;
+  --pro:#6d4bc4;--ent:#c46f1c;--bde:#0e7490;--ddf:#475569;--chef:#9f1239;--int:#4d7c0f}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
-.shell{max-width:1020px;margin:auto;padding:22px 20px 80px}
+.shell{max-width:1120px;margin:auto;padding:22px 20px 80px}
 .haut{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .haut a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px}
 .demo{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
 .demo button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer}
-/* En-tête */
 .tete{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px 20px}
 .code{width:56px;height:56px;border-radius:16px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:.06em}
 .tete h1{margin:0;font-size:20px;letter-spacing:-.02em}
 .tete .info{color:var(--muted);font-size:13.5px}
-.tete .j{margin-left:auto;text-align:right}.tete .j b{display:block;font-size:26px;line-height:1;letter-spacing:-.03em}.tete .j span{font-size:12px;color:var(--muted)}
-/* Maintenant */
+.tete .j{margin-left:auto;text-align:right}.tete .j b{display:block;font-size:26px;line-height:1}.tete .j span{font-size:12px;color:var(--muted)}
 .maint{display:flex;align-items:center;gap:14px;border-radius:16px;padding:13px 18px;margin:14px 0 22px;background:var(--accent);color:#fff}
-.maint.el{background:var(--el)}
 .maint small{display:block;opacity:.85;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
 .maint b{font-size:16px}
-.maint .x{flex:1}
-.maint button{border:0;background:#fff;color:var(--accent);border-radius:10px;padding:9px 15px;font:inherit;font-weight:700;cursor:pointer}
-/* Couloirs */
-.couloirs{display:grid;grid-template-columns:1fr 1fr;margin:0 0 4px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
-.couloirs>div{display:flex;align-items:center;gap:10px}
-.couloirs .g{color:var(--el);padding-left:4px}.couloirs .d{color:var(--accent);justify-content:flex-end;padding-right:4px}
+/* Les trois couloirs */
+.couloirs{display:grid;grid-template-columns:37% 26% 37%;align-items:end;gap:10px;margin:0 0 6px;padding:8px 0 14px}
+.couloirs .t{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.couloirs .g .t{color:var(--el)}.couloirs .d .t{color:var(--accent);justify-content:flex-end}
+.couloirs .m{text-align:center}.couloirs .m .t{justify-content:center;color:var(--muted)}
+.acteurs{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:6px}
+.acteurs span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 9px 3px 4px;background:#fff;border:1px solid var(--line)}
+.acteurs i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-style:normal}
 .av{width:38px;height:38px;border-radius:50%;background:#378ADD;color:#fff;display:grid;place-items:center;font-size:20px;box-shadow:0 0 0 4px #fff,0 4px 14px -6px rgba(0,0,0,.35)}
 .av.prof{background:var(--accent)}
-.carte .mini{width:22px;height:22px;border-radius:50%;background:#378ADD;color:#fff;display:inline-grid;place-items:center;font-size:12px;vertical-align:-6px;margin-right:6px}
-/* Frise */
-.frise{position:relative;padding:6px 0 10px}
+/* La frise */
+.frise{position:relative;padding:4px 0 10px}
 .frise svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
-.phase{position:relative;z-index:2;text-align:center;margin:22px 0 10px}
+.phase{position:relative;z-index:2;text-align:center;margin:24px 0 12px}
 .phase span{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 14px;font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .phase.ok span{color:var(--green);background:var(--green-s);border-color:#c4e6d6}
 .phase.ici span{color:#fff;background:var(--ink);border-color:var(--ink)}
-.et{position:relative;z-index:2;display:flex;margin:10px 0}
-.et.g{justify-content:flex-start}.et.d{justify-content:flex-end}.et.c{justify-content:center}
-.carte{position:relative;width:min(400px,44%);background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;transition:transform .2s}
-.et.c .carte{width:min(460px,80%);text-align:center;border:2px solid var(--accent);background:linear-gradient(135deg,#fff,var(--accent-s))}
+.et{position:relative;z-index:2;display:flex;margin:9px 0}
+.et.m{margin:18px 0}
+.et.g{justify-content:flex-start}.et.d{justify-content:flex-end}.et.m{justify-content:center}.et.c{justify-content:center}
+.carte{position:relative;width:34%;background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px 15px}
 .carte .q{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-.g .q{color:var(--el)}.d .q{color:var(--accent)}.c .q{color:var(--accent)}
-.carte b{display:block;font-size:15px;font-weight:650;line-height:1.35;margin-top:1px}
-.carte p{margin:3px 0 0;font-size:13px;color:var(--muted)}
-.carte .dt{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.g .q{color:var(--el)}.d .q{color:var(--accent)}
+.carte b{display:block;font-size:14.5px;font-weight:650;line-height:1.35;margin-top:1px}
+.carte p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.carte .dt{display:inline-block;margin-top:5px;font-size:12px;font-weight:700;color:var(--muted)}
 .carte .noeud{position:absolute;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:#fff;border:3px solid #d3dbe2}
-.g .noeud{right:-34px}.d .noeud{left:-34px}.c .noeud{display:none}
-.fait .carte{background:#fbfdfc}
-.fait .carte b{color:#3f5366}
+.g .noeud{right:-31px}.d .noeud{left:-31px}
+/* L'intervenant, en transit sur la ligne */
+.etape-m{position:relative;display:flex;align-items:center;gap:10px;max-width:30%;background:#fff;border:2px solid var(--line);border-radius:999px;padding:6px 16px 6px 6px}
+.etape-m .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:18px;flex:none}
+.etape-m .x{min-width:0}
+.etape-m small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;line-height:1.2}
+.etape-m b{display:block;font-size:13.5px;font-weight:650;line-height:1.3}
+.et.c .carte{width:min(460px,70%);text-align:center;border:2px solid var(--accent);background:linear-gradient(135deg,#fff,var(--accent-s))}
+.et.c .noeud{display:none}
+.ens{position:relative;z-index:2;display:flex;justify-content:center;gap:8px;margin-top:6px}
+/* États */
+.fait .carte,.fait .etape-m{background:#fbfdfc}
 .fait .noeud{background:var(--green);border-color:var(--green)}
 .fait .dt{color:var(--green)}
+.fait .etape-m{border-color:#c4e6d6}
 .ici .carte{border:2px solid var(--orange);box-shadow:0 10px 26px -14px rgba(196,111,28,.55)}
+.ici .etape-m{border-color:var(--orange);box-shadow:0 0 0 6px var(--orange-s)}
 .ici .noeud{border-color:var(--orange);box-shadow:0 0 0 7px var(--orange-s)}
 .ici .dt{color:var(--orange)}
-.avenir .carte{opacity:.62}
-.ens{position:relative;z-index:2;display:flex;justify-content:center;gap:8px;margin-top:6px;font-size:22px}
+.avenir .carte,.avenir .etape-m{opacity:.6}
+.statut{display:flex;gap:6px;margin:14px 0 0;flex-wrap:wrap}
+.statut span{flex:1;min-width:110px;text-align:center;font-size:12px;font-weight:700;padding:8px 6px;border-radius:10px;background:#fff;border:1px solid var(--line);color:#9aa8b6}
+.statut span.ok{color:var(--green);background:var(--green-s);border-color:#c4e6d6}
+.statut span.ici{color:#fff;background:var(--accent);border-color:var(--accent)}
+.bal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin:12px 0 0}
+.bal h2{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);display:flex;align-items:center;gap:8px}
+.bal .l{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #eef2f5;font-size:14px}
+.bal .l:first-of-type{border-top:0}
+.bal .l i{font-size:18px;color:var(--el)}
+.bal .l span{flex:1}
+.bal .l em{font-style:normal;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--accent);color:#fff}
+.bal .l em.ok{background:var(--green-s);color:var(--green)}
+.signe{display:inline-flex;align-items:center;gap:4px;margin-left:6px;font-size:10.5px;letter-spacing:.04em}
+.relais{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.relais .tk{letter-spacing:-2px;font-weight:800;color:#c3ccd5}
+.relais .tk.un{color:var(--muted)}.relais .tk.deux{color:var(--green)}
+.lu{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--el-s);color:var(--el)}
+.lu.ok{background:var(--green-s);color:var(--green)}
+.etape-m .relais{margin-top:2px;font-size:11px}
+/* Les couloirs en couleur : bleu pour l'élève, vert pour le référent, le milieu reste neutre. */
+.frise::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:22px;
+  background:linear-gradient(90deg,rgba(45,99,184,.07) 0 37%,transparent 37% 63%,rgba(23,109,102,.08) 63% 100%)}
+.couloirs .g{background:rgba(45,99,184,.09);border-radius:14px 0 0 0;padding:10px 12px}
+.couloirs .d{background:rgba(23,109,102,.10);border-radius:0 14px 0 0;padding:10px 12px}
+.couloirs{gap:0}
+.et.g .carte{border-left:4px solid var(--el)}
+.et.d .carte{border-right:4px solid var(--accent)}
+.avenir.g .carte{border-left-color:#b9cbe8}.avenir.d .carte{border-right-color:#b3d3cf}
+.prop{margin:6px 0 2px;padding:8px 12px;border-radius:10px;background:var(--el-s);color:var(--ink);font-weight:700;font-size:14px;display:flex;gap:8px;align-items:center}
+.prop i{color:var(--el)}
+.suite{margin-top:8px;padding-top:8px;border-top:1px dashed #dfe6ec;font-size:13px}
+.suite small{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--el)}
+.suite span{display:block;margin-top:2px;color:var(--ink)}
+.cf{margin-top:8px;border-top:1px dashed #dfe6ec;padding-top:6px}
+.cf summary{list-style:none;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:5px}
+.cf summary::-webkit-details-marker{display:none}
+.cf summary::after{content:"▾";margin-left:2px}
+.cf[open] summary::after{content:"▴"}
+.cf ol{margin:6px 0 4px;padding-left:18px;font-size:13px;color:var(--ink);display:grid;gap:4px}
+.cf small{display:block;font-size:11px;color:var(--muted)}
+.d .carte{text-align:left}
+/* Les grandes étapes, numérotées */
+.phase span{font-size:12.5px;padding:7px 18px}
+.phase span b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--ink);margin-right:8px;font-size:12px}
+.phase.ok span b{background:var(--green);color:#fff}.phase.ici span b{background:#fff;color:var(--ink)}
 .leg{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:28px}
 .leg span{display:inline-flex;align-items:center;gap:6px}
 .leg i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid #d3dbe2;background:#fff}
 .leg .f{background:var(--green);border-color:var(--green)}.leg .o{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-s)}
-@media (max-width:640px){
-  .carte{width:calc(50% - 26px);padding:10px 12px}
-  .carte b{font-size:13.5px}.carte p{display:none}
-  .g .noeud{right:-30px}.d .noeud{left:-30px}
-  .tete .info{display:none}
+@media (max-width:700px){
+  .carte{width:40%;padding:9px 11px}.carte p{display:none}.carte b{font-size:13px}
+  .g .noeud{right:-24px}.d .noeud{left:-24px}
+  .etape-m{max-width:58%}.etape-m b{font-size:12.5px}
+  .acteurs{display:none}.tete .info{display:none}
 }
 
 [hidden]{display:none!important}
-.avenir .carte .acts{display:none}
+.maint button{margin-left:auto;border:0;background:#fff;color:var(--accent);border-radius:10px;padding:9px 15px;font:inherit;font-weight:700;cursor:pointer;flex:none}
+.carte .acts,.etape-m .acts{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.etape-m .acts{margin-top:4px}
+.acts button{border:0;background:var(--accent);color:#fff;border-radius:9px;padding:7px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.acts button.sec{background:#fff;color:var(--orange);border:1px solid #f0d2b0}
+.acts button.lien{background:none;color:var(--muted);padding:4px 2px;font-weight:600}
+.etape-m .acts button{padding:4px 10px;font-size:12px}
+.bal .l button{border:0;background:var(--accent);color:#fff;border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.motif{display:block;margin-top:6px;font-size:12.5px;color:var(--orange);font-weight:600}
 .nouveau .carte{animation:clignote 1.6s ease-in-out infinite}
 @keyframes clignote{0%,100%{box-shadow:0 0 0 0 rgba(45,99,184,0)}50%{box-shadow:0 0 0 6px rgba(45,99,184,.28)}}
 .nouveau .q::after{content:"Nouveau";margin-left:8px;background:var(--el);color:#fff;border-radius:6px;padding:1px 6px;font-size:10px;letter-spacing:.06em}
-.carte .acts{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
-.g .carte .acts{justify-content:flex-start}
-.carte .acts button{border:0;background:var(--accent);color:#fff;border-radius:9px;padding:7px 13px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
-.carte .acts button.lien{background:none;color:var(--muted);padding:4px 2px;font-weight:600}
-.sous{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
-.sous li{display:flex;align-items:center;gap:8px;font-size:13.5px}
-.sous button{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #cfd8e0;background:#fff;color:#fff;font-size:12px;font-weight:800;cursor:pointer;display:grid;place-items:center;padding:0}
-.sous li.ok button{background:var(--green);border-color:var(--green)}
-.sous li.ok span{color:var(--muted)}
 .vide-msg{text-align:center;color:var(--muted);padding:60px 20px}
 #voile:empty{display:none}
 .voile{position:fixed;inset:0;background:rgba(20,30,40,.4);display:grid;place-items:center;z-index:20;padding:20px}
-.fen{background:#fff;border-radius:20px;padding:22px;max-width:380px;width:100%;text-align:center}
+.fen{background:#fff;border-radius:20px;padding:22px;max-width:400px;width:100%;text-align:center}
 .fen h2{margin:4px 0 6px;font-size:20px}.fen p{margin:0 0 16px;color:var(--muted)}
+.fen textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:12px;padding:10px;font:inherit;margin:0 0 14px;resize:vertical}
 .fen .b2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fen button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px;font:inherit;font-weight:700;cursor:pointer}
 .fen button.oui{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -113,12 +167,18 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 </head>
 <body>
 <main class="shell">
- <div class="haut"><a href="../">← Coordination & Pédagogie</a><div class="demo" id="demo" hidden>Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
- <section class="tete"><div class="code" id="code">—</div><div><h1 id="titre">Chargement…</h1><div class="info" id="info"></div></div><div class="j"><b id="jx"></b><span id="jxl"></span></div></section>
+ <div class="haut"><a href="../">← Coordination & Pédagogie</a></div>
+ <section class="tete" style="margin-bottom:0"><div class="code" id="code">—</div><div><h1 id="titre">Chargement…</h1><div class="info" id="info"></div></div><div class="j"><b id="jx"></b><span id="jxl"></span></div></section>
+ <div class="statut" id="statut"></div>
+ <section class="bal" id="bal" hidden></section>
  <div class="maint" id="maint" hidden></div>
- <div class="couloirs"><div class="g"><span class="av" id="avEl"><i class="ti ti-user"></i></span>L’élève</div><div class="d">L’enseignant<span class="av prof"><i class="ti ti-school"></i></span></div></div>
+ <div class="couloirs">
+  <div class="g"><div class="t"><span class="av" id="avEl"><i class="ti ti-user"></i></span>L’élève</div></div>
+  <div class="m"><div class="t">Ils interviennent</div><div class="acteurs" id="acteurs"></div></div>
+  <div class="d"><div class="t">L’enseignant référent<span class="av prof"><i class="ti ti-school"></i></span></div></div>
+ </div>
  <section class="frise" id="frise"></section>
- <div class="leg"><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
+ <div class="leg"><span>● action</span><span>✉ information · « Lu »</span><span><b style="color:var(--green)">✓✓</b> document remis et reçu</span><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
 </main>
 <div id="voile"></div>
 <script src="./pfmp-commun.js?v=2026-10-09a"></script>
@@ -129,60 +189,26 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 const AVATARS = [['cat', '#D85A30'], ['dog', '#BA7517'], ['butterfly', '#D4537E'], ['fish', '#378ADD'], ['plant-2', '#639922'], ['rocket', '#534AB7'], ['feather', '#1D9E75'], ['planet', '#7F77DD'], ['bike', '#185FA5'], ['music', '#993556'], ['star', '#EF9F27'], ['paw', '#854F0B'], ['ball-football', '#3B6D11'], ['palette', '#A32D2D'], ['camera', '#5F5E5A'], ['bolt', '#C2410C'], ['leaf', '#0F6E56'], ['moon', '#3C3489']];
 const auj = () => new Date().toLocaleDateString('sv-SE');
 const fr = s => s ? new Date(s.slice(0, 10) + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
-const frLong = s => s ? new Date(s + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+const frLong = s => s ? new Date(s.slice(0, 10) + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+const minus = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : '';
+/* Les intervenants, au milieu : nom (socle commun), icône, couleur. */
+const ICO = { pp: ['user-star', 'var(--ink)'], pro: ['tools', 'var(--pro)'], ent: ['building-store', 'var(--ent)'], bde: ['building-bank', 'var(--bde)'], chef: ['signature', 'var(--chef)'], ddf: ['id-badge-2', 'var(--ddf)'], int: ['tools-kitchen-2', 'var(--int)'] };
+$('acteurs').innerHTML = Object.keys(ICO).map(k => `<span><i style="background:${ICO[k][1]}" class="ti ti-${ICO[k][0]}"></i>${esc(P.ACTEURS[k])}</span>`).join('');
+const STATUTS = ['Recherche', 'Proposition de stage', 'Stage validé', 'Convention signée', 'En stage', 'Terminé'];
 let avatar = ['user', '#9aa8b6'];
 
-/* ── Dessin commun : une liste de cartes [{phase} | {cote, titre, detail, date, etat, qui, nouveau, acts, sous}] ── */
-function dessiner(items, maint) {
-  let h = '';
-  items.forEach(x => {
-    if (x.phase) { h += `<div class="phase ${x.etat || ''}"><span>${x.etat === 'ok' ? '✓ ' : ''}${esc(x.phase)}</span></div>`; return; }
-    const mini = x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>` : '';
-    h += `<div class="et ${x.cote} ${x.etat}${x.nouveau ? ' nouveau' : ''}" data-n="${x.n}"><div class="carte"><i class="noeud"></i><div class="q">${mini}${esc(x.qui)}</div><b>${esc(x.titre)}</b>${x.detail ? `<p>${esc(x.detail)}</p>` : ''}`
-      + (x.sous ? `<ul class="sous">${x.sous.map(s => `<li class="${s.ok ? 'ok' : ''}">${s.geste ? `<button data-geste="${s.id}" data-action="${s.action}" aria-label="${esc(s.t)}">${s.ok ? '✓' : ''}</button>` : `<span>${s.ok ? '✓' : '○'}</span>`}<span>${esc(s.t)}</span></li>`).join('')}</ul>` : '')
-      + `<span class="dt">${x.etat === 'fait' ? '✓ ' : ''}${esc(x.date || '')}</span>`
-      + (x.acts && x.acts.length ? `<div class="acts">${x.acts.map(a => `<button class="${a.lien ? 'lien' : ''}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('')}</div>` : '')
-      + `</div></div>`;
-  });
-  h += `<div class="ens"><span class="av" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
-  $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
-  $('avEl').style.background = avatar[1]; $('avEl').innerHTML = `<i class="ti ti-${avatar[0]}"></i>`;
-  const m = $('maint');
-  if (maint) { m.hidden = false; m.className = 'maint' + (maint.cote === 'g' ? ' el' : ''); m.innerHTML = `<div class="x"><small>${esc(maint.qui)}</small><b>${esc(maint.titre)}</b>${maint.date ? ' · ' + esc(maint.date) : ''}</div>${maint.bouton ? `<button data-geste="${maint.bouton.id}" data-action="${maint.bouton.action}">${esc(maint.bouton.t)}</button>` : ''}`; }
-  else m.hidden = true;
-  requestAnimationFrame(ligne);
-}
-/* La ligne serpente d'un point à l'autre ; elle est verte jusqu'à l'étape en cours. */
-let iciN = 0;
-function ligne() {
-  const f = $('frise'), svg = f.querySelector('svg'); if (!svg) return;
-  const b = f.getBoundingClientRect();
-  const pts = [...f.querySelectorAll('.et')].map(el => {
-    const nd = el.querySelector('.noeud'), r = (getComputedStyle(nd).display === 'none' ? el.querySelector('.carte') : nd).getBoundingClientRect();
-    return { x: r.left + r.width / 2 - b.left, y: (el.classList.contains('c') ? r.top : r.top + r.height / 2) - b.top, fait: el.classList.contains('fait') || el.classList.contains('ici') };
-  });
-  const seg = (a, c) => { const m = (a.y + c.y) / 2; return `M${a.x},${a.y} C${a.x},${m} ${c.x},${m} ${c.x},${c.y}`; };
-  let s = '';
-  for (let i = 1; i < pts.length; i++) {
-    const v = pts[i].fait;
-    s += `<path d="${seg(pts[i - 1], pts[i])}" fill="none" stroke="${v ? '#1f9d6b' : '#d8e0e7'}" stroke-width="${v ? 4 : 3}" stroke-linecap="round" ${v ? '' : 'stroke-dasharray="1 8"'}/>`;
-  }
-  svg.innerHTML = s;
-}
-addEventListener('resize', () => requestAnimationFrame(ligne));
-document.fonts && document.fonts.ready.then(() => requestAnimationFrame(ligne));
-
-/* ── Confirmation ── */
-function confirmer(texte, oui) {
-  $('voile').innerHTML = `<div class="voile"><div class="fen" role="dialog" aria-modal="true"><h2>Vous confirmez ?</h2><p>${esc(texte)}</p><div class="b2"><button id="non">Non</button><button class="oui" id="oui">Oui</button></div></div></div>`;
+/* ── Confirmation (avec le motif, pour « À corriger ») ── */
+function confirmer(texte, motif, oui) {
+  $('voile').innerHTML = `<div class="voile"><div class="fen" role="dialog" aria-modal="true"><h2>${motif ? 'À corriger' : 'Vous confirmez ?'}</h2><p>${esc(texte)}</p>${motif ? '<textarea id="motif" maxlength="300" placeholder="Ce qu’il faut corriger"></textarea>' : ''}<div class="b2"><button id="non">${motif ? 'Annuler' : 'Non'}</button><button class="oui" id="oui">${motif ? 'Envoyer' : 'Oui'}</button></div></div></div>`;
   $('non').onclick = () => { $('voile').innerHTML = ''; };
-  $('oui').onclick = () => { $('voile').innerHTML = ''; oui(); };
+  $('oui').onclick = () => { const m = motif ? $('motif').value.trim() : ''; if (motif && !m) { $('motif').focus(); return; } $('voile').innerHTML = ''; oui(m); };
+  if (motif) $('motif').focus();
 }
 
-const f = new URLSearchParams(location.search).get('f');
-if (!f) demo(); else reel(f);
+const q = new URLSearchParams(location.search), f = q.get('f');
+if (!f) location.replace('frise-acteurs.html');
+else reel(f);
 
-/* ═══ La fiche réelle ═══════════════════════════════════════════════════ */
 async function reel(sid) {
   if (!/^20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4]$/.test(sid)) { $('frise').innerHTML = '<p class="vide-msg">Lien incomplet.</p>'; $('titre').textContent = 'PFMP'; return; }
   let F, db;
@@ -195,170 +221,203 @@ async function reel(sid) {
     }
   } catch (e) { $('frise').innerHTML = '<p class="vide-msg">Connexion impossible. Rechargez la page.</p>'; return; }
   const svc = P.service(P.depotModulaire(F, db));
-  let s = null, p = null, pret = 0;
-  /* « Nouveau » : ce que l'élève a validé depuis la dernière visite du référent sur cet appareil. */
+  let s = null, p = null, tu = null, pret = 0;
+  /* « Nouveau » : ce que l'élève a fait depuis la dernière visite du référent sur cet appareil. */
   const cleVu = 'pfmp-frise-vu:' + sid;
   let vu = ''; try { vu = localStorage.getItem(cleVu) || ''; } catch (e) {}
   const noterVu = () => { try { localStorage.setItem(cleVu, new Date().toISOString()); } catch (e) {} };
   addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') noterVu(); });
   addEventListener('pagehide', noterVu);
-  svc.ecouterSuivi(sid, d => { s = d; pret |= 1; if (pret === 3) rendre(); }, () => { $('frise').innerHTML = '<p class="vide-msg">Lecture impossible.</p>'; });
-  F.onSnapshot(F.doc(db, ...('coordination_pfmp_suivi/' + sid + '/eleve/parcours').split('/')), x => { p = x.exists() ? x.data() : null; pret |= 2; if (pret === 3) rendre(); }, () => { pret |= 2; if (pret === 3) rendre(); });
+  const pret3 = () => { if (pret === 3) rendre(); };
+  svc.ecouterSuivi(sid, d => { s = d; pret |= 1; pret3(); }, () => { $('frise').innerHTML = '<p class="vide-msg">Lecture impossible.</p>'; });
+  F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'parcours'), x => { p = x.exists() ? x.data() : null; pret |= 2; pret3(); }, () => { pret |= 2; pret3(); });
+  /* Les gestes du tuteur (arrivée, point d'étape, présences), si le lien porte sa clé. */
+  const tk = q.get('t');
+  if (tk && /^[a-z0-9]{10}$/.test(tk)) F.onSnapshot(F.doc(db, 'coordination_pfmp_tuteur', sid + '_' + tk), x => { tu = x.exists() ? x.data() : null; if (pret === 3) rendre(); }, () => {});
 
   function rendre() {
     if (!s) { $('titre').textContent = 'PFMP'; $('frise').innerHTML = '<p class="vide-msg">Cette fiche n’existe pas encore. L’élève l’ouvre en déclarant son stage sur mapse.fr.</p>'; return; }
     const pr = (p && p.prepa) || {}, R = (p && p.recherches) || [], ent = pr.trouveR && R.find(r => r.id === pr.trouveR);
     if (p && p.avatar != null && AVATARS[p.avatar]) avatar = AVATARS[p.avatar];
+    $('avEl').style.background = avatar[1]; $('avEl').innerHTML = `<i class="ti ti-${avatar[0]}"></i>`;
     $('code').textContent = s.code; $('titre').textContent = (s.libelle || 'PFMP ' + s.periode) + (s.classe ? ' · ' + s.classe : '');
-    $('info').textContent = [s.debut ? 'Du ' + frLong(s.debut) + ' au ' + frLong(s.fin) : '', ent ? ent.nom + (ent.adresse ? ', ' + ent.adresse : '') : ''].filter(Boolean).join(' · ');
+    $('info').textContent = [s.debut ? 'Du ' + frLong(s.debut) + ' au ' + frLong(s.fin) : '', s.refSigle ? 'référent : ' + s.refSigle : ''].filter(Boolean).join(' · ');
     const t = auj(), j = s.debut && s.debut > t ? Math.round((new Date(s.debut + 'T12:00:00') - new Date(t + 'T12:00:00')) / 864e5) : null;
     $('jx').textContent = j != null ? 'J-' + j : ''; $('jxl').textContent = j != null ? 'avant le départ' : '';
-    const items = construire(s, p, ent);
-    let n = 0; items.forEach(x => { if (!x.phase) x.n = n++; });
-    const ici = items.find(x => !x.phase && x.etat !== 'fait');
+    const items = construire(s, pr, R, ent);
+    const etapes = items.filter(x => !x.phase);
+    /* Maintenant : la première étape non faite après la plus avancée (un oubli en arrière reste visible, sans bloquer). */
+    let der = -1; etapes.forEach((x, k) => { if (x.etat === 'fait') der = k; });
+    const ici = etapes.slice(der + 1).find(x => x.etat !== 'fait') || etapes.find(x => x.etat !== 'fait');
     if (ici) ici.etat = 'ici';
-    // Les phases : faite, en cours, à venir
-    items.forEach((x, i) => { if (!x.phase) return; const suite = []; for (let k = i + 1; k < items.length && !items[k].phase; k++) suite.push(items[k]); x.etat = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : ''; });
-    const maint = ici ? { cote: ici.cote, qui: ici.cote === 'g' ? 'L’élève, maintenant' : 'À vous, maintenant', titre: ici.titre, date: ici.date, bouton: ici.acts && ici.acts.find(a => !a.lien) } : null;
-    dessiner(items, maint);
+    let h = '', num = 0;
+    items.forEach((x, i) => {
+      if (x.phase) {
+        const suite = []; for (let k = i + 1; k < items.length && !items[k].phase; k++) suite.push(items[k]);
+        if (!suite.length) return;
+        num++;
+        const cls = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : '';
+        h += `<div class="phase ${cls}"><span><b>${cls === 'ok' ? '✓' : num}</b>${esc(x.phase)}</span></div>`; return;
+      }
+      h += carte(x);
+    });
+    h += `<div class="ens"><span class="av" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
+    $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
+    /* Le statut du stage. */
+    let st = 0;
+    if (P.estFaite(s, 'search') || P.entree(s, 'search').e === 'declare') st = 1;
+    if (P.estFaite(s, 'neg_signed')) st = 2;
+    if (P.estFaite(s, 'ddf_copies') || P.estFaite(s, 'copies')) st = 3;
+    if (['fait', 'valide'].includes(P.entree(s, 'here').e) || (s.debut && t >= s.debut)) st = 4;
+    if (P.estFaite(s, 'student_eval')) st = 6;
+    $('statut').innerHTML = STATUTS.map((x, k) => `<span class="${k < st ? 'ok' : k === st ? 'ici' : ''}">${k < st ? '✓ ' : ''}${esc(x)}</span>`).join('');
+    boite(items);
+    const m = $('maint');
+    if (ici) {
+      const qui = ici.cote.startsWith('m:') ? P.ACTEURS[ici.cote.slice(2)] : ici.cote === 'g' ? 'L’élève' : ici.cote === 'c' ? 'Ensemble' : 'Vous';
+      const b = (ici.acts || []).find(a => !a.lien);
+      m.hidden = false; m.style.background = ici.cote.startsWith('m:') ? ICO[ici.cote.slice(2)][1] : ici.cote === 'g' ? 'var(--el)' : 'var(--accent)';
+      m.innerHTML = `<div><small>${esc(qui)}, maintenant</small><b>${esc(ici.titre)}</b>${ici.date ? ' · ' + esc(ici.date) : ''}</div>${b ? `<button data-geste="${b.id}" data-action="${b.action}">${esc(b.t)}</button>` : ''}`;
+    } else { m.hidden = false; m.style.background = 'var(--green)'; m.innerHTML = '<div><small>Parcours terminé</small><b>Stage validé, bilan fait</b></div>'; }
+    requestAnimationFrame(ligne);
   }
+
   const quand = (en, et) => en && en.le && en.e ? fr(en.le) : ((P.echeance(et, s) || {}).date ? 'avant le ' + fr(P.echeance(et, s).date) : '');
   const neuf = en => en && en.par === 'eleve' && en.le && en.le > vu;
-  function construire(s, p, ent) {
-    const pr = (p && p.prepa) || {}, R = (p && p.recherches) || [], items = [];
-    const E = id => P.entree(s, id);
-    /* Les gestes du référent, dits comme on les fait. */
-    const DIT = { neg_pro: 'Fiche validée par l’enseignant professionnel', neg_signed: 'Signer la fiche de négociation et la garder', pre_given: 'Remettre la pré-convention', conv_given: 'Remettre la convention pour les signatures',
-      copies: 'Remettre les exemplaires signés', pre_return: 'Recevoir et vérifier la pré-convention', conv_return: 'Recevoir et vérifier la convention signée', arrival: 'Appeler le tuteur : arrivée confirmée',
-      assessment: 'Visite-bilan chez le tuteur', archive: 'Archiver la convention (DDF et Pronote)', student_eval: 'Faire le bilan avec l’élève' };
-    const dit = et => DIT[et.id] || et.t;
-    const acte = (id, action, texte, lien) => ({ id, action, t: texte, lien });
+  const acte = (id, action, t, lien) => ({ id, action, t, lien });
+  /* Les boutons du référent sur une étape, avec les mots du socle commun. */
+  function gestes(et, en, lu) {
+    return P.actions(et, en, 'referent').map(a => acte(et.id, a,
+      a === 'valider' && lu ? 'Lu' : a === 'faire' ? 'C’est fait' : a === 'corriger' && lu ? 'Une autre entreprise' : P.libelleAction(a, 'referent', et), a === 'annuler'));
+  }
+  /* Ce que le référent fait, dit comme il le fait. */
+  const DIT = { neg_signed: 'Vérifier, signer et garder la fiche', pre_given: 'Remettre la pré-convention en main propre', pre_return: 'Contrôler la pré-convention', pronote: 'Générer la convention dans le client Pronote',
+    convention: 'Garder l’attestation de côté', pedagogy: 'Joindre l’annexe pédagogique', conv_given: 'Remettre la convention', conv_return: 'Contrôler et signer la convention', bde: 'Transmettre le dossier complet',
+    copies: 'Distribuer les exemplaires', arrival: 'Appeler le tuteur', installed: 'Vérifier l’arrivée et l’installation', evaluation_sent: 'Envoyer le compte rendu d’évaluation', midpoint: 'Suivi du milieu de stage',
+    att_sent: 'Envoyer l’attestation au tuteur', assessment: 'Bilan avec le tuteur', attestation: 'Recevoir l’attestation', attestation_bde: 'Transmettre l’attestation', evaluation_pro: 'Remettre le compte rendu d’évaluation',
+    appreciation: 'Clôturer dans Pronote', archive: 'Archiver la convention', dossier: 'Ranger le dossier de l’élève', intendance: 'Prévenir l’intendance' };
+  const A_QUI = { pre_given: 'l’élève', conv_given: 'l’élève', copies: 'la famille et l’entreprise', pre_return: 'le référent', conv_return: 'le référent', attestation: 'le référent', neg_given: 'l’élève', neg_return: 'le référent', bde: 'le bureau des entreprises', bde_ok: 'le DDF', ddf_copies: 'le référent' };
+  const SUITE = { search: 'Établir sa fiche de négociation avec son enseignant professionnel.' };
+
+  function construire(s, pr, R, ent) {
+    const items = [], E = id => P.entree(s, id);
     P.PHASES.forEach((nom, ph) => {
-      if (ph === 0) {
-        items.push({ phase: 'Préparation' });
-        items.push({ cote: 'g', qui: 'Élève', titre: 'CV et lettre de motivation', detail: 'CV : ' + (pr.cv || '—') + ' · lettre : ' + (pr.lettre || '—'), etat: pr.cv === 'À jour' && pr.lettre === 'Prête' ? 'fait' : 'avenir' });
-        const fini = R.filter(r => r.statut !== 'prevu').length;
-        items.push({ cote: 'g', qui: 'Élève', titre: 'Chercher une entreprise', detail: R.length ? R.length + ' démarche' + (R.length > 1 ? 's' : '') + ' notée' + (R.length > 1 ? 's' : '') + ' · ' + fini + ' faite' + (fini > 1 ? 's' : '') : 'Aucune démarche notée', etat: R.length ? 'fait' : 'avenir', date: R.length ? fr(R.map(r => r.date || '').filter(Boolean).sort()[0]) : '' });
-        return;
-      }
       items.push({ phase: nom });
-      let groupe = null;
-      P.EN_LIGNE.filter(et => et.ph === ph && et.ty !== 'journal' && !et.opt && !(et.ty === 'tache' && !et.by.includes('referent')) && !(et.ty === 'remise' && et.from === 'pp')).forEach(et => {
-        const en = E(et.id), e = en.e;
-        if (et.ty === 'tache' || et.ty === 'info') {
-          const ok = e === 'fait', sous = { id: et.id, t: et.t, ok, geste: et.ty === 'tache', action: ok ? 'annuler' : 'faire' };
-          if (et.id === 'visit') { const v = s.visite || {}; items.push({ cote: 'd', qui: 'Enseignant référent', titre: 'Programmer la visite avec le tuteur', detail: v.le ? 'Visite : ' + v.le : v.rdv ? 'Rendez-vous proposé au tuteur' : 'Le tuteur reçoit un lien et choisit un créneau', etat: v.le || ok ? 'fait' : 'avenir' }); groupe = null; return; }
-          if (groupe) { groupe.sous.push(sous); groupe.etat = groupe.sous.every(x => x.ok) ? 'fait' : 'avenir'; const ec = P.echeance(et, s); if (ec && !groupe.dateBrute) { groupe.dateBrute = ec.date; } groupe.date = groupe.etat === 'fait' ? '' : (groupe.dateBrute ? 'avant le ' + fr(groupe.dateBrute) : ''); return; }
-          const ec = P.echeance(et, s);
-          groupe = { cote: 'd', qui: et.id === 'neg_pro' ? 'Enseignant professionnel · coché par vous' : 'Enseignant référent', titre: dit(et), sous: [sous], etat: ok ? 'fait' : 'avenir', dateBrute: ec && ec.date, date: ok ? fr(en.le) : (ec ? 'avant le ' + fr(ec.date) : '') };
-          groupe.acts = [];
-          items.push(groupe);
-          if (et.id === 'neg_pro') groupe = null;
+      if (ph === 1) {
+        items.push({ cote: 'g', signe: 'a', titre: 'CV et lettre de motivation prêts', detail: 'CV : ' + (pr.cv || '—') + ' · lettre : ' + (pr.lettre || '—'), etat: (pr.cv === 'À jour' && pr.lettre === 'Prête') || !!E('search').e ? 'fait' : 'avenir' });
+        const fini = R.filter(r => r.statut !== 'prevu').length;
+        items.push({ cote: 'g', signe: 'a', titre: 'Démarches de recherche', detail: R.length ? R.length + ' démarche' + (R.length > 1 ? 's' : '') + ' notée' + (R.length > 1 ? 's' : '') + ' · ' + fini + ' faite' + (fini > 1 ? 's' : '') : 'Aucune démarche notée', etat: R.length || E('search').e ? 'fait' : 'avenir' });
+      }
+      P.ETAPES.filter(et => et.ph === ph && !et.local && et.ty !== 'journal' && (!et.opt || et.id === 'intendance')).forEach(et => {
+        const en = E(et.id), e = en.e, o = { aide: et.aide, src: et.src };
+        const fait = P.estFaite(s, et.id);
+        if (et.id === 'referent') { items.push({ cote: 'm:pp', signe: 'a', titre: 'Désigne l’enseignant référent', detail: s.refSigle || '', etat: fait || s.refSigle ? 'fait' : 'avenir' }); return; }
+        if (et.id === 'sent') { items.push(Object.assign({ cote: 'd', signe: 'i', titre: 'Vous suivez ' + s.code + (s.classe ? ' · ' + s.classe : ''), detail: (s.libelle || 'PFMP ' + s.periode) + (s.debut ? ' · du ' + fr(s.debut) + ' au ' + fr(s.fin) : ''), etat: fait ? 'fait' : 'avenir', lu: 1, date: quand(en, et), acts: gestes(et, en, true).map(a => a.action === 'recevoir' ? Object.assign(a, { t: 'Lu' }) : a), boite: 1, en }, o)); return; }
+        /* Un intervenant : au milieu, en transit. */
+        if (et.act) {
+          const parEleve = et.coche === 'eleve';
+          let detail = parEleve ? 'Coché par l’élève' : 'Coché par vous';
+          if (et.id === 'arrival' && tu && tu.arrivee) detail = 'Le tuteur a confirmé en ligne';
+          items.push({ cote: 'm:' + et.act, signe: A_QUI[et.id] ? 'r' : 'a', a: A_QUI[et.id], titre: et.t, detail, etat: fait || (parEleve && ['declare', 'fait', 'valide'].includes(e)) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), acts: parEleve ? [] : gestes(et, en), boite: et.id === 'ddf_copies' || et.id === 'neg_return', en });
           return;
         }
-        groupe = null;
         if (et.ty === 'declare') {
-          items.push({ cote: 'g', qui: 'Élève', titre: et.te || et.t, detail: et.id === 'search' && ent ? ent.nom : (et.id === 'midpoint' && en.v ? (en.v === 'difficulte' ? 'Difficulté signalée' : 'Tout va bien') : ''), etat: ['declare', 'fait', 'valide'].includes(e) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en) });
-          if (et.verif) items.push({ cote: 'd', qui: 'Enseignant référent', titre: et.id === 'search' ? 'Valider l’entreprise' : et.id === 'midpoint' ? 'Faire le point avec l’élève et le tuteur' : dit(et), detail: et.id === 'search' ? 'Conditions de travail adaptées et sécurisées' : '', etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : '',
-            acts: e === 'declare' || e === 'corriger' || e === '' ? (e === 'declare' ? [acte(et.id, 'valider', 'Valider')] : []) : e === 'valide' ? [acte(et.id, 'annuler', 'Annuler', true)] : [] });
+          if (et.id === 'student_eval') { items.push(Object.assign({ cote: 'c', signe: 'a', titre: 'Le bilan du stage, ensemble', detail: 'L’élève remplit l’évaluation de son stage', etat: fait ? 'fait' : 'avenir', date: quand(en, et), acts: gestes(et, en), nouveau: neuf(en) }, o)); return; }
+          const declare = ['declare', 'fait', 'valide'].includes(e);
+          items.push({ cote: 'g', signe: 'a', titre: et.te || et.t, detail: et.id === 'midpoint' && en.v ? (en.v === 'difficulte' ? 'Difficulté signalée' : 'Tout va bien') : '', etat: declare ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), motif: e === 'corriger' ? en.motif : '' });
+          if (et.id === 'here' && tu && tu.arrivee) items.push({ cote: 'm:ent', signe: 'i', titre: 'Le tuteur confirme l’arrivée', detail: 'En ligne', etat: 'fait', date: fr(tu.arrivee.le || '') });
+          if (et.id === 'midpoint' && tu && tu.milieu) items.push({ cote: 'm:ent', signe: 'i', titre: tu.milieu.v === 'difficulte' ? 'Le tuteur signale une difficulté' : 'Le tuteur : « tout se passe bien »', detail: 'En ligne', etat: 'fait', date: fr(tu.milieu.le || '') });
+          if (!et.verif) return;
+          if (et.id === 'search') items.push(Object.assign({ cote: 'd', signe: 'i', titre: s.code + ' a une proposition de stage :', lieu: ent ? ent.nom + (ent.adresse ? ', ' + ent.adresse : '') : '', suite: SUITE.search, etat: e === 'valide' ? 'fait' : 'avenir', lu: 1, date: e === 'valide' ? fr(en.le) : '', acts: e === 'valide' ? gestes(et, en, true) : e === 'declare' ? gestes(et, en, true) : [], boite: 1, en }, o));
+          else items.push(Object.assign({ cote: 'd', signe: 'a', titre: DIT[et.id] || et.t, etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : quand(en, et), acts: gestes(et, en).filter(a => a.action !== 'corriger') }, o));
           return;
         }
         if (et.ty === 'remise' && et.from === 'eleve') {
-          items.push({ cote: 'g', qui: 'Élève', titre: et.te || et.t, etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en) });
-          if (!et.verif) return;
-          items.push({ cote: 'd', qui: 'Enseignant référent', titre: dit(et), etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : '',
-            acts: e === 'valide' ? [acte(et.id, 'annuler', 'Annuler', true)] : e === 'remis' ? [acte(et.id, 'recevoir', 'Reçu')] : [] });
+          items.push({ cote: 'g', signe: 'r', a: A_QUI[et.id] || 'le référent', titre: et.te || et.t, etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', remis: e === 'remis', recu: e === 'valide', date: quand(en, et), nouveau: neuf(en), motif: e === 'corriger' ? en.motif : '' });
+          items.push(Object.assign({ cote: 'd', signe: 'a', titre: DIT[et.id] || et.t, etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : '', acts: gestes(et, en), boite: 1, en, deEleve: 1 }, o));
           return;
         }
-        if (et.ty === 'remise' && et.from === 'referent') {
-          items.push({ cote: 'd', qui: 'Enseignant référent', titre: dit(et), detail: et.ou ? et.ou.replace('Pronote › Communication › Casier numérique', 'Casier numérique de Pronote') : (e === 'valide' ? 'Reçue par l’élève' : ''), etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', date: quand(en, et),
-            acts: e === '' || e === 'corriger' ? [acte(et.id, 'remettre', 'Remis')] : e === 'remis' ? [acte(et.id, 'annuler', 'Annuler', true)] : [] });
+        if (et.ty === 'remise') {
+          items.push(Object.assign({ cote: 'd', signe: 'r', a: A_QUI[et.id] || 'l’élève', titre: DIT[et.id] || et.t, detail: et.ou ? et.ou.replace('Pronote › Communication › Casier numérique', 'Casier numérique de Pronote') : '', etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', remis: e === 'remis', recu: e === 'valide', date: quand(en, et), acts: gestes(et, en) }, o));
+          return;
         }
+        /* Une tâche ou une information du référent. */
+        let detail = '';
+        if (et.id === 'visit') { const v = s.visite || {}; detail = v.le ? 'Visite : ' + frLong(v.le) : v.rdv ? 'Rendez-vous proposé au tuteur' : 'Le tuteur choisit un créneau en ligne'; }
+        items.push(Object.assign({ cote: 'd', signe: 'a', titre: et.id === 'visit' ? 'Fixer le rendez-vous du bilan' : DIT[et.id] || et.t, detail, etat: fait || (et.id === 'visit' && (s.visite || {}).le) ? 'fait' : 'avenir', date: fait ? fr(en.le) : quand(en, et), acts: et.id === 'visit' ? [] : gestes(et, en) }, o));
+        if (et.id === 'assessment' && tu && tu.presences) { const pz = tu.presences, n = Object.values(pz).filter(x => x === 'p').length, tot = Object.keys(pz).length; items.push({ cote: 'm:ent', signe: 'i', titre: 'Présences tenues en ligne', detail: n + ' jour' + (n > 1 ? 's' : '') + ' sur ' + tot, etat: 'fait' }); }
       });
-    });
-    items.push({ cote: 'c', qui: 'Ensemble', titre: 'Le bilan du stage', detail: 'L’élève et son enseignant référent', etat: P.estFaite(s, 'student_eval') ? 'fait' : 'avenir' });
-    // Les tâches groupées : cocher une à une
-    const TITRES = { pronote: 'Préparer la convention', bde: 'Transmettre la convention', installed: 'Début du stage', attestation_bde: 'Après le stage' };
-    items.forEach(x => {
-      if (!x.sous) return;
-      if (x.sous.length > 1) { x.titre = TITRES[x.sous[0].id] || x.titre; return; }
-      const y = x.sous[0]; x.acts = [acte(y.id, y.action, y.ok ? 'Annuler' : 'C’est fait', y.ok)]; delete x.sous;
     });
     return items;
   }
+
+  function relais(x) {
+    if (x.signe !== 'r') return '';
+    const n = x.recu ? 2 : x.remis ? 1 : x.etat === 'fait' ? 2 : 0;
+    return `<div class="relais"><span class="tk ${n === 2 ? 'deux' : n === 1 ? 'un' : ''}">${n === 2 ? '✓✓' : '✓'}</span>→ ${esc(x.a || '')}${n === 2 ? ' · reçu' : n === 1 ? ' · remis' : ''}</div>`;
+  }
+  const boutons = acts => acts && acts.length ? `<div class="acts">${acts.map(a => `<button class="${a.lien ? 'lien' : a.action === 'corriger' ? 'sec' : ''}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('')}</div>` : '';
+  function carte(x) {
+    const marque = x.signe === 'i' ? '<span class="signe">✉</span>' : '';
+    if (x.cote.startsWith('m:')) {
+      const k = x.cote.slice(2), [ic, c] = ICO[k];
+      return `<div class="et m ${x.etat}"><div class="etape-m"><span class="ic" style="background:${c}"><i class="ti ti-${x.etat === 'fait' ? 'check' : ic}"></i></span><div class="x"><small style="color:${c}">${esc(P.ACTEURS[k])}${marque}</small><b>${esc(x.titre)}</b>${relais(x) || (x.detail ? `<div class="relais">${esc(x.detail)}</div>` : '')}${boutons(x.acts)}</div></div></div>`;
+    }
+    const qui = x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]};width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:11px;margin-right:6px;vertical-align:-5px"><i class="ti ti-${avatar[0]}"></i></span>Élève` : x.cote === 'c' ? 'Ensemble' : 'Enseignant référent';
+    const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
+    return `<div class="et ${x.cote} ${x.etat}${x.nouveau ? ' nouveau' : ''}"><div class="carte"><i class="noeud"></i><div class="q">${qui}${marque}</div><b>${esc(x.titre)}</b>${x.detail ? `<p>${esc(x.detail)}</p>` : ''}`
+      + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
+      + (x.suite ? `<div class="suite"><small><i class="ti ti-arrow-right"></i> Étape suivante · pour l’élève</small><span>${esc(x.suite)}</span></div>` : '')
+      + relais(x) + (x.motif ? `<span class="motif">À corriger : ${esc(x.motif)}</span>` : '')
+      + (x.date ? `<span class="dt">${x.etat === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '') + boutons(x.acts) + cf + `</div></div>`;
+  }
+
+  /* La boîte aux lettres : ce qu'on signale au référent et ce qu'on lui remet (les trois derniers). */
+  function boite(items) {
+    const l = items.filter(x => x.boite && x.en && x.en.e).slice(-3).reverse();
+    const bal = $('bal'); bal.hidden = false;
+    bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + (l.length ? l.map(x => {
+      const ok = x.etat === 'fait', info = x.signe === 'i' || x.lu;
+      const t = x.lieu ? x.titre.replace(/ :$/, '') + ' : ' + x.lieu + ' — étape suivante pour l’élève : ' + minus(x.suite) : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'remet $1').replace(/^recevoir /, 'remet ') : x.titre;
+      const b = !ok && (x.acts || []).find(a => !a.lien && a.action !== 'corriger');
+      return `<div class="l"><i class="ti ti-${info ? 'mail-opened' : 'file-arrow-right'}"></i><span>${esc(t)}</span>${b ? `<button data-geste="${b.id}" data-action="${b.action}">${esc(info ? 'Lu' : 'Reçu')}</button>` : `<em class="ok">${info ? '✓ Lu' : '✓✓ Reçu'}</em>`}</div>`;
+    }).join('') : '<div class="l"><span style="color:var(--muted)">Rien pour le moment.</span></div>');
+  }
+
   document.addEventListener('click', ev => {
     const b = ev.target.closest('[data-geste]'); if (!b || !s) return;
     const id = b.dataset.geste, action = b.dataset.action, et = P.PAR_ID[id];
-    confirmer((action === 'annuler' ? 'Annuler : ' : '') + et.t, () => {
+    confirmer((action === 'annuler' ? 'Annuler : ' : '') + et.t, action === 'corriger', motif => {
       b.disabled = true;
-      svc.agir(sid, id, action, 'referent').catch(e => { b.disabled = false; alert(e.message); });
+      svc.agir(sid, id, action, 'referent', motif ? { motif } : undefined).catch(e => { b.disabled = false; alert(e.message); });
     });
   });
 }
 
-/* ═══ La démonstration (aucun lien d'élève) ══════════════════════════════ */
-function demo() {
-  $('demo').hidden = false; avatar = ['fish', '#378ADD'];
-  $('code').textContent = 'K4A7'; $('titre').textContent = 'PFMP 1 · B2GATL2'; $('info').textContent = 'Du lundi 23 novembre au vendredi 18 décembre · élève fictif';
-  $('jx').textContent = 'J-47'; $('jxl').textContent = 'avant le départ';
-  /* [côté, étape, précision, date, qui] — g : l'élève · d : l'enseignant · c : ensemble. */
-  const ETAPES = [
- ['Préparation'],
- ['g','Mon CV et ma lettre de motivation sont prêts','','2 oct.'],
- ['g','Chercher une entreprise','Chaque démarche notée : appel, visite, mail','3 → 7 oct.'],
- ['g','J’ai trouvé mon stage','Agence Rhône Immobilier','7 oct.'],
- ['Entreprise'],
- ['d','Valider l’entreprise','Conditions de travail adaptées et sécurisées','7 oct.'],
- ['Fiche de négociation'],
- ['g','Aller à l’entreprise avec la fiche de négociation','Le tuteur coche les activités prévues (colonne a) et ajoute ses observations','9 oct.'],
- ['g','Signature et cachet de l’entreprise','Responsable ou tuteur','9 oct.'],
- ['g','Signer la fiche de négociation','L’élève majeur, ou son responsable légal','10 oct.'],
- ['d','Valider la fiche de négociation','Les activités correspondent à la formation','avant le 14 oct.','Enseignant professionnel'],
- ['g','Remettre la fiche de négociation','À l’enseignant référent','avant le 15 oct.'],
- ['d','Signer la fiche de négociation et la garder','Dans le dossier de l’élève','avant le 16 oct.'],
- ['Pré-convention'],
- ['d','Remettre la pré-convention','Casier numérique de Pronote · « Remettre à l’élève »','avant le 19 oct.'],
- ['g','Faire remplir la pré-convention par l’entreprise','Dates, adresse, horaires, tuteur, assurance · cachet et signature','avant le 26 oct.'],
- ['g','Rapporter la pré-convention','À l’enseignant référent','avant le 28 oct.'],
- ['Convention'],
- ['d','Saisir la pré-convention dans le client Pronote','Pour éditer la convention et l’attestation de stage · l’attestation est mise de côté','avant le 2 nov.'],
- ['d','Remettre la convention pour les signatures','Avec l’annexe pédagogique','avant le 2 nov.'],
- ['g','Faire signer la convention','Par l’entreprise (responsable, tuteur, cachet) et par mes parents, ou moi si je suis majeur','avant le 6 nov.'],
- ['g','Rapporter la convention signée','À l’enseignant référent','avant le 9 nov.'],
- ['d','Vérifier, signer, transmettre','Au bureau des entreprises, avec l’annexe pédagogique (et l’annexe handicap si besoin)','avant le 10 nov.'],
- ['d','Signature de la cheffe d’établissement','Bureau des entreprises → DDF → cheffe d’établissement · deux exemplaires déposés dans le casier du référent','avant le 17 nov.','Établissement'],
- ['d','Remettre les exemplaires signés','Un pour la famille, un remis à l’élève pour l’entreprise, avec l’attestation','avant le 20 nov.'],
- ['Départ'],
- ['d','Appeler le tuteur','La semaine d’avant : arrivée confirmée · intendance prévenue si demi-pensionnaire','16 → 20 nov.'],
- ['g','Prêt à partir','Adresse, horaires, trajet, nom du tuteur','avant le 23 nov.'],
- ['En stage'],
- ['g','Premier jour de stage','','23 nov.'],
- ['d','Vérifier l’installation','Dans les deux premiers jours · compte rendu d’évaluation envoyé au tuteur','avant le 25 nov.'],
- ['g','Point d’étape','Comment se passe mon stage','7 déc.'],
- ['d','Nouveau contact avec le tuteur','Le stage se déroule bien · organiser le rendez-vous du bilan','7 déc.'],
- ['d','Visite-bilan chez le tuteur','Compte rendu d’évaluation récupéré · attestation à faire établir par l’entreprise','avant le 18 déc.'],
- ['Retour'],
- ['g','Récupérer mon attestation de stage','Remise par l’entreprise','18 déc.'],
- ['d','Attestation au bureau des entreprises','Gratification · appréciation du tuteur dans Pronote · compte rendu au professeur de spécialité','avant le 30 déc.'],
- ['c','Le bilan du stage, ensemble','L’élève fait l’évaluation de son stage avec son enseignant référent','janvier']
-];
-  const etapes = ETAPES.filter(x => x.length > 1);
-  let ici = etapes.findIndex(x => x[4] === 'Enseignant professionnel');
-  const go = () => {
-    let n = -1; const items = [];
-    ETAPES.forEach(x => {
-      if (x.length === 1) { items.push({ phase: x[0] }); return; }
-      n++; const [cote, titre, detail, date, qui] = x;
-      items.push({ n, cote, titre, detail, date, etat: n < ici ? 'fait' : n === ici ? 'ici' : 'avenir', qui: qui || (cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : 'Enseignant référent') });
-    });
-    items.forEach((x, i) => { if (!x.phase) return; const suite = []; for (let k = i + 1; k < items.length && !items[k].phase; k++) suite.push(items[k]); x.etat = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : ''; });
-    const e = etapes[ici], pro = e && !!e[4];
-    dessiner(items, e ? { cote: e[0], qui: e[0] === 'g' ? 'L’élève, maintenant' : pro ? (e[4] === 'Établissement' ? 'L’établissement, maintenant' : 'L’enseignant professionnel, maintenant') : 'À vous, maintenant', titre: e[1], date: e[3] } : null);
-  };
-  $('plus').onclick = () => { ici = Math.min(ici + 1, etapes.length); go(); };
-  $('moins').onclick = () => { ici = Math.max(ici - 1, 0); go(); };
-  go();
+/* La ligne passe par chaque étape : à gauche, au milieu, à droite. */
+function ligne() {
+  const f = $('frise'), svg = f.querySelector('svg'); if (!svg) return;
+  const b = f.getBoundingClientRect();
+  const pts = [...f.querySelectorAll('.et')].map(el => {
+    const v = el.classList.contains('fait') || el.classList.contains('ici');
+    if (el.classList.contains('m') || el.classList.contains('c')) {
+      const r = el.querySelector(el.classList.contains('m') ? '.etape-m' : '.carte').getBoundingClientRect(), x = r.left + r.width / 2 - b.left;
+      return { a: { x, y: r.top - b.top }, s: { x, y: r.bottom - b.top }, v };
+    }
+    const r = el.querySelector('.noeud').getBoundingClientRect(), o = { x: r.left + r.width / 2 - b.left, y: r.top + r.height / 2 - b.top };
+    return { a: o, s: o, v };
+  });
+  const seg = (a, c) => { const m = (a.y + c.y) / 2; return `M${a.x},${a.y} C${a.x},${m} ${c.x},${m} ${c.x},${c.y}`; };
+  let s = '';
+  for (let i = 1; i < pts.length; i++) {
+    const v = pts[i].v;
+    s += `<path d="${seg(pts[i - 1].s, pts[i].a)}" fill="none" stroke="${v ? '#1f9d6b' : '#d8e0e7'}" stroke-width="${v ? 4 : 3}" stroke-linecap="round" ${v ? '' : 'stroke-dasharray="1 8"'}/>`;
+  }
+  svg.innerHTML = s;
 }
+addEventListener('resize', () => requestAnimationFrame(ligne));
+document.addEventListener('toggle', () => requestAnimationFrame(ligne), true);
+document.fonts && document.fonts.ready.then(() => requestAnimationFrame(ligne));
 </script>
 </body>
 </html>
