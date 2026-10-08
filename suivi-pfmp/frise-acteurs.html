@@ -38,7 +38,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .maint small{display:block;opacity:.85;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
 .maint b{font-size:16px}
 /* Les trois couloirs */
-.couloirs{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:end;gap:10px;margin:0 0 6px;position:sticky;top:0;background:linear-gradient(var(--bg) 80%,transparent);padding:8px 0 14px;z-index:5}
+.couloirs{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:end;gap:10px;margin:0 0 6px;padding:8px 0 14px}
 .couloirs .t{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
 .couloirs .g .t{color:var(--el)}.couloirs .d .t{color:var(--accent);justify-content:flex-end}
 .couloirs .m{text-align:center}.couloirs .m .t{justify-content:center;color:var(--muted)}
@@ -103,6 +103,18 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .lu{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--el-s);color:var(--el)}
 .lu.ok{background:var(--green-s);color:var(--green)}
 .etape-m .relais{margin-top:2px;font-size:11px}
+.cf{margin-top:8px;border-top:1px dashed #dfe6ec;padding-top:6px}
+.cf summary{list-style:none;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:5px}
+.cf summary::-webkit-details-marker{display:none}
+.cf summary::after{content:"▾";margin-left:2px}
+.cf[open] summary::after{content:"▴"}
+.cf ol{margin:6px 0 4px;padding-left:18px;font-size:13px;color:var(--ink);display:grid;gap:4px}
+.cf small{display:block;font-size:11px;color:var(--muted)}
+.d .carte{text-align:left}
+/* Les grandes étapes, numérotées */
+.phase span{font-size:12.5px;padding:7px 18px}
+.phase span b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--ink);margin-right:8px;font-size:12px}
+.phase.ok span b{background:var(--green);color:#fff}.phase.ici span b{background:#fff;color:var(--ink)}
 .leg{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:28px}
 .leg span{display:inline-flex;align-items:center;gap:6px}
 .leg i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid #d3dbe2;background:#fff}
@@ -144,11 +156,11 @@ const ACT = {
    couloir : g l'élève · d le référent · m:<acteur> un intervenant · c ensemble
    signe   : a action · i information (« Lu ») · r remise d'un document (✓ remis, ✓✓ reçu) */
 const ETAPES = [
- ['Recherche'],
+ ['Recherche et proposition de stage'],
  ['g', 'a', 'CV et lettre de motivation prêts', '', '2 oct.'],
  ['g', 'a', 'Démarches de recherche', '5 démarches notées', '3 → 7 oct.'],
  ['g', 'a', 'J’ai une proposition de stage', 'Agence Rhône Immobilier · 48 cours Lafayette, Lyon 3e', '7 oct.', { s: 1 }],
- ['d', 'i', 'Proposition de stage reçue', 'En cours de validation · fiche de négociation', '7 oct.'],
+ ['d', 'i', 'Proposition de stage reçue', 'En cours de validation · fiche de négociation', '7 oct.', { c: ['Prendre connaissance de l’entreprise proposée.', 'Aider l’élève à trouver une autre entreprise si celle-ci ne convient pas à sa formation ou à son projet.', 'Élève en situation de handicap : informer le responsable du pôle AESH, avec l’accord des responsables légaux.'], src: 'Procédure §2 et §5' }],
  ['Fiche de négociation'],
  ['g', 'a', 'Réclamer la fiche de négociation', 'À mon enseignant professionnel', '8 oct.'],
  ['m:pro', 'r', 'Remet la fiche de négociation', '', '8 oct.', { a: 'l’élève' }],
@@ -157,38 +169,44 @@ const ETAPES = [
  ['g', 'r', 'Remettre la fiche à mon enseignant professionnel', '', '14 oct.', { a: 'l’enseignant professionnel' }],
  ['m:pro', 'a', 'Signe et valide la fiche', '', 'avant le 16 oct.'],
  ['g', 'r', 'Remettre la fiche à mon référent', '', 'avant le 17 oct.', { a: 'le référent' }],
- ['d', 'a', 'Signer la fiche et la garder', 'Conditions de travail adaptées et sécurisées', 'avant le 17 oct.', { s: 2 }],
+ ['d', 'a', 'Signer la fiche et la garder', 'Conditions de travail adaptées et sécurisées', 'avant le 17 oct.', { s: 2, c: ['Vérifier les signatures : cachet et signature de l’entreprise (responsable ou tuteur), élève ou responsable légal, enseignant professionnel.', 'Vérifier que l’entreprise peut accueillir l’élève dans des conditions de travail adaptées et sécurisées.', 'Signer, puis ranger la fiche dans le dossier de l’élève.'], src: 'Fiche de négociation · Procédure §2' }],
  ['Pré-convention'],
- ['d', 'r', 'Remettre la pré-convention', 'Casier numérique de Pronote · « Remettre à l’élève »', 'avant le 19 oct.', { a: 'l’élève' }],
+ ['d', 'r', 'Remettre la pré-convention', 'Un exemplaire à l’élève', 'avant le 19 oct.', { a: 'l’élève', c: ['La trouver dans Pronote › Communication › Casier numérique › « PFMP - Mini stage ».', 'L’imprimer et la remettre en main propre à l’élève, ou la lui déposer avec « Remettre à l’élève ». (À confirmer : l’usage de l’établissement.)', 'L’élève la fait remplir, signer et tamponner par l’entreprise, puis vous la rapporte.'], src: 'Procédure §2 · mémento 2' }],
  ['m:ent', 'a', 'Remplit, signe et tamponne la pré-convention', 'Confirmé par l’élève', 'avant le 26 nov.'],
  ['g', 'r', 'Rapporter la pré-convention', '', 'avant le 27 nov.', { a: 'le référent' }],
- ['d', 'a', 'Saisir la pré-convention dans le client Pronote', 'Convention et attestation éditées · l’attestation est gardée de côté', 'avant le 30 nov.'],
+ ['d', 'a', 'Saisir la pré-convention dans le client Pronote', 'Convention et attestation éditées', 'avant le 30 nov.', { c: ['Vérifier que la pré-convention est entièrement renseignée.', 'Pronote › Stages › Stagiaires : saisir entreprise, adresses, responsable, tuteur, dates, horaires, assurance.', 'Éditer la convention avec le modèle « R26CSRP-LP convention de stage PFMP ».', 'L’attestation (« R26CSRP-LP attestation de stage PFMP ») s’imprime en même temps : la garder de côté jusqu’à la signature complète de la convention.'], src: 'Procédure §3 · check-list · modèles Pronote' }],
  ['Convention'],
- ['d', 'r', 'Remettre la convention pour les signatures', 'Avec l’annexe pédagogique', 'avant le 30 nov.', { a: 'l’élève' }],
+ ['d', 'r', 'Remettre la convention pour les signatures', 'Avec l’annexe pédagogique', 'avant le 30 nov.', { a: 'l’élève', c: ['Joindre l’annexe pédagogique de la filière.', 'Si besoin : annexe handicap et demande d’aide humaine (étape 2 bis), dans le casier numérique, avec l’accord des responsables légaux.', 'Signatures attendues : responsable de l’entreprise ou tuteur avec le cachet, élève majeur ou responsable légal.'], src: 'Procédure §3 et §5 · check-list' }],
  ['m:ent', 'a', 'Signe la convention · cachet', 'Le responsable ou le tuteur · confirmé par l’élève', 'avant le 4 déc.'],
  ['g', 'a', 'Faire signer mes parents', 'Ou moi, si je suis majeur', 'avant le 6 déc.'],
  ['g', 'r', 'Rapporter la convention signée', '', 'avant le 7 déc.', { a: 'le référent' }],
- ['d', 'a', 'Vérifier la conformité · transmettre', 'Au bureau des entreprises, avec l’annexe pédagogique (et l’annexe handicap si besoin)', 'avant le 8 déc.'],
+ ['d', 'a', 'Vérifier la conformité · signer · transmettre', 'Au bureau des entreprises', 'avant le 8 déc.', { c: ['Vérifier : signature de l’élève majeur ou du représentant légal, du responsable de l’entreprise ou du tuteur, cachet de l’entreprise.', 'Signer en qualité d’enseignant référent.', 'Transmettre au responsable du bureau des entreprises, avec l’annexe pédagogique (et l’annexe handicap si besoin).'], src: 'Check-list · Procédure §3' }],
  ['m:bde', 'a', 'Vérifie la convention · la transmet', 'Coché par le référent', 'avant le 10 déc.'],
  ['m:chef', 'a', 'Signe la convention', 'Coché par le référent', 'avant le 14 déc.'],
  ['m:ddf', 'r', 'Dépose deux exemplaires', 'Dans le casier du référent', 'avant le 15 déc.', { a: 'le référent' }],
- ['d', 'r', 'Remettre les exemplaires signés', 'Un pour la famille, un pour l’entreprise avec l’attestation', 'avant le 18 déc.', { a: 'l’élève', s: 3 }],
- ['m:int', 'i', 'Prévenue', 'Si l’élève est demi-pensionnaire', 'avant le 18 déc.'],
+ ['d', 'r', 'Remettre les exemplaires signés', 'Famille et entreprise', 'avant le 18 déc.', { a: 'l’élève', s: 3, c: ['Un exemplaire aux parents : il peut être remis à l’élève.', 'Un exemplaire à l’entreprise, avec l’attestation de stage : envoi par mail possible.'], src: 'Check-list · Procédure §3' }],
+ ['d', 'a', 'Prévenir l’intendance', 'Si l’élève est demi-pensionnaire', 'avant le 18 déc.', { c: ['Dates de stage différentes de celles prévues.', 'Élève qui revient déjeuner au lycée pendant son stage.'], src: 'Procédure §5' }],
  ['Départ'],
- ['d', 'a', 'Appeler le tuteur', 'La semaine d’avant : arrivée confirmée', 'avant le 18 déc.'],
+ ['d', 'a', 'Appeler le tuteur', 'La semaine d’avant', 'avant le 18 déc.', { c: ['Reprendre contact avec le tuteur la semaine précédant le début du stage.', 'Confirmer l’arrivée de l’élève à la date convenue.', 'Noter l’échange dans Pronote : « Créer un suivi ».'], src: 'Check-list' }],
  ['g', 'a', 'Prêt à partir', 'Adresse, horaires, trajet', 'avant le 4 janv.'],
  ['En stage'],
  ['g', 'a', 'Je suis arrivé', 'Le référent est prévenu', '4 janv.', { s: 4 }],
- ['d', 'a', 'Vérifier l’installation', 'Compte rendu d’évaluation envoyé au tuteur · deux premiers jours', 'avant le 6 janv.'],
+ ['d', 'a', 'Vérifier l’installation', 'Dans les deux premiers jours', 'avant le 6 janv.', { c: ['Vérifier par téléphone (ou sur place si besoin) que l’élève est arrivé et installé.', 'Vérifier que l’accueil et les activités sont conformes à la formation et à la sécurité.', 'Envoyer au tuteur le compte rendu d’évaluation (casier numérique), à lire avant la visite-bilan.', 'Noter l’échange dans Pronote : « Créer un suivi ».'], src: 'Procédure §4 · check-list' }],
  ['g', 'a', 'Point d’étape', 'Comment se passe mon stage', '10 janv.'],
- ['d', 'a', 'Visite-bilan chez le tuteur', 'Récupérer le compte rendu · échanges notés dans Pronote', 'avant le 14 janv.'],
+ ['d', 'a', 'Reprendre contact · organiser le bilan', 'Au milieu du stage', '10 janv.', { c: ['Vérifier que le stage se déroule bien : activités prévues, aucune difficulté.', 'Fixer avec le tuteur le rendez-vous de la visite-bilan.', 'Noter l’échange dans Pronote : « Créer un suivi ».'], src: 'Procédure §4 · check-list' }],
+ ['d', 'a', 'Visite-bilan chez le tuteur', 'Fin du stage', 'avant le 14 janv.', { c: ['Rencontrer le tuteur dans l’entreprise pour faire le bilan.', 'Récupérer le compte rendu d’évaluation.', 'Faire établir l’attestation de stage par l’entreprise, qui la remet directement à l’élève.', 'Noter la visite dans Pronote : « Créer un suivi ».'], src: 'Procédure §4 · check-list' }],
  ['m:ent', 'r', 'Établit l’attestation de stage', '', 'fin du stage', { a: 'l’élève' }],
- ['Après le stage'],
+ ['Bilan'],
  ['g', 'r', 'Rapporter mon attestation', '', 'avant le 22 janv.', { a: 'le référent' }],
- ['d', 'r', 'Transmettre l’attestation', 'Pour la gratification', 'avant le 22 janv.', { a: 'le bureau des entreprises' }],
- ['d', 'a', 'Saisir l’appréciation du tuteur dans Pronote', '', 'avant le 29 janv.'],
- ['d', 'r', 'Remettre le compte rendu d’évaluation', '', 'avant le 29 janv.', { a: 'l’enseignant professionnel' }],
- ['c', 'a', 'Le bilan du stage, ensemble', 'L’élève fait l’évaluation de son stage avec son enseignant référent', 'fin janvier', { s: 5 }]
+ ['d', 'r', 'Transmettre l’attestation', 'Au bureau des entreprises', 'avant le 22 janv.', { a: 'le bureau des entreprises', c: ['Attestation complétée par l’entreprise, à récupérer dès la fin du stage.', 'Elle permet le versement de la gratification à l’élève.'], src: 'Check-list · Procédure §4 · mémento 11' }],
+ ['m:bde', 'i', 'Gratification versée à l’élève', '', ''],
+ ['d', 'a', 'Saisir l’appréciation du tuteur dans Pronote', 'Dans le suivi du stage', 'avant le 29 janv.', { c: ['Pronote : suivi du stage, appréciation générale du tuteur.'], src: 'Check-list' }],
+ ['d', 'r', 'Remettre le compte rendu d’évaluation', 'Au professeur de spécialité', 'avant le 29 janv.', { a: 'l’enseignant professionnel', c: ['Le professeur de spécialité est l’enseignant professionnel de l’élève.'], src: 'Check-list' }],
+ ['c', 'a', 'Le bilan du stage, ensemble', 'L’élève remplit l’évaluation de son stage', 'fin janvier', { s: 5, c: ['Faire compléter l’évaluation de la PFMP par l’élève lors du bilan final.'], src: 'Procédure §4 · mémento 10' }],
+ ['Clôture du dossier'],
+ ['d', 'a', 'Archiver la convention', 'Papier et numérique', 'fin janvier', { c: ['Version papier : au bureau du DDF.', 'Version numérique : enregistrée dans Pronote.'], src: 'Procédure §1 · mémento 9' }],
+ ['d', 'a', 'Ranger le dossier de l’élève', 'Fiche de négociation, échanges, comptes rendus', 'fin janvier', { c: ['Fiche de négociation signée.', 'Échanges notés dans Pronote (« Créer un suivi »).', 'Compte rendu d’évaluation remis à l’enseignant professionnel.'], src: 'Check-list · fiche de négociation' }],
+ ['d', 'a', 'Vérifier le stage dans Pronote', 'Dates et jours réalisés', 'fin janvier', { c: ['Dates et jours réellement réalisés, absences éventuelles.', 'Pièces reçues : attestation, compte rendu d’évaluation.'], src: 'Rubriques du stage dans Pronote (à confirmer avec l’établissement)' }]
 ];
 const STATUTS = ['Recherche', 'Proposition de stage', 'Stage validé', 'Convention signée', 'En stage', 'Terminé'];
 const etapes = ETAPES.filter(x => x.length > 1);
@@ -203,7 +221,7 @@ function relais(it) {
   return `<div class="relais"><span class="tk ${n === 2 ? 'deux' : n === 1 ? 'un' : ''}">${n === 2 ? '✓✓' : '✓'}</span>→ ${esc((o && o.a) || '')}${n === 2 ? ' · reçu' : n === 1 ? ' · remis' : ''}</div>`;
 }
 function rendre() {
-  let n = -1, h = '';
+  let n = -1, h = '', numPh = 0;
   const items = [];
   ETAPES.forEach(x => {
     if (x.length === 1) { items.push({ phase: x[0] }); return; }
@@ -213,7 +231,8 @@ function rendre() {
     if (it.phase) {
       const suite = []; for (let k = i + 1; k < items.length && !items[k].phase; k++) suite.push(items[k]);
       const cls = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : '';
-      h += `<div class="phase ${cls}"><span>${cls === 'ok' ? '✓ ' : ''}${esc(it.phase)}</span></div>`; return;
+      numPh++;
+      h += `<div class="phase ${cls}"><span><b>${cls === 'ok' ? '✓' : numPh}</b>${esc(it.phase)}</span></div>`; return;
     }
     const [cote, signe, titre, detail, date] = it.x;
     const marque = signe === 'i' ? '<span class="signe">✉</span>' : '';
@@ -223,10 +242,11 @@ function rendre() {
       return;
     }
     const qui = cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : 'Enseignant référent';
+    const o = it.x[5] || {};
+    const consignes = o.c ? `<details class="cf"><summary>Comment faire</summary><ol>${o.c.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${o.src ? `<small>Source : ${esc(o.src)}</small>` : ''}</details>` : '';
     const lu = signe === 'i' ? `<span class="lu ${it.etat === 'fait' ? 'ok' : ''}">${it.etat === 'fait' ? '✓ Lu' : 'Lu'}</span>` : '';
-    h += `<div class="et ${cote} ${it.etat}"><div class="carte"><i class="noeud"></i><div class="q">${qui}${marque}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}${relais(it)}${lu}${date ? `<span class="dt">${it.etat === 'fait' ? '✓ ' : ''}${esc(date)}</span>` : ''}</div></div>`;
+    h += `<div class="et ${cote} ${it.etat}"><div class="carte"><i class="noeud"></i><div class="q">${qui}${marque}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}${relais(it)}${lu}${date ? `<span class="dt">${it.etat === 'fait' ? '✓ ' : ''}${esc(date)}</span>` : ''}${consignes}</div></div>`;
   });
-  h += `<div class="ens"><span class="av"><i class="ti ti-fish"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
   $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
   /* Le statut du stage avance tout seul. */
   let st = 0; etapes.forEach((x, k) => { if (k < ici && x[5] && x[5].s) st = Math.max(st, x[5].s); });
@@ -270,6 +290,7 @@ function ligne() {
 $('plus').onclick = () => { ici = Math.min(ici + 1, etapes.length); rendre(); };
 $('moins').onclick = () => { ici = Math.max(ici - 1, 0); rendre(); };
 addEventListener('resize', () => requestAnimationFrame(ligne));
+document.addEventListener('toggle', () => requestAnimationFrame(ligne), true);
 document.fonts && document.fonts.ready.then(() => requestAnimationFrame(ligne));
 rendre();
 </script>
