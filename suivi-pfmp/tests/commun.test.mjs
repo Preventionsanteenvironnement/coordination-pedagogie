@@ -37,7 +37,14 @@ assert.equal(P.echeance(P.PAR_ID.assessment, p1).date, '2027-01-14');
 assert.equal(P.echeance(P.PAR_ID.midpoint, p1).date, '2027-01-10');
 assert.equal(P.echeance(P.PAR_ID.search, p1).proposee, true);
 assert.equal(P.echeance(P.PAR_ID.copies, p1).proposee, false);
-console.log('Échéances : dernier jour 18/12 et 28/05, appel au tuteur avant Noël.');
+/* 08/10/2026 : calendrier commun, aucune échéance pendant les vacances, un week-end ou un jour férié. */
+assert.equal(P.dernierJourDeCours('2027-01-04'), '2026-12-18', 'sans calendrier fourni : celui du socle');
+assert.equal(P.echeance(P.PAR_ID.search, p2).date, '2027-04-09', '23/04 en vacances de printemps → 09/04');
+assert.equal(P.echeance(P.PAR_ID.pre_return, p2).date, '2027-05-04', '07/05 pendant le pont de l’Ascension → 04/05');
+assert.equal(P.echeance(P.PAR_ID.conv_return, p2).date, '2027-05-14', '17/05 lundi de Pentecôte → 14/05');
+assert.equal(P.echeance(P.PAR_ID.student_eval, p2).date, '2027-07-02', '09/07 en été → 02/07');
+assert.equal(P.echeance(P.PAR_ID.here, p1).date, '2027-01-04', 'le premier jour de stage ne bouge pas');
+console.log('Échéances : dernier jour 18/12 et 28/05, appel au tuteur avant Noël, rien pendant les vacances.');
 
 /* 3. Droits : qui peut faire quoi. */
 const A = (id, e, r) => P.actions(P.PAR_ID[id], { e }, r);

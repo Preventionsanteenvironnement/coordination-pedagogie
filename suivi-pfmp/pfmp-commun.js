@@ -17,7 +17,7 @@
 (function (racine) {
   'use strict';
 
-  const VERSION = '2026-10-07';
+  const VERSION = '2026-10-08';
   const COL_SUIVI = 'coordination_pfmp_suivi';
   const COL_REFERENTS = 'coordination_pfmp_referents';
   const ROLES = ['eleve', 'referent', 'pp'];
@@ -106,17 +106,33 @@
   function plus(s, n) { return iso(jour(s) + n * 864e5); }
   function ecartJours(a, b) { return Math.round((jour(b) - jour(a)) / 864e5); }
 
+  /* Calendrier scolaire (zone A, Lyon) : vacances du premier jour inclus au jour de rentrée exclu, jours fériés.
+     Repris de l'Atelier (Progression annuelle) le 08/10/2026. Il sert quand la page n'a pas d'autre calendrier :
+     l'élève et le référent calculent ainsi les mêmes dates que le professeur principal. */
+  const CALENDRIER = {
+    '2026-2027': {
+      vacances: [{ d: '2026-10-17', f: '2026-11-02' }, { d: '2026-12-19', f: '2027-01-04' }, { d: '2027-02-13', f: '2027-03-01' },
+        { d: '2027-04-10', f: '2027-04-26' }, { d: '2027-05-05', f: '2027-05-10' }, { d: '2027-07-03', f: '2027-08-31' }],
+      feries: ['2026-11-01', '2026-11-11', '2026-12-25', '2027-01-01', '2027-03-29', '2027-05-01', '2027-05-06', '2027-05-08', '2027-05-17']
+    }
+  };
+  function calendrierDe(s) {
+    if (!s || !RE_DATE.test(s)) return { vacances: [], feries: [] };
+    const [y, m] = s.split('-').map(Number), an = m >= 8 ? y + '-' + (y + 1) : (y - 1) + '-' + y;
+    return CALENDRIER[an] || { vacances: [], feries: [] };
+  }
+  function estJourDeClasse(s, vacances, feries) {
+    const fer = new Set((feries || []).map(f => f.d || f));
+    const w = new Date(jour(s)).getUTCDay();
+    return !(w === 0 || w === 6 || fer.has(s) || (vacances || []).some(v => v.d === v.f ? s === v.d : (s >= v.d && s < v.f)));
+  }
+
   /* Dernier jour de cours avant le départ : un jour de semaine, hors vacances
      (du premier jour inclus au jour de rentrée exclu) et hors jours fériés. */
   function dernierJourDeCours(debut, vacances, feries) {
-    const fer = new Set((feries || []).map(f => f.d || f));
-    const enVacances = s => (vacances || []).some(v => v.d === v.f ? s === v.d : (s >= v.d && s < v.f));
+    if (vacances == null) { const c = calendrierDe(debut); vacances = c.vacances; feries = c.feries; }
     let s = plus(debut, -1);
-    for (let i = 0; i < 60; i++, s = plus(s, -1)) {
-      const w = new Date(jour(s)).getUTCDay();
-      if (w === 0 || w === 6 || fer.has(s) || enVacances(s)) continue;
-      return s;
-    }
+    for (let i = 0; i < 60; i++, s = plus(s, -1)) if (estJourDeClasse(s, vacances, feries)) return s;
     return plus(debut, -3);
   }
 
@@ -130,7 +146,14 @@
     else if (base === 'arrivee') { const a = plus(per.debut, -7); d = per.dernierJour && per.dernierJour < a ? per.dernierJour : a; }
     else if (base === 'milieu') d = plus(per.debut, Math.floor(ecartJours(per.debut, per.fin) / 2));
     if (!d || !RE_DATE.test(d)) return null;
-    return { date: plus(d, n || 0), proposee: !!prop };
+    let date = plus(d, n || 0);
+    /* Une échéance comptée depuis le dernier jour de cours ou la fin du stage ne tombe jamais pendant les vacances,
+       un week-end ou un jour férié : elle avance au dernier jour de classe précédent. */
+    if (base === 'dernier' || base === 'fin') {
+      const c = calendrierDe(date);
+      for (let i = 0; i < 40 && !estJourDeClasse(date, c.vacances, c.feries); i++) date = plus(date, -1);
+    }
+    return { date, proposee: !!prop };
   }
 
   /* ── États et droits ───────────────────────────────────────────────────── */
@@ -464,7 +487,7 @@
     };
   }
 
-  const API = { VERSION, COL_SUIVI, COL_REFERENTS, ROLES, PHASES, ETAPES, PAR_ID, EN_LIGNE,
+  const API = { VERSION, CALENDRIER, calendrierDe, estJourDeClasse, COL_SUIVI, COL_REFERENTS, ROLES, PHASES, ETAPES, PAR_ID, EN_LIGNE,
     plus, ecartJours, dernierJourDeCours, echeance, entree, estFaite, actions, libelleAction, appliquer,
     aVerifier, aFaire, avancement, drapeaux, phaseCourante, enRetard,
     anneeScolaire, filiereDe, suiviId, referentId, nouveauCodeReferent, sigleDe, nettoyerPiste, verifierSuivi, CHAMPS_SUIVI,
