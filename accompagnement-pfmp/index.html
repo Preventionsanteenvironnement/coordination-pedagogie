@@ -420,8 +420,10 @@ document.addEventListener('keydown', ev => {
   if (td && (ev.key === 'Enter' || ev.key === ' ')) { ev.preventDefault(); ouvrirBulle(td.dataset.code, td.dataset.d, td.dataset.m); }
 });
 
+/* 08/10/2026 — Code retiré pour l'instant (demande de Brahim) : remettre SANS_CODE à false pour le rétablir. */
+const SANS_CODE = true;
 let deja = ''; try { deja = localStorage.getItem(K_OK) || ''; } catch (_) { }
-if (deja === EMPREINTE) entrer(); else porte();
+if (SANS_CODE || deja === EMPREINTE) entrer(); else porte();
 </script>
 </body>
 </html>
