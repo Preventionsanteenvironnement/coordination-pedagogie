@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#176d66">
+<meta name="robots" content="noindex">
+<title>PFMP — l’élève, les intervenants, le référent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!--
+  Modèle (08/10/2026) : la frise à trois couloirs.
+  À gauche l'élève, à droite l'enseignant référent : le suivi officiel des deux.
+  Au milieu, en transit, ceux qui interviennent : enseignant professionnel, entreprise, bureau des entreprises,
+  DDF, cheffe d'établissement, intendance. La ligne passe par eux puis repart à gauche ou à droite.
+  Ordre : procédure R26CSRP-LP, check-list du professeur référent, fiche de négociation, précisions de Brahim.
+  Démonstration : données fictives, aucune base.
+-->
+<style>
+:root{--ink:#172738;--muted:#66768a;--line:#e3e9ee;--accent:#176d66;--accent-s:#e2f1ef;--el:#2d63b8;--el-s:#eaf0fb;--green:#1f9d6b;--green-s:#e8f6ef;--orange:#c46f1c;--orange-s:#fff3e6;--bg:#f5f7f9;
+  --pro:#6d4bc4;--ent:#c46f1c;--bde:#0e7490;--ddf:#475569;--chef:#9f1239;--int:#4d7c0f}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+.shell{max-width:1120px;margin:auto;padding:22px 20px 80px}
+.haut{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.haut a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px}
+.demo{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.demo button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 11px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer}
+.tete{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px 20px}
+.code{width:56px;height:56px;border-radius:16px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:.06em}
+.tete h1{margin:0;font-size:20px;letter-spacing:-.02em}
+.tete .info{color:var(--muted);font-size:13.5px}
+.tete .j{margin-left:auto;text-align:right}.tete .j b{display:block;font-size:26px;line-height:1}.tete .j span{font-size:12px;color:var(--muted)}
+.maint{display:flex;align-items:center;gap:14px;border-radius:16px;padding:13px 18px;margin:14px 0 22px;background:var(--accent);color:#fff}
+.maint small{display:block;opacity:.85;font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.maint b{font-size:16px}
+/* Les trois couloirs */
+.couloirs{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:end;gap:10px;margin:0 0 6px;position:sticky;top:0;background:linear-gradient(var(--bg) 80%,transparent);padding:8px 0 14px;z-index:5}
+.couloirs .t{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.couloirs .g .t{color:var(--el)}.couloirs .d .t{color:var(--accent);justify-content:flex-end}
+.couloirs .m{text-align:center}.couloirs .m .t{justify-content:center;color:var(--muted)}
+.acteurs{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:6px}
+.acteurs span{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 9px 3px 4px;background:#fff;border:1px solid var(--line)}
+.acteurs i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-style:normal}
+.av{width:38px;height:38px;border-radius:50%;background:#378ADD;color:#fff;display:grid;place-items:center;font-size:20px;box-shadow:0 0 0 4px #fff,0 4px 14px -6px rgba(0,0,0,.35)}
+.av.prof{background:var(--accent)}
+/* La frise */
+.frise{position:relative;padding:4px 0 10px}
+.frise svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.phase{position:relative;z-index:2;text-align:center;margin:24px 0 12px}
+.phase span{display:inline-block;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 14px;font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.phase.ok span{color:var(--green);background:var(--green-s);border-color:#c4e6d6}
+.phase.ici span{color:#fff;background:var(--ink);border-color:var(--ink)}
+.et{position:relative;z-index:2;display:flex;margin:9px 0}
+.et.m{margin:18px 0}
+.et.g{justify-content:flex-start}.et.d{justify-content:flex-end}.et.m{justify-content:center}.et.c{justify-content:center}
+.carte{position:relative;width:34%;background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px 15px}
+.carte .q{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.g .q{color:var(--el)}.d .q{color:var(--accent)}
+.carte b{display:block;font-size:14.5px;font-weight:650;line-height:1.35;margin-top:1px}
+.carte p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
+.carte .dt{display:inline-block;margin-top:5px;font-size:12px;font-weight:700;color:var(--muted)}
+.carte .noeud{position:absolute;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:#fff;border:3px solid #d3dbe2}
+.g .noeud{right:-31px}.d .noeud{left:-31px}
+/* L'intervenant, en transit sur la ligne */
+.etape-m{position:relative;display:flex;align-items:center;gap:10px;max-width:30%;background:#fff;border:2px solid var(--line);border-radius:999px;padding:6px 16px 6px 6px}
+.etape-m .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:18px;flex:none}
+.etape-m .x{min-width:0}
+.etape-m small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;line-height:1.2}
+.etape-m b{display:block;font-size:13.5px;font-weight:650;line-height:1.3}
+.et.c .carte{width:min(460px,70%);text-align:center;border:2px solid var(--accent);background:linear-gradient(135deg,#fff,var(--accent-s))}
+.et.c .noeud{display:none}
+.ens{position:relative;z-index:2;display:flex;justify-content:center;gap:8px;margin-top:6px}
+/* États */
+.fait .carte,.fait .etape-m{background:#fbfdfc}
+.fait .noeud{background:var(--green);border-color:var(--green)}
+.fait .dt{color:var(--green)}
+.fait .etape-m{border-color:#c4e6d6}
+.ici .carte{border:2px solid var(--orange);box-shadow:0 10px 26px -14px rgba(196,111,28,.55)}
+.ici .etape-m{border-color:var(--orange);box-shadow:0 0 0 6px var(--orange-s)}
+.ici .noeud{border-color:var(--orange);box-shadow:0 0 0 7px var(--orange-s)}
+.ici .dt{color:var(--orange)}
+.avenir .carte,.avenir .etape-m{opacity:.6}
+.leg{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:28px}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg i{width:12px;height:12px;border-radius:50%;display:inline-block;border:2px solid #d3dbe2;background:#fff}
+.leg .f{background:var(--green);border-color:var(--green)}.leg .o{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-s)}
+@media (max-width:700px){
+  .carte{width:40%;padding:9px 11px}.carte p{display:none}.carte b{font-size:13px}
+  .g .noeud{right:-24px}.d .noeud{left:-24px}
+  .etape-m{max-width:58%}.etape-m b{font-size:12.5px}
+  .acteurs{display:none}.tete .info{display:none}
+}
+</style>
+</head>
+<body>
+<main class="shell">
+ <div class="haut"><a href="../">← Coordination & Pédagogie</a><div class="demo">Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
+ <section class="tete"><div class="code">K4A7</div><div><h1>PFMP 1 · B2GATL2</h1><div class="info">Du lundi 4 au dimanche 17 janvier · élève fictif</div></div><div class="j"><b>J-88</b><span>avant le départ</span></div></section>
+ <div class="maint" id="maint"></div>
+ <div class="couloirs">
+  <div class="g"><div class="t"><span class="av"><i class="ti ti-fish"></i></span>L’élève</div></div>
+  <div class="m"><div class="t">Ils interviennent</div><div class="acteurs" id="acteurs"></div></div>
+  <div class="d"><div class="t">L’enseignant référent<span class="av prof"><i class="ti ti-school"></i></span></div></div>
+ </div>
+ <section class="frise" id="frise"></section>
+ <div class="leg"><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
+</main>
+<script>
+/* Les intervenants, au milieu. */
+const ACT = {
+  pro: ['Enseignant professionnel', 'tools', 'var(--pro)'],
+  ent: ['Entreprise · tuteur', 'building-store', 'var(--ent)'],
+  bde: ['Bureau des entreprises', 'building-bank', 'var(--bde)'],
+  chef: ['Cheffe d’établissement', 'signature', 'var(--chef)'],
+  ddf: ['DDF', 'id-badge-2', 'var(--ddf)'],
+  int: ['Intendance', 'tools-kitchen-2', 'var(--int)']
+};
+/* [couloir, étape, précision, date] — g : l'élève · m:<acteur> : un intervenant · d : le référent · c : ensemble. */
+const ETAPES = [
+ ['Préparation'],
+ ['g', 'Mon CV et ma lettre sont prêts', '', '2 oct.'],
+ ['g', 'Chercher une entreprise', 'Chaque démarche notée', '3 → 7 oct.'],
+ ['g', 'J’ai trouvé mon stage', 'Agence Rhône Immobilier', '7 oct.'],
+ ['d', 'Valider l’entreprise', 'Conditions de travail adaptées et sécurisées', '8 oct.'],
+ ['Fiche de négociation'],
+ ['g', 'Demander la fiche de négociation', 'À mon enseignant professionnel', '9 oct.'],
+ ['m:pro', 'Remet la fiche de négociation à l’élève', '', '9 oct.'],
+ ['g', 'J’ai bien ma fiche', '', '9 oct.'],
+ ['m:ent', 'Coche les activités prévues · signe et tamponne', '', 'avant le 13 nov.'],
+ ['g', 'Signer ma fiche', 'Moi, ou mon responsable légal', 'avant le 13 nov.'],
+ ['m:pro', 'Valide la fiche de négociation', '', 'avant le 16 nov.'],
+ ['g', 'Remettre la fiche à mon référent', '', 'avant le 17 nov.'],
+ ['d', 'Signer la fiche et la garder', 'Dans le dossier de l’élève', 'avant le 17 nov.'],
+ ['Pré-convention'],
+ ['d', 'Remettre la pré-convention', 'Casier numérique de Pronote · « Remettre à l’élève »', 'avant le 19 nov.'],
+ ['m:ent', 'Remplit, signe et tamponne la pré-convention', '', 'avant le 26 nov.'],
+ ['g', 'Rapporter la pré-convention', '', 'avant le 27 nov.'],
+ ['d', 'Saisir la pré-convention dans le client Pronote', 'Convention et attestation éditées · l’attestation est gardée de côté', 'avant le 30 nov.'],
+ ['Convention'],
+ ['d', 'Remettre la convention pour les signatures', 'Avec l’annexe pédagogique', 'avant le 30 nov.'],
+ ['m:ent', 'Signe la convention · cachet', 'Le responsable ou le tuteur', 'avant le 4 déc.'],
+ ['g', 'Faire signer ma famille, puis rapporter la convention', 'Ou moi, si je suis majeur', 'avant le 7 déc.'],
+ ['d', 'Vérifier la conformité · transmettre au bureau des entreprises', 'Annexe pédagogique, annexe handicap si besoin', 'avant le 8 déc.'],
+ ['m:bde', 'Vérifie la convention · la transmet au DDF', '', 'avant le 10 déc.'],
+ ['m:chef', 'Signe la convention', '', 'avant le 14 déc.'],
+ ['m:ddf', 'Dépose deux exemplaires dans le casier du référent', '', 'avant le 15 déc.'],
+ ['d', 'Remettre les exemplaires', 'Un à la famille (par l’élève), un à l’entreprise avec l’attestation', 'avant le 18 déc.'],
+ ['m:int', 'Prévenue si l’élève est demi-pensionnaire', '', 'avant le 18 déc.'],
+ ['Départ'],
+ ['d', 'Appeler le tuteur', 'La semaine d’avant : arrivée confirmée', 'avant le 18 déc.'],
+ ['g', 'Prêt à partir', 'Adresse, horaires, trajet', 'avant le 4 janv.'],
+ ['En stage'],
+ ['g', 'Premier jour de stage', '', '4 janv.'],
+ ['d', 'Vérifier l’installation · envoyer le compte rendu d’évaluation', 'Dans les deux premiers jours (casier numérique)', 'avant le 6 janv.'],
+ ['m:ent', 'Le tuteur prend connaissance du compte rendu', '', 'avant la visite'],
+ ['g', 'Point d’étape', 'Comment se passe mon stage', '10 janv.'],
+ ['d', 'Visite-bilan · récupérer le compte rendu', 'Rendez-vous avec le tuteur · échanges notés dans Pronote', 'avant le 14 janv.'],
+ ['m:ent', 'Établit l’attestation de stage · la remet à l’élève', '', 'fin du stage'],
+ ['Après le stage'],
+ ['g', 'Rapporter mon attestation', '', 'avant le 22 janv.'],
+ ['d', 'Transmettre l’attestation au bureau des entreprises', '', 'avant le 22 janv.'],
+ ['m:bde', 'Gratification versée à l’élève', '', ''],
+ ['d', 'Appréciation du tuteur dans Pronote · compte rendu à l’enseignant professionnel', '', 'avant le 29 janv.'],
+ ['m:pro', 'Reçoit le compte rendu d’évaluation', '', 'avant le 29 janv.'],
+ ['c', 'Le bilan du stage, ensemble', 'L’élève fait l’évaluation de son stage avec son enseignant référent', 'fin janvier']
+];
+const etapes = ETAPES.filter(x => x.length > 1);
+let ici = etapes.findIndex(x => x[1] === 'Valide la fiche de négociation');
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+$('acteurs').innerHTML = Object.values(ACT).map(([n, ic, c]) => `<span><i style="background:${c}" class="ti ti-${ic}"></i>${esc(n)}</span>`).join('');
+
+function rendre() {
+  let n = -1, h = '';
+  const items = [];
+  ETAPES.forEach(x => {
+    if (x.length === 1) { items.push({ phase: x[0] }); return; }
+    n++; items.push({ x, n, etat: n < ici ? 'fait' : n === ici ? 'ici' : 'avenir' });
+  });
+  items.forEach((it, i) => {
+    if (it.phase) {
+      const suite = []; for (let k = i + 1; k < items.length && !items[k].phase; k++) suite.push(items[k]);
+      const cls = suite.every(y => y.etat === 'fait') ? 'ok' : suite.some(y => y.etat === 'ici') ? 'ici' : '';
+      h += `<div class="phase ${cls}"><span>${cls === 'ok' ? '✓ ' : ''}${esc(it.phase)}</span></div>`; return;
+    }
+    const [cote, titre, detail, date] = it.x;
+    if (cote.startsWith('m:')) {
+      const [nom, ic, c] = ACT[cote.slice(2)];
+      h += `<div class="et m ${it.etat}"><div class="etape-m" style="border-left-color:${c}"><span class="ic" style="background:${c}"><i class="ti ti-${it.etat === 'fait' ? 'check' : ic}"></i></span><div class="x"><small style="color:${c}">${esc(nom)}</small><b>${esc(titre)}</b></div></div></div>`;
+      return;
+    }
+    const qui = cote === 'g' ? 'Élève' : cote === 'c' ? 'Ensemble' : 'Enseignant référent';
+    h += `<div class="et ${cote} ${it.etat}"><div class="carte"><i class="noeud"></i><div class="q">${qui}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}${date ? `<span class="dt">${it.etat === 'fait' ? '✓ ' : ''}${esc(date)}</span>` : ''}</div></div>`;
+  });
+  h += `<div class="ens"><span class="av"><i class="ti ti-fish"></i></span><span class="av prof"><i class="ti ti-school"></i></span></div>`;
+  $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
+  const e = etapes[ici];
+  if (e) {
+    const m = e[0].startsWith('m:') ? ACT[e[0].slice(2)][0] : e[0] === 'g' ? 'L’élève' : e[0] === 'c' ? 'Ensemble' : 'Vous';
+    $('maint').innerHTML = `<div><small>${esc(m)}, maintenant</small><b>${esc(e[1])}</b>${e[3] ? ' · ' + esc(e[3]) : ''}</div>`;
+    $('maint').style.background = e[0].startsWith('m:') ? ACT[e[0].slice(2)][2] : e[0] === 'g' ? 'var(--el)' : 'var(--accent)';
+  } else { $('maint').innerHTML = '<div><small>Parcours terminé</small><b>Stage validé, bilan fait</b></div>'; $('maint').style.background = 'var(--green)'; }
+  requestAnimationFrame(ligne);
+}
+/* La ligne passe par chaque étape : à gauche, au milieu, à droite. */
+function ligne() {
+  const f = $('frise'), svg = f.querySelector('svg'), b = f.getBoundingClientRect();
+  /* Chaque étape a un point d'entrée et un point de sortie : un intervenant est traversé de haut en bas, par le centre. */
+  const pts = [...f.querySelectorAll('.et')].map(el => {
+    const v = el.classList.contains('fait') || el.classList.contains('ici');
+    if (el.classList.contains('m') || el.classList.contains('c')) {
+      const r = el.querySelector(el.classList.contains('m') ? '.etape-m' : '.carte').getBoundingClientRect(), x = r.left + r.width / 2 - b.left;
+      return { a: { x, y: r.top - b.top }, s: { x, y: r.bottom - b.top }, v };
+    }
+    const r = el.querySelector('.noeud').getBoundingClientRect(), o = { x: r.left + r.width / 2 - b.left, y: r.top + r.height / 2 - b.top };
+    return { a: o, s: o, v };
+  });
+  const seg = (a, c) => { const m = (a.y + c.y) / 2; return `M${a.x},${a.y} C${a.x},${m} ${c.x},${m} ${c.x},${c.y}`; };
+  let s = '';
+  for (let i = 1; i < pts.length; i++) {
+    const v = pts[i].v;
+    s += `<path d="${seg(pts[i - 1].s, pts[i].a)}" fill="none" stroke="${v ? '#1f9d6b' : '#d8e0e7'}" stroke-width="${v ? 4 : 3}" stroke-linecap="round" ${v ? '' : 'stroke-dasharray="1 8"'}/>`;
+  }
+  svg.innerHTML = s;
+}
+$('plus').onclick = () => { ici = Math.min(ici + 1, etapes.length); rendre(); };
+$('moins').onclick = () => { ici = Math.max(ici - 1, 0); rendre(); };
+addEventListener('resize', () => requestAnimationFrame(ligne));
+document.fonts && document.fonts.ready.then(() => requestAnimationFrame(ligne));
+rendre();
+</script>
+</body>
+</html>
