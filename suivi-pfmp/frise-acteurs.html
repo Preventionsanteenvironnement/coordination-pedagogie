@@ -165,7 +165,7 @@ const ETAPES = [
  ['g', 'a', 'CV et lettre de motivation prêts', '', '3 oct.'],
  ['g', 'a', 'Démarches de recherche', '5 démarches notées', '3 → 7 oct.'],
  ['g', 'a', 'J’ai une proposition de stage', 'Agence Rhône Immobilier · 48 cours Lafayette, Lyon 3e', '7 oct.', { s: 1 }],
- ['d', 'i', 'Proposition de stage reçue', 'En cours de validation · fiche de négociation', '7 oct.', { c: ['Prendre connaissance de l’entreprise proposée.', 'Aider l’élève à trouver une autre entreprise si celle-ci ne convient pas à sa formation ou à son projet.', 'Élève en situation de handicap : informer le responsable du pôle AESH, avec l’accord des responsables légaux.'], src: 'Procédure §2 et §5' }],
+ ['d', 'i', 'K4A7 a une proposition de stage', 'Agence Rhône Immobilier, Lyon 3e · Suite : la fiche de négociation avec son enseignant professionnel', '7 oct.', { c: ['Prendre connaissance de l’entreprise proposée.', 'Aider l’élève à trouver une autre entreprise si celle-ci ne convient pas à sa formation ou à son projet.', 'Élève en situation de handicap : informer le responsable du pôle AESH, avec l’accord des responsables légaux.'], src: 'Procédure §2 et §5' }],
  ['Fiche de négociation'],
  ['g', 'a', 'Demander la fiche de négociation', 'À mon enseignant professionnel (ou au professeur principal en son absence)', '8 oct.'],
  ['m:pro', 'r', 'Remet la fiche de négociation', 'Coché par l’élève', '8 oct.', { a: 'l’élève' }],
@@ -265,10 +265,9 @@ function rendre() {
   const pourLui = etapes.map((x, k) => ({ x, k })).filter(({ x }) => (x[0] === 'd' && x[1] === 'i') || (x[1] === 'r' && x[5] && x[5].a === 'le référent')).filter(({ k }) => k <= ici).slice(-3).reverse();
   $('bal').innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + (pourLui.length ? pourLui.map(({ x, k }) => {
     const info = x[1] === 'i', fait = k < ici;
-    const prop = (etapes.find(e => e[2] === 'J’ai une proposition de stage') || [])[3] || '';
     const qui = x[0].startsWith('m:') ? ACT[x[0].slice(2)][0] : 'K4A7';
     const verbe = s => s.replace('Remettre', 'remet').replace('Rapporter', 'rapporte').replace(/\bmon\b/, 'son').replace(/\bma\b/, 'sa').replace(/\bmes\b/, 'ses');
-    const t = info ? (x[2] === 'Proposition de stage reçue' ? 'K4A7 · proposition de stage : ' + prop.split(' · ')[0] + ' — ' + x[3] : x[2] + (x[3] ? ' — ' + x[3] : '')) : qui + ' · ' + verbe(x[2].charAt(0).toLowerCase() + x[2].slice(1));
+    const t = info ? x[2] + (x[3] ? ' — ' + x[3] : '') : qui + ' · ' + verbe(x[2].charAt(0).toLowerCase() + x[2].slice(1));
     return `<div class="l"><i class="ti ti-${info ? 'mail-opened' : 'file-arrow-right'}"></i><span>${esc(t)}</span><em class="${fait ? 'ok' : ''}">${fait ? (info ? '✓ Lu' : '✓✓ Reçu') : (info ? 'Lu' : 'Reçu')}</em></div>`;
   }).join('') : '<div class="l"><span style="color:var(--muted)">Rien pour le moment.</span></div>');
   const e = etapes[ici];
