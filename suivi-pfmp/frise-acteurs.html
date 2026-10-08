@@ -103,6 +103,11 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .lu{display:inline-block;margin-top:6px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--el-s);color:var(--el)}
 .lu.ok{background:var(--green-s);color:var(--green)}
 .etape-m .relais{margin-top:2px;font-size:11px}
+.prop{margin:6px 0 2px;padding:8px 12px;border-radius:10px;background:var(--el-s);color:var(--ink);font-weight:700;font-size:14px;display:flex;gap:8px;align-items:center}
+.prop i{color:var(--el)}
+.suite{margin-top:8px;padding-top:8px;border-top:1px dashed #dfe6ec;font-size:13px}
+.suite small{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--el)}
+.suite span{display:block;margin-top:2px;color:var(--ink)}
 .cf{margin-top:8px;border-top:1px dashed #dfe6ec;padding-top:6px}
 .cf summary{list-style:none;cursor:pointer;font-size:12.5px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:5px}
 .cf summary::-webkit-details-marker{display:none}
@@ -165,7 +170,7 @@ const ETAPES = [
  ['g', 'a', 'CV et lettre de motivation prêts', '', '3 oct.'],
  ['g', 'a', 'Démarches de recherche', '5 démarches notées', '3 → 7 oct.'],
  ['g', 'a', 'J’ai une proposition de stage', 'Agence Rhône Immobilier · 48 cours Lafayette, Lyon 3e', '7 oct.', { s: 1 }],
- ['d', 'i', 'K4A7 a une proposition de stage', 'Agence Rhône Immobilier, Lyon 3e · Suite : la fiche de négociation avec son enseignant professionnel', '7 oct.', { c: ['Prendre connaissance de l’entreprise proposée.', 'Aider l’élève à trouver une autre entreprise si celle-ci ne convient pas à sa formation ou à son projet.', 'Élève en situation de handicap : informer le responsable du pôle AESH, avec l’accord des responsables légaux.'], src: 'Procédure §2 et §5' }],
+ ['d', 'i', 'K4A7 a une proposition de stage :', '', '7 oct.', { lieu: 'Agence Rhône Immobilier, Lyon 3e', suite: 'Établir sa fiche de négociation avec son enseignant professionnel.', c: ['Prendre connaissance de l’entreprise proposée.', 'Aider l’élève à trouver une autre entreprise si celle-ci ne convient pas à sa formation ou à son projet.', 'Élève en situation de handicap : informer le responsable du pôle AESH, avec l’accord des responsables légaux.'], src: 'Procédure §2 et §5' }],
  ['Fiche de négociation'],
  ['g', 'a', 'Demander la fiche de négociation', 'À mon enseignant professionnel (ou au professeur principal en son absence)', '8 oct.'],
  ['m:pro', 'r', 'Remet la fiche de négociation', 'Coché par l’élève', '8 oct.', { a: 'l’élève' }],
@@ -255,7 +260,7 @@ function rendre() {
     const o = it.x[5] || {};
     const consignes = o.c ? `<details class="cf"><summary>Comment faire</summary><ol>${o.c.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${o.src ? `<small>Source : ${esc(o.src)}</small>` : ''}</details>` : '';
     const lu = signe === 'i' ? `<span class="lu ${it.etat === 'fait' ? 'ok' : ''}">${it.etat === 'fait' ? '✓ Lu' : 'Lu'}</span>` : '';
-    h += `<div class="et ${cote} ${it.etat}"><div class="carte"><i class="noeud"></i><div class="q">${qui}${marque}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}${relais(it)}${lu}${date ? `<span class="dt">${it.etat === 'fait' ? '✓ ' : ''}${esc(date)}</span>` : ''}${consignes}</div></div>`;
+    h += `<div class="et ${cote} ${it.etat}"><div class="carte"><i class="noeud"></i><div class="q">${qui}${marque}</div><b>${esc(titre)}</b>${detail ? `<p>${esc(detail)}</p>` : ''}${o.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(o.lieu)}</div>` : ''}${o.suite ? `<div class="suite"><small><i class="ti ti-arrow-right"></i> Étape suivante · pour l’élève</small><span>${esc(o.suite)}</span></div>` : ''}${relais(it)}${lu}${date ? `<span class="dt">${it.etat === 'fait' ? '✓ ' : ''}${esc(date)}</span>` : ''}${consignes}</div></div>`;
   });
   $('frise').innerHTML = h + '<svg aria-hidden="true"></svg>';
   /* Le statut du stage avance tout seul. */
@@ -267,7 +272,8 @@ function rendre() {
     const info = x[1] === 'i', fait = k < ici;
     const qui = x[0].startsWith('m:') ? ACT[x[0].slice(2)][0] : 'K4A7';
     const verbe = s => s.replace('Remettre', 'remet').replace('Rapporter', 'rapporte').replace(/\bmon\b/, 'son').replace(/\bma\b/, 'sa').replace(/\bmes\b/, 'ses');
-    const t = info ? x[2] + (x[3] ? ' — ' + x[3] : '') : qui + ' · ' + verbe(x[2].charAt(0).toLowerCase() + x[2].slice(1));
+    const o5 = x[5] || {};
+    const t = info ? x[2].replace(/ :$/, '') + (o5.lieu ? ' : ' + o5.lieu : '') + (x[3] ? ' — ' + x[3] : '') + (o5.suite ? ' — étape suivante pour l’élève : ' + o5.suite.charAt(0).toLowerCase() + o5.suite.slice(1) : '') : qui + ' · ' + verbe(x[2].charAt(0).toLowerCase() + x[2].slice(1));
     return `<div class="l"><i class="ti ti-${info ? 'mail-opened' : 'file-arrow-right'}"></i><span>${esc(t)}</span><em class="${fait ? 'ok' : ''}">${fait ? (info ? '✓ Lu' : '✓✓ Reçu') : (info ? 'Lu' : 'Reçu')}</em></div>`;
   }).join('') : '<div class="l"><span style="color:var(--muted)">Rien pour le moment.</span></div>');
   const e = etapes[ici];
