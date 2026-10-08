@@ -143,7 +143,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 </head>
 <body>
 <main class="shell">
- <div class="haut"><a href="../">← Coordination & Pédagogie</a><div class="demo">Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
+ <div class="haut"><a href="maquettes.html">← Les maquettes</a><div class="demo">Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div></div>
  <section class="tete" style="margin-bottom:0"><div class="code">K4A7</div><div><h1>PFMP 1 · B2GATL2</h1><div class="info">Du lundi 4 au dimanche 17 janvier · référent : professeur d’économie-gestion · élève fictif</div></div><div class="j"><b>J-88</b><span>avant le départ</span></div></section>
  <div class="statut" id="statut"></div>
  <section class="bal" id="bal"></section>
@@ -184,7 +184,7 @@ const ETAPES = [
  ['g', 'a', 'Demander la fiche de négociation', 'À mon enseignant professionnel (ou au professeur principal en son absence)', '8 oct.'],
  ['m:pro', 'r', 'Remet la fiche de négociation', 'Coché par l’élève', '8 oct.', { a: 'l’élève' }],
  ['g', 'r', 'Apporter la fiche à l’entreprise', '', '9 oct.', { a: 'l’entreprise' }],
- ['m:ent', 'r', 'Coche les activités possibles · cachet et signature', 'Observations si besoin · coché par l’élève', '12 oct.', { a: 'l’élève' }],
+ ['m:ent', 'r', 'Remplit la fiche en ligne · imprime · cachet et signature', 'Activités cochées en ligne, enregistrées · coché par l’élève', '12 oct.', { a: 'l’élève' }],
  ['g', 'a', 'Signer la fiche', 'Moi si je suis majeur, sinon mon responsable légal', '13 oct.'],
  ['g', 'r', 'Remettre la fiche à mon enseignant professionnel', '', '14 oct.', { a: 'l’enseignant professionnel' }],
  ['m:pro', 'a', 'Contrôle les activités · valide · signe', 'Coché par le référent · prévenu par mail', 'avant le 16 oct.'],
@@ -213,14 +213,17 @@ const ETAPES = [
  ['g', 'a', 'Prêt à partir', 'Adresse, horaires, trajet', 'avant le 4 janv.'],
  ['En stage'],
  ['g', 'a', 'Je suis arrivé', 'Le référent est prévenu', '4 janv.', { s: 4 }],
+ ['m:ent', 'i', 'Le tuteur confirme l’arrivée', 'En ligne', '4 janv.'],
  ['d', 'a', 'Vérifier l’arrivée et l’installation', 'Dans les deux premiers jours', 'avant le 6 janv.', { c: ['Arrivée, installation, activités, conditions d’accueil, difficultés éventuelles.', 'Noter dans Pronote : « Créer un suivi ».'], src: 'Chronologie validée n° 25 · procédure §4' }],
  ['d', 'r', 'Envoyer le compte rendu d’évaluation', 'Casier numérique', 'avant le 6 janv.', { a: 'le tuteur', c: ['Pour que le tuteur en prenne connaissance avant le bilan.'], src: 'Chronologie validée n° 26 · check-list' }],
  ['g', 'a', 'Point d’étape', 'Comment se passe mon stage', '10 janv.'],
+ ['m:ent', 'i', 'Le tuteur : « tout se passe bien »', 'En ligne', '10 janv.'],
  ['d', 'a', 'Suivi du milieu de stage', 'Contact ou visite', '10 janv.', { c: ['Vérifier le déroulement, les activités prévues (fiche de négociation) et les difficultés.', 'Noter dans Pronote : « Créer un suivi ».'], src: 'Chronologie validée n° 27' }],
- ['d', 'a', 'Fixer le rendez-vous du bilan', 'Avec le tuteur', '11 janv.', { c: ['Enregistrer la date du bilan.'], src: 'Chronologie validée n° 28' }],
+ ['d', 'a', 'Fixer le rendez-vous du bilan', 'Le tuteur choisit un créneau en ligne', '11 janv.', { c: ['Enregistrer la date du bilan.'], src: 'Chronologie validée n° 28' }],
  ['d', 'r', 'Envoyer l’attestation au tuteur', 'Par mail avant le bilan, ou en main propre à la visite', 'avant le 14 janv.', { a: 'le tuteur', c: ['Au choix : par mail avant le bilan, ou apportée lors de la visite.'], src: 'Chronologie validée n° 29' }],
  ['d', 'a', 'Bilan avec le tuteur', 'Récupérer le compte rendu d’évaluation', 'avant le 14 janv.', { c: ['Faire le bilan avec le tuteur.', 'Récupérer le compte rendu d’évaluation lorsqu’il est finalisé.', 'Le bilan peut avoir lieu avant la fin du stage : il est indépendant de l’attestation.'], src: 'Chronologie validée n° 30' }],
- ['m:ent', 'r', 'Finalise l’attestation le dernier jour', 'Jours réellement effectués et signature', '17 janv.', { a: 'l’élève' }],
+ ['m:ent', 'i', 'Présences tenues en ligne', '9 jours sur 10 · le total aide à remplir l’attestation', '15 janv.'],
+ ['m:ent', 'r', 'Finalise l’attestation le dernier jour', 'Sur papier : jours réellement effectués et signature', '17 janv.', { a: 'l’élève' }],
  ['Bilan'],
  ['g', 'r', 'Rapporter mon attestation', 'Ou l’entreprise l’envoie au référent', 'avant le 22 janv.', { a: 'le référent' }],
  ['d', 'r', 'Transmettre l’attestation', 'Pour l’allocation PFMP', 'avant le 22 janv.', { a: 'le bureau des entreprises', c: ['Contrôler l’attestation, puis la transmettre pour le traitement de l’allocation PFMP.'], src: 'Chronologie validée n° 33 · check-list' }],
@@ -276,7 +279,7 @@ function rendre() {
   let st = 0; etapes.forEach((x, k) => { if (k < ici && x[5] && x[5].s) st = Math.max(st, x[5].s); });
   $('statut').innerHTML = STATUTS.map((s, k) => `<span class="${k < st ? 'ok' : k === st ? 'ici' : ''}">${k < st ? '✓ ' : ''}${esc(s)}</span>`).join('');
   /* La boîte aux lettres du référent : ce qu'on lui signale et ce qu'on lui remet. */
-  const pourLui = etapes.map((x, k) => ({ x, k })).filter(({ x }) => (x[0] === 'd' && x[1] === 'i') || (x[1] === 'r' && x[5] && x[5].a === 'le référent')).filter(({ k }) => k <= ici).slice(-3).reverse();
+  const pourLui = etapes.map((x, k) => ({ x, k })).filter(({ x }) => (x[0] === 'd' && x[1] === 'i') || (x[0] === 'm:ent' && x[1] === 'i') || (x[1] === 'r' && x[5] && x[5].a === 'le référent')).filter(({ k }) => k <= ici).slice(-3).reverse();
   $('bal').innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + (pourLui.length ? pourLui.map(({ x, k }) => {
     const info = x[1] === 'i', fait = k < ici;
     const qui = x[0].startsWith('m:') ? ACT[x[0].slice(2)][0] : 'K4A7';

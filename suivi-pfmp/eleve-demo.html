@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#dd5f12">
+<meta name="robots" content="noindex">
+<title>PFMP — la page de l’élève (maquette)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!--
+  Maquette (08/10/2026) : mapse.fr › Mon stage PFMP, revue d'après la chronologie validée.
+  L'élève voit d'abord ce qu'il doit faire maintenant ; ce que font les autres apparaît en petit, au fil du parcours.
+  Chaque geste se confirme (« Vous confirmez ? ») et peut être annulé. Démonstration : données fictives.
+-->
+<style>
+:root{--ink:#1f2733;--ink2:#445065;--muted:#6b7686;--line:#e8e3da;--bg:#f6f3ee;--card:#fff;--p50:#fff5ed;--p100:#ffe7d4;--p500:#f1701f;--p600:#dd5f12;--p700:#b94c0e;--ok:#1f9d4c;--ok-vif:#22b356;--ok-s:#e3f6ea;--bleu:#1d5fae;--bleu-s:#e6effa}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 Outfit,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,b.g{font-family:'Space Grotesk',Outfit,sans-serif}
+.app{max-width:560px;margin:auto;padding:12px 16px 60px}
+.demo{display:flex;justify-content:space-between;gap:6px;font-size:12px;color:var(--muted);align-items:center;margin-bottom:6px}
+.demo a{color:var(--muted);text-decoration:none;font-weight:600}
+.demo span{display:flex;gap:6px;align-items:center}
+.demo button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 10px;font:inherit;font-weight:700;cursor:pointer}
+.top{display:flex;align-items:center;gap:10px;padding:6px 0 10px}
+.av{width:44px;height:44px;border-radius:50%;background:#378ADD;color:#fff;display:grid;place-items:center;font-size:22px;flex:none}
+.qui{flex:1}.qui b{display:block;font-size:16px}.qui small{font-size:13px;color:var(--muted)}
+.statut{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.statut span{flex:none;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;background:#fff;border:1px solid var(--line);color:#a49c8f}
+.statut span.ok{background:var(--ok-s);border-color:#bfe8cd;color:var(--ok)}
+.statut span.ici{background:var(--p600);border-color:var(--p600);color:#fff}
+/* Maintenant */
+.maint{background:linear-gradient(140deg,var(--p500),var(--p700));color:#fff;border-radius:22px;padding:18px}
+.maint small{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+.maint h1{margin:6px 0 4px;font-size:23px;line-height:1.2}
+.maint p{margin:0 0 14px;opacity:.95;font-size:15px}
+.maint .gros{width:100%;border:0;border-radius:16px;padding:15px;font:inherit;font-size:17px;font-weight:700;background:#fff;color:var(--p700);cursor:pointer;display:flex;gap:8px;justify-content:center;align-items:center}
+.maint.attente{background:#fff;color:var(--ink);border:2px dashed var(--line)}
+.maint.attente small{color:var(--muted)}
+/* Le fil */
+.fil{margin-top:18px}
+.ph{display:flex;align-items:center;gap:10px;margin:20px 2px 8px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ph i.n{width:24px;height:24px;border-radius:50%;background:#e9e2d6;color:var(--ink2);display:grid;place-items:center;font-style:normal;font-size:12px}
+.ph.ok{color:var(--ok)}.ph.ok i.n{background:var(--ok-vif);color:#fff}
+.ph.ici{color:var(--p700)}.ph.ici i.n{background:var(--p600);color:#fff}
+.moi{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:11px 13px;margin-top:8px}
+.moi .b{width:30px;height:30px;border-radius:50%;border:2.5px solid #cfc7b8;display:grid;place-items:center;color:transparent;flex:none;font-size:16px}
+.moi.fait{border-color:#bfe8cd}.moi.fait .b{background:var(--ok-vif);border-color:var(--ok-vif);color:#fff}
+.moi.ici{border-color:var(--p500);box-shadow:0 0 0 4px var(--p100)}
+.moi.avenir{opacity:.55}
+.moi .x{flex:1;min-width:0}.moi .x small{display:block;font-size:13px;color:var(--muted)}
+.relais{font-size:12.5px;font-weight:700;color:var(--ok);white-space:nowrap}
+.relais.att{color:#a49c8f}
+.autre{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink2);padding:7px 6px 7px 14px;margin-left:14px;border-left:3px solid #e2dbcf}
+.autre i{font-size:17px;color:var(--muted)}
+.autre.fait{border-left-color:#bfe8cd}.autre.fait i{color:var(--ok)}
+.autre.avenir{opacity:.55}
+/* Confirmation */
+#voile:empty{display:none}
+.voile{position:fixed;inset:0;background:rgba(20,20,20,.45);display:grid;place-items:center;padding:20px;z-index:20}
+.fen{background:#fff;border-radius:24px;padding:22px;max-width:380px;width:100%;text-align:center}
+.fen .ic{width:56px;height:56px;border-radius:50%;background:var(--ok-s);color:var(--ok);display:inline-grid;place-items:center;font-size:30px}
+.fen h2{margin:12px 0 6px;font-size:21px}.fen p{margin:0 0 18px;color:var(--ink2)}
+.fen .b2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fen button{border:0;border-radius:14px;padding:13px;font:inherit;font-weight:700;cursor:pointer}
+.fen .non{background:#f3eee6}.fen .oui{background:var(--ok-vif);color:#fff}
+</style>
+</head>
+<body>
+<main class="app">
+ <div class="demo"><a href="maquettes.html">← Les maquettes</a><span>Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></span></div>
+ <div class="top"><span class="av"><i class="ti ti-fish"></i></span><span class="qui"><b>PFMP 1 · du 4 au 17 janvier</b><small id="ref"></small></span></div>
+ <div class="statut" id="statut"></div>
+ <section class="maint" id="maint"></section>
+ <section class="fil" id="fil"></section>
+</main>
+<div id="voile"></div>
+<script>
+const $ = id => document.getElementById(id);
+/* [qui, texte, précision, ✓✓ remise ?] — « moi » : ce que l'élève fait et valide · les autres : ce qu'il voit arriver. */
+const ICONES = { pp: 'user-star', ref: 'school', pro: 'tools', ent: 'building-store', lycee: 'building' };
+const ETAPES = [
+  ['Mon enseignant référent'],
+  ['pp', 'Votre professeur principal désigne votre enseignant référent'],
+  ['moi', 'Mon enseignant référent', 'Professeur d’économie-gestion', 0, { s: 0, ref: 1 }],
+  ['Recherche'],
+  ['moi', 'Mon CV et ma lettre sont prêts'],
+  ['moi', 'Mes démarches', '5 démarches notées'],
+  ['moi', 'J’ai une proposition de stage', 'Agence Rhône Immobilier, Lyon 3e', 0, { s: 1 }],
+  ['ref', 'Votre référent est prévenu'],
+  ['Fiche de négociation'],
+  ['moi', 'Demander ma fiche de négociation', 'À mon enseignant professionnel'],
+  ['moi', 'J’ai ma fiche', 'Remise par mon enseignant professionnel', 1],
+  ['moi', 'Apporter la fiche à l’entreprise', '', 1],
+  ['ent', 'Le tuteur coche les activités, signe et tamponne'],
+  ['moi', 'Signer ma fiche', 'Moi si je suis majeur, sinon mon responsable légal'],
+  ['moi', 'Remettre la fiche à mon enseignant professionnel', '', 1],
+  ['pro', 'Il la valide et la transmet à votre référent'],
+  ['ref', 'Votre référent la signe : stage validé', '', 0, { s: 2 }],
+  ['Pré-convention'],
+  ['moi', 'J’ai ma pré-convention', 'Remise en main propre par mon référent', 1],
+  ['moi', 'La faire remplir par l’entreprise', 'Signature et cachet'],
+  ['moi', 'Rapporter la pré-convention', 'À mon référent', 1],
+  ['ref', 'Pré-convention acceptée'],
+  ['Convention'],
+  ['moi', 'J’ai ma convention', 'Remise par mon référent', 1],
+  ['moi', 'La faire signer par l’entreprise', 'Signature et cachet'],
+  ['moi', 'La signer', 'Moi si je suis majeur, sinon mon responsable légal'],
+  ['moi', 'Rapporter la convention signée', 'À mon référent', 1],
+  ['lycee', 'Le lycée la signe : bureau des entreprises, direction'],
+  ['moi', 'Mon exemplaire signé est arrivé', 'Pour ma famille', 1, { s: 3 }],
+  ['Départ'],
+  ['moi', 'Prêt à partir', 'Adresse, horaires, trajet, nom du tuteur'],
+  ['Stage'],
+  ['moi', 'Je suis arrivé', '', 0, { s: 4 }],
+  ['moi', 'Point d’étape', 'Comment se passe mon stage'],
+  ['ref', 'Visite de votre référent : mercredi 13 janvier, 14 h'],
+  ['Bilan'],
+  ['moi', 'J’ai mon attestation', 'Remise par l’entreprise le dernier jour', 1],
+  ['moi', 'Rapporter mon attestation', 'À mon référent', 1],
+  ['moi', 'Faire le bilan avec mon référent', 'L’évaluation de mon stage', 0, { s: 5 }]
+];
+const STATUTS = ['Mon référent', 'Proposition de stage', 'Stage validé', 'Convention signée', 'En stage', 'Terminé'];
+const miennes = ETAPES.map((x, i) => ({ x, i })).filter(({ x }) => x[0] === 'moi');
+let ici = miennes.findIndex(({ x }) => x[1] === 'Signer ma fiche');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function rendre() {
+  const idx = miennes[ici] ? miennes[ici].i : ETAPES.length;
+  /* Statut atteint et référent connu */
+  let st = 0; ETAPES.forEach((x, i) => { if (i < idx && x[4] && x[4].s != null) st = Math.max(st, x[4].s + 1); });
+  /* Le statut allumé est le dernier atteint ; les précédents sont cochés. */
+  const cur = Math.max(st - 1, 0);
+  $('statut').innerHTML = STATUTS.map((s, k) => `<span class="${k < cur ? 'ok' : k === cur ? 'ici' : ''}">${k < cur ? '✓ ' : ''}${s}</span>`).join('');
+  $('ref').innerHTML = idx > 2 ? '<i class="ti ti-school"></i> Mon enseignant référent : professeur d’économie-gestion' : '<i class="ti ti-school"></i> Mon enseignant référent : à venir';
+  /* Maintenant */
+  const m = miennes[ici];
+  if (m) {
+    const [, t, p, r] = m.x;
+    $('maint').className = 'maint';
+    $('maint').innerHTML = `<small>Maintenant</small><h1>${esc(t)}</h1>${p ? `<p>${esc(p)}</p>` : '<p></p>'}<button class="gros" id="valider"><i class="ti ti-check"></i> ${r ? 'C’est fait : je l’ai' : 'Valider'}</button>`;
+    $('valider').onclick = () => confirmer(t);
+  } else { $('maint').className = 'maint'; $('maint').innerHTML = '<small>Terminé</small><h1>Bravo, votre stage est terminé !</h1><p>Votre dossier est complet.</p>'; }
+  /* Le fil */
+  let h = '', n = 0;
+  ETAPES.forEach((x, i) => {
+    if (x.length === 1) {
+      n++; const suite = []; for (let k = i + 1; k < ETAPES.length && ETAPES[k].length > 1; k++) suite.push(k);
+      const cls = suite.every(k => k < idx) ? 'ok' : suite.some(k => k === idx) || (suite[0] < idx && suite[suite.length - 1] >= idx) ? 'ici' : '';
+      h += `<div class="ph ${cls}"><i class="n">${cls === 'ok' ? '✓' : n}</i>${esc(x[0])}</div>`; return;
+    }
+    const [qui, t, p, r] = x, etat = i < idx ? 'fait' : i === idx ? 'ici' : 'avenir';
+    if (qui === 'moi') h += `<div class="moi ${etat}"><span class="b">✓</span><span class="x">${esc(t)}${p ? `<small>${esc(p)}</small>` : ''}</span>${r ? `<span class="relais ${etat === 'fait' ? '' : 'att'}">${etat === 'fait' ? '✓✓' : '✓'}</span>` : ''}</div>`;
+    else h += `<div class="autre ${i < idx ? 'fait' : 'avenir'}"><i class="ti ti-${i < idx ? 'circle-check' : ICONES[qui]}"></i>${esc(t)}</div>`;
+  });
+  $('fil').innerHTML = h;
+}
+function confirmer(t) {
+  $('voile').innerHTML = `<div class="voile"><div class="fen"><span class="ic"><i class="ti ti-circle-check"></i></span><h2>Vous confirmez ?</h2><p>${esc(t)}</p><div class="b2"><button class="non" id="non">Non</button><button class="oui" id="oui">Oui</button></div></div></div>`;
+  $('non').onclick = () => { $('voile').innerHTML = ''; };
+  $('oui').onclick = () => { $('voile').innerHTML = ''; ici = Math.min(ici + 1, miennes.length); rendre(); };
+}
+$('plus').onclick = () => { ici = Math.min(ici + 1, miennes.length); rendre(); };
+$('moins').onclick = () => { ici = Math.max(ici - 1, 0); rendre(); };
+rendre();
+</script>
+</body>
+</html>
