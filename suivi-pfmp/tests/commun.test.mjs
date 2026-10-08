@@ -11,12 +11,15 @@ const ATELIER = ['search', 'pre_given', 'pre_return', 'pronote', 'convention', '
   'accommodation', 'arrival', 'installed', 'evaluation_sent', 'visit', 'assessment', 'attestation', 'attestation_bde', 'appreciation', 'evaluation_pro'];
 ATELIER.forEach(id => assert.ok(P.PAR_ID[id], 'étape Atelier absente : ' + id));
 assert.equal(new Set(P.ETAPES.map(e => e.id)).size, P.ETAPES.length, 'identifiants en double');
-assert.equal(P.ETAPES.length, 44);
-assert.deepEqual(P.ETAPES.filter(e => e.ph === 2).map(e => e.id), ['neg_visit', 'neg_company', 'neg_family', 'neg_pro', 'neg_return', 'neg_signed']);
+assert.equal(P.ETAPES.length, 51);
+assert.equal(P.PHASES.length, 9);
+assert.deepEqual(P.ETAPES.filter(e => e.ph === 2).map(e => e.id), ['neg_ask', 'neg_given', 'neg_visit', 'neg_company', 'neg_family', 'neg_to_pro', 'neg_pro', 'neg_return', 'neg_signed']);
+P.ETAPES.filter(e => e.act).forEach(e => assert.ok(P.ACTEURS[e.act] && ['eleve', 'referent'].includes(e.coche), 'intervenant sans coche : ' + e.id));
+P.ETAPES.filter(e => e.aide).forEach(e => assert.ok(e.src, 'consigne sans source : ' + e.id));
 assert.ok(P.PAR_ID.pre_visa && !P.ETAPES.includes(P.PAR_ID.pre_visa), 'pre_visa retirée mais reconnue');
-assert.deepEqual(P.ETAPES.filter(e => e.flag).map(e => e.id), ['search', 'conv_return', 'attestation', 'student_eval']);
+assert.deepEqual(P.ETAPES.filter(e => e.flag).map(e => e.id), ['neg_signed', 'conv_return', 'attestation', 'student_eval']);
 P.ETAPES.filter(e => e.ah).forEach(e => assert.ok(e.local, 'aide humaine en ligne : ' + e.id));
-console.log('Étapes : 44 (fiche de négociation en phase 3), les 21 de l’Atelier conservées, aide humaine jamais en ligne.');
+console.log('Étapes : 51 (chronologie validée, 9 grandes étapes), les 21 de l’Atelier conservées, aide humaine jamais en ligne.');
 
 /* 2. Dernier jour de cours et échéances, sur les vraies vacances 2026-2027. */
 const VAC = [{ d: '2026-10-17', f: '2026-11-02' }, { d: '2026-12-19', f: '2027-01-04' }, { d: '2027-02-13', f: '2027-03-01' },
