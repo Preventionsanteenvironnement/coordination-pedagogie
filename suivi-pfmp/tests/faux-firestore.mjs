@@ -8,6 +8,7 @@ const CHAMPS_SUIVI = ['id', 'type', 'annee', 'code', 'classe', 'periode', 'libel
   'refSigle', 'etapes', 'pistes', 'trouve', 'visite', 'creeLe', 'majLe', 'majPar', 'version'];
 const CHAMPS_REF = ['id', 'type', 'annee', 'code', 'sigle', 'suivis', 'majLe', 'version'];
 
+let store_ = new Map();
 export function regles(chemin, avant, apres) {
   const p = chemin.split('/');
   const refuse = m => { const e = new Error('permission-denied: ' + m); e.code = 'permission-denied'; throw e; };
@@ -49,12 +50,25 @@ export function regles(chemin, avant, apres) {
     if (apres.version !== ((avant && avant.version) || 0) + 1) refuse('version référent');
     return;
   }
+  /* 09/10/2026 — Gestes du tuteur : arrivée, point d'étape, présences. Lien = fiche + clé de 10 caractères. */
+  if (p[0] === 'coordination_pfmp_tuteur' && p.length === 2) {
+    const m = /^(20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4])_[a-z0-9]{10}$/.exec(p[1]);
+    if (!m) refuse('id tuteur');
+    Object.keys(apres).forEach(k => { if (!['arrivee', 'milieu', 'presences', 'majLe'].includes(k)) refuse('champ ' + k); });
+    if (typeof apres.majLe !== 'string' || apres.majLe.length > 40) refuse('majLe');
+    if (apres.arrivee && Object.keys(apres.arrivee).some(k => !['v', 'le'].includes(k))) refuse('arrivee');
+    if (apres.milieu && (Object.keys(apres.milieu).some(k => !['v', 'txt', 'le'].includes(k)) || String(apres.milieu.txt || '').length > 200)) refuse('milieu');
+    if (apres.presences && Object.keys(apres.presences).length > 60) refuse('presences');
+    if (!store_.has('coordination_pfmp_suivi/' + m[1])) refuse('fiche absente');
+    return;
+  }
   if (p[0] === 'coordination_rdv') return;
   refuse('collection inconnue ' + p[0]);
 }
 
 export function creerBase() {
   const store = new Map();
+  store_ = store;
   const ecouteurs = new Set();
   let n = 0;
   const clone = x => x == null ? x : JSON.parse(JSON.stringify(x));

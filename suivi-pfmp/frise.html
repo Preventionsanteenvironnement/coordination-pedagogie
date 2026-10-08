@@ -376,7 +376,11 @@ async function reel(sid) {
   function boite(items) {
     const l = items.filter(x => x.boite && x.en && x.en.e).slice(-3).reverse();
     const bal = $('bal'); bal.hidden = false;
-    bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + (l.length ? l.map(x => {
+    /* Ce que le tuteur signale en ligne passe en tête. */
+    const tut = [];
+    if (tu && tu.arrivee && tu.arrivee.v === 'non') tut.push('Le tuteur signale que le stagiaire n’est pas venu');
+    if (tu && tu.milieu && tu.milieu.v === 'difficulte') tut.push('Le tuteur signale une difficulté' + (tu.milieu.txt ? ' : « ' + tu.milieu.txt + ' »' : ''));
+    bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + tut.map(x => `<div class="l"><i class="ti ti-alert-triangle" style="color:var(--orange)"></i><span>${esc(x)}</span></div>`).join('') + (l.length || tut.length ? l.map(x => {
       const ok = x.etat === 'fait', info = x.signe === 'i' || x.lu;
       const t = x.lieu ? x.titre.replace(/ :$/, '') + ' : ' + x.lieu + ' — étape suivante pour l’élève : ' + minus(x.suite) : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'remet $1').replace(/^recevoir /, 'remet ') : x.titre;
       const b = !ok && (x.acts || []).find(a => !a.lien && a.action !== 'corriger');
