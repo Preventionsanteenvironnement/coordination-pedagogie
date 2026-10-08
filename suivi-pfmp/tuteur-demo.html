@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#c46f1c">
+<meta name="robots" content="noindex">
+<title>PFMP — l’espace du tuteur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!--
+  Maquette (08/10/2026) : l'espace du tuteur en entreprise, ouvert par un lien propre à un stage.
+  Seulement ce qui le concerne : fiche de négociation, pré-convention, rendez-vous de visite,
+  présences et confirmations, compte rendu d'évaluation, attestation. Chaque document se remplit
+  en ligne puis s'imprime : cachet, date et signatures au stylo. Aucun nom en ligne.
+  Démonstration : données fictives, aucune base.
+-->
+<style>
+:root{--ink:#1f2733;--muted:#6b7686;--line:#e8e3da;--bg:#f7f4ef;--card:#fff;--ent:#c46f1c;--ent-s:#fff3e6;--ok:#1f9d6b;--ok-s:#e8f6ef;--bleu:#2d63b8;--bleu-s:#eaf0fb}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:auto;padding:16px 16px 60px}
+.demo{display:flex;justify-content:flex-end;gap:6px;font-size:12px;color:var(--muted);align-items:center;margin-bottom:8px}
+.demo button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 10px;font:inherit;font-weight:700;cursor:pointer}
+/* En-tête */
+.tete{background:linear-gradient(140deg,#d9822b,#a95a12);color:#fff;border-radius:22px;padding:18px}
+.tete small{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.tete h1{margin:4px 0 2px;font-size:22px;letter-spacing:-.02em}
+.tete .l{font-size:14px;opacity:.95}
+.tete .ref{display:flex;align-items:center;gap:8px;margin-top:12px;background:rgba(255,255,255,.16);border-radius:12px;padding:8px 10px;font-size:13.5px}
+.anon{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);margin:10px 4px 16px}
+/* Maintenant */
+.maint{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid var(--ent);border-radius:18px;padding:12px 14px;margin-bottom:14px}
+.maint .ic{width:40px;height:40px;border-radius:12px;background:var(--ent-s);color:var(--ent);display:grid;place-items:center;font-size:21px;flex:none}
+.maint small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ent)}
+.maint b{font-size:15.5px}
+/* Les documents */
+.doc{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:10px;overflow:hidden}
+.doc summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px}
+.doc summary::-webkit-details-marker{display:none}
+.doc .n{width:30px;height:30px;border-radius:50%;background:#efe9df;color:var(--muted);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.doc.fait .n{background:var(--ok);color:#fff}
+.doc.ici .n{background:var(--ent);color:#fff}
+.doc .x{flex:1;min-width:0}
+.doc .x b{display:block;font-size:15.5px}
+.doc .x span{font-size:13px;color:var(--muted)}
+.etat{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.etat.ok{background:var(--ok-s);color:var(--ok)}.etat.att{background:var(--ent-s);color:var(--ent)}.etat.gris{background:#f0ece5;color:var(--muted)}
+.doc.plus-tard{opacity:.6}
+.corps{padding:0 14px 14px;border-top:1px solid var(--line)}
+.corps p{font-size:14px;color:var(--muted);margin:12px 0 8px}
+.ligne{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #f1ece4;font-size:14.5px}
+.ligne:first-of-type{border-top:0}
+.ck{width:30px;height:30px;border-radius:9px;border:2px solid #d8d1c4;display:grid;place-items:center;color:#fff;flex:none;font-weight:800}
+.ck.on{background:var(--ok);border-color:var(--ok)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:700;font-size:14.5px;cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.btn.pri{background:var(--ent);color:#fff}.btn.sec{background:#f3eee6;color:var(--ink)}.btn.ok{background:var(--ok);color:#fff}
+.stylo{display:flex;gap:10px;align-items:flex-start;background:#fffaf2;border:1px dashed #e6c39b;border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13.5px}
+.stylo i{color:var(--ent);font-size:19px;margin-top:1px}
+/* Présences */
+.semaine{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0 4px}
+.jour{border:1px solid var(--line);border-radius:12px;padding:6px 4px;text-align:center;font-size:12px;cursor:pointer;background:#fff}
+.jour b{display:block;font-size:15px}
+.jour.p{background:var(--ok-s);border-color:#bfe3d3;color:var(--ok)}
+.jour.a{background:#fdecea;border-color:#f3c3be;color:#c94a3c}
+.jour.r{background:var(--ent-s);border-color:#f1cfa8;color:var(--ent)}
+.jour.f{background:#f3f1ed;color:#b3ab9e;cursor:default}
+.leg{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.total{font-size:14px;font-weight:700;margin-top:8px}
+.choix{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.choix button{border:2px solid #d8d1c4;background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.choix button.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.contact{font-size:13px;color:var(--muted);text-align:center;margin-top:20px}
+</style>
+</head>
+<body>
+<main class="app">
+ <div class="demo">Démonstration <button id="moins" aria-label="Étape précédente">◀</button><button id="plus" aria-label="Étape suivante">▶</button></div>
+
+ <section class="tete">
+  <small>Espace du tuteur · PFMP</small>
+  <h1>Stage du 4 au 17 janvier 2027</h1>
+  <div class="l">Bac Pro AGOrA · seconde · stagiaire K4A7</div>
+  <div class="ref"><i class="ti ti-school"></i> Enseignant référent : professeur d’économie-gestion</div>
+ </section>
+ <div class="anon"><i class="ti ti-shield-lock"></i> Aucun nom en ligne : le nom du stagiaire s’écrit au stylo sur les documents imprimés.</div>
+
+ <div class="maint" id="maint"></div>
+ <div id="docs"></div>
+
+ <p class="contact"><i class="ti ti-message"></i> Une question : votre enseignant référent vous répond par mail.</p>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+/* Les documents du tuteur, dans l'ordre du stage. */
+const DOCS = [
+  { id: 'nego', t: 'Fiche de négociation', s: 'Les activités que vous pourrez confier au stagiaire', ic: 'list-check' },
+  { id: 'pre', t: 'Pré-convention', s: 'L’accord pour la formation en entreprise', ic: 'file-text' },
+  { id: 'rdv', t: 'Rendez-vous de visite', s: 'Choisir un créneau pour la visite de l’enseignant référent', ic: 'calendar-event' },
+  { id: 'arr', t: 'Le stagiaire est arrivé', s: 'Premier jour du stage', ic: 'door-enter' },
+  { id: 'pres', t: 'Présences', s: 'Jour après jour, en un geste', ic: 'calendar-check' },
+  { id: 'mil', t: 'Point du milieu de stage', s: 'Comment se passe le stage ?', ic: 'mood-smile' },
+  { id: 'cr', t: 'Compte rendu d’évaluation', s: 'À remplir avant la visite-bilan', ic: 'clipboard-text' },
+  { id: 'att', t: 'Attestation de stage', s: 'Jours réellement effectués · le dernier jour', ic: 'certificate' }
+];
+let ici = 0;
+const jours = [['lun.', 4], ['mar.', 5], ['mer.', 6], ['jeu.', 7], ['ven.', 8], ['lun.', 11], ['mar.', 12], ['mer.', 13], ['jeu.', 14], ['ven.', 15]];
+const pres = {};
+const ETATS = { p: 'présent', a: 'absent', r: 'retard' };
+const stylo = t => `<div class="stylo"><i class="ti ti-pencil"></i><div>${t}</div></div>`;
+
+function corps(d) {
+  if (d.id === 'nego') return `<p>Cochez les activités possibles, ajoutez vos observations, puis imprimez.</p>
+    <div class="ligne"><span class="ck on">✓</span>1.1.1 Accueil et renseignement</div>
+    <div class="ligne"><span class="ck on">✓</span>1.2.1 Suivi des devis, commandes, contrats, conventions</div>
+    <div class="ligne"><span class="ck"></span>1.3.3 Suivi et actualisation des données sur les réseaux sociaux</div>
+    <div class="btns"><button class="btn pri"><i class="ti ti-edit"></i> Remplir la fiche</button><button class="btn sec"><i class="ti ti-printer"></i> Imprimer</button></div>
+    ${stylo('Après impression : nom du stagiaire, <b>cachet de l’organisation d’accueil</b>, <b>date et signature</b>.')}`;
+  if (d.id === 'pre') return `<p>Le lycée a besoin de ces informations pour établir la convention.</p>
+    <div class="ligne"><span class="ck"></span>Adresse du lieu de stage et horaires</div>
+    <div class="ligne"><span class="ck"></span>Responsable et tuteur, assurance</div>
+    <div class="btns"><button class="btn pri"><i class="ti ti-edit"></i> Remplir la pré-convention</button><button class="btn sec"><i class="ti ti-printer"></i> Imprimer</button></div>
+    ${stylo('Après impression : <b>cachet et signature</b>. Le stagiaire rapporte le document au lycée.')}`;
+  if (d.id === 'rdv') return `<p>Votre enseignant référent propose des créneaux : choisissez celui qui vous convient.</p>
+    <div class="choix"><button>mar. 12 janv. · 10 h</button><button class="on">mer. 13 janv. · 14 h</button><button>jeu. 14 janv. · 9 h</button></div>`;
+  if (d.id === 'arr') return `<p>Un geste suffit : votre enseignant référent est prévenu.</p>
+    <div class="btns"><button class="btn ok"><i class="ti ti-check"></i> Le stagiaire est bien arrivé</button><button class="btn sec">Il n’est pas venu</button></div>`;
+  if (d.id === 'pres') {
+    const n = Object.values(pres).filter(v => v === 'p' || v === 'r').length;
+    return `<p>Touchez un jour : présent, absent, retard.</p>
+      <div class="semaine">${jours.slice(0, 5).map(([j, n]) => jour(j, n)).join('')}</div>
+      <div class="semaine">${jours.slice(5).map(([j, n]) => jour(j, n)).join('')}</div>
+      <div class="leg"><span>🟩 présent</span><span>🟥 absent</span><span>🟧 retard</span></div>
+      <div class="total">${n} jour${n > 1 ? 's' : ''} effectué${n > 1 ? 's' : ''} sur ${jours.length}</div>
+      <p style="margin-top:6px">Ces jours préremplissent l’attestation de stage.</p>`;
+  }
+  if (d.id === 'mil') return `<div class="choix"><button class="on">Tout se passe bien</button><button>J’ai une difficulté</button></div>`;
+  if (d.id === 'cr') return `<p>Le document envoyé par l’enseignant référent, à remplir en ligne avant sa visite.</p>
+    <div class="btns"><button class="btn pri"><i class="ti ti-edit"></i> Remplir le compte rendu</button><button class="btn sec"><i class="ti ti-printer"></i> Imprimer</button></div>
+    ${stylo('Le jour de la visite : <b>date et signature</b>.')}`;
+  if (d.id === 'att') return `<p>À compléter le dernier jour du stage, avec les jours réellement effectués.</p>
+    <div class="ligne"><span class="ck on">✓</span>Jours effectués : repris de vos présences</div>
+    <div class="btns"><button class="btn pri"><i class="ti ti-edit"></i> Remplir l’attestation</button><button class="btn sec"><i class="ti ti-printer"></i> Imprimer</button></div>
+    ${stylo('Après impression : nom du stagiaire, <b>cachet, date et signature</b>. L’attestation est remise au stagiaire.')}`;
+  return '';
+}
+function jour(j, n) { const k = String(n), e = pres[k] || ''; return `<button class="jour ${e}" data-j="${k}">${j}<b>${n}</b>${e ? ETATS[e] : '—'}</button>`; }
+
+let ouverts = null;
+function rendre() {
+  const d = DOCS[ici];
+  $('maint').innerHTML = d ? `<span class="ic"><i class="ti ti-${d.ic}"></i></span><div><small>Maintenant</small><b>${d.t}</b></div>` : `<span class="ic"><i class="ti ti-check"></i></span><div><small>Terminé</small><b>Merci pour votre accueil</b></div>`;
+  $('docs').innerHTML = DOCS.map((x, i) => {
+    const cls = i < ici ? 'fait' : i === ici ? 'ici' : 'plus-tard';
+    const etat = i < ici ? '<span class="etat ok">✓ Fait</span>' : i === ici ? '<span class="etat att">À faire</span>' : '<span class="etat gris">Plus tard</span>';
+    const ouvert = ouverts ? ouverts.has(x.id) : i === ici;
+    return `<details class="doc ${cls}" data-id="${x.id}" ${ouvert ? 'open' : ''}><summary><span class="n">${i < ici ? '✓' : i + 1}</span><span class="x"><b>${x.t}</b><span>${x.s}</span></span>${etat}</summary><div class="corps">${corps(x)}</div></details>`;
+  }).join('');
+}
+document.addEventListener('click', ev => {
+  const j = ev.target.closest('[data-j]');
+  if (j) { const k = j.dataset.j, o = ['', 'p', 'a', 'r']; pres[k] = o[(o.indexOf(pres[k] || '') + 1) % 4]; ouverts = new Set([...document.querySelectorAll('details.doc[open]')].map(x => x.dataset.id)); rendre(); ouverts = null; return; }
+  const c = ev.target.closest('.choix button');
+  if (c) { c.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === c)); }
+});
+$('plus').onclick = () => { ici = Math.min(ici + 1, DOCS.length); rendre(); };
+$('moins').onclick = () => { ici = Math.max(ici - 1, 0); rendre(); };
+rendre();
+</script>
+</body>
+</html>
