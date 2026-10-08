@@ -13,9 +13,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <!--
   Maquette (08/10/2026) : l'espace du tuteur en entreprise, ouvert par un lien propre à un stage.
-  Règle RGPD : en ligne, seulement ce qui ne contient aucun nom ni coordonnée
-  (fiche de négociation, rendez-vous, arrivée et point d'étape, présences).
-  Les documents nominatifs restent sur papier : pré-convention, attestation, compte rendu d'évaluation.
+  Les documents (fiche de négociation, pré-convention, attestation) se remplissent en ligne et s'impriment :
+  rien n'est enregistré par le lycée, la saisie reste sur l'appareil du tuteur. Cachet et signatures au stylo.
+  Seuls quelques gestes sans contenu personnel sont enregistrés : rendez-vous, arrivée, point d'étape, présences.
   Démonstration : données fictives, aucune base.
 -->
 <style>
@@ -88,21 +88,20 @@ textarea{width:100%;border:2px solid #e3dbcd;border-radius:12px;padding:9px 11px
  </section>
  <div class="maint" id="maint"></div>
 
- <h2><i class="ti ti-device-mobile"></i> En ligne</h2>
+ <h2><i class="ti ti-printer"></i> Les documents à remplir et imprimer</h2>
+ <div class="papier"><span class="n"><i class="ti ti-list-check"></i></span><span class="x"><b>Fiche de négociation</b><span>Les activités possibles</span></span><a href="fiche-negociation-agora.html" target="_blank">Remplir</a></div>
+ <div class="papier"><span class="n"><i class="ti ti-file-text"></i></span><span class="x"><b>Pré-convention</b><span>Accord pour la formation en entreprise</span></span><a href="#" onclick="return false">Remplir</a></div>
+ <div class="papier"><span class="n"><i class="ti ti-certificate"></i></span><span class="x"><b>Attestation de stage</b><span>Le dernier jour · jours effectués</span></span><a href="#" onclick="return false">Remplir</a></div>
+ <div class="papier"><span class="n"><i class="ti ti-clipboard-text"></i></span><span class="x"><b>Compte rendu d’évaluation</b><span>Envoyé par l’enseignant référent</span></span></div>
+ <div class="rgpd"><i class="ti ti-device-floppy"></i><div><b style="color:var(--ink)">Rien n’est envoyé au lycée</b><ul><li>Vous remplissez en ligne, puis vous imprimez : votre saisie reste sur cet appareil.</li><li>Cachet, date et signatures au stylo, sur le document imprimé.</li><li>Le stagiaire rapporte le document au lycée.</li></ul></div></div>
+
+ <h2><i class="ti ti-device-mobile"></i> Pendant le stage</h2>
  <div id="enligne"></div>
-
- <h2><i class="ti ti-file-text"></i> Sur papier</h2>
- <div class="papier"><span class="n"><i class="ti ti-file-text"></i></span><span class="x"><b>Pré-convention</b><span>Apportée par le stagiaire · à remplir, signer et tamponner</span></span><a href="#" onclick="return false">Modèle vierge</a></div>
- <div class="papier"><span class="n"><i class="ti ti-clipboard-text"></i></span><span class="x"><b>Compte rendu d’évaluation</b><span>Envoyé par l’enseignant référent au début du stage</span></span></div>
- <div class="papier"><span class="n"><i class="ti ti-certificate"></i></span><span class="x"><b>Attestation de stage</b><span>Envoyée par l’enseignant référent · à compléter le dernier jour</span></span></div>
-
- <div class="rgpd"><i class="ti ti-shield-lock"></i><div><b style="color:var(--ink)">Aucun nom en ligne</b><ul><li>Cette page ne concerne que ce stage.</li><li>Les noms, cachets, dates et signatures se mettent au stylo, sur papier.</li><li>Les informations sont effacées à la fin de l’année scolaire.</li></ul></div></div>
 </main>
 <script>
 const $ = id => document.getElementById(id);
 /* Ce qui se fait en ligne : aucun nom, aucune coordonnée. */
 const EN_LIGNE = [
-  { id: 'nego', t: 'Fiche de négociation', s: 'Cocher les activités possibles, puis imprimer', ic: 'list-check' },
   { id: 'rdv', t: 'Rendez-vous de visite', s: 'Choisir un créneau pour la visite de l’enseignant référent', ic: 'calendar-event' },
   { id: 'arr', t: 'Arrivée et point d’étape', s: 'Deux gestes pendant le stage', ic: 'door-enter' },
   { id: 'pres', t: 'Présences', s: 'Présent, absent ou retard, jour après jour', ic: 'calendar-check' }
