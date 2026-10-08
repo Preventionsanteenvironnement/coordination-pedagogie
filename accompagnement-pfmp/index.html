@@ -9,25 +9,28 @@
 <title>Accompagnement PFMP</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
-   Accompagnement PFMP — page en ligne (08/10/2026)
-   Une grille par demi-journée de stage : élève (code de suivi à 5 caractères)
-   × jour × matin / après-midi. L'équipe pose le ou les sigles des AESH présents.
-   Un seul code d'accès, partagé par l'équipe. Aucun compte.
-   Lit et écrit : coordination_accompagnement_pfmp / <année>_<code>_<date>_<m|a>
-   AUCUN NOM : codes élèves et sigles AESH seulement.
+   Accompagnement PFMP — page en ligne (08/10/2026, v2)
+   L'année entière, semaine par semaine ; les PFMP de chaque classe en couleur.
+   Seuls les élèves choisis par la coordination (document config_<année>,
+   écrit depuis l'Atelier) apparaissent. Par demi-journée : les AESH présents
+   (sigle + heures facultatives), un commentaire.
+   Lit et écrit : coordination_accompagnement_pfmp
+     config_<année>                 { eleves:[{code, classe}] }  (lecture seule ici)
+     <année>_<code>_<date>_<m|a>    { pres:[{s, de, a}], note }
+   AUCUN NOM : codes de suivi des élèves et sigles des AESH seulement.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{--bg:#f3f6f6;--ink:#122224;--ink2:#3c5054;--muted:#667a7e;--line:#d9e3e3;--card:#fff;
-  --teal:#0f766e;--teal-l:#e3f4f0;--teal-d:#0b5b55;--focus:#0f766e;--rouge:#b42335;--ambre:#b45309;
-  --off:#eef2f2;--vac:#e5eaea;--col:46px;--nom:150px;color-scheme:light}
+  --teal:#0f766e;--teal-l:#e3f4f0;--teal-d:#0b5b55;--focus:#0f766e;--rouge:#b42335;
+  --off:#f1f4f4;--vac:#e5eaea;--col:44px;--nom:150px;color-scheme:light}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:16px;line-height:1.45}
-button,input{font:inherit;color:inherit}button{cursor:pointer}
+button,input,textarea{font:inherit;color:inherit}button{cursor:pointer}
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.tete{background:linear-gradient(120deg,#0b5b55 0%,#0f766e 55%,#2a8f86 100%);color:#fff;padding:14px 16px}
+.tete{background:linear-gradient(120deg,#0b5b55 0%,#0f766e 55%,#2a8f86 100%);color:#fff;padding:12px 16px}
 .tete .in{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .tete a.retour{color:#fff;text-decoration:none;font-weight:700;background:rgba(255,255,255,.16);padding:6px 12px;border-radius:10px}
-.tete h1{margin:0;font-size:1.35rem;font-weight:850;letter-spacing:-.01em}
+.tete h1{margin:0;font-size:1.3rem;font-weight:850;letter-spacing:-.01em}
 .tete .etat{margin-left:auto;font-size:.85rem;font-weight:700;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:99px;white-space:nowrap}
 .tete .etat.ko{background:#fde2e4;color:var(--rouge)}
 
@@ -36,73 +39,80 @@ button,input{font:inherit;color:inherit}button{cursor:pointer}
 .porte .carte{background:#fff;border-radius:20px;padding:24px;box-shadow:0 10px 30px rgba(15,118,110,.12)}
 .porte h2{margin:0 0 16px;font-size:1.5rem}
 .porte input{width:100%;font-size:2rem;letter-spacing:.5em;text-align:center;padding:12px;border:2px solid var(--line);border-radius:14px}
-.porte input:focus{border-color:var(--teal);outline:none}
 .porte button{width:100%;margin-top:12px;padding:14px;border:0;border-radius:14px;background:var(--teal);color:#fff;font-weight:800;font-size:1.05rem}
 .porte .err{color:var(--rouge);font-weight:700;min-height:1.4em;margin-top:8px}
 
 /* Outils */
 .outils{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 16px}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font-weight:700;font-size:.9rem}
-.chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.chip{border:2px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;font-weight:700;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:7px 12px;font-weight:700;font-size:.92rem}
 .btn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
-.btn:disabled{opacity:.4;cursor:default}
 .sep{flex:1}
 .nav{display:flex;gap:6px;align-items:center}
 
 /* Grille */
-.cadre{margin:0 16px 24px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:auto;max-height:calc(100vh - 150px);scroll-behavior:smooth;overscroll-behavior-x:contain}
-table.g{border-collapse:separate;border-spacing:0;font-size:.82rem}
+.cadre{margin:0 16px 24px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:auto;max-height:calc(100vh - 140px);scroll-behavior:smooth;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+table.g{border-collapse:separate;border-spacing:0;font-size:.8rem}
 .g th,.g td{padding:0;border-bottom:1px solid var(--line);text-align:center}
 .g thead th{position:sticky;background:#fff;z-index:3;color:var(--ink2);font-weight:700}
-.g thead tr.r1 th{top:0;height:26px}
-.g thead tr.r2 th{top:26px;height:34px}
-.g thead tr.r3 th{top:60px;height:20px;font-size:.7rem;color:var(--muted);font-weight:600}
-.g .nom{position:sticky;left:0;z-index:2;background:#fff;text-align:left;padding:0 10px;min-width:var(--nom);width:var(--nom);border-right:1px solid var(--line)}
-.g thead .nom{z-index:4}
+.g thead tr.r1 th{top:0;height:24px}
+.g thead tr.r2 th{top:24px;height:34px}
+.g thead tr.r3 th{top:58px;height:18px;font-size:.66rem;color:var(--muted);font-weight:600}
+.g .nom{position:sticky;left:0;z-index:2;background:#fff;text-align:left;padding:0 10px;min-width:var(--nom);width:var(--nom);max-width:var(--nom);border-right:1px solid var(--line)}
+.g thead .nom{z-index:5}
 .g th.sem{border-left:2px solid var(--ink2);text-align:left;padding-left:6px;white-space:nowrap}
-.g th.jour{border-left:1px solid var(--line);line-height:1.1;white-space:nowrap}
-.g th.jour.lun{border-left:2px solid var(--ink2)}
-.g th.jour b{display:block;font-size:.95rem;color:var(--ink)}
+.g th.sem.cour{background:var(--teal);color:#fff}
+.g th.jour{line-height:1.1;white-space:nowrap}
+.g th.jour b{display:block;font-size:.92rem;color:var(--ink)}
 .g th.jour.auj b{color:#fff;background:var(--teal);border-radius:8px;padding:0 5px;display:inline-block}
-.g th.ma{width:var(--col);min-width:var(--col)}
-.g th.ma.a,.g td.a{border-right:1px solid var(--line)}
-.g td.lun.m,.g th.lun.m{border-left:2px solid var(--ink2)}
-.g th.trou,.g td.trou{width:18px;min-width:18px;background:repeating-linear-gradient(90deg,#fff 0 3px,var(--off) 3px 6px);border-left:2px solid var(--ink2)}
-tr.cl td{background:#f7faf9;height:30px}
-tr.cl td.nom{background:#f7faf9;font-weight:800;color:var(--teal-d);white-space:nowrap}
-tr.cl td.nom small{font-weight:600;color:var(--muted);margin-left:6px}
-tr.el td.nom{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;letter-spacing:.04em;height:44px}
-tr.el td.nom .n{font-family:inherit;font-weight:700;color:var(--muted);font-size:.72rem;margin-left:6px;letter-spacing:0}
-td.c{height:44px;vertical-align:middle;padding:2px}
-td.c.hors{background:var(--off)}
-td.c.ferie{background:repeating-linear-gradient(45deg,var(--vac) 0 4px,#f6f8f8 4px 8px)}
-td.c.st{background:#fff;cursor:pointer}
-td.c.st:hover{background:var(--teal-l)}
-td.c.st.vide::after{content:"+";color:#b8c7c7;font-weight:800;font-size:1rem}
-td.c.st.sel{outline:3px solid var(--teal);outline-offset:-3px}
-.s{display:block;margin:1px auto;max-width:42px;border-radius:6px;background:var(--teal);color:#fff;font-weight:800;font-size:.72rem;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vide-msg{padding:40px;text-align:center;color:var(--muted)}
+.g th.ma,.g td.c{width:var(--col);min-width:var(--col);max-width:var(--col)}
+.g .lun.m{border-left:2px solid var(--ink2)}
+.g .a{border-right:1px solid var(--line)}
+.g th.vac,.g td.vac{width:30px;min-width:30px;max-width:30px;background:repeating-linear-gradient(45deg,var(--vac) 0 4px,#f7f9f9 4px 8px);border-left:2px solid var(--ink2)}
+.g th.vac{writing-mode:vertical-rl;transform:rotate(180deg);font-size:.66rem;color:var(--muted);font-weight:700;letter-spacing:.04em}
+tr.cl td{height:28px;background:#fbfcfc}
+tr.cl td.nom{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+tr.cl td.nom i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+tr.cl td.p{background:var(--cc);color:#fff;font-weight:800;font-size:.66rem}
+tr.el td.nom{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;letter-spacing:.04em;height:46px}
+td.c{height:46px;vertical-align:middle;padding:2px}
+td.c.hors{background:#fff}
+td.c.ferie{background:repeating-linear-gradient(45deg,var(--vac) 0 4px,#f7f9f9 4px 8px)}
+td.c.st{background:var(--cl);cursor:pointer;box-shadow:inset 0 3px 0 var(--cc)}
+td.c.st:hover{filter:brightness(.96)}
+td.c.st.vide::after{content:"+";color:var(--cc);opacity:.55;font-weight:800;font-size:1rem}
+td.c.st.sel{outline:3px solid var(--ink);outline-offset:-3px}
+.s{display:block;margin:1px auto;max-width:40px;border-radius:6px;background:var(--cc);color:#fff;font-weight:800;font-size:.7rem;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s.h{background:#fff;color:var(--cc);border:1px solid var(--cc)}
+.note{display:block;font-size:.62rem;color:var(--ink2);font-weight:700}
+.vide-msg{padding:28px;text-align:center;color:var(--muted)}
 
 /* Bulle */
 .voile{position:fixed;inset:0;background:rgba(10,30,32,.28);z-index:40;display:flex;align-items:flex-end;justify-content:center}
 @media (min-width:700px){.voile{align-items:center}}
-.bulle{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:460px;padding:18px 18px 22px;box-shadow:0 -10px 40px rgba(0,0,0,.15);max-height:90vh;overflow:auto}
+.bulle{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:18px 18px 22px;box-shadow:0 -10px 40px rgba(0,0,0,.15);max-height:92vh;overflow:auto}
 @media (min-width:700px){.bulle{border-radius:20px}}
 .bulle .haut{display:flex;align-items:flex-start;gap:10px}
-.bulle h2{margin:0;font-size:1.15rem}
+.bulle h2{margin:0;font-size:1.12rem}
 .bulle .sous{color:var(--muted);font-size:.92rem}
 .croix{margin-left:auto;border:0;background:var(--off);width:36px;height:36px;border-radius:50%;font-size:1.1rem;flex:none}
-.sigles{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 10px}
-.sigles button{min-width:64px;padding:12px 10px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:800;font-size:1rem}
-.sigles button.on{background:var(--teal);border-color:var(--teal);color:#fff}
-.autre{display:flex;gap:8px;margin-bottom:12px}
+.etq{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:16px 0 8px}
+.pres{display:flex;align-items:center;gap:6px;padding:8px;border-radius:14px;background:var(--teal-l);margin-bottom:6px;flex-wrap:wrap}
+.pres b{min-width:48px;text-align:center;background:var(--teal);color:#fff;border-radius:10px;padding:6px 8px}
+.pres input{width:96px;padding:6px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.pres .x{margin-left:auto;border:0;background:#fff;border-radius:10px;padding:6px 10px;font-weight:800;color:var(--rouge)}
+.aucun{color:var(--muted);font-weight:600;margin:4px 0}
+.sigles{display:flex;flex-wrap:wrap;gap:8px}
+.sigles button{min-width:60px;padding:10px;border-radius:14px;border:2px solid var(--line);background:#fff;font-weight:800}
+.autre{display:flex;gap:8px;margin-top:8px}
 .autre input{flex:1;min-width:0;padding:10px 12px;border:2px solid var(--line);border-radius:12px;text-transform:uppercase}
-.etq{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:14px 0 8px}
+textarea{width:100%;min-height:64px;padding:10px;border:2px solid var(--line);border-radius:12px;resize:vertical}
+.petit{font-size:.75rem;color:var(--muted)}
 .copies{display:flex;flex-wrap:wrap;gap:8px}
-.copies .btn{padding:9px 12px}
-.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#122224;color:#fff;border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;z-index:60;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#122224;color:#fff;border-radius:14px;padding:10px 14px;display:flex;gap:12px;align-items:center;z-index:60;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:calc(100vw - 32px)}
 .toast button{background:none;border:0;color:#8ee3d7;font-weight:800}
 .toast.err{background:#fde2e4;color:var(--rouge)}
 
@@ -111,18 +121,16 @@ td.c.st.sel{outline:3px solid var(--teal);outline-offset:-3px}
 .doc{font-family:Arial,Helvetica,sans-serif;color:#000;font-size:11pt}
 .doc h2{font-size:14pt;margin:0 0 2mm}
 .doc .sous{margin:0 0 4mm;color:#333}
-.doc table{width:100%;border-collapse:collapse;margin-bottom:6mm;page-break-inside:auto}
-.doc th,.doc td{border:1px solid #000;padding:1.6mm 2mm;text-align:left}
+.doc table{width:100%;border-collapse:collapse;margin-bottom:6mm}
+.doc th,.doc td{border:1px solid #000;padding:1.6mm 2mm;text-align:left;vertical-align:top}
 .doc th{background:#eee}
 .doc tr{page-break-inside:avoid}
-.doc .bloc{page-break-inside:avoid;margin-bottom:6mm}
-.doc .saut{page-break-before:always}
 @media print{
   @page{size:A4 portrait;margin:12mm}
   body.imprime>*:not(#feuille){display:none!important}
   body.imprime #feuille{display:block}
 }
-@media (max-width:600px){:root{--nom:96px;--col:42px}.tete h1{font-size:1.1rem}tr.cl td.nom small{display:none}}
+@media (max-width:600px){:root{--nom:84px;--col:40px}.tete h1{font-size:1.1rem}.outils{padding:10px 12px}.cadre{margin:0 8px 16px;max-height:calc(100vh - 210px)}tr.cl td.nom{font-size:.72rem}}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
@@ -136,22 +144,23 @@ const firebaseConfig = { apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authD
 const COL = 'coordination_accompagnement_pfmp', ANNEE = '2026-2027', SOURCE = 'accompagnement-pfmp';
 /* Empreinte du code d'équipe (le code lui-même n'est écrit nulle part dans le site). */
 const EMPREINTE = '0aeed18246d235b14e232301e1e3972f3bc3833a4adbf4391d6eabfe779004db';
-const K_OK = 'accompagnement-pfmp-ok', K_CLS = 'accompagnement-pfmp-classe';
+const K_OK = 'accompagnement-pfmp-ok';
 
-/* Classes, dates de PFMP (referents-aesh/edt-lycee.json) et codes de suivi (observation-besoins/roster.json), 08/10/2026. */
+/* Classes et dates de PFMP 2026-2027 (referents-aesh/edt-lycee.json). Couleur : bande / fond clair. */
 const CLASSES = [
-  { id:'C1PSR',   lib:'CAP 1 PSR',  pfmp:[['2027-01-25','2027-02-14'],['2027-06-07','2027-06-27']], codes:['43Y99','8UYC5','99TUW','C8A7N','GXVN7','PYEWF','QXEQF'] },
-  { id:'C2PSR',   lib:'CAP 2 PSR',  pfmp:[['2026-11-23','2026-12-20'],['2027-05-10','2027-06-06']], codes:['3YHS4','DTF3B','FJ6TH','GNJ4Y','P5W9H','PZUXQ','WJUC6','Z4Z9V'] },
-  { id:'B2MELEC', lib:'2de MELEC',  pfmp:[['2027-05-17','2027-06-27']], codes:['6CEB5','GNZQM','JX8NX','S3QFU','SBG77','T4Q2J','VYTFT','Z56JP'] },
-  { id:'B1MELEC', lib:'1re MELEC',  pfmp:[['2027-01-18','2027-02-14'],['2027-05-31','2027-06-27']], codes:['4HVGJ','4WVVB','9ED86','JP338','MUBSP','PMBQ3','WU3X7','YVHPN'] },
-  { id:'BTMELEC', lib:'Tle MELEC',  pfmp:[['2026-11-09','2026-12-20']], codes:['448BF','8TVWD','PDX5U','TM9TX','WZ4J8','XYZAA'] },
-  { id:'B2GATL2', lib:'2de GATL 2', pfmp:[['2027-01-04','2027-01-17'],['2027-05-31','2027-06-27']], codes:['6T2EJ','BC4Q6','J6MTP','MGVV3','VQBDU','W5NWP','WWTRU','XG934'] },
+  { id:'C1PSR',   lib:'CAP 1 PSR',  cc:'#0f766e', cl:'#e0f2ef', pfmp:[['2027-01-25','2027-02-14'],['2027-06-07','2027-06-27']] },
+  { id:'C2PSR',   lib:'CAP 2 PSR',  cc:'#2f8f3a', cl:'#e5f4e3', pfmp:[['2026-11-23','2026-12-20'],['2027-05-10','2027-06-06']] },
+  { id:'B2MELEC', lib:'2de MELEC',  cc:'#2563c9', cl:'#e3ecfb', pfmp:[['2027-05-17','2027-06-27']] },
+  { id:'B1MELEC', lib:'1re MELEC',  cc:'#5b47c9', cl:'#ebe8fb', pfmp:[['2027-01-18','2027-02-14'],['2027-05-31','2027-06-27']] },
+  { id:'BTMELEC', lib:'Tle MELEC',  cc:'#a3369a', cl:'#f6e6f4', pfmp:[['2026-11-09','2026-12-20']] },
+  { id:'B2GATL2', lib:'2de GATL 2', cc:'#c2560f', cl:'#fcebdc', pfmp:[['2027-01-04','2027-01-17'],['2027-05-31','2027-06-27']] },
 ];
 /* Équipe PSR · MELEC (referents-aesh/donnees.js) ; d'autres sigles s'ajoutent par « Autre ». */
 const SIGLES = ['AND','TI','FI','ST','CÉ','NA'];
 /* Vacances et jours fériés 2026-2027, fin incluse (referents-aesh/edt-lycee.json). */
-const FERMES = [['2026-10-17','2026-11-01'],['2026-11-11','2026-11-11'],['2026-12-19','2027-01-03'],['2027-02-13','2027-02-28'],
-  ['2027-03-29','2027-03-29'],['2027-04-10','2027-04-25'],['2027-05-06','2027-05-09'],['2027-05-17','2027-05-17'],['2027-07-03','2027-08-31']];
+const FERMES = [['2026-10-17','2026-11-01','Toussaint'],['2026-11-11','2026-11-11'],['2026-12-19','2027-01-03','Noël'],['2027-02-13','2027-02-28','Hiver'],
+  ['2027-03-29','2027-03-29'],['2027-04-10','2027-04-25','Printemps'],['2027-05-06','2027-05-09'],['2027-05-17','2027-05-17'],['2027-07-03','2027-08-31','Été']];
+const DEBUT = '2026-08-31', FIN = '2027-06-28';
 
 /* ─── Dates ─── */
 const D = s => new Date(s + 'T12:00:00Z');
@@ -160,18 +169,22 @@ const plus = (s, n) => iso(new Date(D(s).getTime() + n * 864e5));
 const jsem = s => (D(s).getUTCDay() + 6) % 7;
 const lundi = s => plus(s, -jsem(s));
 const ferme = s => FERMES.some(([a, b]) => s >= a && s <= b);
+const nomVac = s => (FERMES.find(([a, b, n]) => n && s >= a && s <= b) || [])[2] || 'Vacances';
 const fr = s => s.slice(8, 10) + '/' + s.slice(5, 7);
 const long = s => D(s).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
-const moisCourt = s => D(s).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const court = s => D(s).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'];
 const MOM = { m: 'Matin', a: 'Après-midi' };
 const AUJ = (() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })();
 const classe = id => CLASSES.find(c => c.id === id);
-const classeDe = code => CLASSES.find(c => c.codes.includes(code));
-const enStage = (cls, s) => jsem(s) < 5 && !ferme(s) && cls.pfmp.some(([a, b]) => s >= a && s <= b);
-const periodeDe = (cls, s) => cls.pfmp.findIndex(([a, b]) => s >= a && s <= b);
-/* Semaines affichées : celles où au moins une classe est en stage. */
-const SEMAINES = (() => { const set = new Set(); CLASSES.forEach(c => c.pfmp.forEach(([a, b]) => { for (let s = a; s <= b; s = plus(s, 1)) if (enStage(c, s)) set.add(lundi(s)); })); return [...set].sort(); })();
+const dansPfmp = (c, s) => c.pfmp.some(([a, b]) => s >= a && s <= b);
+const enStage = (c, s) => jsem(s) < 5 && !ferme(s) && dansPfmp(c, s);
+const periodeDe = (c, s) => c.pfmp.findIndex(([a, b]) => s >= a && s <= b);
+/* Colonnes de l'année : une semaine de cours = 10 demi-journées ; des semaines de vacances qui se suivent = une bande. */
+const COLONNES = (() => { const r = []; for (let m = DEBUT; m <= FIN; m = plus(m, 7)) {
+  const vac = [0, 1, 2, 3, 4].every(k => ferme(plus(m, k)));
+  if (vac) { const last = r[r.length - 1]; if (last && last.vac) last.fin = m; else r.push({ vac: true, m, fin: m, nom: nomVac(m) }); }
+  else r.push({ vac: false, m }); } return r; })();
 
 /* ─── Firestore ─── */
 let FS = null, db = null, erreurFS = null;
@@ -185,14 +198,24 @@ try {
 const $ = s => document.querySelector(s);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nettoieSigle = v => String(v || '').toUpperCase().normalize('NFC').replace(/[^A-ZÀ-ÖØ-Þ0-9·.\- ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 8);
+const nettoieNote = v => String(v || '').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').slice(0, 300);
+const heure = v => /^\d\d:\d\d$/.test(v || '') ? v : '';
+const hFr = h => h ? h.replace(/^0/, '').replace(':', 'h').replace(/h00$/, 'h') : '';
 const idDe = (code, date, m) => `${ANNEE}_${code}_${date}_${m}`;
+const ID_CONFIG = 'config_' + ANNEE;
 
-const S = { ok: false, docs: new Map(), etat: '', filtre: 'tous', seulement: false, sel: null, annuler: null };
-try { S.filtre = localStorage.getItem(K_CLS) || 'tous'; } catch (_) { }
+const S = { ok: false, docs: new Map(), config: null, filtre: 'tous', sel: null, annuler: null };
 
 function etat(t, ko) { const e = $('#etat'); e.hidden = !t; e.textContent = t; e.classList.toggle('ko', !!ko); }
-const sigDe = (code, date, m) => (S.docs.get(idDe(code, date, m))?.aesh) || [];
-const tousSigles = () => { const set = new Set(SIGLES); S.docs.forEach(d => (d.aesh || []).forEach(x => set.add(x))); return [...set]; };
+/* Une demi-journée : { pres:[{s,de,a}], note }. Les fiches de la première version (aesh:[…]) se lisent aussi. */
+function creneau(code, date, m) {
+  const d = S.docs.get(idDe(code, date, m));
+  if (!d) return { pres: [], note: '' };
+  const pres = Array.isArray(d.pres) ? d.pres : (d.aesh || []).map(s => ({ s, de: '', a: '' }));
+  return { pres: pres.map(p => ({ s: p.s, de: heure(p.de), a: heure(p.a) })), note: d.note || '' };
+}
+const tousSigles = () => { const set = new Set(SIGLES); S.docs.forEach(d => (d.pres || []).forEach(p => set.add(p.s))); return [...set]; };
+const elevesDe = c => (S.config?.eleves || []).filter(e => e.classe === c.id).map(e => e.code);
 
 /* ─── Accès ─── */
 async function empreinte(code) {
@@ -207,15 +230,20 @@ function porte(msg) {
     if (await empreinte(c) === EMPREINTE) { try { localStorage.setItem(K_OK, EMPREINTE); } catch (_) { } entrer(); }
     else porte('Code inconnu'); };
 }
+let premier = true;
 function entrer() {
-  S.ok = true; rendre(); aujourdhui(false);
-  if (erreurFS || !db) { etat('Hors ligne', true); return; }
+  S.ok = true; rendre();
+  if (erreurFS || !db) { etat('Hors ligne', true); allerSemaine(lundi(AUJ), false); return; }
   etat('Connexion…');
   const q = FS.query(FS.collection(db, COL), FS.where('annee', '==', ANNEE));
   FS.onSnapshot(q, snap => {
-    snap.docChanges().forEach(ch => { if (ch.type === 'removed') S.docs.delete(ch.doc.id); else S.docs.set(ch.doc.id, ch.doc.data()); });
+    snap.docChanges().forEach(ch => {
+      if (ch.doc.id === ID_CONFIG) { S.config = ch.type === 'removed' ? null : ch.doc.data(); return; }
+      if (ch.type === 'removed') S.docs.delete(ch.doc.id); else S.docs.set(ch.doc.id, ch.doc.data());
+    });
     etat('En direct'); rendreGrille();
-  }, () => etat('Lecture impossible', true));
+    if (premier) { premier = false; allerSemaine(lundi(AUJ), false); }
+  }, () => { etat('Lecture impossible', true); if (premier) { premier = false; allerSemaine(lundi(AUJ), false); } });
 }
 
 /* ─── Écran ─── */
@@ -223,183 +251,200 @@ function rendre() {
   if (!S.ok) return porte();
   const avant = $('#cadre') ? [$('#cadre').scrollLeft, $('#cadre').scrollTop] : null;
   $('#app').innerHTML = `<div class="outils">
-    <div class="chips" role="group" aria-label="Classe">${[['tous', 'Toutes'], ...CLASSES.map(c => [c.id, c.lib])].map(([k, l]) => `<button class="chip ${S.filtre === k ? 'on' : ''}" data-act="filtre" data-v="${k}">${esc(l)}</button>`).join('')}</div>
-    <button class="chip ${S.seulement ? 'on' : ''}" data-act="seulement">Avec AESH</button>
+    <div class="chips" role="group" aria-label="Classe">${[{ id: 'tous', lib: 'Toutes' }, ...CLASSES].map(c => `<button class="chip ${S.filtre === c.id ? 'on' : ''}" data-act="filtre" data-v="${c.id}" aria-pressed="${S.filtre === c.id}">${c.cc ? `<i style="background:${c.cc}"></i>` : ''}${esc(c.lib)}</button>`).join('')}</div>
     <span class="sep"></span>
-    <div class="nav"><button class="btn" data-act="pas" data-v="-1" aria-label="Semaine précédente">◀</button><button class="btn" data-act="auj">Aujourd'hui</button><button class="btn" data-act="pas" data-v="1" aria-label="Semaine suivante">▶</button></div>
+    <div class="nav"><button class="btn" data-act="pas" data-v="-1" aria-label="Semaine précédente">◀</button><button class="btn" data-act="auj">Cette semaine</button><button class="btn" data-act="pas" data-v="1" aria-label="Semaine suivante">▶</button></div>
     <button class="btn pri" data-act="imprimer">Imprimer</button>
   </div><div class="cadre" id="cadre"></div>`;
   rendreGrille();
   if (avant) { $('#cadre').scrollLeft = avant[0]; $('#cadre').scrollTop = avant[1]; }
 }
-function lignes() {
-  const cls = S.filtre === 'tous' ? CLASSES : CLASSES.filter(c => c.id === S.filtre);
-  return cls.map(c => ({ c, codes: c.codes.filter(code => !S.seulement || [...S.docs.values()].some(d => d.eleve === code && (d.aesh || []).length)) })).filter(x => x.codes.length || !S.seulement);
-}
 function rendreGrille() {
   const cadre = $('#cadre'); if (!cadre) return;
   const x = cadre.scrollLeft, y = cadre.scrollTop;
-  const ls = lignes();
-  if (!ls.length) { cadre.innerHTML = `<div class="vide-msg">Aucun élève</div>`; return; }
-  const cls = ls.map(l => l.c);
-  const sems = SEMAINES.filter(m => cls.some(c => [0, 1, 2, 3, 4].some(k => enStage(c, plus(m, k)))));
+  const cls = S.filtre === 'tous' ? CLASSES : CLASSES.filter(c => c.id === S.filtre);
+  const lm = lundi(AUJ);
   let r1 = '<tr class="r1"><th class="nom" rowspan="3">Élève</th>', r2 = '<tr class="r2">', r3 = '<tr class="r3">';
-  sems.forEach((m, i) => {
-    if (i && plus(sems[i - 1], 7) !== m) { r1 += '<th class="trou" rowspan="3" title="cours ou vacances"></th>'; }
-    r1 += `<th class="sem" colspan="10" data-sem="${m}">Semaine du ${moisCourt(m)}</th>`;
-    [0, 1, 2, 3, 4].forEach(k => { const d = plus(m, k);
-      r2 += `<th class="jour ${k === 0 ? 'lun' : ''} ${d === AUJ ? 'auj' : ''}" colspan="2">${JOURS[k]}<b>${D(d).getUTCDate()}</b></th>`;
+  COLONNES.forEach(col => {
+    if (col.vac) { r1 += `<th class="vac" rowspan="3" data-sem="${col.m}" data-fin="${col.fin}" title="Vacances ${esc(col.nom)}">${esc(col.nom)}</th>`; return; }
+    r1 += `<th class="sem ${col.m === lm ? 'cour' : ''}" colspan="10" data-sem="${col.m}">Semaine du ${court(col.m)}</th>`;
+    [0, 1, 2, 3, 4].forEach(k => { const d = plus(col.m, k);
+      r2 += `<th class="jour ${k === 0 ? 'lun m' : ''} a ${d === AUJ ? 'auj' : ''}" colspan="2">${JOURS[k]}<b>${D(d).getUTCDate()}</b></th>`;
       r3 += `<th class="ma m ${k === 0 ? 'lun' : ''}">M</th><th class="ma a">AM</th>`; });
   });
   let corps = '';
-  ls.forEach(({ c, codes }) => {
-    corps += `<tr class="cl"><td class="nom">${esc(c.lib)}<small>${c.pfmp.map(([a, b]) => fr(a) + '→' + fr(b)).join(' · ')}</small></td>`;
-    sems.forEach((m, i) => { if (i && plus(sems[i - 1], 7) !== m) corps += '<td class="trou"></td>'; corps += '<td colspan="10"></td>'; });
+  cls.forEach(c => {
+    const st = `--cc:${c.cc};--cl:${c.cl}`;
+    corps += `<tr class="cl" style="${st}"><td class="nom" title="${esc(c.lib)}"><i style="background:${c.cc}"></i>${esc(c.lib)}</td>`;
+    COLONNES.forEach(col => {
+      if (col.vac) { corps += '<td class="vac"></td>'; return; }
+      [0, 1, 2, 3, 4].forEach(k => { const d = plus(col.m, k);
+        ['m', 'a'].forEach(mo => { const on = enStage(c, d), p = periodeDe(c, d), debut = on && (k === 0 && mo === 'm' || !enStage(c, plus(d, -1)) && mo === 'm');
+          corps += `<td class="c ${mo} ${k === 0 ? 'lun' : ''} ${on ? 'p' : ''}">${debut ? 'PFMP' + (p + 1) : ''}</td>`; }); });
+    });
     corps += '</tr>';
+    const codes = elevesDe(c);
     codes.forEach(code => {
-      corps += `<tr class="el"><td class="nom">${code}</td>`;
-      sems.forEach((m, i) => {
-        if (i && plus(sems[i - 1], 7) !== m) corps += '<td class="trou"></td>';
-        [0, 1, 2, 3, 4].forEach(k => { const d = plus(m, k);
+      corps += `<tr class="el" style="${st}"><td class="nom">${code}</td>`;
+      COLONNES.forEach(col => {
+        if (col.vac) { corps += '<td class="vac"></td>'; return; }
+        [0, 1, 2, 3, 4].forEach(k => { const d = plus(col.m, k);
           ['m', 'a'].forEach(mo => {
             const cl = `c ${mo} ${k === 0 ? 'lun' : ''}`;
-            if (!enStage(c, d)) { const dansP = c.pfmp.some(([a, b]) => d >= a && d <= b); corps += `<td class="${cl} ${dansP ? 'ferie' : 'hors'}"></td>`; return; }
-            const sg = sigDe(code, d, mo), sel = S.sel && S.sel.code === code && S.sel.date === d && S.sel.m === mo;
-            corps += `<td class="${cl} st ${sg.length ? '' : 'vide'} ${sel ? 'sel' : ''}" data-act="case" data-code="${code}" data-d="${d}" data-m="${mo}" tabindex="0" aria-label="${code} ${long(d)} ${MOM[mo]} : ${sg.length ? sg.join(', ') : 'personne'}">${sg.map(s => `<span class="s">${esc(s)}</span>`).join('')}</td>`;
+            if (!enStage(c, d)) { corps += `<td class="${cl} ${dansPfmp(c, d) && jsem(d) < 5 ? 'ferie' : 'hors'}"></td>`; return; }
+            const cr = creneau(code, d, mo), sel = S.sel && S.sel.code === code && S.sel.date === d && S.sel.m === mo;
+            const lib = cr.pres.length ? cr.pres.map(p => p.s + (p.de || p.a ? ' ' + hFr(p.de) + '–' + hFr(p.a) : '')).join(', ') : 'personne';
+            corps += `<td class="${cl} st ${cr.pres.length ? '' : 'vide'} ${sel ? 'sel' : ''}" data-act="case" data-code="${code}" data-d="${d}" data-m="${mo}" tabindex="0" aria-label="${code} ${long(d)} ${MOM[mo]} : ${esc(lib)}${cr.note ? ' · commentaire' : ''}" title="${esc(lib)}${cr.note ? '\n' + esc(cr.note) : ''}">${cr.pres.map(p => `<span class="s ${p.de || p.a ? 'h' : ''}">${esc(p.s)}</span>`).join('')}${cr.note ? '<span class="note">💬</span>' : ''}</td>`;
           }); });
       });
       corps += '</tr>';
     });
+    if (!codes.length) corps += `<tr class="el"><td class="nom" style="font-family:inherit;font-weight:600;color:var(--muted);letter-spacing:0;font-size:.75rem">aucun élève</td><td colspan="999"></td></tr>`;
   });
   cadre.innerHTML = `<table class="g"><thead>${r1}</tr>${r2}</tr>${r3}</tr></thead><tbody>${corps}</tbody></table>`;
   cadre.scrollLeft = x; cadre.scrollTop = y;
   cadre.onscroll = () => { clearTimeout(tScroll); tScroll = setTimeout(() => { cible = plusProche(); }, 250); };
 }
-function colonneSemaine(m) { return $(`#cadre th.sem[data-sem="${m}"]`); }
-/* Position d'une semaine dans la zone qui défile, colonne des élèves déduite. */
+
+/* ─── Défilement semaine par semaine ─── */
+let cible = null, tScroll = null;
+const semainesVisibles = () => [...document.querySelectorAll('#cadre thead th[data-sem]')].map(t => t.dataset.sem);
 function posSemaine(m) {
-  const cadre = $('#cadre'), th = colonneSemaine(m); if (!cadre || !th) return null;
+  const cadre = $('#cadre'), th = $(`#cadre thead th[data-sem="${m}"]`); if (!cadre || !th) return null;
   const nom = cadre.querySelector('thead .nom').getBoundingClientRect().width;
   return cadre.scrollLeft + th.getBoundingClientRect().left - cadre.getBoundingClientRect().left - nom;
 }
-/* La semaine visée est retenue : un second clic pendant le défilement part d'elle, pas d'une position en mouvement. */
-let cible = null, tScroll = null;
 function allerA(m, doux) {
   const x = posSemaine(m); if (x == null) return;
-  cible = m;
-  $('#cadre').scrollTo({ left: Math.max(0, x), behavior: doux === false ? 'auto' : 'smooth' });
+  cible = m; $('#cadre').scrollTo({ left: Math.max(0, x), behavior: doux === false ? 'instant' : 'smooth' });
+}
+/* Une date → la colonne qui la contient (semaine de cours, ou bande de vacances). */
+function allerSemaine(m, doux) {
+  const col = COLONNES.find(c => c.vac ? m >= c.m && m <= c.fin : c.m === m) || (m < DEBUT ? COLONNES[0] : COLONNES[COLONNES.length - 1]);
+  allerA(col.m, doux);
 }
 function plusProche() {
-  const c = $('#cadre'), l = semainesVisibles(); let best = null, e = Infinity;
-  l.forEach(m => { const d = Math.abs(posSemaine(m) - c.scrollLeft); if (d < e) { e = d; best = m; } });
+  const c = $('#cadre'); let best = null, e = Infinity;
+  semainesVisibles().forEach(m => { const d = Math.abs(posSemaine(m) - c.scrollLeft); if (d < e) { e = d; best = m; } });
   return best;
 }
-function semainesVisibles() { return [...document.querySelectorAll('#cadre th.sem')].map(t => t.dataset.sem); }
-function aujourdhui(doux) { const l = semainesVisibles(); const m = l.find(s => plus(s, 6) >= AUJ) || l[l.length - 1]; if (m) allerA(m, doux); }
 function pas(n) {
   const l = semainesVisibles(); if (!l.length) return;
   const base = l.includes(cible) ? cible : plusProche();
   allerA(l[Math.min(l.length - 1, Math.max(0, l.indexOf(base) + n))]);
 }
+/* Une classe → son stage en cours, sinon le prochain, sinon le dernier. */
+function allerStage(c) {
+  const p = c.pfmp.find(([a, b]) => b >= AUJ) || c.pfmp[c.pfmp.length - 1];
+  let d = p[0] < AUJ ? AUJ : p[0]; while (!enStage(c, d) && d < p[1]) d = plus(d, 1);
+  allerSemaine(lundi(d));
+}
 
 /* ─── Bulle d'une demi-journée ─── */
 function ouvrirBulle(code, date, m) {
   S.sel = { code, date, m }; rendreGrille();
-  const c = classeDe(code), sg = sigDe(code, date, m), autreM = m === 'm' ? 'a' : 'm';
+  const c = classe((S.config?.eleves || []).find(e => e.code === code)?.classe);
+  const autreM = m === 'm' ? 'a' : 'm';
   const v = document.createElement('div'); v.className = 'voile'; v.id = 'voile';
-  v.innerHTML = `<div class="bulle" role="dialog" aria-modal="true" aria-labelledby="bt">
-    <div class="haut"><div><h2 id="bt">${esc(long(date))} · ${MOM[m]}</h2><div class="sous"><b>${code}</b> · ${esc(c.lib)}</div></div><button class="croix" data-b="fermer" aria-label="Fermer">✕</button></div>
-    <div class="sigles">${tousSigles().map(s => `<button data-b="sig" data-v="${esc(s)}" class="${sg.includes(s) ? 'on' : ''}" aria-pressed="${sg.includes(s)}">${esc(s)}</button>`).join('')}</div>
+  document.body.appendChild(v);
+  const peindre = () => {
+    const cr = creneau(code, date, m), libres = tousSigles().filter(s => !cr.pres.some(p => p.s === s));
+    v.innerHTML = `<div class="bulle" role="dialog" aria-modal="true" aria-labelledby="bt">
+    <div class="haut"><div><h2 id="bt">${esc(long(date))} · ${MOM[m]}</h2><div class="sous"><b>${code}</b> · ${esc(c ? c.lib : '')}</div></div><button class="croix" data-b="fermer" aria-label="Fermer">✕</button></div>
+    <div class="etq">Présents</div>
+    ${cr.pres.length ? cr.pres.map((p, i) => `<div class="pres"><b>${esc(p.s)}</b><input type="time" data-h="de" data-i="${i}" value="${p.de}" aria-label="${esc(p.s)} : de"><span>à</span><input type="time" data-h="a" data-i="${i}" value="${p.a}" aria-label="${esc(p.s)} : à"><button class="x" data-b="retirer" data-i="${i}" aria-label="Retirer ${esc(p.s)}">✕</button></div>`).join('') : '<div class="aucun">Personne</div>'}
+    <div class="etq">Ajouter</div>
+    <div class="sigles">${libres.map(s => `<button data-b="ajouter" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div>
     <form class="autre" id="fa"><input id="autre" maxlength="8" placeholder="Autre sigle" aria-label="Autre sigle"><button class="btn" type="submit">Ajouter</button></form>
+    <div class="etq">Commentaire</div>
+    <textarea id="note" maxlength="300" aria-label="Commentaire">${esc(cr.note)}</textarea><div class="petit">Sans nom d'élève</div>
     <div class="etq">Même chose</div>
     <div class="copies">
       <button class="btn" data-b="copie" data-v="autre">${m === 'm' ? "L'après-midi" : 'Le matin'}</button>
-      <button class="btn" data-b="copie" data-v="semaine">Toute la semaine · ${MOM[m].toLowerCase()}</button>
+      <button class="btn" data-b="copie" data-v="semaine">La semaine · ${MOM[m].toLowerCase()}</button>
       <button class="btn" data-b="copie" data-v="stage">Tout le stage · ${MOM[m].toLowerCase()}</button>
       <button class="btn" data-b="copie" data-v="stage2">Tout le stage · journée</button>
     </div>
-    <div class="copies" style="margin-top:14px"><button class="btn" data-b="vider">Personne</button><button class="btn pri" data-b="fermer" style="margin-left:auto">OK</button></div>
-  </div>`;
-  document.body.appendChild(v);
-  const actuel = () => sigDe(code, date, m);
+    <div class="copies" style="margin-top:16px"><button class="btn pri" data-b="fermer" style="margin-left:auto">OK</button></div></div>`;
+    v.querySelector('#fa').onsubmit = ev => { ev.preventDefault(); const s = nettoieSigle(v.querySelector('#autre').value); if (!s) return;
+      const cr2 = creneau(code, date, m); if (!cr2.pres.some(p => p.s === s)) ecrire([[code, date, m, { ...cr2, pres: [...cr2.pres, { s, de: '', a: '' }].slice(0, 6) }]], 'Ajouté'); peindre(); };
+  };
+  let tNote = null;
+  const noteMaintenant = () => { clearTimeout(tNote); const t = v.querySelector('#note'); if (!t) return; const n = nettoieNote(t.value), cr = creneau(code, date, m); if (n !== cr.note) ecrire([[code, date, m, { ...cr, note: n }]], 'Commentaire enregistré', true); };
+  v.addEventListener('input', ev => { if (ev.target.id === 'note') { clearTimeout(tNote); tNote = setTimeout(noteMaintenant, 900); } });
+  v.addEventListener('change', ev => { const h = ev.target.dataset.h; if (!h) return; const cr = creneau(code, date, m), i = Number(ev.target.dataset.i);
+    if (!cr.pres[i]) return; cr.pres[i] = { ...cr.pres[i], [h]: heure(ev.target.value) }; ecrire([[code, date, m, cr]], 'Heure enregistrée', true); });
   v.addEventListener('click', ev => {
-    if (ev.target === v) return fermerBulle();
+    if (ev.target === v) { noteMaintenant(); return fermerBulle(); }
     const b = ev.target.closest('[data-b]'); if (!b) return;
-    const t = b.dataset.b;
+    noteMaintenant(); /* un commentaire en cours de frappe est enregistré avant tout autre geste */
+    const t = b.dataset.b, cr = creneau(code, date, m);
     if (t === 'fermer') return fermerBulle();
-    if (t === 'sig') { const s = b.dataset.v, l = actuel(); ecrire([[code, date, m, l.includes(s) ? l.filter(x => x !== s) : [...l, s].slice(0, 4)]], 'Enregistré'); }
-    if (t === 'vider') ecrire([[code, date, m, []]], 'Retiré');
+    if (t === 'ajouter') ecrire([[code, date, m, { ...cr, pres: [...cr.pres, { s: b.dataset.v, de: '', a: '' }].slice(0, 6) }]], 'Ajouté');
+    if (t === 'retirer') ecrire([[code, date, m, { ...cr, pres: cr.pres.filter((_, i) => i !== Number(b.dataset.i)) }]], 'Retiré');
     if (t === 'copie') {
-      const l = actuel(), cls = classeDe(code), p = periodeDe(cls, date), cibles = [];
+      noteMaintenant();
+      const src = creneau(code, date, m), cls = c, p = periodeDe(cls, date), cibles = [];
       if (b.dataset.v === 'autre') cibles.push([date, autreM]);
-      else {
-        const [a, fin] = cls.pfmp[p];
-        for (let d = a; d <= fin; d = plus(d, 1)) {
-          if (!enStage(cls, d)) continue;
-          if (b.dataset.v === 'semaine' && lundi(d) !== lundi(date)) continue;
-          cibles.push([d, m]); if (b.dataset.v === 'stage2') cibles.push([d, autreM]);
-        }
-      }
-      ecrire(cibles.filter(([d, mo]) => !(d === date && mo === m)).map(([d, mo]) => [code, d, mo, l]), 'Recopié');
+      else { const [a, fin] = cls.pfmp[p];
+        for (let d = a; d <= fin; d = plus(d, 1)) { if (!enStage(cls, d)) continue; if (b.dataset.v === 'semaine' && lundi(d) !== lundi(date)) continue;
+          cibles.push([d, m]); if (b.dataset.v === 'stage2') cibles.push([d, autreM]); } }
+      ecrire(cibles.filter(([d, mo]) => !(d === date && mo === m)).map(([d, mo]) => [code, d, mo, { pres: src.pres, note: creneau(code, d, mo).note }]), 'Recopié');
     }
-    majBulle();
+    peindre();
   });
-  $('#fa').onsubmit = ev => { ev.preventDefault(); const s = nettoieSigle($('#autre').value); if (!s) return;
-    const l = actuel(); if (!l.includes(s)) ecrire([[code, date, m, [...l, s].slice(0, 4)]], 'Enregistré'); $('#autre').value = ''; majBulle(true); };
-  function majBulle(tout) {
-    const l = actuel(), box = v.querySelector('.sigles');
-    if (tout) box.innerHTML = tousSigles().map(s => `<button data-b="sig" data-v="${esc(s)}">${esc(s)}</button>`).join('');
-    box.querySelectorAll('button').forEach(x => { const on = l.includes(x.dataset.v); x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
-  }
+  peindre();
   v.querySelector('.sigles button, #autre')?.focus();
+  S.repeindre = peindre;
 }
-function fermerBulle() { $('#voile')?.remove(); const s = S.sel; S.sel = null; rendreGrille(); if (s) document.querySelector(`td[data-code="${s.code}"][data-d="${s.date}"][data-m="${s.m}"]`)?.focus({ preventScroll: true }); }
+function fermerBulle() { $('#voile')?.remove(); S.repeindre = null; const s = S.sel; S.sel = null; rendreGrille(); if (s) document.querySelector(`td[data-code="${s.code}"][data-d="${s.date}"][data-m="${s.m}"]`)?.focus({ preventScroll: true }); }
 
 /* ─── Écriture : immédiate, avec retour arrière ─── */
 async function ecrire(liste, msg, sansAnnuler) {
   if (!liste.length) return;
-  const avant = liste.map(([code, d, m]) => [code, d, m, sigDe(code, d, m)]);
+  const classeDe = code => (S.config?.eleves || []).find(e => e.code === code)?.classe;
+  const avant = liste.map(([code, d, m]) => [code, d, m, creneau(code, d, m)]);
   const maj = new Date().toISOString();
-  const docs = liste.map(([code, d, m, aesh]) => ({ id: idDe(code, d, m), type: 'creneau', annee: ANNEE, classe: classeDe(code).id, eleve: code, date: d, moment: m, aesh: [...new Set(aesh.map(nettoieSigle).filter(Boolean))].slice(0, 4), majLe: maj, source: SOURCE }));
+  const docs = liste.map(([code, d, m, cr]) => {
+    const vu = new Set(), pres = [];
+    (cr.pres || []).forEach(p => { const s = nettoieSigle(p.s); if (s && !vu.has(s)) { vu.add(s); pres.push({ s, de: heure(p.de), a: heure(p.a) }); } });
+    return { id: idDe(code, d, m), type: 'creneau', annee: ANNEE, classe: classeDe(code), eleve: code, date: d, moment: m, pres: pres.slice(0, 6), note: nettoieNote(cr.note), majLe: maj, source: SOURCE };
+  });
   docs.forEach(x => S.docs.set(x.id, x)); rendreGrille();
   if (!db) { toast('Hors ligne : rien n’est enregistré', true); return; }
   etat('Enregistrement…');
   try {
-    for (let i = 0; i < docs.length; i += 400) {
-      const b = FS.writeBatch(db); docs.slice(i, i + 400).forEach(x => b.set(FS.doc(db, COL, x.id), x)); await b.commit();
-    }
+    for (let i = 0; i < docs.length; i += 400) { const b = FS.writeBatch(db); docs.slice(i, i + 400).forEach(x => b.set(FS.doc(db, COL, x.id), x)); await b.commit(); }
     etat('En direct');
-    if (!sansAnnuler) { S.annuler = avant; toast(msg + (docs.length > 1 ? ' · ' + docs.length + ' demi-journées' : ''), false, true); }
+    if (sansAnnuler) toast(msg); else { S.annuler = avant; toast(msg + (docs.length > 1 ? ' · ' + docs.length + ' demi-journées' : ''), false, true); }
   } catch (e) {
-    avant.forEach(([code, d, m, a]) => { const id = idDe(code, d, m); const x = S.docs.get(id); if (x) S.docs.set(id, { ...x, aesh: a }); });
-    rendreGrille(); etat('Non enregistré', true); toast('Non enregistré : vérifiez la connexion', true);
+    avant.forEach(([code, d, m, cr]) => { const id = idDe(code, d, m), x = S.docs.get(id); if (x) S.docs.set(id, { ...x, pres: cr.pres, note: cr.note, aesh: undefined }); });
+    rendreGrille(); S.repeindre?.(); etat('Non enregistré', true); toast('Non enregistré : vérifiez la connexion', true);
   }
 }
 let tT = null;
 function toast(t, err, annul) {
+  if (!t) return;
   $('#toast')?.remove(); clearTimeout(tT);
   const d = document.createElement('div'); d.id = 'toast'; d.className = 'toast' + (err ? ' err' : ''); d.setAttribute('role', 'status');
   d.innerHTML = `<span>${esc(t)}</span>${annul ? '<button id="tAnn">Annuler</button>' : ''}${err ? '<button id="tX" aria-label="Fermer">✕</button>' : ''}`;
   document.body.appendChild(d);
-  d.querySelector('#tAnn')?.addEventListener('click', () => { const a = S.annuler; S.annuler = null; d.remove(); if (a) ecrire(a, '', true).then(() => { $('#voile') && $('#voile').querySelectorAll('.sigles button').forEach(x => { const s = S.sel; const l = s ? sigDe(s.code, s.date, s.m) : []; x.classList.toggle('on', l.includes(x.dataset.v)); }); }); });
+  d.querySelector('#tAnn')?.addEventListener('click', async () => { const a = S.annuler; S.annuler = null; d.remove(); if (a) { await ecrire(a, 'Annulé', true); S.repeindre?.(); } });
   d.querySelector('#tX')?.addEventListener('click', () => d.remove());
-  if (!err) tT = setTimeout(() => d.remove(), 5000);
+  if (!err) tT = setTimeout(() => d.remove(), annul ? 5000 : 1600);
 }
 
-/* ─── Impression ─── */
+/* ─── Impression : un tableau par élève et par stage ─── */
 function imprimer() {
-  const ls = lignes(); const codes = ls.flatMap(l => l.codes).filter(code => [...S.docs.values()].some(d => d.eleve === code && (d.aesh || []).length));
-  const liste = codes.length ? codes : ls.flatMap(l => l.codes);
-  const blocs = liste.map(code => {
-    const c = classeDe(code);
-    return c.pfmp.map(([a, b], p) => {
-      const jours = []; for (let d = a; d <= b; d = plus(d, 1)) if (enStage(c, d)) jours.push(d);
-      if (!jours.some(d => sigDe(code, d, 'm').length || sigDe(code, d, 'a').length) && codes.length) return '';
-      return `<div class="bloc"><h2>${code} · ${esc(c.lib)}</h2><p class="sous">PFMP ${p + 1} · du ${long(a)} au ${long(b)}</p>
-      <table><tr><th style="width:40%">Jour</th><th>Matin</th><th>Après-midi</th></tr>${jours.map(d => `<tr><td>${esc(long(d))}</td><td>${esc(sigDe(code, d, 'm').join(', '))}</td><td>${esc(sigDe(code, d, 'a').join(', '))}</td></tr>`).join('')}</table></div>`;
-    }).join('');
-  }).filter(Boolean);
-  $('#feuille').innerHTML = `<div class="doc">${blocs.join('') || '<p>Rien à imprimer</p>'}<p style="font-size:9pt;color:#555">Accompagnement PFMP · imprimé le ${long(AUJ)}</p></div>`;
+  const cls = S.filtre === 'tous' ? CLASSES : CLASSES.filter(c => c.id === S.filtre);
+  const blocs = [];
+  cls.forEach(c => elevesDe(c).forEach(code => c.pfmp.forEach(([a, b], p) => {
+    const jours = []; for (let d = a; d <= b; d = plus(d, 1)) if (enStage(c, d)) jours.push(d);
+    const cel = (d, m) => { const cr = creneau(code, d, m); return esc(cr.pres.map(x => x.s + (x.de || x.a ? ' (' + hFr(x.de) + '–' + hFr(x.a) + ')' : '')).join(', ')) + (cr.note ? `<br><i>${esc(cr.note)}</i>` : ''); };
+    blocs.push(`<div><h2>${code} · ${esc(c.lib)}</h2><p class="sous">PFMP ${p + 1} · du ${long(a)} au ${long(b)}</p>
+      <table><tr><th style="width:34%">Jour</th><th>Matin</th><th>Après-midi</th></tr>${jours.map(d => `<tr><td>${esc(long(d))}</td><td>${cel(d, 'm')}</td><td>${cel(d, 'a')}</td></tr>`).join('')}</table></div>`);
+  })));
+  $('#feuille').innerHTML = `<div class="doc">${blocs.join('') || '<p>Aucun élève</p>'}<p style="font-size:9pt;color:#555">Accompagnement PFMP · imprimé le ${long(AUJ)}</p></div>`;
   document.body.classList.add('imprime'); setTimeout(() => { window.print(); document.body.classList.remove('imprime'); }, 60);
 }
 
@@ -408,10 +453,9 @@ document.addEventListener('click', ev => {
   const t = ev.target.closest('[data-act]'); if (!t || $('#voile')) return;
   const a = t.dataset.act;
   if (a === 'case') return ouvrirBulle(t.dataset.code, t.dataset.d, t.dataset.m);
-  if (a === 'filtre') { S.filtre = t.dataset.v; try { localStorage.setItem(K_CLS, S.filtre); } catch (_) { } rendre(); aujourdhui(false); }
-  if (a === 'seulement') { S.seulement = !S.seulement; rendre(); }
+  if (a === 'filtre') { S.filtre = t.dataset.v; rendre(); const c = classe(S.filtre); if (c) allerStage(c); else allerSemaine(lundi(AUJ)); }
   if (a === 'pas') pas(Number(t.dataset.v));
-  if (a === 'auj') aujourdhui();
+  if (a === 'auj') allerSemaine(lundi(AUJ));
   if (a === 'imprimer') imprimer();
 });
 document.addEventListener('keydown', ev => {
