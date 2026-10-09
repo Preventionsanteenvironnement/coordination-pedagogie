@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#dd5f12">
+<meta name="robots" content="noindex">
+<title>PFMP — mon avis sur l'accueil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!--
+  Maquette (09/10/2026) : l'évaluation de la qualité de l'accueil par l'élève, à la fin de chaque PFMP.
+  Questions reprises mot pour mot de l'annexe 4 de la convention-type PFMP (éduscol, septembre 2023),
+  obligation de l'article L. 124-4 du code de l'éducation. Sans nom d'élève ni d'entreprise.
+  Démonstration : rien n'est enregistré.
+-->
+<style>
+:root{--ink:#1f2733;--ink2:#445065;--muted:#6b7686;--line:#e8e3da;--bg:#f6f3ee;--p100:#ffe7d4;--p500:#f1701f;--p600:#dd5f12;--p700:#b94c0e;--ok:#1f9d4c;--ok-s:#e3f6ea}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 Outfit,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:auto;padding:12px 16px 60px}
+.demo{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}
+.demo a{color:var(--muted);text-decoration:none;font-weight:600}
+.tete{background:linear-gradient(140deg,var(--p500),var(--p700));color:#fff;border-radius:22px;padding:18px}
+.tete small{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+.tete h1{font-family:'Space Grotesk',sans-serif;margin:6px 0 4px;font-size:23px;line-height:1.2}
+.tete p{margin:0;font-size:14.5px;opacity:.95}
+.leg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:16px 2px 6px;font-size:11.5px;color:var(--muted);text-align:center}
+.q{background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 13px;margin-top:9px}
+.q.ok{border-color:#bfe8cd}
+.q b{display:block;font-size:15.5px;font-weight:600;line-height:1.3}
+.q small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.notes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.notes button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:8px 0 6px;font-size:24px;cursor:pointer;line-height:1;font-family:inherit}
+.notes button span{display:block;font-size:10.5px;color:var(--muted);margin-top:3px}
+.notes button.on{border-color:var(--p600);background:#fff5ed;box-shadow:0 0 0 3px var(--p100)}
+textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:11px;font:inherit;font-size:15px;min-height:90px;margin-top:8px}
+.sans-nom{font-size:12.5px;color:var(--muted);margin-top:4px;display:flex;gap:6px;align-items:center}
+.envoyer{width:100%;margin-top:16px;border:0;border-radius:16px;padding:15px;font:inherit;font-size:17px;font-weight:700;background:var(--p600);color:#fff;cursor:pointer;display:flex;gap:8px;justify-content:center;align-items:center}
+.envoyer:disabled{opacity:.5}
+.compte{font-size:13px;color:var(--muted);text-align:center;margin-top:8px}
+.merci{background:var(--ok-s);border:2px solid #bfe8cd;border-radius:18px;padding:16px;margin-top:16px;text-align:center;color:var(--ok);font-weight:600}
+.src{font-size:12px;color:var(--muted);margin-top:22px;line-height:1.4}
+</style>
+</head>
+<body>
+<main class="app">
+ <div class="demo"><a href="maquettes.html">← Les maquettes</a><span>Démonstration</span></div>
+ <section class="tete">
+  <small>Fin de stage · PFMP 1</small>
+  <h1>Mon avis sur l’accueil</h1>
+  <p>Il ne compte pas dans ma note ni dans mon diplôme.</p>
+ </section>
+ <div class="leg"><span>Très insatisfait</span><span>Insatisfait</span><span>Satisfait</span><span>Très satisfait</span></div>
+ <div id="questions"></div>
+ <div class="q"><b>Observations</b><textarea id="obs" maxlength="500" placeholder="Ce que je veux ajouter"></textarea><div class="sans-nom"><i class="ti ti-user-off"></i> Sans nom de personne</div></div>
+ <button class="envoyer" id="envoyer" disabled><i class="ti ti-send"></i> Envoyer à mon enseignant référent</button>
+ <div class="compte" id="compte"></div>
+ <div id="fin"></div>
+ <p class="src">Questions de l’annexe 4 de la convention-type PFMP (éduscol, septembre 2023) · obligation de l’article L. 124-4 du code de l’éducation.</p>
+</main>
+<script>
+const Q = [
+  ['L’accueil à l’arrivée'],
+  ['Les informations fournies en début de stage, y compris les consignes de sécurité', 'présentation de l’entreprise, de l’équipe, visite de l’entreprise…'],
+  ['La santé et sécurité au travail', 'règles de sécurité transmises, équipements de protection individuelle fournis quand nécessaires…'],
+  ['La disponibilité et l’écoute du tuteur'],
+  ['L’accompagnement du tuteur', 'par exemple : les conseils apportés, la clarté des consignes…'],
+  ['L’intégration dans l’équipe en tant que stagiaire'],
+  ['L’espace de travail lié aux activités quotidiennes'],
+  ['Les contacts avec les autres salariés'],
+  ['Les relations avec les supérieurs hiérarchiques'],
+  ['L’ambiance générale de travail']
+];
+const NOTES = [['😞', 'Très insatisfait'], ['🙁', 'Insatisfait'], ['🙂', 'Satisfait'], ['😀', 'Très satisfait']];
+const R = {};
+const $ = id => document.getElementById(id);
+function rendre() {
+  $('questions').innerHTML = Q.map(([t, s], i) => `<div class="q ${R[i] != null ? 'ok' : ''}"><b>${t}</b>${s ? `<small>${s}</small>` : ''}<div class="notes">${NOTES.map(([e, l], k) => `<button class="${R[i] === k ? 'on' : ''}" data-q="${i}" data-n="${k}" aria-label="${l}">${e}<span>${l.replace('Très ', 'Très ')}</span></button>`).join('')}</div></div>`).join('');
+  const n = Object.keys(R).length;
+  $('compte').textContent = n + ' / ' + Q.length + ' réponses';
+  $('envoyer').disabled = n < Q.length;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-q]'); if (b) { R[b.dataset.q] = +b.dataset.n; rendre(); return; }
+  if (e.target.closest('#envoyer')) { $('fin').innerHTML = '<div class="merci"><i class="ti ti-circle-check"></i> Envoyé à mon enseignant référent. Merci !</div>'; $('envoyer').hidden = true; $('compte').hidden = true; }
+});
+rendre();
+</script>
+</body>
+</html>
