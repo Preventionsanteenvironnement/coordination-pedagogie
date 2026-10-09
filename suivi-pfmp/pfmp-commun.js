@@ -17,7 +17,7 @@
 (function (racine) {
   'use strict';
 
-  const VERSION = '2026-10-09';
+  const VERSION = '2026-10-09b';
   const COL_SUIVI = 'coordination_pfmp_suivi';
   const COL_REFERENTS = 'coordination_pfmp_referents';
   const ROLES = ['eleve', 'referent', 'pp'];
@@ -111,6 +111,10 @@
   const RETIREES = [
     { id: 'pre_visa', ph: 3, t: 'Pré-convention visée par le professeur de spécialité', ty: 'declare', retiree: true }
   ];
+  /* 09/10/2026 : les documents que l'élève garde. Il peut dire à tout moment « Je l'ai déjà » (même avant son tour)
+     ou « Je l'ai perdu » : le référent et le PP sont prévenus, et l'un d'eux le « remet à nouveau ». */
+  const GARDE = { neg_given: 'Fiche de négociation', pre_given: 'Pré-convention', conv_given: 'Convention', copies: 'Exemplaire signé de la convention', attest_in: 'Attestation de stage' };
+  ETAPES.forEach(e => { if (GARDE[e.id]) e.garde = GARDE[e.id]; });
   const PAR_ID = Object.fromEntries(ETAPES.concat(RETIREES).map(e => [e.id, e]));
   const EN_LIGNE = ETAPES.filter(e => !e.local);
 
@@ -178,8 +182,16 @@
   const adulte = r => r === 'referent' || r === 'pp';
 
   /* Ce que tel rôle peut faire sur telle étape, dans l'état où elle est. */
+  const EN_MAIN = e => ['fait', 'valide', 'declare'].includes(e);
   function actions(etape, en, role) {
     const e = (en && en.e) || '';
+    /* Un document perdu : l'élève peut l'avoir retrouvé ; le référent ou le PP le remet à nouveau. */
+    if (etape && etape.garde && e === 'perdu') return role === 'eleve' ? ['retrouver'] : ['redonner'];
+    const out = actionsBase(etape, e, role);
+    if (etape && etape.garde && role === 'eleve' && EN_MAIN(e)) out.push('perdre');
+    return out;
+  }
+  function actionsBase(etape, e, role) {
     const out = [];
     if (!etape || etape.ty === 'journal') return out;
     if (etape.local && role === 'eleve') return out;
@@ -213,8 +225,8 @@
   }
 
   const LIBELLES = {
-    eleve: { declarer: 'C’est fait', remettre: 'Je l’ai remis', recevoir: 'Je l’ai reçu', annuler: 'Annuler' },
-    adulte: { faire: 'Fait', valider: 'Conforme', corriger: 'À corriger', remettre: 'Remis', recevoir: 'Reçu', annuler: 'Annuler', declarer: 'Fait' }
+    eleve: { declarer: 'C’est fait', remettre: 'Je l’ai remis', recevoir: 'Je l’ai reçu', annuler: 'Annuler', perdre: 'Je l’ai perdu', retrouver: 'Je l’ai retrouvé' },
+    adulte: { faire: 'Fait', valider: 'Conforme', corriger: 'À corriger', remettre: 'Remis', recevoir: 'Reçu', annuler: 'Annuler', declarer: 'Fait', redonner: 'Remis à nouveau' }
   };
   function libelleAction(a, role, etape) {
     if (etape && etape.ty === 'remise' && a === 'recevoir' && etape.verif && role !== 'eleve') return 'Reçu · conforme';
@@ -236,6 +248,10 @@
     else if (action === 'recevoir' || action === 'valider') e = 'valide';
     else if (action === 'faire') e = 'fait';
     else if (action === 'corriger') e = 'corriger';
+    else if (action === 'perdre') e = 'perdu';
+    /* Retrouvé : le document est de nouveau en main. Remis à nouveau : l'élève n'a plus qu'à dire « Je l'ai ». */
+    else if (action === 'retrouver') e = etape.ty === 'remise' ? 'valide' : 'fait';
+    else if (action === 'redonner') e = etape.ty === 'remise' ? 'remis' : 'fait';
     else e = '';
     const nouvelle = { e, par: role, le };
     if (action === 'corriger') {
@@ -253,6 +269,7 @@
   function aVerifier(suivi) {
     return EN_LIGNE.filter(et => {
       const e = entree(suivi, et.id).e;
+      if (et.garde && e === 'perdu') return true;
       if (et.ty === 'declare' && et.verif) return e === 'declare';
       if (et.ty === 'remise' && et.to === 'referent') return e === 'remis';
       return false;
@@ -502,7 +519,7 @@
     };
   }
 
-  const API = { VERSION, ACTEURS, CALENDRIER, calendrierDe, estJourDeClasse, COL_SUIVI, COL_REFERENTS, ROLES, PHASES, ETAPES, PAR_ID, EN_LIGNE,
+  const API = { VERSION, GARDE, ACTEURS, CALENDRIER, calendrierDe, estJourDeClasse, COL_SUIVI, COL_REFERENTS, ROLES, PHASES, ETAPES, PAR_ID, EN_LIGNE,
     plus, ecartJours, dernierJourDeCours, echeance, entree, estFaite, actions, libelleAction, appliquer,
     aVerifier, aFaire, avancement, drapeaux, phaseCourante, enRetard,
     anneeScolaire, filiereDe, suiviId, referentId, nouveauCodeReferent, sigleDe, nettoyerPiste, verifierSuivi, CHAMPS_SUIVI,

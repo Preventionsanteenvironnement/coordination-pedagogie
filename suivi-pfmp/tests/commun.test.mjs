@@ -70,6 +70,32 @@ assert.deepEqual(A('here', 'fait', 'eleve'), ['annuler']);
 assert.throws(() => P.appliquer({ etapes: {} }, 'pronote', 'faire', 'eleve'), /pas possible/);
 assert.throws(() => P.appliquer({ etapes: { search: { e: 'declare' } } }, 'search', 'corriger', 'referent', {}), /corriger/);
 console.log('Droits : élève, référent et PP vérifiés étape par étape.');
+/* 09/10/2026 : documents gardés par l'élève — « Je l'ai déjà » à tout moment, « Je l'ai perdu », « Remis à nouveau ». */
+{
+  assert.deepEqual(Object.keys(P.GARDE).sort(), ['attest_in', 'conv_given', 'copies', 'neg_given', 'pre_given']);
+  const s = { etapes: {} };
+  assert.ok(P.actions(P.PAR_ID.pre_given, P.entree(s, 'pre_given'), 'eleve').includes('recevoir'), 'reçu avant son tour');
+  assert.ok(P.actions(P.PAR_ID.neg_given, P.entree(s, 'neg_given'), 'eleve').includes('declarer'), 'déclaré avant son tour');
+  assert.ok(!P.actions(P.PAR_ID.neg_given, P.entree(s, 'neg_given'), 'eleve').includes('perdre'), 'pas perdu avant de l’avoir');
+  s.etapes.neg_given = P.appliquer(s, 'neg_given', 'declarer', 'eleve').entree;
+  s.etapes.neg_given = P.appliquer(s, 'neg_given', 'perdre', 'eleve').entree;
+  assert.equal(s.etapes.neg_given.e, 'perdu');
+  assert.ok(!P.estFaite(s, 'neg_given'));
+  assert.deepEqual(P.aVerifier(s).map(e => e.id), ['neg_given']);
+  assert.deepEqual(P.actions(P.PAR_ID.neg_given, s.etapes.neg_given, 'eleve'), ['retrouver']);
+  assert.deepEqual(P.actions(P.PAR_ID.neg_given, s.etapes.neg_given, 'pp'), ['redonner']);
+  assert.equal(P.appliquer(s, 'neg_given', 'retrouver', 'eleve').entree.e, 'fait');
+  assert.equal(P.appliquer(s, 'neg_given', 'redonner', 'referent').entree.e, 'fait');
+  s.etapes.pre_given = { e: 'valide' };
+  s.etapes.pre_given = P.appliquer(s, 'pre_given', 'perdre', 'eleve').entree;
+  s.etapes.pre_given = P.appliquer(s, 'pre_given', 'redonner', 'pp').entree;
+  assert.equal(s.etapes.pre_given.e, 'remis');
+  assert.ok(P.actions(P.PAR_ID.pre_given, s.etapes.pre_given, 'eleve').includes('recevoir'));
+  assert.throws(() => P.appliquer({ etapes: {} }, 'search', 'perdre', 'eleve'));
+  assert.equal(P.libelleAction('perdre', 'eleve'), 'Je l’ai perdu');
+  assert.equal(P.libelleAction('redonner', 'referent'), 'Remis à nouveau');
+}
+console.log('Documents : « Je l’ai déjà » avant son tour, perdu → référent et PP prévenus → remis à nouveau.');
 
 /* 4. Identifiants. */
 assert.equal(P.suiviId('2026-2027', 'k4a7', 1), '2026-2027_K4A7_p1');

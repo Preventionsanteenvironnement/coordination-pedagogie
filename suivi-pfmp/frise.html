@@ -181,7 +181,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
  <div class="leg"><span>● action</span><span>✉ information · « Lu »</span><span><b style="color:var(--green)">✓✓</b> document remis et reçu</span><span><i class="f"></i>fait</span><span><i class="o"></i>maintenant</span><span><i></i>à venir</span></div>
 </main>
 <div id="voile"></div>
-<script src="./pfmp-commun.js?v=2026-10-09a"></script>
+<script src="./pfmp-commun.js?v=2026-10-09b"></script>
 <script type="module">
 const P = window.PFMP_COMMUN;
 const $ = id => document.getElementById(id);
@@ -317,8 +317,9 @@ async function reel(sid) {
         if (et.act) {
           const parEleve = et.coche === 'eleve';
           let detail = parEleve ? 'Coché par l’élève' : 'Coché par vous';
+          if (e === 'perdu') detail = '⚠︎ Perdu par l’élève';
           if (et.id === 'arrival' && tu && tu.arrivee) detail = 'Le tuteur a confirmé en ligne';
-          items.push({ cote: 'm:' + et.act, signe: A_QUI[et.id] ? 'r' : 'a', a: A_QUI[et.id], titre: et.t, detail, etat: fait || (parEleve && ['declare', 'fait', 'valide'].includes(e)) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), acts: parEleve ? [] : gestes(et, en), boite: et.id === 'ddf_copies' || et.id === 'neg_return', en });
+          items.push({ cote: 'm:' + et.act, signe: A_QUI[et.id] ? 'r' : 'a', a: A_QUI[et.id], titre: et.t, detail, etat: fait || (parEleve && ['declare', 'fait', 'valide'].includes(e)) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), acts: parEleve && e !== 'perdu' ? [] : gestes(et, en), boite: et.id === 'ddf_copies' || et.id === 'neg_return', en });
           return;
         }
         if (et.ty === 'declare') {
@@ -338,7 +339,7 @@ async function reel(sid) {
           return;
         }
         if (et.ty === 'remise') {
-          items.push(Object.assign({ cote: 'd', signe: 'r', a: A_QUI[et.id] || 'l’élève', titre: DIT[et.id] || et.t, detail: et.ou ? et.ou.replace('Pronote › Communication › Casier numérique', 'Casier numérique de Pronote') : '', etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', remis: e === 'remis', recu: e === 'valide', date: quand(en, et), acts: gestes(et, en) }, o));
+          items.push(Object.assign({ cote: 'd', signe: 'r', a: A_QUI[et.id] || 'l’élève', titre: DIT[et.id] || et.t, detail: e === 'perdu' ? '⚠︎ Perdu par l’élève · à remettre' : et.ou ? et.ou.replace('Pronote › Communication › Casier numérique', 'Casier numérique de Pronote') : '', etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', remis: e === 'remis', recu: e === 'valide', date: quand(en, et), acts: gestes(et, en) }, o));
           return;
         }
         /* Une tâche ou une information du référent. */
@@ -378,9 +379,12 @@ async function reel(sid) {
     const bal = $('bal'); bal.hidden = false;
     /* Ce que le tuteur signale en ligne passe en tête. */
     const tut = [];
+    /* Un document perdu par l'élève passe en tête, avec « Remis à nouveau ». */
+    const perdus = Object.keys(P.GARDE).filter(id => P.entree(s, id).e === 'perdu');
     if (tu && tu.arrivee && tu.arrivee.v === 'non') tut.push('Le tuteur signale que le stagiaire n’est pas venu');
     if (tu && tu.milieu && tu.milieu.v === 'difficulte') tut.push('Le tuteur signale une difficulté' + (tu.milieu.txt ? ' : « ' + tu.milieu.txt + ' »' : ''));
-    bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + tut.map(x => `<div class="l"><i class="ti ti-alert-triangle" style="color:var(--orange)"></i><span>${esc(x)}</span></div>`).join('') + (l.length || tut.length ? l.map(x => {
+    bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + perdus.map(id => `<div class="l"><i class="ti ti-file-alert" style="color:var(--orange)"></i><span>${esc(s.code)} a perdu : ${esc(minus(P.GARDE[id]))}</span><button data-geste="${id}" data-action="redonner">Remis à nouveau</button></div>`).join('')
+      + tut.map(x => `<div class="l"><i class="ti ti-alert-triangle" style="color:var(--orange)"></i><span>${esc(x)}</span></div>`).join('') + (l.length || tut.length || perdus.length ? l.map(x => {
       const ok = x.etat === 'fait', info = x.signe === 'i' || x.lu;
       const t = x.lieu ? x.titre.replace(/ :$/, '') + ' : ' + x.lieu + ' — étape suivante pour l’élève : ' + minus(x.suite) : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'remet $1').replace(/^recevoir /, 'remet ') : x.titre;
       const b = !ok && (x.acts || []).find(a => !a.lien && a.action !== 'corriger');
@@ -391,7 +395,7 @@ async function reel(sid) {
   document.addEventListener('click', ev => {
     const b = ev.target.closest('[data-geste]'); if (!b || !s) return;
     const id = b.dataset.geste, action = b.dataset.action, et = P.PAR_ID[id];
-    confirmer((action === 'annuler' ? 'Annuler : ' : '') + et.t, action === 'corriger', motif => {
+    confirmer(action === 'redonner' ? 'Remis à nouveau : ' + (et.garde || et.t) : (action === 'annuler' ? 'Annuler : ' : '') + et.t, action === 'corriger', motif => {
       b.disabled = true;
       svc.agir(sid, id, action, 'referent', motif ? { motif } : undefined).catch(e => { b.disabled = false; alert(e.message); });
     });
