@@ -31,6 +31,13 @@ export function regles(chemin, avant, apres) {
     return;
   }
   if (p[0] === 'coordination_pfmp_suivi' && p.length === 4 && p[2] === 'eleve') {
+    /* 09/10/2026 : le carnet de bord, à côté du parcours. */
+    if (p[3] === 'carnet') {
+      const okc = Object.keys(apres).every(k => ['jours', 'act', 'org', 'comp', 'accueil', 'accueilEnvoye', 'bilan', 'meme', 'majLe'].includes(k));
+      if (!okc || typeof apres.majLe !== 'string' || (apres.jours && Object.keys(apres.jours).length > 60) || (apres.act && apres.act.length > 3)) refuse('carnet');
+      if (!store_.has('coordination_pfmp_suivi/' + p[1])) refuse('fiche absente');
+      return;
+    }
     if (p[3] !== 'parcours') refuse('eleve');
     const ok = Object.keys(apres).every(k => ['avatar', 'declaration', 'prepa', 'fiche', 'depart', 'recherches', 'majLe'].includes(k));
     if (!ok || typeof apres.majLe !== 'string') refuse('parcours');

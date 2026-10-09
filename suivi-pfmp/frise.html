@@ -142,6 +142,11 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 }
 
 [hidden]{display:none!important}
+.carnet-lien{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin:12px 0 0;text-decoration:none;color:var(--ink)}
+.carnet-lien i{font-size:22px;color:#1d4f91}.carnet-lien span{flex:1;font-size:13.5px;color:var(--muted)}.carnet-lien b{display:block;font-size:14.5px;color:var(--ink)}
+.carnet-lien em{font-style:normal;font-weight:700;font-size:13px;color:#1d4f91}
+.visite-f{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.visite-f input{border:1px solid var(--line);border-radius:9px;padding:6px 8px;font:inherit;font-size:13px}
+.visite-f button{border:0;background:var(--accent);color:#fff;border-radius:9px;padding:7px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .maint button{margin-left:auto;border:0;background:#fff;color:var(--accent);border-radius:10px;padding:9px 15px;font:inherit;font-weight:700;cursor:pointer;flex:none}
 .carte .acts,.etape-m .acts{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .etape-m .acts{margin-top:4px}
@@ -170,6 +175,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
  <div class="haut"><a href="../">← Coordination & Pédagogie</a></div>
  <section class="tete" style="margin-bottom:0"><div class="code" id="code">—</div><div><h1 id="titre">Chargement…</h1><div class="info" id="info"></div></div><div class="j"><b id="jx"></b><span id="jxl"></span></div></section>
  <div class="statut" id="statut"></div>
+ <a class="carnet-lien" id="carnet" hidden target="_blank" rel="noopener"></a>
  <section class="bal" id="bal" hidden></section>
  <div class="maint" id="maint" hidden></div>
  <div class="couloirs">
@@ -221,7 +227,7 @@ async function reel(sid) {
     }
   } catch (e) { $('frise').innerHTML = '<p class="vide-msg">Connexion impossible. Rechargez la page.</p>'; return; }
   const svc = P.service(P.depotModulaire(F, db));
-  let s = null, p = null, tu = null, pret = 0;
+  let s = null, p = null, tu = null, cb = null, pret = 0;
   /* « Nouveau » : ce que l'élève a fait depuis la dernière visite du référent sur cet appareil. */
   const cleVu = 'pfmp-frise-vu:' + sid;
   let vu = ''; try { vu = localStorage.getItem(cleVu) || ''; } catch (e) {}
@@ -230,6 +236,8 @@ async function reel(sid) {
   addEventListener('pagehide', noterVu);
   const pret3 = () => { if (pret === 3) rendre(); };
   svc.ecouterSuivi(sid, d => { s = d; pret |= 1; pret3(); }, () => { $('frise').innerHTML = '<p class="vide-msg">Lecture impossible.</p>'; });
+  /* 09/10/2026 : le carnet de bord de l'élève (mapse.fr), lu ici ; son rapport s'ouvre sur mapse.fr. */
+  F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'carnet'), x => { cb = x.exists() ? x.data() : null; if (pret === 3) rendre(); }, () => {});
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'parcours'), x => { p = x.exists() ? x.data() : null; pret |= 2; pret3(); }, () => { pret |= 2; pret3(); });
   /* Les gestes du tuteur (arrivée, point d'étape, présences), si le lien porte sa clé. */
   const tk = q.get('t');
@@ -272,6 +280,9 @@ async function reel(sid) {
     if (P.estFaite(s, 'student_eval')) st = 6;
     $('statut').innerHTML = STATUTS.map((x, k) => `<span class="${k < st ? 'ok' : k === st ? 'ici' : ''}">${k < st ? '✓ ' : ''}${esc(x)}</span>`).join('');
     boite(items);
+    const cl = $('carnet'), nj = cb ? Object.values(cb.jours || {}).filter(j => j && j.pr && !/^Absent toute|pas encore/.test(j.pr)).length : 0;
+    cl.hidden = false; cl.href = 'https://mapse.fr/pfmp-agora/carnet/index.html?f=' + encodeURIComponent(sid);
+    cl.innerHTML = `<i class="ti ti-notebook"></i><span><b>Carnet de bord</b>${cb ? nj + ' journée' + (nj > 1 ? 's' : '') + ' en entreprise' + (cb.accueilEnvoye ? ' · avis sur l’accueil reçu le ' + esc(cb.accueilEnvoye) : '') : 'pas encore commencé'}</span><em>Ouvrir le rapport ↗</em>`;
     const m = $('maint');
     if (ici) {
       const qui = ici.cote.startsWith('m:') ? P.ACTEURS[ici.cote.slice(2)] : ici.cote === 'g' ? 'L’élève' : ici.cote === 'c' ? 'Ensemble' : 'Vous';
@@ -345,7 +356,7 @@ async function reel(sid) {
         /* Une tâche ou une information du référent. */
         let detail = '';
         if (et.id === 'visit') { const v = s.visite || {}; detail = v.le ? 'Visite : ' + frLong(v.le) : v.rdv ? 'Rendez-vous proposé au tuteur' : 'Le tuteur choisit un créneau en ligne'; }
-        items.push(Object.assign({ cote: 'd', signe: 'a', titre: et.id === 'visit' ? 'Fixer le rendez-vous du bilan' : DIT[et.id] || et.t, detail, etat: fait || (et.id === 'visit' && (s.visite || {}).le) ? 'fait' : 'avenir', date: fait ? fr(en.le) : quand(en, et), acts: et.id === 'visit' ? [] : gestes(et, en) }, o));
+        items.push(Object.assign({ cote: 'd', signe: 'a', titre: et.id === 'visit' ? 'Fixer le rendez-vous du bilan' : DIT[et.id] || et.t, detail, visite: et.id === 'visit', etat: fait || (et.id === 'visit' && (s.visite || {}).le) ? 'fait' : 'avenir', date: fait ? fr(en.le) : quand(en, et), acts: et.id === 'visit' ? [] : gestes(et, en) }, o));
         if (et.id === 'assessment' && tu && tu.presences) { const pz = tu.presences, n = Object.values(pz).filter(x => x === 'p').length, tot = Object.keys(pz).length; items.push({ cote: 'm:ent', signe: 'i', titre: 'Présences tenues en ligne', detail: n + ' jour' + (n > 1 ? 's' : '') + ' sur ' + tot, etat: 'fait' }); }
       });
     });
@@ -370,7 +381,8 @@ async function reel(sid) {
       + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
       + (x.suite ? `<div class="suite"><small><i class="ti ti-arrow-right"></i> Étape suivante · pour l’élève</small><span>${esc(x.suite)}</span></div>` : '')
       + relais(x) + (x.motif ? `<span class="motif">À corriger : ${esc(x.motif)}</span>` : '')
-      + (x.date ? `<span class="dt">${x.etat === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '') + boutons(x.acts) + cf + `</div></div>`;
+      + (x.date ? `<span class="dt">${x.etat === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '') + boutons(x.acts)
+      + (x.visite ? `<form class="visite-f" id="visiteF"><input type="datetime-local" id="visiteLe" value="${esc(String((s.visite || {}).le || '').slice(0, 16))}" required><button>${(s.visite || {}).le ? 'Changer la date' : 'Enregistrer le rendez-vous'}</button></form>` : '') + cf + `</div></div>`;
   }
 
   /* La boîte aux lettres : ce qu'on signale au référent et ce qu'on lui remet (les trois derniers). */
@@ -381,6 +393,7 @@ async function reel(sid) {
     const tut = [];
     /* Un document perdu par l'élève passe en tête, avec « Remis à nouveau ». */
     const perdus = Object.keys(P.GARDE).filter(id => P.entree(s, id).e === 'perdu');
+    if (cb && cb.accueilEnvoye) tut.push('Avis sur l’accueil envoyé par l’élève le ' + cb.accueilEnvoye + ' (carnet de bord)');
     if (tu && tu.arrivee && tu.arrivee.v === 'non') tut.push('Le tuteur signale que le stagiaire n’est pas venu');
     if (tu && tu.milieu && tu.milieu.v === 'difficulte') tut.push('Le tuteur signale une difficulté' + (tu.milieu.txt ? ' : « ' + tu.milieu.txt + ' »' : ''));
     bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + perdus.map(id => `<div class="l"><i class="ti ti-file-alert" style="color:var(--orange)"></i><span>${esc(s.code)} a perdu : ${esc(minus(P.GARDE[id]))}</span><button data-geste="${id}" data-action="redonner">Remis à nouveau</button></div>`).join('')
@@ -392,6 +405,14 @@ async function reel(sid) {
     }).join('') : '<div class="l"><span style="color:var(--muted)">Rien pour le moment.</span></div>');
   }
 
+  /* Le rendez-vous de bilan : la date part dans le suivi (visite.le) ; l'élève la voit dans son carnet de bord. */
+  document.addEventListener('submit', async ev => {
+    if (ev.target.id !== 'visiteF') return; ev.preventDefault();
+    const v = $('visiteLe').value; if (!v) return;
+    const b = ev.target.querySelector('button'); b.disabled = true;
+    try { if (P.estFaite(s, 'visit')) await svc.agir(sid, 'visit', 'annuler', 'referent'); await svc.agir(sid, 'visit', 'faire', 'referent', { v }); }
+    catch (e) { alert(e.message); b.disabled = false; }
+  });
   document.addEventListener('click', ev => {
     const b = ev.target.closest('[data-geste]'); if (!b || !s) return;
     const id = b.dataset.geste, action = b.dataset.action, et = P.PAR_ID[id];
