@@ -161,7 +161,11 @@ const POLES = [
       ['infosoc', 'Information sociale', 'Diffuser une information au personnel : note, affichage, courriel.']]]] }
 ];
 const ACT = {}; POLES.forEach(p => p.sp.forEach(([c, t, l]) => l.forEach(([id, lib, ex]) => { ACT[id] = { id, lib, ex, sp: c, pole: p.n }; })));
-const RESSENTI = ['Très bien', 'Bien', 'Moyen', 'Difficile'];
+const RESSENTI = ['Très bien', 'Bien', 'Moyen', 'Difficile', 'Autre'];
+/* La présence du jour : un retard de démarrage ou une absence se notent, sans bloquer le reste. */
+const PRESENCE = ['Présent toute la journée', 'Absent le matin', 'Absent l’après-midi', 'Absent toute la journée', 'Stage pas encore commencé'];
+const ABSENT_JOUR = p => p === 'Absent toute la journée' || p === 'Stage pas encore commencé';
+const ACCUEIL1 = ['Très bien accueilli', 'Bien accueilli', 'Moyennement accueilli', 'Mal accueilli'];
 const AMORCES = ['Aujourd’hui, j’ai été chargé(e) de…', 'Pour cela, j’ai utilisé…', 'J’ai rencontré une difficulté : …', 'J’ai appris à…'];
 const TRANSV = [
   ['oral', 'Communication orale', 'S’exprimer clairement avec les clients et les collègues, au téléphone et en face à face.'],
@@ -186,8 +190,8 @@ const CLE = 'carnet-bord-demo-v1';
 let D; try { D = JSON.parse(localStorage.getItem(CLE)); } catch (e) {}
 if (!D) D = { periode: 'p1', p1: { jours: {}, act: [], org: {}, comp: {}, accueil: {}, bilan: {} }, p2: { jours: {}, act: [], org: {}, comp: {}, accueil: {}, bilan: {}, meme: '' } };
 (function exemple() { const p = D.p1; if (Object.keys(p.jours).length) return; const d = datesDe('p1');
-  p.jours[d[0]] = { r: 'Bien', a: ['accueil', 'dossiers'], t: 'Aujourd’hui, j’ai été chargé(e) de l’accueil téléphonique avec ma tutrice. J’ai mis à jour le fichier des usagers sur le tableur.' };
-  p.jours[d[1]] = { r: 'Très bien', a: ['accueil', 'demande', 'interne'], t: 'J’ai accueilli seul(e) deux usagers et orienté leur demande vers le bon service. J’ai affiché la note de service sur les congés.' }; })();
+  p.jours[d[0]] = { pr: 'Présent toute la journée', acc: 'Bien accueilli', accT: 'Ma tutrice m’a présenté l’équipe et montré mon poste.', r: 'Bien', a: ['accueil', 'dossiers'], t: 'Aujourd’hui, j’ai été chargé(e) de l’accueil téléphonique avec ma tutrice. J’ai mis à jour le fichier des usagers sur le tableur.' };
+  p.jours[d[1]] = { pr: 'Présent toute la journée', r: 'Très bien', a: ['accueil', 'demande', 'interne'], t: 'J’ai accueilli seul(e) deux usagers et orienté leur demande vers le bon service. J’ai affiché la note de service sur les congés.' }; })();
 let brouillon = null, modifie = false;
 const P = () => D[D.periode];
 function garder() { try { localStorage.setItem(CLE, JSON.stringify(D)); } catch (e) {} }
@@ -241,7 +245,7 @@ function ecranCarnet() {
     <h2>À la fin du stage</h2>
     <a class="ligne" href="#/competences"><span class="ic"><i class="ti ti-chart-dots"></i></span><span class="x"><b>Mes compétences</b><span>Six compétences, comme le compte rendu du tuteur</span></span><span class="puce ${ok(p.comp) ? 'ok' : 'att'}">${ok(p.comp) ? '✓ Fait' : 'À faire'}</span></a>
     <a class="ligne" href="#/accueil"><span class="ic"><i class="ti ti-mood-smile"></i></span><span class="x"><b>Mon avis sur l’accueil</b><span>Annexe 4 de la convention</span></span><span class="puce ${ok(p.accueil) ? 'ok' : 'att'}">${ok(p.accueil) ? '✓ Fait' : 'À faire'}</span></a>
-    <a class="ligne" href="#/bilan"><span class="ic"><i class="ti ti-flag"></i></span><span class="x"><b>Mon bilan</b><span>Ce que je retiens, mon projet</span></span><span class="puce ${ok(p.bilan) ? 'ok' : 'att'}">${ok(p.bilan) ? '✓ Fait' : 'À faire'}</span></a>
+    <a class="ligne" href="#/bilan"><span class="ic"><i class="ti ti-flag"></i></span><span class="x"><b>Mon bilan</b><span>À apporter à l’entretien avec mon référent</span></span><span class="puce ${ok(p.bilan) ? 'ok' : 'att'}">${ok(p.bilan) ? '✓ Fait' : 'À faire'}</span></a>
     <a class="rapport-btn" href="#/rapport"><i class="ti ti-file-text"></i> Mon rapport de stage</a>`;
   $('app').querySelectorAll('[data-periode]').forEach(b => b.onclick = () => { D.periode = b.dataset.periode; garder(); rendre(); });
 }
@@ -249,20 +253,36 @@ function ecranCarnet() {
 /* ── Une journée : ressenti, activités, compte rendu. ── */
 function ecranJour(d) {
   const dates = datesDe(D.periode), i = dates.indexOf(d); if (i < 0) return aller('#/');
-  const p = P(), j = JSON.parse(JSON.stringify(p.jours[d] || { r: '', a: [], t: '' }));
+  const p = P(), j = JSON.parse(JSON.stringify(p.jours[d] || { pr: '', r: '', a: [], t: '' }));
+  j.autres = j.autres || {};
+  /* Le premier jour réellement passé en entreprise (pas forcément le lundi) : la question de l'accueil. */
+  const premier = dates.find(x => x === d ? !ABSENT_JOUR(j.pr) : p.jours[x] && !ABSENT_JOUR(p.jours[x].pr)) === d;
   $('titre').textContent = 'Jour ' + (i + 1) + ' sur ' + dates.length;
   const coche = id => j.a.includes(id);
   const nbPole = n => j.a.filter(id => ACT[id] && ACT[id].pole === n).length;
   $('app').innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><a class="retour" href="#/jour/${dates[i - 1] || d}" ${i ? '' : 'style="visibility:hidden"'}><i class="ti ti-chevron-left"></i></a><b style="flex:1;text-align:center;font-size:17px">${esc(frJ(d))}</b><a class="retour" href="#/jour/${dates[i + 1] || d}" ${i < dates.length - 1 ? '' : 'style="visibility:hidden"'}><i class="ti ti-chevron-right"></i></a></div>
-    <section class="bloc"><h3><span class="n">1</span>Ma journée</h3><div class="choix" id="ress">${RESSENTI.map(r => `<button type="button" class="${j.r === r ? 'on' : ''}" data-r="${r}">${r}</button>`).join('')}</div></section>
-    <section class="bloc"><h3><span class="n">2</span>Les activités réalisées ${aideBtn('Cochez ce que vous avez fait aujourd’hui. Les intitulés sont ceux du référentiel Bac Pro AGOrA et du compte rendu que remplit votre tuteur. Touchez ? pour un exemple.')}</h3>
-      ${POLES.map(po => `<details class="pole" ${nbPole(po.n) ? 'open' : ''}><summary>Pôle ${po.n} · ${esc(po.t)}<span class="nb" data-nb="${po.n}">${nbPole(po.n) || ''}</span></summary><div class="sp">${po.sp.map(([c, t, l]) => `<small>${c} ${esc(t)}</small>${l.map(([id, lib, ex]) => `<div class="act"><input type="checkbox" id="a-${id}" data-a="${id}" ${coche(id) ? 'checked' : ''}><label for="a-${id}">${esc(lib)}</label>${aideBtn(ex)}</div>`).join('')}`).join('')}</div></details>`).join('')}
+    <section class="bloc"><h3><span class="n">1</span>Ma présence</h3><div class="choix" id="pres">${PRESENCE.map(r => `<button type="button" class="${j.pr === r ? 'on' : ''}" data-pr="${r}">${r}</button>`).join('')}</div>
+      <div id="motifZone" ${j.pr && j.pr !== PRESENCE[0] ? '' : 'hidden'}><label class="champ"><span>Pourquoi ? ${aideBtn('Une phrase suffit : rendez-vous médical, convention pas encore signée, transport… Pensez aussi à prévenir votre tuteur et le lycée.')}</span><input type="text" id="motif" maxlength="200" value="${esc(j.motif || '')}"></label></div></section>
+    <div id="suite" ${ABSENT_JOUR(j.pr) ? 'hidden' : ''}>
+    <section class="bloc" id="blocAccueil" ${premier ? '' : 'hidden'}><h3><span class="n">★</span>Mon accueil ${aideBtn('Votre premier jour dans l’organisation : comment avez-vous été accueilli ? Présentation de l’équipe, du poste, des consignes de sécurité…')}</h3><div class="choix" id="acc">${ACCUEIL1.map(r => `<button type="button" class="${j.acc === r ? 'on' : ''}" data-acc="${r}">${r}</button>`).join('')}</div>
+      <textarea id="accT" maxlength="600" style="min-height:70px;margin-top:10px" placeholder="Ce qui s’est passé à mon arrivée">${esc(j.accT || '')}</textarea></section>
+    <section class="bloc"><h3><span class="n">2</span>Ma journée</h3><div class="choix" id="ress">${RESSENTI.map(r => `<button type="button" class="${j.r === r ? 'on' : ''}" data-r="${r}">${r}</button>`).join('')}</div>
+      <textarea id="ressT" maxlength="600" style="min-height:60px;margin-top:10px" placeholder="Je précise (facultatif)">${esc(j.ressT || '')}</textarea></section>
+    <section class="bloc"><h3><span class="n">3</span>Les activités réalisées ${aideBtn('Cochez ce que vous avez fait aujourd’hui. Les intitulés sont ceux du référentiel Bac Pro AGOrA et du compte rendu que remplit votre tuteur. Touchez ? pour un exemple.')}</h3>
+      ${POLES.map(po => `<details class="pole" ${nbPole(po.n) || j.autres[po.n] ? 'open' : ''}><summary>Pôle ${po.n} · ${esc(po.t)}<span class="nb" data-nb="${po.n}">${nbPole(po.n) || ''}</span></summary><div class="sp">${po.sp.map(([c, t, l]) => `<small>${c} ${esc(t)}</small>${l.map(([id, lib, ex]) => `<div class="act"><input type="checkbox" id="a-${id}" data-a="${id}" ${coche(id) ? 'checked' : ''}><label for="a-${id}">${esc(lib)}</label>${aideBtn(ex)}</div>`).join('')}`).join('')}
+        <small>Autre activité</small><input type="text" data-autre="${po.n}" maxlength="200" value="${esc(j.autres[po.n] || '')}" placeholder="Une activité de ce pôle qui n’est pas dans la liste"></div></details>`).join('')}
+      <details class="pole" ${j.autres.x ? 'open' : ''}><summary>Autre · une activité hors des trois pôles</summary><div class="sp"><input type="text" data-autre="x" maxlength="200" value="${esc(j.autres.x || '')}" placeholder="Par exemple : visite d’un autre service"></div></details>
     </section>
-    <section class="bloc"><h3><span class="n">3</span>Mon compte rendu ${aideBtn('Quelques phrases suffisent : ce qui vous a été confié, comment vous l’avez fait, ce que vous avez appris. Touchez un début de phrase pour l’ajouter.')}</h3>
+    <section class="bloc"><h3><span class="n">4</span>Mon compte rendu ${aideBtn('Quelques phrases suffisent : ce qui vous a été confié, comment vous l’avez fait, ce que vous avez appris. Touchez un début de phrase pour l’ajouter.')}</h3>
       <div class="amorces">${AMORCES.map(a => `<button type="button" data-amorce="${esc(a)}">${esc(a)}</button>`).join('')}</div>
-      <textarea id="texte" maxlength="1500" placeholder="Ce que j’ai fait aujourd’hui">${esc(j.t)}</textarea><div class="compte" id="cpt"></div></section>`;
+      <textarea id="texte" maxlength="1500" placeholder="Ce que j’ai fait aujourd’hui">${esc(j.t)}</textarea><div class="compte" id="cpt"></div></section></div>`;
   const cpt = () => { $('cpt').textContent = $('texte').value.length + ' / 1500'; };
   cpt();
+  $('pres').onclick = e => { const b = e.target.closest('[data-pr]'); if (!b) return; j.pr = b.dataset.pr; $('pres').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); $('motifZone').hidden = j.pr === PRESENCE[0]; $('suite').hidden = ABSENT_JOUR(j.pr);
+    const prem = dates.find(x => x === d ? !ABSENT_JOUR(j.pr) : p.jours[x] && !ABSENT_JOUR(p.jours[x].pr)) === d; $('blocAccueil').hidden = !prem; marquer(); };
+  $('acc').onclick = e => { const b = e.target.closest('[data-acc]'); if (!b) return; j.acc = b.dataset.acc; $('acc').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); marquer(); };
+  $('app').querySelectorAll('[data-autre]').forEach(x => x.oninput = () => { j.autres[x.dataset.autre] = x.value; marquer(); });
+  ['motif', 'accT', 'ressT'].forEach(k => { $(k).oninput = () => { j[k] = $(k).value; marquer(); }; });
   $('ress').onclick = e => { const b = e.target.closest('[data-r]'); if (!b) return; j.r = b.dataset.r; $('ress').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); marquer(); };
   $('app').querySelectorAll('[data-a]').forEach(c => c.onchange = () => { const id = c.dataset.a; j.a = c.checked ? j.a.concat(id) : j.a.filter(x => x !== id); const n = ACT[id].pole; $('app').querySelector(`[data-nb="${n}"]`).textContent = nbPole(n) || ''; marquer(); });
   $('app').querySelectorAll('[data-amorce]').forEach(b => b.onclick = () => { const t = $('texte'); t.value = (t.value.trim() ? t.value.trim() + '\n' : '') + b.dataset.amorce + ' '; t.focus(); t.setSelectionRange(t.value.length, t.value.length); cpt(); marquer(); });
@@ -320,7 +340,7 @@ function ecranAccueil() {
 /* ── Le bilan. ── */
 function ecranBilan() {
   const p = P(), b = Object.assign({}, p.bilan);
-  $('titre').textContent = 'Mon bilan';
+  $('titre').textContent = 'Mon bilan · entretien avec mon référent';
   const Q = [['appris', 'Ce que j’ai appris', 'Les savoir-faire et les connaissances acquis pendant le stage.'], ['reussi', 'Ce que je réussis le mieux', 'Une ou deux activités où vous êtes à l’aise.'], ['progres', 'Ce que je dois améliorer', 'Une ou deux pistes de progrès, avec un moyen d’y arriver.'], ['projet', 'Mon projet après ce stage', 'Ce que ce stage confirme ou change dans votre projet.']];
   $('app').innerHTML = Q.map(([k, q, ex], n) => `<section class="bloc"><h3><span class="n">${n + 1}</span>${esc(q)} ${aideBtn(ex)}</h3><textarea data-k="${k}" maxlength="800" style="min-height:80px">${esc(b[k] || '')}</textarea></section>`).join('');
   $('app').oninput = () => marquer();
@@ -332,7 +352,10 @@ function ecranRapport() {
   const p = P(), per = PERIODES[D.periode], dates = datesDe(D.periode), o = p.org || {};
   $('titre').textContent = 'Mon rapport de stage';
   const jours = dates.filter(d => p.jours[d]);
-  const compte = {}; jours.forEach(d => p.jours[d].a.forEach(id => { compte[id] = (compte[id] || 0) + 1; }));
+  const compte = {}; jours.forEach(d => (p.jours[d].a || []).forEach(id => { compte[id] = (compte[id] || 0) + 1; }));
+  const autres = []; jours.forEach(d => Object.entries(p.jours[d].autres || {}).forEach(([k, v]) => { if (v && v.trim()) autres.push([k === 'x' ? 'Autre' : 'Pôle ' + k, v.trim(), d]); }));
+  const presents = jours.filter(d => !ABSENT_JOUR(p.jours[d].pr)), absences = jours.filter(d => p.jours[d].pr && p.jours[d].pr !== PRESENCE[0]);
+  const jAcc = jours.find(d => p.jours[d].acc);
   const sec = (t, h) => `<h2>${t}</h2>${h}`;
   const vide = '<p style="color:#888">Non renseigné.</p>';
   $('app').innerHTML = `<div class="actions-r"><button class="pri" onclick="print()"><i class="ti ti-file-download"></i> Enregistrer en PDF ou imprimer</button><button onclick="alert('Version réelle : le PDF est joint à un courriel prêt à envoyer au tuteur.')"><i class="ti ti-mail"></i> Envoyer à mon tuteur</button></div>
@@ -340,11 +363,12 @@ function ecranRapport() {
     <div class="garde"><small>Baccalauréat professionnel AGOrA · Seconde · ${per.lib}</small><h1>Rapport de période de formation en milieu professionnel</h1>
       <p>${esc(o.nom || 'Organisation d’accueil')} · ${esc(o.service || 'service')}</p><p>Du ${esc(frJ(dates[0]))} au ${esc(frJ(dates[dates.length - 1]))} · ${jours.length} journée${jours.length > 1 ? 's' : ''} renseignée${jours.length > 1 ? 's' : ''}</p></div>
     ${sec('1. L’organisation d’accueil', Object.keys(o).length ? `<table><tr><th>Secteur</th><td>${esc(o.secteur)}</td></tr><tr><th>Activité principale</th><td>${esc(o.activite)}</td></tr><tr><th>Service</th><td>${esc(o.service)}</td></tr><tr><th>Fonction du tuteur</th><td>${esc(o.tuteur)}</td></tr><tr><th>Effectif</th><td>${esc(o.effectif)}</td></tr></table>` : vide)}
-    ${sec('2. Les activités réalisées', Object.keys(compte).length ? `<table><tr><th>Référentiel</th><th>Activité</th><th>Jours</th></tr>${Object.keys(compte).sort((a, b) => ACT[a].sp.localeCompare(ACT[b].sp)).map(id => `<tr><td>${ACT[id].sp}</td><td>${esc(ACT[id].lib)}</td><td>${compte[id]}</td></tr>`).join('')}</table>` : vide)}
-    ${sec('3. Le journal de bord', jours.length ? `<table><tr><th style="width:24%">Jour</th><th>Compte rendu</th></tr>${jours.map(d => `<tr><td>${esc(frJ(d))}</td><td>${esc(p.jours[d].t)}</td></tr>`).join('')}</table>` : vide)}
-    ${sec('4. Activités décrites', p.act.filter(a => a && a.titre).map(a => `<p><b>${esc(a.titre)}</b>${a.sp ? ' · ' + esc(a.sp) : ''}</p><table>${Q5.map(([k, q]) => `<tr><th style="width:30%">${esc(q)}</th><td>${esc(a[k] || '')}</td></tr>`).join('')}</table>`).join('') || vide)}
-    ${sec('5. Mes compétences', Object.keys(p.comp).length ? `<table><tr><th>Compétence</th><th>Mon positionnement</th></tr>${TRANSV.map(([k, t]) => `<tr><td>${esc(t)}</td><td>${esc(p.comp[k] || '—')}</td></tr>`).join('')}</table>` : vide)}
-    ${sec('6. Bilan', Object.keys(p.bilan).length ? [['appris', 'Ce que j’ai appris'], ['reussi', 'Ce que je réussis le mieux'], ['progres', 'Ce que je dois améliorer'], ['projet', 'Mon projet']].map(([k, t]) => `<p><b>${t}.</b> ${esc(p.bilan[k] || '')}</p>`).join('') : vide)}
+    ${sec('2. Présence et accueil', `<table><tr><th>Jours de présence en entreprise</th><td>${presents.length} sur ${dates.length}</td></tr>${absences.map(d => `<tr><th>${esc(frJ(d))}</th><td>${esc(p.jours[d].pr)}${p.jours[d].motif ? ' · ' + esc(p.jours[d].motif) : ''}</td></tr>`).join('')}${jAcc ? `<tr><th>Mon accueil (${esc(frJ(jAcc))})</th><td>${esc(p.jours[jAcc].acc)}${p.jours[jAcc].accT ? ' · ' + esc(p.jours[jAcc].accT) : ''}</td></tr>` : ''}</table>`)}
+    ${sec('3. Les activités réalisées', Object.keys(compte).length || autres.length ? `<table><tr><th>Référentiel</th><th>Activité</th><th>Jours</th></tr>${Object.keys(compte).sort((a, b) => ACT[a].sp.localeCompare(ACT[b].sp)).map(id => `<tr><td>${ACT[id].sp}</td><td>${esc(ACT[id].lib)}</td><td>${compte[id]}</td></tr>`).join('')}${autres.map(([k, v, d]) => `<tr><td>${esc(k)}</td><td>${esc(v)}</td><td>${esc(frC(d))}</td></tr>`).join('')}</table>` : vide)}
+    ${sec('4. Le journal de bord', presents.length ? `<table><tr><th style="width:24%">Jour</th><th>Compte rendu</th></tr>${presents.map(d => `<tr><td>${esc(frJ(d))}${p.jours[d].r ? `<br><span style="color:#666">${esc(p.jours[d].r === 'Autre' ? 'Ma journée' : 'Journée : ' + p.jours[d].r.toLowerCase())}</span>` : ''}</td><td>${esc(p.jours[d].t || '')}${p.jours[d].ressT ? `<br><i style="color:#555">${esc(p.jours[d].ressT)}</i>` : ''}</td></tr>`).join('')}</table>` : vide)}
+    ${sec('5. Activités décrites', p.act.filter(a => a && a.titre).map(a => `<p><b>${esc(a.titre)}</b>${a.sp ? ' · ' + esc(a.sp) : ''}</p><table>${Q5.map(([k, q]) => `<tr><th style="width:30%">${esc(q)}</th><td>${esc(a[k] || '')}</td></tr>`).join('')}</table>`).join('') || vide)}
+    ${sec('6. Mes compétences', Object.keys(p.comp).length ? `<table><tr><th>Compétence</th><th>Mon positionnement</th></tr>${TRANSV.map(([k, t]) => `<tr><td>${esc(t)}</td><td>${esc(p.comp[k] || '—')}</td></tr>`).join('')}</table>` : vide)}
+    ${sec('7. Mon bilan, pour l’entretien avec mon référent', Object.keys(p.bilan).length ? [['appris', 'Ce que j’ai appris'], ['reussi', 'Ce que je réussis le mieux'], ['progres', 'Ce que je dois améliorer'], ['projet', 'Mon projet']].map(([k, t]) => `<p><b>${t}.</b> ${esc(p.bilan[k] || '')}</p>`).join('') : vide)}
     <div class="sign"><div>Signature de l’élève</div><div>Visa de l’enseignant référent</div></div>
   </article>`;
 }
