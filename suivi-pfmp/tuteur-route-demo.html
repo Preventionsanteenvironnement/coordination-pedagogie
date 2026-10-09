@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#c46f1c">
+<meta name="robots" content="noindex">
+<title>PFMP — feuille de route du tuteur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!--
+  Maquette (09/10/2026) : la feuille de route du tuteur, dans l'ordre du stage.
+  Pour chaque document : remplir en ligne → imprimer → cachet et signature → remettre au stagiaire → « C'est fait » (le référent le voit).
+  Le rendez-vous de visite, l'arrivée, le point d'étape et les présences sont dans la même feuille.
+  Démonstration : données fictives, aucune base.
+-->
+<style>
+:root{--ink:#1f2733;--muted:#6b7686;--line:#e8e3da;--bg:#f7f4ef;--card:#fff;--ent:#c46f1c;--ent-s:#fff3e6;--ok:#1f9d6b;--ok-s:#e8f6ef;--err:#c94a3c;--err-s:#fdecea;--bleu:#1d5fae;--bleu-s:#e6effa}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+.app{max-width:560px;margin:auto;padding:16px 16px 60px}
+.demo{display:flex;justify-content:space-between;gap:6px;font-size:12px;color:var(--muted);align-items:center;margin-bottom:8px}
+.demo a{color:var(--muted);text-decoration:none;font-weight:600}
+.tete{background:linear-gradient(140deg,#d9822b,#a95a12);color:#fff;border-radius:22px;padding:18px}
+.tete small{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.tete h1{margin:4px 0 2px;font-size:22px;letter-spacing:-.02em}
+.tete .l{font-size:14px;opacity:.95}
+.tete .ref{display:flex;align-items:center;gap:8px;margin-top:12px;background:rgba(255,255,255,.16);border-radius:12px;padding:8px 10px;font-size:13.5px}
+.avance{margin-top:12px;height:8px;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden}
+.avance i{display:block;height:100%;background:#fff;border-radius:99px;transition:width .3s}
+.avance-t{font-size:12.5px;margin-top:5px;opacity:.95}
+/* La route */
+.route{position:relative;margin-top:18px;padding-left:46px}
+.route::before{content:"";position:absolute;left:17px;top:10px;bottom:10px;width:3px;background:#e2d9cb;border-radius:3px}
+.moment{position:relative;margin:22px 0 8px -46px;padding-left:46px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.et{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+.et .num{position:absolute;left:-46px;top:12px;width:37px;height:37px;border-radius:50%;background:#fff;border:3px solid #e2d9cb;display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--muted)}
+.et.fait .num{background:var(--ok);border-color:var(--ok);color:#fff}
+.et.ici{border:2px solid var(--ent);box-shadow:0 10px 26px -16px rgba(196,111,28,.6)}
+.et.ici .num{border-color:var(--ent);color:var(--ent);box-shadow:0 0 0 5px var(--ent-s)}
+.et.plus-tard{opacity:.6}
+.et h3{margin:0;font-size:16.5px;display:flex;align-items:center;gap:8px}
+.et h3 i{color:var(--ent);font-size:20px}
+.et .s{font-size:13.5px;color:var(--muted);margin-top:2px}
+.etat{margin-left:auto;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.etat.ok{background:var(--ok-s);color:var(--ok)}.etat.att{background:var(--ent-s);color:var(--ent)}.etat.gris{background:#f0ece5;color:var(--muted)}
+.gestes{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.gestes li{display:flex;align-items:center;gap:10px;font-size:14.5px}
+.gestes .b{width:26px;height:26px;border-radius:50%;border:2px solid #d8d1c4;display:grid;place-items:center;flex:none;font-size:13px;color:transparent}
+.gestes li.ok .b{background:var(--ok);border-color:var(--ok);color:#fff}
+.gestes li.ok span.t{color:var(--muted)}
+.gestes a,.gestes button.lien{margin-left:auto;font-size:13px;font-weight:700;color:var(--ent);text-decoration:none;background:none;border:0;font-family:inherit;cursor:pointer;white-space:nowrap}
+.valider{margin-top:12px;width:100%;border:0;border-radius:14px;padding:13px;font:inherit;font-weight:700;font-size:15px;background:var(--ent);color:#fff;cursor:pointer;display:flex;gap:8px;justify-content:center;align-items:center}
+.valider.fait{background:var(--ok-s);color:var(--ok)}
+.ref-voit{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ok);font-weight:600;margin-top:8px}
+.choix{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.choix button{border:2px solid #d8d1c4;background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.choix button.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.semaine{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0 4px}
+.jour{border:1px solid var(--line);border-radius:12px;padding:6px 2px;text-align:center;font-size:12px;cursor:pointer;background:#fff;font-family:inherit}
+.jour b{display:block;font-size:15px}
+.jour.p{background:var(--ok-s);border-color:#bfe3d3;color:var(--ok)}
+.jour.a{background:var(--err-s);border-color:#f3c3be;color:var(--err)}
+.jour.r{background:var(--ent-s);border-color:#f1cfa8;color:var(--ent)}
+.total{font-size:14px;font-weight:700;margin-top:8px}
+textarea{width:100%;border:2px solid #e3dbcd;border-radius:12px;padding:9px 11px;font:inherit;font-size:14.5px;min-height:62px;margin-top:10px}
+.rdv{display:flex;gap:10px;align-items:center;background:var(--bleu-s);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:14px}
+.rdv i{color:var(--bleu);font-size:20px}
+.rgpd{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:20px;font-size:13px;color:var(--muted)}
+.rgpd i{font-size:20px;color:var(--ok)}
+.rgpd ul{margin:2px 0 0;padding-left:16px}
+</style>
+</head>
+<body>
+<main class="app">
+ <div class="demo"><a href="maquettes.html">← Les maquettes</a><span>Démonstration · touchez les cases</span></div>
+ <section class="tete">
+  <small>Feuille de route du tuteur · PFMP</small>
+  <h1>Stage du 4 au 15 janvier 2027</h1>
+  <div class="l">Bac Pro AGOrA · seconde · stagiaire K4A7</div>
+  <div class="ref"><i class="ti ti-school"></i> Enseignant référent : professeur d’économie-gestion</div>
+  <div class="avance"><i id="barre"></i></div><div class="avance-t" id="avanceT"></div>
+ </section>
+ <section class="route" id="route"></section>
+ <div class="rgpd"><i class="ti ti-shield-check"></i><div><b style="color:var(--ink)">Ce qui est enregistré</b><ul><li>Les documents se remplissent sur cet appareil et s’impriment : ils ne sont jamais envoyés.</li><li>Le lycée voit seulement vos « C’est fait », le rendez-vous, l’arrivée, le point d’étape et les présences.</li><li>Aucun nom de personne.</li></ul></div></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/* La feuille de route, dans l'ordre du stage. g : gestes cochés ; v : « C'est fait » envoyé au référent. */
+const ROUTE = [
+  { moment: 'Avant le stage' },
+  { id: 'nego', ic: 'list-check', t: 'Fiche de négociation', s: 'Les activités que le stagiaire pourra faire', doc: 'fiche-negociation-agora.html',
+    g: ['Remplir en ligne', 'Imprimer', 'Cachet, date et signature', 'Remettre la fiche au stagiaire'], v: 'Fiche remise au stagiaire' },
+  { id: 'pre', ic: 'file-text', t: 'Pré-convention', s: 'Accord pour la formation en entreprise', doc: 'pre-convention.html',
+    g: ['Remplir en ligne', 'Imprimer', 'Cachet et signature', 'Remettre la pré-convention au stagiaire'], v: 'Pré-convention remise au stagiaire' },
+  { id: 'conv', ic: 'signature', t: 'Convention de stage', s: 'Préparée par le lycée, apportée par le stagiaire',
+    g: ['Signer (responsable ou tuteur)', 'Cachet de l’entreprise', 'Rendre la convention au stagiaire'], v: 'Convention signée et rendue' },
+  { id: 'rdv', ic: 'calendar-event', t: 'Rendez-vous de visite', s: 'L’enseignant référent propose des créneaux', rdv: true },
+  { moment: 'Pendant le stage' },
+  { id: 'arr', ic: 'door-enter', t: 'Arrivée du stagiaire', s: 'Le premier jour', arr: true },
+  { id: 'mil', ic: 'mood-smile', t: 'Point d’étape', s: 'Au milieu du stage', mil: true },
+  { id: 'pres', ic: 'calendar-check', t: 'Présences', s: 'Jour après jour', pres: true },
+  { moment: 'Fin du stage' },
+  { id: 'cr', ic: 'clipboard-text', t: 'Compte rendu d’évaluation', s: 'À remplir avant la visite-bilan', doc: 'compte-rendu-evaluation.html',
+    g: ['Remplir en ligne', 'Imprimer', 'Signer', 'Le remettre à l’enseignant référent lors du bilan'], v: 'Compte rendu remis' },
+  { id: 'att', ic: 'certificate', t: 'Attestation de stage', s: 'Envoyée par l’enseignant référent', att: true,
+    g: ['Compléter le nombre de jours effectués', 'Cachet et signature', 'Remettre l’attestation au stagiaire'], v: 'Attestation remise au stagiaire' }
+];
+const E = { nego: { g: [1, 1, 1, 1], v: 1 }, pre: { g: [1, 1, 0, 0] } };
+const pres = {}, ETATS = { p: 'présent', a: 'absent', r: 'retard' };
+const jours = [['lun.', 4], ['mar.', 5], ['mer.', 6], ['jeu.', 7], ['ven.', 8], ['lun.', 11], ['mar.', 12], ['mer.', 13], ['jeu.', 14], ['ven.', 15]];
+let rdvChoisi = '', arrivee = '', milieu = '';
+const fini = x => x.rdv ? !!rdvChoisi : x.arr ? !!arrivee : x.mil ? !!milieu : x.pres ? Object.keys(pres).length >= jours.length : !!(E[x.id] && E[x.id].v);
+function corps(x) {
+  const e = E[x.id] || { g: [] };
+  if (x.g) {
+    const tous = x.g.every((_, k) => e.g && e.g[k]);
+    return `<ul class="gestes">${x.g.map((t, k) => `<li class="${e.g && e.g[k] ? 'ok' : ''}"><button class="b" data-g="${x.id}:${k}" aria-label="${esc(t)}" style="background:${e.g && e.g[k] ? '' : '#fff'};cursor:pointer">✓</button><span class="t">${esc(t)}</span>${k === 0 && x.doc ? `<a href="${x.doc}" target="_blank" rel="noopener">Ouvrir ↗</a>` : ''}${k === 0 && x.att ? `<span style="margin-left:auto;font-size:12.5px;color:var(--muted)">Vos présences : ${Object.values(pres).filter(v => v !== 'a').length} jours</span>` : ''}</li>`).join('')}</ul>`
+      + (e.v ? `<button class="valider fait" data-v="${x.id}"><i class="ti ti-circle-check"></i> ${esc(x.v)}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> L’enseignant référent est prévenu</div>`
+        : `<button class="valider" data-v="${x.id}" ${tous ? '' : 'style="opacity:.55"'}><i class="ti ti-send"></i> C’est fait : ${esc(x.v.charAt(0).toLowerCase() + x.v.slice(1))}</button>`);
+  }
+  if (x.rdv) return rdvChoisi ? `<div class="rdv"><i class="ti ti-calendar-check"></i><div><b>${esc(rdvChoisi)}</b><br><span style="color:var(--muted);font-size:13px">Visite de l’enseignant référent · confirmée</span></div></div>`
+    : `<div class="choix">${['mar. 12 janv. · 10 h', 'mer. 13 janv. · 14 h', 'jeu. 14 janv. · 9 h'].map(c => `<button data-rdv="${esc(c)}">${esc(c)}</button>`).join('')}</div>`;
+  if (x.arr) return `<div class="choix"><button data-arr="oui" class="${arrivee === 'oui' ? 'on' : ''}">Le stagiaire est bien arrivé</button><button data-arr="non" class="${arrivee === 'non' ? 'on' : ''}">Il n’est pas venu</button></div>`;
+  if (x.mil) return `<div class="choix"><button data-mil="ok" class="${milieu === 'ok' ? 'on' : ''}">Tout se passe bien</button><button data-mil="diff" class="${milieu === 'diff' ? 'on' : ''}">J’ai une difficulté</button></div>${milieu === 'diff' ? '<textarea placeholder="En une phrase, sans nom"></textarea>' : ''}`;
+  if (x.pres) { const n = Object.values(pres).filter(v => v !== 'a').length; return `<div class="semaine">${jours.slice(0, 5).map(jour).join('')}</div><div class="semaine">${jours.slice(5).map(jour).join('')}</div><div class="total">${n} jour${n > 1 ? 's' : ''} effectué${n > 1 ? 's' : ''} sur ${jours.length}</div>`; }
+  return '';
+}
+function jour([j, n]) { const k = String(n), e = pres[k] || ''; return `<button class="jour ${e}" data-j="${k}">${j}<b>${n}</b>${e ? ETATS[e] : '—'}</button>`; }
+function rendre() {
+  const etapes = ROUTE.filter(x => !x.moment), ici = etapes.find(x => !fini(x)), n = etapes.filter(fini).length;
+  let num = 0;
+  $('route').innerHTML = ROUTE.map(x => {
+    if (x.moment) return `<div class="moment">${esc(x.moment)}</div>`;
+    num++;
+    const f = fini(x), cls = f ? 'fait' : x === ici ? 'ici' : '';
+    const etat = f ? '<span class="etat ok">✓ Fait</span>' : x === ici ? '<span class="etat att">Maintenant</span>' : '<span class="etat gris">Plus tard</span>';
+    return `<div class="et ${cls}"><span class="num">${f ? '✓' : num}</span><h3><i class="ti ti-${x.ic}"></i>${esc(x.t)}${etat}</h3><div class="s">${esc(x.s)}</div>${corps(x)}</div>`;
+  }).join('');
+  $('barre').style.width = Math.round(100 * n / etapes.length) + '%';
+  $('avanceT').textContent = n + ' étape' + (n > 1 ? 's' : '') + ' sur ' + etapes.length;
+}
+document.addEventListener('click', ev => {
+  const g = ev.target.closest('[data-g]');
+  if (g) { const [id, k] = g.dataset.g.split(':'); const e = E[id] || (E[id] = { g: [] }); e.g[+k] = !e.g[+k]; if (!e.g[+k]) e.v = 0; rendre(); return; }
+  const v = ev.target.closest('[data-v]');
+  if (v) { const id = v.dataset.v, x = ROUTE.find(y => y.id === id), e = E[id] || (E[id] = { g: [] }); if (e.v) { e.v = 0; } else { x.g.forEach((_, k) => { e.g[k] = 1; }); e.v = 1; } rendre(); return; }
+  const r = ev.target.closest('[data-rdv]'); if (r) { rdvChoisi = r.dataset.rdv; rendre(); return; }
+  const a = ev.target.closest('[data-arr]'); if (a) { arrivee = a.dataset.arr; rendre(); return; }
+  const m = ev.target.closest('[data-mil]'); if (m) { milieu = m.dataset.mil; rendre(); return; }
+  const j = ev.target.closest('[data-j]'); if (j) { const k = j.dataset.j, o = ['', 'p', 'a', 'r']; pres[k] = o[(o.indexOf(pres[k] || '') + 1) % 4]; if (!pres[k]) delete pres[k]; rendre(); }
+});
+rendre();
+</script>
+</body>
+</html>
