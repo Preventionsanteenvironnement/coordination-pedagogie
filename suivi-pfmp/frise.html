@@ -308,6 +308,8 @@ async function reel(sid) {
     att_sent: 'Envoyer l’attestation au tuteur', assessment: 'Bilan avec le tuteur', attestation: 'Recevoir l’attestation', attestation_bde: 'Transmettre l’attestation', evaluation_pro: 'Remettre le compte rendu d’évaluation',
     appreciation: 'Clôturer dans Pronote', archive: 'Archiver la convention', dossier: 'Ranger le dossier de l’élève', intendance: 'Prévenir l’intendance' };
   const A_QUI = { pre_given: 'l’élève', conv_given: 'l’élève', copies: 'la famille et l’entreprise', pre_return: 'le référent', conv_return: 'le référent', attestation: 'le référent', neg_given: 'l’élève', neg_return: 'le référent', bde: 'le bureau des entreprises', bde_ok: 'le DDF', ddf_copies: 'le référent' };
+  const TUT_ETAPE = { neg_company: 'nego', pre_filled: 'pre', company: 'conv', attest_in: 'att' };
+  const TUT_LIB = { nego: 'fiche de négociation remise au stagiaire', pre: 'pré-convention remise au stagiaire', conv: 'convention signée et rendue', cr: 'compte rendu d’évaluation prêt', att: 'attestation remise au stagiaire' };
   const SUITE = { search: 'Établir sa fiche de négociation avec son enseignant professionnel.' };
 
   function construire(s, pr, R, ent) {
@@ -330,7 +332,10 @@ async function reel(sid) {
           let detail = parEleve ? 'Coché par l’élève' : 'Coché par vous';
           if (e === 'perdu') detail = '⚠︎ Perdu par l’élève';
           if (et.id === 'arrival' && tu && tu.arrivee) detail = 'Le tuteur a confirmé en ligne';
-          items.push({ cote: 'm:' + et.act, signe: A_QUI[et.id] ? 'r' : 'a', a: A_QUI[et.id], titre: et.t, detail, etat: fait || (parEleve && ['declare', 'fait', 'valide'].includes(e)) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), acts: parEleve && e !== 'perdu' ? [] : gestes(et, en), boite: et.id === 'ddf_copies' || et.id === 'neg_return', en });
+          /* La feuille de route du tuteur : ses « C'est fait » cochent l'étape de l'entreprise. */
+          const tk2 = TUT_ETAPE[et.id], fd = tk2 && tu && tu.docs && tu.docs[tk2] && tu.docs[tk2].v;
+          if (fd) detail = 'Fait en ligne par le tuteur · ' + fr(fd);
+          items.push({ cote: 'm:' + et.act, signe: A_QUI[et.id] ? 'r' : 'a', a: A_QUI[et.id], titre: et.t, detail, etat: fait || fd || (parEleve && ['declare', 'fait', 'valide'].includes(e)) ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), acts: parEleve && e !== 'perdu' ? [] : gestes(et, en), boite: et.id === 'ddf_copies' || et.id === 'neg_return', en });
           return;
         }
         if (et.ty === 'declare') {
@@ -395,6 +400,7 @@ async function reel(sid) {
     const perdus = Object.keys(P.GARDE).filter(id => P.entree(s, id).e === 'perdu');
     if (cb && cb.accueilEnvoye) tut.push('Avis sur l’accueil envoyé par l’élève le ' + cb.accueilEnvoye + ' (carnet de bord)');
     if (tu && tu.arrivee && tu.arrivee.v === 'non') tut.push('Le tuteur signale que le stagiaire n’est pas venu');
+    Object.entries((tu && tu.docs) || {}).filter(([, v]) => v && v.v).sort((a, b) => String(b[1].v).localeCompare(String(a[1].v))).slice(0, 2).forEach(([k, v]) => tut.push('Le tuteur : ' + (TUT_LIB[k] || k) + ' · ' + fr(v.v)));
     if (tu && tu.milieu && tu.milieu.v === 'difficulte') tut.push('Le tuteur signale une difficulté' + (tu.milieu.txt ? ' : « ' + tu.milieu.txt + ' »' : ''));
     bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + perdus.map(id => `<div class="l"><i class="ti ti-file-alert" style="color:var(--orange)"></i><span>${esc(s.code)} a perdu : ${esc(minus(P.GARDE[id]))}</span><button data-geste="${id}" data-action="redonner">Remis à nouveau</button></div>`).join('')
       + tut.map(x => `<div class="l"><i class="ti ti-alert-triangle" style="color:var(--orange)"></i><span>${esc(x)}</span></div>`).join('') + (l.length || tut.length || perdus.length ? l.map(x => {

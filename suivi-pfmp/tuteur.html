@@ -6,60 +6,60 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#c46f1c">
 <meta name="robots" content="noindex">
-<title>PFMP — espace du tuteur</title>
-
+<title>PFMP — feuille de route du tuteur</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
 <!--
-  Espace du tuteur en entreprise (09/10/2026), ouvert par le lien propre à un stage :
-    tuteur.html?f=2026-2027_K4A7_p1&t=<clé de 10 caractères>   (lien fabriqué dans l'Atelier PSE, envoyé par le référent)
+  Feuille de route du tuteur en entreprise (09/10/2026), ouverte par le lien propre à un stage :
+    tuteur.html?f=2026-2027_K4A7_p1&t=<clé de 10 caractères>[&m=<adresse académique du référent>]   (lien fabriqué dans l'Atelier PSE)
   Les documents (fiche de négociation, pré-convention, compte rendu) se remplissent en ligne et s'impriment :
   rien n'est enregistré par le lycée, la saisie reste sur l'appareil du tuteur. Cachet et signatures au stylo.
-  Seuls quelques gestes sans nom sont enregistrés, dans coordination_pfmp_tuteur/{fiche}_{clé} :
-  arrivée, point d'étape (une phrase), présences. Le rendez-vous de visite passe par rdv-pfmp.
+  Enregistré, sans nom : coordination_pfmp_tuteur/{fiche}_{clé} (gestes cochés, « C'est fait », arrivée, point d'étape, présences).
 -->
 <style>
-:root{--ink:#1f2733;--muted:#6b7686;--line:#e8e3da;--bg:#f7f4ef;--card:#fff;--ent:#c46f1c;--ent-s:#fff3e6;--ok:#1f9d6b;--ok-s:#e8f6ef;--err:#c94a3c;--err-s:#fdecea}
+:root{--ink:#1f2733;--muted:#6b7686;--line:#e8e3da;--bg:#f7f4ef;--card:#fff;--ent:#c46f1c;--ent-s:#fff3e6;--ok:#1f9d6b;--ok-s:#e8f6ef;--err:#c94a3c;--err-s:#fdecea;--bleu:#1d5fae;--bleu-s:#e6effa}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
 .app{max-width:560px;margin:auto;padding:16px 16px 60px}
 .demo{display:flex;justify-content:space-between;gap:6px;font-size:12px;color:var(--muted);align-items:center;margin-bottom:8px}
 .demo a{color:var(--muted);text-decoration:none;font-weight:600}
-.demo span{display:flex;gap:6px;align-items:center}
-.demo button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 10px;font:inherit;font-weight:700;cursor:pointer}
 .tete{background:linear-gradient(140deg,#d9822b,#a95a12);color:#fff;border-radius:22px;padding:18px}
 .tete small{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
 .tete h1{margin:4px 0 2px;font-size:22px;letter-spacing:-.02em}
 .tete .l{font-size:14px;opacity:.95}
 .tete .ref{display:flex;align-items:center;gap:8px;margin-top:12px;background:rgba(255,255,255,.16);border-radius:12px;padding:8px 10px;font-size:13.5px}
-.maint{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid var(--ent);border-radius:18px;padding:12px 14px;margin:14px 0}
-.maint .ic{width:40px;height:40px;border-radius:12px;background:var(--ent-s);color:var(--ent);display:grid;place-items:center;font-size:21px;flex:none}
-.maint small{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ent)}
-.maint b{font-size:15.5px}
-h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:22px 4px 8px;display:flex;align-items:center;gap:8px}
-.doc{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-bottom:10px;overflow:hidden}
-.doc summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px}
-.doc summary::-webkit-details-marker{display:none}
-.doc .n{width:36px;height:36px;border-radius:11px;background:#f1ece4;color:var(--muted);display:grid;place-items:center;font-size:19px;flex:none}
-.doc.fait .n{background:var(--ok);color:#fff}
-.doc.ici .n{background:var(--ent);color:#fff}
-.doc .x{flex:1;min-width:0}
-.doc .x b{display:block;font-size:15.5px}
-.doc .x span{font-size:13px;color:var(--muted)}
-.etat{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.avance{margin-top:12px;height:8px;border-radius:99px;background:rgba(255,255,255,.25);overflow:hidden}
+.avance i{display:block;height:100%;background:#fff;border-radius:99px;transition:width .3s}
+.avance-t{font-size:12.5px;margin-top:5px;opacity:.95}
+/* La route */
+.route{position:relative;margin-top:18px;padding-left:46px}
+.route::before{content:"";position:absolute;left:17px;top:10px;bottom:10px;width:3px;background:#e2d9cb;border-radius:3px}
+.moment{position:relative;margin:22px 0 8px -46px;padding-left:46px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.et{position:relative;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+.et .num{position:absolute;left:-46px;top:12px;width:37px;height:37px;border-radius:50%;background:#fff;border:3px solid #e2d9cb;display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--muted)}
+.et.fait .num{background:var(--ok);border-color:var(--ok);color:#fff}
+.et.ici{border:2px solid var(--ent);box-shadow:0 10px 26px -16px rgba(196,111,28,.6)}
+.et.ici .num{border-color:var(--ent);color:var(--ent);box-shadow:0 0 0 5px var(--ent-s)}
+.et.plus-tard{opacity:.6}
+.et h3{margin:0;font-size:16.5px;display:flex;align-items:center;gap:8px}
+.et h3 i{color:var(--ent);font-size:20px}
+.et .s{font-size:13.5px;color:var(--muted);margin-top:2px}
+.etat{margin-left:auto;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
 .etat.ok{background:var(--ok-s);color:var(--ok)}.etat.att{background:var(--ent-s);color:var(--ent)}.etat.gris{background:#f0ece5;color:var(--muted)}
-.doc.plus-tard summary{opacity:.62}
-.corps{padding:2px 14px 14px;border-top:1px solid var(--line)}
-.corps p{font-size:14px;color:var(--muted);margin:12px 0 8px}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.btn{border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:700;font-size:14.5px;cursor:pointer;display:inline-flex;gap:7px;align-items:center;text-decoration:none}
-.btn.pri{background:var(--ent);color:#fff}.btn.sec{background:#f3eee6;color:var(--ink)}.btn.ok{background:var(--ok);color:#fff}
-.stylo{display:flex;gap:10px;align-items:flex-start;background:#fffaf2;border:1px dashed #e6c39b;border-radius:12px;padding:10px 12px;margin-top:12px;font-size:13.5px}
-.stylo i{color:var(--ent);font-size:19px;margin-top:1px}
-.sans-nom{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
-textarea{width:100%;border:2px solid #e3dbcd;border-radius:12px;padding:9px 11px;font:inherit;font-size:14.5px;min-height:62px}
+.gestes{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.gestes li{display:flex;align-items:center;gap:10px;font-size:14.5px}
+.gestes .b{width:26px;height:26px;border-radius:50%;border:2px solid #d8d1c4;display:grid;place-items:center;flex:none;font-size:13px;color:transparent}
+.gestes li.ok .b{background:var(--ok);border-color:var(--ok);color:#fff}
+.gestes li.ok span.t{color:var(--muted)}
+.gestes a,.gestes button.lien{margin-left:auto;font-size:13px;font-weight:700;color:var(--ent);text-decoration:none;background:none;border:0;font-family:inherit;cursor:pointer;white-space:nowrap}
+.valider{margin-top:12px;width:100%;border:0;border-radius:14px;padding:13px;font:inherit;font-weight:700;font-size:15px;background:var(--ent);color:#fff;cursor:pointer;display:flex;gap:8px;justify-content:center;align-items:center}
+.valider.fait{background:var(--ok-s);color:var(--ok)}
+.ref-voit{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ok);font-weight:600;margin-top:8px}
+.choix{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.choix button{border:2px solid #d8d1c4;background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.choix button.on{background:var(--ok);border-color:var(--ok);color:#fff}
 .semaine{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0 4px}
 .jour{border:1px solid var(--line);border-radius:12px;padding:6px 2px;text-align:center;font-size:12px;cursor:pointer;background:#fff;font-family:inherit}
 .jour b{display:block;font-size:15px}
@@ -67,46 +67,66 @@ textarea{width:100%;border:2px solid #e3dbcd;border-radius:12px;padding:9px 11px
 .jour.a{background:var(--err-s);border-color:#f3c3be;color:var(--err)}
 .jour.r{background:var(--ent-s);border-color:#f1cfa8;color:var(--ent)}
 .total{font-size:14px;font-weight:700;margin-top:8px}
-.choix{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.choix button{border:2px solid #d8d1c4;background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
-.choix button.on{background:var(--ok);border-color:var(--ok);color:#fff}
-.papier{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px}
-.papier .n{width:36px;height:36px;border-radius:11px;background:#f1ece4;color:var(--ink);display:grid;place-items:center;font-size:19px;flex:none}
-.papier .x{flex:1;min-width:0}.papier b{display:block;font-size:15px}.papier span{font-size:13px;color:var(--muted)}
-.papier a{font-size:13px;font-weight:700;color:var(--ent);text-decoration:none;white-space:nowrap}
+textarea{width:100%;border:2px solid #e3dbcd;border-radius:12px;padding:9px 11px;font:inherit;font-size:14.5px;min-height:62px;margin-top:10px}
+.rdv{display:flex;gap:10px;align-items:center;background:var(--bleu-s);border-radius:12px;padding:10px 12px;margin-top:10px;font-size:14px}
+.rdv i{color:var(--bleu);font-size:20px}
 .rgpd{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:20px;font-size:13px;color:var(--muted)}
 .rgpd i{font-size:20px;color:var(--ok)}
 .rgpd ul{margin:2px 0 0;padding-left:16px}
-.err{font-size:13px;color:var(--err);margin-top:8px}
-.vide-msg{text-align:center;color:var(--muted);padding:60px 20px}
-.ok-msg{font-size:13px;color:var(--ok);font-weight:600;margin-top:8px;min-height:18px}
-[hidden]{display:none!important}
 .horaires-stagiaire{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:14px;font-size:13.5px;color:var(--muted)}.horaires-stagiaire i{font-size:20px;color:var(--ent)}.horaires-stagiaire b{color:var(--ink)}.horaires-stagiaire ul{margin:2px 0 0;padding-left:16px}
+
+
+details.et{display:block}
+details.et>summary{list-style:none;cursor:pointer}
+details.et>summary::-webkit-details-marker{display:none}
+details.et .corps{padding-top:4px}
+.aide{width:22px;height:22px;border-radius:50%;border:1.5px solid #d8cfc1;background:#fff;color:var(--muted);font:600 12px Inter,sans-serif;cursor:pointer;vertical-align:1px;margin-left:4px}
+.explic{background:var(--ent-s);border-radius:10px;padding:8px 11px;font-size:13.5px;color:var(--ink);margin:6px 0 2px}
+.copie{margin-top:10px;width:100%;border:1.5px solid #e6c39b;background:#fff;color:var(--ent);border-radius:12px;padding:11px;font:inherit;font-weight:700;font-size:14px;cursor:pointer;display:flex;gap:8px;justify-content:center;align-items:center}
+.nbj{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.gestes .b{background:#fff;cursor:pointer}
+.role{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 14px;margin-top:14px;font-size:14px}
+.role summary{cursor:pointer;font-weight:700;display:flex;gap:8px;align-items:center;list-style:none}
+.role summary::-webkit-details-marker{display:none}
+.role ul{margin:8px 0 6px;padding-left:18px;display:grid;gap:4px}
+.role small{color:var(--muted);font-size:12px}
+.horaires-stagiaire{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:14px;font-size:13.5px;color:var(--muted)}.horaires-stagiaire i{font-size:20px;color:var(--ent)}.horaires-stagiaire b{color:var(--ink)}.horaires-stagiaire ul{margin:2px 0 0;padding-left:16px}
+.vide-msg{text-align:center;color:var(--muted);padding:60px 20px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:10px 16px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20;max-width:90vw;text-align:center}
+.toast.vu{opacity:1}
+a.valider{color:#fff}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
 <main class="app" id="app">
  <section class="tete">
-  <small>Espace du tuteur · PFMP</small>
+  <small>Feuille de route du tuteur · PFMP</small>
   <h1 id="titre">Chargement…</h1>
   <div class="l" id="ligne"></div>
   <div class="ref" id="ref" hidden></div>
+  <div class="avance"><i id="barre"></i></div><div class="avance-t" id="avanceT"></div>
  </section>
- <div class="maint" id="maint" hidden></div>
-
- <h2><i class="ti ti-printer"></i> Les documents à remplir et imprimer</h2>
- <div class="papier"><span class="n"><i class="ti ti-list-check"></i></span><span class="x"><b>Fiche de négociation</b><span>Les activités possibles</span></span><a href="fiche-negociation-agora.html" target="_blank" rel="noopener">Remplir</a></div>
- <div class="papier"><span class="n"><i class="ti ti-file-text"></i></span><span class="x"><b>Pré-convention</b><span>Accord pour la formation en entreprise</span></span><a href="pre-convention.html" target="_blank" rel="noopener">Remplir</a></div>
- <div class="papier"><span class="n"><i class="ti ti-certificate"></i></span><span class="x"><b>Attestation de stage</b><span>Éditée avec la convention · envoyée par l’enseignant référent, à compléter le dernier jour</span></span></div>
- <div class="papier"><span class="n"><i class="ti ti-clipboard-text"></i></span><span class="x"><b>Compte rendu d’évaluation</b><span>Activités pratiquées, évaluation, bilan · à remplir avant la visite-bilan</span></span><a href="compte-rendu-evaluation.html" target="_blank" rel="noopener">Remplir</a></div>
- <div class="rgpd"><i class="ti ti-device-floppy"></i><div><b style="color:var(--ink)">Rien n’est envoyé au lycée</b><ul><li>Vous remplissez en ligne, puis vous imprimez : votre saisie reste sur cet appareil.</li><li>Cachet, date et signatures au stylo, sur le document imprimé.</li><li>Le stagiaire rapporte le document au lycée.</li></ul></div></div>
-
+ <details class="role"><summary><i class="ti ti-info-circle"></i> Votre rôle de tuteur</summary>
+  <ul>
+   <li>Accueillir le stagiaire, l’informer des règles de sécurité et veiller à son intégration.</li>
+   <li>Lui confier les activités prévues par la convention et l’accompagner.</li>
+   <li>Signaler à l’enseignant référent les retards, les absences ou toute difficulté.</li>
+   <li>Faire le bilan avec l’enseignant référent et le stagiaire.</li>
+  </ul>
+  <small>Source : circulaire n° 2016-053 du 29 mars 2016, organisation et accompagnement des PFMP.</small>
+ </details>
+ <section class="route" id="route"></section>
  <div class="horaires-stagiaire"><i class="ti ti-clock"></i><div><b>Horaires du stagiaire</b><ul><li>Moins de 18 ans : 8 h par jour et 35 h par semaine au plus, pause de 30 min après 4 h 30.</li><li>Ni nuit ni jour férié ; 2 jours de repos de suite, dimanche compris.</li><li>18 ans et plus : les horaires inscrits sur la convention.</li></ul></div></div>
- <h2><i class="ti ti-device-mobile"></i> Pendant le stage</h2>
- <div id="enligne"></div>
+ <div class="rgpd"><i class="ti ti-shield-check"></i><div><b style="color:var(--ink)">Ce qui est enregistré</b><ul><li>Les documents se remplissent sur cet appareil et s’impriment : ils ne sont jamais envoyés au lycée par cette page.</li><li>Le lycée voit vos « C’est fait », l’arrivée, le point d’étape et les présences.</li><li>Aucun nom de personne.</li></ul></div></div>
 </main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="./pfmp-commun.js?v=2026-10-09b"></script>
 <script type="module">
+/* Feuille de route du tuteur (09/10/2026), d'après la maquette validée tuteur-route-demo.html.
+   tuteur.html?f=<fiche>&t=<clé de 10 caractères>[&m=<adresse académique du référent>]
+   Lu : coordination_pfmp_suivi/<fiche> (dates, filière, matière du référent, rendez-vous).
+   Écrit : coordination_pfmp_tuteur/<fiche>_<clé> : docs (gestes cochés, « C'est fait »), arrivée, point d'étape, présences, vu. Aucun nom. */
 const P = window.PFMP_COMMUN;
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -116,7 +136,30 @@ const frCourt = s => new Date(s + 'T12:00:00').toLocaleDateString('fr-FR', { day
 const RDV = 'https://preventionsanteenvironnement.github.io/rdv-pfmp/';
 const FILIERES = { AGOrA: 'Bac Pro AGOrA', MELEC: 'Bac Pro MELEC', 'CAP PSR': 'CAP PSR' };
 const q = new URLSearchParams(location.search), sid = q.get('f') || '', tk = q.get('t') || '';
+const mailRef = /^[a-z0-9._%+-]+@ac-lyon\.fr$/i.test(q.get('m') || '') ? q.get('m') : '';
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('vu'); clearTimeout(toast.m); toast.m = setTimeout(() => el.classList.remove('vu'), 2600); }
 const vide = m => { $('app').innerHTML = `<p class="vide-msg">${m}</p>`; };
+
+/* La feuille de route, dans l'ordre du stage. g : gestes cochés ; v : « C'est fait » vu par le référent. ? : explication. */
+const ROUTE = [
+  { moment: 'Avant le stage' },
+  { id: 'nego', ic: 'list-check', t: 'Fiche de négociation', s: 'Les activités que le stagiaire pourra faire', doc: 'fiche-negociation-agora.html', aide: 'Elle fixe avec le lycée les activités confiées au stagiaire. Cochez les activités possibles dans votre organisation.',
+    g: ['Remplir en ligne', 'Imprimer', 'Cachet, date et signature', 'Remettre la fiche au stagiaire'], v: 'Fiche remise au stagiaire' },
+  { id: 'pre', ic: 'file-text', t: 'Pré-convention', s: 'Accord pour la formation en entreprise', doc: 'pre-convention.html', aide: 'Elle donne au lycée les informations nécessaires pour éditer la convention : adresses, responsable, tuteur, assurance, dates et horaires.',
+    g: ['Remplir en ligne', 'Imprimer', 'Cachet et signature', 'Remettre la pré-convention au stagiaire'], v: 'Pré-convention remise au stagiaire' },
+  { id: 'conv', ic: 'signature', t: 'Convention de stage', s: 'Préparée par le lycée, apportée par le stagiaire', aide: 'La convention est signée par le chef d’établissement, le représentant de l’organisation, le tuteur, l’enseignant référent et l’élève ou son représentant légal.',
+    g: ['Signer (responsable ou tuteur)', 'Cachet de l’organisation', 'Rendre la convention au stagiaire'], v: 'Convention signée et rendue' },
+  { id: 'rdv', ic: 'calendar-event', t: 'Rendez-vous de bilan', s: 'Avec l’enseignant référent et le stagiaire', rdv: true },
+  { moment: 'Pendant le stage' },
+  { id: 'arr', ic: 'door-enter', t: 'Arrivée du stagiaire', s: 'Le premier jour', arr: true, aide: 'Accueil, présentation de l’équipe et du poste, consignes de sécurité : le premier jour compte beaucoup.' },
+  { id: 'mil', ic: 'mood-smile', t: 'Point d’étape', s: 'Au milieu du stage', mil: true, aide: 'Un retard, une absence ou une difficulté se signalent à l’enseignant référent dès qu’ils arrivent.' },
+  { id: 'pres', ic: 'calendar-check', t: 'Présences', s: 'Jour après jour', pres: true, aide: 'Les présences aident à remplir l’attestation : seuls les jours réellement effectués y figurent.' },
+  { moment: 'Fin du stage' },
+  { id: 'cr', ic: 'clipboard-text', t: 'Compte rendu d’évaluation', s: 'À remplir avant le rendez-vous de bilan', doc: 'compte-rendu-evaluation.html', aide: 'Activités pratiquées, compétences et bilan : il sert à l’évaluation, faite avec l’enseignant référent en présence du stagiaire.',
+    g: ['Remplir en ligne', 'Imprimer', 'Signer', 'Le remettre à l’enseignant référent lors du bilan'], v: 'Compte rendu remis' },
+  { id: 'att', ic: 'certificate', t: 'Attestation de stage', s: 'Envoyée par l’enseignant référent', att: true, aide: 'Elle indique le nombre de jours réellement effectués. Ce nombre sert au versement de l’allocation de l’État au stagiaire.',
+    g: ['Compléter le nombre de jours effectués', 'Cachet et signature', 'Remettre l’attestation au stagiaire'], v: 'Attestation remise au stagiaire' }
+];
 
 if (!/^20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4]$/.test(sid) || !/^[a-z0-9]{10}$/.test(tk)) vide('Lien incomplet. Demandez le lien à l’enseignant référent.');
 else demarrer();
@@ -132,53 +175,46 @@ async function demarrer() {
     }
   } catch (e) { vide('Connexion impossible. Rechargez la page.'); return; }
   const refT = F.doc(db, 'coordination_pfmp_tuteur', sid + '_' + tk);
-  let s = null, T = {}, lu = 0, erreur = '', ouverts = null;
+  let s = null, T = {}, lu = 0, erreur = '', ouvert = new Set(), vuNote = false;
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid), x => { s = x.exists() ? x.data() : null; lu |= 1; rendre(); }, () => vide('Lecture impossible. Rechargez la page.'));
-  /* Tant que les règles ne connaissent pas cette collection, la page reste utilisable : seuls les gestes en ligne attendent. */
-  F.onSnapshot(refT, x => { T = x.exists() ? x.data() : {}; lu |= 2; rendre(); }, () => { lu |= 2; erreur = 'lecture'; rendre(); });
+  F.onSnapshot(refT, x => { T = x.exists() ? x.data() : {}; lu |= 2; if (!vuNote) { vuNote = true; ecrire({ vu: new Date().toISOString() }, '', true); } rendre(); }, () => { lu |= 2; erreur = 'lecture'; rendre(); });
 
-  /* Les jours de stage, du lundi au vendredi. */
   function jours() {
     const l = []; if (!s || !s.debut || !s.fin) return l;
-    for (let d = new Date(s.debut + 'T12:00:00'); d <= new Date(s.fin + 'T12:00:00') && l.length < 60; d.setDate(d.getDate() + 1)) {
-      const w = d.getDay(); if (w === 0 || w === 6) continue;
-      l.push(d.toLocaleDateString('sv-SE'));
-    }
+    for (let d = new Date(s.debut + 'T12:00:00'); d <= new Date(s.fin + 'T12:00:00') && l.length < 60; d.setDate(d.getDate() + 1)) { const w = d.getDay(); if (w && w !== 6) l.push(d.toLocaleDateString('sv-SE')); }
     return l;
   }
-  function etapesEnLigne() {
-    const t = auj(), v = (s && s.visite) || {};
-    return [
-      { id: 'rdv', t: 'Rendez-vous de visite', s: v.le ? 'Confirmé : ' + frLong(v.le) : 'Choisir un créneau pour la visite de l’enseignant référent', ic: 'calendar-event', fait: !!v.le, pret: !!v.rdv },
-      { id: 'arr', t: 'Arrivée et point d’étape', s: 'Deux gestes pendant le stage', ic: 'door-enter', fait: !!(T.arrivee && T.milieu), pret: !s.debut || t >= s.debut },
-      { id: 'pres', t: 'Présences', s: 'Présent, absent ou retard, jour après jour', ic: 'calendar-check', fait: !!s.fin && t > s.fin && Object.keys(T.presences || {}).length >= jours().length, pret: !s.debut || t >= s.debut }
-    ];
+  const D = () => T.docs || {};
+  const effectues = () => Object.values(T.presences || {}).filter(v => v === 'p' || v === 'r').length;
+  function fini(x) {
+    if (x.rdv) return !!(s.visite && s.visite.le);
+    if (x.arr) return !!T.arrivee;
+    if (x.mil) return !!T.milieu;
+    if (x.pres) { const J = jours(); return J.length > 0 && J.every(k => (T.presences || {})[k]); }
+    return !!(D()[x.id] && D()[x.id].v);
   }
-  function corps(d) {
-    const v = s.visite || {};
-    if (d.id === 'rdv') {
-      if (v.le) return `<p>Rendez-vous confirmé : <b style="color:var(--ink)">${esc(frLong(v.le))}</b>.</p><div class="btns"><a class="btn sec" href="${RDV}?r=${encodeURIComponent(v.rdv || '')}" target="_blank" rel="noopener"><i class="ti ti-calendar"></i> Voir le rendez-vous</a></div>`;
-      if (v.rdv) return `<p>L’enseignant référent propose des créneaux : choisissez celui qui vous convient.</p><div class="btns"><a class="btn pri" href="${RDV}?r=${encodeURIComponent(v.rdv)}" target="_blank" rel="noopener"><i class="ti ti-calendar-plus"></i> Choisir un créneau</a></div>`;
-      return `<p>L’enseignant référent vous proposera ici des créneaux pour sa visite.</p>`;
+  const aideBtn = t => t ? `<button class="aide" type="button" data-aide="${esc(t)}" aria-label="Explication">?</button>` : '';
+  function corps(x) {
+    if (erreur && !x.rdv) return '<p class="s">Cette partie ouvre bientôt.</p>';
+    const e = D()[x.id] || { g: [] };
+    if (x.g) {
+      const tous = x.g.every((_, k) => e.g && e.g[k]);
+      return `<ul class="gestes">${x.g.map((t, k) => `<li class="${e.g && e.g[k] ? 'ok' : ''}"><button class="b" data-g="${x.id}:${k}" aria-label="${esc(t)}">✓</button><span class="t">${esc(t)}</span>${k === 0 && x.doc ? `<a href="${x.doc}" target="_blank" rel="noopener">Ouvrir ↗</a>` : ''}${k === 0 && x.att ? `<span class="nbj">Présences : ${effectues()} jour${effectues() > 1 ? 's' : ''}</span>` : ''}</li>`).join('')}</ul>`
+        + (x.doc && mailRef ? `<button class="copie" data-copie="${x.id}"><i class="ti ti-mail"></i> Envoyer une copie à l’enseignant référent</button>` : '')
+        + (e.v ? `<button class="valider fait" data-v="${x.id}"><i class="ti ti-circle-check"></i> ${esc(x.v)} · ${esc(new Date(e.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> L’enseignant référent est prévenu</div>`
+          : `<button class="valider" data-v="${x.id}" ${tous ? '' : 'style="opacity:.6"'}><i class="ti ti-send"></i> C’est fait : ${esc(x.v.charAt(0).toLowerCase() + x.v.slice(1))}</button>`);
     }
-    if (erreur) return `<p>Cette partie ouvre bientôt. En attendant, l’enseignant référent vous appelle.</p>`;
-    if (d.id === 'arr') {
-      const a = T.arrivee || {}, m = T.milieu || {};
-      return `<p>Premier jour : un geste suffit, l’enseignant référent est prévenu.</p>
-        <div class="choix"><button data-arr="oui" class="${a.v === 'oui' ? 'on' : ''}">Le stagiaire est bien arrivé</button><button data-arr="non" class="${a.v === 'non' ? 'on' : ''}">Il n’est pas venu</button></div>
-        <p style="margin-top:16px">Au milieu du stage :</p>
-        <div class="choix"><button data-mil="ok" class="${m.v === 'ok' ? 'on' : ''}">Tout se passe bien</button><button data-mil="difficulte" class="${m.v === 'difficulte' ? 'on' : ''}">J’ai une difficulté</button></div>
-        ${m.v === 'difficulte' ? `<textarea id="txt" maxlength="200" placeholder="En une phrase">${esc(m.txt || '')}</textarea><div class="sans-nom"><i class="ti ti-user-off"></i> Sans nom de personne</div><div class="btns"><button class="btn pri" data-envoyer>Envoyer</button></div>` : ''}
-        <div class="ok-msg" id="okMsg"></div>`;
-    }
-    if (d.id === 'pres') {
-      const J = jours(), pz = T.presences || {}, ETATS = { p: 'présent', a: 'absent', r: 'retard' };
-      const n = J.filter(k => pz[k] === 'p' || pz[k] === 'r').length;
-      const sem = []; J.forEach(k => { const w = new Date(k + 'T12:00:00').getDay(); if (w === 1 || !sem.length) sem.push([]); sem[sem.length - 1].push(k); });
-      const jour = k => { const dt = new Date(k + 'T12:00:00'), e = pz[k] || ''; return `<button class="jour ${e}" data-j="${k}" style="grid-column:${dt.getDay()}">${dt.toLocaleDateString('fr-FR', { weekday: 'short' })}<b>${dt.getDate()}</b>${e ? ETATS[e] : '—'}</button>`; };
-      return `<p>Touchez un jour : présent, puis absent, puis retard.</p>${sem.map(w => `<div class="semaine">${w.map(jour).join('')}</div>`).join('')}
-        <div class="total">${n} jour${n > 1 ? 's' : ''} effectué${n > 1 ? 's' : ''} sur ${J.length}</div>
-        <p style="margin-top:6px">Ce total vous aide à remplir l’attestation papier, le dernier jour.</p>`;
+    if (x.rdv) { const v = s.visite || {}; return v.le ? `<div class="rdv"><i class="ti ti-calendar-check"></i><div><b>${esc(frLong(v.le))}${/T\d{2}:\d{2}/.test(v.le) ? ' · ' + (+v.le.slice(11, 13)) + ' h ' + v.le.slice(14, 16) : ''}</b><br><span style="color:var(--muted);font-size:13px">Rendez-vous de bilan · confirmé</span></div></div>`
+      : v.rdv ? `<p class="s">L’enseignant référent propose des créneaux : choisissez celui qui vous convient.</p><a class="valider" href="${RDV}?r=${encodeURIComponent(v.rdv)}" target="_blank" rel="noopener" style="text-decoration:none"><i class="ti ti-calendar-plus"></i> Choisir un créneau</a>`
+      : '<p class="s">L’enseignant référent vous proposera la date ici.</p>'; }
+    if (x.arr) { const a = T.arrivee || {}; return `<div class="choix"><button data-arr="oui" class="${a.v === 'oui' ? 'on' : ''}">Le stagiaire est bien arrivé</button><button data-arr="non" class="${a.v === 'non' ? 'on' : ''}">Il n’est pas venu</button></div>`; }
+    if (x.mil) { const m = T.milieu || {}; return `<div class="choix"><button data-mil="ok" class="${m.v === 'ok' ? 'on' : ''}">Tout se passe bien</button><button data-mil="difficulte" class="${m.v === 'difficulte' ? 'on' : ''}">J’ai une difficulté</button></div>${m.v === 'difficulte' ? `<textarea id="txt" maxlength="200" placeholder="En une phrase, sans nom">${esc(m.txt || '')}</textarea><button class="valider" data-envoyer style="margin-top:8px"><i class="ti ti-send"></i> Envoyer</button>` : ''}`; }
+    if (x.pres) {
+      const J = jours(), pz = T.presences || {}, ETATS = { p: 'présent', a: 'absent', r: 'retard' }, sem = [];
+      J.forEach(k => { const w = new Date(k + 'T12:00:00').getDay(); if (w === 1 || !sem.length) sem.push([]); sem[sem.length - 1].push(k); });
+      const jour = k => { const dt = new Date(k + 'T12:00:00'), e2 = pz[k] || ''; return `<button class="jour ${e2}" data-j="${k}" style="grid-column:${dt.getDay()}">${dt.toLocaleDateString('fr-FR', { weekday: 'short' })}<b>${dt.getDate()}</b>${e2 ? ETATS[e2] : '—'}</button>`; };
+      const n = effectues();
+      return `<p class="s">Touchez un jour : présent, puis absent, puis retard.</p>${sem.map(w => `<div class="semaine">${w.map(jour).join('')}</div>`).join('')}<div class="total">${n} jour${n > 1 ? 's' : ''} effectué${n > 1 ? 's' : ''} sur ${J.length}</div>`;
     }
     return '';
   }
@@ -189,33 +225,42 @@ async function demarrer() {
     $('titre').textContent = s.debut ? 'Stage du ' + debut + ' au ' + fin : (s.libelle || 'PFMP');
     $('ligne').textContent = [FILIERES[P.filiereDe(s.classe)] || '', 'stagiaire ' + s.code].filter(Boolean).join(' · ');
     if (s.refSigle) { $('ref').hidden = false; $('ref').innerHTML = `<i class="ti ti-school"></i> Enseignant référent : professeur ${/^[aeiouéèêh]/i.test(s.refSigle) ? 'd’' : 'de '}${esc(s.refSigle)}`; }
-    const L = etapesEnLigne(), ici = L.find(x => !x.fait && x.pret);
-    const t = auj(), apres = s.fin && t > s.fin;
-    $('maint').hidden = false;
-    $('maint').innerHTML = apres && !ici ? `<span class="ic"><i class="ti ti-heart-handshake"></i></span><div><small>Merci</small><b>Merci pour votre accueil</b></div>`
-      : ici ? `<span class="ic"><i class="ti ti-${ici.ic}"></i></span><div><small>Maintenant</small><b>${esc(ici.t)}</b></div>`
-      : `<span class="ic"><i class="ti ti-list-check"></i></span><div><small>Maintenant</small><b>Les documents à remplir et imprimer</b></div>`;
-    /* Ce qui est ouvert reste ouvert quand une donnée arrive. */
-    const deja = ouverts || ($('enligne').children.length ? new Set([...document.querySelectorAll('details.doc[open]')].map(x => x.dataset.id)) : null);
-    $('enligne').innerHTML = L.map(x => {
-      const cls = x.fait ? 'fait' : x === ici ? 'ici' : x.pret ? '' : 'plus-tard';
-      const etat = x.fait ? '<span class="etat ok">✓ Fait</span>' : x === ici ? '<span class="etat att">À faire</span>' : x.pret ? '' : '<span class="etat gris">Plus tard</span>';
-      const ouvert = deja ? deja.has(x.id) : x === ici;
-      return `<details class="doc ${cls}" data-id="${x.id}" ${ouvert ? 'open' : ''}><summary><span class="n"><i class="ti ti-${x.fait ? 'check' : x.ic}"></i></span><span class="x"><b>${esc(x.t)}</b><span>${esc(x.s)}</span></span>${etat}</summary><div class="corps">${corps(x)}</div></details>`;
+    const etapes = ROUTE.filter(x => !x.moment), ici = etapes.find(x => !fini(x)), n = etapes.filter(fini).length;
+    $('barre').style.width = Math.round(100 * n / etapes.length) + '%';
+    $('avanceT').textContent = n + ' étape' + (n > 1 ? 's' : '') + ' sur ' + etapes.length;
+    if (!ouvert.size && ici) ouvert.add(ici.id);
+    let num = 0;
+    $('route').innerHTML = ROUTE.map(x => {
+      if (x.moment) return `<div class="moment">${esc(x.moment)}</div>`;
+      num++;
+      const f = fini(x), cls = f ? 'fait' : x === ici ? 'ici' : '';
+      const etat = f ? '<span class="etat ok">✓ Fait</span>' : x === ici ? '<span class="etat att">Maintenant</span>' : '<span class="etat gris">Plus tard</span>';
+      return `<details class="et ${cls}" data-id="${x.id}" ${ouvert.has(x.id) ? 'open' : ''}><summary><span class="num">${f ? '✓' : num}</span><h3><i class="ti ti-${x.ic}"></i>${esc(x.t)}${etat}</h3><div class="s">${esc(x.s)} ${aideBtn(x.aide)}</div></summary><div class="corps">${corps(x)}</div></details>`;
     }).join('');
   }
-  const garder = () => { ouverts = new Set([...document.querySelectorAll('details.doc[open]')].map(x => x.dataset.id)); rendre(); ouverts = null; };
-  async function ecrire(maj, msg) {
+  async function ecrire(maj, msg, discret) {
     const d = Object.assign({}, T, maj, { majLe: new Date().toISOString() });
-    try { await F.setDoc(refT, d); T = d; garder(); const o = $('okMsg'); if (o && msg) o.textContent = msg; }
-    catch (e) { garder(); const o = $('okMsg'); if (o) { o.className = 'err'; o.textContent = 'Non enregistré. Réessayez plus tard.'; } }
+    try { await F.setDoc(refT, d); T = d; if (!discret) { rendre(); if (msg) toast(msg); } }
+    catch (e) { if (!discret) toast('Non enregistré. Réessayez plus tard.'); }
   }
+  document.addEventListener('toggle', ev => { const d = ev.target; if (d.matches && d.matches('details.et')) { if (d.open) ouvert.add(d.dataset.id); else ouvert.delete(d.dataset.id); } }, true);
   document.addEventListener('click', ev => {
+    const h = ev.target.closest('[data-aide]');
+    if (h) { ev.preventDefault(); const nx = h.closest('.s').nextElementSibling; if (nx && nx.classList.contains('explic')) nx.remove(); else h.closest('.s').insertAdjacentHTML('afterend', `<div class="explic">${esc(h.dataset.aide)}</div>`); return; }
+    const g = ev.target.closest('[data-g]');
+    if (g) { const [id, k] = g.dataset.g.split(':'); const docs = JSON.parse(JSON.stringify(D())), e = docs[id] || (docs[id] = { g: [] }); e.g[+k] = !e.g[+k]; if (!e.g[+k]) e.v = ''; e.g = e.g.map(Boolean); ecrire({ docs }); return; }
+    const v = ev.target.closest('[data-v]');
+    if (v) { const id = v.dataset.v, x = ROUTE.find(y => y.id === id), docs = JSON.parse(JSON.stringify(D())), e = docs[id] || (docs[id] = { g: [] });
+      if (e.v) { e.v = ''; ecrire({ docs }, 'Annulé'); } else { e.g = x.g.map(() => true); e.v = new Date().toISOString(); ecrire({ docs }, 'L’enseignant référent est prévenu'); } return; }
+    const c = ev.target.closest('[data-copie]');
+    if (c) { const x = ROUTE.find(y => y.id === c.dataset.copie);
+      location.href = 'mailto:' + mailRef + '?subject=' + encodeURIComponent('PFMP · ' + s.code + ' · ' + x.t) + '&body=' + encodeURIComponent('Bonjour,\n\nVeuillez trouver ci-joint une copie du document « ' + x.t + ' » pour le stagiaire ' + s.code + '.\n\nCordialement');
+      toast('Joignez le PDF enregistré depuis « Imprimer » du document.'); return; }
     const j = ev.target.closest('[data-j]');
-    if (j) { const k = j.dataset.j, o = ['', 'p', 'a', 'r'], pz = Object.assign({}, T.presences || {}); const n = o[(o.indexOf(pz[k] || '') + 1) % 4]; if (n) pz[k] = n; else delete pz[k]; ecrire({ presences: pz }); return; }
-    const a = ev.target.closest('[data-arr]'); if (a) { ecrire({ arrivee: { v: a.dataset.arr, le: new Date().toISOString() } }, '✓ L’enseignant référent est prévenu'); return; }
-    const m = ev.target.closest('[data-mil]'); if (m) { ecrire({ milieu: { v: m.dataset.mil, le: new Date().toISOString() } }, m.dataset.mil === 'ok' ? '✓ L’enseignant référent est prévenu' : ''); return; }
-    if (ev.target.closest('[data-envoyer]')) { const txt = ($('txt').value || '').trim().slice(0, 200); ecrire({ milieu: { v: 'difficulte', txt, le: new Date().toISOString() } }, '✓ L’enseignant référent est prévenu'); }
+    if (j) { const k = j.dataset.j, o = ['', 'p', 'a', 'r'], pz = Object.assign({}, T.presences || {}); const n2 = o[(o.indexOf(pz[k] || '') + 1) % 4]; if (n2) pz[k] = n2; else delete pz[k]; ecrire({ presences: pz }); return; }
+    const a = ev.target.closest('[data-arr]'); if (a) { ecrire({ arrivee: { v: a.dataset.arr, le: new Date().toISOString() } }, 'L’enseignant référent est prévenu'); return; }
+    const m = ev.target.closest('[data-mil]'); if (m) { ecrire({ milieu: { v: m.dataset.mil, le: new Date().toISOString() } }, m.dataset.mil === 'ok' ? 'L’enseignant référent est prévenu' : ''); return; }
+    if (ev.target.closest('[data-envoyer]')) { const txt = ($('txt').value || '').trim().slice(0, 200); ecrire({ milieu: { v: 'difficulte', txt, le: new Date().toISOString() } }, 'L’enseignant référent est prévenu'); }
   });
 }
 </script>

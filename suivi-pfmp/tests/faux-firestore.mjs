@@ -61,7 +61,8 @@ export function regles(chemin, avant, apres) {
   if (p[0] === 'coordination_pfmp_tuteur' && p.length === 2) {
     const m = /^(20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4])_[a-z0-9]{10}$/.exec(p[1]);
     if (!m) refuse('id tuteur');
-    Object.keys(apres).forEach(k => { if (!['arrivee', 'milieu', 'presences', 'majLe'].includes(k)) refuse('champ ' + k); });
+    Object.keys(apres).forEach(k => { if (!['arrivee', 'milieu', 'presences', 'docs', 'vu', 'majLe'].includes(k)) refuse('champ ' + k); });
+    if (apres.docs && Object.keys(apres.docs).length > 10) refuse('docs');
     if (typeof apres.majLe !== 'string' || apres.majLe.length > 40) refuse('majLe');
     if (apres.arrivee && Object.keys(apres.arrivee).some(k => !['v', 'le'].includes(k))) refuse('arrivee');
     if (apres.milieu && (Object.keys(apres.milieu).some(k => !['v', 'txt', 'le'].includes(k)) || String(apres.milieu.txt || '').length > 200)) refuse('milieu');
