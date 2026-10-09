@@ -47,6 +47,15 @@ h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute
 .jours a.fait{background:var(--ok-s);border-color:#b9dfc9;color:var(--ok)}
 .jours a.ici{border:2px solid var(--b)}
 .jours a.avenir{color:#a3adbd}
+.jours a{position:relative}
+.jours a.absent{background:#f3f4f6;color:#8a94a3}
+.jours .tag{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--b);margin-top:1px}
+.jours .pastille{position:absolute;top:5px;right:6px;width:9px;height:9px;border-radius:50%;background:#d9480f;box-shadow:0 0 0 2px #fff}
+.convoc{display:flex;gap:12px;align-items:center;background:#fff4e6;border:1.5px solid #f6c99b;border-radius:16px;padding:12px 14px;margin-top:12px}
+.convoc i{font-size:26px;color:#d9480f}.convoc small{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#b4430c}
+.convoc b{display:block;font-size:16px}.convoc span{font-size:13px;color:var(--ink2)}
+.lien-demo{border:0;background:none;color:var(--b);font:inherit;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline}
+.ligne.enplus{border:1.5px solid #bcd0ec;background:#f7faff}
 .ligne{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;text-decoration:none;color:var(--ink)}
 .ligne .ic{width:36px;height:36px;border-radius:10px;background:var(--b-s);color:var(--b);display:grid;place-items:center;font-size:19px;flex:none}
 .ligne .x{flex:1;min-width:0}.ligne .x b{display:block;font-size:15px;font-weight:600}.ligne .x span{font-size:13px;color:var(--muted)}
@@ -228,26 +237,30 @@ function aideBtn(texte) { return `<button class="aide" type="button" data-aide="
 document.addEventListener('click', e => { const b = e.target.closest('[data-aide]'); if (!b) return; const nx = b.parentElement.nextElementSibling; if (nx && nx.classList.contains('explic')) { nx.remove(); return; } b.parentElement.insertAdjacentHTML('afterend', `<div class="explic">${esc(b.dataset.aide)}</div>`); });
 
 /* ── Le carnet ── */
+/* Le rendez-vous de bilan avec le tuteur : fixé par le référent (outil RDV PFMP), lu par le carnet. Démonstration : bouton « Simuler ». */
+const rdvDe = () => (D.rdv || {})[D.periode] || null;
+/* Le premier jour réellement passé en entreprise : l'étiquette « Début du stage » le suit. */
+function debutReel(p, dates) { return dates.find(x => p.jours[x] && !ABSENT_JOUR(p.jours[x].pr)) || dates.find(x => !p.jours[x]) || dates[0]; }
+function rangPresence(p, dates, d, prD) { let n = 0; for (const x of dates) { const pr = x === d ? prD : p.jours[x] ? p.jours[x].pr : PRESENCE[0]; if (pr && !ABSENT_JOUR(pr)) n++; if (x === d) return n; } return 0; }
 function ecranCarnet() {
   $('titre').textContent = 'Mon carnet de bord PFMP';
   const p = P(), dates = datesDe(D.periode), faits = dates.filter(d => p.jours[d]);
-  const ici = dates.find(d => !p.jours[d]) || dates[dates.length - 1];
-  const nAct = p.act.filter(a => a && a.titre).length;
+  const ici = dates.find(d => !p.jours[d]) || dates[dates.length - 1], debut = debutReel(p, dates), fin = dates[dates.length - 1], rdv = rdvDe();
   const ok = x => Object.keys(x || {}).length > 0;
-  $('app').innerHTML = `<div class="demo"><span>Démonstration · enregistré dans ce navigateur</span><a href="maquettes.html">Les maquettes</a></div>
+  const tag = d => d === debut ? '<span class="tag">Début</span>' : d === fin ? '<span class="tag">Fin</span>' : '';
+  $('app').innerHTML = `<div class="demo"><span>Démonstration · enregistré dans ce navigateur</span><button class="lien-demo" id="simRdv">${rdv ? 'Retirer le rendez-vous' : 'Simuler : rendez-vous fixé'}</button></div>
     <div class="periodes">${Object.entries(PERIODES).map(([k, v]) => `<button class="${D.periode === k ? 'on' : ''}" data-periode="${k}"><b>${v.lib}</b><span>${v.quand}</span></button>`).join('')}</div>
+    ${rdv ? `<div class="convoc"><i class="ti ti-calendar-event"></i><div><small>Rendez-vous de bilan</small><b>${esc(frJ(rdv.date))} · ${esc(rdv.h)}</b><span>Avec mon tuteur et mon enseignant référent, dans l’entreprise</span></div></div>` : ''}
     <a class="aujourdhui" href="#/jour/${ici}"><div class="x"><small>${faits.length < dates.length ? 'Ma journée' : 'Dernière journée'}</small><b>${esc(frJ(ici))}</b></div><i class="ti ti-chevron-right"></i></a>
     <h2>Mes journées · ${faits.length} / ${dates.length}</h2>
-    <div class="jours">${dates.map(d => `<a href="#/jour/${d}" class="${p.jours[d] ? 'fait' : d === ici ? 'ici' : 'avenir'}">${frC(d).split(' ')[0]}<b>${new Date(d + 'T12:00:00').getDate()}</b></a>`).join('')}</div>
-    <h2>Pendant le stage</h2>
-    <a class="ligne" href="#/organisation"><span class="ic"><i class="ti ti-building"></i></span><span class="x"><b>Mon organisation d’accueil</b><span>Secteur, service, tuteur</span></span><span class="puce ${ok(p.org) ? 'ok' : 'att'}">${ok(p.org) ? '✓ Fait' : 'À faire'}</span></a>
-    ${[0, 1, 2].map(i => { const a = p.act[i]; return `<a class="ligne" href="#/activite/${i}"><span class="ic"><i class="ti ti-clipboard-text"></i></span><span class="x"><b>${a && a.titre ? esc(a.titre) : 'Activité décrite n° ' + (i + 1)}</b><span>${i < 2 ? 'Une activité en détail' : 'Facultative'}</span></span><span class="puce ${a && a.titre ? 'ok' : 'att'}">${a && a.titre ? '✓ Fait' : 'À faire'}</span></a>`; }).join('')}
-    <h2>À la fin du stage</h2>
-    <a class="ligne" href="#/competences"><span class="ic"><i class="ti ti-chart-dots"></i></span><span class="x"><b>Mes compétences</b><span>Six compétences, comme le compte rendu du tuteur</span></span><span class="puce ${ok(p.comp) ? 'ok' : 'att'}">${ok(p.comp) ? '✓ Fait' : 'À faire'}</span></a>
-    <a class="ligne" href="#/accueil"><span class="ic"><i class="ti ti-mood-smile"></i></span><span class="x"><b>Mon avis sur l’accueil</b><span>Annexe 4 de la convention</span></span><span class="puce ${ok(p.accueil) ? 'ok' : 'att'}">${ok(p.accueil) ? '✓ Fait' : 'À faire'}</span></a>
-    <a class="ligne" href="#/bilan"><span class="ic"><i class="ti ti-flag"></i></span><span class="x"><b>Mon bilan</b><span>À apporter à l’entretien avec mon référent</span></span><span class="puce ${ok(p.bilan) ? 'ok' : 'att'}">${ok(p.bilan) ? '✓ Fait' : 'À faire'}</span></a>
+    <div class="jours">${dates.map(d => `<a href="#/jour/${d}" class="${p.jours[d] ? (ABSENT_JOUR(p.jours[d].pr) ? 'absent' : 'fait') : d === ici ? 'ici' : 'avenir'}">${rdv && rdv.date === d ? '<i class="pastille" title="Rendez-vous de bilan"></i>' : ''}${frC(d).split(' ')[0]}<b>${new Date(d + 'T12:00:00').getDate()}</b>${tag(d)}</a>`).join('')}</div>
+    <h2>Préparer ma fin de stage</h2>
+    <a class="ligne" href="#/competences"><span class="ic"><i class="ti ti-chart-dots"></i></span><span class="x"><b>Mes compétences</b><span>${rdv ? 'Prêtes pour le rendez-vous de bilan · ' + esc(frJ(rdv.date)) : 'Prêtes pour le rendez-vous de bilan avec mon tuteur'}</span></span><span class="puce ${ok(p.comp) ? 'ok' : 'att'}">${ok(p.comp) ? '✓ Prêtes' : 'À faire'}</span></a>
+    <a class="ligne" href="#/accueil"><span class="ic"><i class="ti ti-mood-smile"></i></span><span class="x"><b>Mon avis sur l’accueil</b><span>Envoyé à mon référent et à mon professeur principal</span></span><span class="puce ${p.accueilEnvoye ? 'ok' : 'att'}">${p.accueilEnvoye ? '✓ Envoyé' : 'À faire'}</span></a>
+    <a class="ligne" href="#/bilan"><span class="ic"><i class="ti ti-flag"></i></span><span class="x"><b>Mon bilan</b><span>Pour l’entretien avec mon référent</span></span><span class="puce ${ok(p.bilan) ? 'ok' : 'att'}">${ok(p.bilan) ? '✓ Fait' : 'À faire'}</span></a>
     <a class="rapport-btn" href="#/rapport"><i class="ti ti-file-text"></i> Mon rapport de stage</a>`;
   $('app').querySelectorAll('[data-periode]').forEach(b => b.onclick = () => { D.periode = b.dataset.periode; garder(); rendre(); });
+  $('simRdv').onclick = () => { D.rdv = D.rdv || {}; D.rdv[D.periode] = rdv ? null : { date: dates[Math.min(8, dates.length - 2)], h: '10 h 00' }; garder(); rendre(); };
 }
 
 /* ── Une journée : ressenti, activités, compte rendu. ── */
@@ -257,6 +270,13 @@ function ecranJour(d) {
   j.autres = j.autres || {};
   /* Le premier jour réellement passé en entreprise (pas forcément le lundi) : la question de l'accueil. */
   const premier = dates.find(x => x === d ? !ABSENT_JOUR(j.pr) : p.jours[x] && !ABSENT_JOUR(p.jours[x].pr)) === d;
+  const rang = rangPresence(p, dates, d, j.pr || PRESENCE[0]), rdv = rdvDe();
+  const ok = x => Object.keys(x || {}).length > 0;
+  /* Ce que la journée apporte : l'organisation le premier jour, une activité en détail au 3e et au 7e jour, la préparation du bilan le jour du rendez-vous. */
+  const enPlus = [];
+  if (premier) enPlus.push(['#/organisation', 'building', 'Mon organisation d’accueil', 'Quelques lignes sur l’organisation, à faire aujourd’hui', ok(p.org)]);
+  if (rang === 3 || rang === 7) { const k = rang === 3 ? 0 : 1, a = p.act[k]; enPlus.push(['#/activite/' + k, 'clipboard-text', 'Une activité en détail', a && a.titre ? a.titre : 'Racontez une activité importante, en 5 questions', !!(a && a.titre)]); }
+  if (rdv && rdv.date === d) enPlus.push(['#/competences', 'chart-dots', 'Rendez-vous de bilan aujourd’hui · ' + rdv.h, 'Mes compétences doivent être prêtes', ok(p.comp)]);
   $('titre').textContent = 'Jour ' + (i + 1) + ' sur ' + dates.length;
   const coche = id => j.a.includes(id);
   const nbPole = n => j.a.filter(id => ACT[id] && ACT[id].pole === n).length;
@@ -266,6 +286,7 @@ function ecranJour(d) {
     <div id="suite" ${ABSENT_JOUR(j.pr) ? 'hidden' : ''}>
     <section class="bloc" id="blocAccueil" ${premier ? '' : 'hidden'}><h3><span class="n">★</span>Mon accueil ${aideBtn('Votre premier jour dans l’organisation : comment avez-vous été accueilli ? Présentation de l’équipe, du poste, des consignes de sécurité…')}</h3><div class="choix" id="acc">${ACCUEIL1.map(r => `<button type="button" class="${j.acc === r ? 'on' : ''}" data-acc="${r}">${r}</button>`).join('')}</div>
       <textarea id="accT" maxlength="600" style="min-height:70px;margin-top:10px" placeholder="Ce qui s’est passé à mon arrivée">${esc(j.accT || '')}</textarea></section>
+    ${enPlus.map(([h, ic, t2, s, f]) => `<a class="ligne enplus" href="${h}"><span class="ic"><i class="ti ti-${ic}"></i></span><span class="x"><b>${esc(t2)}</b><span>${esc(s)}</span></span><span class="puce ${f ? 'ok' : 'att'}">${f ? '✓ Fait' : 'Aujourd’hui'}</span></a>`).join('')}
     <section class="bloc"><h3><span class="n">2</span>Ma journée</h3><div class="choix" id="ress">${RESSENTI.map(r => `<button type="button" class="${j.r === r ? 'on' : ''}" data-r="${r}">${r}</button>`).join('')}</div>
       <textarea id="ressT" maxlength="600" style="min-height:60px;margin-top:10px" placeholder="Je précise (facultatif)">${esc(j.ressT || '')}</textarea></section>
     <section class="bloc"><h3><span class="n">3</span>Les activités réalisées ${aideBtn('Cochez ce que vous avez fait aujourd’hui. Les intitulés sont ceux du référentiel Bac Pro AGOrA et du compte rendu que remplit votre tuteur. Touchez ? pour un exemple.')}</h3>
@@ -334,6 +355,8 @@ function ecranAccueil() {
     `<section class="bloc"><h3>Observations</h3><textarea id="obs" maxlength="600">${esc(a.obs || '')}</textarea></section>`;
   $('app').querySelectorAll('[data-q]').forEach(g => g.onclick = e => { const b = e.target.closest('button'); if (!b) return; a[g.dataset.q] = b.textContent; g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); marquer(); });
   $('obs').oninput = () => marquer();
+  $('app').insertAdjacentHTML('beforeend', `<button class="rapport-btn" id="envoyerAvis" style="background:var(--b)"><i class="ti ti-send"></i> ${p.accueilEnvoye ? 'Envoyé le ' + esc(p.accueilEnvoye) : 'Envoyer à mon référent et à mon professeur principal'}</button>`);
+  $('envoyerAvis').onclick = () => { if (Object.keys(a).filter(k => k !== 'obs').length < ACCUEIL.length) { toast('Répondez aux 10 questions avant d’envoyer.'); return; } a.obs = $('obs').value; p.accueil = a; p.accueilEnvoye = new Date().toLocaleDateString('fr-FR'); garder(); modifie = false; toast('Envoyé à votre référent et à votre professeur principal'); rendre(); };
   enregistrer(() => { a.obs = $('obs').value; p.accueil = a; });
 }
 
