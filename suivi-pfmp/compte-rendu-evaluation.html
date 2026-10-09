@@ -50,17 +50,18 @@ input:focus,textarea:focus{outline:none;border-color:var(--acc)}
 .compte{font-size:12px;color:var(--muted);text-align:right}
 .apercu{position:sticky;top:76px;min-width:0;overflow:hidden;max-height:calc(100vh - 92px);overflow-y:auto}
 .apercu h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
-.cadre{background:#fff;box-shadow:0 10px 30px -14px rgba(0,0,0,.35);overflow:hidden;max-width:100%;margin-bottom:14px}
-.page{position:relative;width:595.3pt;height:842pt;transform-origin:0 0;background:#fff}
+.cadre{background:#fff;box-shadow:0 10px 30px -14px rgba(0,0,0,.35);overflow:hidden;max-width:595.3pt;margin-bottom:14px}
+/* Feuilles élastiques : tout en proportion de la largeur, une feuille = une page A4 dans n'importe quel navigateur. */
+.page{position:relative;width:100%;aspect-ratio:595.3/842;background:#fff;container-type:inline-size;overflow:hidden}
 .page img{position:absolute;inset:0;width:100%;height:100%}
-.val{position:absolute;font:10pt/12pt Arial,Helvetica,sans-serif;color:#000;white-space:nowrap;overflow:hidden}
-.val.gras{font-weight:700;font-size:11pt}
-.val.com{white-space:normal;font-size:8pt;line-height:9.6pt}
-.case{position:absolute;width:7.6pt;height:7.6pt;border:.8pt solid #000;background:#fff}
-.x{position:absolute;width:9pt;height:9pt}
-.x::before,.x::after{content:"";position:absolute;left:50%;top:50%;width:11pt;height:1.2pt;background:#000;transform:translate(-50%,-50%) rotate(45deg)}
+.val{position:absolute;font:calc(10cqw/5.953)/calc(12cqw/5.953) Arial,Helvetica,sans-serif;color:#000;white-space:nowrap;overflow:hidden}
+.val.gras{font-weight:700;font-size:calc(11cqw/5.953)}
+.val.com{white-space:normal;font-size:calc(8cqw/5.953);line-height:calc(9.6cqw/5.953)}
+.case{position:absolute;width:calc(7.6cqw/5.953);height:calc(7.6cqw/5.953);border:.calc(8cqw/5.953) solid #000;background:#fff}
+.x{position:absolute;width:calc(9cqw/5.953);height:calc(9cqw/5.953)}
+.x::before,.x::after{content:"";position:absolute;left:50%;top:50%;width:calc(11cqw/5.953);height:calc(1.2cqw/5.953);background:#000;transform:translate(-50%,-50%) rotate(45deg)}
 .x::after{transform:translate(-50%,-50%) rotate(-45deg)}
-.point{position:absolute;width:6pt;height:6pt;border-radius:50%;background:#000}
+.point{position:absolute;width:calc(6cqw/5.953);height:calc(6cqw/5.953);border-radius:50%;background:#000}
 .effacer{display:none;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:12px;font-size:14px}
 @page{size:A4 portrait;margin:0}
 @media print{
@@ -68,9 +69,10 @@ input:focus,textarea:focus{outline:none;border-color:var(--acc)}
   .barre,.form,.apercu h2{display:none!important}
   .grille{display:block;padding:0;max-width:none}
   .apercu{position:static;max-height:none;overflow:visible}
-  .cadre{box-shadow:none;width:auto!important;height:auto!important;margin:0;break-after:page}
+  html,body{margin:0;padding:0}
+  .grille{margin:0}
+  .cadre{box-shadow:none;max-width:none;width:min(99.5vw,calc(99.5vh * 595.3 / 842));margin:0 auto;break-after:page;break-inside:avoid}
   .cadre:last-child{break-after:auto}
-  .page{transform:none!important}
 }
 </style>
 </head>
@@ -198,8 +200,8 @@ function apercu() {
   });
 }
 function poser(pg, cls, x, y, w, texte, h) {
-  const s = document.createElement('div'); s.className = cls; s.style.left = x + 'pt'; s.style.top = y + 'pt';
-  if (w) s.style.width = w + 'pt'; if (h) s.style.height = h + 'pt';
+  const s = document.createElement('div'); s.className = cls; s.style.left = (x / 5.953) + '%'; s.style.top = (y / 8.42) + '%';
+  if (w) s.style.width = (w / 5.953) + '%'; if (h) s.style.height = (h / 8.42) + '%';
   if (texte != null) s.textContent = texte;
   pages[pg].appendChild(s);
 }
@@ -227,18 +229,11 @@ function changer() {
   dessiner(); clearTimeout(minuteur);
   minuteur = setTimeout(() => { try { localStorage.setItem(CLE, JSON.stringify(V)); $('etat').textContent = '✓ Gardé sur cet appareil'; } catch (e) { $('etat').textContent = ''; } }, 500);
 }
-function echelle() {
-  const largeur = Math.min($('apercu').clientWidth, $('form').clientWidth || 9999);
-  pages.forEach(p => { const k = Math.min(1, largeur / p.offsetWidth); p.style.transform = 'scale(' + k + ')'; p.parentElement.style.width = p.offsetWidth * k + 'px'; p.parentElement.style.height = p.offsetHeight * k + 'px'; });
-}
 $('imprimer').onclick = () => window.print();
 $('effacer').onclick = () => { $('confEff').style.display = 'block'; };
 $('non').onclick = () => { $('confEff').style.display = 'none'; };
 $('oui').onclick = () => { V = {}; try { localStorage.removeItem(CLE); } catch (e) {} location.reload(); };
-addEventListener('resize', echelle);
-addEventListener('beforeprint', () => pages.forEach(p => { p.style.transform = 'none'; }));
-addEventListener('afterprint', echelle);
-apercu(); formulaire(); dessiner(); echelle();
+apercu(); formulaire(); dessiner();
 </script>
 </body>
 </html>
