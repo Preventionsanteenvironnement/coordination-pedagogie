@@ -123,7 +123,7 @@ function ecranAcces() {
     <h1>Suivre mes élèves en PFMP</h1>
     <p>Entrez le code à 6 chiffres reçu du professeur principal.</p>
     <label class="sr" for="code">Code référent</label>
-    <input id="code" name="code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" value="${refInconnu ? esc(code) : ''}" required>
+    <input id="code" name="code" maxlength="6" pattern="[0-9]{6}|[Zz][Zz]99" value="${refInconnu ? esc(code) : ''}" required>
     <div class="err" id="err">${refInconnu ? 'Ce code n’est pas reconnu pour ' + esc(ANNEE) + '.' : ''}</div>
     <button class="btn pri" type="submit">Entrer</button>
     <p style="margin:14px 0 0"><a class="retour" href="../"><i class="ti ti-home" aria-hidden="true"></i> Accueil du portail</a></p>
@@ -332,7 +332,9 @@ function envoi(ev) {
   const f = ev.target;
   if (f.id === 'form-code') {
     ev.preventDefault();
-    const c = String(new FormData(f).get('code') || '').trim();
+    /* 11/10/2026 — ZZ99 (majuscules ou minuscules), le code de démonstration de l'élève, ouvre aussi la démonstration du référent (999999). */
+    let c = String(new FormData(f).get('code') || '').trim().toUpperCase();
+    if (c === 'ZZ99') c = '999999';
     if (!/^\d{6}$/.test(c)) { document.getElementById('err').textContent = 'Le code compte 6 chiffres.'; return; }
     try { localStorage.setItem(CLE_CODE, c); } catch (e) {}
     brancher(c); location.hash = ''; rendre();
