@@ -17,7 +17,7 @@
 (function (racine) {
   'use strict';
 
-  const VERSION = '2026-10-12a';
+  const VERSION = '2026-10-12b';
   const COL_SUIVI = 'coordination_pfmp_suivi';
   const COL_REFERENTS = 'coordination_pfmp_referents';
   const ROLES = ['eleve', 'referent', 'pp'];
@@ -25,7 +25,7 @@
   /* 09/10/2026 : les grandes étapes de la chronologie validée (Projet_PFMP_connecte…, 35 étapes).
      Le référent est désigné en premier ; le dossier se clôt après le bilan. */
   const PHASES = ['Mon enseignant référent', 'Recherche et proposition de stage', 'Fiche de négociation', 'Pré-convention', 'Convention',
-    'Départ', 'En stage', 'Bilan', 'Clôture du dossier'];
+    'Démarrage du stage', 'En stage', 'Bilan', 'Clôture du dossier'];
   /* Les intervenants du milieu : ils n'ont pas de compte ; leur étape est cochée par l'élève ou par le référent. */
   const ACTEURS = { pp: 'Professeur principal', pro: 'Enseignant professionnel', ent: 'Entreprise · tuteur', bde: 'Bureau des entreprises',
     chef: 'Cheffe d’établissement', ddf: 'DDF', int: 'Intendance' };
@@ -60,7 +60,7 @@
     { id: "neg_ask", ph: 2, t: "Fiche de négociation demandée à l’enseignant professionnel", te: "Demander ma fiche de négociation", ty: "declare", src: "Chronologie n° 2", voit: "Recours possible : le professeur principal, si l’enseignant professionnel est absent." },
     { id: "neg_given", ph: 2, t: "Fiche de négociation remise par l’enseignant professionnel", te: "J’ai ma fiche de négociation", ty: "declare", act: "pro", coche: "eleve", doc: "Fiche de négociation", ou: "Base documentaire de l’enseignant professionnel", src: "Chronologie n° 2" },
     { id: "neg_visit", ph: 2, t: "Fiche de négociation apportée à l’entreprise", te: "Apporter la fiche à l’entreprise", ty: "declare", doc: "Fiche de négociation", src: "Chronologie n° 3" },
-    { id: "neg_company", ph: 2, t: "Activités possibles cochées · cachet et signature de l’entreprise", te: "L’entreprise l’a remplie, signée et tamponnée", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 4" },
+    { id: "neg_company", ph: 2, t: "Activités possibles cochées · cachet et signature de l’entreprise", te: "L’entreprise l’a remplie, signée, avec son cachet", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 4" },
     { id: "neg_family", ph: 2, t: "Fiche signée par l’élève majeur ou le responsable légal", te: "Signer ma fiche (ou mon responsable légal)", ty: "declare", src: "Chronologie n° 5" },
     { id: "neg_to_pro", ph: 2, t: "Fiche remise à l’enseignant professionnel", te: "Remettre ma fiche à mon enseignant professionnel", ty: "declare", src: "Chronologie n° 6", due: ["dernier", -33, true] },
     { id: "neg_pro", ph: 2, t: "Activités contrôlées · fiche validée et signée par l’enseignant professionnel", ty: "tache", by: ["referent"], act: "pro", coche: "referent", src: "Chronologie n° 6", due: ["dernier", -32, true], voit: "Votre enseignant professionnel a validé votre fiche." },
@@ -69,7 +69,7 @@
 
     { id: "pre_given", ph: 3, t: "Pré-convention remise en main propre", te: "J’ai ma pré-convention", ty: "remise", from: "referent", to: "eleve", doc: "Pré-convention", ou: "Pronote › Communication › Casier numérique › « PFMP - Mini stage »", src: "Chronologie n° 9 · procédure §2", due: ["dernier", -26, true], aide: ["La trouver dans Pronote › Communication › Casier numérique › « PFMP - Mini stage ».", "L’imprimer et la remettre en main propre à l’élève."] },
     { id: "pre_ent", ph: 3, t: "Pré-convention remise à l’entreprise par l’élève", te: "Remettre ma pré-convention à l’entreprise", ty: "declare", src: "Chronologie n° 10" },
-    { id: "pre_filled", ph: 3, t: "Pré-convention renseignée, signée et tamponnée par l’entreprise", te: "L’entreprise l’a remplie, signée et tamponnée", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 10" },
+    { id: "pre_filled", ph: 3, t: "Pré-convention renseignée, signée, avec le cachet de l’entreprise", te: "L’entreprise l’a remplie, signée, avec son cachet", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 10" },
     { id: "pre_return", ph: 3, t: "Pré-convention rapportée · complète et exploitable", te: "Rapporter ma pré-convention", ty: "remise", from: "eleve", to: "referent", verif: true, doc: "Pré-convention", src: "Chronologie n° 11 et 12", due: ["dernier", -21, true], aide: ["Vérifier qu’elle est complète et exploitable : l’élève voit qu’elle est acceptée."] },
 
     { id: "pronote", ph: 4, t: "Convention générée dans le client Pronote", ty: "tache", by: ["referent"], ou: "Pronote › Stages › Stagiaires", src: "Chronologie n° 13 · check-list", due: ["dernier", -18, true], voit: "Convention en préparation.", aide: ["Pronote › Stages › Stagiaires : saisir les informations de la pré-convention.", "Éditer la convention (« R26CSRP-LP convention de stage PFMP »)."] },
@@ -80,8 +80,8 @@
     { id: "company", ph: 4, t: "Convention signée par l’entreprise ou le tuteur · cachet", te: "La faire signer par l’entreprise", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 15" },
     { id: "family", ph: 4, t: "Convention signée par l’élève majeur ou le responsable légal", te: "La signer (ou mon responsable légal)", ty: "declare", src: "Chronologie n° 16" },
     { id: "conv_return", ph: 4, t: "Convention rapportée · contrôlée et signée par le référent", te: "Rapporter ma convention signée", ty: "remise", from: "eleve", to: "referent", verif: true, flag: "Drapeau 2", src: "Chronologie n° 17 et 18 · check-list", due: ["dernier", -11, true], aide: ["Vérifier : informations, signature de l’élève majeur ou du responsable légal, du responsable de l’entreprise ou du tuteur, cachet.", "Signer en qualité d’enseignant référent."] },
-    { id: "bde", ph: 4, t: "Dossier complet transmis au bureau des entreprises", ty: "tache", by: ["referent"], src: "Chronologie n° 19", due: ["dernier", -10, true], voit: "Convention en signature au lycée.", aide: ["Convention, annexe pédagogique, et annexe handicap si besoin."] },
-    { id: "bde_ok", ph: 4, t: "Dossier contrôlé par le bureau des entreprises · transmis au DDF", ty: "tache", by: ["referent"], act: "bde", coche: "referent", src: "Chronologie n° 20", due: ["dernier", -8, true] },
+    { id: "bde", ph: 4, t: "Dossier complet transmis au RBDE", ty: "tache", by: ["referent"], src: "Chronologie n° 19", due: ["dernier", -10, true], voit: "Convention en signature au lycée.", aide: ["Convention, annexe pédagogique, et annexe handicap si besoin."] },
+    { id: "bde_ok", ph: 4, t: "Dossier contrôlé par le RBDE · transmis au DDF", ty: "tache", by: ["referent"], act: "bde", coche: "referent", src: "Chronologie n° 20", due: ["dernier", -8, true] },
     { id: "head", ph: 4, t: "Convention signée par la cheffe d’établissement", ty: "tache", by: ["referent"], act: "chef", coche: "referent", src: "Chronologie n° 21" },
     { id: "ddf_copies", ph: 4, t: "Deux exemplaires signés déposés dans le casier du référent", ty: "tache", by: ["referent"], act: "ddf", coche: "referent", src: "Chronologie n° 22", due: ["dernier", -4, true] },
     { id: "copies", ph: 4, t: "Exemplaires distribués : famille et entreprise", te: "J’ai l’exemplaire signé pour ma famille", ty: "remise", from: "referent", to: "eleve", src: "Chronologie n° 23 · check-list", due: ["dernier", 0, false], aide: ["Un exemplaire à la famille : il peut être remis à l’élève.", "Un exemplaire à l’entreprise : par l’élève ou par mail."] },
@@ -199,7 +199,8 @@
     if (etape.ty === 'tache' || etape.ty === 'info') {
       const peut = etape.by.includes(role) || (role === 'pp' && etape.by.includes('referent'));
       if (!peut) return out;
-      if (e === 'fait') out.push('annuler'); else out.push('faire');
+      /* Le rendez-vous de bilan se change en un seul geste (pas d'annulation intermédiaire). */
+      if (e === 'fait') { out.push('annuler'); if (etape.id === 'visit') out.push('faire'); } else out.push('faire');
       return out;
     }
     if (etape.ty === 'declare') {

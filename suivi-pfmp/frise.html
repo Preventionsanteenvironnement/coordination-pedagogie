@@ -182,7 +182,7 @@ button.b:disabled{opacity:.5}
  <div class="leg" id="leg" hidden><span><i style="background:var(--el)"></i>à faire</span><span><i style="background:var(--orange)"></i>en attente</span><span><i style="background:var(--green)"></i>fait</span><span><i style="background:var(--red)"></i>à corriger</span></div>
 </main>
 <div id="voile"></div>
-<script src="./pfmp-commun.js?v=2026-10-12a"></script>
+<script src="./pfmp-commun.js?v=2026-10-12b"></script>
 <script type="module">
 const P = window.PFMP_COMMUN;
 const $ = id => document.getElementById(id);
@@ -412,7 +412,7 @@ async function reel(sid) {
         if (et.ty === 'declare') {
           if (et.id === 'student_eval') { items.push(Object.assign({ cote: 'c', signe: 'a', titre: 'Le bilan du stage, ensemble', detail: 'L’élève remplit l’évaluation de son stage', etat: fait ? 'fait' : 'avenir', date: quand(en, et), acts: gestes(et, en), nouveau: neuf(en) }, o)); return; }
           const declare = ['declare', 'fait', 'valide'].includes(e);
-          items.push({ cote: 'g', signe: 'a', titre: et.te || et.t, detail: et.id === 'midpoint' && en.v ? (en.v === 'difficulte' ? 'Difficulté signalée' : 'Tout va bien') : '', etat: declare ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), motif: e === 'corriger' ? en.motif : '' });
+          items.push({ cote: 'g', signe: 'a', titre: et.te || et.t, detail: et.id === 'midpoint' && en.v ? (en.v === 'difficulte' ? 'Difficulté signalée' : 'Tout va bien') : '', etat: declare ? 'fait' : 'avenir', date: quand(en, et), nouveau: neuf(en), motif: e === 'corriger' ? en.motif : '' , acts: et.verif ? [] : gestes(et, en).filter(x => x.action === 'annuler') });
           if (et.id === 'here' && tu && tu.arrivee) items.push({ cote: 'm:ent', signe: 'i', titre: 'Le tuteur confirme l’arrivée', detail: 'En ligne', etat: 'fait', date: fr(tu.arrivee.le || '') });
           if (et.id === 'midpoint' && tu && tu.milieu) items.push({ cote: 'm:ent', signe: 'i', titre: ['contact', 'difficulte'].includes(tu.milieu.v) ? 'Le tuteur souhaite être contacté' : 'Le tuteur : « tout se passe bien »', detail: 'En ligne', etat: 'fait', date: fr(tu.milieu.le || '') });
           if (!et.verif) return;
@@ -449,7 +449,7 @@ async function reel(sid) {
     return `<div class="relais"><span class="tk ${n === 2 ? 'deux' : n === 1 ? 'un' : ''}">${n === 2 ? '✓✓' : '✓'}</span>→ ${esc(x.a || '')}${n === 2 ? ' · reçu' : n === 1 ? ' · remis' : ''}</div>`;
   }
   /* Les mots de la page : « cachet » partout ; côté élève, « sa », « son », « ses » (c'est le référent qui lit). */
-  const PHASE_LIB = { 'Mon enseignant référent': 'Référent désigné', 'Départ': 'Démarrage du stage' };
+  const PHASE_LIB = { 'Mon enseignant référent': 'Référent désigné' };
   /* Les précisions sous le geste du référent (check-list du professeur référent). */
   const PRECIS = { evaluation_sent: 'À récupérer dans le casier numérique, auprès de l’enseignant professionnel ou du professeur principal.', copies: 'À l’entreprise avec l’attestation de stage (possible par mail) ; à la famille, ou remis à l’élève.',
     attestation: 'Rapportée par l’élève ; à défaut, transmise par le tuteur ou l’employeur.', assessment: 'Récupérer le compte rendu d’évaluation rempli par le tuteur.' };
@@ -535,7 +535,7 @@ async function reel(sid) {
     if (ev.target.id !== 'visiteF') return; ev.preventDefault();
     const v = $('visiteLe').value; if (!v) return;
     const b = ev.target.querySelector('button'); b.disabled = true;
-    try { if (P.estFaite(s, 'visit')) await svc.agir(sid, 'visit', 'annuler', 'referent'); await svc.agir(sid, 'visit', 'faire', 'referent', { v }); }
+    try { await svc.agir(sid, 'visit', 'faire', 'referent', { v }); }
     catch (e) { alert(e.message); b.disabled = false; }
   });
   document.addEventListener('click', ev => {
