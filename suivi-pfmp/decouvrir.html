@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=5">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f5f7f9">
+<meta name="robots" content="noindex">
+<title>PFMP — découvrir le suivi en ligne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!--
+  Découvrir le suivi de PFMP en ligne, pour l'enseignant référent (12/10/2026).
+  Quelques écrans à faire défiler : à gauche la page de l'élève, à droite celle de l'enseignant référent,
+  et ce qui voyage de l'une à l'autre. Page autonome : aucune base, aucun nom, élève fictif ZZ99.
+-->
+<style>
+:root{--ink:#172738;--muted:#66768a;--line:#e3e9ee;--accent:#176d66;--accent-s:#e2f1ef;--el:#2d63b8;--el-s:#eaf0fb;--green:#1f9d6b;--green-s:#e8f6ef;--orange:#c46f1c;--orange-s:#fff3e6;--red:#c23b3b;--red-s:#fdecec;--bg:#f5f7f9}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.45 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+body{display:flex;flex-direction:column;min-height:100dvh}
+.haut{display:flex;align-items:center;gap:14px;padding:14px 20px 0}
+.haut a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px}
+.haut .pts{margin-left:auto;display:flex;gap:6px}
+.haut .pts i{width:8px;height:8px;border-radius:50%;background:#d3dbe2;transition:.3s}
+.haut .pts i.on{background:var(--accent);width:22px;border-radius:99px}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 20px;text-align:center;min-height:0}
+h1{margin:0;font-size:clamp(26px,4.6vw,44px);line-height:1.12;letter-spacing:-.03em;font-weight:800;max-width:18em}
+.sous{margin:10px auto 0;color:var(--muted);font-size:clamp(15px,2vw,19px);max-width:34em;min-height:1.5em}
+.txt{animation:monte .5s both}
+@keyframes monte{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* La scène : deux pages et ce qui voyage entre elles */
+.scene{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 90px minmax(0,1fr);align-items:stretch;gap:0;width:min(860px,100%);margin:26px auto 0}
+.page{background:#fff;border:1px solid var(--line);border-radius:22px;padding:14px;text-align:left;box-shadow:0 20px 40px -30px rgba(23,39,56,.35);min-height:238px;display:flex;flex-direction:column;gap:9px;transition:box-shadow .3s,border-color .3s}
+.page.r{background:linear-gradient(#fff,#fff) padding-box}
+.page.actif{border-color:var(--ink)}
+.qui{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.qui .av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:17px;background:#378ADD}
+.page.r .qui .av{background:var(--accent)}.page.r .qui{color:var(--accent)}
+.qui small{margin-left:auto;font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px;color:#9aa8b6}
+.barre{display:grid;grid-template-columns:repeat(9,1fr);gap:3px}
+.barre i{height:5px;border-radius:9px;background:#e6ebf0;transition:background .5s}
+.barre i.ok{background:var(--green)}.barre i.ici{background:var(--el)}
+.etape{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:-3px}
+.c{border:1px solid #cfd8e0;border-left:5px solid #b8c4cf;border-radius:13px;padding:10px 12px;font-weight:650;font-size:15px;line-height:1.3;transition:background .4s,border-color .4s}
+.c.neuf{animation:pose .55s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pose{from{opacity:0;transform:scale(.9) translateY(8px)}to{opacity:1;transform:none}}
+.c small{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:2px}
+.c .p{float:right;font-size:11.5px;font-weight:800;border-radius:99px;padding:1px 9px;margin-left:8px;background:#eef2f5;color:var(--muted)}
+.c.afaire{background:var(--el-s);border-color:#c5d5ee;border-left-color:var(--el)}.c.afaire .p{background:var(--el);color:#fff}
+.c.attend{background:var(--orange-s);border-color:#f0d2b0;border-left-color:var(--orange)}.c.attend .p{background:var(--orange);color:#fff}
+.c.fait{border-color:#a9d9c3;border-left-color:var(--green)}.c.fait .p{background:var(--green-s);color:var(--green)}
+.c.corr{background:var(--red-s);border-color:#eec3c3;border-left-color:var(--red)}.c.corr .p{background:var(--red);color:#fff}
+.c .bts{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;clear:both}
+.b{border:1px solid var(--el);background:var(--el);color:#fff;border-radius:10px;padding:8px 13px;font:inherit;font-size:13.5px;font-weight:700;cursor:default}
+.b.sec{background:#fff;color:var(--red);border-color:#eec3c3}
+.b.cible{cursor:pointer;animation:appel 1.5s ease-in-out infinite}
+@keyframes appel{0%,100%{box-shadow:0 0 0 0 rgba(45,99,184,.45)}60%{box-shadow:0 0 0 11px rgba(45,99,184,0)}}
+.b.sec.cible{animation-name:appelr}
+@keyframes appelr{0%,100%{box-shadow:0 0 0 0 rgba(194,59,59,.4)}60%{box-shadow:0 0 0 11px rgba(194,59,59,0)}}
+.vide{margin:auto;color:#9aa8b6;font-size:14px;font-weight:600;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px}
+.vide i{font-size:30px;color:#c3ccd5}
+.fil{display:grid;place-items:center;color:#c3ccd5;font-size:26px}
+.vol{position:absolute;z-index:5;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:17px;display:grid;place-items:center;color:#fff;font-size:28px;background:var(--el);box-shadow:0 14px 28px -10px rgba(23,39,56,.5);pointer-events:none}
+.vol.v{background:var(--green)}.vol.r{background:var(--red)}.vol.o{background:var(--orange)}
+/* L'écran d'accueil et la fin */
+.grand{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:28px}
+.duo{display:flex;align-items:center;justify-content:center;gap:16px;margin:0 0 22px;color:#c3ccd5;font-size:26px}
+.duo .av{width:64px;height:64px;border-radius:22px;display:grid;place-items:center;color:#fff;font-size:34px;background:#378ADD}
+.duo .av.r{background:var(--accent)}
+.trois{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:min(720px,100%);margin:26px auto 0}
+.trois div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 12px;font-weight:700;font-size:15px}
+.trois i{display:block;font-size:30px;color:var(--accent);margin-bottom:6px}
+/* Les commandes */
+.bas{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 20px calc(18px + env(safe-area-inset-bottom))}
+.nav{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:14px;padding:13px 20px;font:inherit;font-weight:700;font-size:16px;cursor:pointer;min-width:52px}
+.nav.go{background:var(--ink);border-color:var(--ink);color:#fff;min-width:170px}
+.nav:disabled{opacity:.35;cursor:default}
+.nav.lien{text-decoration:none;display:inline-block}
+@media (max-width:700px){
+  main{justify-content:flex-start;padding-top:14px}
+  .scene{grid-template-columns:minmax(0,1fr);margin-top:16px}
+  .page{min-height:0;padding:12px}
+  .fil{height:34px}.fil i{transform:rotate(90deg)}
+  .c{font-size:14.5px}
+  .trois{grid-template-columns:1fr}
+  .nav.go{min-width:0;flex:1}
+}
+@media (prefers-reduced-motion:reduce){.txt,.c.neuf,.b.cible{animation:none}}
+</style>
+</head>
+<body>
+<div class="haut"><a href="../">← Coordination & Pédagogie</a><div class="pts" id="pts"></div></div>
+<main id="main"></main>
+<div class="bas"><button class="nav" id="prec" aria-label="Écran précédent">←</button><button class="nav go" id="suiv">Commencer</button></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ETAPES = ['Référent désigné', 'Recherche de stage', 'Fiche de négociation', 'Pré-convention', 'Convention', 'Démarrage du stage', 'En stage', 'Bilan', 'Clôture'];
+
+/* Une carte : t titre · s précision · e état (afaire, attend, fait, corr) · p pastille · b bouton · b2 second bouton. */
+const carte = (t, o = {}) => Object.assign({ t }, o);
+
+/* Les écrans. e = page de l'élève, r = page de l'enseignant référent, n = étape en cours (0 à 8).
+   gestes : ce que l'on clique, dans l'ordre. qui = page où l'on clique, b = 'b' ou 'b2', vol = icône et couleur de ce qui voyage. */
+const ECRANS = [
+  { accueil: 1, titre: 'Suivre votre élève en stage, simplement.', sous: 'Si vous le souhaitez, une page en ligne vous accompagne. Regardez comment elle marche : une minute.' },
+  { titre: 'D’abord, l’élève apprend que vous êtes son enseignant référent.', sous: 'Le professeur principal vous désigne. L’élève le voit sur sa page, vous sur la vôtre.', n: 0,
+    e: [carte('Mon enseignant référent', { e: 'attend', p: 'En attente' })],
+    r: [carte('Vous suivez ZZ99 · B2GATL2', { e: 'afaire', p: 'À lire', s: 'PFMP 1 · du 4 au 15 janvier', b: 'Lu' })],
+    gestes: [{ qui: 'r', vol: ['check', 'v'], fait(s) {
+      s.r = [carte('Vous suivez ZZ99 · B2GATL2', { e: 'fait', p: 'Lu', s: 'PFMP 1 · du 4 au 15 janvier' })];
+      s.e = [carte('Mon enseignant référent est désigné', { e: 'fait', p: 'Fait', s: 'Il sait qu’il me suit' })]; s.n = 1; } }] },
+  { titre: 'Deux pages qui avancent ensemble.', sous: 'L’élève a la sienne. Vous avez la vôtre. Ce que l’un fait, l’autre le voit.', n: 1,
+    e: [carte('Chercher un stage', { e: 'afaire', p: 'À faire' })], r: [] },
+  { titre: 'L’élève trouve un stage.', sous: 'Il le déclare sur sa page. Vous êtes prévenu.', n: 1,
+    e: [carte('J’ai une proposition de stage', { e: 'afaire', p: 'À faire', b: 'J’ai un stage' })], r: [],
+    gestes: [{ qui: 'e', vol: ['building-store', ''], fait(s) {
+      s.e = [carte('J’ai une proposition de stage', { e: 'attend', p: 'Envoyé', s: 'Agence Rhône Immobilier' })];
+      s.r = [carte('ZZ99 a trouvé un stage :', { e: 'afaire', p: 'À faire', s: 'Agence Rhône Immobilier, Lyon 3e', b: 'Valider' })]; } }] },
+  { titre: 'Vous validez. Un clic.', sous: 'L’élève le sait aussitôt.', n: 1,
+    e: [carte('J’ai une proposition de stage', { e: 'attend', p: 'Envoyé', s: 'Agence Rhône Immobilier' })],
+    r: [carte('ZZ99 a trouvé un stage :', { e: 'afaire', p: 'À faire', s: 'Agence Rhône Immobilier, Lyon 3e', b: 'Valider' })],
+    gestes: [{ qui: 'r', vol: ['check', 'v'], fait(s) {
+      s.r = [carte('ZZ99 a trouvé un stage :', { e: 'fait', p: 'Validé', s: 'Agence Rhône Immobilier, Lyon 3e' })];
+      s.e = [carte('Stage validé par mon enseignant référent', { e: 'fait', p: 'Fait' })]; s.n = 2; } }] },
+  { titre: 'Les documents passent de main en main.', sous: 'L’élève vous rapporte sa pré-convention. Elle arrive chez vous.', n: 3,
+    e: [carte('Rapporter ma pré-convention', { e: 'afaire', p: 'À faire', b: 'Je l’ai remise' })], r: [],
+    gestes: [{ qui: 'e', vol: ['file-text', ''], fait(s) {
+      s.e = [carte('Rapporter ma pré-convention', { e: 'attend', p: 'Remise' })];
+      s.r = [carte('ZZ99 a remis la pré-convention', { e: 'afaire', p: 'À faire', b: 'Reçu · conforme', b2: 'À corriger' })]; } }] },
+  { titre: 'Il manque quelque chose ?', sous: 'Vous choisissez le motif dans une liste. L’élève sait quoi corriger.', n: 3,
+    e: [carte('Rapporter ma pré-convention', { e: 'attend', p: 'Remise' })],
+    r: [carte('ZZ99 a remis la pré-convention', { e: 'afaire', p: 'À faire', b: 'Reçu · conforme', b2: 'À corriger' })],
+    gestes: [{ qui: 'r', b: 'b2', vol: ['pencil', 'r'], fait(s) {
+      s.r = [carte('Pré-convention renvoyée à ZZ99', { e: 'attend', p: 'En attente', s: 'Motif : cachet manquant' })];
+      s.e = [carte('Rapporter ma pré-convention', { e: 'corr', p: 'À corriger', s: 'Cachet manquant', b: 'C’est corrigé' })]; } },
+    { qui: 'e', vol: ['file-text', ''], fait(s) {
+      s.e = [carte('Rapporter ma pré-convention', { e: 'attend', p: 'Remise' })];
+      s.r = [carte('ZZ99 a remis la pré-convention', { e: 'afaire', p: 'À faire', b: 'Reçu · conforme', b2: 'À corriger' })]; } },
+    { qui: 'r', vol: ['check', 'v'], fait(s) {
+      s.r = [carte('Pré-convention reçue · conforme', { e: 'fait', p: 'Fait' })];
+      s.e = [carte('Pré-convention reçue par mon référent', { e: 'fait', p: 'Fait' })]; s.n = 4; } }] },
+  { titre: 'Un souci pendant le stage ?', sous: 'L’élève le signale en un clic. Pas de messagerie : vous allez vers lui.', n: 6,
+    e: [carte('Besoin d’aide ?', { s: 'Je souhaite être contacté par mon référent', b: 'Signaler' })], r: [],
+    gestes: [{ qui: 'e', vol: ['bell', 'o'], fait(s) {
+      s.e = [carte('Besoin d’aide ?', { e: 'attend', p: 'Signalé', s: 'Mon référent est prévenu' })];
+      s.r = [carte('ZZ99 souhaite être contacté', { e: 'afaire', p: 'À traiter', b: 'J’en ai pris connaissance' })]; } },
+    { qui: 'r', vol: ['check', 'v'], fait(s) {
+      s.r = [carte('ZZ99 souhaite être contacté', { e: 'fait', p: 'Vu' })];
+      s.e = [carte('Besoin d’aide ?', { e: 'fait', p: 'Vu', s: 'Mon référent en a pris connaissance' })]; } }] },
+  { fin: 1, titre: 'C’est tout.', sous: 'Neuf étapes, de la recherche du stage à la clôture du dossier. Vous voyez toujours où en est votre élève.' }
+];
+
+let i = 0, g = 0, etat = null, occupe = false;
+
+function page(qui, s, cible) {
+  const cartes = s[qui] || [], r = qui === 'r';
+  return `<div class="page ${qui}${cible && cible.qui === qui ? ' actif' : ''}" id="pg-${qui}">
+    <div class="qui"><span class="av"><i class="ti ti-${r ? 'school' : 'user'}"></i></span>${r ? 'L’enseignant référent' : 'L’élève'}<small>${r ? 'votre page' : 'sa page'}</small></div>
+    <div class="barre">${ETAPES.map((_, k) => `<i class="${k < s.n ? 'ok' : k === s.n ? 'ici' : ''}"></i>`).join('')}</div>
+    <div class="etape">Étape ${s.n + 1} sur 9 · ${esc(ETAPES[s.n])}</div>
+    ${cartes.length ? cartes.map(c => `<div class="c ${c.e || ''}${s.neuf === qui || s.neuf === 'tout' ? ' neuf' : ''}">${c.p ? `<span class="p">${esc(c.p)}</span>` : ''}${esc(c.t)}${c.s ? `<small>${esc(c.s)}</small>` : ''}`
+      + (c.b || c.b2 ? `<div class="bts">${c.b ? `<button class="b${cible && cible.qui === qui && (cible.b || 'b') === 'b' ? ' cible' : ''}" ${cible && cible.qui === qui && (cible.b || 'b') === 'b' ? 'data-geste' : 'tabindex="-1"'}>${esc(c.b)}</button>` : ''}${c.b2 ? `<button class="b sec${cible && cible.qui === qui && cible.b === 'b2' ? ' cible' : ''}" ${cible && cible.qui === qui && cible.b === 'b2' ? 'data-geste' : 'tabindex="-1"'}>${esc(c.b2)}</button>` : ''}</div>` : '') + `</div>`).join('')
+      : `<div class="vide"><i class="ti ti-circle-check"></i>Rien à traiter</div>`}
+  </div>`;
+}
+
+function rendre(texte) {
+  const E = ECRANS[i], m = $('main');
+  $('pts').innerHTML = ECRANS.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+  const tete = `<div class="${texte ? 'txt' : ''}"><h1>${esc(E.titre)}</h1><p class="sous">${esc(E.sous)}</p></div>`;
+  if (E.accueil) m.innerHTML = `<div class="duo txt"><span class="av"><i class="ti ti-user"></i></span><i class="ti ti-arrows-left-right"></i><span class="av r"><i class="ti ti-school"></i></span></div>` + tete;
+  else if (E.fin) m.innerHTML = tete + `<div class="trois txt"><div><i class="ti ti-key"></i>Un code, pas de compte</div><div><i class="ti ti-device-mobile"></i>Ordinateur ou téléphone</div><div><i class="ti ti-shield-check"></i>Aucun nom en ligne</div></div>`;
+  else {
+    const cible = (E.gestes || [])[g];
+    m.innerHTML = tete + `<div class="scene" id="scene">${page('e', etat, cible)}<div class="fil"><i class="ti ti-arrows-left-right"></i></div>${page('r', etat, cible)}</div>`;
+  }
+  $('prec').disabled = i === 0;
+  const s = $('suiv'), reste = (E.gestes || []).length - g;
+  s.outerHTML = E.fin ? `<a class="nav go lien" id="suiv" href="./">Entrer mon code</a>` : `<button class="nav go" id="suiv">${E.accueil ? 'Commencer' : reste > 0 ? 'Voir' : 'Suivant →'}</button>`;
+  if (!E.fin) $('suiv').onclick = avancer;
+}
+
+function ouvrir(k) {
+  i = Math.max(0, Math.min(ECRANS.length - 1, k)); g = 0;
+  const E = ECRANS[i];
+  etat = { e: (E.e || []).map(c => Object.assign({}, c)), r: (E.r || []).map(c => Object.assign({}, c)), n: E.n || 0, neuf: 'tout' };
+  rendre(true); etat.neuf = '';
+}
+
+/* Ce qui voyage d'une page à l'autre. */
+function voler(de, icone, couleur) {
+  return new Promise(fin => {
+    const sc = $('scene'), a = $('pg-' + de), b = $('pg-' + (de === 'e' ? 'r' : 'e'));
+    if (!sc || !a || !b || matchMedia('(prefers-reduced-motion:reduce)').matches) return fin();
+    const S = sc.getBoundingClientRect(), A = a.getBoundingClientRect(), B = b.getBoundingClientRect();
+    const x0 = A.left + A.width / 2 - S.left, y0 = A.top + A.height / 2 - S.top, x1 = B.left + B.width / 2 - S.left, y1 = B.top + B.height / 2 - S.top;
+    const v = document.createElement('div'); v.className = 'vol ' + (couleur || ''); v.innerHTML = `<i class="ti ti-${icone}"></i>`;
+    v.style.left = x0 + 'px'; v.style.top = y0 + 'px'; sc.appendChild(v);
+    const dx = x1 - x0, dy = y1 - y0, haut = Math.abs(dx) > Math.abs(dy) ? -46 : 0, cote = haut ? 0 : 40;
+    v.animate([{ transform: 'translate(0,0) scale(.4)', opacity: 0 }, { transform: 'translate(0,0) scale(1)', opacity: 1, offset: .15 },
+      { transform: `translate(${dx / 2 + cote}px,${dy / 2 + haut}px) scale(1.12) rotate(${dx >= 0 ? 6 : -6}deg)`, opacity: 1, offset: .55 },
+      { transform: `translate(${dx}px,${dy}px) scale(1)`, opacity: 1, offset: .9 }, { transform: `translate(${dx}px,${dy}px) scale(.4)`, opacity: 0 }],
+      { duration: 1050, easing: 'cubic-bezier(.45,0,.3,1)' }).onfinish = () => { v.remove(); fin(); };
+  });
+}
+
+async function avancer() {
+  if (occupe) return;
+  const E = ECRANS[i], geste = (E.gestes || [])[g];
+  if (!geste) return ouvrir(i + 1);
+  occupe = true;
+  const b = document.querySelector('[data-geste]'); if (b) { b.classList.remove('cible'); b.style.transform = 'scale(.94)'; }
+  await voler(geste.qui, geste.vol[0], geste.vol[1]);
+  geste.fait(etat); etat.neuf = 'tout'; g++;
+  rendre(false); etat.neuf = ''; occupe = false;
+}
+
+$('prec').onclick = () => { if (!occupe) ouvrir(i - 1); };
+document.addEventListener('click', ev => { if (ev.target.closest('[data-geste]')) avancer(); });
+addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowRight' || ev.key === ' ' || ev.key === 'Enter') { if (!ECRANS[i].fin) { ev.preventDefault(); avancer(); } }
+  else if (ev.key === 'ArrowLeft' && !occupe) ouvrir(i - 1);
+});
+/* Sur téléphone : glisser pour changer d'écran. */
+let x0 = null;
+addEventListener('touchstart', ev => { x0 = ev.touches[0].clientX; }, { passive: true });
+addEventListener('touchend', ev => { if (x0 == null || occupe) return; const d = ev.changedTouches[0].clientX - x0; x0 = null; if (d < -60 && !ECRANS[i].fin) ouvrir(i + 1); else if (d > 60) ouvrir(i - 1); }, { passive: true });
+ouvrir(0);
+</script>
+</body>
+</html>
