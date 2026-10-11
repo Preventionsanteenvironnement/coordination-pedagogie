@@ -58,24 +58,34 @@ button.b.lien{background:none;border-color:transparent;color:var(--muted);font-w
 button.b:disabled{opacity:.5}
 .parc{margin:26px 0 10px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .ph{background:#fff;border:1px solid var(--line);border-radius:16px;margin:8px 0;overflow:hidden}
-.ph>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 16px;min-height:54px}
+.ph>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:10px;padding:14px 16px;min-height:60px;background:#f7f9fb}
+.ph[open]>summary{border-bottom:1px solid var(--line)}
 .ph>summary::-webkit-details-marker{display:none}
-.ph>summary>b{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--ink);font-size:13px}
-.ph>summary>span{flex:1;font-weight:700;font-size:15.5px;min-width:0}
-.ph>summary>small{color:var(--muted);font-size:12.5px;font-weight:600}
+.ph>summary::before{content:""}
+.ph>summary .ct{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;font-weight:800;font-size:18px;letter-spacing:-.01em;text-align:center}
+.ph>summary .ct b{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--line);color:var(--ink);font-size:14px}
+.ph>summary .ct em{font-style:normal;font-size:12px;font-weight:800;letter-spacing:0;border-radius:999px;padding:4px 11px;background:#e6ebf0;color:var(--muted);white-space:nowrap}
+.ph>summary>small{justify-self:end;color:var(--muted);font-size:12.5px;font-weight:600}
 .ph>summary::after{content:"▾";color:var(--muted)}
 .ph[open]>summary::after{content:"▴"}
-.ph>summary>em{font-style:normal;font-size:12px;font-weight:800;border-radius:999px;padding:4px 11px;background:#eef2f5;color:var(--muted);white-space:nowrap}
-.ph.fait>summary>b{background:var(--green);color:#fff}.ph.fait>summary>em{background:var(--green-s);color:var(--green)}
-.ph.fait>summary>span{color:var(--muted)}
-.ph.afaire{border-color:var(--el)}.ph.afaire>summary>b{background:var(--el);color:#fff}.ph.afaire>summary>em{background:var(--el);color:#fff}
-.ph.attend>summary>b{background:var(--orange);color:#fff}.ph.attend>summary>em{background:var(--orange-s);color:var(--orange)}
-.ph.corr>summary>b{background:var(--red);color:#fff}.ph.corr>summary>em{background:var(--red-s);color:var(--red)}
-.ph .dedans{padding:2px 14px 14px;border-top:1px solid #eef2f5}
-.cols,.grille{display:grid;grid-template-columns:1fr .82fr 1fr;gap:10px 12px}
+.ph.fait>summary .ct b{background:var(--green);color:#fff}.ph.fait>summary .ct em{background:var(--green-s);color:var(--green)}
+.ph.fait>summary .ct{color:var(--muted)}
+.ph.afaire{border:2px solid var(--el)}.ph.afaire>summary .ct b,.ph.afaire>summary .ct em{background:var(--el);color:#fff}
+.ph.attend>summary .ct b{background:var(--orange);color:#fff}.ph.attend>summary .ct em{background:var(--orange-s);color:var(--orange)}
+.ph.corr>summary .ct b{background:var(--red);color:#fff}.ph.corr>summary .ct em{background:var(--red-s);color:var(--red)}
+.ph .dedans{padding:2px 14px 16px}
+.cols,.grille{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,.82fr) 34px minmax(0,1fr);gap:3px 4px}
 .cols{padding:10px 0 8px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.cols span:nth-child(2){text-align:center}.cols span:nth-child(3){text-align:right}
-.et.g{grid-column:1}.et.m{grid-column:2}.et.d{grid-column:3}.et.c{grid-column:1/-1}
+.cols span:nth-child(2){grid-column:3;text-align:center}.cols span:nth-child(3){grid-column:5;text-align:right}
+.et.g{grid-column:1}.et.m{grid-column:3}.et.d{grid-column:5}.et.c{grid-column:1/-1}
+/* Les flèches : vers le bas quand le geste suivant est dans le même couloir, vers la droite quand ça change de main. Vertes une fois le passage fait. */
+.fl{display:flex;align-items:center;justify-content:center;gap:6px;color:#a9b5c1;font-size:11.5px;font-weight:700;white-space:nowrap}
+.fl .ti{font-size:22px}
+.fl.on{color:var(--green)}
+.fl.v{min-height:26px}
+.fl .iv,.fl span{display:none}.fl.v .iv{display:inline}
+.fl.long span{display:inline}
+.fl .tr{flex:1;border-top:2px dashed currentColor;opacity:.7}
 .et{scroll-margin-top:16px}
 .carte{height:100%;background:#f7f9fb;border:1px solid var(--line);border-left:5px solid #cfd8e0;border-radius:12px;padding:10px 13px}
 .et.m .carte{border-style:dashed;border-left-style:solid;padding:8px 11px}
@@ -119,10 +129,12 @@ button.b:disabled{opacity:.5}
   .tete{padding:12px 14px;gap:12px;border-radius:16px}.tete h1{font-size:17px}.tete .info{font-size:12.5px}.code{width:48px;height:48px;border-radius:13px;font-size:13px}
   .tete .j b{font-size:20px}
   .cols{display:none}
-  .grille{grid-template-columns:1fr;gap:8px;padding-top:12px}
-  .et.g,.et.m,.et.d,.et.c{grid-column:1}
+  .grille{grid-template-columns:minmax(0,1fr);gap:2px;padding-top:12px}
+  .grille>*{grid-column:1!important;grid-row:auto!important}
+  .fl{justify-content:flex-start;padding-left:16px;min-height:28px}
+  .fl .ih,.fl .tr{display:none}.fl .iv,.fl span{display:inline}
   .et.m{margin-left:22px}
-  .ph>summary{padding:12px 12px;gap:9px}.ph>summary>span{font-size:14.5px}.ph>summary>small{display:none}
+  .ph>summary{padding:12px 10px;gap:6px;grid-template-columns:0 1fr 0 auto}.ph>summary .ct{font-size:16px}.ph>summary>small{display:none}
   .ph .dedans{padding:0 10px 12px}
   .bal .l .bts{flex:1 1 100%}.bal .l .bts button{flex:1}
   .carte .acts button.b:not(.lien){flex:1}
@@ -251,8 +263,8 @@ async function reel(sid) {
       const [cls, lib] = nf === suite.length ? ['fait', 'Terminée'] : tons.includes('corr') ? ['corr', 'À corriger'] : tons.includes('afaire') ? ['afaire', 'À vous']
         : att ? ['attend', 'Attend ' + (att.cote === 'g' ? 'l’élève' : minus(P.ACTEURS[att.cote.slice(2)] || ''))] : nf ? ['cours', 'En cours'] : ['', 'À venir'];
       const ouvert = num in ouv ? ouv[num] : ['corr', 'afaire', 'attend'].includes(cls);
-      h += `<details class="ph ${cls}" data-ph="${num}"${ouvert ? ' open' : ''}><summary><b>${cls === 'fait' ? '✓' : num}</b><span>${esc(PHASE_LIB[x.phase] || x.phase)}</span><small>${nf}/${suite.length}</small><em>${esc(lib)}</em></summary>`
-        + `<div class="dedans"><div class="cols"><span>L’élève</span><span>Ils interviennent</span><span>Vous, référent</span></div><div class="grille">${suite.map(carte).join('')}</div></div></details>`;
+      h += `<details class="ph ${cls}" data-ph="${num}"${ouvert ? ' open' : ''}><summary><span class="ct"><b>${cls === 'fait' ? '✓' : num}</b>${esc(PHASE_LIB[x.phase] || x.phase)}<em>${esc(lib)}</em></span><small>${nf}/${suite.length}</small></summary>`
+        + `<div class="dedans"><div class="cols"><span>L’élève</span><span>Ils interviennent</span><span>Vous, référent</span></div><div class="grille">${grille(suite)}</div></div></details>`;
     });
     $('frise').innerHTML = h; $('parc').hidden = false; $('leg').hidden = false;
     boite(items, ici);
@@ -357,14 +369,40 @@ async function reel(sid) {
   const mots = (t, eleve) => { t = String(t || '').replace('signée et tamponnée par', 'signée, avec le cachet de').replace(/tamponnée/g, 'avec cachet'); return eleve ? t.replace(/\bma\b/g, 'sa').replace(/\bmon\b/g, 'son').replace(/\bmes\b/g, 'ses') : t; };
   const ETAT_LIB = { afaire: 'À faire', attend: 'En attente', corr: 'À corriger' };
   const boutons = (acts, t) => acts && acts.length ? `<div class="acts">${acts.map(a => `<button class="b ${a.lien ? 'lien' : a.action === 'corriger' ? 'corr' : t === 'afaire' ? '' : 'dis'}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('')}</div>` : '';
-  function carte(x) {
+  /* La grille d'une étape : une carte reste sur la rangée de la précédente quand elle est plus à droite (ça change de main) ; sinon rangée suivante. */
+  const COL = x => x.cote === 'g' ? 1 : x.cote === 'd' ? 5 : x.cote === 'c' ? 0 : 3;
+  const VERS = { pp: 'le professeur principal', pro: 'l’enseignant professionnel', ent: 'l’entreprise', bde: 'le bureau des entreprises', chef: 'la cheffe d’établissement', ddf: 'le DDF', int: 'l’intendance' };
+  const vers = x => x.cote === 'g' ? 'vers l’élève' : x.cote === 'd' ? 'vers vous' : x.cote === 'c' ? '' : 'vers ' + (VERS[x.cote.slice(2)] || minus(P.ACTEURS[x.cote.slice(2)] || ''));
+  function grille(suite) {
+    let h = '', r = 1, prev = null;
+    suite.forEach(x => {
+      const c = COL(x), on = ton(x) === 'fait' ? ' on' : '';
+      if (prev) {
+        const pc = COL(prev), mot = prev.cote !== x.cote && vers(x) ? `<span>${esc(vers(x))}</span>` : '';
+        if (c && pc && c > pc) {
+          /* Aller-retour : l'élève demande, l'intervenant lui remet. */
+          const dbl = pc === 1 && c === 3 && x.a === 'l’élève';
+          h += c - pc === 4
+            ? `<div class="fl long${on}" style="grid-column:2/5;grid-row:${r}"><i class="tr"></i>${mot}<i class="tr"></i><i class="ti ti-arrow-right ih"></i><i class="ti ti-arrow-down iv"></i></div>`
+            : `<div class="fl h${on}" style="grid-column:${pc + 1};grid-row:${r}"><i class="ti ti-${dbl ? 'arrows-left-right' : 'arrow-right'} ih"></i><i class="ti ti-${dbl ? 'arrows-up-down' : 'arrow-down'} iv"></i>${dbl ? mot.replace('>vers ', '>avec ') : mot}</div>`;
+        } else {
+          r++;
+          h += `<div class="fl v${on}" style="grid-column:${c || '1/-1'};grid-row:${r}"><i class="ti ti-arrow-down iv"></i>${mot}</div>`;
+          r++;
+        }
+      }
+      h += carte(x, r); prev = x;
+    });
+    return h;
+  }
+  function carte(x, r) {
     const t = ton(x), m = x.cote.startsWith('m:') ? x.cote.slice(2) : '';
     const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(P.ACTEURS[m])}` : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : 'Vous';
     const tete = `<div class="q">${qui}${x.signe === 'i' ? '<span class="signe">✉</span>' : ''}${x.nouveau ? '<em class="neuf">Nouveau</em>' : ''}${ETAT_LIB[t] ? `<em class="pst">${ETAT_LIB[t]}</em>` : ''}</div>`;
     const date = x.date ? `<span class="dt">${t === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '';
-    if (m) return `<div class="et m ${t}" id="c${x.k}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${relais(x) || (x.detail ? `<p>${esc(x.detail)}</p>` : '')}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
+    if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${relais(x) || (x.detail ? `<p>${esc(x.detail)}</p>` : '')}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
     const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
-    return `<div class="et ${x.cote} ${t}" id="c${x.k}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail ? `<p>${esc(x.detail)}</p>` : ''}`
+    return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail ? `<p>${esc(x.detail)}</p>` : ''}`
       + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
       + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
       + (x.visite ? `<form class="visite-f" id="visiteF"><input type="datetime-local" id="visiteLe" value="${esc(String((s.visite || {}).le || '').slice(0, 16))}" required><button>${(s.visite || {}).le ? 'Changer la date' : 'Enregistrer le rendez-vous'}</button></form>` : '')
