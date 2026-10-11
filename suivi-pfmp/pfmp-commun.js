@@ -17,7 +17,7 @@
 (function (racine) {
   'use strict';
 
-  const VERSION = '2026-10-09b';
+  const VERSION = '2026-10-11a';
   const COL_SUIVI = 'coordination_pfmp_suivi';
   const COL_REFERENTS = 'coordination_pfmp_referents';
   const ROLES = ['eleve', 'referent', 'pp'];
@@ -68,6 +68,7 @@
     { id: "neg_signed", ph: 2, t: "Fiche vérifiée, signée et gardée · lieu de PFMP validé", ty: "tache", by: ["referent"], flag: "Drapeau 1", src: "Chronologie n° 8 · procédure §2", due: ["dernier", -30, true], voit: "Stage validé par votre enseignant référent.", aide: ["Vérifier les signatures : cachet et signature de l’entreprise, élève ou responsable légal, enseignant professionnel.", "Vérifier que l’entreprise peut accueillir l’élève dans des conditions de travail adaptées et sécurisées ; conseiller si besoin.", "Signer, puis garder la fiche dans le dossier : elle servira au suivi et à l’évaluation."] },
 
     { id: "pre_given", ph: 3, t: "Pré-convention remise en main propre", te: "J’ai ma pré-convention", ty: "remise", from: "referent", to: "eleve", doc: "Pré-convention", ou: "Pronote › Communication › Casier numérique › « PFMP - Mini stage »", src: "Chronologie n° 9 · procédure §2", due: ["dernier", -26, true], aide: ["La trouver dans Pronote › Communication › Casier numérique › « PFMP - Mini stage ».", "L’imprimer et la remettre en main propre à l’élève."] },
+    { id: "pre_ent", ph: 3, t: "Pré-convention remise à l’entreprise par l’élève", te: "Remettre ma pré-convention à l’entreprise", ty: "declare", src: "Chronologie n° 10" },
     { id: "pre_filled", ph: 3, t: "Pré-convention renseignée, signée et tamponnée par l’entreprise", te: "L’entreprise l’a remplie, signée et tamponnée", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 10" },
     { id: "pre_return", ph: 3, t: "Pré-convention rapportée · complète et exploitable", te: "Rapporter ma pré-convention", ty: "remise", from: "eleve", to: "referent", verif: true, doc: "Pré-convention", src: "Chronologie n° 11 et 12", due: ["dernier", -21, true], aide: ["Vérifier qu’elle est complète et exploitable : l’élève voit qu’elle est acceptée."] },
 
@@ -97,7 +98,7 @@
     { id: "assessment", ph: 6, t: "Bilan avec le tuteur · compte rendu d’évaluation récupéré", ty: "tache", by: ["referent"], doc: "Livret de formation · grille de notation", src: "Chronologie n° 30", due: ["fin", -3, false], aide: ["Faire le bilan avec le tuteur ; récupérer le compte rendu d’évaluation lorsqu’il est finalisé.", "Le bilan peut avoir lieu avant la fin du stage : il est indépendant de l’attestation."] },
     { id: "attest_in", ph: 6, t: "Attestation finalisée par l’entreprise le dernier jour", te: "J’ai mon attestation", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 31", due: ["fin", -3, false] },
 
-    { id: "attestation", ph: 7, t: "Attestation rapportée au référent", te: "Rapporter mon attestation", ty: "remise", from: "eleve", to: "referent", flag: "Drapeau 3", src: "Chronologie n° 32", due: ["fin", 5, true] },
+    { id: "attestation", ph: 7, t: "Attestation rapportée au référent · contrôlée", te: "Rapporter mon attestation", ty: "remise", from: "eleve", to: "referent", verif: true, flag: "Drapeau 3", src: "Chronologie n° 32", due: ["fin", 5, true] },
     { id: "attestation_bde", ph: 7, t: "Attestation transmise pour l’allocation PFMP", ty: "tache", by: ["referent"], src: "Chronologie n° 33 · check-list", due: ["fin", 5, true], aide: ["Contrôler l’attestation, puis la transmettre au bureau des entreprises pour l’allocation PFMP."] },
     { id: "evaluation_pro", ph: 7, t: "Compte rendu d’évaluation remis à l’enseignant professionnel", ty: "tache", by: ["referent"], src: "Chronologie n° 34 · check-list", due: ["fin", 12, true], aide: ["Le professeur de spécialité est l’enseignant professionnel de l’élève."] },
     { id: "student_eval", ph: 7, t: "Bilan du stage avec l’élève · évaluation de la PFMP", te: "Faire le bilan avec mon référent", ty: "declare", verif: true, flag: "Arrivée", src: "Procédure §4 · mémento 10", due: ["fin", 12, true], aide: ["Faire compléter l’évaluation de la PFMP par l’élève lors du bilan final."] },
