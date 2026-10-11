@@ -224,7 +224,7 @@ function ligne(id, s, et, opts) {
     <span class="pic"><i class="ti ti-${ic}" aria-hidden="true"></i></span>
     <div><div class="t">${esc(et.t)}</div>${detail ? `<div class="d">${esc(detail)}</div>` : ''}<div>${fini ? '' : echeanceHtml(et, s)}${docHtml(et)}</div></div>
     <div class="act">${boutons(id, et, en, opts && opts.annuler)}</div>
-    ${motifOuvert === id + '|' + et.id ? `<form class="motif" data-motif="${et.id}" data-suivi="${esc(id)}"><label class="sr" for="motif-${et.id}">Ce qu’il faut corriger</label><input id="motif-${et.id}" name="motif" placeholder="Ce qu’il faut corriger" maxlength="300" required><button class="btn mini pri" type="submit">Envoyer à l’élève</button><button class="btn mini" type="button" data-act="fermer-motif">Fermer</button></form>` : ''}
+    ${motifOuvert === id + '|' + et.id ? `<form class="motif" data-motif="${et.id}" data-suivi="${esc(id)}"><label class="sr" for="motif-${et.id}">Motif</label><select id="motif-${et.id}" name="motif">${motifsDe(et.id).map(x => `<option>${esc(x)}</option>`).join('')}</select><label class="sr" for="plus-${et.id}">Précision</label><input id="plus-${et.id}" name="plus" placeholder="Précision (facultatif)" maxlength="120"><button class="btn mini pri" type="submit">Envoyer à l’élève</button><button class="btn mini" type="button" data-act="fermer-motif">Fermer</button></form>` : ''}
   </div>`;
 }
 
@@ -252,10 +252,8 @@ function ecranFiche(id) {
       ${taches.length ? `<div class="liste">${taches.map(et => ligne(id, s, et)).join('')}</div>` : '<div class="vide">Rien à faire pour le moment.</div>'}
       <p class="sous" style="font-size:12px;margin-top:6px">* échéance proposée, à fixer en équipe.</p></div>
     <div class="bloc" id="visite"><h2><i class="ti ti-calendar-event" aria-hidden="true"></i> Visite de stage</h2>${visiteHtml(id, s)}</div>
-    <div class="bloc"><h2><i class="ti ti-messages" aria-hidden="true"></i> Messages avec l’élève</h2>
-      <div class="fil" id="fil"></div>
-      <form class="ecrire" data-message="${esc(id)}"><label class="sr" for="texte">Votre message</label><textarea id="texte" name="texte" maxlength="1000" placeholder="Votre message à l’élève" required></textarea><button class="btn pri" type="submit"><i class="ti ti-send" aria-hidden="true"></i> Envoyer</button></form>
-      <p class="sous" style="font-size:12px;margin-top:6px">Le professeur principal lit aussi ce fil.</p></div>
+    <div class="bloc"><h2><i class="ti ti-alert-triangle" aria-hidden="true"></i> Signalements de l’élève</h2>
+      <div class="fil" id="fil"></div></div>
     <div class="bloc"><h2><i class="ti ti-route" aria-hidden="true"></i> Tout le parcours</h2>
       ${P.PHASES.map((nom, ph) => {
         const etapes = P.EN_LIGNE.filter(e => e.ph === ph && e.ty !== 'journal');
@@ -283,11 +281,25 @@ function visiteHtml(id, s) {
   return `<div class="visite"><i class="ti ti-calendar-plus" style="font-size:26px;color:var(--ref)" aria-hidden="true"></i><div><b>Aucune visite programmée</b><div style="color:var(--doux);font-size:13px">Vous proposez des créneaux ; le tuteur choisit par un lien, sans compte. L’élève ne voit que la date confirmée.</div></div><span class="esp" style="flex:1"></span><a class="btn pri" href="${lien}" target="_blank" rel="noopener"><i class="ti ti-calendar-plus" aria-hidden="true"></i> Proposer une visite au tuteur</a></div>`;
 }
 
+/* 11/10/2026 — Aucune messagerie libre entre l'élève et un adulte. Ce bloc ne montre que les signalements à texte fixe
+   envoyés depuis mapse.fr (« Besoin d'aide ? »), avec « J'en ai pris connaissance ». Les anciens messages ne sont ni affichés ni effacés. */
+/* « À corriger » : un motif choisi dans une liste (la même que sur la frise), précision courte facultative. */
+const MOTIFS = {
+  search: ['Entreprise hors du domaine de formation', 'Informations de l’entreprise incomplètes', 'Stage à confirmer avec l’entreprise'],
+  pre_return: ['Informations de l’entreprise incomplètes', 'Horaires incomplets', 'Signature manquante', 'Cachet manquant', 'Dates à vérifier', 'Informations du tuteur incomplètes'],
+  conv_return: ['Signature de l’entreprise manquante', 'Cachet manquant', 'Signature du responsable légal manquante', 'Informations à vérifier'],
+  attestation: ['Nombre de jours manquant', 'Signature manquante', 'Cachet manquant']
+};
+const motifsDe = id => (MOTIFS[id] || ['À compléter']).concat(['Voir avec mon référent']);
+const SIGNAUX = { stage: 'ne trouve pas de stage', annule: 'signale que son entreprise a annulé le stage', absent: 'signale une absence ou un retard', mal: 'signale que son stage se passe mal', contact: 'souhaite être contacté par son référent',
+  'perdu-neg_given': 'a perdu sa fiche de négociation', 'perdu-pre_given': 'a perdu sa pré-convention', 'perdu-conv_given': 'a perdu sa convention', 'perdu-attest_in': 'a perdu son attestation' };
 function rendreMessages() {
   const fil = document.getElementById('fil');
   if (!fil) return;
-  fil.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${esc(m.de)}"><small>${m.de === 'eleve' ? 'Élève' : m.de === 'pp' ? 'Professeur principal' : 'Référent'}${m.sigle ? ' ' + esc(m.sigle) : ''} · ${fr(m.le)} ${m.le ? new Date(m.le).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''}</small>${esc(m.texte)}</div>`).join('') : '<p class="sous" style="margin:0">Aucun message.</p>';
-  fil.scrollTop = fil.scrollHeight;
+  const id = msgsPour;
+  const sig = msgs.filter(m => m.de === 'eleve' && /^§signal:/.test(m.texte || '') && SIGNAUX[m.texte.slice(8)]).map(m => ({ k: m.texte.slice(8), le: m.le, vu: msgs.some(y => y.de !== 'eleve' && y.texte === '§vu:' + m.le) })).reverse();
+  fil.innerHTML = sig.length ? sig.map(x => `<div class="msg eleve"><small>${fr(x.le)}</small>L’élève ${esc(SIGNAUX[x.k])}${x.vu ? ' <em>· ✓ pris connaissance</em>' : ` <button class="btn mini" data-pris="${esc(x.le)}">J’en ai pris connaissance</button>`}</div>`).join('') : '<p class="sous">Aucun signalement.</p>';
+  fil.querySelectorAll('[data-pris]').forEach(b => b.onclick = () => { b.disabled = true; svc.envoyerMessage(id, 'referent', ref ? ref.sigle : '', '§vu:' + b.dataset.pris).catch(e => { toast(e.message); b.disabled = false; }); });
 }
 
 function ecranDocuments() {
@@ -326,16 +338,9 @@ function envoi(ev) {
   }
   if (f.dataset.motif) {
     ev.preventDefault();
-    const motif = String(new FormData(f).get('motif') || '').trim();
+    const fd = new FormData(f), plus = String(fd.get('plus') || '').trim(), motif = String(fd.get('motif') || '').trim() + (plus ? ' — ' + plus : '');
     const et = f.dataset.motif, id = f.dataset.suivi;
     svc.agir(id, et, 'corriger', 'referent', { motif }).then(() => { motifOuvert = ''; }).catch(e => toast(e.message));
     return;
-  }
-  if (f.dataset.message) {
-    ev.preventDefault();
-    const t = f.querySelector('textarea');
-    const texte = t.value;
-    t.value = '';
-    svc.envoyerMessage(f.dataset.message, 'referent', ref ? ref.sigle : '', texte).catch(e => { toast(e.message); const z = document.getElementById('texte'); if (z && !z.value) z.value = texte; });
   }
 }
