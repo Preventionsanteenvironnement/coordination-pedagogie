@@ -182,7 +182,7 @@ button.b:disabled{opacity:.5}
  <div class="leg" id="leg" hidden><span><i style="background:var(--el)"></i>à faire</span><span><i style="background:var(--orange)"></i>en attente</span><span><i style="background:var(--green)"></i>fait</span><span><i style="background:var(--red)"></i>à corriger</span></div>
 </main>
 <div id="voile"></div>
-<script src="./pfmp-commun.js?v=2026-10-11b"></script>
+<script src="./pfmp-commun.js?v=2026-10-12a"></script>
 <script type="module">
 const P = window.PFMP_COMMUN;
 const $ = id => document.getElementById(id);
@@ -252,12 +252,19 @@ async function reel(sid) {
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'parcours'), x => { p = x.exists() ? x.data() : null; pret |= 2; pret3(); }, () => { pret |= 2; pret3(); });
   /* 11/10/2026 — La page du tuteur ne concerne que le professeur principal (Atelier) : la frise du référent ne lit plus rien du tuteur. */
 
+  /* La matière de l'enseignant référent : celle qu'il a choisie en activant le suivi, sinon celle du professeur principal. */
+  const matRef = () => s ? String(P.entree(s, 'sent').v || s.refSigle || '') : '';
   function rendre() {
+    /* Une saisie en cours (matière, date du rendez-vous) survit à la mise à jour de la page. */
+    const saisie = {}; ['matiere', 'visiteLe'].forEach(k => { const e = $(k); if (e) saisie[k] = { v: e.value, f: document.activeElement === e }; });
+    try { rendre0(); } finally { Object.keys(saisie).forEach(k => { const e = $(k); if (!e) return; if (saisie[k].v) e.value = saisie[k].v; if (saisie[k].f) e.focus(); }); }
+  }
+  function rendre0() {
     if (!s) { $('titre').textContent = 'PFMP'; $('frise').innerHTML = '<p class="vide-msg">Cette fiche n’existe pas encore. L’élève l’ouvre en déclarant son stage sur mapse.fr.</p>'; return; }
     const pr = (p && p.prepa) || {}, R = (p && p.recherches) || [], ent = pr.trouveR && R.find(r => r.id === pr.trouveR);
     if (p && p.avatar != null && AVATARS[p.avatar]) avatar = AVATARS[p.avatar];
     $('code').textContent = s.code; $('titre').textContent = (s.libelle || 'PFMP ' + s.periode) + (s.classe ? ' · ' + s.classe : '');
-    $('info').textContent = [s.debut ? 'Du ' + frLong(s.debut) + ' au ' + frLong(s.fin) : '', s.refSigle ? 'référent : ' + s.refSigle : ''].filter(Boolean).join(' · ');
+    $('info').textContent = [s.debut ? 'Du ' + frLong(s.debut) + ' au ' + frLong(s.fin) : '', matRef() ? 'référent : ' + matRef() : ''].filter(Boolean).join(' · ');
     const t = auj(), j = s.debut && s.debut > t ? Math.round((new Date(s.debut + 'T12:00:00') - new Date(t + 'T12:00:00')) / 864e5) : null;
     $('jx').textContent = j != null ? 'J-' + j : ''; $('jxl').textContent = j != null ? 'avant le départ' : '';
     const items = construire(s, pr, R, ent);
@@ -383,7 +390,7 @@ async function reel(sid) {
       P.ETAPES.filter(et => et.ph === ph && !et.local && et.ty !== 'journal' && !et.opt).forEach(et0 => { const n0 = items.length; (et => {
         const en = E(et.id), e = en.e, o = { aide: et.aide, src: et.src };
         const fait = P.estFaite(s, et.id);
-        if (et.id === 'referent') { items.push({ cote: 'm:pp', signe: 'a', titre: 'Désigne l’enseignant référent', detail: s.refSigle || '', etat: fait || s.refSigle || P.estFaite(s, 'sent') ? 'fait' : 'avenir' }); return; }
+        if (et.id === 'referent') { items.push({ cote: 'm:pp', signe: 'a', titre: 'Désigne l’enseignant référent', detail: matRef(), etat: fait || s.refSigle || P.estFaite(s, 'sent') ? 'fait' : 'avenir' }); return; }
         /* 12/10/2026 — La toute première démarche : l'enseignant référent active le suivi en indiquant sa matière (jamais son nom).
            L'élève lit alors « Mon enseignant référent : professeur de … ». Le professeur principal peut aussi l'indiquer depuis son tableau de bord. */
         if (et.id === 'sent') { const mat = en.v || s.refSigle || '', pfmp = (s.libelle || 'PFMP ' + s.periode) + (s.debut ? ' · du ' + fr(s.debut) + ' au ' + fr(s.fin) : '');

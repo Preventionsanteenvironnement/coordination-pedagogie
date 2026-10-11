@@ -110,7 +110,8 @@ function dessiner() {
   if (h !== dernierEcran) { dernierEcran = h; motifOuvert = ''; requestAnimationFrame(() => window.scrollTo(0, 0)); }
   if (!code || refInconnu) return ecranAcces();
   if (h === '#documents') return ecranDocuments();
-  if (h.startsWith('#eleve/')) return ecranFiche(decodeURIComponent(h.slice(7)));
+  /* 12/10/2026 — Une seule page pour suivre un élève : celle du référent (frise.html). L'ancienne fiche en liste n'est plus proposée. */
+  if (h.startsWith('#eleve/')) { location.replace('frise.html?f=' + encodeURIComponent(decodeURIComponent(h.slice(7))) + '&r=1'); return; }
   /* 11/10/2026 — Un référent suit en général un seul élève : sa fiche s'ouvre directement, sans passer par la liste. */
   /* Un seul élève : la frise s'ouvre directement (l'élève à gauche, le référent à droite, les échanges entre les deux). */
   if (!h && ref && (ref.suivis || []).length === 1 && !listeVoulue) { location.replace('frise.html?f=' + encodeURIComponent(ref.suivis[0]) + '&r=1'); return; }

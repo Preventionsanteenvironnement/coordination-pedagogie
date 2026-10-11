@@ -202,6 +202,7 @@ function voler(de, icone, couleur) {
     const v = document.createElement('div'); v.className = 'vol ' + (couleur || ''); v.innerHTML = `<i class="ti ti-${icone}"></i>`;
     v.style.left = x0 + 'px'; v.style.top = y0 + 'px'; sc.appendChild(v);
     const dx = x1 - x0, dy = y1 - y0, haut = Math.abs(dx) > Math.abs(dy) ? -46 : 0, cote = haut ? 0 : 40;
+    if (!v.animate) { v.remove(); return fin(); }
     v.animate([{ transform: 'translate(0,0) scale(.4)', opacity: 0 }, { transform: 'translate(0,0) scale(1)', opacity: 1, offset: .15 },
       { transform: `translate(${dx / 2 + cote}px,${dy / 2 + haut}px) scale(1.12) rotate(${dx >= 0 ? 6 : -6}deg)`, opacity: 1, offset: .55 },
       { transform: `translate(${dx}px,${dy}px) scale(1)`, opacity: 1, offset: .9 }, { transform: `translate(${dx}px,${dy}px) scale(.4)`, opacity: 0 }],
@@ -217,7 +218,7 @@ async function avancer() {
   if (!geste) return ouvrir(i + 1);
   occupe = true;
   const b = document.querySelector('[data-geste]'); if (b) { b.classList.remove('cible'); b.style.transform = 'scale(.94)'; }
-  await voler(geste.qui, geste.vol[0], geste.vol[1]);
+  try { await voler(geste.qui, geste.vol[0], geste.vol[1]); } catch (e) {}
   geste.fait(etat); etat.neuf = 'tout'; g++;
   rendre(false); etat.neuf = ''; occupe = false;
 }
@@ -225,6 +226,7 @@ async function avancer() {
 $('prec').onclick = () => { if (!occupe) ouvrir(i - 1); };
 document.addEventListener('click', ev => { if (ev.target.closest('[data-geste]')) avancer(); });
 addEventListener('keydown', ev => {
+  if (ev.target.closest && ev.target.closest('button, a')) return;
   if (ev.key === 'ArrowRight' || ev.key === ' ' || ev.key === 'Enter') { if (!ECRANS[i].fin) { ev.preventDefault(); avancer(); } }
   else if (ev.key === 'ArrowLeft' && !occupe) ouvrir(i - 1);
 });

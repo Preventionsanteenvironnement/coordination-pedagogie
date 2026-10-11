@@ -17,7 +17,7 @@
 (function (racine) {
   'use strict';
 
-  const VERSION = '2026-10-11b';
+  const VERSION = '2026-10-12a';
   const COL_SUIVI = 'coordination_pfmp_suivi';
   const COL_REFERENTS = 'coordination_pfmp_referents';
   const ROLES = ['eleve', 'referent', 'pp'];
@@ -74,7 +74,7 @@
 
     { id: "pronote", ph: 4, t: "Convention générée dans le client Pronote", ty: "tache", by: ["referent"], ou: "Pronote › Stages › Stagiaires", src: "Chronologie n° 13 · check-list", due: ["dernier", -18, true], voit: "Convention en préparation.", aide: ["Pronote › Stages › Stagiaires : saisir les informations de la pré-convention.", "Éditer la convention (« R26CSRP-LP convention de stage PFMP »)."] },
     { id: "convention", ph: 4, t: "Attestation de stage éditée avec la convention · gardée de côté", ty: "tache", by: ["referent"], doc: "Convention (modèle « R26CSRP-LP convention de stage PFMP »)", ou: "Pronote › fiche de stage › publipostage", src: "Check-list", due: ["dernier", -18, true], aide: ["L’attestation (« R26CSRP-LP attestation de stage PFMP ») s’imprime avec la convention : la garder jusqu’à la signature complète."] },
-    { id: "pedagogy", ph: 4, t: "Annexe pédagogique jointe", ty: "tache", by: ["referent"], doc: "Annexe pédagogique", src: "P §3", due: ["dernier", -18, true] },
+    { id: "pedagogy", ph: 4, t: "Annexe pédagogique jointe", ty: "tache", by: ["referent"], opt: true, doc: "Annexe pédagogique", src: "P §3", due: ["dernier", -18, true] },
     { id: "ah_docs", ph: 4, t: "Annexe handicap remplie · PIAL sollicité si besoin (étape 2bis)", ty: "tache", by: ["pp", "referent"], local: true, opt: true, ah: true, doc: "Annexe handicap · Demande AH étape 2bis", ou: "Pronote › Casier numérique", src: "Protocole AH 2 et 2bis", due: ["dernier", -14, true] },
     { id: "conv_given", ph: 4, t: "Convention remise à l’élève", te: "J’ai ma convention", ty: "remise", from: "referent", to: "eleve", src: "Chronologie n° 14 · procédure §3", due: ["dernier", -18, true], aide: ["Joindre l’annexe pédagogique de la filière.", "Si besoin : annexe handicap et demande d’aide humaine (étape 2 bis), avec l’accord des responsables légaux."] },
     { id: "company", ph: 4, t: "Convention signée par l’entreprise ou le tuteur · cachet", te: "La faire signer par l’entreprise", ty: "declare", act: "ent", coche: "eleve", src: "Chronologie n° 15" },
@@ -92,7 +92,7 @@
     { id: "here", ph: 6, t: "Arrivée de l’élève", te: "Je suis arrivé dans mon entreprise", ty: "declare", due: ["debut", 0, false] },
     { id: "installed", ph: 6, t: "Arrivée et installation vérifiées (deux premiers jours)", ty: "tache", by: ["referent"], ou: "Pronote › Créer un suivi", src: "Chronologie n° 25 · procédure §4", due: ["debut", 1, false], aide: ["Arrivée, installation, activités, conditions d’accueil, difficultés éventuelles.", "Noter dans Pronote : « Créer un suivi »."] },
     { id: "evaluation_sent", ph: 6, t: "Compte rendu d’évaluation envoyé au tuteur", ty: "tache", by: ["referent"], doc: "Compte rendu d’évaluation", ou: "Pronote › Casier numérique", src: "Chronologie n° 26 · check-list", due: ["debut", 1, false], aide: ["Depuis le casier numérique, pour que le tuteur en prenne connaissance avant le bilan."] },
-    { id: "midpoint", ph: 6, t: "Point d’étape · suivi du milieu de stage", te: "Comment se passe mon stage ?", ty: "declare", verif: true, ou: "Pronote › Créer un suivi", src: "Chronologie n° 27", due: ["milieu", 0, false], aide: ["Contact ou visite : déroulement, activités prévues (fiche de négociation), difficultés.", "Noter dans Pronote : « Créer un suivi »."] },
+    { id: "midpoint", ph: 6, t: "Point d’étape · suivi du milieu de stage", te: "Comment se passe mon stage ?", ty: "declare", ou: "Pronote › Créer un suivi", src: "Chronologie n° 27", due: ["milieu", 0, false], aide: ["Contact ou visite : déroulement, activités prévues (fiche de négociation), difficultés.", "Noter dans Pronote : « Créer un suivi »."] },
     { id: "visit", ph: 6, t: "Rendez-vous du bilan fixé avec le tuteur", te: "Visite de l’enseignant référent", ty: "info", by: ["referent"], ou: "Visite de stage (RDV PFMP)", src: "Chronologie n° 28" },
     { id: "att_sent", ph: 6, t: "Attestation envoyée au tuteur (mail avant le bilan, ou à la visite)", ty: "tache", by: ["referent"], src: "Chronologie n° 29", due: ["fin", -4, false] },
     { id: "assessment", ph: 6, t: "Bilan avec le tuteur · compte rendu d’évaluation récupéré", ty: "tache", by: ["referent"], doc: "Livret de formation · grille de notation", src: "Chronologie n° 30", due: ["fin", -3, false], aide: ["Faire le bilan avec le tuteur ; récupérer le compte rendu d’évaluation lorsqu’il est finalisé.", "Le bilan peut avoir lieu avant la fin du stage : il est indépendant de l’attestation."] },
@@ -509,6 +509,9 @@
           (base.etapesPP || []).forEach(([eid, en]) => {
             const et = PAR_ID[eid]; if (!et || et.local) return;
             const enLigne = (data.etapes || {})[eid];
+            /* 12/10/2026 — Une coche locale du professeur principal ne rétrograde jamais un geste terminé en ligne
+               (exemple : l'activation du suivi par l'enseignant référent, avec sa matière). */
+            if (enLigne && FINI.has(enLigne.e) && !FINI.has(en.e) && enLigne.par !== 'pp') return;
             if (!enLigne || String(enLigne.le || '') < String(en.le || '')) { data.etapes = data.etapes || {}; data.etapes[eid] = en; }
           });
           const pb = verifierSuivi(majCommune(data, 'pp', le));
