@@ -124,7 +124,7 @@ a.valider{color:#fff}
  <div class="rgpd"><i class="ti ti-shield-check"></i><div><b style="color:var(--ink)">Ce qui est enregistré</b><ul><li>Les documents se remplissent sur cet appareil et s’impriment : ils ne sont jamais envoyés au lycée par cette page.</li><li>Le lycée voit vos « C’est fait », l’arrivée, le point d’étape, les présences et vos demandes de contact.</li><li>Aucun nom de personne.</li></ul></div></div>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="./pfmp-commun.js?v=2026-10-11a"></script>
+<script src="./pfmp-commun.js?v=2026-10-11b"></script>
 <script type="module">
 /* Feuille de route du tuteur (09/10/2026), d'après la maquette validée tuteur-route-demo.html.
    tuteur.html?f=<fiche>&t=<clé de 10 caractères>[&m=<adresse académique du référent>]
@@ -257,7 +257,7 @@ async function demarrer() {
     const h = ev.target.closest('[data-aide]');
     if (h) { ev.preventDefault(); const nx = h.closest('.s').nextElementSibling; if (nx && nx.classList.contains('explic')) nx.remove(); else h.closest('.s').insertAdjacentHTML('afterend', `<div class="explic">${esc(h.dataset.aide)}</div>`); return; }
     const g = ev.target.closest('[data-g]');
-    if (g) { const [id, k] = g.dataset.g.split(':'); const docs = JSON.parse(JSON.stringify(D())), e = docs[id] || (docs[id] = { g: [] }); e.g[+k] = !e.g[+k]; if (!e.g[+k]) e.v = ''; e.g = e.g.map(Boolean); ecrire({ docs }); return; }
+    if (g) { const [id, k] = g.dataset.g.split(':'); const docs = JSON.parse(JSON.stringify(D())), e = docs[id] || (docs[id] = { g: [] }); e.g = ROUTE.find(y => y.id === id).g.map((_, i) => !!(e.g && e.g[i])); e.g[+k] = !e.g[+k]; if (!e.g[+k]) e.v = ''; ecrire({ docs }); return; }
     const v = ev.target.closest('[data-v]');
     if (v) { const id = v.dataset.v, x = ROUTE.find(y => y.id === id), docs = JSON.parse(JSON.stringify(D())), e = docs[id] || (docs[id] = { g: [] });
       if (e.v) { e.v = ''; ecrire({ docs }, 'Annulé'); } else { e.g = x.g.map(() => true); e.v = new Date().toISOString(); ecrire({ docs }, 'Le lycée est prévenu'); } return; }

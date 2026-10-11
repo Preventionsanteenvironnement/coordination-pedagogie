@@ -17,7 +17,7 @@
 (function (racine) {
   'use strict';
 
-  const VERSION = '2026-10-11a';
+  const VERSION = '2026-10-11b';
   const COL_SUIVI = 'coordination_pfmp_suivi';
   const COL_REFERENTS = 'coordination_pfmp_referents';
   const ROLES = ['eleve', 'referent', 'pp'];
@@ -242,6 +242,12 @@
     if (!ROLES.includes(role)) throw new Error('Rôle inconnu.');
     const en = entree(suivi, id);
     if (!actions(etape, en, role).includes(action)) throw new Error('Cette action n’est pas possible à cette étape.');
+    /* 11/10/2026 — Traçabilité : dès qu'un adulte a validé la suite de la même grande étape, l'élève n'annule plus ce qui précède. */
+    if (role === 'eleve' && action === 'annuler') {
+      const rang = ETAPES.indexOf(etape);
+      const verrou = ETAPES.some((x, k) => { if (k <= rang || x.ph !== etape.ph) return false; const y = entree(suivi, x.id); return FINI.has(y.e) && adulte(y.par); });
+      if (verrou) throw new Error('Un adulte a déjà validé la suite : cette étape ne s’annule plus.');
+    }
     const le = (opts && opts.le) || new Date().toISOString();
     let e;
     if (action === 'declarer') e = etape.verif ? 'declare' : 'fait';
