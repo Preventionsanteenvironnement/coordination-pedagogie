@@ -104,13 +104,15 @@ function rendre() {
   if (ds.length === ouvertes.length) ds.forEach((d, i) => { d.open = ouvertes[i]; });
   window.scrollTo(0, y);
 }
-let dernierEcran = '';
+let dernierEcran = '', listeVoulue = false;
 function dessiner() {
   const h = location.hash;
   if (h !== dernierEcran) { dernierEcran = h; motifOuvert = ''; requestAnimationFrame(() => window.scrollTo(0, 0)); }
   if (!code || refInconnu) return ecranAcces();
   if (h === '#documents') return ecranDocuments();
   if (h.startsWith('#eleve/')) return ecranFiche(decodeURIComponent(h.slice(7)));
+  /* 11/10/2026 — Un référent suit en général un seul élève : sa fiche s'ouvre directement, sans passer par la liste. */
+  if (!h && ref && (ref.suivis || []).length === 1 && !listeVoulue) { location.replace('#eleve/' + encodeURIComponent(ref.suivis[0])); return; }
   return ecranListe();
 }
 
@@ -131,7 +133,7 @@ function ecranAcces() {
 
 function enTete(retour) {
   return `<div class="haut">
-    ${retour ? `<a class="retour" href="#"><i class="ti ti-chevron-left" aria-hidden="true"></i> Mes élèves</a>` : `<a class="retour" href="../"><i class="ti ti-home" aria-hidden="true"></i> Accueil</a>`}
+    ${retour ? `<a class="retour" href="#liste"><i class="ti ti-chevron-left" aria-hidden="true"></i> Mes élèves</a>` : `<a class="retour" href="../"><i class="ti ti-home" aria-hidden="true"></i> Accueil</a>`}
     <span class="esp"></span>
     <a class="retour" href="#documents"><i class="ti ti-files" aria-hidden="true"></i> Documents</a>
     <span class="puce ref" title="Votre sigle">${esc(ref ? ref.sigle : '')}</span>

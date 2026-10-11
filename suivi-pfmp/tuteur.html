@@ -247,10 +247,25 @@ async function demarrer() {
       return `<details class="et ${cls}" data-id="${x.id}" ${ouvert.has(x.id) ? 'open' : ''}><summary><span class="num">${f ? '✓' : num}</span><h3><i class="ti ti-${x.ic}"></i>${esc(x.t)}${etat}</h3><div class="s">${esc(x.s)} ${aideBtn(x.aide)}</div></summary><div class="corps">${corps(x)}</div></details>`;
     }).join('');
   }
-  async function ecrire(maj, msg, discret) {
-    const d = Object.assign({}, T, maj, { majLe: new Date().toISOString() });
-    try { await F.setDoc(refT, d); T = d; if (!discret) { rendre(); if (msg) toast(msg); } }
-    catch (e) { if (!discret) toast('Non enregistré. Réessayez plus tard.'); }
+  /* 11/10/2026 — Deux onglets ou deux appareils : on relit la copie en ligne, puis on n'y reporte que ce qui vient de changer ici
+     (un geste, un jour de présence). « milieu: null » retire le point d'étape. */
+  const reporter = (avant = {}, apres = {}, loin = {}) => { const o = Object.assign({}, loin); new Set(Object.keys(avant).concat(Object.keys(apres))).forEach(k => { if (JSON.stringify(avant[k]) !== JSON.stringify(apres[k])) { if (apres[k] === undefined) delete o[k]; else o[k] = apres[k]; } }); return o; };
+  let enEcriture = Promise.resolve();
+  function ecrire(maj, msg, discret) {
+    const avant = T;
+    enEcriture = enEcriture.then(async () => {
+      try {
+        const d = await F.runTransaction(db, async t => {
+          const sn = await t.get(refT), loin = sn.exists() ? sn.data() : {}, d = Object.assign({}, loin, maj, { majLe: new Date().toISOString() });
+          if (maj.docs) d.docs = reporter(avant.docs, maj.docs, loin.docs);
+          if (maj.presences) d.presences = reporter(avant.presences, maj.presences, loin.presences);
+          if (maj.milieu === null) delete d.milieu;
+          t.set(refT, d); return d;
+        });
+        T = d; if (!discret) { rendre(); if (msg) toast(msg); }
+      } catch (e) { if (!discret) toast('Non enregistré. Réessayez plus tard.'); }
+    });
+    return enEcriture;
   }
   document.addEventListener('toggle', ev => { const d = ev.target; if (d.matches && d.matches('details.et')) { if (d.open) ouvert.add(d.dataset.id); else ouvert.delete(d.dataset.id); } }, true);
   document.addEventListener('click', ev => {
@@ -267,14 +282,14 @@ async function demarrer() {
     const m = ev.target.closest('[data-mil]');
     if (m) { const k = m.dataset.mil;
       if (k === 'contact') { milContact = !milContact; milMotif = ''; rendre(); return; }
-      if (k === 'annuler') { const d = Object.assign({}, T); delete d.milieu; d.majLe = new Date().toISOString(); F.setDoc(refT, d).then(() => { T = d; milContact = false; milMotif = ''; rendre(); toast('Annulé'); }).catch(() => toast('Non enregistré. Réessayez plus tard.')); return; }
+      if (k === 'annuler') { milContact = false; milMotif = ''; ecrire({ milieu: null }, 'Annulé'); return; }
       ecrire({ milieu: { v: 'ok', le: new Date().toISOString() } }, 'Le lycée est prévenu'); return; }
     const mo = ev.target.closest('[data-motif]'); if (mo) { milMotif = milMotif === mo.dataset.motif ? '' : mo.dataset.motif; rendre(); return; }
     if (ev.target.closest('[data-envoyer]')) { const mil = { v: 'contact', le: new Date().toISOString() }; if (milMotif) mil.txt = milMotif; ecrire({ milieu: mil }, 'Le lycée est prévenu'); return; }
     /* « Besoin de contacter le lycée ? » : un clic, sans rien écrire ; un second clic annule. */
     /* La demande de contact s'enregistre dans « milieu » (seul champ que les règles Firestore acceptent pour cela). */
     if (ev.target.closest('[data-contact]')) {
-      if (T.milieu && ['contact', 'difficulte'].includes(T.milieu.v)) { const d = Object.assign({}, T); delete d.milieu; d.majLe = new Date().toISOString(); F.setDoc(refT, d).then(() => { T = d; milContact = false; milMotif = ''; rendre(); toast('Annulé'); }).catch(() => toast('Non enregistré. Réessayez plus tard.')); }
+      if (T.milieu && ['contact', 'difficulte'].includes(T.milieu.v)) { milContact = false; milMotif = ''; ecrire({ milieu: null }, 'Annulé'); }
       else ecrire({ milieu: { v: 'contact', le: new Date().toISOString() } }, 'Le lycée est prévenu');
       return; }
   });
