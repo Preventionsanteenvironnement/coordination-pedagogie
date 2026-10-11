@@ -73,33 +73,39 @@ button.b:disabled{opacity:.5}
 .ph.afaire{border:2px solid var(--el)}.ph.afaire>summary .ct b,.ph.afaire>summary .ct em{background:var(--el);color:#fff}
 .ph.attend>summary .ct b{background:var(--orange);color:#fff}.ph.attend>summary .ct em{background:var(--orange-s);color:var(--orange)}
 .ph.corr>summary .ct b{background:var(--red);color:#fff}.ph.corr>summary .ct em{background:var(--red-s);color:var(--red)}
-.ph .dedans{padding:2px 14px 16px}
+.ph .dedans{position:relative;padding:2px 14px 16px}
+.ph .dedans::before{content:"";position:absolute;top:0;bottom:0;right:0;width:calc((100% - 112px)/2.82 + 22px);background:var(--accent-s)}
+.cols,.grille{position:relative;align-items:start}
 .cols,.grille{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,.82fr) 34px minmax(0,1fr);gap:3px 4px}
-.cols{padding:10px 0 8px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cols{padding:12px 0 10px;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cols span:first-child{color:var(--ink)}.cols span:nth-child(3){color:var(--accent)}
 .cols span:nth-child(2){grid-column:3;text-align:center}.cols span:nth-child(3){grid-column:5;text-align:right}
 .et.g{grid-column:1}.et.m{grid-column:3}.et.d{grid-column:5}.et.c{grid-column:1/-1}
 /* Les flèches : vers le bas quand le geste suivant est dans le même couloir, vers la droite quand ça change de main. Vertes une fois le passage fait. */
-.fl{display:flex;align-items:center;justify-content:center;gap:6px;color:#a9b5c1;font-size:11.5px;font-weight:700;white-space:nowrap}
-.fl .ti{font-size:22px}
+.fl{display:flex;align-items:center;justify-content:center;gap:6px;color:#55667a;font-size:12px;font-weight:700;white-space:nowrap;align-self:center}
+.fl.h,.fl.long{align-self:start;margin-top:22px}
+.fl .ti{font-size:24px;font-weight:700}
 .fl.on{color:var(--green)}
 .fl.v{min-height:26px}
 .fl .iv,.fl span{display:none}.fl.v .iv{display:inline}
 .fl.long span{display:inline}
-.fl .tr{flex:1;border-top:2px dashed currentColor;opacity:.7}
+.fl .tr{flex:1;border-top:2px solid currentColor}
 .et{scroll-margin-top:16px}
-.carte{height:100%;background:#f7f9fb;border:1px solid var(--line);border-left:5px solid #cfd8e0;border-radius:12px;padding:10px 13px}
+.carte{background:#fff;border:1px solid #cfd8e0;border-left:5px solid #b8c4cf;border-radius:12px;padding:10px 13px}
 .et.m .carte{border-style:dashed;border-left-style:solid;padding:8px 11px}
 .carte .q{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .carte .q>i{font-size:14px}
 .carte .q .mini{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font-size:11px}
-.carte .q .pst{margin-left:auto;font-style:normal;letter-spacing:0;text-transform:none;font-size:11.5px;border-radius:999px;padding:1px 9px}
+.carte .q .pst{margin-left:auto;white-space:nowrap;flex:none;font-style:normal;letter-spacing:0;text-transform:none;font-size:11.5px;border-radius:999px;padding:1px 9px}
 .carte .q .neuf{font-style:normal;background:var(--el);color:#fff;border-radius:6px;padding:1px 6px;font-size:10px;letter-spacing:.04em}
 .carte>b{display:block;font-size:14.5px;font-weight:650;line-height:1.35;margin-top:3px}
 .et.m .carte>b{font-size:13.5px}
 .carte p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}
 .carte .dt{display:inline-block;margin-top:5px;font-size:12px;font-weight:700;color:var(--muted)}
 .carte .acts{display:flex;gap:8px;align-items:center;margin-top:9px;flex-wrap:wrap}
-.et.fait .carte{background:var(--green-s);border-color:#c4e6d6;border-left-color:var(--green)}.et.fait .dt{color:var(--green)}
+.et.g .q{color:var(--ink)}.et.d .q,.et.c .q{color:var(--accent)}
+.et.avenir .pst{background:#eef2f5;color:var(--muted)}
+.et.fait .carte{border-color:#a9d9c3;border-left-color:var(--green)}.et.fait .pst{background:var(--green-s);color:var(--green)}.et.fait .dt{color:var(--green)}
 .et.afaire .carte{background:var(--el-s);border-color:#c5d5ee;border-left-color:var(--el)}.et.afaire .pst{background:var(--el);color:#fff}
 .et.attend .carte{background:var(--orange-s);border-color:#f0d2b0;border-left-color:var(--orange)}.et.attend .pst{background:var(--orange);color:#fff}
 .et.corr .carte{background:var(--red-s);border-color:#eec3c3;border-left-color:var(--red)}.et.corr .pst{background:var(--red);color:#fff}
@@ -134,6 +140,7 @@ button.b:disabled{opacity:.5}
   .fl{justify-content:flex-start;padding-left:16px;min-height:28px}
   .fl .ih,.fl .tr{display:none}.fl .iv,.fl span{display:inline}
   .et.m{margin-left:22px}
+  .ph .dedans::before{display:none}.et.d .carte,.et.c .carte{box-shadow:0 0 0 5px var(--accent-s)}.et.d,.et.c{margin:5px}
   .ph>summary{padding:12px 10px;gap:6px;grid-template-columns:0 1fr 0 auto}.ph>summary .ct{font-size:16px}.ph>summary>small{display:none}
   .ph .dedans{padding:0 10px 12px}
   .bal .l .bts{flex:1 1 100%}.bal .l .bts button{flex:1}
@@ -301,7 +308,6 @@ async function reel(sid) {
   const A_QUI = { pre_given: 'l’élève', conv_given: 'l’élève', copies: 'la famille et l’entreprise', pre_return: 'le référent', conv_return: 'le référent', attestation: 'le référent', neg_given: 'l’élève', neg_return: 'le référent', bde: 'le bureau des entreprises', bde_ok: 'le DDF', ddf_copies: 'le référent' };
   const TUT_ETAPE = { neg_company: 'nego', pre_filled: 'pre', company: 'conv', attest_in: 'att' };
   const TUT_LIB = { nego: 'fiche de négociation remise au stagiaire', pre: 'pré-convention remise au stagiaire', conv: 'convention signée et rendue', cr: 'compte rendu d’évaluation prêt', contact: 'souhaite être contacté', att: 'attestation remise au stagiaire' };
-  const SUITE = { search: 'Établir sa fiche de négociation avec son enseignant professionnel.' };
 
   function construire(s, pr, R, ent) {
     const items = [], E = id => P.entree(s, id);
@@ -336,7 +342,11 @@ async function reel(sid) {
           if (et.id === 'here' && tu && tu.arrivee) items.push({ cote: 'm:ent', signe: 'i', titre: 'Le tuteur confirme l’arrivée', detail: 'En ligne', etat: 'fait', date: fr(tu.arrivee.le || '') });
           if (et.id === 'midpoint' && tu && tu.milieu) items.push({ cote: 'm:ent', signe: 'i', titre: ['contact', 'difficulte'].includes(tu.milieu.v) ? 'Le tuteur souhaite être contacté' : 'Le tuteur : « tout se passe bien »', detail: 'En ligne', etat: 'fait', date: fr(tu.milieu.le || '') });
           if (!et.verif) return;
-          if (et.id === 'search') items.push(Object.assign({ cote: 'd', signe: 'i', titre: s.code + ' a une proposition de stage :', lieu: ent ? ent.nom + (ent.adresse ? ', ' + ent.adresse : '') : '', suite: SUITE.search, etat: e === 'valide' ? 'fait' : 'avenir', lu: 1, date: e === 'valide' ? fr(en.le) : '', acts: e === 'valide' ? gestes(et, en, true) : e === 'declare' ? gestes(et, en, true) : [], boite: 1, en }, o));
+          /* 12/10/2026 — Le référent prend acte, rien d'autre : la cohérence du stage se vérifie avec la fiche de négociation, par l'enseignant professionnel. */
+          if (et.id === 'search') { const su = declare || e === 'valide';
+            items.push({ cote: 'd', signe: 'i', info: 1, titre: su ? s.code + ' a trouvé un stage' : 'Vous serez informé quand ' + s.code + ' aura trouvé un stage', lieu: su && ent ? ent.nom + (ent.adresse ? ', ' + ent.adresse : '') : '',
+              detail: su ? 'Vous en prenez acte. La cohérence du stage est vérifiée par l’enseignant professionnel, avec la fiche de négociation.' : '', etat: e === 'valide' ? 'fait' : 'avenir', lu: 1, date: e === 'valide' ? fr(en.le) : '',
+              acts: su ? gestes(et, en, true).filter(a => a.action !== 'corriger').map(a => a.lien ? a : Object.assign(a, { t: 'J’en prends acte' })) : [], boite: 1, en, aide: (et.aide || []).filter(c => /handicap/.test(c)), src: et.src }); }
           else items.push(Object.assign({ cote: 'd', signe: 'a', titre: DIT[et.id] || et.t, etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : quand(en, et), acts: gestes(et, en).filter(a => a.action !== 'corriger') }, o));
           return;
         }
@@ -366,8 +376,9 @@ async function reel(sid) {
   }
   /* Les mots de la page : « cachet » partout ; côté élève, « sa », « son », « ses » (c'est le référent qui lit). */
   const PHASE_LIB = { 'Mon enseignant référent': 'Référent désigné' };
-  const mots = (t, eleve) => { t = String(t || '').replace('signée et tamponnée par', 'signée, avec le cachet de').replace(/tamponnée/g, 'avec cachet'); return eleve ? t.replace(/\bma\b/g, 'sa').replace(/\bmon\b/g, 'son').replace(/\bmes\b/g, 'ses') : t; };
-  const ETAT_LIB = { afaire: 'À faire', attend: 'En attente', corr: 'À corriger' };
+  const MILIEU_DIT = { 'Activités contrôlées · fiche validée et signée par l’enseignant professionnel': 'Contrôle la fiche de négociation : les activités proposées par l’entreprise correspondent à la formation' };
+  const mots = (t, eleve) => { t = MILIEU_DIT[t] || t; t = String(t || '').replace('signée et tamponnée par', 'signée, avec le cachet de').replace(/tamponnée/g, 'avec cachet'); return eleve ? t.replace(/\bma\b/g, 'sa').replace(/\bmon\b/g, 'son').replace(/\bmes\b/g, 'ses') : t; };
+  const ETAT_LIB = { afaire: 'À faire', attend: 'En attente', corr: 'À corriger', fait: 'Fait', avenir: 'À venir' };
   const boutons = (acts, t) => acts && acts.length ? `<div class="acts">${acts.map(a => `<button class="b ${a.lien ? 'lien' : a.action === 'corriger' ? 'corr' : t === 'afaire' ? '' : 'dis'}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('')}</div>` : '';
   /* La grille d'une étape : une carte reste sur la rangée de la précédente quand elle est plus à droite (ça change de main) ; sinon rangée suivante. */
   const COL = x => x.cote === 'g' ? 1 : x.cote === 'd' ? 5 : x.cote === 'c' ? 0 : 3;
@@ -397,16 +408,16 @@ async function reel(sid) {
   }
   function carte(x, r) {
     const t = ton(x), m = x.cote.startsWith('m:') ? x.cote.slice(2) : '';
-    const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(P.ACTEURS[m])}` : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : 'Vous';
-    const tete = `<div class="q">${qui}${x.signe === 'i' ? '<span class="signe">✉</span>' : ''}${x.nouveau ? '<em class="neuf">Nouveau</em>' : ''}${ETAT_LIB[t] ? `<em class="pst">${ETAT_LIB[t]}</em>` : ''}</div>`;
+    const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(P.ACTEURS[m])}` : x.info ? '<i class="ti ti-school"></i>Vous · information' : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : '<i class="ti ti-school"></i>Vous';
+    const tete = `<div class="q">${qui}${x.nouveau ? '<em class="neuf">Nouveau</em>' : ''}${ETAT_LIB[t] ? `<em class="pst">${ETAT_LIB[t]}</em>` : ''}</div>`;
     const date = x.date ? `<span class="dt">${t === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '';
     if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${relais(x) || (x.detail ? `<p>${esc(x.detail)}</p>` : '')}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
     const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
-    return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail ? `<p>${esc(x.detail)}</p>` : ''}`
+    return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail && !x.lieu ? `<p>${esc(x.detail)}</p>` : ''}`
       + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
-      + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
+      + (x.detail && x.lieu ? `<p>${esc(x.detail)}</p>` : '') + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
       + (x.visite ? `<form class="visite-f" id="visiteF"><input type="datetime-local" id="visiteLe" value="${esc(String((s.visite || {}).le || '').slice(0, 16))}" required><button>${(s.visite || {}).le ? 'Changer la date' : 'Enregistrer le rendez-vous'}</button></form>` : '')
-      + (x.suite ? `<div class="suite"><small>Ensuite, pour l’élève</small><span>${esc(x.suite)}</span></div>` : '') + cf + `</div></div>`;
+      + cf + `</div></div>`;
   }
 
   /* « À traiter » : ce qui attend le référent, et rien d'autre. Les signalements de l'élève d'abord. */
@@ -419,7 +430,7 @@ async function reel(sid) {
     Object.keys(P.GARDE).filter(id => P.entree(s, id).e === 'perdu').forEach(id => L.push(`<div class="l sig"><i class="ti ti-file-alert"></i><span><b>${esc(s.code)} a perdu : ${esc(minus(P.GARDE[id]))}</b></span><div class="bts"><button class="b" data-geste="${id}" data-action="redonner">Remis à nouveau</button></div></div>`));
     items.filter(x => !x.phase && x.cote !== 'g' && !x.cote.startsWith('m:') && ton(x) === 'afaire').forEach(x => {
       const info = x.signe === 'i' || x.lu;
-      const t = x.lieu ? x.titre.replace(/ :$/, '') + ' : ' + x.lieu : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'a remis $1').replace(/^recevoir /, 'a remis ') : x.titre;
+      const t = x.lieu ? x.titre + ' : ' + x.lieu : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'a remis $1').replace(/^recevoir /, 'a remis ') : x.titre;
       const bs = (x.acts || []).filter(a => !a.lien);
       L.push(`<div class="l"><i class="ti ti-${info ? 'mail' : x.deEleve ? 'file-arrow-right' : 'checkbox'}"></i><span><b>${esc(t)}</b>${x.date ? ' · ' + esc(x.date) : ''}</span><div class="bts">`
         + (bs.length ? bs.map(a => `<button class="b ${a.action === 'corriger' ? 'corr' : ''}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('') : `<button class="b dis" data-vers="c${x.k}">Voir</button>`) + `</div></div>`);
