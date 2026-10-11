@@ -254,9 +254,7 @@ async function reel(sid) {
   /* 09/10/2026 : le carnet de bord de l'élève (mapse.fr), lu ici ; son rapport s'ouvre sur mapse.fr. */
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'carnet'), x => { cb = x.exists() ? x.data() : null; if (pret === 3) rendre(); }, () => {});
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'parcours'), x => { p = x.exists() ? x.data() : null; pret |= 2; pret3(); }, () => { pret |= 2; pret3(); });
-  /* Les gestes du tuteur (arrivée, point d'étape, présences), si le lien porte sa clé. */
-  const tk = q.get('t');
-  if (tk && /^[a-z0-9]{10}$/.test(tk)) F.onSnapshot(F.doc(db, 'coordination_pfmp_tuteur', sid + '_' + tk), x => { tu = x.exists() ? x.data() : null; if (pret === 3) rendre(); }, () => {});
+  /* 11/10/2026 — La page du tuteur ne concerne que le professeur principal (Atelier) : la frise du référent ne lit plus rien du tuteur. */
 
   function rendre() {
     if (!s) { $('titre').textContent = 'PFMP'; $('frise').innerHTML = '<p class="vide-msg">Cette fiche n’existe pas encore. L’élève l’ouvre en déclarant son stage sur mapse.fr.</p>'; return; }

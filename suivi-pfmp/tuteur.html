@@ -143,7 +143,7 @@ const mailRef = /^[a-z0-9._%+-]+@ac-lyon\.fr$/i.test(q.get('m') || '') ? q.get('
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('vu'); clearTimeout(toast.m); toast.m = setTimeout(() => el.classList.remove('vu'), 2600); }
 const vide = m => { $('app').innerHTML = `<p class="vide-msg">${m}</p>`; };
 
-/* La feuille de route, dans l'ordre du stage. g : gestes cochés ; v : « C'est fait » vu par le référent. ? : explication. */
+/* La feuille de route, dans l'ordre du stage. g : gestes cochés ; v : « C'est fait » vu par le professeur principal seulement (Atelier) ; ni le référent ni l'élève ne voient cette page. ? : explication. */
 const ROUTE = [
   { moment: 'Avant le stage' },
   { id: 'nego', ic: 'list-check', t: 'Fiche de négociation', s: 'Les activités que le stagiaire pourra faire', doc: 'fiche-negociation-agora.html', aide: 'Elle fixe avec le lycée les activités confiées au stagiaire. Cochez les activités possibles dans votre organisation.',
@@ -154,7 +154,7 @@ const ROUTE = [
     g: ['Signer (responsable ou tuteur)', 'Cachet de l’organisation', 'Rendre la convention au stagiaire'], v: 'Convention signée et rendue' },
   { moment: 'Pendant le stage' },
   { id: 'arr', ic: 'door-enter', t: 'Arrivée du stagiaire', s: 'Le premier jour', arr: true, aide: 'Accueil, présentation de l’équipe et du poste, consignes de sécurité : le premier jour compte beaucoup.' },
-  { id: 'mil', ic: 'mood-smile', t: 'Point d’étape', s: 'Au milieu du stage', mil: true, aide: 'Un retard, une absence ou une difficulté se signalent à l’enseignant référent dès qu’ils arrivent.' },
+  { id: 'mil', ic: 'mood-smile', t: 'Point d’étape', s: 'Au milieu du stage', mil: true, aide: 'Un retard, une absence ou une difficulté se signalent au lycée dès qu’ils arrivent.' },
   { id: 'pres', ic: 'calendar-check', t: 'Présences', s: 'Jour après jour', pres: true, aide: 'Les présences aident à remplir l’attestation : seuls les jours réellement effectués y figurent.' },
   { moment: 'Fin du stage' },
   { id: 'rdv', ic: 'calendar-event', t: 'Rendez-vous de bilan', s: 'Avec l’enseignant référent et le stagiaire', rdv: true },
@@ -164,7 +164,7 @@ const ROUTE = [
     g: ['Compléter le nombre de jours effectués', 'Cachet et signature', 'Remettre l’attestation au stagiaire'], v: 'Attestation remise au stagiaire' }
 ];
 
-if (!/^20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4]$/.test(sid) || !/^[a-z0-9]{10}$/.test(tk)) vide('Lien incomplet. Demandez le lien à l’enseignant référent.');
+if (!/^20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4]$/.test(sid) || !/^[a-z0-9]{10}$/.test(tk)) vide('Lien incomplet. Demandez le lien au lycée.');
 else demarrer();
 
 async function demarrer() {
@@ -179,7 +179,7 @@ async function demarrer() {
   } catch (e) { vide('Connexion impossible. Rechargez la page.'); return; }
   const refT = F.doc(db, 'coordination_pfmp_tuteur', sid + '_' + tk);
   let s = null, T = {}, lu = 0, erreur = '', ouvert = new Set(), vuNote = false, milContact = false, milMotif = '';
-  /* 11/10/2026 — Aucun texte libre : le tuteur choisit un motif, l'enseignant référent le contacte. */
+  /* 11/10/2026 — Aucun texte libre : le tuteur choisit un motif, le lycée le contacte. */
   const MOTIFS = ['Absence ou retard', 'Activités du stage', 'Comportement', 'Organisation', 'Autre situation'];
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid), x => { s = x.exists() ? x.data() : null; lu |= 1; rendre(); }, () => vide('Lecture impossible. Rechargez la page.'));
   F.onSnapshot(refT, x => { T = x.exists() ? x.data() : {}; lu |= 2; if (!vuNote) { vuNote = true; ecrire({ vu: new Date().toISOString() }, '', true); } rendre(); }, () => { lu |= 2; erreur = 'lecture'; rendre(); });
@@ -205,18 +205,17 @@ async function demarrer() {
     if (x.g) {
       const tous = x.g.every((_, k) => e.g && e.g[k]);
       return `<ul class="gestes">${x.g.map((t, k) => `<li class="${e.g && e.g[k] ? 'ok' : ''}"><button class="b" data-g="${x.id}:${k}" aria-label="${esc(t)}">✓</button><span class="t">${esc(t)}</span>${k === 0 && x.doc ? `<a href="${x.doc}" target="_blank" rel="noopener">Ouvrir ↗</a>` : ''}${k === 0 && x.att ? `<span class="nbj">Présences : ${effectues()} jour${effectues() > 1 ? 's' : ''}</span>` : ''}</li>`).join('')}</ul>`
-        + (x.doc && mailRef ? `<button class="copie" data-copie="${x.id}"><i class="ti ti-mail"></i> Envoyer une copie à l’enseignant référent</button>` : '')
-        + (e.v ? `<button class="valider fait" data-v="${x.id}"><i class="ti ti-circle-check"></i> ${esc(x.v)} · ${esc(new Date(e.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> L’enseignant référent est prévenu</div>`
+        + (e.v ? `<button class="valider fait" data-v="${x.id}"><i class="ti ti-circle-check"></i> ${esc(x.v)} · ${esc(new Date(e.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> Le lycée est prévenu</div>`
           : `<button class="valider" data-v="${x.id}" ${tous ? '' : 'style="opacity:.6"'}><i class="ti ti-send"></i> C’est fait : ${esc(x.v.charAt(0).toLowerCase() + x.v.slice(1))}</button>`);
     }
     if (x.rdv) { const v = s.visite || {}; return v.le ? `<div class="rdv"><i class="ti ti-calendar-check"></i><div><b>${esc(frLong(v.le))}${/T\d{2}:\d{2}/.test(v.le) ? ' · ' + (+v.le.slice(11, 13)) + ' h ' + v.le.slice(14, 16) : ''}</b><br><span style="color:var(--muted);font-size:13px">Rendez-vous de bilan · confirmé</span></div></div>`
-      : v.rdv ? `<p class="s">L’enseignant référent propose des créneaux : choisissez celui qui vous convient.</p><a class="valider" href="${RDV}?r=${encodeURIComponent(v.rdv)}" target="_blank" rel="noopener" style="text-decoration:none"><i class="ti ti-calendar-plus"></i> Choisir un créneau</a>`
-      : '<p class="s">L’enseignant référent vous proposera la date ici.</p>'; }
+      : v.rdv ? `<p class="s">Le lycée propose des créneaux : choisissez celui qui vous convient.</p><a class="valider" href="${RDV}?r=${encodeURIComponent(v.rdv)}" target="_blank" rel="noopener" style="text-decoration:none"><i class="ti ti-calendar-plus"></i> Choisir un créneau</a>`
+      : '<p class="s">Le lycée vous indiquera la date ici.</p>'; }
     if (x.arr) { const a = T.arrivee || {}; return `<div class="choix"><button data-arr="oui" class="${a.v === 'oui' ? 'on' : ''}">Le stagiaire est bien arrivé</button><button data-arr="non" class="${a.v === 'non' ? 'on' : ''}">Il n’est pas venu</button></div>`; }
     if (x.mil) { const m = T.milieu || {}, ct = m.v === 'contact' || m.v === 'difficulte';
       if (m.v === 'ok') return `<button class="valider fait" data-mil="annuler"><i class="ti ti-circle-check"></i> Tout se passe bien · ${esc(new Date(m.le).toLocaleDateString('fr-FR'))}</button>`;
-      if (ct) return `<button class="valider fait" data-mil="annuler"><i class="ti ti-circle-check"></i> Demande envoyée · ${esc(new Date(m.le).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> L’enseignant référent est prévenu. Il vous contactera.${m.txt && MOTIFS.includes(m.txt) ? ' Motif : ' + esc(m.txt.toLowerCase()) + '.' : ''}</div>`;
-      return `<div class="choix"><button data-mil="ok">Tout se passe bien</button><button data-mil="contact" class="${milContact ? 'on bleu' : ''}">Je souhaite être contacté par l’enseignant référent</button></div>${milContact ? `<p class="s" style="margin-top:12px">Motif (facultatif)</p><div class="choix">${MOTIFS.map(t => `<button data-motif="${esc(t)}" class="${milMotif === t ? 'on bleu' : ''}">${esc(t)}</button>`).join('')}</div><button class="valider" data-envoyer style="margin-top:10px"><i class="ti ti-send"></i> Prévenir l’enseignant référent</button>` : ''}`; }
+      if (ct) return `<button class="valider fait" data-mil="annuler"><i class="ti ti-circle-check"></i> Demande envoyée · ${esc(new Date(m.le).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> Le lycée est prévenu. Il vous contactera.${m.txt && MOTIFS.includes(m.txt) ? ' Motif : ' + esc(m.txt.toLowerCase()) + '.' : ''}</div>`;
+      return `<div class="choix"><button data-mil="ok">Tout se passe bien</button><button data-mil="contact" class="${milContact ? 'on bleu' : ''}">Je souhaite être contacté par le lycée</button></div>${milContact ? `<p class="s" style="margin-top:12px">Motif (facultatif)</p><div class="choix">${MOTIFS.map(t => `<button data-motif="${esc(t)}" class="${milMotif === t ? 'on bleu' : ''}">${esc(t)}</button>`).join('')}</div><button class="valider" data-envoyer style="margin-top:10px"><i class="ti ti-send"></i> Prévenir le lycée</button>` : ''}`; }
     if (x.pres) {
       const J = jours(), pz = T.presences || {}, ETATS = { p: 'présent', a: 'absent', r: 'retard' }, sem = [];
       J.forEach(k => { const w = new Date(k + 'T12:00:00').getDay(); if (w === 1 || !sem.length) sem.push([]); sem[sem.length - 1].push(k); });
@@ -228,7 +227,7 @@ async function demarrer() {
   }
   function rendre() {
     if (lu !== 3) return;
-    if (!s) { vide('Ce stage n’est pas encore ouvert. Demandez le lien à l’enseignant référent.'); return; }
+    if (!s) { vide('Ce stage n’est pas encore ouvert. Demandez le lien au lycée.'); return; }
     const debut = s.debut ? frCourt(s.debut).replace(/ \d{4}$/, '') : '', fin = s.fin ? frCourt(s.fin) : '';
     $('titre').textContent = s.debut ? 'Stage du ' + debut + ' au ' + fin : (s.libelle || 'PFMP');
     $('ligne').textContent = [FILIERES[P.filiereDe(s.classe)] || '', 'stagiaire ' + s.code].filter(Boolean).join(' · ');
@@ -239,7 +238,7 @@ async function demarrer() {
     if (!ouvert.size && ici) ouvert.add(ici.id);
     let num = 0;
     { const c = D().contact;
-      $('contact').innerHTML = `<b>Besoin de contacter le référent ?</b>` + (c && c.v ? `<button class="valider fait" data-contact="1"><i class="ti ti-circle-check"></i> Demande envoyée · ${esc(new Date(c.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> L’enseignant référent est prévenu. Il vous contactera.</div>` : `<button class="valider" data-contact="1" style="background:#1d5fae"><i class="ti ti-phone-call"></i> Je souhaite être contacté par l’enseignant référent</button>`); }
+      $('contact').innerHTML = `<b>Besoin de contacter le lycée ?</b>` + (c && c.v ? `<button class="valider fait" data-contact="1"><i class="ti ti-circle-check"></i> Demande envoyée · ${esc(new Date(c.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> Le lycée est prévenu. Il vous contactera.</div>` : `<button class="valider" data-contact="1" style="background:#1d5fae"><i class="ti ti-phone-call"></i> Je souhaite être contacté par le lycée</button>`); }
     $('route').innerHTML = ROUTE.map(x => {
       if (x.moment) return `<div class="moment">${esc(x.moment)}</div>`;
       num++;
@@ -261,23 +260,19 @@ async function demarrer() {
     if (g) { const [id, k] = g.dataset.g.split(':'); const docs = JSON.parse(JSON.stringify(D())), e = docs[id] || (docs[id] = { g: [] }); e.g[+k] = !e.g[+k]; if (!e.g[+k]) e.v = ''; e.g = e.g.map(Boolean); ecrire({ docs }); return; }
     const v = ev.target.closest('[data-v]');
     if (v) { const id = v.dataset.v, x = ROUTE.find(y => y.id === id), docs = JSON.parse(JSON.stringify(D())), e = docs[id] || (docs[id] = { g: [] });
-      if (e.v) { e.v = ''; ecrire({ docs }, 'Annulé'); } else { e.g = x.g.map(() => true); e.v = new Date().toISOString(); ecrire({ docs }, 'L’enseignant référent est prévenu'); } return; }
-    const c = ev.target.closest('[data-copie]');
-    if (c) { const x = ROUTE.find(y => y.id === c.dataset.copie);
-      location.href = 'mailto:' + mailRef + '?subject=' + encodeURIComponent('PFMP · ' + s.code + ' · ' + x.t) + '&body=' + encodeURIComponent('Bonjour,\n\nVeuillez trouver ci-joint une copie du document « ' + x.t + ' » pour le stagiaire ' + s.code + '.\n\nCordialement');
-      toast('Joignez le PDF enregistré depuis « Imprimer » du document.'); return; }
+      if (e.v) { e.v = ''; ecrire({ docs }, 'Annulé'); } else { e.g = x.g.map(() => true); e.v = new Date().toISOString(); ecrire({ docs }, 'Le lycée est prévenu'); } return; }
     const j = ev.target.closest('[data-j]');
     if (j) { const k = j.dataset.j, o = ['', 'p', 'a', 'r'], pz = Object.assign({}, T.presences || {}); const n2 = o[(o.indexOf(pz[k] || '') + 1) % 4]; if (n2) pz[k] = n2; else delete pz[k]; ecrire({ presences: pz }); return; }
-    const a = ev.target.closest('[data-arr]'); if (a) { ecrire({ arrivee: { v: a.dataset.arr, le: new Date().toISOString() } }, 'L’enseignant référent est prévenu'); return; }
+    const a = ev.target.closest('[data-arr]'); if (a) { ecrire({ arrivee: { v: a.dataset.arr, le: new Date().toISOString() } }, 'Le lycée est prévenu'); return; }
     const m = ev.target.closest('[data-mil]');
     if (m) { const k = m.dataset.mil;
       if (k === 'contact') { milContact = !milContact; milMotif = ''; rendre(); return; }
       if (k === 'annuler') { const d = Object.assign({}, T); delete d.milieu; d.majLe = new Date().toISOString(); F.setDoc(refT, d).then(() => { T = d; milContact = false; milMotif = ''; rendre(); toast('Annulé'); }).catch(() => toast('Non enregistré. Réessayez plus tard.')); return; }
-      ecrire({ milieu: { v: 'ok', le: new Date().toISOString() } }, 'L’enseignant référent est prévenu'); return; }
+      ecrire({ milieu: { v: 'ok', le: new Date().toISOString() } }, 'Le lycée est prévenu'); return; }
     const mo = ev.target.closest('[data-motif]'); if (mo) { milMotif = milMotif === mo.dataset.motif ? '' : mo.dataset.motif; rendre(); return; }
-    if (ev.target.closest('[data-envoyer]')) { const mil = { v: 'contact', le: new Date().toISOString() }; if (milMotif) mil.txt = milMotif; ecrire({ milieu: mil }, 'L’enseignant référent est prévenu'); return; }
-    /* « Besoin de contacter le référent ? » : un clic, sans rien écrire ; un second clic annule. */
-    if (ev.target.closest('[data-contact]')) { const docs = JSON.parse(JSON.stringify(D())); if (docs.contact && docs.contact.v) { delete docs.contact; ecrire({ docs }, 'Annulé'); } else { docs.contact = { g: [], v: new Date().toISOString() }; ecrire({ docs }, 'L’enseignant référent est prévenu'); } return; }
+    if (ev.target.closest('[data-envoyer]')) { const mil = { v: 'contact', le: new Date().toISOString() }; if (milMotif) mil.txt = milMotif; ecrire({ milieu: mil }, 'Le lycée est prévenu'); return; }
+    /* « Besoin de contacter le lycée ? » : un clic, sans rien écrire ; un second clic annule. */
+    if (ev.target.closest('[data-contact]')) { const docs = JSON.parse(JSON.stringify(D())); if (docs.contact && docs.contact.v) { delete docs.contact; ecrire({ docs }, 'Annulé'); } else { docs.contact = { g: [], v: new Date().toISOString() }; ecrire({ docs }, 'Le lycée est prévenu'); } return; }
   });
 }
 </script>
