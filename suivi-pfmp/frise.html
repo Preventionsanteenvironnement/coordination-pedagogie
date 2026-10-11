@@ -110,6 +110,8 @@ button.b:disabled{opacity:.5}
 .et.attend .carte{background:var(--orange-s);border-color:#f0d2b0;border-left-color:var(--orange)}.et.attend .pst{background:var(--orange);color:#fff}
 .et.corr .carte{background:var(--red-s);border-color:#eec3c3;border-left-color:var(--red)}.et.corr .pst{background:var(--red);color:#fff}
 .et.avenir .carte>b{color:#4a5a6c}
+.carte p.reserve{color:var(--red);font-weight:650;font-size:13px;margin-top:8px}.reserve u{text-underline-offset:3px}
+.cf ol.sans{list-style:none;padding-left:0}
 .motif{display:block;margin-top:6px;font-size:13px;color:var(--red);font-weight:650}
 .signe{font-size:11px}
 .relais{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
@@ -342,11 +344,11 @@ async function reel(sid) {
           if (et.id === 'here' && tu && tu.arrivee) items.push({ cote: 'm:ent', signe: 'i', titre: 'Le tuteur confirme l’arrivée', detail: 'En ligne', etat: 'fait', date: fr(tu.arrivee.le || '') });
           if (et.id === 'midpoint' && tu && tu.milieu) items.push({ cote: 'm:ent', signe: 'i', titre: ['contact', 'difficulte'].includes(tu.milieu.v) ? 'Le tuteur souhaite être contacté' : 'Le tuteur : « tout se passe bien »', detail: 'En ligne', etat: 'fait', date: fr(tu.milieu.le || '') });
           if (!et.verif) return;
-          /* 12/10/2026 — Le référent prend acte, rien d'autre : la cohérence du stage se vérifie avec la fiche de négociation, par l'enseignant professionnel. */
+          /* 12/10/2026 — Le référent valide le stage trouvé, sous réserve de la fiche de négociation : la cohérence du stage se vérifie avec la fiche de négociation, par l'enseignant professionnel. */
           if (et.id === 'search') { const su = declare || e === 'valide';
-            items.push({ cote: 'd', signe: 'i', info: 1, titre: su ? s.code + ' a trouvé un stage' : 'Vous serez informé quand ' + s.code + ' aura trouvé un stage', lieu: su && ent ? ent.nom + (ent.adresse ? ', ' + ent.adresse : '') : '',
-              detail: su ? 'Vous en prenez acte. La cohérence du stage est vérifiée par l’enseignant professionnel, avec la fiche de négociation.' : '', etat: e === 'valide' ? 'fait' : 'avenir', lu: 1, date: e === 'valide' ? fr(en.le) : '',
-              acts: su ? gestes(et, en, true).filter(a => a.action !== 'corriger').map(a => a.lien ? a : Object.assign(a, { t: 'J’en prends acte' })) : [], boite: 1, en, aide: (et.aide || []).filter(c => /handicap/.test(c)), src: et.src }); }
+            items.push({ cote: 'd', signe: 'i', titre: su ? s.code + ' a trouvé un stage :' : 'Vous serez informé quand ' + s.code + ' aura trouvé un stage', lieu: su && ent ? ent.nom + (ent.adresse ? ', ' + ent.adresse : '') : '',
+              reserve: su, confirme: e === 'valide', etat: e === 'valide' ? 'fait' : 'avenir', lu: 1, date: e === 'valide' ? 'Validé le ' + fr(en.le) : '',
+              acts: su ? gestes(et, en, true).filter(a => a.action !== 'corriger').map(a => a.lien ? a : Object.assign(a, { t: 'Valider' })) : [], boite: 1, en }); }
           else items.push(Object.assign({ cote: 'd', signe: 'a', titre: DIT[et.id] || et.t, etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : quand(en, et), acts: gestes(et, en).filter(a => a.action !== 'corriger') }, o));
           return;
         }
@@ -408,14 +410,15 @@ async function reel(sid) {
   }
   function carte(x, r) {
     const t = ton(x), m = x.cote.startsWith('m:') ? x.cote.slice(2) : '';
-    const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(P.ACTEURS[m])}` : x.info ? '<i class="ti ti-school"></i>Vous · information' : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : '<i class="ti ti-school"></i>Vous';
+    const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(P.ACTEURS[m])}` : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : '<i class="ti ti-school"></i>Vous';
     const tete = `<div class="q">${qui}${x.nouveau ? '<em class="neuf">Nouveau</em>' : ''}${ETAT_LIB[t] ? `<em class="pst">${ETAT_LIB[t]}</em>` : ''}</div>`;
     const date = x.date ? `<span class="dt">${t === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '';
     if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${relais(x) || (x.detail ? `<p>${esc(x.detail)}</p>` : '')}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
     const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
     return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail && !x.lieu ? `<p>${esc(x.detail)}</p>` : ''}`
       + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
-      + (x.detail && x.lieu ? `<p>${esc(x.detail)}</p>` : '') + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
+      + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
+      + (x.reserve ? `<p class="reserve">Sous réserve de la validation de la fiche de négociation par <u>l’enseignant professionnel</u> (étape suivante).</p>${x.confirme ? `<p>${esc(s.code)} a reçu la confirmation.</p>` : ''}<details class="cf"><summary>Qu’est-ce que la fiche de négociation ?</summary><ol class="sans"><li>Elle liste les activités que l’élève fera pendant son stage.</li><li>L’entreprise la remplit, la signe et y met son cachet.</li><li>L’enseignant professionnel vérifie qu’elle correspond à la formation.</li></ol></details>` : '')
       + (x.visite ? `<form class="visite-f" id="visiteF"><input type="datetime-local" id="visiteLe" value="${esc(String((s.visite || {}).le || '').slice(0, 16))}" required><button>${(s.visite || {}).le ? 'Changer la date' : 'Enregistrer le rendez-vous'}</button></form>` : '')
       + cf + `</div></div>`;
   }
@@ -430,9 +433,9 @@ async function reel(sid) {
     Object.keys(P.GARDE).filter(id => P.entree(s, id).e === 'perdu').forEach(id => L.push(`<div class="l sig"><i class="ti ti-file-alert"></i><span><b>${esc(s.code)} a perdu : ${esc(minus(P.GARDE[id]))}</b></span><div class="bts"><button class="b" data-geste="${id}" data-action="redonner">Remis à nouveau</button></div></div>`));
     items.filter(x => !x.phase && x.cote !== 'g' && !x.cote.startsWith('m:') && ton(x) === 'afaire').forEach(x => {
       const info = x.signe === 'i' || x.lu;
-      const t = x.lieu ? x.titre + ' : ' + x.lieu : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'a remis $1').replace(/^recevoir /, 'a remis ') : x.titre;
+      const t = x.lieu ? x.titre + ' ' + x.lieu : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'a remis $1').replace(/^recevoir /, 'a remis ') : x.titre;
       const bs = (x.acts || []).filter(a => !a.lien);
-      L.push(`<div class="l"><i class="ti ti-${info ? 'mail' : x.deEleve ? 'file-arrow-right' : 'checkbox'}"></i><span><b>${esc(t)}</b>${x.date ? ' · ' + esc(x.date) : ''}</span><div class="bts">`
+      L.push(`<div class="l"><i class="ti ti-${info ? 'mail' : x.deEleve ? 'file-arrow-right' : 'checkbox'}"></i><span><b>${esc(t)}</b>${x.date ? ' · ' + esc(x.date) : ''}${x.reserve ? '<br><small class="reserve" style="color:var(--red);font-weight:650">Sous réserve de la validation de la fiche de négociation par <u>l’enseignant professionnel</u>.</small>' : ''}</span><div class="bts">`
         + (bs.length ? bs.map(a => `<button class="b ${a.action === 'corriger' ? 'corr' : ''}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('') : `<button class="b dis" data-vers="c${x.k}">Voir</button>`) + `</div></div>`);
     });
     const n = L.length;
