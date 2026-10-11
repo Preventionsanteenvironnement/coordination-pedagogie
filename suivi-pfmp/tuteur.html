@@ -237,7 +237,7 @@ async function demarrer() {
     $('avanceT').textContent = n + ' étape' + (n > 1 ? 's' : '') + ' sur ' + etapes.length;
     if (!ouvert.size && ici) ouvert.add(ici.id);
     let num = 0;
-    { const c = D().contact;
+    { const c = T.milieu && ['contact', 'difficulte'].includes(T.milieu.v) ? { v: T.milieu.le } : null;
       $('contact').innerHTML = `<b>Besoin de contacter le lycée ?</b>` + (c && c.v ? `<button class="valider fait" data-contact="1"><i class="ti ti-circle-check"></i> Demande envoyée · ${esc(new Date(c.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> Le lycée est prévenu. Il vous contactera.</div>` : `<button class="valider" data-contact="1" style="background:#1d5fae"><i class="ti ti-phone-call"></i> Je souhaite être contacté par le lycée</button>`); }
     $('route').innerHTML = ROUTE.map(x => {
       if (x.moment) return `<div class="moment">${esc(x.moment)}</div>`;
@@ -272,7 +272,11 @@ async function demarrer() {
     const mo = ev.target.closest('[data-motif]'); if (mo) { milMotif = milMotif === mo.dataset.motif ? '' : mo.dataset.motif; rendre(); return; }
     if (ev.target.closest('[data-envoyer]')) { const mil = { v: 'contact', le: new Date().toISOString() }; if (milMotif) mil.txt = milMotif; ecrire({ milieu: mil }, 'Le lycée est prévenu'); return; }
     /* « Besoin de contacter le lycée ? » : un clic, sans rien écrire ; un second clic annule. */
-    if (ev.target.closest('[data-contact]')) { const docs = JSON.parse(JSON.stringify(D())); if (docs.contact && docs.contact.v) { delete docs.contact; ecrire({ docs }, 'Annulé'); } else { docs.contact = { g: [], v: new Date().toISOString() }; ecrire({ docs }, 'Le lycée est prévenu'); } return; }
+    /* La demande de contact s'enregistre dans « milieu » (seul champ que les règles Firestore acceptent pour cela). */
+    if (ev.target.closest('[data-contact]')) {
+      if (T.milieu && ['contact', 'difficulte'].includes(T.milieu.v)) { const d = Object.assign({}, T); delete d.milieu; d.majLe = new Date().toISOString(); F.setDoc(refT, d).then(() => { T = d; milContact = false; milMotif = ''; rendre(); toast('Annulé'); }).catch(() => toast('Non enregistré. Réessayez plus tard.')); }
+      else ecrire({ milieu: { v: 'contact', le: new Date().toISOString() } }, 'Le lycée est prévenu');
+      return; }
   });
 }
 </script>
