@@ -112,7 +112,8 @@ function dessiner() {
   if (h === '#documents') return ecranDocuments();
   if (h.startsWith('#eleve/')) return ecranFiche(decodeURIComponent(h.slice(7)));
   /* 11/10/2026 — Un référent suit en général un seul élève : sa fiche s'ouvre directement, sans passer par la liste. */
-  if (!h && ref && (ref.suivis || []).length === 1 && !listeVoulue) { location.replace('#eleve/' + encodeURIComponent(ref.suivis[0])); return; }
+  /* Un seul élève : la frise s'ouvre directement (l'élève à gauche, le référent à droite, les échanges entre les deux). */
+  if (!h && ref && (ref.suivis || []).length === 1 && !listeVoulue) { location.replace('frise.html?f=' + encodeURIComponent(ref.suivis[0]) + '&r=1'); return; }
   return ecranListe();
 }
 
@@ -256,6 +257,7 @@ function ecranFiche(id) {
     <div class="bloc" id="visite"><h2><i class="ti ti-calendar-event" aria-hidden="true"></i> Visite de stage</h2>${visiteHtml(id, s)}</div>
     <div class="bloc"><h2><i class="ti ti-alert-triangle" aria-hidden="true"></i> Signalements de l’élève</h2>
       <div class="fil" id="fil"></div></div>
+    <a class="btn pri" href="frise.html?f=${encodeURIComponent(id)}&r=1" style="display:flex;justify-content:center;gap:8px;margin:14px 0;text-decoration:none"><i class="ti ti-arrows-left-right" aria-hidden="true"></i> Ouvrir la frise : l’élève, le référent, leurs échanges</a>
     <div class="bloc"><h2><i class="ti ti-route" aria-hidden="true"></i> Tout le parcours</h2>
       ${P.PHASES.map((nom, ph) => {
         const etapes = P.EN_LIGNE.filter(e => e.ph === ph && e.ty !== 'journal');

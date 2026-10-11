@@ -174,7 +174,7 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 </head>
 <body>
 <main class="shell">
- <div class="haut"><a href="../">← Coordination & Pédagogie</a></div>
+ <div class="haut"><a href="../">← Coordination & Pédagogie</a> <a id="versFiche" href="./#liste" hidden style="margin-left:14px">Ma page de référent</a></div>
  <section class="tete" style="margin-bottom:0"><div class="code" id="code">—</div><div><h1 id="titre">Chargement…</h1><div class="info" id="info"></div></div><div class="j"><b id="jx"></b><span id="jxl"></span></div></section>
  <div class="statut" id="statut"></div>
  <a class="carnet-lien" id="carnet" hidden target="_blank" rel="noopener"></a>
@@ -226,6 +226,8 @@ const SIGNAUX = { stage: 'ne trouve pas de stage', annule: 'signale que son entr
   'perdu-neg_given': 'a perdu sa fiche de négociation', 'perdu-pre_given': 'a perdu sa pré-convention', 'perdu-conv_given': 'a perdu sa convention', 'perdu-attest_in': 'a perdu son attestation' };
 
 const q = new URLSearchParams(location.search), f = q.get('f');
+/* Arrivée depuis la page d'entrée du référent (un seul élève) : un lien pour y revenir (changer de code, documents). */
+if (q.get('r')) { const v = document.getElementById('versFiche'); if (v) v.hidden = false; }
 if (!f) location.replace('frise-acteurs.html');
 else reel(f);
 
