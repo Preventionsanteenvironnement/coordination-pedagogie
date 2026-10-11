@@ -164,6 +164,8 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,-ap
 .voile{position:fixed;inset:0;background:rgba(20,30,40,.4);display:grid;place-items:center;z-index:20;padding:20px}
 .fen{background:#fff;border-radius:20px;padding:22px;max-width:400px;width:100%;text-align:center}
 .fen h2{margin:4px 0 6px;font-size:20px}.fen p{margin:0 0 16px;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.fen select,.fen input[type=text]{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px;font:inherit;margin:0 0 10px;background:#fff}
 .fen textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:12px;padding:10px;font:inherit;margin:0 0 14px;resize:vertical}
 .fen .b2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .fen button{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px;font:inherit;font-weight:700;cursor:pointer}
@@ -204,12 +206,24 @@ const STATUTS = ['Recherche', 'Proposition de stage', 'Stage validé', 'Conventi
 let avatar = ['user', '#9aa8b6'];
 
 /* ── Confirmation (avec le motif, pour « À corriger ») ── */
+/* 11/10/2026 — « À corriger » : un motif choisi dans une liste, avec une courte précision facultative.
+   L'élève lit le motif ; il ne répond jamais par écrit (aucune messagerie libre entre l'élève et un adulte). */
+const MOTIFS = {
+  search: ['Entreprise hors du domaine de formation', 'Informations de l’entreprise incomplètes', 'Stage à confirmer avec l’entreprise'],
+  pre_return: ['Informations de l’entreprise incomplètes', 'Horaires incomplets', 'Signature manquante', 'Tampon manquant', 'Dates à vérifier', 'Informations du tuteur incomplètes'],
+  conv_return: ['Signature de l’entreprise manquante', 'Tampon manquant', 'Signature du responsable légal manquante', 'Informations à vérifier'],
+  attestation: ['Nombre de jours manquant', 'Signature manquante', 'Tampon manquant']
+};
+const motifsDe = id => (MOTIFS[id] || ['À compléter']).concat(['Voir avec mon référent']);
 function confirmer(texte, motif, oui) {
-  $('voile').innerHTML = `<div class="voile"><div class="fen" role="dialog" aria-modal="true"><h2>${motif ? 'À corriger' : 'Vous confirmez ?'}</h2><p>${esc(texte)}</p>${motif ? '<textarea id="motif" maxlength="300" placeholder="Ce qu’il faut corriger"></textarea>' : ''}<div class="b2"><button id="non">${motif ? 'Annuler' : 'Non'}</button><button class="oui" id="oui">${motif ? 'Envoyer' : 'Oui'}</button></div></div></div>`;
+  $('voile').innerHTML = `<div class="voile"><div class="fen" role="dialog" aria-modal="true"><h2>${motif ? 'À corriger' : 'Vous confirmez ?'}</h2><p>${esc(texte)}</p>${motif ? `<label class="sr" for="motif">Motif</label><select id="motif">${motif.map(x => `<option>${esc(x)}</option>`).join('')}</select><label class="sr" for="motifPlus">Précision</label><input type="text" id="motifPlus" maxlength="120" placeholder="Précision (facultatif)">` : ''}<div class="b2"><button id="non">${motif ? 'Annuler' : 'Non'}</button><button class="oui" id="oui">${motif ? 'Envoyer' : 'Oui'}</button></div></div></div>`;
   $('non').onclick = () => { $('voile').innerHTML = ''; };
-  $('oui').onclick = () => { const m = motif ? $('motif').value.trim() : ''; if (motif && !m) { $('motif').focus(); return; } $('voile').innerHTML = ''; oui(m); };
+  $('oui').onclick = () => { const plus = motif ? $('motifPlus').value.trim() : '', m = motif ? $('motif').value + (plus ? ' — ' + plus : '') : ''; $('voile').innerHTML = ''; oui(m); };
   if (motif) $('motif').focus();
 }
+/* Les signalements de l'élève (mapse.fr › Besoin d'aide ?) : une ligne à texte fixe dans le fil du suivi. */
+const SIGNAUX = { stage: 'ne trouve pas de stage', annule: 'signale que son entreprise a annulé le stage', absent: 'signale une absence ou un retard', mal: 'signale que son stage se passe mal', contact: 'souhaite être contacté par son référent',
+  'perdu-neg_given': 'a perdu sa fiche de négociation', 'perdu-pre_given': 'a perdu sa pré-convention', 'perdu-conv_given': 'a perdu sa convention', 'perdu-attest_in': 'a perdu son attestation' };
 
 const q = new URLSearchParams(location.search), f = q.get('f');
 if (!f) location.replace('frise-acteurs.html');
@@ -227,7 +241,7 @@ async function reel(sid) {
     }
   } catch (e) { $('frise').innerHTML = '<p class="vide-msg">Connexion impossible. Rechargez la page.</p>'; return; }
   const svc = P.service(P.depotModulaire(F, db));
-  let s = null, p = null, tu = null, cb = null, pret = 0;
+  let s = null, p = null, tu = null, cb = null, pret = 0, ms = [];
   /* « Nouveau » : ce que l'élève a fait depuis la dernière visite du référent sur cet appareil. */
   const cleVu = 'pfmp-frise-vu:' + sid;
   let vu = ''; try { vu = localStorage.getItem(cleVu) || ''; } catch (e) {}
@@ -236,6 +250,7 @@ async function reel(sid) {
   addEventListener('pagehide', noterVu);
   const pret3 = () => { if (pret === 3) rendre(); };
   svc.ecouterSuivi(sid, d => { s = d; pret |= 1; pret3(); }, () => { $('frise').innerHTML = '<p class="vide-msg">Lecture impossible.</p>'; });
+  svc.ecouterMessages(sid, l => { ms = l; if (pret === 3) rendre(); }, () => {});
   /* 09/10/2026 : le carnet de bord de l'élève (mapse.fr), lu ici ; son rapport s'ouvre sur mapse.fr. */
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'carnet'), x => { cb = x.exists() ? x.data() : null; if (pret === 3) rendre(); }, () => {});
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid, 'eleve', 'parcours'), x => { p = x.exists() ? x.data() : null; pret |= 2; pret3(); }, () => { pret |= 2; pret3(); });
@@ -398,12 +413,16 @@ async function reel(sid) {
     const tut = [];
     /* Un document perdu par l'élève passe en tête, avec « Remis à nouveau ». */
     const perdus = Object.keys(P.GARDE).filter(id => P.entree(s, id).e === 'perdu');
+    /* Les signalements de l'élève : en tête, avec « J'en ai pris connaissance » (l'élève le voit sur sa page). */
+    const sig = ms.filter(m => m.de === 'eleve' && /^§signal:/.test(m.texte || '') && SIGNAUX[m.texte.slice(8)]).map(m => ({ k: m.texte.slice(8), le: m.le, vu: ms.some(y => y.de !== 'eleve' && y.texte === '§vu:' + m.le) }));
+    const sigHtml = sig.filter(x => !x.vu).map(x => `<div class="l"><i class="ti ti-alert-triangle" style="color:var(--orange)"></i><span><b>${esc(s.code)} ${esc(SIGNAUX[x.k])}</b> · ${esc(fr(String(x.le).slice(0, 10)))}</span><button data-vu="${esc(x.le)}">J’en ai pris connaissance</button></div>`).join('')
+      + sig.filter(x => x.vu).slice(-2).map(x => `<div class="l"><i class="ti ti-mail-opened"></i><span>${esc(s.code)} ${esc(SIGNAUX[x.k])} · ${esc(fr(String(x.le).slice(0, 10)))}</span><em class="ok">✓ Pris connaissance</em></div>`).join('');
     if (cb && cb.accueilEnvoye) tut.push('Avis sur l’accueil envoyé par l’élève le ' + cb.accueilEnvoye + ' (carnet de bord)');
     if (tu && tu.arrivee && tu.arrivee.v === 'non') tut.push('Le tuteur signale que le stagiaire n’est pas venu');
     Object.entries((tu && tu.docs) || {}).filter(([, v]) => v && v.v).sort((a, b) => String(b[1].v).localeCompare(String(a[1].v))).slice(0, 2).forEach(([k, v]) => tut.push('Le tuteur : ' + (TUT_LIB[k] || k) + ' · ' + fr(v.v)));
     if (tu && tu.milieu && tu.milieu.v === 'difficulte') tut.push('Le tuteur signale une difficulté' + (tu.milieu.txt ? ' : « ' + tu.milieu.txt + ' »' : ''));
-    bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + perdus.map(id => `<div class="l"><i class="ti ti-file-alert" style="color:var(--orange)"></i><span>${esc(s.code)} a perdu : ${esc(minus(P.GARDE[id]))}</span><button data-geste="${id}" data-action="redonner">Remis à nouveau</button></div>`).join('')
-      + tut.map(x => `<div class="l"><i class="ti ti-alert-triangle" style="color:var(--orange)"></i><span>${esc(x)}</span></div>`).join('') + (l.length || tut.length || perdus.length ? l.map(x => {
+    bal.innerHTML = `<h2><i class="ti ti-mail"></i> Boîte aux lettres du référent</h2>` + sigHtml + perdus.map(id => `<div class="l"><i class="ti ti-file-alert" style="color:var(--orange)"></i><span>${esc(s.code)} a perdu : ${esc(minus(P.GARDE[id]))}</span><button data-geste="${id}" data-action="redonner">Remis à nouveau</button></div>`).join('')
+      + tut.map(x => `<div class="l"><i class="ti ti-alert-triangle" style="color:var(--orange)"></i><span>${esc(x)}</span></div>`).join('') + (l.length || tut.length || perdus.length || sig.length ? l.map(x => {
       const ok = x.etat === 'fait', info = x.signe === 'i' || x.lu;
       const t = x.lieu ? x.titre.replace(/ :$/, '') + ' : ' + x.lieu + ' — étape suivante pour l’élève : ' + minus(x.suite) : x.deEleve ? s.code + ' · ' + minus(x.titre).replace(/^contrôler (la|le|l’)/, 'remet $1').replace(/^recevoir /, 'remet ') : x.titre;
       const b = !ok && (x.acts || []).find(a => !a.lien && a.action !== 'corriger');
@@ -420,9 +439,11 @@ async function reel(sid) {
     catch (e) { alert(e.message); b.disabled = false; }
   });
   document.addEventListener('click', ev => {
+    const v = ev.target.closest('[data-vu]');
+    if (v && s) { v.disabled = true; svc.envoyerMessage(sid, 'referent', s.refSigle || '', '§vu:' + v.dataset.vu).catch(e => { v.disabled = false; alert(e.message); }); return; }
     const b = ev.target.closest('[data-geste]'); if (!b || !s) return;
     const id = b.dataset.geste, action = b.dataset.action, et = P.PAR_ID[id];
-    confirmer(action === 'redonner' ? 'Remis à nouveau : ' + (et.garde || et.t) : (action === 'annuler' ? 'Annuler : ' : '') + et.t, action === 'corriger', motif => {
+    confirmer(action === 'redonner' ? 'Remis à nouveau : ' + (et.garde || et.t) : (action === 'annuler' ? 'Annuler : ' : '') + et.t, action === 'corriger' ? motifsDe(id) : false, motif => {
       b.disabled = true;
       svc.agir(sid, id, action, 'referent', motif ? { motif } : undefined).catch(e => { b.disabled = false; alert(e.message); });
     });
