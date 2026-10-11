@@ -47,14 +47,16 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,-ap
 .et h3 i{color:var(--ent);font-size:20px}
 .et .s{font-size:13.5px;color:var(--muted);margin-top:2px}
 .etat{margin-left:auto;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
-.etat.ok{background:var(--ok-s);color:var(--ok)}.etat.att{background:var(--ent-s);color:var(--ent)}.etat.gris{background:#f0ece5;color:var(--muted)}
+.etat.ok{background:var(--ok-s);color:var(--ok)}.etat.att{background:var(--ent-s);color:var(--ent)}.etat.gris{background:#f0ece5;color:var(--muted)}.etat.bleu{background:#e6effa;color:#1d5fae}
+.choix button.on.bleu{background:#1d5fae;border-color:#1d5fae}
+.contact{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:20px}.contact b{display:block;margin-bottom:8px}
 .gestes{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
 .gestes li{display:flex;align-items:center;gap:10px;font-size:14.5px}
 .gestes .b{width:26px;height:26px;border-radius:50%;border:2px solid #d8d1c4;display:grid;place-items:center;flex:none;font-size:13px;color:transparent}
 .gestes li.ok .b{background:var(--ok);border-color:var(--ok);color:#fff}
 .gestes li.ok span.t{color:var(--muted)}
 .gestes a,.gestes button.lien{margin-left:auto;font-size:13px;font-weight:700;color:var(--ent);text-decoration:none;background:none;border:0;font-family:inherit;cursor:pointer;white-space:nowrap}
-.valider{margin-top:12px;width:100%;border:0;border-radius:14px;padding:13px;font:inherit;font-weight:700;font-size:15px;background:var(--ent);color:#fff;cursor:pointer;display:flex;gap:8px;justify-content:center;align-items:center}
+.valider{margin-top:12px;width:100%;border:0;border-radius:14px;padding:13px;font:inherit;font-weight:700;font-size:15px;background:#1d5fae;color:#fff;cursor:pointer;display:flex;gap:8px;justify-content:center;align-items:center}
 .valider.fait{background:var(--ok-s);color:var(--ok)}
 .ref-voit{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ok);font-weight:600;margin-top:8px}
 .choix{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -117,11 +119,12 @@ a.valider{color:#fff}
   <small>Source : circulaire n° 2016-053 du 29 mars 2016, organisation et accompagnement des PFMP.</small>
  </details>
  <section class="route" id="route"></section>
+ <div class="contact" id="contact"></div>
  <div class="horaires-stagiaire"><i class="ti ti-clock"></i><div><b>Horaires du stagiaire</b><ul><li>Moins de 18 ans : 8 h par jour et 35 h par semaine au plus, pause de 30 min après 4 h 30.</li><li>Ni nuit ni jour férié ; 2 jours de repos de suite, dimanche compris.</li><li>18 ans et plus : les horaires inscrits sur la convention.</li></ul></div></div>
- <div class="rgpd"><i class="ti ti-shield-check"></i><div><b style="color:var(--ink)">Ce qui est enregistré</b><ul><li>Les documents se remplissent sur cet appareil et s’impriment : ils ne sont jamais envoyés au lycée par cette page.</li><li>Le lycée voit vos « C’est fait », l’arrivée, le point d’étape et les présences.</li><li>Aucun nom de personne.</li></ul></div></div>
+ <div class="rgpd"><i class="ti ti-shield-check"></i><div><b style="color:var(--ink)">Ce qui est enregistré</b><ul><li>Les documents se remplissent sur cet appareil et s’impriment : ils ne sont jamais envoyés au lycée par cette page.</li><li>Le lycée voit vos « C’est fait », l’arrivée, le point d’étape, les présences et vos demandes de contact.</li><li>Aucun nom de personne.</li></ul></div></div>
 </main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script src="./pfmp-commun.js?v=2026-10-09b"></script>
+<script src="./pfmp-commun.js?v=2026-10-11a"></script>
 <script type="module">
 /* Feuille de route du tuteur (09/10/2026), d'après la maquette validée tuteur-route-demo.html.
    tuteur.html?f=<fiche>&t=<clé de 10 caractères>[&m=<adresse académique du référent>]
@@ -149,12 +152,12 @@ const ROUTE = [
     g: ['Remplir en ligne', 'Imprimer', 'Cachet et signature', 'Remettre la pré-convention au stagiaire'], v: 'Pré-convention remise au stagiaire' },
   { id: 'conv', ic: 'signature', t: 'Convention de stage', s: 'Préparée par le lycée, apportée par le stagiaire', aide: 'La convention est signée par le chef d’établissement, le représentant de l’organisation, le tuteur, l’enseignant référent et l’élève ou son représentant légal.',
     g: ['Signer (responsable ou tuteur)', 'Cachet de l’organisation', 'Rendre la convention au stagiaire'], v: 'Convention signée et rendue' },
-  { id: 'rdv', ic: 'calendar-event', t: 'Rendez-vous de bilan', s: 'Avec l’enseignant référent et le stagiaire', rdv: true },
   { moment: 'Pendant le stage' },
   { id: 'arr', ic: 'door-enter', t: 'Arrivée du stagiaire', s: 'Le premier jour', arr: true, aide: 'Accueil, présentation de l’équipe et du poste, consignes de sécurité : le premier jour compte beaucoup.' },
   { id: 'mil', ic: 'mood-smile', t: 'Point d’étape', s: 'Au milieu du stage', mil: true, aide: 'Un retard, une absence ou une difficulté se signalent à l’enseignant référent dès qu’ils arrivent.' },
   { id: 'pres', ic: 'calendar-check', t: 'Présences', s: 'Jour après jour', pres: true, aide: 'Les présences aident à remplir l’attestation : seuls les jours réellement effectués y figurent.' },
   { moment: 'Fin du stage' },
+  { id: 'rdv', ic: 'calendar-event', t: 'Rendez-vous de bilan', s: 'Avec l’enseignant référent et le stagiaire', rdv: true },
   { id: 'cr', ic: 'clipboard-text', t: 'Compte rendu d’évaluation', s: 'À remplir avant le rendez-vous de bilan', doc: 'compte-rendu-evaluation.html', aide: 'Activités pratiquées, compétences et bilan : il sert à l’évaluation, faite avec l’enseignant référent en présence du stagiaire.',
     g: ['Remplir en ligne', 'Imprimer', 'Signer', 'Le remettre à l’enseignant référent lors du bilan'], v: 'Compte rendu remis' },
   { id: 'att', ic: 'certificate', t: 'Attestation de stage', s: 'Envoyée par l’enseignant référent', att: true, aide: 'Elle indique le nombre de jours réellement effectués. Ce nombre sert au versement de l’allocation de l’État au stagiaire.',
@@ -175,7 +178,9 @@ async function demarrer() {
     }
   } catch (e) { vide('Connexion impossible. Rechargez la page.'); return; }
   const refT = F.doc(db, 'coordination_pfmp_tuteur', sid + '_' + tk);
-  let s = null, T = {}, lu = 0, erreur = '', ouvert = new Set(), vuNote = false;
+  let s = null, T = {}, lu = 0, erreur = '', ouvert = new Set(), vuNote = false, milContact = false, milMotif = '';
+  /* 11/10/2026 — Aucun texte libre : le tuteur choisit un motif, l'enseignant référent le contacte. */
+  const MOTIFS = ['Absence ou retard', 'Activités du stage', 'Comportement', 'Organisation', 'Autre situation'];
   F.onSnapshot(F.doc(db, 'coordination_pfmp_suivi', sid), x => { s = x.exists() ? x.data() : null; lu |= 1; rendre(); }, () => vide('Lecture impossible. Rechargez la page.'));
   F.onSnapshot(refT, x => { T = x.exists() ? x.data() : {}; lu |= 2; if (!vuNote) { vuNote = true; ecrire({ vu: new Date().toISOString() }, '', true); } rendre(); }, () => { lu |= 2; erreur = 'lecture'; rendre(); });
 
@@ -208,13 +213,16 @@ async function demarrer() {
       : v.rdv ? `<p class="s">L’enseignant référent propose des créneaux : choisissez celui qui vous convient.</p><a class="valider" href="${RDV}?r=${encodeURIComponent(v.rdv)}" target="_blank" rel="noopener" style="text-decoration:none"><i class="ti ti-calendar-plus"></i> Choisir un créneau</a>`
       : '<p class="s">L’enseignant référent vous proposera la date ici.</p>'; }
     if (x.arr) { const a = T.arrivee || {}; return `<div class="choix"><button data-arr="oui" class="${a.v === 'oui' ? 'on' : ''}">Le stagiaire est bien arrivé</button><button data-arr="non" class="${a.v === 'non' ? 'on' : ''}">Il n’est pas venu</button></div>`; }
-    if (x.mil) { const m = T.milieu || {}; return `<div class="choix"><button data-mil="ok" class="${m.v === 'ok' ? 'on' : ''}">Tout se passe bien</button><button data-mil="difficulte" class="${m.v === 'difficulte' ? 'on' : ''}">J’ai une difficulté</button></div>${m.v === 'difficulte' ? `<textarea id="txt" maxlength="200" placeholder="En une phrase, sans nom">${esc(m.txt || '')}</textarea><button class="valider" data-envoyer style="margin-top:8px"><i class="ti ti-send"></i> Envoyer</button>` : ''}`; }
+    if (x.mil) { const m = T.milieu || {}, ct = m.v === 'contact' || m.v === 'difficulte';
+      if (m.v === 'ok') return `<button class="valider fait" data-mil="annuler"><i class="ti ti-circle-check"></i> Tout se passe bien · ${esc(new Date(m.le).toLocaleDateString('fr-FR'))}</button>`;
+      if (ct) return `<button class="valider fait" data-mil="annuler"><i class="ti ti-circle-check"></i> Demande envoyée · ${esc(new Date(m.le).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> L’enseignant référent est prévenu. Il vous contactera.${m.txt && MOTIFS.includes(m.txt) ? ' Motif : ' + esc(m.txt.toLowerCase()) + '.' : ''}</div>`;
+      return `<div class="choix"><button data-mil="ok">Tout se passe bien</button><button data-mil="contact" class="${milContact ? 'on bleu' : ''}">Je souhaite être contacté par l’enseignant référent</button></div>${milContact ? `<p class="s" style="margin-top:12px">Motif (facultatif)</p><div class="choix">${MOTIFS.map(t => `<button data-motif="${esc(t)}" class="${milMotif === t ? 'on bleu' : ''}">${esc(t)}</button>`).join('')}</div><button class="valider" data-envoyer style="margin-top:10px"><i class="ti ti-send"></i> Prévenir l’enseignant référent</button>` : ''}`; }
     if (x.pres) {
       const J = jours(), pz = T.presences || {}, ETATS = { p: 'présent', a: 'absent', r: 'retard' }, sem = [];
       J.forEach(k => { const w = new Date(k + 'T12:00:00').getDay(); if (w === 1 || !sem.length) sem.push([]); sem[sem.length - 1].push(k); });
       const jour = k => { const dt = new Date(k + 'T12:00:00'), e2 = pz[k] || ''; return `<button class="jour ${e2}" data-j="${k}" style="grid-column:${dt.getDay()}">${dt.toLocaleDateString('fr-FR', { weekday: 'short' })}<b>${dt.getDate()}</b>${e2 ? ETATS[e2] : '—'}</button>`; };
       const n = effectues();
-      return `<p class="s">Touchez un jour : présent, puis absent, puis retard.</p>${sem.map(w => `<div class="semaine">${w.map(jour).join('')}</div>`).join('')}<div class="total">${n} jour${n > 1 ? 's' : ''} effectué${n > 1 ? 's' : ''} sur ${J.length}</div>`;
+      return `<p class="s">Touchez un jour : présent, puis absent, puis retard.</p>${sem.map(w => `<div class="semaine">${w.map(jour).join('')}</div>`).join('')}<div class="total">${n} jour${n > 1 ? 's' : ''} effectué${n > 1 ? 's' : ''} sur ${J.length}</div><p class="s">Un jour avec retard compte comme un jour effectué.</p>`;
     }
     return '';
   }
@@ -230,11 +238,13 @@ async function demarrer() {
     $('avanceT').textContent = n + ' étape' + (n > 1 ? 's' : '') + ' sur ' + etapes.length;
     if (!ouvert.size && ici) ouvert.add(ici.id);
     let num = 0;
+    { const c = D().contact;
+      $('contact').innerHTML = `<b>Besoin de contacter le référent ?</b>` + (c && c.v ? `<button class="valider fait" data-contact="1"><i class="ti ti-circle-check"></i> Demande envoyée · ${esc(new Date(c.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> L’enseignant référent est prévenu. Il vous contactera.</div>` : `<button class="valider" data-contact="1" style="background:#1d5fae"><i class="ti ti-phone-call"></i> Je souhaite être contacté par l’enseignant référent</button>`); }
     $('route').innerHTML = ROUTE.map(x => {
       if (x.moment) return `<div class="moment">${esc(x.moment)}</div>`;
       num++;
       const f = fini(x), cls = f ? 'fait' : x === ici ? 'ici' : '';
-      const etat = f ? '<span class="etat ok">✓ Fait</span>' : x === ici ? '<span class="etat att">Maintenant</span>' : '<span class="etat gris">Plus tard</span>';
+      const etat = f ? '<span class="etat ok">✓ Fait</span>' : x === ici ? '<span class="etat bleu">À faire</span>' : '<span class="etat gris">Plus tard</span>';
       return `<details class="et ${cls}" data-id="${x.id}" ${ouvert.has(x.id) ? 'open' : ''}><summary><span class="num">${f ? '✓' : num}</span><h3><i class="ti ti-${x.ic}"></i>${esc(x.t)}${etat}</h3><div class="s">${esc(x.s)} ${aideBtn(x.aide)}</div></summary><div class="corps">${corps(x)}</div></details>`;
     }).join('');
   }
@@ -259,8 +269,15 @@ async function demarrer() {
     const j = ev.target.closest('[data-j]');
     if (j) { const k = j.dataset.j, o = ['', 'p', 'a', 'r'], pz = Object.assign({}, T.presences || {}); const n2 = o[(o.indexOf(pz[k] || '') + 1) % 4]; if (n2) pz[k] = n2; else delete pz[k]; ecrire({ presences: pz }); return; }
     const a = ev.target.closest('[data-arr]'); if (a) { ecrire({ arrivee: { v: a.dataset.arr, le: new Date().toISOString() } }, 'L’enseignant référent est prévenu'); return; }
-    const m = ev.target.closest('[data-mil]'); if (m) { ecrire({ milieu: { v: m.dataset.mil, le: new Date().toISOString() } }, m.dataset.mil === 'ok' ? 'L’enseignant référent est prévenu' : ''); return; }
-    if (ev.target.closest('[data-envoyer]')) { const txt = ($('txt').value || '').trim().slice(0, 200); ecrire({ milieu: { v: 'difficulte', txt, le: new Date().toISOString() } }, 'L’enseignant référent est prévenu'); }
+    const m = ev.target.closest('[data-mil]');
+    if (m) { const k = m.dataset.mil;
+      if (k === 'contact') { milContact = !milContact; milMotif = ''; rendre(); return; }
+      if (k === 'annuler') { const d = Object.assign({}, T); delete d.milieu; d.majLe = new Date().toISOString(); F.setDoc(refT, d).then(() => { T = d; milContact = false; milMotif = ''; rendre(); toast('Annulé'); }).catch(() => toast('Non enregistré. Réessayez plus tard.')); return; }
+      ecrire({ milieu: { v: 'ok', le: new Date().toISOString() } }, 'L’enseignant référent est prévenu'); return; }
+    const mo = ev.target.closest('[data-motif]'); if (mo) { milMotif = milMotif === mo.dataset.motif ? '' : mo.dataset.motif; rendre(); return; }
+    if (ev.target.closest('[data-envoyer]')) { const mil = { v: 'contact', le: new Date().toISOString() }; if (milMotif) mil.txt = milMotif; ecrire({ milieu: mil }, 'L’enseignant référent est prévenu'); return; }
+    /* « Besoin de contacter le référent ? » : un clic, sans rien écrire ; un second clic annule. */
+    if (ev.target.closest('[data-contact]')) { const docs = JSON.parse(JSON.stringify(D())); if (docs.contact && docs.contact.v) { delete docs.contact; ecrire({ docs }, 'Annulé'); } else { docs.contact = { g: [], v: new Date().toISOString() }; ecrire({ docs }, 'L’enseignant référent est prévenu'); } return; }
   });
 }
 </script>
