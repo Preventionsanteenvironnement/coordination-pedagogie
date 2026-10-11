@@ -204,7 +204,7 @@ async function demarrer() {
     const e = D()[x.id] || { g: [] };
     if (x.g) {
       const tous = x.g.every((_, k) => e.g && e.g[k]);
-      return `<ul class="gestes">${x.g.map((t, k) => `<li class="${e.g && e.g[k] ? 'ok' : ''}"><button class="b" data-g="${x.id}:${k}" aria-label="${esc(t)}">✓</button><span class="t">${esc(t)}</span>${k === 0 && x.doc ? `<a href="${x.doc}" target="_blank" rel="noopener">Ouvrir ↗</a>` : ''}${k === 0 && x.att ? `<span class="nbj">Présences : ${effectues()} jour${effectues() > 1 ? 's' : ''}</span>` : ''}</li>`).join('')}</ul>`
+      return `<ul class="gestes">${x.g.map((t, k) => `<li class="${e.g && e.g[k] ? 'ok' : ''}"><button class="b" data-g="${x.id}:${k}" aria-label="${esc(t)}">✓</button><span class="t">${esc(t)}</span>${k === 0 && x.doc ? `<a href="${x.doc}?s=${encodeURIComponent(sid)}" target="_blank" rel="noopener">Ouvrir ↗</a>` : ''}${k === 0 && x.att ? `<span class="nbj">Présences : ${effectues()} jour${effectues() > 1 ? 's' : ''}</span>` : ''}</li>`).join('')}</ul>`
         + (e.v ? `<button class="valider fait" data-v="${x.id}"><i class="ti ti-circle-check"></i> ${esc(x.v)} · ${esc(new Date(e.v).toLocaleDateString('fr-FR'))}</button><div class="ref-voit"><i class="ti ti-eye-check"></i> Le lycée est prévenu</div>`
           : `<button class="valider" data-v="${x.id}" ${tous ? '' : 'style="opacity:.6"'}><i class="ti ti-send"></i> C’est fait : ${esc(x.v.charAt(0).toLowerCase() + x.v.slice(1))}</button>`);
     }

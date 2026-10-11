@@ -27,7 +27,11 @@ export function regles(chemin, avant, apres) {
   if (p[0] === 'coordination_pfmp_suivi' && p.length === 4 && p[2] === 'messages') {
     if (avant) refuse('message modifié');
     const ok = Object.keys(apres).every(k => ['de', 'sigle', 'texte', 'le'].includes(k));
-    if (!ok || !['eleve', 'referent', 'pp'].includes(apres.de) || !apres.texte || apres.texte.length > 1000) refuse('message');
+    /* 11/10/2026 — Règles à publier : plus de texte libre, seulement le signalement fixe de l'élève et l'accusé d'un adulte. */
+    const signal = apres.de === 'eleve' && /^.signal:(stage|annule|absent|mal|contact|perdu-neg_given|perdu-pre_given|perdu-conv_given|perdu-attest_in)$/.test(apres.texte || '');
+    const accuse = ['referent', 'pp'].includes(apres.de) && /^.vu:[0-9TZ:.-]{10,40}$/.test(apres.texte || '');
+    if (!ok || !(signal || accuse) || typeof apres.le !== 'string' || apres.le.length > 40) refuse('message');
+    if (!store_.has('coordination_pfmp_suivi/' + p[1])) refuse('fiche absente');
     return;
   }
   if (p[0] === 'coordination_pfmp_suivi' && p.length === 4 && p[2] === 'eleve') {
@@ -62,7 +66,14 @@ export function regles(chemin, avant, apres) {
     const m = /^(20\d{2}-20\d{2}_[A-Z0-9]{4,6}_p[1-4])_[a-z0-9]{10}$/.exec(p[1]);
     if (!m) refuse('id tuteur');
     Object.keys(apres).forEach(k => { if (!['arrivee', 'milieu', 'presences', 'docs', 'vu', 'majLe'].includes(k)) refuse('champ ' + k); });
-    if (apres.docs && Object.keys(apres.docs).length > 10) refuse('docs');
+    /* Comme en production : cinq documents seulement, des listes de vrai/faux sans trou, une date courte. */
+    const LIMITES = { nego: 4, pre: 4, conv: 3, cr: 4, att: 3 };
+    Object.entries(apres.docs || {}).forEach(([k, d]) => {
+      if (!(k in LIMITES) || !d || Object.keys(d).some(x => !['g', 'v'].includes(x))) refuse('docs ' + k);
+      if (d.g && (!Array.isArray(d.g) || d.g.length > LIMITES[k] || d.g.some(x => x !== true && x !== false))) refuse('docs ' + k + ' gestes');
+      if (d.v != null && (typeof d.v !== 'string' || d.v.length > 40)) refuse('docs ' + k + ' date');
+    });
+    if (apres.vu != null && (typeof apres.vu !== 'string' || apres.vu.length > 40)) refuse('vu');
     if (typeof apres.majLe !== 'string' || apres.majLe.length > 40) refuse('majLe');
     if (apres.arrivee && Object.keys(apres.arrivee).some(k => !['v', 'le'].includes(k))) refuse('arrivee');
     if (apres.milieu && (Object.keys(apres.milieu).some(k => !['v', 'txt', 'le'].includes(k)) || String(apres.milieu.txt || '').length > 200)) refuse('milieu');

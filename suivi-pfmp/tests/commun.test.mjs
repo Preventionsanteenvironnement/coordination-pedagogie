@@ -129,8 +129,11 @@ async function circuit(svcPP, svcEl, svcRef, base) {
   await svcEl.agir(id, 'pre_return', 'remettre', 'eleve');
   await svcRef.agir(id, 'pre_return', 'recevoir', 'referent');
   await svcRef.agir(id, 'visit', 'faire', 'referent', { v: '2027-01-14 10:00' });
-  await svcEl.envoyerMessage(id, 'eleve', '', 'Bonjour, j’ai trouvé !');
-  await svcRef.envoyerMessage(id, 'referent', 'T. R.', 'Bravo, passe me voir mardi.');
+  /* 11/10/2026 — Plus de messagerie libre : un signalement à texte fixe, puis l'accusé du référent. Un texte libre est refusé. */
+  await svcEl.envoyerMessage(id, 'eleve', '', '§signal:contact');
+  await svcRef.envoyerMessage(id, 'referent', 'T. R.', '§vu:2026-10-11T10:00:00.000Z');
+  await assert.rejects(svcEl.envoyerMessage(id, 'eleve', '', 'Bonjour, j’ai trouvé !'), /permission-denied/);
+  await assert.rejects(svcRef.envoyerMessage(id, 'referent', 'T. R.', 'Passe me voir mardi.'), /permission-denied/);
   await attendre();
   assert.equal(vu.etapes.search.e, 'valide');
   assert.equal(vu.etapes.pre_return.e, 'valide');
