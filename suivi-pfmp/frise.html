@@ -114,6 +114,7 @@ button.b:disabled{opacity:.5}
 .cf ol.sans{list-style:none;padding-left:0}
 .rappel{position:relative;margin:12px 0 0;padding:9px 12px;border-radius:10px;background:#fff;border:1px solid #cfd8e0;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:center}.rappel i{font-size:18px;color:var(--accent)}
 .carte p.att{display:flex;gap:7px;align-items:flex-start;margin-top:8px;padding:7px 9px;border-radius:9px;background:var(--orange-s);color:#8a4b0f;font-size:12.5px;font-weight:600}.carte p.att i{font-size:17px;color:var(--orange);flex:none;margin-top:1px}
+.activer{margin-top:9px;display:grid;gap:7px}.activer label{font-size:12.5px;font-weight:600;color:var(--muted)}.activer select{border:2px solid #c5d5ee;border-radius:10px;padding:9px 10px;font:inherit;font-weight:600;background:#fff;min-height:42px}
 .motif{display:block;margin-top:6px;font-size:13px;color:var(--red);font-weight:650}
 .signe{font-size:11px}
 .relais{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
@@ -194,6 +195,7 @@ const minus = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : '';
 /* Les intervenants, au milieu : nom (socle commun), icône, couleur. */
 const ICO = { pp: ['user-star', 'var(--ink)'], pro: ['tools', 'var(--pro)'], ent: ['building-store', 'var(--ent)'], bde: ['building-bank', 'var(--bde)'], chef: ['signature', 'var(--chef)'], ddf: ['id-badge-2', 'var(--ddf)'], int: ['tools-kitchen-2', 'var(--int)'] };
 let avatar = ['user', '#9aa8b6'];
+const CARNET_REFERENT = false;
 
 /* ── Confirmation (avec le motif, pour « À corriger ») ── */
 /* 11/10/2026 — « À corriger » : un motif choisi dans une liste, avec une courte précision facultative.
@@ -212,6 +214,8 @@ function confirmer(texte, motif, oui) {
   if (motif) $('motif').focus();
 }
 /* Les signalements de l'élève (mapse.fr › Besoin d'aide ?) : une ligne à texte fixe dans le fil du suivi. */
+/* Les matières proposées à l'enseignant référent : une liste, pas de saisie libre. L'élève voit la matière, jamais le nom. */
+const MATIERES = ['Éco-gestion', 'Économie-droit', 'Français', 'Histoire-géographie', 'Mathématiques', 'Sciences', 'Anglais', 'Espagnol', 'Arts appliqués', 'PSE', 'EPS'];
 const SIGNAUX = { stage: 'ne trouve pas de stage', annule: 'signale que son entreprise a annulé le stage', absent: 'signale une absence ou un retard', mal: 'signale que son stage se passe mal', contact: 'souhaite être contacté par son référent',
   'perdu-neg_given': 'a perdu sa fiche de négociation', 'perdu-pre_given': 'a perdu sa pré-convention', 'perdu-conv_given': 'a perdu sa convention', 'perdu-attest_in': 'a perdu son attestation' };
 
@@ -280,7 +284,8 @@ async function reel(sid) {
     $('frise').innerHTML = h; $('parc').hidden = false; $('leg').hidden = false;
     boite(items, ici);
     const cl = $('carnet'), nj = cb ? Object.values(cb.jours || {}).filter(j => j && j.pr && !/^Absent toute|pas encore/.test(j.pr)).length : 0;
-    cl.hidden = false; cl.href = 'https://mapse.fr/pfmp-agora/carnet/index.html?f=' + encodeURIComponent(sid);
+    /* 12/10/2026 — Le carnet de bord de l'élève n'est pas montré à l'enseignant référent pour le moment (option à venir : CARNET_REFERENT). */
+    cl.hidden = !CARNET_REFERENT; cl.href = 'https://mapse.fr/pfmp-agora/carnet/index.html?f=' + encodeURIComponent(sid);
     cl.innerHTML = `<i class="ti ti-notebook"></i><span><b>Carnet de bord</b>${cb ? nj + ' journée' + (nj > 1 ? 's' : '') + ' en entreprise' : 'pas encore commencé'}</span><em>Ouvrir ↗</em>`;
   }
   /* Les étapes ouvertes ou refermées à la main le restent quand la page se met à jour. */
@@ -290,6 +295,7 @@ async function reel(sid) {
   function ton(x) {
     if (x.motif) return 'corr';
     if (x.etat === 'fait') return 'fait';
+    if (x.activer) return 'afaire';
     if (x.cote === 'd' && x.boite && x.en && x.en.e && x.en.e !== 'corriger') return 'afaire';
     if (x.etat === 'ici') return x.cote === 'd' || x.cote === 'c' ? 'afaire' : 'attend';
     return 'avenir';
@@ -350,6 +356,8 @@ async function reel(sid) {
     items.forEach(x => {
       const L = x.eid && LIGNES[x.eid + '|' + x.cote.charAt(0)];
       if (L && L.x) return;
+      /* Un geste fait par le professeur principal depuis son tableau de bord : l'enseignant référent le voit, et passe à la suite. */
+      if (x.eid && x.cote !== 'g' && x.etat === 'fait' && P.entree(s, x.eid).par === 'pp') x.parPP = 1;
       if (L && L.t) x.titre = L.t;
       if (L && 'd' in L) { x.detail = L.d; x.precis = !!L.d; }
       if (L && L.a) x.att = L.a;
@@ -375,8 +383,13 @@ async function reel(sid) {
       P.ETAPES.filter(et => et.ph === ph && !et.local && et.ty !== 'journal' && !et.opt).forEach(et0 => { const n0 = items.length; (et => {
         const en = E(et.id), e = en.e, o = { aide: et.aide, src: et.src };
         const fait = P.estFaite(s, et.id);
-        if (et.id === 'referent') { items.push({ cote: 'm:pp', signe: 'a', titre: 'Désigne l’enseignant référent', detail: s.refSigle || '', etat: fait || s.refSigle ? 'fait' : 'avenir' }); return; }
-        if (et.id === 'sent') { items.push(Object.assign({ cote: 'd', signe: 'i', titre: 'Vous suivez ' + s.code + (s.classe ? ' · ' + s.classe : ''), detail: (s.libelle || 'PFMP ' + s.periode) + (s.debut ? ' · du ' + fr(s.debut) + ' au ' + fr(s.fin) : ''), etat: fait ? 'fait' : 'avenir', lu: 1, date: quand(en, et), acts: gestes(et, en, true).map(a => a.action === 'recevoir' ? Object.assign(a, { t: 'Lu' }) : a), boite: 1, en }, o)); return; }
+        if (et.id === 'referent') { items.push({ cote: 'm:pp', signe: 'a', titre: 'Désigne l’enseignant référent', detail: s.refSigle || '', etat: fait || s.refSigle || P.estFaite(s, 'sent') ? 'fait' : 'avenir' }); return; }
+        /* 12/10/2026 — La toute première démarche : l'enseignant référent active le suivi en indiquant sa matière (jamais son nom).
+           L'élève lit alors « Mon enseignant référent : professeur de … ». Le professeur principal peut aussi l'indiquer depuis son tableau de bord. */
+        if (et.id === 'sent') { const mat = en.v || s.refSigle || '', pfmp = (s.libelle || 'PFMP ' + s.periode) + (s.debut ? ' · du ' + fr(s.debut) + ' au ' + fr(s.fin) : '');
+          items.push(Object.assign({ cote: 'd', signe: 'i', activer: !fait, matiere: mat, titre: fait ? 'Vous suivez ' + s.code + (s.classe ? ' · ' + s.classe : '') : 'Activer le suivi de ' + s.code + (s.classe ? ' · ' + s.classe : ''),
+            detail: pfmp + (fait && mat ? '\n' + s.code + ' lit : « Mon enseignant référent : professeur ' + (/^[aeiouéèêh]/i.test(mat) ? 'd’' : 'de ') + mat + ' »' : ''), etat: fait ? 'fait' : 'avenir', lu: 1, date: quand(en, et),
+            acts: gestes(et, en, true).filter(a => a.lien), boite: 1, en }, o, { aide: [] })); return; }
         /* Un intervenant : au milieu, en transit. */
         if (et.act) {
           const parEleve = et.coche === 'eleve';
@@ -470,13 +483,14 @@ async function reel(sid) {
     const t = ton(x), m = x.cote.startsWith('m:') ? x.cote.slice(2) : '';
     const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(m === 'bde' ? 'RBDE' : P.ACTEURS[m])}` : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : '<i class="ti ti-school"></i>Enseignant référent';
     const tete = `<div class="q">${qui}${x.nouveau ? '<em class="neuf">Nouveau</em>' : ''}${ETAT_LIB[t] ? `<em class="pst">${ETAT_LIB[t]}</em>` : ''}</div>`;
-    const date = x.date ? `<span class="dt">${t === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '';
+    const date = x.date || x.parPP ? `<span class="dt">${t === 'fait' ? '✓ ' : ''}${esc(x.date || '')}${x.parPP ? (x.date ? ' · ' : '') + 'par le professeur principal' : ''}</span>` : '';
     if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${x.ic ? `<i class="ti ti-${x.ic}" style="font-size:19px;vertical-align:-3px;margin-right:5px;color:var(--accent)"></i>` : ''}${esc(mots(x.titre, x.cote === 'g'))}</b>${x.precis ? para(x.detail) : relais(x) || para(x.detail)}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
     const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.filter(c => !/^Joindre l’annexe pédagogique/.test(c)).map(c => `<li>${esc(c.replace('annexe pédagogique, et ', ''))}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
     return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${x.ic ? `<i class="ti ti-${x.ic}" style="font-size:19px;vertical-align:-3px;margin-right:5px;color:var(--accent)"></i>` : ''}${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail && !x.lieu ? para(x.detail) : ''}`
       + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
       + (x.att ? `<p class="att"><i class="ti ti-alert-triangle"></i><span>${esc(x.att)}</span></p>` : '') + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
       + (x.reserve ? `<p class="reserve">Sous réserve de la validation de la fiche de négociation par <u>l’enseignant professionnel</u> (étape suivante).</p>${x.confirme ? `<p>${esc(s.code)} a reçu la confirmation.</p>` : ''}<details class="cf"><summary>Qu’est-ce que la fiche de négociation ?</summary><ol class="sans"><li>Elle liste les activités que l’élève fera pendant son stage.</li><li>L’entreprise la remplit, la signe et y met son cachet.</li><li>L’enseignant professionnel vérifie qu’elle correspond à la formation.</li></ol></details>` : '')
+      + (x.activer ? `<div class="activer"><label for="matiere">Votre matière (l’élève la verra à la place de votre nom)</label><select id="matiere"><option value="">Choisir…</option>${MATIERES.map(m => `<option${m === x.matiere ? ' selected' : ''}>${esc(m)}</option>`).join('')}</select><button class="b" data-activer>Activer le suivi</button></div>` : '')
       + (x.visite ? `<form class="visite-f" id="visiteF"><input type="datetime-local" id="visiteLe" value="${esc(String((s.visite || {}).le || '').slice(0, 16))}" required><button>${(s.visite || {}).le ? 'Changer la date' : 'Enregistrer le rendez-vous'}</button></form>` : '')
       + cf + `</div></div>`;
   }
@@ -504,7 +518,7 @@ async function reel(sid) {
       if (!cor.length && ici && ton(ici) !== 'afaire') L.push(`<div class="l att"><i class="ti ti-hourglass"></i><span>En attente : ${esc(ici.cote === 'g' ? 'l’élève' : minus(P.ACTEURS[ici.cote.slice(2)] || ''))} · ${esc(minus(mots(ici.titre, ici.cote === 'g')))}</span><div class="bts"><button class="b dis" data-vers="c${ici.k}">Voir</button></div></div>`);
     }
     sig.filter(x => x.vu).slice(-2).forEach(x => L.push(`<div class="l info"><i class="ti ti-mail-opened"></i><span>${esc(s.code)} ${esc(SIGNAUX[x.k])} · ${esc(jour(x.le))} · ✓ pris connaissance</span></div>`));
-    if (cb && cb.accueilEnvoye) L.push(`<div class="l info"><i class="ti ti-notebook"></i><span>Avis sur l’accueil envoyé par l’élève le ${esc(cb.accueilEnvoye)} (carnet de bord)</span></div>`);
+    if (CARNET_REFERENT && cb && cb.accueilEnvoye) L.push(`<div class="l info"><i class="ti ti-notebook"></i><span>Avis sur l’accueil envoyé par l’élève le ${esc(cb.accueilEnvoye)} (carnet de bord)</span></div>`);
     bal.className = 'bal' + (n ? '' : ' vide');
     bal.innerHTML = `<h2>À traiter${n ? ` <em>${n}</em>` : ''}</h2>` + L.join('');
   }
@@ -520,6 +534,9 @@ async function reel(sid) {
   document.addEventListener('click', ev => {
     const vers = ev.target.closest('[data-vers]');
     if (vers) { const c = $(vers.dataset.vers); if (c) { const d = c.closest('details'); d.open = true; ouv[d.dataset.ph] = true; c.scrollIntoView({ behavior: 'smooth', block: 'center' }); } return; }
+    const act = ev.target.closest('[data-activer]');
+    if (act && s) { const m = $('matiere').value; if (!m) { $('matiere').focus(); $('matiere').style.borderColor = 'var(--red)'; return; }
+      act.disabled = true; svc.agir(sid, 'sent', 'recevoir', 'referent', { v: m }).catch(e => { act.disabled = false; alert(e.message); }); return; }
     const v = ev.target.closest('[data-vu]');
     if (v && s) { v.disabled = true; svc.envoyerMessage(sid, 'referent', s.refSigle || '', '§vu:' + v.dataset.vu).catch(e => { v.disabled = false; alert(e.message); }); return; }
     const b = ev.target.closest('[data-geste]'); if (!b || !s) return;

@@ -108,12 +108,12 @@ const carte = (t, o = {}) => Object.assign({ t }, o);
    gestes : ce que l'on clique, dans l'ordre. qui = page où l'on clique, b = 'b' ou 'b2', vol = icône et couleur de ce qui voyage. */
 const ECRANS = [
   { accueil: 1, titre: 'Suivre votre élève en stage, simplement.', sous: 'Si vous le souhaitez, une page en ligne vous accompagne. Regardez comment elle marche : une minute.' },
-  { titre: 'D’abord, l’élève apprend que vous êtes son enseignant référent.', sous: 'Le professeur principal vous désigne. L’élève le voit sur sa page, vous sur la vôtre.', n: 0,
-    e: [carte('Mon enseignant référent', { e: 'attend', p: 'En attente' })],
-    r: [carte('Vous suivez ZZ99 · B2GATL2', { e: 'afaire', p: 'À lire', s: 'PFMP 1 · du 4 au 15 janvier', b: 'Lu' })],
-    gestes: [{ qui: 'r', vol: ['check', 'v'], fait(s) {
-      s.r = [carte('Vous suivez ZZ99 · B2GATL2', { e: 'fait', p: 'Lu', s: 'PFMP 1 · du 4 au 15 janvier' })];
-      s.e = [carte('Mon enseignant référent est désigné', { e: 'fait', p: 'Fait', s: 'Il sait qu’il me suit' })]; s.n = 1; } }] },
+  { titre: 'D’abord, vous activez le suivi.', sous: 'Vous choisissez votre matière, pas votre nom. L’élève sait aussitôt qui l’accompagne.', n: 0,
+    e: [carte('Mon enseignant référent', { e: 'attend', p: 'À venir' })],
+    r: [carte('Activer le suivi de ZZ99', { e: 'afaire', p: 'À faire', s: 'Votre matière : Éco-gestion ▾', b: 'Activer le suivi' })],
+    gestes: [{ qui: 'r', vol: ['school', 'v'], fait(s) {
+      s.r = [carte('Vous suivez ZZ99 · B2GATL2', { e: 'fait', p: 'Activé', s: 'PFMP 1 · du 4 au 15 janvier' })];
+      s.e = [carte('Mon enseignant référent', { e: 'fait', p: 'Désigné', s: 'professeur d’Éco-gestion' })]; s.n = 1; } }] },
   { titre: 'Deux pages qui avancent ensemble.', sous: 'L’élève a la sienne. Vous avez la vôtre. Ce que l’un fait, l’autre le voit.', n: 1,
     e: [carte('Chercher un stage', { e: 'afaire', p: 'À faire' })], r: [] },
   { titre: 'L’élève trouve un stage.', sous: 'Il le déclare sur sa page. Vous êtes prévenu.', n: 1,
@@ -206,6 +206,8 @@ function voler(de, icone, couleur) {
       { transform: `translate(${dx / 2 + cote}px,${dy / 2 + haut}px) scale(1.12) rotate(${dx >= 0 ? 6 : -6}deg)`, opacity: 1, offset: .55 },
       { transform: `translate(${dx}px,${dy}px) scale(1)`, opacity: 1, offset: .9 }, { transform: `translate(${dx}px,${dy}px) scale(.4)`, opacity: 0 }],
       { duration: 1050, easing: 'cubic-bezier(.45,0,.3,1)' }).onfinish = () => { v.remove(); fin(); };
+    /* Si l'animation ne se joue pas (onglet en arrière-plan), on avance quand même. */
+    setTimeout(() => { v.remove(); fin(); }, 1400);
   });
 }
 
