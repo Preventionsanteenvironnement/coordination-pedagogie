@@ -113,6 +113,7 @@ button.b:disabled{opacity:.5}
 .carte p.reserve{color:var(--red);font-weight:650;font-size:13px;margin-top:8px}.reserve u{text-underline-offset:3px}
 .cf ol.sans{list-style:none;padding-left:0}
 .rappel{position:relative;margin:12px 0 0;padding:9px 12px;border-radius:10px;background:#fff;border:1px solid #cfd8e0;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:center}.rappel i{font-size:18px;color:var(--accent)}
+.carte p.att{display:flex;gap:7px;align-items:flex-start;margin-top:8px;padding:7px 9px;border-radius:9px;background:var(--orange-s);color:#8a4b0f;font-size:12.5px;font-weight:600}.carte p.att i{font-size:17px;color:var(--orange);flex:none;margin-top:1px}
 .motif{display:block;margin-top:6px;font-size:13px;color:var(--red);font-weight:650}
 .signe{font-size:11px}
 .relais{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
@@ -315,7 +316,7 @@ async function reel(sid) {
 
   /* 12/10/2026 — Les mots validés ligne par ligne avec le professeur principal, d'après la check-list du professeur référent.
      Clé : étape du moteur + couloir (g élève, m intervenant, d enseignant référent, c ensemble). t = titre, d = précision, x = carte retirée. */
-  const NB_SUIVI = 'NB : noter tous les échanges (mails, appels téléphoniques, rencontres) sur Pronote avec « Créer un suivi ».';
+  const NB_SUIVI = 'Important : noter tous les échanges (mails, appels téléphoniques, rencontres) sur Pronote avec « Créer un suivi ».';
   const LIGNES = {
     'neg_ask|g': { d: '(auprès de l’enseignant professionnel)' }, 'neg_visit|g': { d: '(en vue d’une validation)' }, 'neg_family|g': { d: '(après la signature et le cachet de l’entreprise)' },
     'neg_to_pro|g': { d: '(pour vérifier que le stage correspond à la formation)' },
@@ -323,6 +324,10 @@ async function reel(sid) {
     'neg_return|m': { t: 'Fiche signée transmise à l’enseignant référent', d: '(pour qu’il la signe à son tour)' },
     'neg_signed|d': { t: 'Vérifier, signer et garder la fiche de côté', d: '(elle peut servir pour le bilan)' },
     'pre_given|d': { t: 'Remettre la pré-convention en main propre à l’élève', d: 'Source : casier numérique de Pronote' },
+    'pronote|d': { t: 'Saisir sur Pronote les informations nécessaires à l’édition de la convention, puis l’imprimer.', d: '(quand l’élève a remis sa fiche de négociation visée)' },
+    'convention|d': { t: 'Garder l’attestation de stage de côté.', a: 'Attention : l’attestation de stage s’imprime en même temps que la convention. À conserver jusqu’à la signature complète de la convention.' },
+    'conv_return|d': { t: 'Vérifier que la convention est conforme, puis la signer', d: '– signature de l’élève ou de son représentant légal\n– signature du responsable de l’entreprise ou du tuteur\n– cachet de l’entreprise' },
+    'attest_in|m': { t: 'Attestation de stage finalisée par l’entreprise le dernier jour' }, 'attestation|g': { t: 'Rapporter son attestation de stage' },
     'pedagogy|d': { x: 1 },
     'bde|d': { t: 'Transmettre le dossier complet au RBDE' }, 'bde_ok|m': { t: 'Dossier contrôlé par le RBDE · transmis au DDF' },
     'ddf_copies|m': { t: 'Deux exemplaires signés déposés dans le casier du référent, remis en main propre, ou à récupérer auprès du DDF ou du RBDE' },
@@ -333,10 +338,12 @@ async function reel(sid) {
     'midpoint|d': { x: 1 },
     'visit|d': { t: 'Pendant la PFMP : organiser le rendez-vous pour le bilan avec le tuteur et assurer le suivi.' },
     'assessment|d': { t: 'Lors du bilan : récupérer le compte-rendu d’évaluation.', d: '' },
-    'att_sent|d': { t: 'Lors du bilan : penser à faire établir une « attestation de stage » par l’entreprise, qu’elle remet directement à l’élève.', d: 'Attention : il est souhaitable de laisser l’attestation de stage jusqu’à la fin de la PFMP, mais il faudra veiller à la récupérer dès la fin du stage.' },
-    'attestation|d': { d: '' }, 'attestation_bde|d': { t: 'Transmettre l’attestation de stage complétée par l’entreprise au RBDE.' },
-    'evaluation_pro|d': { t: 'Remettre le compte-rendu d’évaluation au professeur de spécialité.' }, 'student_eval|c': { t: 'Le bilan du stage, avec l’élève' },
-    'appreciation|d': { t: 'Saisir dans le suivi Pronote l’appréciation générale du tuteur.' }
+    'att_sent|d': { t: 'Lors du bilan : penser à faire établir une « attestation de stage » par l’entreprise, qu’elle remet directement à l’élève.', d: '', a: 'Attention : il est souhaitable de laisser l’attestation de stage jusqu’à la fin de la PFMP, mais il faudra veiller à la récupérer dès la fin du stage.' },
+    'attestation|d': { t: 'Recevoir l’attestation de stage', d: '' }, 'attestation_bde|d': { t: 'Transmettre l’attestation de stage complétée par l’entreprise au RBDE.' },
+    'evaluation_pro|d': { t: 'Remettre le compte-rendu d’évaluation à l’enseignant professionnel.' }, 'student_eval|c': { t: 'Le bilan du stage, avec l’élève' },
+    'appreciation|d': { t: 'Saisir dans le suivi Pronote l’appréciation générale du tuteur.' },
+    'archive|d': { sa: 1, ic: 'device-floppy', t: 'Importer dans le client Pronote, dans le dossier de l’élève :', d: '– l’attestation de stage\n– le compte-rendu d’évaluation\n– le rapport de stage de l’élève\n(sauvegardés sur Pronote, ces documents pourront être retrouvés jusqu’en terminale)' },
+    'dossier|d': { sa: 1, t: 'Remettre au DDF le dossier complet de l’élève, avec tous les documents.', d: '(pour archivage)' }
   };
   function retouches(items) {
     const out = [];
@@ -345,7 +352,10 @@ async function reel(sid) {
       if (L && L.x) return;
       if (L && L.t) x.titre = L.t;
       if (L && 'd' in L) { x.detail = L.d; x.precis = !!L.d; }
-      if (x.eid === 'visit' && x.cote === 'd') { const v = s.visite || {}; x.detail = (v.le ? 'Rendez-vous : ' + frLong(v.le) + '\n' : '') + NB_SUIVI; x.rang = 1; }
+      if (L && L.a) x.att = L.a;
+      if (L && L.sa) x.aide = [];
+      if (L && L.ic) x.ic = L.ic;
+      if (x.eid === 'visit' && x.cote === 'd') { const v = s.visite || {}; x.detail = v.le ? 'Rendez-vous : ' + frLong(v.le) : ''; x.att = NB_SUIVI; x.rang = 1; }
       out.push(x);
     });
     /* Lors du bilan : d'abord le compte-rendu, puis l'attestation (ordre de la check-list). */
@@ -461,11 +471,11 @@ async function reel(sid) {
     const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(m === 'bde' ? 'RBDE' : P.ACTEURS[m])}` : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : '<i class="ti ti-school"></i>Enseignant référent';
     const tete = `<div class="q">${qui}${x.nouveau ? '<em class="neuf">Nouveau</em>' : ''}${ETAT_LIB[t] ? `<em class="pst">${ETAT_LIB[t]}</em>` : ''}</div>`;
     const date = x.date ? `<span class="dt">${t === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '';
-    if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.precis ? para(x.detail) : relais(x) || para(x.detail)}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
-    const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
-    return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail && !x.lieu ? para(x.detail) : ''}`
+    if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${x.ic ? `<i class="ti ti-${x.ic}" style="font-size:19px;vertical-align:-3px;margin-right:5px;color:var(--accent)"></i>` : ''}${esc(mots(x.titre, x.cote === 'g'))}</b>${x.precis ? para(x.detail) : relais(x) || para(x.detail)}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
+    const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.filter(c => !/^Joindre l’annexe pédagogique/.test(c)).map(c => `<li>${esc(c.replace('annexe pédagogique, et ', ''))}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
+    return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${x.ic ? `<i class="ti ti-${x.ic}" style="font-size:19px;vertical-align:-3px;margin-right:5px;color:var(--accent)"></i>` : ''}${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail && !x.lieu ? para(x.detail) : ''}`
       + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
-      + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
+      + (x.att ? `<p class="att"><i class="ti ti-alert-triangle"></i><span>${esc(x.att)}</span></p>` : '') + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
       + (x.reserve ? `<p class="reserve">Sous réserve de la validation de la fiche de négociation par <u>l’enseignant professionnel</u> (étape suivante).</p>${x.confirme ? `<p>${esc(s.code)} a reçu la confirmation.</p>` : ''}<details class="cf"><summary>Qu’est-ce que la fiche de négociation ?</summary><ol class="sans"><li>Elle liste les activités que l’élève fera pendant son stage.</li><li>L’entreprise la remplit, la signe et y met son cachet.</li><li>L’enseignant professionnel vérifie qu’elle correspond à la formation.</li></ol></details>` : '')
       + (x.visite ? `<form class="visite-f" id="visiteF"><input type="datetime-local" id="visiteLe" value="${esc(String((s.visite || {}).le || '').slice(0, 16))}" required><button>${(s.visite || {}).le ? 'Changer la date' : 'Enregistrer le rendez-vous'}</button></form>` : '')
       + cf + `</div></div>`;
