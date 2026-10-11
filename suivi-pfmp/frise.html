@@ -112,6 +112,7 @@ button.b:disabled{opacity:.5}
 .et.avenir .carte>b{color:#4a5a6c}
 .carte p.reserve{color:var(--red);font-weight:650;font-size:13px;margin-top:8px}.reserve u{text-underline-offset:3px}
 .cf ol.sans{list-style:none;padding-left:0}
+.rappel{position:relative;margin:12px 0 0;padding:9px 12px;border-radius:10px;background:#fff;border:1px solid #cfd8e0;font-size:13.5px;font-weight:600;display:flex;gap:8px;align-items:center}.rappel i{font-size:18px;color:var(--accent)}
 .motif{display:block;margin-top:6px;font-size:13px;color:var(--red);font-weight:650}
 .signe{font-size:11px}
 .relais{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;font-weight:700;color:var(--muted)}
@@ -273,7 +274,7 @@ async function reel(sid) {
         : att ? ['attend', 'Attend ' + (att.cote === 'g' ? 'l’élève' : minus(P.ACTEURS[att.cote.slice(2)] || ''))] : nf ? ['cours', 'En cours'] : ['', 'À venir'];
       const ouvert = num in ouv ? ouv[num] : ['corr', 'afaire', 'attend'].includes(cls);
       h += `<details class="ph ${cls}" data-ph="${num}"${ouvert ? ' open' : ''}><summary><span class="ct"><b>${cls === 'fait' ? '✓' : num}</b>${esc(PHASE_LIB[x.phase] || x.phase)}<em>${esc(lib)}</em></span><small>${nf}/${suite.length}</small></summary>`
-        + `<div class="dedans"><div class="cols"><span>L’élève</span><span>Ils interviennent</span><span>Vous, référent</span></div><div class="grille">${grille(suite)}</div></div></details>`;
+        + `<div class="dedans">${RAPPEL[x.phase] ? `<p class="rappel"><i class="ti ti-notes"></i>${esc(RAPPEL[x.phase])}</p>` : ''}<div class="cols"><span>L’élève</span><span>Ils interviennent</span><span>Vous, référent</span></div><div class="grille">${grille(suite)}</div></div></details>`;
     });
     $('frise').innerHTML = h; $('parc').hidden = false; $('leg').hidden = false;
     boite(items, ici);
@@ -381,7 +382,9 @@ async function reel(sid) {
   const PHASE_LIB = { 'Mon enseignant référent': 'Référent désigné', 'Départ': 'Démarrage du stage' };
   /* Les précisions sous le geste du référent (check-list du professeur référent). */
   const PRECIS = { evaluation_sent: 'À récupérer dans le casier numérique, auprès de l’enseignant professionnel ou du professeur principal.', copies: 'À l’entreprise avec l’attestation de stage (possible par mail) ; à la famille, ou remis à l’élève.',
-    attestation: 'Rapportée par l’élève ; à défaut, transmise par le tuteur ou l’employeur.' };
+    attestation: 'Rapportée par l’élève ; à défaut, transmise par le tuteur ou l’employeur.', assessment: 'Récupérer le compte rendu d’évaluation rempli par le tuteur.' };
+  /* Le rappel en tête d'une étape (check-list du professeur référent). */
+  const RAPPEL = { 'En stage': 'Noter tous les échanges (mails, appels téléphoniques, rencontres) dans Pronote, avec « Créer un suivi ».' };
   const MILIEU_DIT = { 'Deux exemplaires signés déposés dans le casier du référent': 'Deux exemplaires signés déposés dans le casier du référent, remis en main propre, ou à récupérer auprès du DDF ou du bureau des entreprises', 'Activités contrôlées · fiche validée et signée par l’enseignant professionnel': 'Contrôle la fiche de négociation : les activités proposées par l’entreprise correspondent à la formation' };
   const mots = (t, eleve) => { t = MILIEU_DIT[t] || t; t = String(t || '').replace('signée et tamponnée par', 'signée, avec le cachet de').replace(/tamponnée/g, 'avec cachet'); return eleve ? t.replace(/\bma\b/g, 'sa').replace(/\bmon\b/g, 'son').replace(/\bmes\b/g, 'ses') : t; };
   const ETAT_LIB = { afaire: 'À faire', attend: 'En attente', corr: 'À corriger', fait: 'Fait', avenir: 'À venir' };
