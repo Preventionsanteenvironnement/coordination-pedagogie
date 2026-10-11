@@ -199,6 +199,7 @@ function etatTexte(et, en) {
   }
 }
 function echeanceHtml(et, s) {
+  return ''; /* 12/10/2026 — plus d'échéances : ce sont des estimations. */
   const ec = P.echeance(et, s);
   if (!ec) return '';
   const n = P.ecartJours(aujourdhui(), ec.date);

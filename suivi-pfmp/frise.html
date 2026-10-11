@@ -293,7 +293,8 @@ async function reel(sid) {
     return 'avenir';
   }
 
-  const quand = (en, et) => en && en.le && en.e ? fr(en.le) : ((P.echeance(et, s) || {}).date ? 'avant le ' + fr(P.echeance(et, s).date) : '');
+  /* 12/10/2026 — Plus d'échéances : ce sont des estimations. Seule la date d'un geste fait s'affiche. */
+  const quand = en => en && en.le && en.e ? fr(en.le) : '';
   const neuf = en => en && en.par === 'eleve' && en.le && en.le > vu;
   const acte = (id, action, t, lien) => ({ id, action, t, lien });
   /* Les boutons du référent sur une étape, avec les mots du socle commun. */
@@ -303,9 +304,9 @@ async function reel(sid) {
   }
   /* Ce que le référent fait, dit comme il le fait. */
   const DIT = { neg_signed: 'Vérifier, signer et garder la fiche', pre_given: 'Remettre la pré-convention en main propre', pre_return: 'Contrôler la pré-convention', pronote: 'Générer la convention dans le client Pronote',
-    convention: 'Garder l’attestation de côté', pedagogy: 'Joindre l’annexe pédagogique', conv_given: 'Remettre la convention', conv_return: 'Contrôler et signer la convention', bde: 'Transmettre le dossier complet',
-    copies: 'Distribuer les exemplaires', arrival: 'Appeler le tuteur', installed: 'Vérifier l’arrivée et l’installation', evaluation_sent: 'Envoyer le compte rendu d’évaluation', midpoint: 'Suivi du milieu de stage',
-    att_sent: 'Envoyer l’attestation au tuteur', assessment: 'Bilan avec le tuteur', attestation: 'Recevoir l’attestation', attestation_bde: 'Transmettre l’attestation', evaluation_pro: 'Remettre le compte rendu d’évaluation',
+    convention: 'Garder l’attestation de côté', pedagogy: 'Joindre l’annexe pédagogique', conv_given: 'Remettre la convention', conv_return: 'Contrôler et signer la convention', bde: 'Transmettre le dossier complet au bureau des entreprises',
+    copies: 'Distribuer les exemplaires : un à l’entreprise, un à la famille', arrival: 'Appeler le tuteur', installed: 'Vérifier l’arrivée et l’installation', evaluation_sent: 'Envoyer le compte rendu d’évaluation au tuteur', midpoint: 'Suivi du milieu de stage',
+    att_sent: 'Envoyer l’attestation au tuteur', assessment: 'Bilan avec le tuteur', attestation: 'Recevoir l’attestation', attestation_bde: 'Transmettre l’attestation au bureau des entreprises', evaluation_pro: 'Remettre le compte rendu d’évaluation',
     appreciation: 'Clôturer dans Pronote', archive: 'Archiver la convention', dossier: 'Ranger le dossier de l’élève', intendance: 'Prévenir l’intendance' };
   const A_QUI = { pre_given: 'l’élève', conv_given: 'l’élève', copies: 'la famille et l’entreprise', pre_return: 'le référent', conv_return: 'le référent', attestation: 'le référent', neg_given: 'l’élève', neg_return: 'le référent', bde: 'le bureau des entreprises', bde_ok: 'le DDF', ddf_copies: 'le référent' };
   const TUT_ETAPE = { neg_company: 'nego', pre_filled: 'pre', company: 'conv', attest_in: 'att' };
@@ -320,7 +321,7 @@ async function reel(sid) {
         const fini = R.filter(r => r.statut !== 'prevu').length;
         items.push({ cote: 'g', signe: 'a', titre: 'Démarches de recherche', detail: R.length ? R.length + ' démarche' + (R.length > 1 ? 's' : '') + ' notée' + (R.length > 1 ? 's' : '') + ' · ' + fini + ' faite' + (fini > 1 ? 's' : '') : 'Aucune démarche notée', etat: R.length || E('search').e ? 'fait' : 'avenir' });
       }
-      P.ETAPES.filter(et => et.ph === ph && !et.local && et.ty !== 'journal' && (!et.opt || et.id === 'intendance')).forEach(et => {
+      P.ETAPES.filter(et => et.ph === ph && !et.local && et.ty !== 'journal' && !et.opt).forEach(et => {
         const en = E(et.id), e = en.e, o = { aide: et.aide, src: et.src };
         const fait = P.estFaite(s, et.id);
         if (et.id === 'referent') { items.push({ cote: 'm:pp', signe: 'a', titre: 'Désigne l’enseignant référent', detail: s.refSigle || '', etat: fait || s.refSigle ? 'fait' : 'avenir' }); return; }
@@ -354,15 +355,15 @@ async function reel(sid) {
         }
         if (et.ty === 'remise' && et.from === 'eleve') {
           items.push({ cote: 'g', signe: 'r', a: A_QUI[et.id] || 'le référent', titre: et.te || et.t, etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', remis: e === 'remis', recu: e === 'valide', date: quand(en, et), nouveau: neuf(en), motif: e === 'corriger' ? en.motif : '' });
-          items.push(Object.assign({ cote: 'd', signe: 'a', titre: DIT[et.id] || et.t, etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : '', acts: gestes(et, en), boite: 1, en, deEleve: 1 }, o));
+          items.push(Object.assign({ cote: 'd', signe: 'a', titre: DIT[et.id] || et.t, detail: PRECIS[et.id] || '', etat: e === 'valide' ? 'fait' : 'avenir', date: e === 'valide' ? fr(en.le) : '', acts: gestes(et, en), boite: 1, en, deEleve: 1 }, o));
           return;
         }
         if (et.ty === 'remise') {
-          items.push(Object.assign({ cote: 'd', signe: 'r', a: A_QUI[et.id] || 'l’élève', titre: DIT[et.id] || et.t, detail: e === 'perdu' ? '⚠︎ Perdu par l’élève · à remettre' : et.ou ? et.ou.replace('Pronote › Communication › Casier numérique', 'Casier numérique de Pronote') : '', etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', remis: e === 'remis', recu: e === 'valide', date: quand(en, et), acts: gestes(et, en) }, o));
+          items.push(Object.assign({ cote: 'd', signe: 'r', a: A_QUI[et.id] || 'l’élève', titre: DIT[et.id] || et.t, detail: e === 'perdu' ? '⚠︎ Perdu par l’élève · à remettre' : PRECIS[et.id] ? PRECIS[et.id] : et.ou ? et.ou.replace('Pronote › Communication › Casier numérique', 'Casier numérique de Pronote') : '', etat: ['remis', 'valide'].includes(e) ? 'fait' : 'avenir', remis: e === 'remis', recu: e === 'valide', date: quand(en, et), acts: gestes(et, en) }, o));
           return;
         }
         /* Une tâche ou une information du référent. */
-        let detail = '';
+        let detail = PRECIS[et.id] || '';
         if (et.id === 'visit') { const v = s.visite || {}; detail = v.le ? 'Visite : ' + frLong(v.le) : v.rdv ? 'Rendez-vous proposé au tuteur' : 'Le tuteur choisit un créneau en ligne'; }
         items.push(Object.assign({ cote: 'd', signe: 'a', titre: et.id === 'visit' ? 'Fixer le rendez-vous du bilan' : DIT[et.id] || et.t, detail, visite: et.id === 'visit', etat: fait || (et.id === 'visit' && (s.visite || {}).le) ? 'fait' : 'avenir', date: fait ? fr(en.le) : quand(en, et), acts: et.id === 'visit' ? [] : gestes(et, en) }, o));
         if (et.id === 'assessment' && tu && tu.presences) { const pz = tu.presences, n = Object.values(pz).filter(x => x === 'p').length, tot = Object.keys(pz).length; items.push({ cote: 'm:ent', signe: 'i', titre: 'Présences tenues en ligne', detail: n + ' jour' + (n > 1 ? 's' : '') + ' sur ' + tot, etat: 'fait' }); }
@@ -377,8 +378,11 @@ async function reel(sid) {
     return `<div class="relais"><span class="tk ${n === 2 ? 'deux' : n === 1 ? 'un' : ''}">${n === 2 ? '✓✓' : '✓'}</span>→ ${esc(x.a || '')}${n === 2 ? ' · reçu' : n === 1 ? ' · remis' : ''}</div>`;
   }
   /* Les mots de la page : « cachet » partout ; côté élève, « sa », « son », « ses » (c'est le référent qui lit). */
-  const PHASE_LIB = { 'Mon enseignant référent': 'Référent désigné' };
-  const MILIEU_DIT = { 'Activités contrôlées · fiche validée et signée par l’enseignant professionnel': 'Contrôle la fiche de négociation : les activités proposées par l’entreprise correspondent à la formation' };
+  const PHASE_LIB = { 'Mon enseignant référent': 'Référent désigné', 'Départ': 'Démarrage du stage' };
+  /* Les précisions sous le geste du référent (check-list du professeur référent). */
+  const PRECIS = { evaluation_sent: 'À récupérer dans le casier numérique, auprès de l’enseignant professionnel ou du professeur principal.', copies: 'À l’entreprise avec l’attestation de stage (possible par mail) ; à la famille, ou remis à l’élève.',
+    attestation: 'Rapportée par l’élève ; à défaut, transmise par le tuteur ou l’employeur.' };
+  const MILIEU_DIT = { 'Deux exemplaires signés déposés dans le casier du référent': 'Deux exemplaires signés déposés dans le casier du référent, remis en main propre, ou à récupérer auprès du DDF ou du bureau des entreprises', 'Activités contrôlées · fiche validée et signée par l’enseignant professionnel': 'Contrôle la fiche de négociation : les activités proposées par l’entreprise correspondent à la formation' };
   const mots = (t, eleve) => { t = MILIEU_DIT[t] || t; t = String(t || '').replace('signée et tamponnée par', 'signée, avec le cachet de').replace(/tamponnée/g, 'avec cachet'); return eleve ? t.replace(/\bma\b/g, 'sa').replace(/\bmon\b/g, 'son').replace(/\bmes\b/g, 'ses') : t; };
   const ETAT_LIB = { afaire: 'À faire', attend: 'En attente', corr: 'À corriger', fait: 'Fait', avenir: 'À venir' };
   const boutons = (acts, t) => acts && acts.length ? `<div class="acts">${acts.map(a => `<button class="b ${a.lien ? 'lien' : a.action === 'corriger' ? 'corr' : t === 'afaire' ? '' : 'dis'}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('')}</div>` : '';
