@@ -274,7 +274,7 @@ async function reel(sid) {
         : att ? ['attend', 'Attend ' + (att.cote === 'g' ? 'l’élève' : minus(P.ACTEURS[att.cote.slice(2)] || ''))] : nf ? ['cours', 'En cours'] : ['', 'À venir'];
       const ouvert = num in ouv ? ouv[num] : ['corr', 'afaire', 'attend'].includes(cls);
       h += `<details class="ph ${cls}" data-ph="${num}"${ouvert ? ' open' : ''}><summary><span class="ct"><b>${cls === 'fait' ? '✓' : num}</b>${esc(PHASE_LIB[x.phase] || x.phase)}<em>${esc(lib)}</em></span><small>${nf}/${suite.length}</small></summary>`
-        + `<div class="dedans">${RAPPEL[x.phase] ? `<p class="rappel"><i class="ti ti-notes"></i>${esc(RAPPEL[x.phase])}</p>` : ''}<div class="cols"><span>L’élève</span><span>Ils interviennent</span><span>Vous, référent</span></div><div class="grille">${grille(suite)}</div></div></details>`;
+        + `<div class="dedans"><div class="cols"><span>L’élève</span><span>Ils interviennent</span><span>Enseignant référent</span></div><div class="grille">${grille(suite)}</div></div></details>`;
     });
     $('frise').innerHTML = h; $('parc').hidden = false; $('leg').hidden = false;
     boite(items, ici);
@@ -313,6 +313,46 @@ async function reel(sid) {
   const TUT_ETAPE = { neg_company: 'nego', pre_filled: 'pre', company: 'conv', attest_in: 'att' };
   const TUT_LIB = { nego: 'fiche de négociation remise au stagiaire', pre: 'pré-convention remise au stagiaire', conv: 'convention signée et rendue', cr: 'compte rendu d’évaluation prêt', contact: 'souhaite être contacté', att: 'attestation remise au stagiaire' };
 
+  /* 12/10/2026 — Les mots validés ligne par ligne avec le professeur principal, d'après la check-list du professeur référent.
+     Clé : étape du moteur + couloir (g élève, m intervenant, d enseignant référent, c ensemble). t = titre, d = précision, x = carte retirée. */
+  const NB_SUIVI = 'NB : noter tous les échanges (mails, appels téléphoniques, rencontres) sur Pronote avec « Créer un suivi ».';
+  const LIGNES = {
+    'neg_ask|g': { d: '(auprès de l’enseignant professionnel)' }, 'neg_visit|g': { d: '(en vue d’une validation)' }, 'neg_family|g': { d: '(après la signature et le cachet de l’entreprise)' },
+    'neg_to_pro|g': { d: '(pour vérifier que le stage correspond à la formation)' },
+    'neg_pro|m': { t: 'Contrôle la fiche de négociation : les activités proposées par l’entreprise correspondent à la formation. Il la signe.' },
+    'neg_return|m': { t: 'Fiche signée transmise à l’enseignant référent', d: '(pour qu’il la signe à son tour)' },
+    'neg_signed|d': { t: 'Vérifier, signer et garder la fiche de côté', d: '(elle peut servir pour le bilan)' },
+    'pre_given|d': { t: 'Remettre la pré-convention en main propre à l’élève', d: 'Source : casier numérique de Pronote' },
+    'pedagogy|d': { x: 1 },
+    'bde|d': { t: 'Transmettre le dossier complet au RBDE' }, 'bde_ok|m': { t: 'Dossier contrôlé par le RBDE · transmis au DDF' },
+    'ddf_copies|m': { t: 'Deux exemplaires signés déposés dans le casier du référent, remis en main propre, ou à récupérer auprès du DDF ou du RBDE' },
+    'copies|d': { t: 'Transmettre une copie de la convention signée', d: '– aux parents (il est possible de la remettre à l’élève)\n– à l’entreprise, avec l’attestation de stage (il est possible de l’envoyer par mail)' },
+    'arrival|d': { t: 'La semaine précédant le début de la PFMP : reprendre contact avec le tuteur pour confirmer l’arrivée de l’élève à la date convenue.' },
+    'installed|d': { t: 'Dans les 2 premiers jours de la PFMP : s’assurer que l’élève est bien installé.' },
+    'evaluation_sent|d': { t: 'Envoyer le compte-rendu d’évaluation (à disposition dans le casier numérique) afin que le tuteur puisse en prendre connaissance avant la visite-bilan.', d: '' },
+    'midpoint|d': { x: 1 },
+    'visit|d': { t: 'Pendant la PFMP : organiser le rendez-vous pour le bilan avec le tuteur et assurer le suivi.' },
+    'assessment|d': { t: 'Lors du bilan : récupérer le compte-rendu d’évaluation.', d: '' },
+    'att_sent|d': { t: 'Lors du bilan : penser à faire établir une « attestation de stage » par l’entreprise, qu’elle remet directement à l’élève.', d: 'Attention : il est souhaitable de laisser l’attestation de stage jusqu’à la fin de la PFMP, mais il faudra veiller à la récupérer dès la fin du stage.' },
+    'attestation|d': { d: '' }, 'attestation_bde|d': { t: 'Transmettre l’attestation de stage complétée par l’entreprise au RBDE.' },
+    'evaluation_pro|d': { t: 'Remettre le compte-rendu d’évaluation au professeur de spécialité.' }, 'student_eval|c': { t: 'Le bilan du stage, avec l’élève' },
+    'appreciation|d': { t: 'Saisir dans le suivi Pronote l’appréciation générale du tuteur.' }
+  };
+  function retouches(items) {
+    const out = [];
+    items.forEach(x => {
+      const L = x.eid && LIGNES[x.eid + '|' + x.cote.charAt(0)];
+      if (L && L.x) return;
+      if (L && L.t) x.titre = L.t;
+      if (L && 'd' in L) { x.detail = L.d; x.precis = !!L.d; }
+      if (x.eid === 'visit' && x.cote === 'd') { const v = s.visite || {}; x.detail = (v.le ? 'Rendez-vous : ' + frLong(v.le) + '\n' : '') + NB_SUIVI; x.rang = 1; }
+      out.push(x);
+    });
+    /* Lors du bilan : d'abord le compte-rendu, puis l'attestation (ordre de la check-list). */
+    const a = out.findIndex(x => x.eid === 'att_sent'), b = out.findIndex(x => x.eid === 'assessment' && x.cote === 'd');
+    if (a >= 0 && b === a + 1) { const t = out[a]; out[a] = out[b]; out[b] = t; }
+    return out;
+  }
   function construire(s, pr, R, ent) {
     const items = [], E = id => P.entree(s, id);
     P.PHASES.forEach((nom, ph) => {
@@ -322,7 +362,7 @@ async function reel(sid) {
         const fini = R.filter(r => r.statut !== 'prevu').length;
         items.push({ cote: 'g', signe: 'a', titre: 'Démarches de recherche', detail: R.length ? R.length + ' démarche' + (R.length > 1 ? 's' : '') + ' notée' + (R.length > 1 ? 's' : '') + ' · ' + fini + ' faite' + (fini > 1 ? 's' : '') : 'Aucune démarche notée', etat: R.length || E('search').e ? 'fait' : 'avenir' });
       }
-      P.ETAPES.filter(et => et.ph === ph && !et.local && et.ty !== 'journal' && !et.opt).forEach(et => {
+      P.ETAPES.filter(et => et.ph === ph && !et.local && et.ty !== 'journal' && !et.opt).forEach(et0 => { const n0 = items.length; (et => {
         const en = E(et.id), e = en.e, o = { aide: et.aide, src: et.src };
         const fait = P.estFaite(s, et.id);
         if (et.id === 'referent') { items.push({ cote: 'm:pp', signe: 'a', titre: 'Désigne l’enseignant référent', detail: s.refSigle || '', etat: fait || s.refSigle ? 'fait' : 'avenir' }); return; }
@@ -330,7 +370,7 @@ async function reel(sid) {
         /* Un intervenant : au milieu, en transit. */
         if (et.act) {
           const parEleve = et.coche === 'eleve';
-          let detail = parEleve ? 'Coché par l’élève' : 'Coché par vous';
+          let detail = parEleve ? 'Coché par l’élève' : 'Coché par l’enseignant référent ou le professeur principal';
           if (e === 'perdu') detail = '⚠︎ Perdu par l’élève';
           if (et.id === 'arrival' && tu && tu.arrivee) detail = 'Le tuteur a confirmé en ligne';
           /* La feuille de route du tuteur : ses « C'est fait » cochent l'étape de l'entreprise. */
@@ -368,9 +408,9 @@ async function reel(sid) {
         if (et.id === 'visit') { const v = s.visite || {}; detail = v.le ? 'Visite : ' + frLong(v.le) : v.rdv ? 'Rendez-vous proposé au tuteur' : 'Le tuteur choisit un créneau en ligne'; }
         items.push(Object.assign({ cote: 'd', signe: 'a', titre: et.id === 'visit' ? 'Fixer le rendez-vous du bilan' : DIT[et.id] || et.t, detail, visite: et.id === 'visit', etat: fait || (et.id === 'visit' && (s.visite || {}).le) ? 'fait' : 'avenir', date: fait ? fr(en.le) : quand(en, et), acts: et.id === 'visit' ? [] : gestes(et, en) }, o));
         if (et.id === 'assessment' && tu && tu.presences) { const pz = tu.presences, n = Object.values(pz).filter(x => x === 'p').length, tot = Object.keys(pz).length; items.push({ cote: 'm:ent', signe: 'i', titre: 'Présences tenues en ligne', detail: n + ' jour' + (n > 1 ? 's' : '') + ' sur ' + tot, etat: 'fait' }); }
-      });
+      })(et0); for (let k = n0; k < items.length; k++) items[k].eid = et0.id; });
     });
-    return items;
+    return retouches(items);
   }
 
   function relais(x) {
@@ -386,12 +426,13 @@ async function reel(sid) {
   /* Le rappel en tête d'une étape (check-list du professeur référent). */
   const RAPPEL = { 'En stage': 'Noter tous les échanges (mails, appels téléphoniques, rencontres) dans Pronote, avec « Créer un suivi ».' };
   const MILIEU_DIT = { 'Deux exemplaires signés déposés dans le casier du référent': 'Deux exemplaires signés déposés dans le casier du référent, remis en main propre, ou à récupérer auprès du DDF ou du bureau des entreprises', 'Activités contrôlées · fiche validée et signée par l’enseignant professionnel': 'Contrôle la fiche de négociation : les activités proposées par l’entreprise correspondent à la formation' };
-  const mots = (t, eleve) => { t = MILIEU_DIT[t] || t; t = String(t || '').replace('signée et tamponnée par', 'signée, avec le cachet de').replace(/tamponnée/g, 'avec cachet'); return eleve ? t.replace(/\bma\b/g, 'sa').replace(/\bmon\b/g, 'son').replace(/\bmes\b/g, 'ses') : t; };
+  const mots = (t, eleve) => { t = MILIEU_DIT[t] || t; t = String(t || '').replace('signée et tamponnée par', 'signée, avec le cachet de').replace(/tamponnée/g, 'avec cachet'); return eleve && !/^J[e’']|\?$/.test(t) ? t.replace(/\bma\b/g, 'sa').replace(/\bmon\b/g, 'son').replace(/\bmes\b/g, 'ses') : t; };
+  const para = t => t ? `<p>${esc(t).replace(/\n/g, '<br>')}</p>` : '';
   const ETAT_LIB = { afaire: 'À faire', attend: 'En attente', corr: 'À corriger', fait: 'Fait', avenir: 'À venir' };
   const boutons = (acts, t) => acts && acts.length ? `<div class="acts">${acts.map(a => `<button class="b ${a.lien ? 'lien' : a.action === 'corriger' ? 'corr' : t === 'afaire' ? '' : 'dis'}" data-geste="${a.id}" data-action="${a.action}">${esc(a.t)}</button>`).join('')}</div>` : '';
   /* La grille d'une étape : une carte reste sur la rangée de la précédente quand elle est plus à droite (ça change de main) ; sinon rangée suivante. */
   const COL = x => x.cote === 'g' ? 1 : x.cote === 'd' ? 5 : x.cote === 'c' ? 0 : 3;
-  const VERS = { pp: 'le professeur principal', pro: 'l’enseignant professionnel', ent: 'l’entreprise', bde: 'le bureau des entreprises', chef: 'la cheffe d’établissement', ddf: 'le DDF', int: 'l’intendance' };
+  const VERS = { pp: 'le professeur principal', pro: 'l’enseignant professionnel', ent: 'l’entreprise', bde: 'le RBDE', chef: 'la cheffe d’établissement', ddf: 'le DDF', int: 'l’intendance' };
   const vers = x => x.cote === 'g' ? 'vers l’élève' : x.cote === 'd' ? 'vers vous' : x.cote === 'c' ? '' : 'vers ' + (VERS[x.cote.slice(2)] || minus(P.ACTEURS[x.cote.slice(2)] || ''));
   function grille(suite) {
     let h = '', r = 1, prev = null;
@@ -399,7 +440,7 @@ async function reel(sid) {
       const c = COL(x), on = ton(x) === 'fait' ? ' on' : '';
       if (prev) {
         const pc = COL(prev), mot = prev.cote !== x.cote && vers(x) ? `<span>${esc(vers(x))}</span>` : '';
-        if (c && pc && c > pc) {
+        if (c && pc && c > pc && !x.rang) {
           /* Aller-retour : l'élève demande, l'intervenant lui remet. */
           const dbl = pc === 1 && c === 3 && x.a === 'l’élève';
           h += c - pc === 4
@@ -417,12 +458,12 @@ async function reel(sid) {
   }
   function carte(x, r) {
     const t = ton(x), m = x.cote.startsWith('m:') ? x.cote.slice(2) : '';
-    const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(P.ACTEURS[m])}` : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : '<i class="ti ti-school"></i>Vous';
+    const qui = m ? `<i class="ti ti-${ICO[m][0]}"></i>${esc(m === 'bde' ? 'RBDE' : P.ACTEURS[m])}` : x.cote === 'g' ? `<span class="mini" style="background:${avatar[1]}"><i class="ti ti-${avatar[0]}"></i></span>L’élève` : x.cote === 'c' ? 'Ensemble' : '<i class="ti ti-school"></i>Enseignant référent';
     const tete = `<div class="q">${qui}${x.nouveau ? '<em class="neuf">Nouveau</em>' : ''}${ETAT_LIB[t] ? `<em class="pst">${ETAT_LIB[t]}</em>` : ''}</div>`;
     const date = x.date ? `<span class="dt">${t === 'fait' ? '✓ ' : ''}${esc(x.date)}</span>` : '';
-    if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${relais(x) || (x.detail ? `<p>${esc(x.detail)}</p>` : '')}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
+    if (m) return `<div class="et m ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.precis ? para(x.detail) : relais(x) || para(x.detail)}${t === 'fait' ? date : ''}${boutons(x.acts, t)}</div></div>`;
     const cf = x.aide && x.aide.length ? `<details class="cf"><summary>Comment faire</summary><ol>${x.aide.map(c => `<li>${esc(c)}</li>`).join('')}</ol>${x.src ? `<small>Source : ${esc(x.src)}</small>` : ''}</details>` : '';
-    return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail && !x.lieu ? `<p>${esc(x.detail)}</p>` : ''}`
+    return `<div class="et ${x.cote} ${t}" id="c${x.k}" style="grid-row:${r}"><div class="carte">${tete}<b>${esc(mots(x.titre, x.cote === 'g'))}</b>${x.detail && !x.lieu ? para(x.detail) : ''}`
       + (x.lieu ? `<div class="prop"><i class="ti ti-building-store"></i>${esc(x.lieu)}</div>` : '')
       + relais(x) + (x.motif ? `<span class="motif">${esc(x.motif)}</span>` : '') + date + boutons(x.acts, t)
       + (x.reserve ? `<p class="reserve">Sous réserve de la validation de la fiche de négociation par <u>l’enseignant professionnel</u> (étape suivante).</p>${x.confirme ? `<p>${esc(s.code)} a reçu la confirmation.</p>` : ''}<details class="cf"><summary>Qu’est-ce que la fiche de négociation ?</summary><ol class="sans"><li>Elle liste les activités que l’élève fera pendant son stage.</li><li>L’entreprise la remplit, la signe et y met son cachet.</li><li>L’enseignant professionnel vérifie qu’elle correspond à la formation.</li></ol></details>` : '')
