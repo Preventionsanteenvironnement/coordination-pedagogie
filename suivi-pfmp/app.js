@@ -179,7 +179,7 @@ function ecranListe() {
       ${drapeauxHtml(s)}
       <div class="barre" title="${av.faits} étape${av.faits > 1 ? 's' : ''} sur ${av.total}"><i style="width:${av.pct}%"></i></div>
       <div class="puces">${verif ? `<span class="puce att"><i class="ti ti-eye-check" aria-hidden="true"></i> ${verif} à vérifier</span>` : ''}${retard ? `<span class="puce ret"><i class="ti ti-clock-exclamation" aria-hidden="true"></i> ${retard} en retard</span>` : ''}</div>
-      <div class="suite">${prochaine ? 'Ensuite : ' + esc(prochaine.t) : 'Rien à faire pour le moment'}</div>
+      <div class="suite">${!P.estFaite(s, 'sent') ? '<b>À faire : activer le suivi</b>' : prochaine ? 'Ensuite : ' + esc(prochaine.t) : 'Rien à faire pour le moment'}</div>
     </button>`;
   }).join('');
   $app().innerHTML = enTete(false) + `<h1 class="titre">Mes élèves en PFMP</h1>
