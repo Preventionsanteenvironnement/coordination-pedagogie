@@ -41,7 +41,7 @@ try {
   }
 } catch (e) { erreur = e; }
 try {
-  const m = await import('./app.js?v=2026-10-12c');
+  const m = await import('./app.js?v=2026-10-12d');
   m.demarrer({ F, db, erreur });
 } catch (e) {
   document.getElementById('app').innerHTML = '<p class="chargement">La page n’a pas pu se charger. Vérifiez la connexion puis rechargez.</p>';

@@ -128,6 +128,11 @@ function ecranAcces() {
     <input id="code" name="code" maxlength="6" pattern="[0-9]{6}|[Zz][Zz]99" value="${refInconnu ? esc(code) : ''}" required>
     <div class="err" id="err">${refInconnu ? 'Ce code n’est pas reconnu pour ' + esc(ANNEE) + '.' : ''}</div>
     <button class="btn pri" type="submit">Entrer</button>
+    <details class="oubli" style="margin:14px 0 0;text-align:left;font-size:14px"${refInconnu ? ' open' : ''}>
+      <summary style="cursor:pointer;font-weight:700;color:var(--accent,#176d66);text-align:center">Code oublié ?</summary>
+      <p style="margin:8px 0 0">Votre code est dans le mail que le professeur principal vous a envoyé, avec le code de votre élève.</p>
+      <p style="margin:6px 0 0">Mail introuvable ? Demandez-lui votre code : il le conserve.</p>
+    </details>
     <p style="margin:14px 0 0"><a class="retour" href="../"><i class="ti ti-home" aria-hidden="true"></i> Accueil du portail</a></p>
   </form>`;
   setTimeout(() => document.getElementById('code')?.focus(), 0);
