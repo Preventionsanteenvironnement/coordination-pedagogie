@@ -108,9 +108,14 @@ const carte = (t, o = {}) => Object.assign({ t }, o);
    gestes : ce que l'on clique, dans l'ordre. qui = page où l'on clique, b = 'b' ou 'b2', vol = icône et couleur de ce qui voyage. */
 const ECRANS = [
   { accueil: 1, titre: 'Suivre votre élève en stage, simplement.', sous: 'Si vous le souhaitez, une page en ligne vous accompagne. Regardez comment elle marche : une minute.' },
-  { titre: 'D’abord, vous activez le suivi.', sous: 'Vous choisissez votre matière, pas votre nom. L’élève sait aussitôt qui l’accompagne.', n: 0,
+  { titre: 'D’abord, vous tapez votre code.', sous: 'Six chiffres, reçus du professeur principal. Votre élève apparaît, sous son code. Deux élèves ? Deux cartes.', n: 0,
     e: [carte('Mon enseignant référent', { e: 'attend', p: 'À venir' })],
-    r: [carte('Activer le suivi de ZZ99', { e: 'afaire', p: 'À faire', s: 'Votre matière : Éco-gestion ▾', b: 'Activer le suivi' })],
+    r: [carte('Votre code', { e: 'afaire', p: 'À saisir', s: '● ● ● ● ● ●', b: 'Entrer' })],
+    gestes: [{ qui: 'r', sansVol: 1, fait(s) {
+      s.r = [carte('ZZ99 · B2GATL2', { e: 'afaire', p: 'Votre élève', s: 'PFMP 1 · du 4 au 15 janvier', b: 'Ouvrir' })]; } }] },
+  { titre: 'Puis vous activez le suivi.', sous: 'Votre matière est déjà indiquée, pas votre nom. Un clic : l’élève sait aussitôt qui l’accompagne.', n: 0,
+    e: [carte('Mon enseignant référent', { e: 'attend', p: 'À venir' })],
+    r: [carte('Activer le suivi de ZZ99', { e: 'afaire', p: 'À faire', s: 'Votre matière : Éco-gestion', b: 'Activer le suivi' })],
     gestes: [{ qui: 'r', vol: ['school', 'v'], fait(s) {
       s.r = [carte('Vous suivez ZZ99 · B2GATL2', { e: 'fait', p: 'Activé', s: 'PFMP 1 · du 4 au 15 janvier' })];
       s.e = [carte('Mon enseignant référent', { e: 'fait', p: 'Désigné', s: 'professeur d’Éco-gestion' })]; s.n = 1; } }] },
@@ -218,7 +223,7 @@ async function avancer() {
   if (!geste) return ouvrir(i + 1);
   occupe = true;
   const b = document.querySelector('[data-geste]'); if (b) { b.classList.remove('cible'); b.style.transform = 'scale(.94)'; }
-  try { await voler(geste.qui, geste.vol[0], geste.vol[1]); } catch (e) {}
+  if (!geste.sansVol) { try { await voler(geste.qui, geste.vol[0], geste.vol[1]); } catch (e) {} }
   geste.fait(etat); etat.neuf = 'tout'; g++;
   rendre(false); etat.neuf = ''; occupe = false;
 }
