@@ -153,22 +153,25 @@ function lireIdent() { try { return JSON.parse(localStorage.getItem(CLE_IDENT) |
 function demanderIdent() {
   return new Promise(resolve => {
     const deja = lireIdent();
-    if (deja && deja.ini) return resolve(deja);
+    if (deja && deja.ini && deja.couleur) return resolve(deja);
+    const couleurs = ['#2563eb', '#ea580c', '#059669', '#9333ea', '#db2777', '#0891b2', '#ca8a04', '#dc2626'];
     const v = document.createElement('div');
     v.className = 'en-ligne-voile';
     v.innerHTML = `<form class="en-ligne-boite">
       <h2>Carte du projet, en équipe</h2>
       <p>Cette carte s’enregistre toute seule et se met à jour en direct chez chacun.</p>
       <label>Vos initiales<input name="ini" maxlength="4" autocomplete="off" required placeholder="ex. BM"></label>
+      <div class="en-ligne-couleurs"><span>Votre couleur (repère sur ce que vous écrivez)</span><div>${couleurs.map((c, i) => `<label style="--c:${c}"><input type="radio" name="couleur" value="${c}"${(deja && deja.couleur ? deja.couleur === c : i === 0) ? ' checked' : ''}><i></i></label>`).join('')}</div></div>
       <label>Votre rôle<select name="role"><option>PSE</option><option>Enseignement professionnel</option><option>Autre enseignant</option><option>Autre</option></select></label>
       <p class="en-ligne-rgpd">Jamais de nom d’élève dans la carte.</p>
       <button class="primaire">Entrer</button></form>`;
     document.body.appendChild(v);
     const f = v.querySelector('form');
+    if (deja && deja.ini) { f.ini.value = deja.ini; if (deja.role) f.role.value = deja.role; }
     f.ini.focus();
     f.addEventListener('submit', ev => {
       ev.preventDefault();
-      const id = { ini: f.ini.value.trim().toUpperCase().replace(/[^A-ZÀ-Ÿ.-]/g, '').slice(0, 4) || '?', role: f.role.value };
+      const id = { ini: f.ini.value.trim().toUpperCase().replace(/[^A-ZÀ-Ÿ.-]/g, '').slice(0, 4) || '?', role: f.role.value, couleur: f.couleur.value };
       try { localStorage.setItem(CLE_IDENT, JSON.stringify(id)); } catch (e) {}
       v.remove(); resolve(id);
     });
@@ -189,6 +192,8 @@ async function demarrer() {
   window.CARTE_EN_LIGNE = { id: CARTE_ID, retour: PARAMS.get('retour') || '../../', recevoir: null };
   const attente = document.getElementById('en-ligne-attente');
   const ident = await demanderIdent();
+  window.CARTE_EN_LIGNE.auteur = ident.ini;
+  window.CARTE_EN_LIGNE.couleur = ident.couleur;
 
   const app = initializeApp({ apiKey: "AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", authDomain: "coordination-pedagogie.firebaseapp.com", projectId: "coordination-pedagogie", storageBucket: "coordination-pedagogie.firebasestorage.app", messagingSenderId: "526058585010", appId: "1:526058585010:web:ba4dd6d9c8281ba5bf02ab" });
   const db = getFirestore(app);

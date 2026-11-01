@@ -75,7 +75,39 @@
     try { reprendreAjouts(); S.set(M.CLE, JSON.stringify(donnees)); if (S.flush) S.flush(); noter(donnees); etat('Enregistré'); }
     catch (e) { etat('Enregistrement impossible : ' + (e && e.message || e)); }
   }
+  /* [EN LIGNE] Repère d'auteur : un sujet créé, ou dont le texte ou la note change ici, prend les initiales de
+     la personne (n.auteur) ; la couleur de chacun est rangée dans carte.auteurs. Les versions reçues d'ailleurs
+     ne changent pas d'auteur (empreintes recalculées à leur arrivée). */
+  var empreintes = new Map();
+  function empreinte(n) { return JSON.stringify([n.t, n.note || '']); }
+  function relever(c) { empreintes = new Map(); (c ? c.feuilles : []).forEach(function (f) { M.parcourir(f, function (n) { empreintes.set(n.id, empreinte(n)); }); }); }
+  function marquerAuteur() {
+    var EL = window.CARTE_EN_LIGNE, ini = EL && EL.auteur;
+    if (!ini || !carte) return;
+    carte.auteurs = carte.auteurs || {};
+    if (EL.couleur && carte.auteurs[ini] !== EL.couleur) carte.auteurs[ini] = EL.couleur;
+    carte.feuilles.forEach(function (f) {
+      M.parcourir(f, function (n) {
+        var e = empreinte(n);
+        if (empreintes.get(n.id) !== e) { n.auteur = ini; empreintes.set(n.id, e); }
+      });
+    });
+  }
+  var AUTEURS_PALETTE = ['#2563eb', '#ea580c', '#059669', '#9333ea', '#db2777', '#0891b2', '#ca8a04', '#dc2626'];
+  function couleurAuteur(ini) {
+    var a = carte && carte.auteurs && carte.auteurs[ini];
+    if (a) return a;
+    var h = 0; String(ini).split('').forEach(function (ch) { h = (h * 31 + ch.charCodeAt(0)) % 9973; });
+    return AUTEURS_PALETTE[h % AUTEURS_PALETTE.length];
+  }
+  var voirAuteurs = (function () { try { return localStorage.getItem('carte-voir-auteurs') !== '0'; } catch (e) { return true; } })();
+  function auteursLegende() {
+    var vus = {}; carte.feuilles.forEach(function (f) { M.parcourir(f, function (n) { if (n.auteur) vus[n.auteur] = (vus[n.auteur] || 0) + 1; }); });
+    var l = Object.keys(vus).map(function (k) { return k + ' : ' + vus[k] + ' sujet' + (vus[k] > 1 ? 's' : ''); });
+    return 'Montrer ou cacher qui a écrit chaque sujet' + (l.length ? '\n' + l.join('\n') : '');
+  }
   function sauver() {
+    if (window.CARTE_EN_LIGNE) marquerAuteur();
     if (carte) carte.maj = M.maintenant();
     etat('Enregistrement…');
     clearTimeout(tSauve); tSauve = setTimeout(ecrire, 350);
@@ -458,6 +490,11 @@
       });
     }
     if (opt.choisi) h += '<rect x="-4" y="-4" width="' + (w + 8) + '" height="' + (ht + 8) + '" rx="' + (Math.min(rx, 16) + 4) + '" fill="none" stroke="#4f46e5" stroke-width="2.2"/>';
+    if (n.auteur && voirAuteurs && window.CARTE_EN_LIGNE && !opt.fixe) {   // [EN LIGNE] pastille de l'auteur, à cheval sur le coin, au-dessus du cadre de sélection
+      var ca = couleurAuteur(n.auteur), la = Math.max(24, String(n.auteur).length * 8 + 10);
+      h += '<g transform="translate(' + arr(w - la + 10) + ',-11)"><title>Écrit par ' + echap(n.auteur) + '</title><rect width="' + la + '" height="18" rx="9" fill="' + ca + '" stroke="' + T.fond + '" stroke-width="2"/>' +
+        '<text x="' + arr(la / 2) + '" y="9.5" text-anchor="middle" dominant-baseline="central" ' + attrPolice() + ' font-size="10.5" font-weight="750" fill="#fff">' + echap(n.auteur) + '</text></g>';
+    }
     // Bouton replier / déplier (pas sur le sujet central)
     if (n.enfants.length && b.prof > 0 || (n.enfants.length && b.libre)) {
       var px = b.dir === 0 ? w / 2 : b.dir > 0 ? w + 11 : -11, py = b.dir === 0 ? ht + 11 : souligne(b) ? ht : ht / 2;
@@ -532,7 +569,8 @@
   function signature(b) {
     var n = b.n, s = b.s;
     return [n.t, b.w, b.h, b.dir, s.fond, s.texte, s.forme, s.fs, s.poids, !!s.italique, s.trait, (n.marqueurs || []).join(), (n.etiquettes || []).join('¦'),
-      n.note || '', n.lien || '', !!n.plie, n.enfants.length, n.plie ? compterSous(n) : 0, sel.has(n.id), n.image ? n.image.data.length + ':' + (n.image.echelle || 1) : 0, feuille.theme, feuille.police || '', pres && pres.trous || 0].join('|');
+      n.note || '', n.lien || '', !!n.plie, n.enfants.length, n.plie ? compterSous(n) : 0, sel.has(n.id), n.image ? n.image.data.length + ':' + (n.image.echelle || 1) : 0, feuille.theme, feuille.police || '', pres && pres.trous || 0,
+      n.auteur ? n.auteur + (voirAuteurs ? couleurAuteur(n.auteur) : '') : ''].join('|');   // [EN LIGNE] auteur
   }
   function rendre(opt) {
     opt = opt || {};
@@ -808,7 +846,7 @@
     if (i < 0) { donnees.cartes.push(c); noter(donnees); return true; }
     if (!carte || carte.id !== c.id) { donnees.cartes[i] = c; noter(donnees); return true; }
     if (edition || appui || tSauve || document.activeElement === $('titre-carte') || (document.activeElement && $('panneau').contains(document.activeElement) && /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName))) return false;
-    donnees.cartes[i] = c; carte = c; noter(donnees);
+    donnees.cartes[i] = c; carte = c; noter(donnees); relever(c);
     feuille = (feuille && c.feuilles.find(function (f) { return f.id === feuille.id; })) || c.feuilles[0];
     sel.forEach(function (id) { if (!M.trouver(feuille, id)) sel.delete(id); });
     if (principal && !sel.has(principal)) principal = sel.values().next().value || null;
@@ -1435,6 +1473,7 @@
     plan: '<path d="M4 6h3M10 6h10M7 12h3M13 12h7M7 18h3M13 18h7"/>',
     exporter: '<path d="M12 4v11M7.5 8.5L12 4l4.5 4.5"/><path d="M5 15v4h14v-4"/>',
     projeter: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/><path d="M10.5 7.8v4.4l3.8-2.2z"/>',
+    auteurs: '<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17.5" cy="15.5" r="3.5"/><path d="M16 15.5h3"/>',   // [EN LIGNE]
     aide: '<rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M7 10h1M11 10h1M15 10h1M7 14h10"/>'
   };
   function bouton(id, label, titre) {
@@ -1447,7 +1486,7 @@
       '<span class="sep"></span>' + bouton('note', 'Note', 'Note, lien, étiquettes, image') + bouton('marqueur', 'Marqueur') + bouton('image', 'Image') +
       '<span class="sep"></span>' + bouton('annuler', 'Annuler', 'Annuler (⌘Z)') + bouton('retablir', 'Rétablir', 'Rétablir (⇧⌘Z)') +
       '<span class="pousse"></span><span id="etat-sauve"></span>' +
-      bouton('projeter', 'Projeter', 'Ouvrir l’écran des élèves et le piloter d’ici') + bouton('plan', 'Plan', 'Copier ou coller le plan') + bouton('exporter', 'Exporter', 'Image ou PDF') + bouton('aide', 'Raccourcis') + bouton('style', 'Style', 'Structure, thème, style');
+      (window.CARTE_EN_LIGNE ? bouton('auteurs', 'Auteurs', 'Montrer ou cacher qui a écrit chaque sujet') : '') + bouton('projeter', 'Projeter', 'Ouvrir l’écran des élèves et le piloter d’ici') + bouton('plan', 'Plan', 'Copier ou coller le plan') + bouton('exporter', 'Exporter', 'Image ou PDF') + bouton('aide', 'Raccourcis') + bouton('style', 'Style', 'Structure, thème, style');
     $('b-retour').onclick = function () { if (window.CARTE_EN_LIGNE) location.href = window.CARTE_EN_LIGNE.retour; else location.hash = ''; };   // [EN LIGNE]
     $('b-sujet').onclick = function () { ajouterFrere(false); };
     $('b-sous').onclick = ajouterEnfant;
@@ -1472,6 +1511,11 @@
     };
     $('b-aide').onclick = montrerRaccourcis;
     $('b-projeter').onclick = diffuser;
+    if ($('b-auteurs')) $('b-auteurs').onclick = function () {   // [EN LIGNE]
+      voirAuteurs = !voirAuteurs;
+      try { localStorage.setItem('carte-voir-auteurs', voirAuteurs ? '1' : '0'); } catch (e) {}
+      rendre();
+    };
     var ti = $('titre-carte');
     ti.addEventListener('change', function () { var v = ti.value.trim() || 'Carte sans titre'; if (v !== carte.titre) { historiser(); carte.titre = v; sauver(); } ti.value = carte.titre; });
     ti.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') ti.blur(); });
@@ -1486,6 +1530,7 @@
     $('b-encadrer').disabled = !plOk; $('b-resumer').disabled = !plOk;
     $('b-liaison').classList.toggle('actif', mode === 'liaison');
     $('b-style').classList.toggle('actif', panneau === 'style');
+    if ($('b-auteurs')) { $('b-auteurs').classList.toggle('actif', voirAuteurs); $('b-auteurs').title = auteursLegende(); }   // [EN LIGNE]
     $('b-projeter').classList.toggle('actif', !!diffusion);
     $('b-note').classList.toggle('actif', panneau === 'note');
     $('b-marqueur').classList.toggle('actif', panneau === 'marqueurs');
@@ -2001,6 +2046,7 @@
   /* ---------- Navigation liste ↔ éditeur (les flèches du navigateur fonctionnent) ---------- */
   function ouvrirCarte(c) {
     carte = c; pile = []; refaire = []; mode = null; panneau = null; clePanneau = '';
+    relever(c);   // [EN LIGNE]
     $('liste').classList.add('cache'); $('editeur').classList.remove('cache');
     if (!$('b-annuler')) construireBarre();
     document.title = c.titre + ' · Cartes mentales';
