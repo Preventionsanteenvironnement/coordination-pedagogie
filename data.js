@@ -382,6 +382,35 @@ const THEMATIQUES = [
     ],
   },
   {
+    id: "equipe",
+    nom: "Espace équipe pédagogique",
+    couleur: "#0f766e",
+    icon: "users",
+    enfants: [
+      {
+        titre: "Projet chef-d'œuvre — CAP PSR, 1re année",
+        desc: "Le projet construit à deux, PSE et enseignement professionnel : illustrer des risques du métier en cuisine et leur prévention, pour les élèves des années suivantes. Mercredis 14 h – 17 h.",
+        icon: "cap",
+        enfants: [
+          {
+            titre: "Carte mentale du projet",
+            desc: "La carte à nourrir ensemble, en direct : on ajoute des branches, on déplace, on note. Les mercredis, les vacances et les stages sont déjà posés. Enregistrement automatique. Anonyme : initiales seulement, jamais de nom d'élève.",
+            lien: "espace-equipe/carte-mentale/",
+            type: "Carte partagée",
+            icon: "brain",
+          },
+          {
+            titre: "Dossier de pilotage du chef-d'œuvre",
+            desc: "Le suivi sur deux ans : périodes, jalons, co-disciplines, passage de témoin entre la 1re et la 2e année, préparation de l'oral.",
+            lien: "chef-doeuvre/",
+            type: "Outil",
+            icon: "cap",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "projets",
     nom: "Projets d'équipe",
     couleur: "#2f6cd6",
