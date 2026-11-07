@@ -56,6 +56,7 @@ main{max-width:640px;margin:-44px auto 0;padding:0 14px 120px;display:flex;flex-
 .pres::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor}
 .pres.deja{background:var(--ok-l);color:#0b6b49}.pres.aucune{background:#fff1f2;color:#9f1239}.pres.inc{background:#f1f0f8;color:var(--muted)}
 .besoin{font-size:.88rem;color:var(--ink-2);margin-top:6px}
+.manque{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;font-size:.86rem;font-weight:600;background:var(--res-l);color:#8a4b03}.manque.complet{background:var(--ok-l);color:#0b6b49}
 .choix{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
 .choix button{border:2px solid var(--line);background:#fff;border-radius:14px;padding:12px 6px;font-weight:800;font-size:.93rem;min-height:52px;transition:transform .08s,background .15s,border-color .15s,color .15s}
 .choix button:active{transform:scale(.97)}
@@ -143,6 +144,15 @@ function presence(s){
   return `<span class="pres deja">${n === 1 ? 'Une AESH est déjà présente' : n + ' AESH sont déjà présentes'} à ce cours</span>`;
 }
 const besoin = s => { if (mobilisation()) return `${s.nbAesh} AESH souhaitée(s) au total`; const r = s.renfort ?? s.nbAesh; return +r > 0 ? `${r} AESH en renfort ${+r > 1 ? 'sont demandées' : 'est demandée'}` : 'Renfort à confirmer'; };
+/* [07/11/2026, Brahim] Ce qui reste à pourvoir, d'après « pourvus » (un NOMBRE d'AESH retenues par séance, écrit
+   par l'Atelier ; jamais un prénom). Sans « pourvus », la page affiche seulement le besoin, comme avant. */
+function pourvu(s, i){
+  const p = S.d && Array.isArray(S.d.pourvus) ? +S.d.pourvus[i] : NaN, r = +(s.renfort ?? s.nbAesh);
+  if (mobilisation() || !(r > 0) || !(p >= 0)) return '';
+  const m = r - p;
+  if (m <= 0) return `<div class="manque complet">Complet, merci ! Vous pouvez encore répondre « sous réserve » en cas de désistement.</div>`;
+  return `<div class="manque">${p > 0 ? `Il manque encore ${m} AESH (${p} sur ${r} déjà retenue${p > 1 ? 's' : ''})` : `Il manque ${m} AESH`}</div>`;
+}
 const nomEp = d => [NATURES[d.nature] || d.natureAutre || 'Épreuve', (mobilisation() ? d.intitule || d.matiere : d.matiere)].filter(Boolean).join(' · ');
 const COCHE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function rendre(){
@@ -170,7 +180,7 @@ function rendre(){
       ${l.map((s, i) => `<div class="seance ${S.rep[i] || ''}"><div class="s-t"><div class="cal" aria-hidden="true"><i>${esc(jourC(s.date))}</i><b>${parseInt(String(s.date).slice(8), 10)}</b></div>
         <div class="s-i"><div class="h">${esc(dateLongue(s.date))} · ${hFr(s.debut)}–${hFr(s.fin)}</div>
           <div class="d">${esc(s.libelle || s.classe)}${s.salle ? ' · salle ' + esc(s.salle) : ''}${s.tiersTemps ? ' · tiers temps compris' : ''}</div>
-          ${mobilisation() ? '' : presence(s)}<div class="besoin">${esc(besoin(s))}</div></div></div>
+          ${mobilisation() ? '' : presence(s)}<div class="besoin">${esc(besoin(s))}</div>${pourvu(s, i)}</div></div>
         <div class="choix" role="group" aria-label="Disponibilité pour le ${esc(dateLongue(s.date))}">${(mobilisation() ? [['convenue','Ma participation est déjà convenue avec l’organisateur'],['oui','Je suis disponible pour accompagner cette sortie'],['non','Je ne suis pas disponible pour cette sortie']] : Object.entries(LIB)).map(([k, t]) => `<button type="button" id="r${i}-${k}" data-a="dispo" data-i="${i}" data-v="${k}" aria-pressed="${(k === 'convenue' ? S.participation[i] === 'convenue' : S.rep[i] === k && S.participation[i] !== 'convenue')}">${t}</button>`).join('')}</div></div>`).join('')}</section>
     <section class="carte"><p class="etq">Un mot pour la coordination <span style="text-transform:none;letter-spacing:0;font-weight:500">(facultatif)</span></p>
       <p class="interdit">Aucun nom ni prénom d’élève.</p><textarea id="commentaire" data-c="commentaire" maxlength="300" placeholder="${mobilisation() ? 'Précision utile sur l’organisation de la sortie' : 'Par exemple : disponible seulement jusqu’à 10h'}" aria-label="Commentaire">${esc(S.commentaire)}</textarea></section>
