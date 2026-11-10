@@ -195,6 +195,42 @@
 .qr-c .qr{width:170px;height:170px}.qr-c .qr svg{width:100%;height:100%}
 .qr-c small{color:var(--muted);word-break:break-all;font-size:.74rem}
 #impression{display:none}
+/* ───── Affiche QR (A4) ───── */
+.aff{width:210mm;height:297mm;background:#fff;display:flex;flex-direction:column;align-items:center;font-family:"Inter",system-ui,Arial,sans-serif;color:#0f172a;position:relative;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;box-sizing:border-box}
+.aff-haut{width:100%;background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#0e7490);color:#fff;text-align:center;padding:18mm 14mm 30mm;border-radius:0 0 50% 50%/0 0 16mm 16mm}
+.aff-sur{font-size:13pt;letter-spacing:.22em;font-weight:800;opacity:.85;text-transform:uppercase}
+.aff-nom{font-size:46pt;font-weight:800;line-height:1.05;margin-top:4mm}
+.aff-qr{margin-top:-18mm;background:#fff;padding:8mm;border-radius:10mm;box-shadow:0 4mm 14mm rgba(15,23,42,.18);width:122mm;height:122mm;box-sizing:border-box}
+.aff-qr svg{width:100%;height:100%;display:block}
+.aff-msg{font-size:24pt;font-weight:800;text-align:center;margin:14mm 20mm 0;line-height:1.25}
+.aff-etapes{display:flex;gap:7mm;margin-top:11mm}
+.aff-etapes div{display:flex;align-items:center;gap:3mm;font-size:13pt;font-weight:600;color:#334155}
+.aff-etapes span{width:9mm;height:9mm;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12pt}
+.aff-pied{position:absolute;bottom:13mm;font-size:11pt;color:#64748b}
+.aff-apercu{width:238px;height:336px;overflow:hidden;border-radius:12px;box-shadow:0 0 0 1px var(--line),0 10px 28px rgba(15,23,42,.12);flex:none}
+.aff-apercu .aff{transform:scale(.2999);transform-origin:top left}
+/* ───── Rapport ───── */
+.rap{background:#fff;border-radius:var(--r);box-shadow:var(--sh);padding:28px 30px;color:var(--ink);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rap section{margin-top:26px}.rap h2{font-size:1.05rem;margin:0 0 12px;display:flex;gap:8px;align-items:center}.rap h2 small{color:var(--muted);font-weight:600}
+.r-tete{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:22px 24px;border-radius:18px;background:linear-gradient(135deg,#1e3a8a,#2563eb 55%,#0e7490);color:#fff}
+.r-tete h1{margin:4px 0;font-size:1.7rem}.r-tete p{margin:0;opacity:.9}
+.r-sur{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.85}
+.r-logo{width:58px;height:58px;border-radius:16px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:none}.r-logo .ico{width:30px;height:30px;color:#fff}
+.r-tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.r-tuile{border-radius:14px;background:var(--bg);padding:14px;border-left:4px solid var(--bleu)}
+.r-tuile b{display:block;font-size:1.6rem;line-height:1.1}.r-tuile span{color:var(--muted);font-size:.84rem}
+.r-tuile.ok{border-left-color:var(--ok)}.r-tuile.pb{border-left-color:#f59e0b}.r-tuile.non{border-left-color:var(--non)}
+.r-deux{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.r-tab{width:100%;border-collapse:collapse;font-size:.88rem}
+.r-tab th{text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 8px;border-bottom:2px solid var(--line)}
+.r-tab td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.r-tab tbody tr:nth-child(even){background:#fafbfd}
+.r-tab .ico{width:16px;height:16px;vertical-align:-3px;color:var(--muted)}
+.r-barre{display:inline-block;width:60px;height:7px;border-radius:99px;background:var(--hs-l);margin-right:8px;vertical-align:1px;overflow:hidden}.r-barre i{display:block;height:100%;background:var(--ok)}
+.r-pastille{display:inline-block;border-radius:99px;padding:1px 8px;font-weight:800;font-size:.76rem;color:#fff}.r-pastille.non{background:var(--non)}.r-pastille.pb{background:#d97706}
+.r-aide{margin:-6px 0 10px;color:var(--muted);font-size:.85rem}.r-vide{color:var(--muted);font-style:italic;margin:0}
+.r-pied{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:.8rem;text-align:center}
+@media screen and (max-width:820px){.r-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))}.r-deux{grid-template-columns:1fr}.rap{padding:18px 14px}.r-tab{font-size:.78rem}.rap-ecran{overflow-x:auto}}
 /* ───── Mobile ───── */
 @media (max-width:980px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grille2{grid-template-columns:1fr}}
 @media (max-width:820px){
@@ -219,12 +255,12 @@
   body{background:#fff}
   body>*:not(#impression){display:none!important}
   #impression{display:block}
-  .affiche{width:210mm;height:297mm;padding:22mm 18mm;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;page-break-after:always;font-family:"Inter",system-ui,Arial,sans-serif;color:#0f172a}
-  .affiche .sur{font-size:13pt;letter-spacing:.16em;text-transform:uppercase;color:#2563eb;font-weight:800}
-  .affiche h1{font-size:46pt;margin:4mm 0 8mm;line-height:1.05}
-  .affiche .qr{width:125mm;height:125mm}.affiche .qr svg{width:100%;height:100%}
-  .affiche p{font-size:20pt;margin:9mm 0 0;font-weight:700}
-  .affiche .petit{font-size:12pt;font-weight:400;color:#475569;margin-top:4mm}
+  .aff{page-break-after:always;break-after:page}
+  .rap{box-shadow:none;border-radius:0;padding:12mm 13mm;font-size:10pt}
+  .rap section{break-inside:avoid}.rap section:has(.r-tab tbody tr:nth-child(12)){break-inside:auto}
+  .r-tab tr{break-inside:avoid}
+  .histo-zone svg{height:150px}
+  .r-tuiles{grid-template-columns:repeat(4,minmax(0,1fr))}.r-deux{grid-template-columns:1fr 1fr}.r-tuile b{font-size:1.35rem}
 }
 </style>
 </head>

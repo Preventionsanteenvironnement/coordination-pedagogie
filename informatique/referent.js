@@ -103,7 +103,7 @@ function rendre(doux = false){
   if (!S.parc) return;
   const ss = sallesChargees();
   const pannesSalle = s => ouverts(s).length;
-  const vues = { tdb: vueTdb, nouvelle: vueNouvelle, catalogue: vueCatalogue, qr: vueQR, param: vueParam };
+  const vues = { tdb: vueTdb, nouvelle: vueNouvelle, catalogue: vueCatalogue, qr: vueQR, param: vueParam, rapport: vueRapport };
   const corps = S.vue.startsWith('salle:') ? vueSalle(S.vue.slice(6)) : (vues[S.vue] || vueTdb)();
   const scroll = scrollY;
   $('#racine').innerHTML = `<div class="app">
@@ -115,6 +115,9 @@ function rendre(doux = false){
       ${nav('nouvelle', 'Nouvelle salle', 'outil')}
       <div class="nav-titre">Configuration</div>
       ${nav('catalogue', 'Personnaliser', 'clavier')}
+      <div class="nav-titre">Documents</div>
+      ${nav('qr', 'Affiches QR', 'imprimante')}
+      ${nav('rapport', 'Rapport', 'logiciel')}
       ${nav('param', 'Sauvegarde', 'session')}
     </nav>
     <main class="contenu" id="contenu" tabindex="-1">
@@ -619,34 +622,181 @@ async function enregistrerCatalogue(){
   } catch (_) { toast('Enregistrement impossible : vérifiez la connexion.'); }
 }
 
-/* ═════════ QR codes ═════════ */
-function tiroirQR(t, s){
-  const u = urlSalle(t.sid);
-  cadre('QR code de la salle', esc(s.nom), `<div class="qr-c" style="box-shadow:none;padding:0"><div class="qr" style="width:240px;height:240px">${svgQR(u)}</div>
-    <p style="margin:0;color:var(--ink-2)">À imprimer et à coller près des ordinateurs. Les collègues scannent, cochent, c’est envoyé.</p><small>${esc(u)}</small></div>`,
-    `<button class="btn ghost" id="qr-copier">Copier le lien</button><button class="btn" id="qr-imprimer">${icone('imprimante')}Imprimer l’affiche</button>`);
-  $('#qr-imprimer').onclick = () => imprimer(t.sid);
-  $('#qr-copier').onclick = async () => { try { await navigator.clipboard.writeText(u); toast('Lien copié.'); } catch (_) { toast('Copie impossible.'); } };
-}
+/* ═════════ QR codes : affiche personnalisable, impression, image, mail ═════════ */
+const MSG_DEFAUT = 'Scannez ce code QR pour signaler un problème informatique';
+const messageAffiche = () => nettoie(cat().affiche, 140) || MSG_DEFAUT;
 function svgQR(texte){
   if (typeof qrcode !== 'function') return '<p class="err">QR code indisponible (connexion).</p>';
   const q = qrcode(0, 'M'); q.addData(texte); q.make();
-  return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true, alt: { text: 'QR code de la salle' } });
+  return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true, alt: { text: 'QR code de la salle' } });
+}
+const nomSalle = id => S.salles[id]?.nom || listeSalles().find(x => x.id === id)?.nom || 'Salle';
+/* L'affiche A4 (même dessin à l'écran, à l'impression et en PDF). */
+function afficheHTML(id){
+  return `<div class="aff">
+    <div class="aff-haut"><div class="aff-sur">Salle informatique</div><div class="aff-nom">${esc(nomSalle(id))}</div></div>
+    <div class="aff-qr">${svgQR(urlSalle(id))}</div>
+    <div class="aff-msg">${esc(messageAffiche())}</div>
+    <div class="aff-etapes"><div><span>1</span>Scannez</div><div><span>2</span>Touchez l’ordinateur</div><div><span>3</span>Cochez, c’est envoyé</div></div>
+    <div class="aff-pied">Le jour et la salle s’affichent tout seuls · aucun compte, aucun nom</div>
+  </div>`;
+}
+const apercuAffiche = id => `<div class="aff-apercu" aria-label="Aperçu de l’affiche">${afficheHTML(id)}</div>`;
+function imprimer(quoi){
+  const ls = listeSalles().filter(x => quoi === 'tout' || x.id === quoi);
+  $('#impression').innerHTML = ls.map(x => afficheHTML(x.id)).join('');
+  setTimeout(() => window.print(), 80);
+}
+/* Image PNG de l'affiche (A4, 150 points par pouce) : à joindre à un mail, à envoyer, à garder. */
+async function affichePNG(id){
+  if (typeof qrcode !== 'function') return toast('QR code indisponible (connexion).');
+  const W = 1240, H = 1754, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d'), police = (t, p) => `${p} ${t}px Inter, system-ui, -apple-system, Arial, sans-serif`;
+  g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+  const dg = g.createLinearGradient(0, 0, W, 600); dg.addColorStop(0, '#1e3a8a'); dg.addColorStop(.55, '#2563eb'); dg.addColorStop(1, '#0e7490');
+  g.fillStyle = dg; g.beginPath(); g.moveTo(0, 0); g.lineTo(W, 0); g.lineTo(W, 520); g.quadraticCurveTo(W / 2, 640, 0, 520); g.closePath(); g.fill();
+  g.textAlign = 'center'; g.fillStyle = 'rgba(255,255,255,.85)'; g.font = police(34, '800'); g.fillText('SALLE INFORMATIQUE', W / 2, 150);
+  g.fillStyle = '#fff'; g.font = police(118, '800'); let nom = nomSalle(id); while (g.measureText(nom).width > W - 140 && nom.length > 4) nom = nom.slice(0, -2) + '…'; g.fillText(nom, W / 2, 300);
+  const q = qrcode(0, 'M'); q.addData(urlSalle(id)); q.make();
+  const n = q.getModuleCount(), cote = 640, cell = cote / n, x0 = (W - cote) / 2, y0 = 470;
+  g.save(); g.shadowColor = 'rgba(15,23,42,.18)'; g.shadowBlur = 50; g.shadowOffsetY = 18; g.fillStyle = '#fff';
+  const r = 60, bx = x0 - 50, by = y0 - 50, bw = cote + 100; g.beginPath(); g.roundRect ? g.roundRect(bx, by, bw, bw, r) : g.rect(bx, by, bw, bw); g.fill(); g.restore();
+  g.fillStyle = '#0f172a'; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if (q.isDark(i, j)) g.fillRect(Math.floor(x0 + j * cell), Math.floor(y0 + i * cell), Math.ceil(cell), Math.ceil(cell));
+  g.font = police(62, '800'); g.fillStyle = '#0f172a';
+  const mots = messageAffiche().split(' '), lignes = []; let l = '';
+  mots.forEach(m => { const t = l ? l + ' ' + m : m; if (g.measureText(t).width > W - 200) { lignes.push(l); l = m; } else l = t; }); if (l) lignes.push(l);
+  lignes.slice(0, 4).forEach((t, i) => g.fillText(t, W / 2, 1300 + i * 78));
+  const etapes = ['Scannez', 'Touchez l’ordinateur', 'Cochez, c’est envoyé'], ye = 1300 + Math.min(4, lignes.length) * 78 + 70;
+  g.font = police(34, '600'); const largeurs = etapes.map(t => g.measureText(t).width + 90), total = largeurs.reduce((a, b) => a + b, 0) + 60;
+  let xe = (W - total) / 2;
+  etapes.forEach((t, i) => { g.fillStyle = '#2563eb'; g.beginPath(); g.arc(xe + 26, ye - 12, 26, 0, 7); g.fill(); g.fillStyle = '#fff'; g.font = police(30, '800'); g.textAlign = 'center'; g.fillText(String(i + 1), xe + 26, ye - 1);
+    g.fillStyle = '#334155'; g.font = police(34, '600'); g.textAlign = 'left'; g.fillText(t, xe + 64, ye); xe += largeurs[i] + 30; });
+  g.textAlign = 'center'; g.fillStyle = '#64748b'; g.font = police(28, '400'); g.fillText('Le jour et la salle s’affichent tout seuls · aucun compte, aucun nom', W / 2, H - 80);
+  c.toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `QR code - ${nomSalle(id)}.png`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 600); }, 'image/png');
+  toast('Image de l’affiche téléchargée : vous pouvez la joindre à un mail.');
+}
+/* Mail : ouvre votre messagerie avec le message et le lien ; rien ne part tout seul. */
+function mailAffiche(id){
+  const sujet = `QR code — ${nomSalle(id)}`;
+  const corps = `${messageAffiche()}\n\n${nomSalle(id)} : ${urlSalle(id)}\n\n(L’affiche à imprimer est jointe en image ou en PDF.)`;
+  location.href = `mailto:?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+}
+function boutonsAffiche(id){
+  return `<div class="puces" style="justify-content:center">
+    <button class="btn petit" data-imprimer="${id}">${icone('imprimante')}Imprimer / PDF</button>
+    <button class="btn petit sec" data-aff-png="${id}">${icone('ecran')}Image</button>
+    <button class="btn petit sec" data-aff-mail="${id}">${icone('session')}Mail</button>
+    <button class="btn petit ghost" data-copier="${esc(urlSalle(id))}">Copier le lien</button></div>`;
+}
+function editeurMessage(){
+  return `<div class="champ plein"><label for="aff-msg">Message de l’affiche (toutes les salles)</label>
+    <textarea id="aff-msg" maxlength="140" rows="2">${esc(messageAffiche())}</textarea>
+    <div class="puces" style="margin-top:6px"><button class="btn petit" id="aff-msg-ok">Enregistrer le message</button><button class="btn petit ghost" id="aff-msg-def">Message par défaut</button></div></div>`;
+}
+async function enregistrerMessage(v){
+  const m = nettoie(v, 140);
+  try { await modifierParc(p => { p.cat = { ...(p.cat || CATALOGUE_DEFAUT()), affiche: m === MSG_DEFAUT ? '' : m }; return p; }); toast('Message de l’affiche enregistré.'); }
+  catch (_) { toast('Enregistrement impossible : vérifiez la connexion.'); }
+}
+function tiroirQR(t, s){
+  cadre('Affiche QR de la salle', esc(s.nom), `<div style="display:flex;flex-direction:column;align-items:center;gap:14px">${apercuAffiche(t.sid)}${boutonsAffiche(t.sid)}</div>${editeurMessage()}`, '');
+  brancherAffiches($('#calque'));
 }
 function vueQR(){
   const ls = listeSalles();
-  return `<div class="tete"><div><h1>QR codes</h1><p>Un QR code par salle. Imprimez-le et collez-le près des ordinateurs : c’est tout.</p></div>
+  return `<div class="tete"><div><h1>Affiches QR</h1><p>Une affiche par salle, prête à imprimer, à envoyer en image ou par mail.</p></div>
     ${ls.length ? `<button class="btn" data-imprimer="tout">${icone('imprimante')}Imprimer toutes les affiches</button>` : ''}</div>
-  ${ls.length ? `<div class="qr-grille">${ls.map(x => { const nom = S.salles[x.id]?.nom || x.nom, u = urlSalle(x.id); return `<div class="qr-c">
-    <b style="font-size:1.1rem">${esc(nom)}</b><div class="qr">${svgQR(u)}</div><small>${esc(u)}</small>
-    <div class="puces" style="justify-content:center"><button class="btn petit" data-imprimer="${x.id}">${icone('imprimante')}Imprimer</button><button class="btn petit sec" data-copier="${esc(u)}">Copier le lien</button><a class="btn petit ghost" href="${esc(u)}" target="_blank" rel="noopener">Tester</a></div></div>`; }).join('')}</div>` : '<div class="carte vide">Créez d’abord une salle.</div>'}`;
+  ${ls.length ? `<section class="carte" style="margin-bottom:18px;max-width:760px">${editeurMessage()}</section>
+  <div class="qr-grille">${ls.map(x => `<div class="qr-c">${apercuAffiche(x.id)}${boutonsAffiche(x.id)}</div>`).join('')}</div>` : '<div class="carte vide">Créez d’abord une salle.</div>'}`;
 }
-function imprimer(quoi){
-  const ls = listeSalles().filter(x => quoi === 'tout' || x.id === quoi);
-  $('#impression').innerHTML = ls.map(x => `<div class="affiche"><div class="sur">Salle informatique</div><h1>${esc(S.salles[x.id]?.nom || x.nom)}</h1>
-    <div class="qr">${svgQR(urlSalle(x.id))}</div><p>Un ordinateur ne marche pas ?<br>Scannez, cochez, c’est envoyé.</p>
-    <p class="petit">Le jour, la salle et l’heure s’affichent tout seuls. Aucun compte, aucun nom.</p></div>`).join('');
-  setTimeout(() => window.print(), 50);
+function brancherAffiches(racine){
+  racine.querySelectorAll('[data-imprimer]').forEach(b => b.onclick = () => imprimer(b.dataset.imprimer));
+  racine.querySelectorAll('[data-aff-png]').forEach(b => b.onclick = () => affichePNG(b.dataset.affPng));
+  racine.querySelectorAll('[data-aff-mail]').forEach(b => b.onclick = () => mailAffiche(b.dataset.affMail));
+  racine.querySelectorAll('[data-copier]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copier); toast('Lien copié.'); } catch (_) { toast('Copie impossible.'); } });
+  const ok = racine.querySelector('#aff-msg-ok'); if (ok) ok.onclick = () => enregistrerMessage(racine.querySelector('#aff-msg').value);
+  const def = racine.querySelector('#aff-msg-def'); if (def) def.onclick = () => { racine.querySelector('#aff-msg').value = MSG_DEFAUT; enregistrerMessage(MSG_DEFAUT); };
+}
+
+/* ═════════ Rapport d'activité ═════════ */
+function donneesRapport(){
+  const ss = sallesChargees(), st = stats(ss), t0 = debutPeriode().getTime(), now = Date.now();
+  const nomP = (s, n) => { const p = (s.postes || []).find(y => y.n === n); return n === 0 ? 'La salle' : p ? nomPoste(p) : `Poste ${n}`; };
+  const interventions = [], enCours = [], recurrents = {}, materiel = {};
+  ss.forEach(s => (s.sig || []).forEach(x => {
+    const lp = libPanne(s, x.t), nb = (x.d || []).filter(d => new Date(d).getTime() >= t0).length;
+    if (x.etat === 'repare' && new Date(x.rep).getTime() >= t0) interventions.push({ s, x, lp, delai: new Date(x.rep) - new Date(x.d[0]) });
+    if (x.etat === 'ouvert') enCours.push({ s, x, lp });
+    if (nb && x.p !== 0) { const k = s.id + '|' + x.p; const r = recurrents[k] ||= { s, p: x.p, n: 0, types: new Set() }; r.n += nb; r.types.add(lp.court || lp.lib); }
+    if (x.t.startsWith('eq:')) {
+      const e = x.t.slice(3), m = materiel[e] ||= { lib: lp.court || lp.lib, ic: lp.ic, signale: 0, remplace: 0, enCours: 0 };
+      m.signale += nb;
+      if (x.etat === 'repare' && new Date(x.rep).getTime() >= t0 && /remplac|chang/i.test(x.repTxt || '')) m.remplace++;
+      if (x.etat === 'ouvert') m.enCours++;
+    }
+  }));
+  interventions.sort((a, b) => String(b.x.rep).localeCompare(String(a.x.rep)));
+  enCours.sort((a, b) => String(a.x.d[0]).localeCompare(String(b.x.d[0])));
+  const parSalle = ss.map(s => {
+    const ps = s.postes || [], act = ps.filter(p => !p.hs).length, ok = ps.filter(p => etatPoste(s, p) === 'ok').length;
+    const sig = (s.sig || []).reduce((n, x) => n + (x.d || []).filter(d => new Date(d).getTime() >= t0).length, 0);
+    const rep = interventions.filter(i => i.s.id === s.id), del = rep.map(i => i.delai);
+    return { s, postes: ps.length, act, ok, sig, rep: rep.length, enCours: ouverts(s).length, delai: del.length ? del.reduce((a, b) => a + b, 0) / del.length : null };
+  });
+  return { ss, st, debut: new Date(t0), fin: new Date(now), interventions, enCours, parSalle, nomP,
+    recurrents: Object.values(recurrents).filter(r => r.n >= 2).sort((a, b) => b.n - a.n).slice(0, 12),
+    materiel: Object.values(materiel).sort((a, b) => b.signale - a.signale) };
+}
+const jourFr = d => d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+function rapportHTML(){
+  const R = donneesRapport(), st = R.st;
+  if (!R.ss.length) return '<p class="vide">Aucune salle : le rapport sera disponible dès la première salle créée.</p>';
+  const tuile = (v, l, c = '') => `<div class="r-tuile ${c}"><b>${v}</b><span>${l}</span></div>`;
+  const pct = st.actifs ? Math.round(100 * st.ok / st.actifs) : 0;
+  const tab = (tetes, lignes, vide) => lignes.length ? `<table class="r-tab"><thead><tr>${tetes.map(t => `<th>${t}</th>`).join('')}</tr></thead><tbody>${lignes.join('')}</tbody></table>` : `<p class="r-vide">${vide}</p>`;
+  return `<article class="rap">
+    <header class="r-tete"><div><div class="r-sur">Rapport d’activité · ${esc(S.parc.nom || 'Parc informatique')}</div>
+      <h1>Gestion des ordinateurs</h1><p>Période du ${jourFr(R.debut)} au ${jourFr(R.fin)} · édité le ${dateCourte(maintenant()).replace('aujourd’hui', jourFr(new Date()) + ' à')}</p></div>
+      <div class="r-logo">${icone('ecran')}</div></header>
+    <section><h2>Synthèse</h2><div class="r-tuiles">
+      ${tuile(R.ss.length, 'salles suivies')}${tuile(st.total, 'ordinateurs')}${tuile(pct + ' %', 'disponibles aujourd’hui', 'ok')}${tuile(st.signalements, 'signalements reçus')}
+      ${tuile(st.touches, 'ordinateurs concernés', 'pb')}${tuile(R.interventions.length, 'interventions réalisées', 'ok')}${tuile(st.delai != null ? duree(st.delai) : '—', 'délai moyen de réparation')}${tuile(st.enCours, 'problèmes encore ouverts', st.enCours ? 'non' : 'ok')}
+    </div></section>
+    <section><h2>Évolution des signalements</h2>${histogramme(st.parJour).replace('id="histo"', '').replace('<div class="bulle" id="bulle" hidden></div>', '')}</section>
+    <section><h2>Par salle</h2>${tab(['Salle', 'Ordinateurs', 'Disponibles', 'Signalements', 'Interventions', 'En cours', 'Délai moyen'],
+      R.parSalle.map(r => `<tr><td><b>${esc(r.s.nom)}</b></td><td>${r.postes}</td><td><span class="r-barre"><i style="width:${r.act ? Math.round(100 * r.ok / r.act) : 0}%"></i></span>${r.ok}/${r.act}</td><td>${r.sig}</td><td>${r.rep}</td><td>${r.enCours ? `<span class="r-pastille non">${r.enCours}</span>` : '0'}</td><td>${r.delai != null ? duree(r.delai) : '—'}</td></tr>`), '')}</section>
+    <div class="r-deux">
+      <section><h2>Types de problèmes</h2>${barres(st.parType, 'Aucun signalement sur la période.')}</section>
+      <section><h2>Matériel manquant ou remplacé</h2>${tab(['Matériel', 'Signalé', 'Remplacé', 'En cours'], R.materiel.map(m => `<tr><td>${icone(m.ic)} ${esc(m.lib)}</td><td>${m.signale}</td><td>${m.remplace}</td><td>${m.enCours}</td></tr>`), 'Aucun matériel signalé sur la période.')}</section>
+    </div>
+    <section><h2>Pannes récurrentes</h2><p class="r-aide">Ordinateurs signalés au moins deux fois sur la période.</p>${tab(['Ordinateur', 'Salle', 'Signalements', 'Problèmes'],
+      R.recurrents.map(r => `<tr><td><b>${esc(R.nomP(r.s, r.p))}</b></td><td>${esc(r.s.nom)}</td><td><span class="r-pastille pb">${r.n}</span></td><td>${esc([...r.types].join(', '))}</td></tr>`), 'Aucune panne récurrente sur la période.')}</section>
+    <section><h2>Interventions réalisées <small>${R.interventions.length}</small></h2>${tab(['Réparé le', 'Salle', 'Ordinateur', 'Problème', 'Action', 'Délai'],
+      R.interventions.map(i => `<tr><td>${esc(dateCourte(i.x.rep))}</td><td>${esc(i.s.nom)}</td><td>${esc(R.nomP(i.s, i.x.p))}</td><td>${esc(i.lp.lib)}${i.x.d.length > 1 ? ` <span class="r-pastille pb">×${i.x.d.length}</span>` : ''}</td><td>${esc(i.x.repTxt || '—')}</td><td>${duree(i.delai)}</td></tr>`), 'Aucune intervention sur la période.')}</section>
+    <section><h2>Toujours en cours <small>${R.enCours.length}</small></h2>${tab(['Signalé le', 'Salle', 'Ordinateur', 'Problème', 'Étape', 'Depuis'],
+      R.enCours.map(i => { const stp = libStatut(i.s, i.x.suivi); return `<tr><td>${esc(dateCourte(i.x.d[0]))}</td><td>${esc(i.s.nom)}</td><td>${esc(R.nomP(i.s, i.x.p))}</td><td>${esc(i.lp.lib)}${i.x.d.length > 1 ? ` <span class="r-pastille pb">×${i.x.d.length}</span>` : ''}</td><td>${stp ? esc(stp.lib) : 'À prendre en compte'}</td><td>${duree(Date.now() - new Date(i.x.d[0]))}</td></tr>`; }), 'Rien en cours : tout est réparé.')}</section>
+    <footer class="r-pied">Rapport généré automatiquement par la gestion des ordinateurs · aucun nom de personne n’est enregistré.</footer>
+  </article>`;
+}
+function vueRapport(){
+  return `<div class="tete"><div><h1>Rapport</h1><p>Le bilan de votre travail, prêt à imprimer en PDF ou à envoyer.</p></div>
+    <div class="puces">${filtrePeriode()}<button class="btn" id="rap-imprimer">${icone('imprimante')}Imprimer / PDF</button><button class="btn sec" id="rap-mail">${icone('session')}Envoyer par mail</button></div></div>
+  <div class="rap-ecran">${rapportHTML()}</div>`;
+}
+function mailRapport(){
+  const R = donneesRapport(), st = R.st;
+  const l = [`Rapport d’activité — gestion des ordinateurs`, `Période du ${jourFr(R.debut)} au ${jourFr(R.fin)}`, '',
+    `• ${R.ss.length} salles, ${st.total} ordinateurs (${st.actifs ? Math.round(100 * st.ok / st.actifs) : 0} % disponibles aujourd’hui)`,
+    `• ${st.signalements} signalements, ${st.touches} ordinateurs concernés`,
+    `• ${R.interventions.length} interventions réalisées${st.delai != null ? `, délai moyen ${duree(st.delai)}` : ''}`,
+    `• ${st.enCours} problèmes encore ouverts`, '',
+    ...(R.recurrents.length ? ['Pannes récurrentes :', ...R.recurrents.slice(0, 5).map(r => `  – ${R.nomP(r.s, r.p)} (${r.s.nom}) : ${r.n} signalements`), ''] : []),
+    'Le rapport détaillé est joint en PDF.'];
+  location.href = `mailto:?subject=${encodeURIComponent(`Rapport — gestion des ordinateurs (${jourFr(R.debut)} – ${jourFr(R.fin)})`)}&body=${encodeURIComponent(l.join('\n'))}`;
+}
+function imprimerRapport(){
+  $('#impression').innerHTML = rapportHTML();
+  setTimeout(() => window.print(), 80);
 }
 
 /* ═════════ Sauvegarde & paramètres ═════════ */
@@ -735,8 +885,9 @@ function brancher(){
   c.querySelectorAll('[data-reglages]').forEach(b => b.onclick = () => ouvrirTiroir({ type: 'reglages', sid: b.dataset.reglages }));
   c.querySelectorAll('[data-qr]').forEach(b => b.onclick = () => ouvrirTiroir({ type: 'qr', sid: b.dataset.qr }));
   c.querySelectorAll('[data-humeur]').forEach(b => b.onclick = () => { garder(K_HUMEUR, JSON.stringify({ jour: isoJour(new Date()), v: b.dataset.humeur })); rendre(true); });
-  c.querySelectorAll('[data-imprimer]').forEach(b => b.onclick = () => imprimer(b.dataset.imprimer));
-  c.querySelectorAll('[data-copier]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copier); toast('Lien copié.'); } catch (_) { toast('Copie impossible.'); } });
+  brancherAffiches(c);
+  $('#rap-imprimer')?.addEventListener('click', imprimerRapport);
+  $('#rap-mail')?.addEventListener('click', mailRapport);
   /* Salle : plan */
   if (S.vue.startsWith('salle:')) {
     const sid = S.vue.slice(6);
