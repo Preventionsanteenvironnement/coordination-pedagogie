@@ -114,7 +114,7 @@ function rendre(doux = false){
       ${listeSalles().map(x => { const s = S.salles[x.id]; return nav('salle:' + x.id, s?.nom || x.nom, 'salle', s ? pannesSalle(s) : null); }).join('')}
       ${nav('nouvelle', 'Nouvelle salle', 'outil')}
       <div class="nav-titre">Configuration</div>
-      ${nav('catalogue', 'Équipements & pannes', 'clavier')}
+      ${nav('catalogue', 'Personnaliser', 'clavier')}
       ${nav('param', 'Sauvegarde', 'session')}
     </nav>
     <main class="contenu" id="contenu" tabindex="-1">
@@ -235,6 +235,7 @@ function vueTdb(){
   const aTraiter = ss.flatMap(s => ouverts(s).map(x => ({ s, x }))).sort((a, b) => b.x.d.length - a.x.d.length || String(a.x.d[0]).localeCompare(String(b.x.d[0])));
   const top = Object.values(st.parPoste).sort((a, b) => b.n - a.n).slice(0, 5);
   return `${accueil(ss, aTraiter)}
+  ${blocSalles(ss)}
   <div class="tete"><div><h2 style="margin:0;font-size:1.2rem">Tableau de bord</h2><p>${ss.length} salle${ss.length > 1 ? 's' : ''} · ${st.total} postes · mis à jour en temps réel</p></div>
     <div class="puces">${filtrePeriode()}<button class="btn ghost petit" data-vue="qr">${icone('imprimante')}Affiches QR</button></div></div>
   <div class="kpis">
@@ -255,8 +256,14 @@ function vueTdb(){
           <li><button class="ligne" style="width:100%;border:0;text-align:left" data-poste="${t.s.id}|${t.p}"><span class="pic etat-${etatPoste(t.s, p)}">${icone(t.p === 0 ? 'salle' : 'ecran')}</span><span class="txt"><b>${esc(nomPoste(p))}</b><small>${esc(t.s.nom)}${p.marque ? ' · ' + esc(p.marque) : ''}</small></span><b>${t.n}</b></button></li>`; }).join('')}</ul>` : '<p class="vide">Aucun signalement sur la période.</p>'}</section>
       </div>
     </div>
-    <section><div class="tete" style="margin:6px 0 12px;align-items:center"><h2 style="font-size:1rem;margin:0">Les salles</h2>${`<div class="legende" aria-hidden="true"><span><i class="c-ok"></i>Fonctionne</span><span><i class="c-pb"></i>Problème signalé</span><span><i class="c-panne"></i>En panne</span><span><i class="c-hs"></i>Hors service</span></div>`}</div><div class="salles">${ss.map(carteSalle).join('')}</div></section>
+
   </div>`;
+}
+/* Une entrée par salle, en tête du tableau de bord ; on clique pour l'ouvrir. */
+function blocSalles(ss){
+  return `<section style="margin-bottom:22px"><div class="tete" style="margin:0 0 12px;align-items:center"><div><h2 style="font-size:1.2rem;margin:0">Vos salles</h2><p>Cliquez sur une salle pour voir ses ordinateurs.</p></div>
+    <div class="legende" aria-hidden="true"><span><i class="c-ok"></i>Fonctionne</span><span><i class="c-pb"></i>Problème signalé</span><span><i class="c-panne"></i>En panne</span><span><i class="c-hs"></i>Hors service</span></div></div>
+    <div class="salles">${ss.map(carteSalle).join('')}<button class="salle-carte nouvelle" data-vue="nouvelle">${icone('outil')}<b>Ajouter une salle</b><small>Nom, nombre d’ordinateurs, matériel</small></button></div></section>`;
 }
 function carteSalle(s){
   const ps = s.postes || [], ok = ps.filter(p => etatPoste(s, p) === 'ok').length, act = ps.filter(p => !p.hs).length, o = ouverts(s).length;
@@ -591,7 +598,7 @@ function vueCatalogue(){
       ${avecOn ? `<label class="bascule" style="padding:4px 8px;background:none" title="Proposé aux enseignants"><span class="sr">Proposé aux enseignants</span><input type="checkbox" data-con="${i}" ${x.on ? 'checked' : ''}></label>` : '<span></span>'}
       <button class="suppr" data-csup="${cle}|${i}" aria-label="Supprimer ${esc(x.lib)}">×</button></div>`).join('')}
     <button class="btn sec petit" style="margin-top:12px" data-cadd="${cle}">+ Ajouter</button></section>`;
-  return `<div class="tete"><div><h1>Équipements & pannes</h1><p>Ce que vous suivez, et ce que les enseignants peuvent cocher. Valable pour toutes les salles.</p></div>
+  return `<div class="tete"><div><h1>Personnaliser</h1><p>Les listes communes à toutes les salles : le matériel suivi, les problèmes que les collègues peuvent cocher en scannant, et vos étapes de suivi. Rien n’est obligatoire : ajoutez, renommez ou supprimez.</p></div>
     <div class="puces"><button class="btn ghost" id="cat-annuler">Annuler</button><button class="btn" id="cat-ok">${icone('ok')}Enregistrer</button></div></div>
   <div class="pile">
     ${bloc('eq', 'Équipements des postes', 'Unité centrale, écran, clavier, souris, casque… Chaque poste peut avoir sa propre référence pour chacun. L’enseignant les voit dans « Il manque ou ne marche pas ».', false)}
