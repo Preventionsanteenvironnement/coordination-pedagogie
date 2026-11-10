@@ -70,11 +70,20 @@ export const CATALOGUE_DEFAUT = () => ({
     { k: 'tbi', lib: 'Tableau interactif', ic: 'tbi' }, { k: 'enceinte', lib: 'Enceintes', ic: 'enceinte' },
     { k: 'reseau', lib: 'Internet de toute la salle', ic: 'internet' },
   ],
+  /* Étapes de suivi d'une panne, choisies par le référent (il en ajoute, en retire, les renomme). */
+  statuts: [
+    { k: 'vu', lib: 'Pris en compte', ic: 'ok' }, { k: 'encours', lib: 'Réparation en cours', ic: 'outil' },
+    { k: 'piece', lib: 'En attente de pièce', ic: 'materiel' }, { k: 'envoye', lib: 'Envoyé en réparation', ic: 'cable' },
+  ],
+  /* Le référent décide si les collègues qui scannent voient l'état des ordinateurs. */
+  voir: true,
 });
 export const TYPES_POSTE = [['fixe', 'Fixe'], ['portable', 'Portable'], ['aio', 'Tout-en-un'], ['leger', 'Client léger'], ['tablette', 'Tablette']];
 
 /* Ce que l'enseignant voit dans la salle : copie du catalogue stockée dans la salle. */
 export const catSalle = cat => ({
+  voir: cat.voir !== false,
+  statuts: (cat.statuts || CATALOGUE_DEFAUT().statuts).map(({ k, lib, ic }) => ({ k, lib, ic })),
   eq: (cat.eq || []).map(({ k, lib, ic }) => ({ k, lib, ic })),
   pannes: (cat.pannes || []).filter(x => x.on).map(({ k, lib, ic }) => ({ k, lib, ic })),
   salle: (cat.salle || []).map(({ k, lib, ic }) => ({ k, lib, ic })),
@@ -136,6 +145,19 @@ export function etatPoste(salle, poste){
   const o = ouverts(salle, poste.n);
   if (!o.length) return 'ok';
   return o.some(x => x.t === 'hs') ? 'panne' : 'pb';
+}
+/* Étape de suivi d'un signalement (« Pris en compte »…), ou null. */
+export function libStatut(salle, k){
+  if (!k) return null;
+  const l = salle?.cat?.statuts || CATALOGUE_DEFAUT().statuts;
+  return l.find(x => x.k === k) || null;
+}
+/* Étape la plus avancée parmi les pannes ouvertes d'un poste (ordre de la liste du référent). */
+export function suiviPoste(salle, n){
+  const l = salle?.cat?.statuts || CATALOGUE_DEFAUT().statuts;
+  const ks = ouverts(salle, n).map(x => x.suivi).filter(Boolean);
+  let best = null; l.forEach(x => { if (ks.includes(x.k)) best = x; });
+  return best;
 }
 export const LIB_ETAT = { ok: 'Fonctionne', pb: 'Problème signalé', panne: 'En panne', hs: 'Hors service' };
 

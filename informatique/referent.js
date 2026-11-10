@@ -6,13 +6,13 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 import { base, COL_PARC, COL_SALLE, RE_SALLE, MAX_POSTES, MAX_SALLES, CATALOGUE_DEFAUT, TYPES_POSTE, ICONES, catSalle,
          $, $$, esc, nettoie, maintenant, aleatoire, avecDelai, dateCourte, duree, icone, posteVierge, nomPoste, libPanne,
-         ouverts, etatPoste, LIB_ETAT, modifierDoc, modifierSalle } from './commun.js?v=20261110b';
+         ouverts, etatPoste, LIB_ETAT, modifierDoc, modifierSalle, libStatut, suiviPoste } from './commun.js?v=20261110c';
 
 const { FS, db, erreurFS } = await base('info-referent');
 /* Pour l'instant, SANS CODE (décision de Brahim, 10/11/2026) : un espace unique, ouvert directement.
    Un code d'accès pourra être ajouté plus tard : l'écran « ecranAcces » est conservé pour cela. */
 const ESPACE_PAR_DEFAUT = 'cpinfo2026';
-const K_SECOURS = 'info-referent-secours';
+const K_SECOURS = 'info-referent-secours', K_HUMEUR = 'info-referent-humeur';
 const K_CODE = 'info-referent-code', K_VUE = 'info-referent-vue', K_PER = 'info-referent-periode';
 const S = { code: '', parc: null, salles: {}, vue: 'tdb', periode: '30', depuis: '', selection: null, tiroir: null, codeNouveau: '', erreur: '' };
 const ecoutes = {}; let ecouteParc = null;
@@ -24,13 +24,13 @@ const codeLisible = c => c.slice(0, 5) + '-' + c.slice(5);
 const urlSalle = id => new URL('./?s=' + id, location.href).href;
 const listeSalles = () => (S.parc?.salles || []).filter(x => RE_SALLE.test(x.id));
 const sallesChargees = () => listeSalles().map(x => S.salles[x.id] ? { ...S.salles[x.id], id: x.id } : null).filter(Boolean);
-const cat = () => S.parc?.cat || CATALOGUE_DEFAUT();
-const catPourSalle = (s, catalogue = cat()) => { const c = catSalle(catalogue); return { ...c, salle: c.salle.filter(x => (s.eqSalle || []).includes(x.k)) }; };
+const cat = () => { const c = S.parc?.cat || CATALOGUE_DEFAUT(); return { ...c, statuts: c.statuts || CATALOGUE_DEFAUT().statuts, voir: c.voir !== false }; };
+const catPourSalle = (s, catalogue = cat()) => { const c = catSalle({ ...catalogue, statuts: catalogue.statuts || CATALOGUE_DEFAUT().statuts }); return { ...c, salle: c.salle.filter(x => (s.eqSalle || []).includes(x.k)) }; };
 const COUL = { ok: 'var(--ok)', pb: 'var(--pb)', panne: 'var(--non)', hs: 'var(--hs)' };
 const ICO_ETAT = { ok: 'ok', pb: 'outil', panne: 'power', hs: 'materiel' };
 const NOMS_ICONES = { ecran: 'Écran', clavier: 'Clavier', souris: 'Souris', casque: 'Casque', webcam: 'Webcam', uc: 'Unité centrale', portable: 'Portable',
   imprimante: 'Imprimante', videoproj: 'Projecteur', tbi: 'Tableau', enceinte: 'Enceinte', internet: 'Internet', power: 'Marche', session: 'Cadenas',
-  lent: 'Chrono', logiciel: 'Fenêtre', son: 'Son', cable: 'Câble', autre: 'Autre', salle: 'Salle', materiel: 'Matériel' };
+  lent: 'Chrono', ok: 'Coche', outil: 'Outil', logiciel: 'Fenêtre', son: 'Son', cable: 'Câble', autre: 'Autre', salle: 'Salle', materiel: 'Matériel' };
 const typeLib = k => (TYPES_POSTE.find(t => t[0] === k) || [, ''])[1];
 
 /* ═════════ Accès ═════════ */
@@ -115,7 +115,6 @@ function rendre(doux = false){
       ${nav('nouvelle', 'Nouvelle salle', 'outil')}
       <div class="nav-titre">Configuration</div>
       ${nav('catalogue', 'Équipements & pannes', 'clavier')}
-      ${nav('qr', 'QR codes', 'logiciel')}
       ${nav('param', 'Sauvegarde', 'session')}
     </nav>
     <main class="contenu" id="contenu" tabindex="-1">
@@ -210,14 +209,34 @@ function barres(objet, vide){
 }
 
 /* ═════════ Tableau de bord ═════════ */
+/* Accueil : date du jour, salutation, humeur (gardée sur cet appareil seulement), résumé en une phrase. */
+const HUMEURS = [['top', '😄', 'Au top', 'Super ! Belle journée à vous.'], ['bien', '🙂', 'Bien', 'Parfait, bonne journée !'], ['moyen', '😐', 'Moyen', 'On y va tranquillement, un poste à la fois.'],
+  ['bof', '😕', 'Bof', 'Courage : commencez par ce qui est signalé plusieurs fois.'], ['epuise', '😫', 'Épuisé', 'Prenez soin de vous : rien ne presse qui ne puisse attendre.']];
+function accueil(ss, aTraiter){
+  const d = new Date(), h = d.getHours();
+  const salut = h < 12 ? 'Bonjour' : h < 18 ? 'Bon après-midi' : 'Bonsoir';
+  let hum = null; try { const x = JSON.parse(localStorage.getItem(K_HUMEUR) || 'null'); if (x?.jour === isoJour(d)) hum = x.v; } catch (_) { }
+  const rep = aTraiter.filter(a => a.x.d.length > 1).length, nbS = new Set(aTraiter.map(a => a.s.id)).size;
+  const resume = !ss.length ? 'Créez votre première salle pour commencer.' : !aTraiter.length ? `Tout fonctionne dans ${ss.length > 1 ? `les ${ss.length} salles` : 'la salle'}. Rien à traiter aujourd’hui.`
+    : `${aTraiter.length} problème${aTraiter.length > 1 ? 's' : ''} à traiter dans ${nbS} salle${nbS > 1 ? 's' : ''}${rep ? `, dont ${rep} signalé${rep > 1 ? 's' : ''} plusieurs fois` : ''}.`;
+  const choisi = HUMEURS.find(x => x[0] === hum);
+  return `<section class="accueil">
+    <div class="acc-g"><div class="cal" aria-hidden="true"><div class="m">${d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}</div><div class="j">${d.getDate()}</div><div class="s">${d.toLocaleDateString('fr-FR', { weekday: 'long' })}</div></div>
+      <div><h1>${salut} 👋</h1><p class="date">${esc((t => t.charAt(0).toUpperCase() + t.slice(1))(d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })))}</p><p class="resume">${esc(resume)}</p></div></div>
+    <div class="humeur"><p id="q-hum">${choisi ? esc(choisi[3]) : 'Comment vous sentez-vous aujourd’hui ?'}</p>
+      <div role="group" aria-labelledby="q-hum">${HUMEURS.map(([k, e, l]) => `<button data-humeur="${k}" aria-pressed="${hum === k}" title="${l}" aria-label="${l}">${e}</button>`).join('')}</div></div>
+  </section>`;
+}
 function vueTdb(){
   const ss = sallesChargees();
-  if (!listeSalles().length) return `<div class="tete"><div><h1>Bienvenue</h1><p>Commencez par créer votre première salle.</p></div></div>
+  if (!listeSalles().length) return `${accueil([], [])}
     <div class="carte vide"><p>Aucune salle pour l’instant.</p><button class="btn" data-vue="nouvelle">${icone('outil')}Créer une salle</button></div>`;
   const st = stats(ss);
   const aTraiter = ss.flatMap(s => ouverts(s).map(x => ({ s, x }))).sort((a, b) => b.x.d.length - a.x.d.length || String(a.x.d[0]).localeCompare(String(b.x.d[0])));
   const top = Object.values(st.parPoste).sort((a, b) => b.n - a.n).slice(0, 5);
-  return `<div class="tete"><div><h1>Tableau de bord</h1><p>${ss.length} salle${ss.length > 1 ? 's' : ''} · ${st.total} postes · mis à jour en temps réel</p></div>${filtrePeriode()}</div>
+  return `${accueil(ss, aTraiter)}
+  <div class="tete"><div><h2 style="margin:0;font-size:1.2rem">Tableau de bord</h2><p>${ss.length} salle${ss.length > 1 ? 's' : ''} · ${st.total} postes · mis à jour en temps réel</p></div>
+    <div class="puces">${filtrePeriode()}<button class="btn ghost petit" data-vue="qr">${icone('imprimante')}Affiches QR</button></div></div>
   <div class="kpis">
     <div class="kpi">${anneau(st.ok, st.actifs)}<div><div class="val">${st.ok}<small>/${st.actifs}</small></div><div class="lib">postes disponibles${st.hs ? ` · ${st.hs} hors service` : ''}</div></div></div>
     <div class="kpi"><span class="badge-ic etat-${st.enCours ? 'panne' : 'ok'}">${icone(st.enCours ? 'outil' : 'ok')}</span><div><div class="val">${st.enCours}</div><div class="lib">problème${st.enCours > 1 ? 's' : ''} en cours${st.repetees ? ` · ${st.repetees} signalé${st.repetees > 1 ? 's' : ''} plusieurs fois` : ''}</div></div></div>
@@ -227,28 +246,32 @@ function vueTdb(){
   <div class="pile">
     <section class="carte"><h2>Signalements sur la période<small>${st.signalements} au total</small></h2>${histogramme(st.parJour)}</section>
     <div class="grille2">
-      <section class="carte"><h2>À traiter<small>${aTraiter.length}</small></h2>${aTraiter.length ? `<ul class="liste">${aTraiter.slice(0, 8).map(({ s, x }) => lignePanne(s, x)).join('')}</ul>${aTraiter.length > 8 ? `<p class="vide" style="padding:10px 0 0">+ ${aTraiter.length - 8} autres dans les salles</p>` : ''}` : `<p class="vide">${icone('ok')}<br>Tout fonctionne. Rien à traiter.</p>`}</section>
+      <section class="carte"><h2>À traiter, salle par salle<small>${aTraiter.length}</small></h2>${aTraiter.length ? ss.filter(s => ouverts(s).length).map(s => { const l = aTraiter.filter(a => a.s.id === s.id); return `
+        <div class="groupe"><button class="groupe-t" data-vue="salle:${s.id}">${icone('salle')}<b>${esc(s.nom)}</b><span class="pastille-g">${l.length}</span><span class="voir">Voir la salle ›</span></button>
+        <ul class="liste">${l.slice(0, 3).map(({ x }) => lignePanne(s, x, true)).join('')}</ul>${l.length > 3 ? `<button class="btn lien petit" data-vue="salle:${s.id}">+ ${l.length - 3} autre${l.length - 3 > 1 ? 's' : ''} dans cette salle</button>` : ''}</div>`; }).join('') : `<p class="vide">${icone('ok')}<br>Tout fonctionne. Rien à traiter.</p>`}</section>
       <div class="pile">
         <section class="carte"><h2>Par type de problème</h2>${barres(st.parType, 'Aucun signalement sur la période.')}</section>
         <section class="carte"><h2>Postes les plus signalés</h2>${top.length ? `<ul class="liste">${top.map(t => { const p = (t.s.postes || []).find(y => y.n === t.p) || { n: t.p }; return `
           <li><button class="ligne" style="width:100%;border:0;text-align:left" data-poste="${t.s.id}|${t.p}"><span class="pic etat-${etatPoste(t.s, p)}">${icone(t.p === 0 ? 'salle' : 'ecran')}</span><span class="txt"><b>${esc(nomPoste(p))}</b><small>${esc(t.s.nom)}${p.marque ? ' · ' + esc(p.marque) : ''}</small></span><b>${t.n}</b></button></li>`; }).join('')}</ul>` : '<p class="vide">Aucun signalement sur la période.</p>'}</section>
       </div>
     </div>
-    <section><h2 style="font-size:1rem;margin:6px 0 12px">Les salles</h2><div class="salles">${ss.map(carteSalle).join('')}</div></section>
+    <section><div class="tete" style="margin:6px 0 12px;align-items:center"><h2 style="font-size:1rem;margin:0">Les salles</h2>${`<div class="legende" aria-hidden="true"><span><i class="c-ok"></i>Fonctionne</span><span><i class="c-pb"></i>Problème signalé</span><span><i class="c-panne"></i>En panne</span><span><i class="c-hs"></i>Hors service</span></div>`}</div><div class="salles">${ss.map(carteSalle).join('')}</div></section>
   </div>`;
 }
 function carteSalle(s){
   const ps = s.postes || [], ok = ps.filter(p => etatPoste(s, p) === 'ok').length, act = ps.filter(p => !p.hs).length, o = ouverts(s).length;
   return `<button class="salle-carte" data-vue="salle:${s.id}">
-    <div class="h"><div><b>${esc(s.nom)}</b><br><small>${ps.length} postes · ${o ? `${o} problème${o > 1 ? 's' : ''}` : 'tout fonctionne'}</small></div>${anneau(ok, act, o ? 'var(--pb)' : 'var(--ok)')}</div>
-    <div class="mini" style="grid-template-columns:repeat(${Math.min(12, Math.max(4, s.colonnes || 6))},1fr)">${ps.map(p => `<i class="c-${etatPoste(s, p)}" title="${esc(nomPoste(p))} : ${LIB_ETAT[etatPoste(s, p)]}"></i>`).join('')}</div>
+    <div class="h"><div><b>${esc(s.nom)}</b><br><small>${ps.length} postes · ${o ? `${o} problème${o > 1 ? 's' : ''} en cours` : 'tout fonctionne'}</small></div>
+      <div class="dispo">${anneau(ok, act, 'var(--ok)')}<small>${ok}/${act} disponibles</small></div></div>
+    <div class="mini">${ps.map(p => `<i class="c-${etatPoste(s, p)}" title="${esc(nomPoste(p))} : ${LIB_ETAT[etatPoste(s, p)]}">${p.n}</i>`).join('')}</div>
   </button>`;
 }
-function lignePanne(s, x){
+const badgeSuivi = (s, x) => { const st = libStatut(s, x.suivi); return st ? `<span class="suivi">${icone(st.ic)}${esc(st.lib)}</span>` : ''; };
+function lignePanne(s, x, sansSalle){
   const lp = libPanne(s, x.t), p = x.p === 0 ? { n: 0 } : ((s.postes || []).find(y => y.n === x.p) || { n: x.p });
   return `<li class="ligne"><span class="pic ${x.t === 'hs' ? 'etat-panne' : 'etat-pb'}">${icone(lp.ic)}</span>
     <span class="txt"><b>${esc(nomPoste(p))} · ${esc(lp.lib)}${x.d.length > 1 ? `<span class="rep">×${x.d.length}</span>` : ''}</b>
-    <small>${esc(s.nom)} · ${x.d.length > 1 ? `depuis ${esc(dateCourte(x.d[0]))}, dernier ${esc(dateCourte(x.d.at(-1)))}` : esc(dateCourte(x.d[0]))}${x.txt ? ` · « ${esc(x.txt)} »` : ''}</small></span>
+    ${badgeSuivi(s, x)}<small>${sansSalle ? '' : esc(s.nom) + ' · '}${x.d.length > 1 ? `depuis ${esc(dateCourte(x.d[0]))}, dernier ${esc(dateCourte(x.d.at(-1)))}` : esc(dateCourte(x.d[0]))}${x.txt ? ` · « ${esc(x.txt)} »` : ''}</small></span>
     <button class="btn petit ok" data-reparer="${s.id}|${x.id}">${icone('ok')}Réparé</button></li>`;
 }
 
@@ -269,10 +292,10 @@ function vueSalle(id){
   <div class="pile">
     <section class="carte">
       <div class="barre-outils">
-        <div class="compteurs">${['ok', 'pb', 'panne', 'hs'].map(k => `<span class="compteur etat-${k}">${icone(ICO_ETAT[k])}${cpt[k]} ${LIB_ETAT[k].toLowerCase()}</span>`).join('')}</div>
+        <div class="compteurs">${['ok', 'pb', 'panne', 'hs'].filter(k => k === 'ok' || cpt[k]).map(k => `<span class="compteur etat-${k}">${icone(ICO_ETAT[k])}${compteur(k, cpt[k])}</span>`).join('')}</div>
         ${sel ? `<div class="puces"><b style="font-size:.9rem">${sel.size} sélectionné${sel.size > 1 ? 's' : ''}</b><button class="btn petit sec" id="sel-tout">Tout</button><button class="btn petit" id="sel-modif" ${sel.size ? '' : 'disabled'}>Modifier ensemble</button></div>` : `<span class="legende"><span><i class="c-ok"></i>Fonctionne</span><span><i class="c-pb"></i>Problème</span><span><i class="c-panne"></i>En panne</span><span><i class="c-hs"></i>Hors service</span></span>`}
       </div>
-      ${ps.length ? `<div class="plan" style="grid-template-columns:repeat(${Math.max(1, Math.min(12, s.colonnes || 6))},minmax(0,1fr))">${ps.map(p => tuile(s, p)).join('')}</div>` : '<p class="vide">Aucun poste. Ouvrez « Réglages de la salle » pour en ajouter.</p>'}
+      ${ps.length ? `<div class="plan" style="--max:${Math.max(1, Math.min(12, s.colonnes || 6))}">${ps.map(p => tuile(s, p)).join('')}</div>` : '<p class="vide">Aucun poste. Ouvrez « Réglages de la salle » pour en ajouter.</p>'}
     </section>
     <div class="grille2">
       <section class="carte"><h2>Équipements de la salle<button class="btn petit ghost" data-poste="${id}|0">Détails</button></h2>
@@ -284,6 +307,11 @@ function vueSalle(id){
     </div>
   </div>`;
 }
+/* « 1 poste fonctionne », « 9 postes fonctionnent », « 5 problèmes signalés »… */
+function compteur(k, n){
+  const p = n > 1;
+  return { ok: `${n} fonctionne${p ? 'nt' : ''}`, pb: `${n} problème${p ? 's' : ''} signalé${p ? 's' : ''}`, panne: `${n} en panne`, hs: `${n} hors service` }[k];
+}
 function tuile(s, p){
   const e = etatPoste(s, p), o = ouverts(s, p.n), ko = new Set(o.filter(x => x.t.startsWith('eq:')).map(x => x.t.slice(3)));
   const sel = S.selection?.has(p.n);
@@ -292,8 +320,9 @@ function tuile(s, p){
     <span class="n">${p.n}</span>
     <span class="nom">${esc(p.nom || [p.marque, p.modele].filter(Boolean).join(' ') || typeLib(p.type))}</span>
     ${S.selection ? `<span class="coche">${sel ? icone('ok') : ''}</span>` : o.length ? `<span class="alerte">${o.reduce((n, x) => n + x.d.length, 0)}</span>` : ''}
-    <span class="eqs">${eqs.map(x => `<span class="${ko.has(x.k) ? 'ko' : ''}" title="${esc(x.lib)}${ko.has(x.k) ? ' : signalé' : ''}">${icone(x.ic)}</span>`).join('')}</span>
-    <span class="et">${icone(ICO_ETAT[e])}${e === 'pb' ? esc(o.map(x => libPanne(s, x.t).court || libPanne(s, x.t).lib).join(', ')) : LIB_ETAT[e]}</span>
+    <span class="et">${icone(ICO_ETAT[e])}<span>${e === 'pb' || (e === 'panne' && o.length > 1) ? esc([...new Set(o.map(x => libPanne(s, x.t).court || libPanne(s, x.t).lib))].join(', ')) : LIB_ETAT[e]}</span></span>
+    ${ko.size ? `<span class="eqs">${eqs.filter(x => ko.has(x.k)).map(x => `<span class="ko" title="${esc(x.lib)} : signalé">${icone(x.ic)}</span>`).join('')}</span>` : ''}
+    ${(() => { const st = suiviPoste(s, p.n); return st && e !== 'hs' ? `<span class="suivi">${icone(st.ic)}${esc(st.lib)}</span>` : ''; })()}
   </button>`;
 }
 
@@ -312,6 +341,8 @@ function rendreTiroir(){
   if (t.type === 'poste') return tiroirPoste(t, s);
   if (t.type === 'groupe') return tiroirGroupe(t, s);
   if (t.type === 'reglages') return tiroirReglages(t, s);
+  if (t.type === 'qr') return tiroirQR(t, s);
+  if (t.type === 'rapide') return tiroirReparationRapide(t.sid, t.xid, true);
 }
 
 const champ = (id, lib, val, attrs = '', plein = false) => `<div class="champ ${plein ? 'plein' : ''}"><label for="${id}">${lib}</label><input type="text" id="${id}" value="${esc(val || '')}" ${attrs}></div>`;
@@ -386,11 +417,20 @@ function blocReparation(s, x){
   const lp = libPanne(s, x.t);
   return `<div class="panne-o" data-bloc="${x.id}"><div class="h"><span class="pic ${x.t === 'hs' ? 'etat-panne' : 'etat-pb'}" style="width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center">${icone(lp.ic)}</span>
     <div class="txt"><b>${esc(lp.lib)}</b>${x.d.length > 1 ? `<span class="rep">×${x.d.length}</span>` : ''}<br><small style="color:var(--muted)">${x.d.map(d => esc(dateCourte(d))).join(' · ')}${x.txt ? ` · « ${esc(x.txt)} »` : ''}</small></div></div>
+    <div><p class="section-t" style="margin:2px 0 6px">Suivi</p><div class="actions-rep">${cat().statuts.map(st => `<button class="puce ${x.suivi === st.k ? 'on' : ''}" data-suivi="${s.id}|${x.id}|${st.k}" aria-pressed="${x.suivi === st.k}">${icone(st.ic)}${esc(st.lib)}</button>`).join('')}</div></div>
+    <p class="section-t" style="margin:2px 0 -4px">Réparé</p>
     <div class="actions-rep">${ACTIONS_REP.map(a => `<button class="puce" data-act="${x.id}" data-v="${esc(a)}" aria-pressed="false">${esc(a)}</button>`).join('')}</div>
     <div class="puces" style="flex-wrap:nowrap"><label class="sr" for="rt-${x.id}">Ce qui a été fait</label><input id="rt-${x.id}" maxlength="80" placeholder="Ce qui a été fait (facultatif)" style="flex:1;border:1.5px solid var(--line-2);border-radius:10px;padding:8px 10px;min-width:0">
     <button class="btn petit ok" data-valider="${s.id}|${x.id}">${icone('ok')}Réparé</button></div></div>`;
 }
+async function changerSuivi(sid, xid, k){
+  try {
+    await modifierSalle(sid, d => { const y = (d.sig || []).find(z => z.id === xid); if (y && y.etat === 'ouvert') { if (y.suivi === k) { delete y.suivi; delete y.suiviLe; } else { y.suivi = k; y.suiviLe = maintenant(); } } return d; });
+    toast('Suivi mis à jour.');
+  } catch (_) { toast('Enregistrement impossible : vérifiez la connexion.'); }
+}
 function brancherReparations(){
+  $$('#calque [data-suivi]').forEach(b => b.onclick = () => { const [sid, xid, k] = b.dataset.suivi.split('|'); changerSuivi(sid, xid, k); });
   $$('#calque [data-act]').forEach(b => b.onclick = () => { const i = $('#rt-' + b.dataset.act); i.value = b.dataset.v; $$(`#calque [data-act="${b.dataset.act}"]`).forEach(y => y.setAttribute('aria-pressed', y === b)); });
   $$('#calque [data-valider]').forEach(b => b.onclick = () => { const [sid, xid] = b.dataset.valider.split('|'); reparer(sid, xid, $('#rt-' + xid)?.value); });
 }
@@ -402,14 +442,15 @@ async function reparer(sid, xid, note){
     if (S.tiroir?.brouillon) { /* garde le brouillon du poste */ }
   } catch (_) { toast('Enregistrement impossible : vérifiez la connexion.'); }
 }
-function tiroirReparationRapide(sid, xid){
-  const s = S.salles[sid], x = (s?.sig || []).find(y => y.id === xid); if (!x) return;
+function tiroirReparationRapide(sid, xid, redessin){
+  const s = S.salles[sid], x = (s?.sig || []).find(y => y.id === xid);
+  if (!x || x.etat !== 'ouvert') { if (redessin) fermerTiroir(true); return; }
   const p = x.p === 0 ? { n: 0 } : ((s.postes || []).find(y => y.n === x.p) || { n: x.p });
-  S.tiroir = { type: 'rapide', sid };
+  S.tiroir = { type: 'rapide', sid, xid };
   cadre(esc(nomPoste(p)), esc(s.nom), `<div class="pile" style="gap:10px">${blocReparation({ ...s, id: sid }, x)}</div>`, '');
   brancherReparations();
   $$('#calque [data-valider]').forEach(b => b.onclick = async () => { await reparer(sid, xid, $('#rt-' + xid)?.value); fermerTiroir(); });
-  setTimeout(() => $('#t-titre')?.focus(), 30);
+  if (!redessin) setTimeout(() => $('#t-titre')?.focus(), 30);
 }
 
 function tiroirSalleEq(t, s){
@@ -542,10 +583,11 @@ function vueNouvelle(){
 /* ═════════ Catalogue ═════════ */
 function vueCatalogue(){
   const c = S.brouillonCat ||= structuredClone(cat());
+  c.statuts ||= CATALOGUE_DEFAUT().statuts;
   const bloc = (cle, titre, aide, avecOn) => `<section class="carte"><h2>${titre}<small>${c[cle].length}</small></h2><p style="margin:-6px 0 12px;color:var(--muted);font-size:.88rem">${aide}</p>
     ${c[cle].map((x, i) => `<div class="cat-l"><span class="ic-ap">${icone(x.ic)}</span>
       <span style="display:flex;gap:8px;min-width:0"><label class="sr" for="c-${cle}-${i}">Libellé</label><input type="text" id="c-${cle}-${i}" data-cl="${cle}|${i}" value="${esc(x.lib)}" maxlength="30">
-      <label class="sr" for="ci-${cle}-${i}">Pictogramme</label><select id="ci-${cle}-${i}" data-ci="${cle}|${i}">${ICONES.filter(k => !['ok', 'outil'].includes(k)).map(k => `<option value="${k}" ${x.ic === k ? 'selected' : ''}>${NOMS_ICONES[k] || k}</option>`).join('')}</select></span>
+      <label class="sr" for="ci-${cle}-${i}">Pictogramme</label><select id="ci-${cle}-${i}" data-ci="${cle}|${i}">${ICONES.map(k => `<option value="${k}" ${x.ic === k ? 'selected' : ''}>${NOMS_ICONES[k] || k}</option>`).join('')}</select></span>
       ${avecOn ? `<label class="bascule" style="padding:4px 8px;background:none" title="Proposé aux enseignants"><span class="sr">Proposé aux enseignants</span><input type="checkbox" data-con="${i}" ${x.on ? 'checked' : ''}></label>` : '<span></span>'}
       <button class="suppr" data-csup="${cle}|${i}" aria-label="Supprimer ${esc(x.lib)}">×</button></div>`).join('')}
     <button class="btn sec petit" style="margin-top:12px" data-cadd="${cle}">+ Ajouter</button></section>`;
@@ -555,11 +597,14 @@ function vueCatalogue(){
     ${bloc('eq', 'Équipements des postes', 'Unité centrale, écran, clavier, souris, casque… Chaque poste peut avoir sa propre référence pour chacun. L’enseignant les voit dans « Il manque ou ne marche pas ».', false)}
     ${bloc('pannes', 'Problèmes proposés', 'Les problèmes généraux d’un poste. Le bouton bleu indique ceux qui sont proposés aux enseignants.', true)}
     ${bloc('salle', 'Équipements de salle', 'Vidéoprojecteur, imprimante… à cocher ensuite dans les réglages de chaque salle.', false)}
+    ${bloc('statuts', 'Étapes de suivi', 'Ce que vous indiquez sur une panne avant qu’elle soit réparée : « Pris en compte », « En attente de pièce »… Ajoutez, renommez ou supprimez à volonté.', false)}
+    <section class="carte"><h2>Ce que voient les collègues qui scannent</h2>
+      <label class="bascule"><span>Montrer l’état des ordinateurs<br><small style="color:var(--muted);font-weight:500">Activé : en scannant, ils voient quels postes fonctionnent aujourd’hui et où en est chaque panne. Désactivé : ils signalent seulement.</small></span><input type="checkbox" id="c-voir" ${c.voir !== false ? 'checked' : ''}></label></section>
   </div>`;
 }
 async function enregistrerCatalogue(){
   const c = S.brouillonCat;
-  for (const cle of ['eq', 'pannes', 'salle']) { c[cle] = c[cle].map(x => ({ ...x, lib: nettoie(x.lib, 30) })).filter(x => x.lib).slice(0, 30); }
+  for (const cle of ['eq', 'pannes', 'salle', 'statuts']) { c[cle] = c[cle].map(x => ({ ...x, lib: nettoie(x.lib, 30) })).filter(x => x.lib).slice(0, 30); }
   try {
     await modifierParc(p => { p.cat = c; return p; });
     for (const x of listeSalles()) await modifierSalle(x.id, d => { d.cat = catPourSalle(d, c); d.postes = (d.postes || []).map(p => ({ ...p, eq: (p.eq || []).filter(k => c.eq.some(e => e.k === k)) })); d.eqSalle = (d.eqSalle || []).filter(k => c.salle.some(e => e.k === k)); return d; });
@@ -568,6 +613,14 @@ async function enregistrerCatalogue(){
 }
 
 /* ═════════ QR codes ═════════ */
+function tiroirQR(t, s){
+  const u = urlSalle(t.sid);
+  cadre('QR code de la salle', esc(s.nom), `<div class="qr-c" style="box-shadow:none;padding:0"><div class="qr" style="width:240px;height:240px">${svgQR(u)}</div>
+    <p style="margin:0;color:var(--ink-2)">À imprimer et à coller près des ordinateurs. Les collègues scannent, cochent, c’est envoyé.</p><small>${esc(u)}</small></div>`,
+    `<button class="btn ghost" id="qr-copier">Copier le lien</button><button class="btn" id="qr-imprimer">${icone('imprimante')}Imprimer l’affiche</button>`);
+  $('#qr-imprimer').onclick = () => imprimer(t.sid);
+  $('#qr-copier').onclick = async () => { try { await navigator.clipboard.writeText(u); toast('Lien copié.'); } catch (_) { toast('Copie impossible.'); } };
+}
 function svgQR(texte){
   if (typeof qrcode !== 'function') return '<p class="err">QR code indisponible (connexion).</p>';
   const q = qrcode(0, 'M'); q.addData(texte); q.make();
@@ -673,7 +726,8 @@ function brancher(){
   c.querySelectorAll('[data-reparer]').forEach(b => b.onclick = () => { const [sid, xid] = b.dataset.reparer.split('|'); tiroirReparationRapide(sid, xid); });
   c.querySelectorAll('[data-poste]').forEach(b => b.onclick = () => { const [sid, n] = b.dataset.poste.split('|'); ouvrirTiroir({ type: 'poste', sid, n: +n }); });
   c.querySelectorAll('[data-reglages]').forEach(b => b.onclick = () => ouvrirTiroir({ type: 'reglages', sid: b.dataset.reglages }));
-  c.querySelectorAll('[data-qr]').forEach(b => b.onclick = () => aller('qr'));
+  c.querySelectorAll('[data-qr]').forEach(b => b.onclick = () => ouvrirTiroir({ type: 'qr', sid: b.dataset.qr }));
+  c.querySelectorAll('[data-humeur]').forEach(b => b.onclick = () => { garder(K_HUMEUR, JSON.stringify({ jour: isoJour(new Date()), v: b.dataset.humeur })); rendre(true); });
   c.querySelectorAll('[data-imprimer]').forEach(b => b.onclick = () => imprimer(b.dataset.imprimer));
   c.querySelectorAll('[data-copier]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copier); toast('Lien copié.'); } catch (_) { toast('Copie impossible.'); } });
   /* Salle : plan */
@@ -706,7 +760,8 @@ function brancher(){
     c.querySelectorAll('[data-ci]').forEach(i => i.onchange = () => { const [k, j] = i.dataset.ci.split('|'); cb[k][+j].ic = i.value; rendre(true); });
     c.querySelectorAll('[data-con]').forEach(i => i.onchange = () => { cb.pannes[+i.dataset.con].on = i.checked; });
     c.querySelectorAll('[data-csup]').forEach(b => b.onclick = () => { const [k, j] = b.dataset.csup.split('|'); if (confirm(`Supprimer « ${cb[k][+j].lib} » ? Il disparaîtra de tous les postes après l’enregistrement.`)) { cb[k].splice(+j, 1); rendre(true); } });
-    c.querySelectorAll('[data-cadd]').forEach(b => b.onclick = () => { const k = b.dataset.cadd; cb[k].push({ k: 'x' + aleatoire(6), lib: '', ic: k === 'salle' ? 'salle' : 'materiel', ...(k === 'pannes' ? { on: true } : {}) }); rendre(true); const ins = c.querySelectorAll(`[data-cl^="${k}|"]`); setTimeout(() => $$(`[data-cl^="${k}|"]`).at(-1)?.focus(), 0); });
+    c.querySelectorAll('[data-cadd]').forEach(b => b.onclick = () => { const k = b.dataset.cadd; cb[k].push({ k: 'x' + aleatoire(6), lib: '', ic: k === 'salle' ? 'salle' : k === 'statuts' ? 'outil' : 'materiel', ...(k === 'pannes' ? { on: true } : {}) }); rendre(true); const ins = c.querySelectorAll(`[data-cl^="${k}|"]`); setTimeout(() => $$(`[data-cl^="${k}|"]`).at(-1)?.focus(), 0); });
+    const cv = $('#c-voir'); if (cv) cv.onchange = () => { cb.voir = cv.checked; };
     $('#cat-ok').onclick = enregistrerCatalogue;
     $('#cat-annuler').onclick = () => { S.brouillonCat = null; rendre(); };
   }

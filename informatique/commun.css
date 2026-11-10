@@ -23,3 +23,5 @@ button:disabled{cursor:not-allowed;opacity:.45}
 @keyframes monte{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 .err{color:var(--non);font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+[tabindex="-1"]:focus{outline:none}
+.btn.lien{background:none;color:var(--bleu);padding:6px 2px;text-decoration:underline}.btn.lien:hover{background:none;color:var(--bleu-f)}
