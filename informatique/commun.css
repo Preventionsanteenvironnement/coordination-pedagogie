@@ -1,0 +1,25 @@
+/* Informatique — socle commun (enseignant + référent). Épuré, lisible, jamais la couleur seule. */
+:root{--bg:#f5f6fa;--ink:#0f172a;--ink-2:#334155;--muted:#64748b;--line:#e2e8f0;--line-2:#cbd5e1;--card:#fff;--focus:#2563eb;
+  --bleu:#2563eb;--bleu-f:#1e40af;--bleu-l:#eff4ff;--ok:#047857;--ok-l:#e7f7ef;--ok-b:#86d5b1;--pb:#b45309;--pb-l:#fff5e1;--pb-b:#f5c56b;
+  --non:#be123c;--non-l:#ffe9ee;--non-b:#f5a3b5;--hs:#64748b;--hs-l:#f1f5f9;--hs-b:#cbd5e1;
+  --r:20px;--sh:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06);color-scheme:light}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45;font-size:16px;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ico{width:22px;height:22px;flex:none}
+.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:650;background:var(--bleu);color:#fff;display:inline-flex;align-items:center;gap:8px;justify-content:center;text-decoration:none;line-height:1.2}
+.btn:hover{background:var(--bleu-f)}
+.btn.sec{background:var(--bleu-l);color:var(--bleu-f)}.btn.sec:hover{background:#dfe8ff}
+.btn.ghost{background:#fff;color:var(--ink-2);box-shadow:inset 0 0 0 1.5px var(--line-2)}.btn.ghost:hover{background:var(--bg)}
+.btn.ok{background:var(--ok)}.btn.ok:hover{background:#065f46}
+.btn.danger{background:#fff;color:var(--non);box-shadow:inset 0 0 0 1.5px var(--non-b)}
+.btn.petit{padding:7px 11px;font-size:.86rem;border-radius:10px}
+.btn .ico{width:18px;height:18px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 18px;border-radius:14px;font-weight:600;z-index:60;max-width:calc(100% - 28px);text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:monte .25s ease-out}
+@keyframes monte{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.err{color:var(--non);font-weight:600}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

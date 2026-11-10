@@ -435,6 +435,29 @@ const THEMATIQUES = [
     ],
   },
   {
+    id: "informatique",
+    nom: "Informatique",
+    couleur: "#1d4ed8",
+    icon: "monitor",
+    enfants: [
+      {
+        titre: "État des lieux — inventaire des ordinateurs",
+        desc: "Les salles informatiques, leurs ordinateurs et leur état en temps réel. Un QR code affiché dans chaque salle permet à tout enseignant de signaler une panne en quelques secondes.",
+        icon: "monitor",
+        enfants: [
+          {
+            titre: "Espace de l'enseignant informatique",
+            desc: "Le tableau de bord du parc : plan de chaque salle, fiche de chaque poste (marque, modèle, références de l'unité centrale, de l'écran, du clavier, de la souris…), équipements et pannes entièrement paramétrables, bilans en temps réel depuis une date, réparations, QR codes à imprimer. Accès par code. Les collègues, eux, scannent simplement le QR code de la salle.",
+            lien: "informatique/referent.html",
+            type: "Outil",
+            icon: "monitor",
+            badge: "Nouveau",
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: "reunions",
     nom: "Rendez-vous",
     couleur: "#2f7d6b",

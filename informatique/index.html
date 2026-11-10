@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#ffffff">
+<title>Signaler un problème</title>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     Informatique — page ENSEIGNANT (10/11/2026).
+     Ouverte par le QR code affiché dans la salle : …/informatique/?s=salle_xxxxxxxxxxxx
+     Trois gestes : choisir le poste, cocher, envoyer. Aucun état, aucun bilan :
+     tout cela appartient au tableau de bord de l'enseignant informatique.
+     Écrit dans : coordination_info_salles/salle_<clé> (signalements). AUCUN NOM.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<link rel="stylesheet" href="commun.css?v=20261110b">
+<style>
+body{background:#fff}
+.page{max-width:560px;margin:0 auto;padding:22px 18px calc(120px + env(safe-area-inset-bottom))}
+.haut .sur{display:flex;align-items:center;gap:8px;color:var(--bleu);font-weight:700;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase}
+.haut h1{margin:6px 0 2px;font-size:1.75rem;line-height:1.15;letter-spacing:-.02em}
+.haut .quand{color:var(--muted);margin:0}
+.entete{display:flex;gap:16px;align-items:center;margin-top:10px}
+.cal{width:64px;flex:none;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1.5px var(--line-2);text-align:center;background:#fff}
+.cal .m{background:var(--bleu);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 0}
+.cal .j{font-size:1.65rem;font-weight:800;line-height:1.15;padding-top:2px}
+.cal .s{font-size:.68rem;color:var(--muted);font-weight:700;padding-bottom:4px;text-transform:capitalize}
+.entete h1{margin:0}
+.q{font-size:1.05rem;font-weight:700;margin:26px 0 12px}
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:10px}
+.num{aspect-ratio:1;border:1.5px solid var(--line-2);background:#fff;border-radius:16px;font-size:1.5rem;font-weight:750;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:transform .12s,border-color .12s,box-shadow .12s}
+.num small{font-size:.62rem;font-weight:600;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.num:hover{border-color:var(--bleu);box-shadow:0 6px 18px rgba(37,99,235,.14);transform:translateY(-1px)}
+.num:active{transform:scale(.97)}
+.large{width:100%;margin-top:12px;border:1.5px solid var(--line-2);background:#fff;border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;font-weight:650;text-align:left}
+.large:hover{border-color:var(--bleu)}
+.large .ico{color:var(--bleu)}
+.retour{border:0;background:none;color:var(--bleu);font-weight:650;padding:6px 0;display:inline-flex;gap:6px;align-items:center}
+.cases{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.case{border:1.5px solid var(--line-2);background:#fff;border-radius:16px;padding:14px 12px;display:flex;gap:10px;align-items:center;text-align:left;font-weight:650;min-height:62px;transition:all .12s;position:relative}
+.case .ico{color:var(--ink-2)}
+.case[aria-pressed=true]{border-color:var(--bleu);background:var(--bleu-l);box-shadow:inset 0 0 0 1px var(--bleu);color:var(--bleu-f)}
+.case[aria-pressed=true] .ico{color:var(--bleu)}
+.case[aria-pressed=true]::after{content:"";position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--bleu) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center/12px no-repeat}
+textarea{width:100%;margin-top:10px;border:1.5px solid var(--line-2);border-radius:14px;padding:12px;min-height:72px;resize:vertical}
+.bas{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,#fff 30%);padding:26px 18px calc(16px + env(safe-area-inset-bottom))}
+.bas .btn{width:100%;max-width:524px;margin:0 auto;display:flex;padding:16px;font-size:1.05rem;border-radius:16px}
+.fini{text-align:center;padding-top:40px}
+.fini .rond{width:84px;height:84px;border-radius:50%;margin:0 auto 18px;background:var(--ok-l);color:var(--ok);display:flex;align-items:center;justify-content:center;animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+.fini .rond .ico{width:44px;height:44px;stroke-width:2.6}
+.fini h2{margin:0;font-size:1.6rem}.fini p{color:var(--muted);margin:8px 0 26px}
+@keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.vide{color:var(--muted);text-align:center;padding:40px 10px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="haut">
+    <div class="sur"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>Signaler un problème</div>
+    <div class="entete">
+      <div class="cal" id="cal" aria-hidden="true"></div>
+      <div><h1 id="titre">Chargement…</h1><p class="quand" id="jour"></p></div>
+    </div>
+  </header>
+  <main id="vue" tabindex="-1"></main>
+</div>
+<div id="bas"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+import { base, COL_SALLE, RE_SALLE, $, esc, nettoie, maintenant, dateLongue, icone, nomPoste, ajouterSignalement, modifierSalle } from './commun.js?v=20261110b';
+
+const { FS, db, erreurFS } = await base('info-enseignant');
+const ID = new URLSearchParams(location.search).get('s') || '';
+const S = { salle: null, ecran: 'postes', poste: null, choix: new Set(), txt: '', envoi: false, envoye: [] };
+
+const majJour = () => {
+  const d = new Date();
+  $('#jour').textContent = dateLongue(d.toISOString());
+  $('#cal').innerHTML = `<div class="m">${d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '')}</div><div class="j">${d.getDate()}</div><div class="s">${d.toLocaleDateString('fr-FR', { weekday: 'long' })}</div>`;
+};
+majJour(); setInterval(majJour, 30000);
+
+async function demarrer(){
+  if (erreurFS) return erreur('Pas de connexion. Rechargez la page.');
+  if (!RE_SALLE.test(ID)) return erreur('Lien incomplet : scannez de nouveau le QR code de la salle.');
+  /* Temps réel : une modification du référent (postes, équipements) apparaît aussitôt. */
+  FS.onSnapshot(FS.doc(db, COL_SALLE, ID), snap => {
+    if (!snap.exists()) return erreur('Cette salle n’est plus suivie. Prévenez l’enseignant informatique.');
+    S.salle = snap.data();
+    if (S.envoi || document.activeElement?.id === 'txt') return;
+    if (S.ecran === 'cocher' && S.poste !== 0 && !postes().some(p => p.n === S.poste)) S.ecran = 'postes';
+    if (S.ecran !== 'fini') rendre();
+  }, () => erreur('Connexion impossible. Vérifiez le réseau, puis rechargez.'));
+}
+function erreur(t){ $('#titre').textContent = 'Salle informatique'; $('#vue').innerHTML = `<p class="vide err">${esc(t)}</p>`; }
+
+const postes = () => (S.salle.postes || []);
+const cat = () => S.salle.cat || { eq: [], pannes: [], salle: [] };
+
+function rendre(){
+  const s = S.salle;
+  document.title = `${s.nom} — signaler un problème`;
+  $('#titre').textContent = s.nom;
+  if (S.ecran === 'fini') return rendreFini();
+  if (S.ecran === 'cocher') return rendreCocher();
+  $('#bas').innerHTML = '';
+  $('#vue').innerHTML = `
+    <h2 class="q" id="q-poste">Quel ordinateur ?</h2>
+    <div class="grille" role="group" aria-labelledby="q-poste">
+      ${postes().map(p => `<button class="num" data-p="${p.n}" aria-label="${esc(nomPoste(p))}">${p.n}${p.nom ? `<small>${esc(p.nom)}</small>` : ''}</button>`).join('')}
+    </div>
+    ${cat().salle.length ? `<button class="large" data-p="0">${icone('salle')}<span>La salle<br><small style="color:var(--muted);font-weight:500">${esc(cat().salle.map(x => x.lib).join(', '))}</small></span></button>` : ''}`;
+  $('#vue').querySelectorAll('[data-p]').forEach(b => b.onclick = () => { S.poste = +b.dataset.p; S.choix = new Set(); S.txt = ''; S.ecran = 'cocher'; rendre(); scrollTo(0, 0); $('#vue').focus(); });
+}
+
+function options(){
+  if (S.poste === 0) return [{ titre: 'Qu’est-ce qui ne marche pas ?', items: cat().salle.map(x => ({ t: 'salle:' + x.k, lib: x.lib, ic: x.ic })) }];
+  const p = postes().find(x => x.n === S.poste) || { eq: [] };
+  const eq = cat().eq.filter(x => (p.eq || []).includes(x.k));
+  return [
+    { titre: 'Que se passe-t-il ?', items: cat().pannes.map(x => ({ t: x.k, lib: x.lib, ic: x.ic })) },
+    ...(eq.length ? [{ titre: 'Il manque ou ne marche pas', items: eq.map(x => ({ t: 'eq:' + x.k, lib: x.lib, ic: x.ic })) }] : []),
+  ];
+}
+
+function rendreCocher(){
+  const p = S.poste === 0 ? { n: 0 } : postes().find(x => x.n === S.poste);
+  const groupes = options();
+  $('#vue').innerHTML = `
+    <button class="retour" id="retour">‹ Autre ordinateur</button>
+    <h2 class="q" style="margin-top:6px;font-size:1.35rem">${esc(nomPoste(p))}</h2>
+    ${groupes.map((g, i) => `<p class="q" id="g${i}" style="font-size:.95rem;color:var(--ink-2)">${esc(g.titre)}</p>
+      <div class="cases" role="group" aria-labelledby="g${i}">${g.items.map(x => `<button type="button" class="case" data-t="${esc(x.t)}" aria-pressed="${S.choix.has(x.t)}">${icone(x.ic)}<span>${esc(x.lib)}</span></button>`).join('')}</div>`).join('')}
+    <p class="q" style="font-size:.95rem;color:var(--ink-2)">Autre chose ?</p>
+    <div class="cases"><button type="button" class="case" data-t="autre" aria-pressed="${S.choix.has('autre')}" style="grid-column:1/-1">${icone('autre')}<span>Autre problème</span></button></div>
+    ${S.choix.has('autre') ? `<label class="sr" for="txt">Préciser le problème</label><textarea id="txt" maxlength="120" placeholder="En quelques mots (jamais de nom d’élève)">${esc(S.txt)}</textarea>` : ''}`;
+  $('#retour').onclick = () => { S.ecran = 'postes'; rendre(); };
+  $('#vue').querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
+    const t = b.dataset.t; S.choix.has(t) ? S.choix.delete(t) : S.choix.add(t);
+    rendreCocher(); $(`[data-t="${CSS.escape(t)}"]`)?.focus(); if (t === 'autre' && S.choix.has('autre')) $('#txt')?.focus();
+  });
+  const txt = $('#txt'); if (txt) txt.oninput = () => { S.txt = txt.value; };
+  const n = S.choix.size;
+  $('#bas').innerHTML = `<div class="bas"><button class="btn" id="envoyer" ${n && !S.envoi ? '' : 'disabled'}>${S.envoi ? 'Envoi…' : n ? `Envoyer${n > 1 ? ` (${n})` : ''}` : 'Cochez un problème'}</button></div>`;
+  $('#envoyer').onclick = envoyer;
+}
+
+async function envoyer(){
+  if (S.envoi || !S.choix.size) return;
+  const n = S.poste, types = [...S.choix], txt = nettoie(S.txt, 120);
+  S.envoi = true; rendreCocher();
+  try {
+    await modifierSalle(ID, s => { types.forEach(t => ajouterSignalement(s, n, t, t === 'autre' ? txt : '')); return s; });
+    S.envoye = types; S.envoi = false; S.ecran = 'fini'; rendre();
+  } catch (_) { S.envoi = false; rendreCocher(); toast('L’envoi n’a pas abouti. Vérifiez la connexion et réessayez.'); }
+}
+
+function rendreFini(){
+  const p = S.poste === 0 ? { n: 0 } : postes().find(x => x.n === S.poste);
+  $('#bas').innerHTML = '';
+  $('#vue').innerHTML = `<div class="fini" aria-live="polite">
+    <div class="rond">${icone('ok')}</div>
+    <h2 tabindex="-1" id="merci">C’est transmis, merci !</h2>
+    <p>${esc(nomPoste(p))} — l’enseignant informatique est prévenu.</p>
+    <button class="btn" id="encore">Signaler un autre ordinateur</button></div>`;
+  $('#merci').focus();
+  $('#encore').onclick = () => { S.ecran = 'postes'; rendre(); };
+}
+
+let tt = null;
+function toast(m){ const t = $('#toast'); t.innerHTML = `<div class="toast">${esc(m)}</div>`; clearTimeout(tt); tt = setTimeout(() => { t.innerHTML = ''; }, 4000); }
+
+demarrer();
+</script>
+</body>
+</html>
