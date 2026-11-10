@@ -45,6 +45,7 @@ const P = {
   salle: '<path d="M3.5 20.5V8l8.5-5 8.5 5v12.5"/><path d="M9.5 20.5v-6h5v6"/>',
   outil: '<path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L3.5 17.5l3 3 5.7-5.7a4 4 0 0 0 5.3-5.3l-2.5 2.5-2.5-.5-.5-2.5z"/>',
   ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  etiquette: '<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1 1 0 0 1 0 1.4l-7.3 7.3a1 1 0 0 1-1.4 0z"/><circle cx="8" cy="8" r="1.6"/>',
   materiel: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/>',
 };
 export const ICONES = Object.keys(P);
@@ -190,6 +191,6 @@ export async function modifierDoc(col, id, modif){
     apres.version = (avant.version || 0) + 1;
     tr.set(ref, apres);
     return apres;
-  }));
+  })).then(r => { window.dispatchEvent(new CustomEvent('info-enregistre')); return r; });
 }
 export const modifierSalle = (id, modif) => modifierDoc(COL_SALLE, id, modif);

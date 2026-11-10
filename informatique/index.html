@@ -14,7 +14,7 @@
      tout cela appartient au tableau de bord de l'enseignant informatique.
      Écrit dans : coordination_info_salles/salle_<clé> (signalements). AUCUN NOM.
      ═══════════════════════════════════════════════════════════════════════ -->
-<link rel="stylesheet" href="commun.css?v=20261110b">
+<link rel="stylesheet" href="commun.css?v=20261110d">
 <style>
 body{background:#fff}
 .page{max-width:560px;margin:0 auto;padding:22px 18px calc(120px + env(safe-area-inset-bottom))}
@@ -85,7 +85,7 @@ textarea{width:100%;margin-top:10px;border:1.5px solid var(--line-2);border-radi
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
-import { base, COL_SALLE, RE_SALLE, $, esc, nettoie, maintenant, dateLongue, icone, nomPoste, ajouterSignalement, modifierSalle, etatPoste, ouverts, libPanne, suiviPoste, libStatut } from './commun.js?v=20261110c';
+import { base, COL_SALLE, RE_SALLE, $, esc, nettoie, maintenant, dateLongue, icone, nomPoste, ajouterSignalement, modifierSalle, etatPoste, ouverts, libPanne, suiviPoste, libStatut } from './commun.js?v=20261110d';
 
 const { FS, db, erreurFS } = await base('info-enseignant');
 const ID = new URLSearchParams(location.search).get('s') || '';

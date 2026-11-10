@@ -6,7 +6,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 import { base, COL_PARC, COL_SALLE, RE_SALLE, MAX_POSTES, MAX_SALLES, CATALOGUE_DEFAUT, TYPES_POSTE, ICONES, catSalle,
          $, $$, esc, nettoie, maintenant, aleatoire, avecDelai, dateCourte, duree, icone, posteVierge, nomPoste, libPanne,
-         ouverts, etatPoste, LIB_ETAT, modifierDoc, modifierSalle, libStatut, suiviPoste } from './commun.js?v=20261110c';
+         ouverts, etatPoste, LIB_ETAT, modifierDoc, modifierSalle, libStatut, suiviPoste } from './commun.js?v=20261110d';
 
 const { FS, db, erreurFS } = await base('info-referent');
 /* Pour l'instant, SANS CODE (décision de Brahim, 10/11/2026) : un espace unique, ouvert directement.
@@ -103,7 +103,7 @@ function rendre(doux = false){
   if (!S.parc) return;
   const ss = sallesChargees();
   const pannesSalle = s => ouverts(s).length;
-  const vues = { tdb: vueTdb, nouvelle: vueNouvelle, catalogue: vueCatalogue, qr: vueQR, param: vueParam, rapport: vueRapport };
+  const vues = { tdb: vueTdb, nouvelle: vueNouvelle, catalogue: vueCatalogue, qr: vueQR, param: vueParam, rapport: vueRapport, etiquettes: vueEtiquettes };
   const corps = S.vue.startsWith('salle:') ? vueSalle(S.vue.slice(6)) : (vues[S.vue] || vueTdb)();
   const scroll = scrollY;
   $('#racine').innerHTML = `<div class="app">
@@ -117,8 +117,10 @@ function rendre(doux = false){
       ${nav('catalogue', 'Personnaliser', 'clavier')}
       <div class="nav-titre">Documents</div>
       ${nav('qr', 'Affiches QR', 'imprimante')}
+      ${nav('etiquettes', 'Étiquettes', 'etiquette')}
       ${nav('rapport', 'Rapport', 'logiciel')}
       ${nav('param', 'Sauvegarde', 'session')}
+      <div class="enr" id="etat-enr" role="status" aria-live="polite">${icone('ok')}<span>${S.dernierEnr ? `Enregistré à ${S.dernierEnr}` : 'Enregistrement automatique'}</span></div>
     </nav>
     <main class="contenu" id="contenu" tabindex="-1">
       ${S.codeNouveau ? `<div class="carte" style="margin-bottom:18px;box-shadow:inset 0 0 0 2px var(--bleu),var(--sh)">
@@ -297,7 +299,7 @@ function vueSalle(id){
   const ouvSalle = ouverts(s, 0);
   const journal = (s.sig || []).flatMap(x => [...x.d.map(d => ({ d, x, r: false })), ...(x.rep ? [{ d: x.rep, x, r: true }] : [])]).sort((a, b) => String(b.d).localeCompare(String(a.d))).slice(0, 25);
   return `<div class="tete"><div><h1>${esc(s.nom)}</h1><p>${ps.length} postes${marques.length ? ' · ' + esc(marques.join(', ')) : ''}</p></div>
-    <div class="puces"><button class="btn ghost petit" data-reglages="${id}">${icone('session')}Réglages de la salle</button><button class="btn ghost petit" data-qr="${id}">${icone('logiciel')}QR code</button>
+    <div class="puces"><button class="btn ghost petit" data-reglages="${id}">${icone('session')}Réglages de la salle</button><button class="btn ghost petit" data-qr="${id}">${icone('logiciel')}QR code</button><button class="btn ghost petit" data-dupliquer="${id}">${icone('salle')}Dupliquer</button>
     <button class="btn ${sel ? '' : 'sec'} petit" id="mode-sel">${icone('ok')}${sel ? 'Terminer la sélection' : 'Sélectionner'}</button></div></div>
   <div class="pile">
     <section class="carte">
@@ -548,10 +550,7 @@ function tiroirReglages(t, s){
       toast('Réglages enregistrés.'); fermerTiroir();
     } catch (_) { toast('Enregistrement impossible : vérifiez la connexion.'); }
   };
-  $('#r-dup').onclick = async () => {
-    try { const id = await creerSalle(nettoie(s.nom + ' (copie)', 40), (s.postes || []).map(p => ({ ...p, hs: false })), s.colonnes, s.eqSalle); fermerTiroir(true); aller('salle:' + id); toast('Salle dupliquée (sans l’historique).'); }
-    catch (_) { toast('Duplication impossible : vérifiez la connexion.'); }
-  };
+  $('#r-dup').onclick = () => { fermerTiroir(true); dupliquerSalle(t.sid); };
   $('#r-suppr').onclick = async () => {
     if (!confirm(`Retirer « ${s.nom} » du tableau de bord ? Son QR code ne sera plus suivi.`)) return;
     try { await modifierParc(p => { p.salles = p.salles.filter(x => x.id !== t.sid); return p; }); fermerTiroir(true); aller('tdb'); toast('Salle retirée.'); }
@@ -559,6 +558,18 @@ function tiroirReglages(t, s){
   };
 }
 
+/* Copie une salle configurée (postes, matériel, références, plan ; sans l'historique), puis ouvre ses réglages pour la renommer. */
+async function dupliquerSalle(sid){
+  const s = S.salles[sid]; if (!s) return;
+  if (listeSalles().length >= MAX_SALLES) return toast(`${MAX_SALLES} salles au maximum.`);
+  try {
+    const id = await creerSalle(nettoie(s.nom + ' (copie)', 40), (s.postes || []).map(p => ({ ...structuredClone(p), hs: false })), s.colonnes, s.eqSalle);
+    aller('salle:' + id);
+    const ouvrir = () => { if (S.salles[id]) { ouvrirTiroir({ type: 'reglages', sid: id }); setTimeout(() => { const n = $('#r-nom'); if (n) { n.focus(); n.select(); } }, 60); } else setTimeout(ouvrir, 120); };
+    ouvrir();
+    toast('Salle dupliquée : donnez-lui son nom, puis Enregistrer.');
+  } catch (_) { toast('Duplication impossible : vérifiez la connexion.'); }
+}
 /* ═════════ Nouvelle salle ═════════ */
 async function creerSalle(nom, postes, colonnes, eqSalle){
   if (listeSalles().length >= MAX_SALLES) throw new Error('trop');
@@ -716,6 +727,160 @@ function brancherAffiches(racine){
   racine.querySelectorAll('[data-copier]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copier); toast('Lien copié.'); } catch (_) { toast('Copie impossible.'); } });
   const ok = racine.querySelector('#aff-msg-ok'); if (ok) ok.onclick = () => enregistrerMessage(racine.querySelector('#aff-msg').value);
   const def = racine.querySelector('#aff-msg-def'); if (def) def.onclick = () => { racine.querySelector('#aff-msg').value = MSG_DEFAUT; enregistrerMessage(MSG_DEFAUT); };
+}
+
+/* ═════════ Étiquettes à imprimer, découper et coller ═════════
+   On choisit la salle : une étiquette par ordinateur et par matériel coché (unité centrale, écran…),
+   remplie avec le numéro, le nom, la référence. Tout se modifie. Planche A4 avec traits de découpe.
+   Rien n'est enregistré en ligne : seuls les réglages sont gardés sur l'appareil. */
+const K_ETQ = 'info-etiquettes-reglages';
+const TAILLES = {
+  mini: { lib: 'Mini', w: 38, h: 21.2 }, petite: { lib: 'Petite', w: 48.5, h: 25.4 },
+  moyenne: { lib: 'Moyenne', w: 63.5, h: 38.1 }, grande: { lib: 'Grande', w: 99, h: 57 }, perso: { lib: 'Sur mesure', w: 50, h: 30 },
+};
+const COULEURS = [['#2563eb', 'Bleu'], ['#0d9488', 'Vert d’eau'], ['#16a34a', 'Vert'], ['#f59e0b', 'Orange'], ['#dc2626', 'Rouge'], ['#7c3aed', 'Violet'], ['#db2777', 'Rose'], ['#0f172a', 'Noir']];
+/* Une couleur par matériel quand on choisit « couleur selon le matériel ». */
+const COUL_EQ = { uc: '#2563eb', ecran: '#0d9488', clavier: '#f59e0b', souris: '#7c3aed', casque: '#db2777', webcam: '#16a34a' };
+const REGLAGES_DEFAUT = () => ({ taille: 'petite', w: 50, h: 30, salle: true, numero: true, nom: true, materiel: true, ref: true, pastille: true, qr: false,
+  couleur: '#2563eb', couleurPar: 'unique', forme: 'rond', exemplaires: 1, cadre: true });
+function reglagesEtq(){
+  if (!S.etq) {
+    let r = {}; try { r = JSON.parse(localStorage.getItem(K_ETQ) || '{}'); } catch (_) { }
+    S.etq = { sid: listeSalles()[0]?.id || '', eqs: null, liste: [], r: { ...REGLAGES_DEFAUT(), ...r } };
+  }
+  return S.etq;
+}
+const K_ETQ_LISTES = 'info-etiquettes-listes';
+const garderEtq = () => { try { localStorage.setItem(K_ETQ, JSON.stringify(S.etq.r)); } catch (_) { } };
+/* La liste modifiée d'une salle est gardée sur l'appareil et retrouvée la fois suivante. */
+function garderListe(){ try { const t = JSON.parse(localStorage.getItem(K_ETQ_LISTES) || '{}'); t[S.etq.sid] = { eqs: [...(S.etq.eqs || [])], liste: S.etq.liste }; localStorage.setItem(K_ETQ_LISTES, JSON.stringify(t)); } catch (_) { } }
+function reprendreListe(){ try { const t = JSON.parse(localStorage.getItem(K_ETQ_LISTES) || '{}')[S.etq.sid]; if (t?.liste?.length) { S.etq.eqs = new Set(t.eqs || []); S.etq.liste = t.liste; return true; } } catch (_) { } return false; }
+/* Matériel présent dans la salle (pour les cases à cocher). */
+function materielSalle(s){ const ks = new Set((s?.postes || []).flatMap(p => p.eq || [])); return cat().eq.filter(e => ks.has(e.k)); }
+/* Remplit la liste à partir de la salle et du matériel coché. */
+function genererEtiquettes(){
+  const E = reglagesEtq(), s = S.salles[E.sid];
+  if (!s) { E.liste = []; return; }
+  const mats = materielSalle(s);
+  if (!E.eqs) E.eqs = new Set(mats.some(m => m.k === 'uc') ? ['uc'] : mats.slice(0, 1).map(m => m.k));
+  E.liste = [];
+  (s.postes || []).forEach(p => {
+    const choisis = E.eqs.size ? mats.filter(m => E.eqs.has(m.k) && (p.eq || []).includes(m.k)) : [null];
+    choisis.forEach(m => E.liste.push({
+      on: true, num: String(p.n).padStart(2, '0'), nom: p.nom || `Poste ${p.n}`,
+      mat: m ? m.lib : '', k: m ? m.k : '', ic: m ? m.ic : 'ecran',
+      ref: m ? (p.refs?.[m.k] || (m.k === 'uc' ? [p.marque, p.modele].filter(Boolean).join(' ') : '')) : [p.marque, p.modele].filter(Boolean).join(' '),
+      salle: s.nom, sid: E.sid,
+    }));
+  });
+}
+function dimEtq(r){ const t = TAILLES[r.taille] || TAILLES.petite; return r.taille === 'perso' ? { w: Math.max(20, Math.min(190, +r.w || 50)), h: Math.max(12, Math.min(140, +r.h || 30)) } : { w: t.w, h: t.h }; }
+function grilleA4(r){ const { w, h } = dimEtq(r), m = 6; const cols = Math.max(1, Math.floor((210 - 2 * m) / w)), rows = Math.max(1, Math.floor((297 - 2 * m) / h)); return { w, h, cols, rows, parPage: cols * rows }; }
+const couleurEtq = (r, e) => r.couleurPar === 'materiel' ? (COUL_EQ[e.k] || r.couleur) : r.couleur;
+/* Une étiquette (dimensions en mm, tailles de texte proportionnelles). */
+function etiquetteHTML(e, r, g){
+  const c = couleurEtq(r, e), H = g.h, W = g.w;
+  /* Pastille, QR et textes proportionnés à la place qui reste pour le texte. */
+  const pas = Math.min(H * .56, W * .24, 20), qs = r.qr ? Math.min(H * .66, W * .22, 24) : 0;
+  const reste = W - (r.pastille ? pas : 2) - qs - 7, fT = Math.min(H * .19, reste * .13), fS = Math.min(H * .115, reste * .075);
+  const titre = [r.numero ? e.num : '', r.nom ? e.nom : ''].filter(Boolean);
+  const ligne2 = [r.materiel ? e.mat : '', r.salle ? e.salle : ''].filter(Boolean).join(' · ');
+  const qr = r.qr && e.sid && typeof qrcode === 'function' ? (() => { const q = qrcode(0, 'L'); q.addData(urlSalle(e.sid)); q.make(); return q.createSvgTag({ cellSize: 2, margin: 0, scalable: true }); })() : '';
+  return `<div class="etq ${r.cadre ? 'cadre' : ''}" style="width:${W}mm;height:${H}mm;--c:${c}">
+    ${r.pastille ? `<div class="etq-pas ${r.forme}" style="width:${pas}mm;height:${pas}mm;font-size:${pas * .42}mm">${r.numero ? esc(e.num) : icone(e.ic)}</div>` : `<div class="etq-barre"></div>`}
+    <div class="etq-txt" style="font-size:${fS}mm">
+      ${(() => { const t = r.pastille && r.numero ? (r.nom ? e.nom : '') : titre.join(' · '); return t ? `<b style="font-size:${fT}mm">${esc(t)}</b>` : ''; })()}
+      ${ligne2 ? `<span>${esc(ligne2)}</span>` : ''}
+      ${r.ref && e.ref ? `<span class="etq-ref">${esc(e.ref)}</span>` : ''}
+    </div>
+    ${qr ? `<div class="etq-qr" style="width:${qs}mm;height:${qs}mm">${qr}</div>` : ''}
+  </div>`;
+}
+function planchesHTML(){
+  const E = reglagesEtq(), r = E.r, g = grilleA4(r);
+  const toutes = E.liste.filter(e => e.on).flatMap(e => Array.from({ length: Math.max(1, Math.min(10, +r.exemplaires || 1)) }, () => e));
+  const pages = []; for (let i = 0; i < toutes.length; i += g.parPage) pages.push(toutes.slice(i, i + g.parPage));
+  return { g, total: toutes.length, html: pages.map(p => `<div class="feuille"><div class="feuille-grille" style="grid-template-columns:repeat(${g.cols},${g.w}mm);grid-auto-rows:${g.h}mm">${p.map(e => etiquetteHTML(e, r, g)).join('')}</div></div>`).join('') };
+}
+function vueEtiquettes(){
+  const E = reglagesEtq(), r = E.r, ls = listeSalles();
+  if (!ls.length) return `<div class="tete"><div><h1>Étiquettes</h1></div></div><div class="carte vide">Créez d’abord une salle : ses ordinateurs rempliront les étiquettes.</div>`;
+  if (!S.salles[E.sid]) E.sid = ls[0].id;
+  if (!E.liste.length || E.liste[0].sid !== E.sid) { if (!reprendreListe()) genererEtiquettes(); }
+  const s = S.salles[E.sid], mats = materielSalle(s), g = grilleA4(r);
+  const opt = (k, lib) => `<label class="opt"><input type="checkbox" data-etq-opt="${k}" ${r[k] ? 'checked' : ''}><span>${lib}</span></label>`;
+  return `<div class="tete"><div><h1>Étiquettes</h1><p>Choisissez la salle : les étiquettes se remplissent toutes seules. Imprimez, découpez sur les pointillés, collez.</p></div>
+    <div class="puces"><button class="btn ghost" id="etq-enregistrer">${icone('ok')}Enregistrer</button><button class="btn sec" id="etq-mail">${icone('session')}Envoyer par mail</button><button class="btn" id="etq-imprimer">${icone('imprimante')}Imprimer / PDF</button></div></div>
+  <p class="astuce">${icone('logiciel')}<span><b>Pour garder la planche sur une clé USB ou l’envoyer :</b> Imprimer / PDF, puis choisissez « Enregistrer au format PDF » (ou « PDF » en bas à gauche sur Mac) et la clé USB comme emplacement. Le PDF se joint ensuite à un mail.</span></p>
+  <div class="etq-zone">
+    <div class="pile">
+      <section class="carte"><h2>1. La salle et le matériel</h2>
+        <div class="champ"><label for="etq-salle">Salle</label><select id="etq-salle">${ls.map(x => `<option value="${x.id}" ${x.id === E.sid ? 'selected' : ''}>${esc(S.salles[x.id]?.nom || x.nom)}</option>`).join('')}</select></div>
+        <p class="lab" style="margin:12px 0 6px">Une étiquette pour chaque</p>
+        <div class="equip">${mats.map(m => `<label>${icone(m.ic)}<input type="checkbox" data-etq-eq="${m.k}" ${E.eqs?.has(m.k) ? 'checked' : ''}>${esc(m.lib)}</label>`).join('')}</div>
+        <p class="aide-p">Rien de coché : une seule étiquette par ordinateur.</p></section>
+      <section class="carte"><h2>2. La taille</h2>
+        <div class="tailles">${Object.entries(TAILLES).map(([k, t]) => { const gg = grilleA4({ ...r, taille: k }); return `<button class="taille ${r.taille === k ? 'on' : ''}" data-etq-taille="${k}"><b>${t.lib}</b><small>${k === 'perso' ? 'vos mesures' : `${t.w} × ${t.h} mm · ${gg.parPage} par page`}</small></button>`; }).join('')}</div>
+        ${r.taille === 'perso' ? `<div class="champs" style="margin-top:10px"><div class="champ"><label for="etq-w">Largeur (mm)</label><input type="number" id="etq-w" min="20" max="190" value="${r.w}"></div><div class="champ"><label for="etq-h">Hauteur (mm)</label><input type="number" id="etq-h" min="12" max="140" value="${r.h}"></div></div>` : ''}</section>
+      <section class="carte"><h2>3. Ce qui est écrit</h2>
+        <div class="opts">${opt('numero', 'Numéro du poste')}${opt('nom', 'Nom de l’ordinateur')}${opt('materiel', 'Matériel (écran…)')}${opt('salle', 'Nom de la salle')}${opt('ref', 'Référence')}${opt('qr', 'Petit QR code de la salle')}</div></section>
+      <section class="carte"><h2>4. Couleurs et style</h2>
+        <div class="opts">${opt('pastille', 'Pastille')}${opt('cadre', 'Bordure colorée')}</div>
+        ${r.pastille ? `<div class="puces" style="margin-top:10px" role="group" aria-label="Forme de la pastille">${[['rond', 'Rond'], ['carre', 'Carré'], ['goutte', 'Arrondi']].map(([k, l]) => `<button class="puce" data-etq-forme="${k}" aria-pressed="${r.forme === k}">${l}</button>`).join('')}</div>` : ''}
+        <div class="puces" style="margin-top:10px" role="group" aria-label="Couleur">${[['unique', 'Une couleur'], ['materiel', 'Selon le matériel']].map(([k, l]) => `<button class="puce" data-etq-par="${k}" aria-pressed="${r.couleurPar === k}">${l}</button>`).join('')}</div>
+        ${r.couleurPar === 'unique' ? `<div class="couleurs">${COULEURS.map(([c, l]) => `<button class="pastille-c ${r.couleur === c ? 'on' : ''}" data-etq-coul="${c}" style="background:${c}" title="${l}" aria-label="${l}"></button>`).join('')}<label class="pastille-c libre" title="Autre couleur"><input type="color" id="etq-coul" value="${r.couleur}" aria-label="Autre couleur"></label></div>`
+          : `<div class="legende" style="margin-top:10px">${mats.map(m => `<span><i style="background:${COUL_EQ[m.k] || r.couleur}"></i>${esc(m.lib)}</span>`).join('')}</div>`}
+        <div class="champ" style="margin-top:12px;max-width:220px"><label for="etq-ex">Exemplaires de chaque étiquette</label><input type="number" id="etq-ex" min="1" max="10" value="${r.exemplaires}"></div></section>
+      <section class="carte"><h2>5. Les étiquettes<small id="etq-compte"></small></h2>
+        <p class="aide-p" style="margin-top:-6px">Tout se modifie. Décochez celles à ne pas imprimer.</p>
+        <div class="etq-liste" id="etq-liste">${listeEtqHTML()}</div>
+        <div class="puces" style="margin-top:10px"><button class="btn petit sec" id="etq-ajout">+ Étiquette libre</button><button class="btn petit ghost" id="etq-regen">Recréer depuis la salle</button></div></section>
+    </div>
+    <div class="etq-apercu-zone"><div class="etq-collant"><p class="lab" style="margin:0 0 8px">Aperçu de la feuille A4 <span id="etq-info"></span></p><div class="etq-apercu" id="etq-apercu"></div></div></div>
+  </div>`;
+}
+function listeEtqHTML(){
+  return reglagesEtq().liste.map((e, i) => `<div class="etq-ligne ${e.on ? '' : 'off'}">
+    <input type="checkbox" data-etq-on="${i}" ${e.on ? 'checked' : ''} aria-label="Imprimer cette étiquette">
+    <input data-etq-champ="${i}|num" value="${esc(e.num)}" aria-label="Numéro" class="n">
+    <input data-etq-champ="${i}|nom" value="${esc(e.nom)}" aria-label="Nom" placeholder="Nom">
+    <input data-etq-champ="${i}|mat" value="${esc(e.mat)}" aria-label="Matériel" placeholder="Matériel">
+    <input data-etq-champ="${i}|ref" value="${esc(e.ref)}" aria-label="Référence" placeholder="Référence">
+    <button class="suppr" data-etq-suppr="${i}" aria-label="Retirer">×</button></div>`).join('');
+}
+function majApercu(){
+  const P = planchesHTML(), a = $('#etq-apercu'); if (!a) return;
+  a.innerHTML = P.html || '<p class="vide">Aucune étiquette cochée.</p>';
+  $('#etq-info').textContent = P.total ? `· ${P.total} étiquette${P.total > 1 ? 's' : ''} · ${Math.ceil(P.total / P.g.parPage)} page${P.total > P.g.parPage ? 's' : ''} · ${P.g.parPage} par page` : '';
+  $('#etq-compte').textContent = reglagesEtq().liste.filter(e => e.on).length;
+}
+function brancherEtiquettes(){
+  const E = reglagesEtq(), r = E.r, c = $('#contenu'); if (!$('#etq-apercu')) return;
+  const refaire = () => { garderEtq(); garderListe(); rendre(true); };
+  $('#etq-salle').onchange = e => { garderListe(); E.sid = e.target.value; E.eqs = null; E.liste = []; if (!reprendreListe()) genererEtiquettes(); refaire(); };
+  c.querySelectorAll('[data-etq-eq]').forEach(i => i.onchange = () => { i.checked ? E.eqs.add(i.dataset.etqEq) : E.eqs.delete(i.dataset.etqEq); genererEtiquettes(); refaire(); });
+  c.querySelectorAll('[data-etq-taille]').forEach(b => b.onclick = () => { r.taille = b.dataset.etqTaille; refaire(); });
+  c.querySelectorAll('[data-etq-opt]').forEach(i => i.onchange = () => { r[i.dataset.etqOpt] = i.checked; refaire(); });
+  c.querySelectorAll('[data-etq-forme]').forEach(b => b.onclick = () => { r.forme = b.dataset.etqForme; refaire(); });
+  c.querySelectorAll('[data-etq-par]').forEach(b => b.onclick = () => { r.couleurPar = b.dataset.etqPar; refaire(); });
+  c.querySelectorAll('[data-etq-coul]').forEach(b => b.onclick = () => { r.couleur = b.dataset.etqCoul; refaire(); });
+  const cl = $('#etq-coul'); if (cl) cl.onchange = () => { r.couleur = cl.value; refaire(); };
+  ['w', 'h'].forEach(k => { const i = $('#etq-' + k); if (i) i.onchange = () => { r[k] = +i.value; refaire(); }; });
+  const ex = $('#etq-ex'); ex.onchange = () => { r.exemplaires = Math.max(1, Math.min(10, +ex.value || 1)); garderEtq(); majApercu(); };
+  c.querySelectorAll('[data-etq-on]').forEach(i => i.onchange = () => { E.liste[+i.dataset.etqOn].on = i.checked; i.closest('.etq-ligne').classList.toggle('off', !i.checked); majApercu(); });
+  c.querySelectorAll('[data-etq-champ]').forEach(i => { i.oninput = () => { const [j, k] = i.dataset.etqChamp.split('|'); E.liste[+j][k] = i.value; majApercu(); }; i.onchange = () => garderListe(); });
+  c.querySelectorAll('[data-etq-suppr]').forEach(b => b.onclick = () => { E.liste.splice(+b.dataset.etqSuppr, 1); refaire(); });
+  $('#etq-ajout').onclick = () => { E.liste.push({ on: true, num: '', nom: 'Nouvelle étiquette', mat: '', k: '', ic: 'materiel', ref: '', salle: S.salles[E.sid]?.nom || '', sid: E.sid }); refaire(); setTimeout(() => $$('[data-etq-champ$="|nom"]').at(-1)?.select(), 0); };
+  $('#etq-regen').onclick = () => { genererEtiquettes(); refaire(); };
+  $('#etq-enregistrer').onclick = () => { garderEtq(); garderListe(); signalerEnregistre(); toast('Étiquettes et réglages enregistrés sur cet appareil.'); };
+  $('#etq-mail').onclick = () => {
+    const nom = S.salles[E.sid]?.nom || 'la salle', n = E.liste.filter(e => e.on).length;
+    const corps = `Bonjour,\n\nVoici la planche d’étiquettes de ${nom} (${n} étiquette${n > 1 ? 's' : ''}, format ${(TAILLES[r.taille] || TAILLES.petite).lib.toLowerCase()}).\nÀ imprimer en taille réelle (100 %), puis découper sur les pointillés.\n\n(Le PDF est joint.)`;
+    location.href = `mailto:?subject=${encodeURIComponent('Étiquettes — ' + nom)}&body=${encodeURIComponent(corps)}`;
+  };
+  window.addEventListener('beforeunload', garderListe, { once: true });
+  $('#etq-imprimer').onclick = () => { const P = planchesHTML(); if (!P.total) return toast('Cochez au moins une étiquette.'); $('#impression').innerHTML = P.html; setTimeout(() => window.print(), 80); };
+  majApercu();
 }
 
 /* ═════════ Rapport d'activité ═════════ */
@@ -883,9 +1048,11 @@ function brancher(){
   c.querySelectorAll('[data-reparer]').forEach(b => b.onclick = () => { const [sid, xid] = b.dataset.reparer.split('|'); tiroirReparationRapide(sid, xid); });
   c.querySelectorAll('[data-poste]').forEach(b => b.onclick = () => { const [sid, n] = b.dataset.poste.split('|'); ouvrirTiroir({ type: 'poste', sid, n: +n }); });
   c.querySelectorAll('[data-reglages]').forEach(b => b.onclick = () => ouvrirTiroir({ type: 'reglages', sid: b.dataset.reglages }));
+  c.querySelectorAll('[data-dupliquer]').forEach(b => b.onclick = () => dupliquerSalle(b.dataset.dupliquer));
   c.querySelectorAll('[data-qr]').forEach(b => b.onclick = () => ouvrirTiroir({ type: 'qr', sid: b.dataset.qr }));
   c.querySelectorAll('[data-humeur]').forEach(b => b.onclick = () => { garder(K_HUMEUR, JSON.stringify({ jour: isoJour(new Date()), v: b.dataset.humeur })); rendre(true); });
   brancherAffiches(c);
+  if (S.vue === 'etiquettes') brancherEtiquettes();
   $('#rap-imprimer')?.addEventListener('click', imprimerRapport);
   $('#rap-mail')?.addEventListener('click', mailRapport);
   /* Salle : plan */
@@ -932,6 +1099,12 @@ function brancher(){
   $('#im-json')?.addEventListener('change', e => { const f = e.target.files?.[0]; if (f) restaurer(f); e.target.value = ''; });
 }
 
+/* « Enregistré à 14 h 32 » : rassure après chaque écriture réussie. */
+function signalerEnregistre(){
+  const d = new Date(); S.dernierEnr = `${d.getHours()} h ${String(d.getMinutes()).padStart(2, '0')}`;
+  const e = $('#etat-enr'); if (e) { e.querySelector('span').textContent = `Enregistré à ${S.dernierEnr}`; e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); }
+}
+window.addEventListener('info-enregistre', signalerEnregistre);
 let tt = null;
 function toast(m){ const t = $('#toast'); t.innerHTML = `<div class="toast">${esc(m)}</div>`; clearTimeout(tt); tt = setTimeout(() => { t.innerHTML = ''; }, 3500); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.tiroir) fermerTiroir(); });
