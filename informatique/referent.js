@@ -9,6 +9,10 @@ import { base, COL_PARC, COL_SALLE, RE_SALLE, MAX_POSTES, MAX_SALLES, CATALOGUE_
          ouverts, etatPoste, LIB_ETAT, modifierDoc, modifierSalle } from './commun.js?v=20261110b';
 
 const { FS, db, erreurFS } = await base('info-referent');
+/* Pour l'instant, SANS CODE (décision de Brahim, 10/11/2026) : un espace unique, ouvert directement.
+   Un code d'accès pourra être ajouté plus tard : l'écran « ecranAcces » est conservé pour cela. */
+const ESPACE_PAR_DEFAUT = 'cpinfo2026';
+const K_SECOURS = 'info-referent-secours';
 const K_CODE = 'info-referent-code', K_VUE = 'info-referent-vue', K_PER = 'info-referent-periode';
 const S = { code: '', parc: null, salles: {}, vue: 'tdb', periode: '30', depuis: '', selection: null, tiroir: null, codeNouveau: '', erreur: '' };
 const ecoutes = {}; let ecouteParc = null;
@@ -57,7 +61,10 @@ function entrer(c){
   S.code = c; S.erreur = '';
   ecouteParc?.();
   ecouteParc = FS.onSnapshot(FS.doc(db, COL_PARC, parcId(c)), snap => {
-    if (!snap.exists()) { S.erreur = 'Ce code n’est pas reconnu.'; return sortir(false); }
+    if (!snap.exists()) {
+      if (c === ESPACE_PAR_DEFAUT && !S.creation) { S.creation = true; FS.setDoc(FS.doc(db, COL_PARC, parcId(c)), { id: parcId(c), type: 'parc', nom: 'Parc informatique', salles: [], cat: CATALOGUE_DEFAUT(), majLe: maintenant(), version: 1 }).catch(() => toast('Création impossible : vérifiez la connexion.')); return; }
+      S.erreur = 'Ce code n’est pas reconnu.'; return sortir(false);
+    }
     garder(K_CODE, c);
     S.parc = snap.data(); brancherSalles();
     /* Une salle retirée (ici ou sur un autre appareil) : retour au tableau de bord. */
@@ -101,7 +108,7 @@ function rendre(doux = false){
   const scroll = scrollY;
   $('#racine').innerHTML = `<div class="app">
     <nav class="cote" aria-label="Navigation">
-      <div class="marque"><span class="logo">${icone('ecran')}</span><div><b>${esc(S.parc.nom || 'Parc informatique')}</b><small>Tableau de bord</small></div></div>
+      <div class="marque"><span class="logo">${icone('ecran')}</span><div><b>${esc(S.parc.nom || 'Parc informatique')}</b><small>Gestion des ordinateurs</small></div></div>
       ${nav('tdb', 'Tableau de bord', 'materiel', ss.reduce((n, s) => n + pannesSalle(s), 0))}
       <div class="nav-titre">Salles</div>
       ${listeSalles().map(x => { const s = S.salles[x.id]; return nav('salle:' + x.id, s?.nom || x.nom, 'salle', s ? pannesSalle(s) : null); }).join('')}
@@ -109,7 +116,7 @@ function rendre(doux = false){
       <div class="nav-titre">Configuration</div>
       ${nav('catalogue', 'Équipements & pannes', 'clavier')}
       ${nav('qr', 'QR codes', 'logiciel')}
-      ${nav('param', 'Paramètres', 'session')}
+      ${nav('param', 'Sauvegarde', 'session')}
     </nav>
     <main class="contenu" id="contenu" tabindex="-1">
       ${S.codeNouveau ? `<div class="carte" style="margin-bottom:18px;box-shadow:inset 0 0 0 2px var(--bleu),var(--sh)">
@@ -119,6 +126,7 @@ function rendre(doux = false){
       ${corps}
     </main></div>`;
   if (doux) scrollTo(0, scroll);
+  if (listeSalles().length) copieSecours();
   $$('[data-vue]').forEach(b => b.onclick = () => aller(b.dataset.vue));
   $('#code-ok')?.addEventListener('click', () => { S.codeNouveau = ''; rendre(); });
   brancher();
@@ -581,13 +589,71 @@ function imprimer(quoi){
   setTimeout(() => window.print(), 50);
 }
 
-/* ═════════ Paramètres ═════════ */
+/* ═════════ Sauvegarde & paramètres ═════════ */
+function exportComplet(){
+  const salles = {}; listeSalles().forEach(x => { if (S.salles[x.id]) salles[x.id] = S.salles[x.id]; });
+  return { format: 'parc-informatique', version: 1, exporteLe: maintenant(), parc: S.parc, salles };
+}
+/* Copie de secours automatique sur cet appareil, à chaque changement : rien ne se perd. */
+let secoursT = null;
+function copieSecours(){ clearTimeout(secoursT); secoursT = setTimeout(() => { try { localStorage.setItem(K_SECOURS, JSON.stringify(exportComplet())); } catch (_) { } }, 400); }
+function telecharger(nom, contenu, type){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([contenu], { type })); a.download = nom;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+const jourFichier = () => isoJour(new Date());
+function inventaireCSV(){
+  const cel = v => { const t = String(v ?? ''); return /[;"\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+  const eqLib = k => (cat().eq.find(e => e.k === k) || {}).lib || k;
+  const lignes = [['Salle', 'Poste', 'Nom', 'Type', 'Marque', 'Modèle', 'N° inventaire / série', 'Système', 'Année', 'Équipements', 'Références', 'État', 'Problèmes en cours', 'Note']];
+  sallesChargees().forEach(s => (s.postes || []).forEach(p => {
+    lignes.push([s.nom, p.n, p.nom, typeLib(p.type), p.marque, p.modele, p.inv, p.os, p.annee, (p.eq || []).map(eqLib).join(', '),
+      Object.entries(p.refs || {}).map(([k, v]) => `${eqLib(k)} : ${v}`).join(' | '), LIB_ETAT[etatPoste(s, p)],
+      ouverts(s, p.n).map(x => libPanne(s, x.t).lib + (x.d.length > 1 ? ` (×${x.d.length})` : '')).join(' | '), p.note]);
+  }));
+  return '﻿' + lignes.map(l => l.map(cel).join(';')).join('\r\n');
+}
+async function restaurer(fichier){
+  let d;
+  try { d = JSON.parse(await fichier.text()); } catch (_) { return toast('Ce fichier n’est pas une sauvegarde lisible.'); }
+  if (d?.format !== 'parc-informatique' || !d.parc || typeof d.salles !== 'object') return toast('Ce fichier n’est pas une sauvegarde du parc informatique.');
+  const ids = Object.keys(d.salles).filter(id => RE_SALLE.test(id));
+  if (!confirm(`Restaurer la sauvegarde du ${dateCourte(d.exporteLe)} ? ${ids.length} salle(s). Les salles de la sauvegarde reprendront exactement leur état d’alors ; les autres ne changent pas.`)) return;
+  const champs = ['nom', 'colonnes', 'postes', 'eqSalle', 'cat', 'sig'];
+  const vide = k => (k === 'sig' || k === 'postes' || k === 'eqSalle') ? [] : k === 'colonnes' ? 6 : k === 'cat' ? {} : 'Salle';
+  try {
+    for (const id of ids) {
+      const src = d.salles[id], ref = FS.doc(db, COL_SALLE, id);
+      const existe = (await FS.getDoc(ref)).exists();
+      if (existe) await modifierSalle(id, x => { champs.forEach(k => { if (src[k] !== undefined) x[k] = src[k]; }); return x; });
+      else { const n = { id, type: 'salle', majLe: maintenant(), version: 1 }; champs.forEach(k => { n[k] = src[k] ?? vide(k); }); await FS.setDoc(ref, n); }
+    }
+    await modifierParc(p => {
+      p.nom = d.parc.nom || p.nom; p.cat = d.parc.cat || p.cat;
+      const garde = (p.salles || []).filter(x => !ids.includes(x.id));
+      p.salles = [...(d.parc.salles || []).filter(x => ids.includes(x.id)), ...garde].slice(0, MAX_SALLES);
+      return p;
+    });
+    toast('Sauvegarde restaurée.');
+  } catch (_) { toast('Restauration interrompue : vérifiez la connexion, puis recommencez.'); }
+}
 function vueParam(){
-  return `<div class="tete"><div><h1>Paramètres</h1><p>Votre espace et votre code d’accès.</p></div></div>
-  <div class="pile" style="max-width:640px">
+  let secours = null; try { secours = JSON.parse(localStorage.getItem(K_SECOURS) || 'null'); } catch (_) { }
+  const nb = sallesChargees().reduce((n, s) => n + (s.postes || []).length, 0);
+  return `<div class="tete"><div><h1>Sauvegarde</h1><p>Tout est enregistré en ligne automatiquement, à chaque modification. Ici, vous gardez en plus une copie.</p></div></div>
+  <div class="pile" style="max-width:720px">
+    <section class="carte"><h2>Télécharger<small>${listeSalles().length} salle(s) · ${nb} postes</small></h2>
+      <div class="pile" style="gap:10px">
+        <div class="ligne"><span class="pic etat-ok">${icone('logiciel')}</span><span class="txt"><b>Sauvegarde complète (JSON)</b><small>Salles, postes, références, catalogue, signalements et réparations. Permet de tout restaurer.</small></span><button class="btn petit" id="ex-json">Télécharger</button></div>
+        <div class="ligne"><span class="pic etat-pb">${icone('clavier')}</span><span class="txt"><b>Inventaire pour tableur (CSV)</b><small>Un poste par ligne, à ouvrir dans Excel ou Numbers.</small></span><button class="btn petit sec" id="ex-csv">Télécharger</button></div>
+      </div></section>
+    <section class="carte"><h2>Restaurer une sauvegarde</h2>
+      <p style="margin:0 0 12px;color:var(--ink-2)">Choisissez un fichier JSON téléchargé ici. Les salles qu’il contient reprennent leur état ; les autres ne changent pas.</p>
+      <label class="btn ghost" style="cursor:pointer">${icone('logiciel')}Choisir un fichier…<input type="file" id="im-json" accept="application/json,.json" class="sr"></label></section>
+    <section class="carte"><h2>Copie de secours de cet appareil</h2>
+      <p style="margin:0 0 12px;color:var(--ink-2)">${secours ? `Mise à jour automatiquement : dernière copie ${esc(dateCourte(secours.exporteLe))}.` : 'Elle se crée automatiquement dès la première salle.'}</p>
+      ${secours ? `<button class="btn petit ghost" id="ex-secours">Télécharger la copie de secours</button>` : ''}</section>
     <form class="carte" id="f-param"><h2>Nom de l’espace</h2><div class="puces" style="flex-wrap:nowrap"><label class="sr" for="pa-nom">Nom de l’espace</label><input id="pa-nom" maxlength="40" value="${esc(S.parc.nom || '')}" style="flex:1;border:1.5px solid var(--line-2);border-radius:11px;padding:10px 12px;min-width:0"><button class="btn">Enregistrer</button></div></form>
-    <section class="carte"><h2>Code d’accès</h2><p style="margin:0 0 12px;color:var(--ink-2)">À garder pour vous. Il ouvre ce tableau de bord sur tout appareil.</p><span class="code">${codeLisible(S.code)}</span></section>
-    <section class="carte"><h2>Cet appareil</h2><button class="btn ghost" id="sortir">Se déconnecter</button></section>
   </div>`;
 }
 
@@ -647,6 +713,10 @@ function brancher(){
   /* Paramètres */
   const fp = $('#f-param'); if (fp) fp.onsubmit = async e => { e.preventDefault(); const nom = nettoie($('#pa-nom').value, 40) || 'Parc informatique'; try { await modifierParc(p => { p.nom = nom; return p; }); toast('Nom enregistré.'); } catch (_) { toast('Impossible : vérifiez la connexion.'); } };
   $('#sortir')?.addEventListener('click', () => { if (confirm('Se déconnecter de cet appareil ? Il faudra retaper le code.')) sortir(); });
+  $('#ex-json')?.addEventListener('click', () => telecharger('parc-informatique-' + jourFichier() + '.json', JSON.stringify(exportComplet(), null, 2), 'application/json'));
+  $('#ex-csv')?.addEventListener('click', () => telecharger('inventaire-ordinateurs-' + jourFichier() + '.csv', inventaireCSV(), 'text/csv;charset=utf-8'));
+  $('#ex-secours')?.addEventListener('click', () => { try { telecharger('parc-informatique-secours-' + jourFichier() + '.json', JSON.stringify(JSON.parse(localStorage.getItem(K_SECOURS)), null, 2), 'application/json'); } catch (_) { toast('Copie de secours illisible.'); } });
+  $('#im-json')?.addEventListener('change', e => { const f = e.target.files?.[0]; if (f) restaurer(f); e.target.value = ''; });
 }
 
 let tt = null;
@@ -654,4 +724,4 @@ function toast(m){ const t = $('#toast'); t.innerHTML = `<div class="toast">${es
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.tiroir) fermerTiroir(); });
 
 if (erreurFS) $('#racine').innerHTML = '<div class="acces"><div class="boite"><p class="err">Pas de connexion au serveur. Rechargez la page.</p></div></div>';
-else if (S.code) entrer(S.code); else ecranAcces();
+else entrer(S.code || ESPACE_PAR_DEFAUT);
