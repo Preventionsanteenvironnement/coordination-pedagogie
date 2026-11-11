@@ -88,6 +88,7 @@ textarea:focus{border-color:var(--indigo);outline:none;box-shadow:0 0 0 4px rgba
 .lien{background:none;border:0;color:var(--indigo);font-weight:700;text-decoration:underline;margin-top:14px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 .choix button[aria-pressed=true][data-v=convenue]{background:var(--ok);border-color:var(--ok);color:#fff}.choix button[data-v=convenue]:hover{border-color:var(--ok)}.choix{flex-wrap:wrap}.choix button{white-space:normal;overflow-wrap:anywhere;min-width:0}.recap em{white-space:normal;overflow-wrap:anywhere}.recap>div{flex-wrap:wrap;gap:8px}
+.etat-suivi h2{margin:0 0 8px}.etat-suivi.annulee{border-left:6px solid #b91c1c}.etat-suivi.reportee{border-left:6px solid #b45309}.etat-suivi a.envoi{display:inline-block;text-decoration:none}
 </style>
 </head>
 <body>
@@ -159,6 +160,20 @@ function rendre(){
   const v = $('#vue'), a = document.activeElement, id = a && a.id;
   if (S.etat !== 'ok'){ $('#intro').textContent = S.etat === 'chargement' ? 'Chargement de la demande…' : ''; v.innerHTML = S.etat === 'chargement' ? '' : `<div class="carte msg">${esc(S.etat)}</div>`; return; }
   const d = S.d, cls = (d.classes || []).map(c => c.libelle || c.classe).join(', ');
+  /* [11/11/2026, Brahim] Demande annulée ou reportée par la coordination (champs etat, reporteAu, remplacePar écrits
+     par l'Atelier) : plus de réponse possible, et un lien vers la nouvelle demande quand elle existe. */
+  if (d.etat === 'annulee' || d.etat === 'reportee'){
+    const an = d.etat === 'annulee', nv = /^epreuve_[a-z0-9]{8,24}$/.test(d.remplacePar || '') ? d.remplacePar : '';
+    const quand = an ? 'est annulé' : /^\d{4}-\d{2}-\d{2}$/.test(d.reporteAu || '') ? 'est reporté au ' + dateLongue(d.reporteAu) : 'est reporté à une date ultérieure';
+    $('#titre').textContent = an ? 'Renfort annulé' : 'Renfort reporté';
+    $('#intro').textContent = `Le renfort AESH pour ${nomEp(d)} (${cls}) ${quand}.`;
+    v.innerHTML = `<section class="carte etat-suivi ${d.etat}" role="status"><h2>${an ? 'Renfort annulé' : 'Renfort reporté'}</h2>
+      <p>Le renfort AESH prévu ${quand}. Vous n’avez pas à venir à la date prévue.</p>
+      <div class="recap">${seances().map(s => `<div class="non"><span><s>${esc(dateLongue(s.date))} · ${hFr(s.debut)}–${hFr(s.fin)}</s></span><em>${esc(s.libelle || s.classe)}</em></div>`).join('')}</div>
+      ${nv ? `<p style="margin-top:12px"><a class="envoi" href="?d=${esc(nv)}">Répondre pour la nouvelle date</a></p>` : an ? '' : `<p style="margin-top:12px">Une nouvelle demande vous sera envoyée ${d.reporteAu ? 'pour la nouvelle date' : 'dès que la nouvelle date sera fixée'}.</p>`}
+      <p style="margin-top:12px">Merci à toutes celles et ceux qui ont répondu.</p></section>`;
+    return;
+  }
   if (S.envoye){
     $('#titre').textContent = 'Merci ' + S.envoye.prenom;
     $('#intro').textContent = 'Votre réponse est bien arrivée à la coordination.';
@@ -196,6 +211,7 @@ function controle(){
   return e;
 }
 async function envoyer(){
+  if (S.d && (S.d.etat === 'annulee' || S.d.etat === 'reportee')) return;
   S.erreurs = controle(); if (S.erreurs.length){ rendre(); $('#erreurs')?.focus(); return; }
   const now = new Date().toISOString(), prenom = nettoie(S.prenom, 30), id = nouvelId();
   const doc = { id, type: 'reponse', annee: String(S.d.annee || ''), epreuve: ID, prenom,
