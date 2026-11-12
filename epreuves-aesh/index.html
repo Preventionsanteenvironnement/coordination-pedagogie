@@ -270,7 +270,7 @@ const ETAPES = [
 ];
 const S = {
   edt: null, C: null, eleves: {}, elevesEtat: {}, majEleves: {}, chargement: true, erreur: '',
-  f: { matiere: '', matiereAutre: '', groupes: [], choix: '', classeAutre: '', nature: '', natureAutre: '', forme: '', formeAutre: '', seances: [], observations: '', autreDemande: '' },
+  f: { demandeur: '', matiere: '', matiereAutre: '', groupes: [], choix: '', classeAutre: '', nature: '', natureAutre: '', forme: '', formeAutre: '', seances: [], observations: '', autreDemande: '' },
   etape: 1, ok: {}, snap: null, erreurs: [], nomConfirme: '', envoi: null, envoye: null
 };
 let uid = 0;
@@ -375,6 +375,7 @@ const suivante = () => { for (let n = 1; n <= 5; n++) if (!S.ok[n]) return n; re
 function ouvrir(n){ if (n === 4) proposerSeances(); S.snap = clone(S.f); S.etape = n; S.erreurs = []; S.nomConfirme = ''; }
 function controle(n){
   const f = S.f, e = [];
+  if (n === 1 && !nettoie(f.demandeur, 60)) e.push('Indiquez votre nom : la coordination doit savoir qui fait la demande.');
   if (n === 1 && !matiereF()) e.push('Choisissez la matière (ou « Autre… » et écrivez-la).');
   if (n === 2 && !f.groupes.length) e.push('Choisissez au moins une classe.');
   if (n === 3){
@@ -428,7 +429,7 @@ function nomSuspect(t){ const m = String(t).match(/\b[A-ZÀ-ÖØ-Ý]{3,}(?:-[A-Z
    Seules exceptions : au moins une classe (étape 2), et le nom repéré à l'étape 5 (second clic). */
 function valider(n, force){
   S.erreurs = controle(n);
-  const bloquant = (n === 2 && !S.f.groupes.length) || n === 5 || (n === 4 && S.f.seances.some(x => controleSeance(x).length));
+  const bloquant = (n === 1 && (!matiereF() || !nettoie(S.f.demandeur, 60))) || (n === 2 && !S.f.groupes.length) || n === 5 || (n === 4 && S.f.seances.some(x => controleSeance(x).length));
   if (S.erreurs.length && !(force && !bloquant)){ rendre(); $('#erreurs')?.focus(); return; }
   S.erreurs = [];
   S.ok[n] = true;
@@ -460,7 +461,7 @@ function rendre(){
 }
 function htmlParcours(){
   const faits = ETAPES.filter(e => S.ok[e.n]).length;
-  return `<p class="rgpd">🔒 <b>Aucun nom</b> : ni élève, ni enseignant, ni AESH. Vous voyez seulement des nombres. Vous ne cochez aucun aménagement : la coordination les connaît déjà.</p>
+  return `<p class="rgpd">🔒 <b>Aucun nom d’élève ni d’AESH</b> : vous indiquez seulement votre nom, pour que la coordination vous réponde. Vous voyez seulement des nombres. Vous ne cochez aucun aménagement : la coordination les connaît déjà.</p>
     ${S.envoi && S.envoi.etat === 'attente' ? `<div class="msg err" role="alert">${esc(S.envoi.message)} <button type="button" class="btn lien" data-a="renvoyer">L’envoyer maintenant</button></div>` : ''}
     <nav class="prog" aria-label="Avancement"><div class="prog-t"><span>Étape <b>${S.etape}</b> sur 6 · ${esc(ETAPES[S.etape - 1].t)}</span><span>${faits} / 6 validée${faits > 1 ? 's' : ''}</span></div>
       <div class="segs">${ETAPES.map(e => `<button type="button" class="seg ${S.ok[e.n] ? 'fait' : ''} ${S.etape === e.n ? 'cour' : ''}" style="--c:var(${e.c})" data-a="aller" data-v="${e.n}" ${S.ok[e.n] || e.n === S.etape || e.n <= suivante() ? '' : 'disabled'} aria-label="Étape ${e.n} : ${esc(e.t)}${S.ok[e.n] ? ' (validée)' : ''}"><i></i><span>${e.n}. ${esc(e.t)}</span></button>`).join('')}</div></nav>
@@ -472,7 +473,7 @@ function htmlEtape(E){
   const past = cour ? `<span class="pastille p-cour">${fait ? 'en modification' : 'à remplir'}</span>` : fait ? '<span class="pastille p-ok">✓ validée</span>' : '<span class="pastille p-av">à venir</span>';
   const tete = `<div class="et-t"><span class="rond" aria-hidden="true">${fait && !cour ? '✓' : n}</span><h2 tabindex="-1">${esc(E.t)}</h2>${past}</div>`;
   if (cour) return `<section class="etape" id="et-${n}" ${st} aria-current="step">${tete}<div class="et-c"><p class="guide">${esc(E.g)}</p>
-      ${S.erreurs.length ? (n === 5 || (n === 2 && !S.f.groupes.length) || (n === 4 && S.f.seances.some(x => controleSeance(x).length))
+      ${S.erreurs.length ? ((n === 1 && (!matiereF() || !nettoie(S.f.demandeur, 60))) || n === 5 || (n === 2 && !S.f.groupes.length) || (n === 4 && S.f.seances.some(x => controleSeance(x).length))
         ? `<div class="erreurs" role="alert" id="erreurs" tabindex="-1"><b>${n === 4 ? 'Indispensable pour prévenir les AESH : la date, l’heure et la durée de chaque séance.' : 'À compléter'}</b><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>`
         : `<div class="avert" role="alert" id="erreurs" tabindex="-1"><p class="avert-t">Avant de valider</p><ul>${S.erreurs.map(e => `<li>${esc(e)}</li>`).join('')}</ul>
           <p class="avert-q">Voulez-vous quand même valider cette étape ?</p><div class="puces"><button type="button" class="btn pt" data-a="avert-fermer">Compléter</button><button type="button" class="btn pt ok" style="--c:#b45309" data-a="forcer" data-v="${n}">Valider quand même</button></div></div>`) : ''}
@@ -482,7 +483,7 @@ function htmlEtape(E){
 }
 function resume(n){
   const f = S.f;
-  if (n === 1) return `<b>${esc(matiereF())}</b>`;
+  if (n === 1) return `<b>${esc(matiereF())}</b>${nettoie(f.demandeur, 60) ? ' · demandé par ' + esc(nettoie(f.demandeur, 60)) : ''}`;
   if (n === 2) return f.groupes.map(g => { const c = cG(g); return `<b>${esc(libGroupe(g))}</b>${c.total ? ` · estimation ${c.propose} AESH` : ''}`; }).join('<br>');
   if (n === 3) return `<b>${esc(natureTxt())}</b>${formeTxt() ? ' · ' + esc(formeTxt()) : ''}${f.groupes.some(g => nettoie(g.intitule, 120)) ? '<br>' + f.groupes.filter(g => nettoie(g.intitule, 120)).map(g => `${esc(libGroupe(g))} : « ${esc(nettoie(g.intitule, 120))} »`).join('<br>') : ''}`;
   if (n === 4) return pluriel(f.seances.length, 'séance', 'séances') + ' : ' + triees().map(s => `${esc(dateLongue(s.date))} ${hFr(s.debut)}–${hFr(finS(s))}`).join(' · ');
@@ -494,7 +495,8 @@ const triees = () => [...S.f.seances].sort((a, b) => (a.date || '9').localeCompa
 /* — 1. Matière — */
 function corps1(){
   const f = S.f;
-  return `<div class="champ"><label for="matiere">Matière</label>
+  return `<div class="champ"><label for="demandeur">Votre nom <span class="aide">(obligatoire — la coordination vous répondra)</span></label><input type="text" id="demandeur" data-c="demandeur" maxlength="60" autocomplete="name" placeholder="Ex. : Mme Charlotte Subero-Couroyer" value="${esc(f.demandeur)}"></div>
+    <div class="champ"><label for="matiere">Matière <span class="aide">(obligatoire)</span></label>
       <select id="matiere" data-c="matiere"><option value="">— sélectionner votre matière —</option>${matieres().map(x => `<option ${f.matiere === x ? 'selected' : ''}>${esc(x)}</option>`).join('')}<option value="__autre" ${f.matiere === '__autre' ? 'selected' : ''}>Autre…</option></select></div>
     ${f.matiere === '__autre' ? `<div class="champ"><label for="matiere-autre">Nom de la matière</label><input type="text" id="matiere-autre" data-c="matiereAutre" maxlength="60" value="${esc(f.matiereAutre)}"></div>` : ''}`;
 }
@@ -782,7 +784,7 @@ function construire(){
     classes: f.groupes.map(g => ({ classe: g.id, classes: g.classes, libelle: libGroupe(g), autre: !!g.autre, intitule: nettoie(g.intitule, 120),
       diplome: nettoie(g.diplome, 60), pole: poleDe(g), nbSouhaite: Math.max(0, ...S.f.seances.filter(s => s.classe === g.id).map(s => totalDe(s) || 0)),
       comptes: g.classes.length ? (({ amen, besoins, ...r }) => ({ ...r, ...amen, besoins: besoins.map(([n, v]) => n + ' ×' + v) }))(comptesGroupe(g.classes)) : {} })),
-    seances, observations: nettoie(f.observations, 600), autreDemande: nettoie(f.autreDemande, 600),
+    seances, observations: ('Demandé par : ' + nettoie(f.demandeur, 60) + (nettoie(f.observations, 600) ? '\n' + nettoie(f.observations, 600) : '')).slice(0, 600), autreDemande: nettoie(f.autreDemande, 600),
     statut: 'nouvelle', reponse: { statut: '', texte: '', majLe: '' }, creeLe: now, majLe: now, source: SOURCE };
 }
 async function envoyer(renvoi){
