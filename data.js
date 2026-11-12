@@ -214,8 +214,8 @@ const THEMATIQUES = [
         badge: "Nouveau",
       },
       {
-        titre: "Besoin AESH pour une épreuve",
-        desc: "Pour les enseignants : CCF, CCF blanc, bac blanc, évaluation, sortie. Choisissez la matière, la classe et les séances — le créneau du cours et le tiers temps sont proposés. Vous voyez combien d'élèves ont des aménagements, sans aucun nom, et la coordination organise les AESH.",
+        titre: "Demande d'AESH",
+        desc: "Pour les enseignants : CCF, CCF blanc, bac blanc, évaluation, sortie, stage ou autre besoin, en une seule demande. Choisissez la matière, la classe et les séances — le créneau du cours et le tiers temps sont proposés. Vous voyez combien d'élèves ont des aménagements, sans aucun nom, et la coordination organise les AESH.",
         lien: "epreuves-aesh/",
         type: "Formulaire",
         icon: "calendar",

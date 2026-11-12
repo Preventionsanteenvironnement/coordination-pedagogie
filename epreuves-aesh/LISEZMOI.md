@@ -71,3 +71,12 @@ La demande garde `type:'epreuve'`, `nature:'sortie'` (ou autre) et la collection
 Réponse AESH : prénom, participation déjà convenue / disponible / non disponible ; commentaire facultatif. Disponibilité sur toute la plage obligatoire dans le libellé. La réponse garde `dispo:'oui'` pour les deux situations positives, avec `participation:'convenue'|'disponible'` et `engagementComplet`. Une réponse positive n'affecte pas automatiquement le planning. Les anciennes épreuves gardent Disponible / Sous réserve / Pas disponible et leur format de réponse.
 
 Tests fictifs isolés : regroupements/déduplication, estimation absente, correction, dates invalides, horaires, échec d'envoi/reprise, envoi unique, maintien des épreuves et anciennes réponses, deux statuts nouveaux, largeur 390 px, absence d'erreurs JS. Aperçus inspectés. Aucun nom d'élève dans les tests, aucune écriture Firestore, aucune règle changée, aucun commit/push/déploiement. Vérification des règles actives et essai d'envoi réel restant à faire après autorisation distincte. Les effectifs en ligne restent ceux du dernier envoi confirmé des fiches ; pas de publication automatique.
+
+## 12/11/2026 — Une seule demande (« Demande d'AESH »)
+Accord de Brahim (« Oui, vas-y »). Les boutons Épreuve / CCF, Sortie, Autre besoin sont retirés : le type se choisit à l'étape 3
+(CCF, CCF blanc, Bac blanc, Évaluation, Sortie, Stage, Autre besoin). `sorties.mjs` n'est plus chargé (gardé pour mémoire).
+- Étape 1 : la matière est obligatoire, le nom de l'enseignant facultatif (« Demandé par : … » dans les observations s'il est donné).
+- Sortie et stage : pas de forme ni de tiers temps, matinée / après-midi / journée, lieu (120 caractères) ;
+  sortie : élèves prévus et enseignants accompagnateurs (séance : `mobilisation`, `effectifPrevu`, `enseignants`, comme l'ancien parcours).
+- Étape 6 : « Aperçu de ma demande », fiche propre (tableau des séances), puis « Envoyer ma demande ».
+Collection et champs de premier niveau inchangés.
