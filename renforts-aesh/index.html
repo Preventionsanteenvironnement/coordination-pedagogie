@@ -113,7 +113,7 @@ const hFr = h => /^\d\d:\d\d$/.test(h || '') ? `${parseInt(h, 10)}h${h.slice(3) 
 const dateLongue = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso || '') ? new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
 const avecDelai = (p, ms) => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('délai'), { code: 'delai' })), ms); })]).finally(() => clearTimeout(t)); };
 const nouvelId = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = crypto.getRandomValues(new Uint8Array(8)); return 'reponse_' + Date.now().toString(36) + [...r].map(x => a[x % 36]).join(''); };
-const NATURES = { ccf: 'CCF', ccfblanc: 'CCF blanc', bacblanc: 'Bac blanc', evaluation: 'Évaluation', sortie: 'Sortie' };
+const NATURES = { ccf: 'CCF', ccfblanc: 'CCF blanc', bacblanc: 'Bac blanc', evaluation: 'Évaluation', sortie: 'Sortie', stage: 'Stage' };
 const LIB = { oui: 'Disponible', reserve: 'Sous réserve', non: 'Pas disponible' };
 /* Le prénom seul : lettres, espace, tiret, apostrophe. */
 const RE_PRENOM = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ' -]{1,29}$/;
@@ -154,7 +154,7 @@ function pourvu(s, i){
   if (m <= 0) return `<div class="manque complet">Complet, merci ! Vous pouvez encore répondre « sous réserve » en cas de désistement.</div>`;
   return `<div class="manque">${p > 0 ? `Il manque encore ${m} AESH (${p} sur ${r} déjà retenue${p > 1 ? 's' : ''})` : `Il manque ${m} AESH`}</div>`;
 }
-const nomEp = d => [NATURES[d.nature] || d.natureAutre || 'Épreuve', (mobilisation() ? d.intitule || d.matiere : d.matiere)].filter(Boolean).join(' · ');
+const nomEp = d => [d.nature === 'stage' ? 'Stage' + (d.natureAutre ? ' ' + d.natureAutre : '') : NATURES[d.nature] || d.natureAutre || 'Épreuve', (mobilisation() ? d.intitule || d.matiere : d.matiere)].filter(Boolean).join(' · ');
 const COCHE = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 function rendre(){
   const v = $('#vue'), a = document.activeElement, id = a && a.id;

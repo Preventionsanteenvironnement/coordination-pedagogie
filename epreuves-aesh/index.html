@@ -240,7 +240,7 @@ const nouvelId = () => { const a = 'abcdefghijklmnopqrstuvwxyz0123456789', r = c
 const avecDelai = (p, ms) => { let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(Object.assign(new Error('délai'), { code: 'delai' })), ms); })]).finally(() => clearTimeout(t)); };
 const typeErreur = e => { const t = `${e?.code || ''} ${e?.message || ''}`; return /permission|PERMISSION_DENIED|insufficient/i.test(t) ? 'refus' : (navigator.onLine === false || /unavailable|offline|network|delai|fetch/i.test(t)) ? 'horsligne' : 'autre'; };
 
-const NATURES = [['ccf', 'CCF'], ['ccfblanc', 'CCF blanc'], ['bacblanc', 'Bac blanc'], ['evaluation', 'Évaluation'], ['sortie', 'Sortie'], ['autre', 'Autre']];
+const NATURES = [['ccf', 'CCF'], ['ccfblanc', 'CCF blanc'], ['bacblanc', 'Bac blanc'], ['evaluation', 'Évaluation'], ['sortie', 'Sortie'], ['stage', 'Stage'], ['autre', 'Autre']];
 const FORMES = [['ecrit', 'Écrit'], ['oral', 'Oral'], ['pratique', 'Pratique'], ['autre', 'Autre']];
 const AMEN = [['tiers', '⅓ temps'], ['lecteur', 'lecteur'], ['scripteur', 'scripteur'], ['assistant', 'assistant'], ['ordi', 'ordinateur'], ['agrandi', 'sujet agrandi'], ['isole', 'salle à part'], ['dispense', 'dispense']];
 const DUREES = [30, 45, 60, 90, 120, 150, 180, 240];
@@ -351,6 +351,7 @@ const libDuree = d => d < 60 ? d + ' min' : Math.floor(d / 60) + ' h' + (d % 60 
 const tiersDe = d => Math.ceil((Number(d) || 0) / 3 / 5) * 5;
 function nouvelleSeance(id){
   const g = groupe(id), c = cG(g);
+  if (estStage()) return { uid: ++uid, classe: id, date: '', debut: '08:30', duree: 240, tiers: false, fin: '', finManuelle: false, heureManuelle: true, salle: '', nbAesh: '1', deja: '0', ouvert: true };
   return { uid: ++uid, classe: id, date: '', debut: '', duree: 60, tiers: (c.amen.tiers || 0) > 0, fin: '', finManuelle: false, heureManuelle: false, salle: '', nbAesh: g ? String(g.nb ?? c.propose) : '0' };
 }
 function poserCours(s, c){
@@ -362,7 +363,8 @@ function finCalculee(s){
   const m = min(s.debut) + (Number(s.duree) || 0) + (s.tiers ? tiersDe(s.duree) : 0); return m < 24 * 60 ? hDe(m) : '';
 }
 const finS = s => s.finManuelle ? s.fin : finCalculee(s);
-const natureTxt = () => { const n = NATURES.find(x => x[0] === S.f.nature); return n ? (S.f.nature === 'autre' ? nettoie(S.f.natureAutre, 80) || 'Autre' : n[1]) : ''; };
+const natureTxt = () => { const n = NATURES.find(x => x[0] === S.f.nature); return n ? (S.f.nature === 'autre' ? nettoie(S.f.natureAutre, 80) || 'Autre' : S.f.nature === 'stage' ? 'Stage' + (nettoie(S.f.natureAutre, 80) ? ' · ' + nettoie(S.f.natureAutre, 80) : '') : n[1]) : ''; };
+const estStage = () => S.f.nature === 'stage';   /* 12/11/2026 : besoin d'AESH pour un stage (matinée, journée, plusieurs jours) */
 const formeTxt = () => { const n = FORMES.find(x => x[0] === S.f.forme); return n ? (S.f.forme === 'autre' ? nettoie(S.f.formeAutre, 80) || 'Autre' : n[1]) : ''; };
 const majTxt = cls => { const l = cls.map(k => S.majEleves[k]).filter(Boolean).sort(); return l.length ? new Date(l[0]).toLocaleDateString('fr-FR') : ''; };
 const nomEpreuve = g => nettoie(g && g.intitule, 120) || [natureTxt(), matiereF()].filter(Boolean).join(' · ') || 'Épreuve';
@@ -405,7 +407,7 @@ function controleSeance(s){
 function avertSeance(s){
   const a = [];
   if (!s.deja) a.push('Vous n’avez pas répondu à la question 1 : une AESH est-elle déjà présente à ce cours ?');
-  if (!nettoie(s.salle, 20)) a.push('La salle n’est pas indiquée.');
+  if (!nettoie(s.salle, 20) && !estStage()) a.push('La salle n’est pas indiquée.');
   return a;
 }
 const numero = s => S.f.seances.filter(x => x.classe === s.classe).indexOf(s) + 1;
@@ -413,6 +415,7 @@ const numero = s => S.f.seances.filter(x => x.classe === s.classe).indexOf(s) + 
 function proposerSeances(){
   S.f.groupes.forEach(g => {
     if (S.f.seances.some(s => s.classe === g.id)) return;
+    if (estStage()){ S.f.seances.push(nouvelleSeance(g.id)); return; }
     const s = nouvelleSeance(g.id), c = coursSemaineG(g).map(x => [x, prochaine(x, g)]).filter(x => x[1]).sort((a, b) => a[1].localeCompare(b[1]))[0];
     if (c){ s.date = c[1]; poserCours(s, c[0]); s.propose = true; } else s.ouvert = true;
     S.f.seances.push(s);
@@ -549,6 +552,7 @@ function corps3(){
   const f = S.f;
   return `<div class="champ"><span class="leg">Type d’épreuve <span class="aide">(CCF, bac blanc, évaluation…)</span></span><div class="puces">${NATURES.map(([k, n]) => `<button type="button" class="puce" id="na-${k}" data-a="nature" data-v="${k}" aria-pressed="${f.nature === k}">${n}</button>`).join('')}</div></div>
     ${f.nature === 'autre' ? `<div class="champ"><label for="nature-autre">Précisez <span class="aide">(facultatif)</span></label><input type="text" id="nature-autre" data-c="natureAutre" maxlength="80" value="${esc(f.natureAutre)}"></div>` : ''}
+    ${f.nature === 'stage' ? `<div class="champ"><label for="nature-autre">Type de stage <span class="aide">(facultatif — par exemple : OD)</span></label><input type="text" id="nature-autre" data-c="natureAutre" maxlength="80" placeholder="Ex. : OD" value="${esc(f.natureAutre)}"></div><p class="aide">À l’étape 4, choisissez librement le ou les jours : une matinée, une journée, ou plusieurs jours (une séance par jour).</p>` : ''}
     <div class="champ"><span class="leg">Forme <span class="aide">(écrit, oral, pratique — facultatif)</span></span><div class="puces">${FORMES.map(([k, n]) => `<button type="button" class="puce" id="fo-${k}" data-a="forme" data-v="${k}" aria-pressed="${f.forme === k}">${n}</button>`).join('')}</div></div>
     ${f.forme === 'autre' ? `<div class="champ"><label for="forme-autre">Précisez <span class="aide">(facultatif)</span></label><input type="text" id="forme-autre" data-c="formeAutre" maxlength="80" value="${esc(f.formeAutre)}"></div>` : ''}
     <div class="champ" style="margin-top:6px"><span class="leg">Nommez l’épreuve <span class="aide">(facultatif — le nom peut changer d’une classe à l’autre)</span></span></div>
@@ -609,37 +613,38 @@ function prochainesDates(g){
   return out.sort((a, b) => a[0].localeCompare(b[0]) || a[1].d.localeCompare(b[1].d)).slice(0, 4);
 }
 function carteSeance(s, k){
-  const g = groupe(s.classe), cs = coursDuJourG(g, s.date), c = cG(g), al = alertesDateG(g, s.date), fin = finS(s), id = x => `s${s.uid}-${x}`, dur = +s.duree || 0;
+  const g = groupe(s.classe), cs = estStage() ? [] : coursDuJourG(g, s.date), c = cG(g), al = estStage() ? alertesDateG(g, s.date).filter(x => !/PFMP|stage/i.test(x)) : alertesDateG(g, s.date), fin = finS(s), id = x => `s${s.uid}-${x}`, dur = +s.duree || 0;
   const err = S.erreurs.length || s.essai ? controleSeance(s) : [], edit = s.ouvert || err.length || !s.date;
   let auto = '';
   if (s.date && cs.length === 1) auto = `🕘 Ce jour-là, cours de ${esc(cs[0].lib)} de ${hFr(cs[0].d)} à ${hFr(cs[0].f)}${s.heureManuelle ? ` <button type="button" class="btn lien" data-a="cours" data-v="${s.uid}|0">Reprendre ce créneau</button>` : ' : créneau repris.'}`;
   else if (s.date && cs.length > 1) auto = `🕘 Ce jour-là, ${cs.length} cours : ${cs.map((x, j) => `<button type="button" class="btn pt ${!s.heureManuelle && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="cours" data-v="${s.uid}|${j}">${hFr(x.d)}–${hFr(x.f)}</button>`).join(' ')}`;
   else if (s.date && g && g.classes.length) auto = `Pas de cours de ${esc(matiereF())} ce jour-là : indiquez l’heure.`;
-  const pd = g && g.classes.length ? prochainesDates(g) : [];
+  const pd = g && g.classes.length && !estStage() ? prochainesDates(g) : [];
   const est = estimationDe(s), Q = (n, t, h) => `<div class="q4"><p class="q4-t"><span class="q4-n">${n}</span>${t}</p>${h}</div>`;
   return `<div class="seance s4 ${err.length ? 'en-erreur' : ''}" id="carte-${s.uid}">
     <div class="s4-t"><div class="s4-l"><b>Séance ${k}</b> · ${ligneDate(s)}${s.propose && !s.ouvert ? '<div class="aide">proposée d’après votre cours, modifiable</div>' : ''}</div>
       ${edit ? '' : `<button type="button" class="btn pt mod" style="--c:var(--e4)" id="${id('m')}" data-a="deplier" data-v="${s.uid}">✎ Modifier</button>`}</div>
-    ${edit ? `<div class="editeur"><p class="guide-p">${s.date ? 'Modifiez ce qui doit changer : date, heure, salle.' : 'Choisissez la date : le créneau du cours se remplit tout seul.'}</p>
+    ${edit ? `<div class="editeur"><p class="guide-p">${estStage() ? 'Choisissez la date, puis matinée, après-midi ou journée. Pour plusieurs jours : une séance par jour (« ajouter une séance » après validation).' : s.date ? 'Modifiez ce qui doit changer : date, heure, salle.' : 'Choisissez la date : le créneau du cours se remplit tout seul.'}</p>
       ${pd.length ? `<div class="puces" style="margin-bottom:8px"><span class="aide" style="align-self:center">Vos prochains cours :</span>${pd.map(([d, x]) => `<button type="button" class="btn pt ${s.date === d && s.debut === x.d ? 'ok' : ''}" style="--c:var(--e4)" data-a="date-cours" data-v="${s.uid}|${d}|${esc(x.id)}">${esc(dateLongue(d).replace(/^(\S+) (\d+) (\S+)$/, (m0, j, n, mo) => j.slice(0, 3) + '. ' + n + ' ' + mo.slice(0, 4) + (mo.length > 4 ? '.' : '')))} ${hFr(x.d)}</button>`).join('')}</div>` : ''}
+      ${estStage() ? `<div class="puces" style="margin-bottom:8px"><span class="aide" style="align-self:center">Stage :</span>${[['08:30', 240, 'Matinée (8 h 30 – 12 h 30)'], ['13:30', 210, 'Après-midi (13 h 30 – 17 h)'], ['08:30', 510, 'Journée (8 h 30 – 17 h)']].map(([d, du, l]) => `<button type="button" class="btn pt ${s.debut === d && +s.duree === du ? 'ok' : ''}" style="--c:var(--e4)" data-a="stage-plage" data-v="${s.uid}|${d}|${du}">${l}</button>`).join('')}</div>` : ''}
       <div class="grille">
         <div class="champ large"><label for="${id('date')}">Date</label><input type="date" id="${id('date')}" data-s="${s.uid}" data-k="date" value="${esc(s.date)}" min="${isoLocal()}"></div>
         <div class="champ"><span class="leg">Début</span>${choixHeure(s, 'debut', s.debut, id)}</div>
         <div class="champ"><span class="leg">Fin</span>${choixHeure(s, 'fin', fin, id)}</div>
-        <div class="champ large"><label for="${id('salle')}">Salle</label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
+        <div class="champ large"><label for="${id('salle')}">${estStage() ? 'Lieu du stage <span class="aide">(facultatif)</span>' : 'Salle'}</label><input type="text" id="${id('salle')}" data-s="${s.uid}" data-k="salle" maxlength="20" value="${esc(s.salle)}"></div>
         <div class="champ large"><label for="${id('duree')}">Durée en minutes</label><input type="number" id="${id('duree')}" data-s="${s.uid}" data-k="duree" min="5" max="600" step="5" inputmode="numeric" value="${esc(s.duree)}"></div>
       </div>
       ${auto ? `<div class="auto">${auto}</div>` : ''}
       ${s.finManuelle ? `<p class="aide">Fin choisie à la main. <button type="button" class="btn lien" data-a="fin-auto" data-v="${s.uid}">Revenir à la fin calculée</button></p>` : ''}
       <button type="button" class="btn pt" style="margin-top:8px" data-a="replier" data-v="${s.uid}">✓ Fermer</button></div>` : ''}
-    ${Q(1, 'Une AESH est-elle déjà présente à ce cours ? <span class="aide">(celle qui vient habituellement)</span>',
+    ${Q(1, estStage() ? 'Une AESH accompagne-t-elle déjà l’élève ce jour-là ? <span class="aide">(si oui, combien)</span>' : 'Une AESH est-elle déjà présente à ce cours ? <span class="aide">(celle qui vient habituellement)</span>',
       `<div class="puces">${[['0', 'Non'], ['1', 'Oui, 1'], ['2', 'Oui, 2'], ['3', 'Oui, 3'], ['nsp', 'Je ne sais pas']].map(([v, l]) => `<button type="button" class="btn pt ${s.deja === v ? 'ok' : ''}" style="--c:var(--e4)" data-a="deja" data-v="${s.uid}|${v}">${l}</button>`).join('')}</div>`)}
     ${Q(2, 'Combien d’AESH en plus ?',
       `<div class="ver-l"><button type="button" class="btn pt rond-b" data-a="nb-moins" data-v="${s.uid}" aria-label="Une AESH de moins">−</button><b class="nb-aff" aria-live="polite">${renfortDe(s)}</b><button type="button" class="btn pt rond-b" data-a="nb-plus" data-v="${s.uid}" aria-label="Une AESH de plus">+</button>
         <span class="aide">${dejaN(s) ? `soit ${totalDe(s)} AESH au total avec ${dejaN(s) > 1 ? 'les AESH habituelles' : 'l’AESH habituelle'} · ` : ''}estimation : ${est} au total</span></div>`)}
-    ${Q(3, 'Durée de l’épreuve',
-      `<div class="puces">${[60, 90, 120, 180, 240].map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>${[60, 90, 120, 180, 240].includes(dur) ? '' : `<span class="aide" style="align-self:center">${libDuree(dur)}</span>`}</div>`)}
-    ${Q(4, 'Tiers temps',
+    ${Q(3, estStage() ? 'Durée' : 'Durée de l’épreuve',
+      `<div class="puces">${(estStage() ? [210, 240, 510] : [60, 90, 120, 180, 240]).map(d => `<button type="button" class="btn pt ${dur === d ? 'ok' : ''}" style="--c:var(--e4)" data-a="duree" data-v="${s.uid}|${d}">${libDuree(d)}</button>`).join('')}<button type="button" class="btn pt" data-a="plus30" data-v="${s.uid}">+30 min</button>${[60, 90, 120, 180, 240].includes(dur) ? '' : `<span class="aide" style="align-self:center">${libDuree(dur)}</span>`}</div>`)}
+    ${estStage() ? '' : Q(4, 'Tiers temps',
       `<label class="interrupteur"><input type="checkbox" id="${id('tiers')}" data-s="${s.uid}" data-k="tiers" ${s.tiers ? 'checked' : ''}> ${s.tiers ? `oui, +${tiersDe(dur)} min` : 'non'}</label>${c.amen && c.amen.tiers ? ` <span class="aide">${pluriel(c.amen.tiers, 'élève a', 'élèves ont')} droit au tiers temps</span>` : ''}`)}
     ${err.length ? `<div class="erreurs" style="margin:10px 0"><b>Indispensable pour prévenir les AESH :</b> ${err.map(esc).join(' ')}</div>` : ''}
     ${!err.length && s.avert && avertSeance(s).length ? `<div class="avert" role="alert"><p class="avert-t">Avant de valider</p><ul>${avertSeance(s).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
@@ -717,6 +722,7 @@ vue.addEventListener('click', ev => {
   else if (a === 'retirer') f.seances = f.seances.filter(s => s.uid !== +v);
   else if (a === 'cours'){ const [u, j] = v.split('|'), s = seance(u), c = s && coursDuJourG(groupe(s.classe), s.date)[+j]; if (c) poserCours(s, c); }
   else if (a === 'duree'){ const [u, d] = v.split('|'), s = seance(u); if (s){ s.duree = +d; s.finManuelle = false; } }
+  else if (a === 'stage-plage'){ const [u, d, du] = v.split('|'), s = seance(u); if (s){ s.debut = d; s.duree = +du; s.tiers = false; s.finManuelle = false; s.heureManuelle = true; } }
   else if (a === 'plus30'){ const s = seance(v); if (s){ s.duree = (Number(s.duree) || 0) + 30; s.finManuelle = false; } }
   else if (a === 'fin-auto'){ const s = seance(v); if (s) s.finManuelle = false; }
   else if (a === 'envoyer'){ envoyer(); return; }
@@ -771,7 +777,7 @@ function construire(){
   });
   const ints = [...new Set(f.groupes.map(g => nettoie(g.intitule, 120)))];
   return { id: nouvelId(), type: 'epreuve', annee: ANNEE, matiere: matiereF(),
-    nature: f.nature, natureAutre: f.nature === 'autre' ? nettoie(f.natureAutre, 80) : '',
+    nature: f.nature, natureAutre: f.nature === 'autre' || f.nature === 'stage' ? nettoie(f.natureAutre, 80) : '',
     forme: f.forme || '', formeAutre: f.forme === 'autre' ? nettoie(f.formeAutre, 80) : '', intitule: ints.length === 1 ? ints[0] : '',
     classes: f.groupes.map(g => ({ classe: g.id, classes: g.classes, libelle: libGroupe(g), autre: !!g.autre, intitule: nettoie(g.intitule, 120),
       diplome: nettoie(g.diplome, 60), pole: poleDe(g), nbSouhaite: Math.max(0, ...S.f.seances.filter(s => s.classe === g.id).map(s => totalDe(s) || 0)),
