@@ -15,20 +15,20 @@
   --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
   --body:"Source Sans 3","Segoe UI",system-ui,-apple-system,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
-  --r:16px;
+  --r:16px; --eclaircir:0%;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0D1715; --surface:#14201D; --sunk:#1B2926; --line:#2A3B37; --ink:#E4EEEB; --muted:#9AB0A9;
   --accent:#43B6A4; --accent-soft:#163C36; --accent-ink:#04201C;
   --good:#7BCB86; --good-soft:#1C3720; --l3:#B5D67A; --l3-soft:#2A3517; --warn:#E9B44C; --warn-soft:#3A2E14; --alert:#F08A73; --alert-soft:#41201A;
   --cps:#C3A6F2; --cps-soft:#231B33; --cps-line:#3E2F57; --help:#9DB2F0; --help-soft:#202A47;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark }}
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); --eclaircir:50%; color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0D1715; --surface:#14201D; --sunk:#1B2926; --line:#2A3B37; --ink:#E4EEEB; --muted:#9AB0A9;
   --accent:#43B6A4; --accent-soft:#163C36; --accent-ink:#04201C;
   --good:#7BCB86; --good-soft:#1C3720; --l3:#B5D67A; --l3-soft:#2A3517; --warn:#E9B44C; --warn-soft:#3A2E14; --alert:#F08A73; --alert-soft:#41201A;
   --cps:#C3A6F2; --cps-soft:#231B33; --cps-line:#3E2F57; --help:#9DB2F0; --help-soft:#202A47;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark }
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); --eclaircir:50%; color-scheme:dark }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.01em;text-wrap:balance;margin:0}
@@ -168,15 +168,72 @@ dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .vide{color:var(--muted);font-style:italic;font-size:14px}
+/* Une couleur par élève (repère visuel), sur la carte, la fiche et le PDF */
+[data-ce]{--ce-t:color-mix(in srgb,var(--ce) calc(100% - var(--eclaircir)),#fff);--ce-f:color-mix(in srgb,var(--ce) 15%,var(--surface))}
+.carte[data-ce]{border-top:5px solid var(--ce)}
+[data-ce] .av{background:var(--ce-f);color:var(--ce-t)}
+[data-ce] .code{background:var(--ce-f);color:var(--ce-t)}
+.p-h[data-ce]{box-shadow:inset 0 -3px 0 var(--ce)}
+.bloc[data-ce]{border-left:5px solid var(--ce)}
+/* Menu Exporter */
+.export{position:relative;display:inline-block}
+.export-menu{position:absolute;z-index:20;top:calc(100% + 6px);left:0;min-width:330px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:8px;display:flex;flex-direction:column;gap:2px}
+.export-menu small{font:600 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
+.export-menu button{appearance:none;border:0;background:none;text-align:left;font:500 15px/1.3 var(--body);color:var(--ink);padding:9px 10px;border-radius:9px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.export-menu button:hover,.export-menu button:focus-visible{background:var(--sunk)}
+.export-menu button span{font-size:12.5px;color:var(--muted)}
+.export-menu .fmt{font:700 11px/1 var(--mono);padding:3px 6px;border-radius:5px;background:var(--accent-soft);color:var(--accent);min-width:40px;text-align:center}
+.export-menu .fmt.w{background:var(--help-soft);color:var(--help)}
 .code{font-family:var(--mono);font-weight:500;letter-spacing:.06em;background:var(--accent-soft);color:var(--accent);padding:1px 7px;border-radius:7px}
+/* ═══ Version imprimée (PDF) : un dossier A4 construit à part, invisible à l'écran ═══ */
+#impression{display:none}
+@page{size:A4;margin:14mm 14mm 16mm}
 @media print{
-  body{background:#fff;color:#000}
-  .btn,.fermer,.toast,.chev{display:none!important}
-  body[data-impr="fiche"] .page{display:none}
-  body[data-impr="fiche"] dialog{position:static;width:100%;height:auto;max-height:none;background:#fff}
-  body[data-impr="page"] dialog{display:none}
-  .carte,.bloc,.classe,.methode{break-inside:avoid;box-shadow:none}
-  .p-h{position:static}
+  :root{--ink:#12302A;--muted:#566B65;--line:#D3DDD9;--accent:#0E6B60;--accent-soft:#D5EBE6;--good:#2F7D3B;--good-soft:#DDEFD9;--l3:#5E8A1F;--l3-soft:#E8F1D2;--warn:#A86A00;--warn-soft:#F7E8C8;--alert:#B3361F;--alert-soft:#F6DDD6;--cps:#6B3FB5;--cps-soft:#F1EBFA;--sunk:#EEF2F0;color-scheme:light}
+  html,body{background:#fff!important;color:var(--ink)}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page,dialog,.toast{display:none!important}
+  #impression{display:block;font-size:12pt;line-height:1.45}
+  body[data-eleve] #impression .seulement-classe{display:none}
+  body[data-eleve] #impression [data-code]:not(.choisi){display:none}
+  .im-tete{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--accent);padding-bottom:8px;margin-bottom:12px}
+  .im-tete h1{font-size:22pt;line-height:1}
+  .im-tete .eyebrow{font-size:12pt}
+  .im-meta{font-size:12pt;color:var(--muted);text-align:right}
+  .im-methode{background:var(--accent-soft);border-radius:8px;padding:8px 12px;font-size:12pt;margin-bottom:14px}
+  .im-methode b{color:var(--accent)}
+  .im-h2{font:700 13pt/1.2 var(--display);color:var(--accent);margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+  .im-h2::after{content:"";flex:1;height:1px;background:var(--line)}
+  .im-classe p{font-size:12pt;line-height:1.55}
+  .im-ind{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
+  .im-ind div{border-radius:6px;padding:5px 8px;background:var(--sunk);font-size:12pt;color:var(--muted)}
+  .im-ind b{display:block;font:700 12pt var(--display);color:var(--ink)}
+  .im-ind .p{background:var(--good-soft)}.im-ind .p b{color:var(--good)}.im-ind .e{background:var(--warn-soft)}.im-ind .e b{color:var(--warn)}.im-ind .m{background:var(--alert-soft)}.im-ind .m b{color:var(--alert)}
+  .im-liste{font-size:12pt;margin:3px 0}.im-liste i{font-style:normal;font-weight:600;color:var(--muted);margin-right:4px}
+  .im-el{break-inside:avoid;border:1px solid var(--line);border-left:4px solid var(--ce,var(--accent));border-radius:8px;padding:8px 12px;margin-bottom:8px;background:linear-gradient(90deg,color-mix(in srgb,var(--ce) 7%,#fff),#fff 40%)}
+  .im-el-h{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .im-n{width:26px;height:26px;border-radius:6px;background:var(--ce,var(--accent));color:#fff;font:700 12pt/26px var(--display);text-align:center}
+  .im-code{font-family:var(--mono);font-weight:600;letter-spacing:.06em;color:var(--ce,var(--accent))}
+  .im-t{margin-left:auto;font-size:12pt;font-weight:600;padding:2px 7px;border-radius:99px}
+  .im-t.p{background:var(--good-soft);color:var(--good)}.im-t.e{background:var(--warn-soft);color:var(--warn)}.im-t.m{background:var(--alert-soft);color:var(--alert)}.im-t.n{background:var(--sunk);color:var(--muted)}
+  .im-el p{font-size:12pt}
+  .im-annexe{break-before:page}
+  body[data-format="court"] .im-annexe{display:none}
+  body[data-eleve] .im-annexe{break-before:auto}
+  .im-nom{flex:1;max-width:62mm;margin-left:10px;font-size:12pt;color:var(--muted);border-bottom:1px dotted #9AB0A9;padding-bottom:1px}
+  .im-det{break-inside:avoid;margin-bottom:12px;border-top:3px solid var(--ce,var(--accent));padding-top:6px}
+  .im-det table.im-g tr.fam td{color:var(--ce,var(--muted))}
+  .im-cols{display:grid;grid-template-columns:1.35fr 1fr;gap:6px 16px}
+  table.im-g{width:100%;border-collapse:collapse;font-size:12pt}
+  table.im-g td{padding:2px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.im-g td.v{white-space:nowrap;font-weight:700;text-align:right}
+  .v.toujours{color:var(--good)}.v.souvent{color:var(--l3)}.v.parfois{color:var(--warn)}.v.jamais{color:var(--alert)}.v.no{color:var(--muted);font-weight:400;font-style:italic}
+  table.im-g tr.fam td{font-size:12pt;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:0;padding-top:5px}
+  .im-cps{background:var(--cps-soft);border-radius:6px;padding:5px 8px;font-size:12pt}
+  .im-cps div{display:block;border-bottom:1px dashed #DDCDF3;padding:3px 0}.im-cps div span{display:block}
+  .im-cps div:last-child{border-bottom:0}
+  .im-cps div b{display:block;white-space:nowrap}
+  .im-pied{margin-top:14px;padding-top:6px;border-top:1px solid var(--line);font-size:12pt;color:var(--muted)}
 }
 </style>
 
@@ -213,7 +270,7 @@ dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
     <div class="sect-t"><h2 id="cT">La classe</h2><span id="cMaj"></span></div>
     <div class="classe">
       <p class="texte" id="cTexte"></p>
-      <div class="barre"><button class="btn" id="cCopier" type="button">Copier l'appréciation de la classe</button><button class="btn" id="tout" type="button">Copier toutes les appréciations</button><button class="btn" id="pdfTout" type="button">Enregistrer en PDF</button></div>
+      <div class="barre"><button class="btn" id="cCopier" type="button">Copier l'appréciation de la classe</button><button class="btn" id="tout" type="button">Copier toutes les appréciations</button><span class="export"><button class="btn plein" id="exp" type="button" aria-expanded="false" aria-haspopup="true">Exporter ▾</button></span></div>
       <div class="indics" id="cIndics"></div>
       <details class="dep" id="cDep">
         <summary>Voir le détail des observations <small id="cDepN"></small><span class="chev" aria-hidden="true">⌄</span></summary>
@@ -232,6 +289,7 @@ dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
   </footer>
 </div>
 
+<div id="impression" aria-hidden="true"></div>
 <dialog id="fiche" aria-labelledby="fNom"><div class="panneau" id="fIn"></div></dialog>
 <div class="toast" id="toast" role="status"></div>
 
@@ -275,6 +333,9 @@ const FAMILLES = [
 ];
 const FREQ = [["toujours","Toujours","p"],["souvent","Souvent","p3"],["parfois","Parfois","e"],["jamais","Jamais","m"]];
 const CPS = [["confiance","Capacité à avoir confiance en soi"],["retenir","Capacité à se retenir (attendre son tour, ne pas interrompre)"],["objectif","Capacité à maintenir son objectif jusqu'au bout"],["aide","Capacité à demander de l'aide quand il en a besoin"],["difficultes","Capacité à repérer et dire ses difficultés"],["ressenti","Capacité à identifier et exprimer ce qu'il ressent"],["calme","Capacité à réguler ses émotions désagréables"],["stress","Capacité à gérer son stress (évaluation, prise de parole)"],["ecoute","Capacité à écouter ses camarades"],["cooperer","Capacité à coopérer et à aider"],["affirmer","Capacité à donner son avis et régler un désaccord sans agressivité"]];
+/* Une couleur par élève : 8 teintes bien distinctes, lisibles imprimées */
+const PAL = ['#2563A8','#7A3FB0','#B5446E','#C05A12','#0E7C86','#5B7A1E','#8A5A2B','#3F51B5','#A3367E','#2F7D6B'];
+const ce = i => `data-ce style="--ce:${PAL[i%PAL.length]}"`;
 const NIV = {"1":"À accompagner","2":"En développement","3":"En progression","4":"Mobilisée régulièrement"};
 const COUL = {"1":"var(--alert)","2":"var(--warn)","3":"var(--l3)","4":"var(--good)"};
 const TEND = {"+":["En progrès","p"],"=":["Stable","e"],"-":["En recul","m"]};
@@ -302,16 +363,36 @@ $('#cDepN').textContent = `${(CF.appuis||[]).length+(CF.difficultes||[]).length+
 
 $('#cCopier').onclick=()=>copier(D.classeResume);
 $('#tout').onclick=()=>copier(['Appréciations de mi-parcours','',"La classe — "+D.classeResume,'',...D.eleves.filter(e=>e.resume).map(e=>'Élève '+e.nom+' — '+e.resume+'\n')].join('\n'));
-$('#pdfTout').onclick=()=>imprimer('page');
+/* Menu « Exporter » : PDF (ou impression) et Word, appréciations seules ou complet */
+function menuExport(btn, code){
+  const box=btn.parentNode; const ouvert=box.querySelector('.export-menu'); document.querySelectorAll('.export-menu').forEach(m=>m.remove());
+  document.querySelectorAll('.export > .btn').forEach(b=>b.setAttribute('aria-expanded','false'));
+  if(ouvert) return;
+  const m=document.createElement('div'); m.className='export-menu'; m.setAttribute('role','menu');
+  const opts = code ? [['PDF','',"Fiche de l'élève","PDF ou impression",'pdf','complet'],['DOC','w',"Fiche de l'élève","Fichier Word modifiable",'word','complet']]
+    : [['PDF','','Appréciations','classe et élèves','pdf','court'],['PDF','','Suivi complet','avec le détail des observations','pdf','complet'],['DOC','w','Appréciations','fichier Word modifiable','word','court'],['DOC','w','Suivi complet','fichier Word modifiable','word','complet']];
+  m.innerHTML='<small>PDF : enregistrer ou imprimer</small>'+opts.filter(o=>o[4]==='pdf').map((o,j)=>`<button type="button" role="menuitem" data-o="${opts.indexOf(o)}"><b class="fmt ${o[1]}">${o[0]}</b>${esc(o[2])} <span>${esc(o[3])}</span></button>`).join('')
+    +'<small>Word : modifier et compléter</small>'+opts.filter(o=>o[4]==='word').map(o=>`<button type="button" role="menuitem" data-o="${opts.indexOf(o)}"><b class="fmt ${o[1]}">${o[0]}</b>${esc(o[2])} <span>${esc(o[3])}</span></button>`).join('');
+  m.querySelectorAll('button').forEach(b=>b.onclick=()=>{ const o=opts[+b.dataset.o]; m.remove(); btn.setAttribute('aria-expanded','false'); o[4]==='pdf'?imprimer(o[5],code):versWord(o[5],code); });
+  box.appendChild(m); btn.setAttribute('aria-expanded','true'); m.querySelector('button').focus();
+}
+$('#exp').onclick=()=>menuExport($('#exp'));
+document.addEventListener('click',ev=>{ if(!ev.target.closest('.export')) document.querySelectorAll('.export-menu').forEach(m=>m.remove()); });
+document.addEventListener('keydown',ev=>{ if(ev.key==='Escape') document.querySelectorAll('.export-menu').forEach(m=>m.remove()); });
 /* PDF : la boîte d'impression du navigateur propose « Enregistrer en PDF ». */
-function imprimer(quoi){ document.body.dataset.impr=quoi; if(quoi==='fiche') document.querySelectorAll('#fiche details').forEach(d=>d.open=true); else document.querySelectorAll('#cDep').forEach(d=>d.open=true);
-  try{ window.print(); }catch(e){} setTimeout(()=>{ delete document.body.dataset.impr; },500); }
+/* « Enregistrer en PDF » : la boîte d'impression du navigateur propose « Enregistrer en PDF ».
+   Toute la classe, ou un seul élève (sa fiche et son détail). */
+function imprimer(quoi, code){
+  document.body.dataset.format = quoi==='court' ? 'court' : 'complet';
+  document.querySelectorAll('#impression .choisi').forEach(x=>x.classList.remove('choisi'));
+  if(code){ document.body.dataset.eleve=code; document.querySelectorAll(`#impression [data-code="${code}"]`).forEach(x=>x.classList.add('choisi')); } else delete document.body.dataset.eleve;
+  try{ window.print(); }catch(e){} }
 /* Les élèves */
 const derniere = e => e.fiches.filter(f=>!f.pasVu).slice(-1)[0];
 const tendance = e => { const f=derniere(e); const p=f&&f.grille&&f.grille.progres; return TEND[p] || (e.fiches.length?['Observation limitée','n']:['Pas encore observé','n']); };
 function miniBarre(f){ if(!f) return ''; const vals=Object.entries(f.grille||{}).filter(([k,v])=>k!=='progres'&&FREQ.some(x=>x[0]===v)).map(([,v])=>FREQ.find(x=>x[0]===v)[2]); if(!vals.length) return ''; const ordre={p:0,p3:1,e:2,m:3}; vals.sort((a,b)=>ordre[a]-ordre[b]); return `<div class="mini" aria-hidden="true">${vals.map(c=>`<i class="${c}"></i>`).join('')}</div>`; }
 $('#eleves').innerHTML = D.eleves.map((e,i)=>{ const [t,c]=tendance(e); const n=e.fiches.length;
-  return `<article class="carte" data-i="${i}">
+  return `<article class="carte" data-i="${i}" ${ce(i)}>
     <div class="carte-h"><span class="av">${i+1}</span><span><b>Élève <span class="code">${esc(e.nom)}</span></b><small>${n} observation${n>1?'s':''}</small></span><span class="tend ${c}">${esc(t)}</span></div>
     <p class="extrait">${esc(e.resume||'Appréciation à venir.')}</p>
     ${miniBarre(derniere(e))}
@@ -332,8 +413,8 @@ function ouvrir(i){
   const cpsL = CPS.filter(([k])=>f.cps&&f.cps[k]&&f.cps[k]!=='no').map(([k,lab])=>{ const n=f.cps[k]; return `<div class="cpsr"><span>${esc(lab)}</span><span class="niv"><span class="pts">${[1,2,3,4].map(x=>`<i class="${x<=+n?'on n'+n:''}"></i>`).join('')}</span><em style="color:${COUL[n]}">${n} · ${esc(NIV[n])}</em></span></div>`; }).join('');
   const chrono = e.fiches.slice().reverse().map(x=>{ const nb=Object.keys(x.grille||{}).length+Object.keys(x.cps||{}).length+(x.forts||[]).length+(x.pistes||[]).length+(x.aide||[]).length+(x.mesures||[]).length; return `<li><b>${dateFr(x.date)}</b><small>${esc(x.source)} · ${x.pasVu?'élève trop peu vu pour être évalué':nb+' élément'+(nb>1?'s':'')+' noté'+(nb>1?'s':'')}</small></li>`; }).join('');
   $('#fIn').innerHTML = `
-    <div class="p-h"><button class="fermer retour" type="button" aria-label="Revenir à la classe">←</button><span class="av">${i+1}</span><div><h2 id="fNom">Élève <span class="code">${esc(e.nom)}</span></h2><span class="tend ${c}" style="display:inline-block;margin-top:6px">${esc(t)}</span></div><button class="fermer" type="button" aria-label="Fermer la fiche">×</button></div>
-    <div class="bloc"><span class="eyebrow">Appréciation de mi-parcours${e.maj?` · ${esc(e.maj)}`:''}</span><p class="texte">${esc(e.resume||'Appréciation à venir.')}</p><div class="barre">${e.resume?'<button class="btn copier" type="button">Copier l\'appréciation</button>':''}<button class="btn pdf" type="button">Enregistrer en PDF</button></div></div>
+    <div class="p-h" ${ce(i)}><button class="fermer retour" type="button" aria-label="Revenir à la classe">←</button><span class="av">${i+1}</span><div><h2 id="fNom">Élève <span class="code">${esc(e.nom)}</span></h2><span class="tend ${c}" style="display:inline-block;margin-top:6px">${esc(t)}</span></div><button class="fermer" type="button" aria-label="Fermer la fiche">×</button></div>
+    <div class="bloc" ${ce(i)}><span class="eyebrow">Appréciation de mi-parcours${e.maj?` · ${esc(e.maj)}`:''}</span><p class="texte">${esc(e.resume||'Appréciation à venir.')}</p><div class="barre">${e.resume?'<button class="btn copier" type="button">Copier l\'appréciation</button>':''}<span class="export"><button class="btn pdf" type="button" aria-expanded="false" aria-haspopup="true">Exporter cet élève ▾</button></span></div></div>
     <div class="approf">
       <details class="dep"><summary><span class="pastille" style="background:var(--accent)"></span>Voir le détail des observations <small>${f.date?'au '+dateFr(f.date):''}</small><span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in">${grille||'<span class="vide">Aucun critère noté.</span>'}</div></details>
       <details class="dep"><summary><span class="pastille" style="background:var(--cps)"></span>Compétences psychosociales <small>${cpsL?'échelle 1 à 4':'non renseignées'}</small><span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in"><div class="bloc cps" style="padding:8px 16px">${cpsL||'<span class="vide">Pas encore observées.</span>'}</div></div></details>
@@ -347,10 +428,83 @@ function ouvrir(i){
     </div>`;
   $('#fIn .fermer:not(.retour)').onclick=()=>$('#fiche').close(); $('#fIn .retour').onclick=()=>$('#fiche').close();
   const cp=$('#fIn .copier'); if(cp) cp.onclick=()=>copier(e.resume);
-  $('#fIn .pdf').onclick=()=>imprimer('fiche');
+  $('#fIn .pdf').onclick=()=>menuExport($('#fIn .pdf'), e.nom);
   $('#fiche').showModal(); $('#fiche').scrollTop=0;
 }
 $('#fiche').addEventListener('click',ev=>{ if(ev.target===$('#fiche')) $('#fiche').close(); });
+
+/* ═══ Export Word (.doc) : même contenu que le PDF, en tableaux simples que Word sait relire et modifier.
+   Fabriqué dans le navigateur ; rien n'est envoyé ailleurs. ═══ */
+function versWord(mode, code){
+  const lib=Object.fromEntries(FREQ.map(([k,l])=>[k,l]));
+  const COUL_F={toujours:'#2F7D3B',souvent:'#5E8A1F',parfois:'#A86A00',jamais:'#B3361F'};
+  const CNIV={'1':'#B3361F','2':'#A86A00','3':'#5E8A1F','4':'#2F7D3B'};
+  const T='font-family:Calibri,Arial,sans-serif;';
+  const h2=t=>`<p style="${T}font-size:14pt;font-weight:bold;color:#0E6B60;margin:14pt 0 6pt;border-bottom:1px solid #D3DDD9">${esc(t)}</p>`;
+  const liste=(t,l)=>l&&l.length?`<p style="${T}font-size:12pt;margin:2pt 0"><b style="color:#566B65">${esc(t)} :</b> ${l.map(esc).join(' · ')}</p>`:'';
+  const tete=(e,i,suite)=>{ const c=PAL[i%PAL.length]; return `<table style="width:100%;border-collapse:collapse;margin-top:10pt"><tr>
+    <td style="${T}width:22pt;background:${c};color:#fff;font-weight:bold;text-align:center;font-size:12pt">${i+1}</td>
+    <td style="${T}padding:3pt 8pt;border-bottom:2pt solid ${c};font-size:12pt"><b>Élève <span style="color:${c};font-family:Consolas,monospace">${esc(e.nom)}</span></b>${suite||''}</td>
+    <td style="${T}padding:3pt 8pt;border-bottom:2pt solid ${c};font-size:12pt;color:#566B65">Nom : ............................................</td></tr></table>`; };
+  const indices = D.eleves.map((e,i)=>i).filter(i=>!code||D.eleves[i].nom===code);
+  let html = `<p style="${T}font-size:12pt;letter-spacing:1pt;color:#0E6B60;margin:0">SUIVI DES ÉLÈVES · CONSEIL DE MI-SEMESTRE</p>
+    <p style="${T}font-size:22pt;font-weight:bold;margin:0 0 4pt">Suivi de la classe</p>
+    <p style="${T}font-size:12pt;color:#566B65;margin:0 0 8pt">${esc(D.conseil||'')} · mis à jour le ${esc(D.maj||'')}</p>
+    <p style="${T}font-size:12pt;background:#D5EBE6;padding:6pt;margin:0 0 8pt"><b>Lecture.</b> Chaque élève est désigné par un code ; la correspondance figure dans le message reçu sur votre messagerie académique. <b>Méthode.</b> Observations régulières en classe, cumulées dans le temps : 18 comportements notés selon leur fréquence et les compétences psychosociales de 1 (à accompagner) à 4 (mobilisée régulièrement). Chaque appréciation part des progrès et fixe un objectif mesurable, sans les notes.</p>`;
+  if(!code){
+    const ind=C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['—','']; const bg={p:'#DDEFD9',e:'#F7E8C8',m:'#F6DDD6'}[c]||'#EEF2F0'; return `<td style="${T}background:${bg};padding:4pt 6pt;font-size:12pt;color:#566B65">${esc(lab)}<br><b style="font-size:12pt;color:#12302A">${esc(t)}</b></td>`; }).join('');
+    html += h2('La classe')+`<p style="${T}font-size:12pt;line-height:1.4">${esc(D.classeResume||'')}</p><table style="width:100%;border-collapse:separate;border-spacing:3pt"><tr>${ind}</tr></table>`
+      + liste("Points d'appui",CF.appuis)+liste('Difficultés',CF.difficultes)+liste('Mis en place',CF.propositions) + h2('Appréciations des élèves');
+  }
+  html += indices.map(i=>{ const e=D.eleves[i]; const [t]=tendance(e); return tete(e,i,` <span style="font-size:12pt;color:#566B65">· ${esc(t)}</span>`)+`<p style="${T}font-size:12pt;line-height:1.4;margin:4pt 0 0">${esc(e.resume||'Appréciation à venir.')}</p>`; }).join('');
+  if(mode==='complet'){
+    html += (code?'':h2('Annexe · détail des observations')) + indices.map(i=>{ const e=D.eleves[i]; const f=derniere(e)||{grille:{},cps:{}};
+      const lignes=FAMILLES.map(([fam,crits])=>{ const r=crits.filter(([k])=>f.grille&&f.grille[k]&&f.grille[k]!=='no').map(([k,lab])=>`<tr><td style="${T}font-size:12pt;padding:1pt 4pt;border-bottom:1px solid #D3DDD9">${esc(lab)}</td><td style="${T}font-size:12pt;padding:1pt 4pt;border-bottom:1px solid #D3DDD9;font-weight:bold;color:${COUL_F[f.grille[k]]}">${esc(lib[f.grille[k]])}</td></tr>`).join(''); return r?`<tr><td colspan="2" style="${T}font-size:12pt;color:${PAL[i%PAL.length]};padding-top:4pt">${esc(fam.toUpperCase())}</td></tr>${r}`:''; }).join('');
+      const cps=CPS.filter(([k])=>f.cps&&f.cps[k]&&f.cps[k]!=='no').map(([k,lab])=>`<tr><td style="${T}font-size:12pt;padding:1pt 4pt">${esc(lab)}</td><td style="${T}font-size:12pt;padding:1pt 4pt;font-weight:bold;color:${CNIV[f.cps[k]]}">${f.cps[k]} · ${esc(NIV[f.cps[k]])}</td></tr>`).join('');
+      return tete(e,i,code?'':' <span style="font-size:12pt;color:#566B65">· détail</span>')
+        + (lignes?`<table style="width:100%;border-collapse:collapse;margin-top:4pt">${lignes}</table>`:`<p style="${T}font-size:12pt;font-style:italic">Présence trop irrégulière pour observer les critères de la grille.</p>`)
+        + (cps?`<p style="${T}font-size:12pt;font-weight:bold;color:#6B3FB5;margin:6pt 0 2pt">Compétences psychosociales</p><table style="width:100%;border-collapse:collapse;background:#F1EBFA">${cps}</table>`:'')
+        + liste('Points forts',f.forts)+liste("Pistes d'amélioration",f.pistes)+liste("Ce qui l'aide",f.aide)+liste('Proposé au conseil',f.mesures); }).join('');
+  }
+  html += `<p style="${T}font-size:12pt;color:#566B65;margin-top:14pt;border-top:1px solid #D3DDD9">Document de travail réservé à l'équipe pédagogique. Merci de ne pas le diffuser.</p>`;
+  const doc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Suivi de la classe</title><style>@page{size:21cm 29.7cm;margin:1.6cm}</style></head><body>${html}</body></html>`;
+  const nom = code ? `Suivi-eleve-${code}.doc` : (mode==='complet' ? 'Suivi-classe-complet.doc' : 'Suivi-classe-appreciations.doc');
+  window.__dernierWord = doc;
+  try{
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['﻿',doc],{type:'application/msword'})); a.download=nom;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
+    toast('Fichier Word enregistré : '+nom);
+  }catch(e){ toast("L'enregistrement Word n'a pas pu se faire sur cet appareil."); }
+}
+/* ═══ Dossier imprimable : 1) la classe, 2) les appréciations par élève, 3) en annexe, le détail des observations ═══ */
+(function construireImpression(){
+  const box=document.getElementById('impression'); if(!box) return;
+  const liste=(t,l)=>l&&l.length?`<div class="im-liste"><i>${esc(t)} :</i>${l.map(esc).join(' · ')}</div>`:'';
+  const ind=C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['—','']; return `<div class="${c}">${esc(lab)}<b>${esc(t)}</b></div>`; }).join('');
+  const lib=Object.fromEntries(FREQ.map(([k,l])=>[k,l]));
+  const eleves=D.eleves.map((e,i)=>{ const [t,c]=tendance(e);
+    return `<div class="im-el" data-code="${esc(e.nom)}" style="--ce:${PAL[i%PAL.length]}"><div class="im-el-h"><span class="im-n">${i+1}</span><b>Élève <span class="im-code">${esc(e.nom)}</span></b><span class="im-nom">Nom :</span><span class="im-t ${c}">${esc(t)}</span></div><p>${esc(e.resume||'Appréciation à venir.')}</p></div>`; }).join('');
+  const details=D.eleves.map((e,i)=>{ const f=derniere(e)||{grille:{},cps:{}};
+    const lignes=FAMILLES.map(([fam,crits])=>{ const r=crits.filter(([k])=>f.grille&&f.grille[k]&&f.grille[k]!=='no').map(([k,lab])=>`<tr><td>${esc(lab)}</td><td class="v ${f.grille[k]}">${esc(lib[f.grille[k]])}</td></tr>`).join(''); return r?`<tr class="fam"><td colspan="2">${esc(fam)}</td></tr>${r}`:''; }).join('');
+    const cps=CPS.filter(([k])=>f.cps&&f.cps[k]&&f.cps[k]!=='no').map(([k,lab])=>`<div><span>${esc(lab)}</span><b style="color:${COUL[f.cps[k]]}">${f.cps[k]} · ${esc(NIV[f.cps[k]])}</b></div>`).join('');
+    const dates=e.fiches.map(x=>dateFr(x.date)).join(', ');
+    const nNo=Object.entries(f.grille||{}).filter(([k,v])=>k!=='progres'&&v==='no').length;
+    return `<div class="im-det" data-code="${esc(e.nom)}" style="--ce:${PAL[i%PAL.length]}"><div class="im-el-h"><span class="im-n">${i+1}</span><b>Élève <span class="im-code">${esc(e.nom)}</span></b><span class="im-nom">Nom :</span><span class="im-t n">Observé le ${esc(dates||'—')}</span></div>
+      <div class="im-cols"><div>${lignes?`<table class="im-g">${lignes}</table>`:'<span class="vide">Présence trop irrégulière pour observer les critères de la grille.</span>'}${nNo?`<div class="im-liste"><i>Non observés :</i>${nNo} critère${nNo>1?'s':''}</div>`:''}</div>
+      <div>${cps?`<div class="im-cps"><b style="color:var(--cps)">Compétences psychosociales</b>${cps}</div>`:''}
+        ${liste('Points forts',f.forts)}${liste("Pistes d'amélioration",f.pistes)}${liste("Ce qui l'aide",f.aide)}${liste('Proposé au conseil',f.mesures)}</div></div></div>`; }).join('');
+  box.innerHTML=`
+  <div class="im-tete"><div><span class="eyebrow">Suivi des élèves · conseil de mi-semestre</span><h1>Suivi de la classe</h1></div><div class="im-meta">${esc(D.conseil||'')}<br>Mis à jour le ${esc(D.maj||'')}</div></div>
+  <div class="im-methode"><b>Lecture.</b> Chaque élève est désigné par un code ; la correspondance figure dans le message reçu sur votre messagerie académique (ligne « Nom » à compléter à la main).<br><b>Méthode.</b> Observations régulières en classe, cumulées dans le temps : une grille de 18 comportements notés selon leur fréquence (toujours, souvent, parfois, jamais) et les compétences psychosociales sur une échelle de 1 (à accompagner) à 4 (mobilisée régulièrement). Chaque appréciation part des progrès et fixe un objectif mesurable, sans les notes.</div>
+  <div class="seulement-classe">
+    <div class="im-h2">La classe</div>
+    <div class="im-classe"><p>${esc(D.classeResume||'')}</p><div class="im-ind">${ind}</div>${liste("Points d'appui",CF.appuis)}${liste('Difficultés',CF.difficultes)}${liste('Mis en place',CF.propositions)}</div>
+    <div class="im-h2">Appréciations des élèves</div>
+  </div>
+  ${eleves}
+  <div class="im-annexe"><div class="im-h2">Annexe · détail des observations</div>${details}</div>
+  <div class="im-pied">Document de travail réservé à l'équipe pédagogique. Merci de ne pas le diffuser.</div>`;
+})();
 })();
 </script>
 </body></html>
