@@ -137,6 +137,13 @@ summary::-webkit-details-marker{display:none}
 .cpt-txt{grid-column:1/-1;margin:0;font-size:13px;color:var(--muted);text-align:center}
 .compte.urgent .cpt-bloc b{color:var(--warn)}
 .compte.fini .cpt-bloc b{color:var(--muted)}
+.cpsr{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}
+.cpsr span{flex:1;min-width:170px;font-size:14px}.cpsr small{display:block;color:var(--muted);font-size:12px}
+.cpsr .seg{flex-wrap:wrap}
+.cpsr .seg button[aria-pressed="true"][data-v="oui"]{background:var(--good);color:var(--surface)}
+.cpsr .seg button[aria-pressed="true"][data-v="moyen"]{background:var(--warn);color:var(--surface)}
+.cpsr .seg button[aria-pressed="true"][data-v="non"]{background:var(--alert);color:var(--surface)}
+.cpsr .seg button[aria-pressed="true"][data-v="ne"]{background:var(--muted);color:var(--surface)}
 .vide{display:flex;flex-direction:column;gap:10px;padding-block:40px;text-align:center;align-items:center}
 @media (max-width:420px){.hero h1{font-size:26px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.big-check path{stroke-dashoffset:0}}
@@ -220,6 +227,7 @@ summary::-webkit-details-marker{display:none}
     <div class="grp h"><h3><span class="dot" style="background:var(--help)"></span>Ce qui l'aide<span class="n">0</span></h3><div class="chips" data-k="aide"></div></div>
     <div class="grp"><h3><span class="dot" style="background:var(--accent)"></span>Mesure à proposer au conseil<span class="n">0</span></h3><div class="chips" data-k="mesures"></div></div>
     <div class="grp a"><h3><span class="dot" style="background:var(--alert)"></span>Signal de décrochage<span class="n">0</span></h3><div class="chips" data-k="alerte"></div></div>
+    <div class="grp cpsg"><h3><span class="dot" style="background:#8A5CD0"></span>Compétences psychosociales <small style="font:500 12px var(--body);color:var(--muted)">(facultatif)</small></h3><div id="cpsRows"></div></div>
     <details>
       <summary>+ Plus de choix pour décrire précisément</summary>
       <div class="more" id="more"></div>
@@ -268,6 +276,21 @@ const PLUS = [
   ["Lecture et langage",["Bute sur les mots techniques","Réussit à l'oral, pas à l'écrit","Cherche ses mots"]],
   ["Émotions",["Stress avant les évaluations","« Je sais pas faire » avant de lire","Abandonne à la première difficulté","Plus engagé sur le métier"]]
 ];
+/* « En classe, l'élève… » : capacités observables, SANS classement visible (choix de Brahim, 14/11/2026).
+   Correspondance cachée avec le Référentiel national des CPS (Santé publique France, Tome 1, 2025) : 1er champ.
+   Oui → appuis ; Non → besoins ; Moyennement → plus (« … : en partie ») ; Non évaluable ou rien → non enregistré. */
+const CPS = [["C2.2","Capacité à se retenir (attendre son tour, ne pas interrompre)"],
+  ["C2.1","Capacité à maintenir son objectif jusqu'au bout"],
+  ["C2.4","Capacité à demander de l'aide quand il en a besoin"],
+  ["C1.1","Capacité à repérer et dire ses difficultés"],
+  ["E1.2","Capacité à identifier et exprimer ce qu'il ressent"],
+  ["E2.2b","Capacité à réguler ses émotions désagréables (retrouver son calme)"],
+  ["E2.3","Capacité à gérer son stress (évaluation, prise de parole)"],
+  ["S1.2","Capacité à écouter ses camarades"],
+  ["S1.3","Capacité à coopérer et à aider"],
+  ["S2","Capacité à donner son avis et régler un désaccord sans agressivité"]];
+const cpsTexte = c => c[1];
+const cpsMoyen = c => c[1] + ' : en partie';
 const CLIMAT = [["climat_travail","Climat de travail"],["cohesion","Cohésion du groupe"],["respect","Respect des règles"],["participation","Participation"]];
 const PISTES = ["Rappeler le cadre ensemble","Travaux de groupe","Changer le plan de classe","Valoriser les réussites","Heure de vie de classe"];
 
@@ -455,8 +478,18 @@ function renderListe(){
 document.querySelectorAll('.sheet .chips[data-k]').forEach(box=>{ autre(box); CHOIX[box.dataset.k].forEach(t=>chip(t, box)); });
 PLUS.forEach(([t,l])=>{ const g=document.createElement('div'); g.className='grp w'; g.innerHTML=`<span class="sub">${esc(t)}</span>`; const c=document.createElement('div'); c.className='chips'; c.dataset.k='plus'; l.forEach(x=>chip(x,c)); g.appendChild(c); $('#more').appendChild(g); });
 
+CPS.forEach(c=>{ const r=document.createElement('div'); r.className='cpsr'; r.innerHTML=`<span>${esc(c[1])}</span>`;
+  const s=document.createElement('div'); s.className='seg'; s.dataset.cps=c[0];
+  [['oui','Oui'],['moyen','Moyennement'],['non','Non'],['ne','Non évaluable']].forEach(([v,l])=>{ const b=document.createElement('button'); b.type='button'; b.dataset.v=v; b.textContent=l; b.setAttribute('aria-pressed','false');
+    b.onclick=()=>{ const on=b.getAttribute('aria-pressed')==='true'; s.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false')); if(!on) b.setAttribute('aria-pressed','true'); }; s.appendChild(b); });
+  r.appendChild(s); $('#cpsRows').appendChild(r); });
+function lireCps(choix){ document.querySelectorAll('#cpsRows .seg').forEach(s=>{ const b=s.querySelector('[aria-pressed=true]'); if(!b||b.dataset.v==='ne') return; const c=CPS.find(x=>x[0]===s.dataset.cps);
+  const [k,t]=b.dataset.v==='oui'?['appuis',cpsTexte(c)]:b.dataset.v==='non'?['besoins',cpsTexte(c)]:['plus',cpsMoyen(c)]; (choix[k]=choix[k]||[]).push(t); }); }
+function remplirCps(r){ document.querySelectorAll('#cpsRows .seg').forEach(s=>{ const c=CPS.find(x=>x[0]===s.dataset.cps), t=cpsTexte(c), ch=r?.choix||{};
+  const v=(ch.appuis||[]).includes(t)?'oui':(ch.besoins||[]).includes(t)?'non':(ch.plus||[]).includes(cpsMoyen(c))?'moyen':''; s.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v?'true':'false')); }); }
 let cur=-1;
 function remplirFeuille(r){
+  remplirCps(r);
   document.querySelectorAll('.sheet .chips[data-k]').forEach(box=>{
     const k=box.dataset.k, voulu=new Set((r?.choix?.[k])||[]);
     box.querySelectorAll('.chip:not(.autre)').forEach(c=>{ if(!CHOIX[k]?.includes(c.dataset.v) && k!=='plus' && !voulu.has(c.dataset.v)) c.remove(); else c.setAttribute('aria-pressed', voulu.has(c.dataset.v)?'true':'false'); });
@@ -487,6 +520,7 @@ $('#envoyer').onclick=()=>{
   if(t){ const er=$('#errTxt'); er.textContent=`Retirez « ${t} » de votre commentaire : en ligne, l'élève reste un code.`; er.hidden=false; $('#txt').focus(); return; }
   const choix={}; document.querySelectorAll('.sheet .chips[data-k]:not([data-k=plus])').forEach(box=>{ const l=lus(box); if(l.length) choix[box.dataset.k]=l; });
   const plus=[...document.querySelectorAll('#more .chip[aria-pressed=true]')].map(c=>c.dataset.v); if(plus.length) choix.plus=plus;
+  lireCps(choix);
   if(!Object.keys(choix).length && !txt){ toast('Touchez au moins un choix, ou « Rien de particulier »'); return; }
   const c=ELEVES[cur].c; etat.eleves[c]={rien:false, choix, commentaire:txt}; delete etat.envoyes[c]; sauver();
   if(matiere()) envoyer(c);
