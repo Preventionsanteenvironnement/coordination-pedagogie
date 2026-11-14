@@ -399,9 +399,9 @@ const AUTEUR = (() => {                            // identifiant aléatoire de 
   if (!/^[a-z0-9]{10}$/.test(a||'')){ a = Array.from(crypto.getRandomValues(new Uint8Array(10)), x => 'abcdefghijklmnopqrstuvwxyz0123456789'[x%36]).join(''); stock.set('regards-croises-auteur', a); }
   return a;
 })();
-document.title = `Regards croisés · ${L.label || L.classe}`;
+document.title = 'Regards croisés';
 $('#hTitre').textContent = L.titre || 'Conseil de classe';
-$('#hClasse').textContent = `Regards croisés sur la ${L.label || L.classe}`;
+$('#hClasse').textContent = 'Regards croisés sur votre classe'; /* le nom de la classe n'est jamais affiché : il est dans le mail */
 $('#hMeta').innerHTML = [L.date && new Date(L.date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'short'}) + (L.heure?` · ${L.heure}`:''), L.limite && `Avant ${L.limite}`, L.pp && `PP : ${L.pp}`].filter(Boolean).map(t=>`<span class="pill">${esc(t)}</span>`).join('');
 
 /* Compte à rebours jusqu'à la date limite de réponse (L.fin, ex. "2026-11-19T12:00"), sinon jusqu'au conseil. */

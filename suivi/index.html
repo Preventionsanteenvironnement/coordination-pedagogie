@@ -1,4 +1,4 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"></head><body><title>Suivi de classe</title>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"></head><body><title>Suivi de la classe</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -281,8 +281,8 @@ const C_IND = [["climat","Climat",{serein:["Serein","p"],variable:["Variable","e
 /* En-tête */
 const nObs = D.eleves.reduce((a,e)=>a+e.fiches.length,0);
 const dates = [...new Set(D.eleves.flatMap(e=>e.fiches.map(f=>f.date)))].sort();
-document.title = 'Suivi de classe · ' + D.label;
-$('#hClasse').textContent = D.label;
+document.title = 'Suivi de la classe';
+$('#hClasse').textContent = 'Suivi de la classe';
 $('#hMeta').innerHTML = [D.conseil && `<span>${esc(D.conseil)}</span>`, D.maj && `<span>Mis à jour le <b>${esc(D.maj)}</b></span>`].filter(Boolean).join('');
 $('#chiffres').innerHTML = [[D.eleves.filter(e=>e.fiches.length).length+'/'+D.eleves.length,'élèves suivis'],[nObs,'observations notées'],[dates.length,'temps d\'observation']].map(([b,s])=>`<div class="chiffre"><b>${b}</b><span>${s}</span></div>`).join('');
 
@@ -299,7 +299,7 @@ $('#cDetail').innerHTML = `
 $('#cDepN').textContent = `${(CF.appuis||[]).length+(CF.difficultes||[]).length+(CF.propositions||[]).length} éléments`;
 
 $('#cCopier').onclick=()=>copier(D.classeResume);
-$('#tout').onclick=()=>copier([D.label+' — appréciations de mi-parcours','',"La classe — "+D.classeResume,'',...D.eleves.filter(e=>e.resume).map(e=>'Élève '+e.nom+' — '+e.resume+'\n')].join('\n'));
+$('#tout').onclick=()=>copier(['Appréciations de mi-parcours','',"La classe — "+D.classeResume,'',...D.eleves.filter(e=>e.resume).map(e=>'Élève '+e.nom+' — '+e.resume+'\n')].join('\n'));
 $('#pdfTout').onclick=()=>imprimer('page');
 /* PDF : la boîte d'impression du navigateur propose « Enregistrer en PDF ». */
 function imprimer(quoi){ document.body.dataset.impr=quoi; if(quoi==='fiche') document.querySelectorAll('#fiche details').forEach(d=>d.open=true); else document.querySelectorAll('#cDep').forEach(d=>d.open=true);
