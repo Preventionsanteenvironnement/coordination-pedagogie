@@ -121,10 +121,12 @@ details.dep>summary small{font:500 13px var(--body);color:var(--muted)}
 dialog{border:0;padding:0;margin:0 0 0 auto;height:100%;max-height:100%;width:min(720px,100%);max-width:100%;background:var(--bg);color:var(--ink)}
 dialog::backdrop{background:rgba(8,20,17,.45);backdrop-filter:blur(2px)}
 dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
-@keyframes entre{from{transform:translateX(30px);opacity:.4}to{transform:none;opacity:1}}
+@keyframes entre{from{transform:translateX(24px)}to{transform:none}}
 .panneau{min-height:100%;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));padding-block:calc(14px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
 .p-h{display:flex;align-items:center;gap:14px;position:sticky;top:0;background:var(--bg);padding-block:8px;z-index:2}
-.p-h h2{font-size:28px;line-height:1.05}
+.p-h h2{font-size:24px;line-height:1.1;white-space:nowrap}.p-h h2 .code{font-size:20px}
+.p-h{border-bottom:1px solid var(--line)}
+@media (max-width:520px){.p-h h2{font-size:19px}.p-h h2 .code{font-size:17px}.p-h .av{width:36px;height:36px;border-radius:11px;font-size:14px}.p-h{gap:10px}}
 .retour{margin-left:0!important}
 .fermer{margin-left:auto;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;flex:none}
 .bloc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px}
