@@ -1,0 +1,354 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="referrer" content="no-referrer"></head><body><title>Suivi de classe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Mise en page : un dossier de suivi qu'on feuillette — la classe d'abord, puis une fiche par élève qui s'ouvre et se déplie. */
+:root{
+  --bg:#EEF3F1; --surface:#FFFFFF; --sunk:#E3EAE7; --line:#D3DDD9; --ink:#12302A; --muted:#566B65;
+  --accent:#0E6B60; --accent-soft:#D5EBE6; --accent-ink:#FFFFFF;
+  --good:#2F7D3B; --good-soft:#DDEFD9; --l3:#5E8A1F; --l3-soft:#E8F1D2; --warn:#A86A00; --warn-soft:#F7E8C8; --alert:#B3361F; --alert-soft:#F6DDD6;
+  --cps:#6B3FB5; --cps-soft:#F1EBFA; --cps-line:#DDCDF3; --help:#3D57A6; --help-soft:#DFE5F6;
+  --shadow:0 1px 2px rgba(18,48,42,.06),0 8px 24px -12px rgba(18,48,42,.18);
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:16px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1715; --surface:#14201D; --sunk:#1B2926; --line:#2A3B37; --ink:#E4EEEB; --muted:#9AB0A9;
+  --accent:#43B6A4; --accent-soft:#163C36; --accent-ink:#04201C;
+  --good:#7BCB86; --good-soft:#1C3720; --l3:#B5D67A; --l3-soft:#2A3517; --warn:#E9B44C; --warn-soft:#3A2E14; --alert:#F08A73; --alert-soft:#41201A;
+  --cps:#C3A6F2; --cps-soft:#231B33; --cps-line:#3E2F57; --help:#9DB2F0; --help-soft:#202A47;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0D1715; --surface:#14201D; --sunk:#1B2926; --line:#2A3B37; --ink:#E4EEEB; --muted:#9AB0A9;
+  --accent:#43B6A4; --accent-soft:#163C36; --accent-ink:#04201C;
+  --good:#7BCB86; --good-soft:#1C3720; --l3:#B5D67A; --l3-soft:#2A3517; --warn:#E9B44C; --warn-soft:#3A2E14; --alert:#F08A73; --alert-soft:#41201A;
+  --cps:#C3A6F2; --cps-soft:#231B33; --cps-line:#3E2F57; --help:#9DB2F0; --help-soft:#202A47;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6); color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:-.01em;text-wrap:balance;margin:0}
+p{margin:0}
+.page{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 64px;display:flex;flex-direction:column;gap:28px}
+.eyebrow{font:600 12px/1.2 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.mono{font-family:var(--mono);font-size:12.5px;letter-spacing:.02em}
+
+/* En-tête */
+.tete{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 32px;align-items:end;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.tete h1{font-size:clamp(34px,6vw,56px);line-height:1;margin-top:10px}
+.tete .meta{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;color:var(--muted);font-size:15px}
+.tete .meta b{color:var(--ink);font-weight:600}
+.chiffres{display:flex;gap:10px}
+.chiffre{min-width:92px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.chiffre b{font:700 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.chiffre span{font-size:12.5px;color:var(--muted);line-height:1.25}
+@media (max-width:720px){.tete{grid-template-columns:1fr}.chiffres{flex-wrap:wrap}.chiffre{flex:1}}
+
+/* Méthode */
+.methode{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,2fr);gap:18px 36px;padding:22px 24px;border-radius:var(--r);background:var(--accent-soft)}
+.methode h2{font-size:20px}
+.methode>div>p{margin-top:8px;color:var(--ink);max-width:62ch}
+.etapes{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.etapes li{background:var(--surface);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.etapes .n{font:700 13px/1 var(--mono);color:var(--accent)}
+.etapes b{font:700 15px/1.2 var(--display)}
+.etapes span{font-size:14px;color:var(--muted);line-height:1.4}
+.echelles{display:flex;flex-wrap:wrap;gap:8px 18px;grid-column:1/-1;font-size:13px;color:var(--muted);align-items:center}
+.ech{display:inline-flex;align-items:center;gap:6px}
+@media (max-width:820px){.methode{grid-template-columns:1fr}.etapes{grid-template-columns:1fr}}
+
+/* Sections */
+.sect{display:flex;flex-direction:column;gap:14px}
+.sect-t{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.sect-t h2{font-size:24px}
+.sect-t span{color:var(--muted);font-size:14px}
+
+/* Carte classe */
+.classe{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;gap:18px}
+.texte{font-size:17px;line-height:1.65;max-width:72ch}
+.indics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.indic{border-radius:12px;padding:10px 12px;background:var(--sunk);display:flex;flex-direction:column;gap:4px;min-width:0}
+.indic small{font-size:12px;color:var(--muted);line-height:1.25}
+.indic b{font:700 15px/1.2 var(--display)}
+.indic.p{background:var(--good-soft)}.indic.p b{color:var(--good)}
+.indic.e{background:var(--warn-soft)}.indic.e b{color:var(--warn)}
+.indic.m{background:var(--alert-soft)}.indic.m b{color:var(--alert)}
+@media (max-width:720px){.indics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Dépliants */
+details.dep{border-top:1px solid var(--line)}
+details.dep>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 2px;font:700 16px/1.2 var(--display)}
+details.dep>summary::-webkit-details-marker{display:none}
+details.dep>summary .chev{margin-left:auto;width:28px;height:28px;border-radius:50%;background:var(--sunk);display:grid;place-items:center;transition:transform .2s}
+details.dep[open]>summary .chev{transform:rotate(180deg)}
+details.dep>summary small{font:500 13px var(--body);color:var(--muted)}
+.dep-in{padding:2px 2px 18px;display:flex;flex-direction:column;gap:14px}
+.pastille{width:10px;height:10px;border-radius:3px;flex:none}
+
+.groupe{display:flex;flex-direction:column;gap:8px}
+.groupe>small{font:600 12px/1.2 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.puces{display:flex;flex-wrap:wrap;gap:6px}
+.puce{font-size:14px;line-height:1.25;padding:6px 11px;border-radius:99px;background:var(--sunk);border:1px solid transparent}
+.puce.ok{background:var(--good-soft);color:var(--good);border-color:color-mix(in srgb,var(--good) 25%,transparent)}
+.puce.df{background:var(--warn-soft);color:var(--warn);border-color:color-mix(in srgb,var(--warn) 30%,transparent)}
+.puce.h{background:var(--help-soft);color:var(--help)}
+.puce.ac{background:var(--accent-soft);color:var(--accent)}
+
+/* Élèves */
+.eleves{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.carte{text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;transition:transform .15s,box-shadow .15s,border-color .15s;min-width:0}
+.carte:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.carte-h{display:flex;align-items:center;gap:12px}
+.av{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font:700 16px/1 var(--display);background:var(--accent-soft);color:var(--accent);flex:none}
+.carte-h b{font:700 18px/1.15 var(--display);display:block}
+.carte-h small{color:var(--muted);font-size:13px}
+.tend{margin-left:auto;font:600 12px/1 var(--body);padding:6px 9px;border-radius:99px;white-space:nowrap}
+.tend.p{background:var(--good-soft);color:var(--good)}.tend.e{background:var(--warn-soft);color:var(--warn)}.tend.m{background:var(--alert-soft);color:var(--alert)}.tend.n{background:var(--sunk);color:var(--muted)}
+.extrait{color:var(--muted);font-size:15px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.mini{display:flex;gap:4px;align-items:center;margin-top:auto}
+.mini i{height:6px;flex:1;border-radius:3px;background:var(--sunk)}
+.mini i.p{background:var(--good)}.mini i.p3{background:var(--l3)}.mini i.e{background:var(--warn)}.mini i.m{background:var(--alert)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--accent);font:600 14px/1 var(--body);padding:10px 14px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn.plein{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.barre{display:flex;gap:8px;flex-wrap:wrap}
+
+/* Fiche élève (panneau) */
+dialog{border:0;padding:0;margin:0 0 0 auto;height:100%;max-height:100%;width:min(720px,100%);max-width:100%;background:var(--bg);color:var(--ink)}
+dialog::backdrop{background:rgba(8,20,17,.45);backdrop-filter:blur(2px)}
+dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
+@keyframes entre{from{transform:translateX(30px);opacity:.4}to{transform:none;opacity:1}}
+.panneau{min-height:100%;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:max(18px,env(safe-area-inset-right,0px));padding-block:calc(14px + env(safe-area-inset-top,0px)) calc(40px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:18px}
+.p-h{display:flex;align-items:center;gap:14px;position:sticky;top:0;background:var(--bg);padding-block:8px;z-index:2}
+.p-h h2{font-size:28px;line-height:1.05}
+.retour{margin-left:0!important}
+.fermer{margin-left:auto;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;flex:none}
+.bloc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:12px}
+.bloc>.eyebrow{display:flex;align-items:center;gap:8px}
+.copier{align-self:flex-start;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--accent);font:600 14px/1 var(--body);padding:10px 14px;border-radius:10px;cursor:pointer}
+.approf{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:4px 20px}
+.approf>details.dep:first-child{border-top:0}
+
+.crit{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.crit:last-child{border-bottom:0}
+.crit .lab{font-size:15px;min-width:0}
+.crit .lab small{display:block;color:var(--muted);font-size:12.5px}
+.freq{display:flex;gap:3px}
+.freq span{font:600 11.5px/1 var(--body);padding:6px 7px;border-radius:7px;background:var(--sunk);color:var(--muted);opacity:.55}
+.freq span.on{opacity:1;color:var(--surface)}
+.freq span.on.p{background:var(--good)}.freq span.on.p3{background:var(--l3)}.freq span.on.e{background:var(--warn)}.freq span.on.m{background:var(--alert)}
+.freq .no{font-style:italic;opacity:1;background:transparent;padding-inline:2px}
+@media (max-width:520px){.crit{grid-template-columns:1fr}}
+
+.cps{background:var(--cps-soft);border-color:var(--cps-line)}
+.cpsr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--cps-line)}
+.cpsr:last-child{border-bottom:0}
+.niv{display:flex;align-items:center;gap:8px}
+.niv .pts{display:flex;gap:4px}
+.niv .pts i{width:22px;height:8px;border-radius:4px;background:color-mix(in srgb,var(--cps) 18%,transparent)}
+.niv .pts i.on.n1{background:var(--alert)}.niv .pts i.on.n2{background:var(--warn)}.niv .pts i.on.n3{background:var(--l3)}.niv .pts i.on.n4{background:var(--good)}
+.niv em{font:600 13px/1.2 var(--body);font-style:italic;min-width:150px}
+@media (max-width:520px){.cpsr{grid-template-columns:1fr}.niv em{min-width:0}}
+
+.chrono{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:14px}
+.chrono li{position:relative}
+.chrono li::before{content:"";position:absolute;left:-25px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--bg)}
+.chrono b{font:700 15px/1.2 var(--display)}
+.chrono small{display:block;color:var(--muted);font-size:13.5px}
+
+.pied{border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:13.5px;display:flex;flex-wrap:wrap;gap:6px 24px;justify-content:space-between}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:600;font-size:14px;transition:all .25s;z-index:50;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.vide{color:var(--muted);font-style:italic;font-size:14px}
+.code{font-family:var(--mono);font-weight:500;letter-spacing:.06em;background:var(--accent-soft);color:var(--accent);padding:1px 7px;border-radius:7px}
+@media print{
+  body{background:#fff;color:#000}
+  .btn,.fermer,.toast,.chev{display:none!important}
+  body[data-impr="fiche"] .page{display:none}
+  body[data-impr="fiche"] dialog{position:static;width:100%;height:auto;max-height:none;background:#fff}
+  body[data-impr="page"] dialog{display:none}
+  .carte,.bloc,.classe,.methode{break-inside:avoid;box-shadow:none}
+  .p-h{position:static}
+}
+</style>
+
+<div class="page" id="page">
+  <header class="tete">
+    <div>
+      <span class="eyebrow">Suivi des élèves · conseil de mi-semestre</span>
+      <h1 id="hClasse"></h1>
+      <div class="meta" id="hMeta"></div>
+    </div>
+    <div class="chiffres" id="chiffres"></div>
+  </header>
+
+  <section class="methode" aria-labelledby="mT">
+    <div>
+      <h2 id="mT">Comment ces appréciations sont construites</h2>
+      <p>Chaque élève est observé régulièrement en classe, au fil des séances. Les observations s'additionnent dans le temps : l'appréciation rend compte d'une évolution, pas d'une séance isolée. Elle porte sur les progrès, les besoins et les leviers, en intégrant les compétences psychosociales, et fixe des objectifs concrets, sans les notes.</p>
+    </div>
+    <ol class="etapes">
+      <li><span class="n">1</span><b>Observer</b><span>Une grille de 18 comportements observables, notés selon leur fréquence.</span></li>
+      <li><span class="n">2</span><b>Repérer les CPS</b><span>Les compétences psychosociales visibles en classe, sur une échelle de développement de 1 à 4.</span></li>
+      <li><span class="n">3</span><b>Rédiger</b><span>Une appréciation qui part des progrès et fixe un objectif mesurable.</span></li>
+    </ol>
+    <div class="echelles">
+      <span class="ech"><span class="pastille" style="background:var(--good)"></span>Toujours</span>
+      <span class="ech"><span class="pastille" style="background:var(--l3)"></span>Souvent</span>
+      <span class="ech"><span class="pastille" style="background:var(--warn)"></span>Parfois</span>
+      <span class="ech"><span class="pastille" style="background:var(--alert)"></span>Jamais</span>
+      <span class="ech" style="margin-left:6px">CPS : 1 À accompagner · 2 En développement · 3 En progression · 4 Mobilisée régulièrement</span>
+    </div>
+  </section>
+
+  <section class="sect" aria-labelledby="cT">
+    <div class="sect-t"><h2 id="cT">La classe</h2><span id="cMaj"></span></div>
+    <div class="classe">
+      <p class="texte" id="cTexte"></p>
+      <div class="barre"><button class="btn" id="cCopier" type="button">Copier l'appréciation de la classe</button><button class="btn" id="tout" type="button">Copier toutes les appréciations</button><button class="btn" id="pdfTout" type="button">Enregistrer en PDF</button></div>
+      <div class="indics" id="cIndics"></div>
+      <details class="dep" id="cDep">
+        <summary>Voir le détail des observations <small id="cDepN"></small><span class="chev" aria-hidden="true">⌄</span></summary>
+        <div class="dep-in" id="cDetail"></div>
+      </details>
+    </div>
+  </section>
+
+  <section class="sect" aria-labelledby="eT">
+    <div class="sect-t"><h2 id="eT">Les élèves</h2><span>Touchez « Lire la fiche » pour l'appréciation et le détail des observations.</span></div>
+    <div class="eleves" id="eleves"></div>
+  </section>
+
+  <footer class="pied">
+    <span>Document de travail réservé à l'équipe pédagogique. Merci de ne pas le diffuser.</span>
+  </footer>
+</div>
+
+<dialog id="fiche" aria-labelledby="fNom"><div class="panneau" id="fIn"></div></dialog>
+<div class="toast" id="toast" role="status"></div>
+
+<script id="donnees" type="application/json"></script>
+<script>
+/* Deux façons d'ouvrir : données incluses (aperçu privé) ou fichier chiffré en ligne.
+   En ligne, le lien se termine par « #<fichier>.<clé> » : la clé ne quitte jamais le navigateur,
+   le serveur ne garde qu'un texte illisible (AES-GCM 256). */
+async function dechiffrer(){
+  const m = location.hash.match(/^#([a-z0-9]{12})\.([A-Za-z0-9_-]{43})$/);
+  const echec = t => { document.getElementById('hClasse').textContent='Lien incomplet'; document.getElementById('hMeta').textContent=t; return null; };
+  if(!m) return echec("Ouvrez le lien complet reçu par messagerie académique.");
+  try{
+    const b64 = x => Uint8Array.from(atob(x.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((x.length+3)%4)), c=>c.charCodeAt(0));
+    const r = await fetch('d/'+m[1]+'.json',{cache:'no-store'}); if(!r.ok) throw 0;
+    const f = await r.json();
+    const cle = await crypto.subtle.importKey('raw', b64(m[2]), 'AES-GCM', false, ['decrypt']);
+    const clair = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(f.iv)}, cle, b64(f.ct));
+    return JSON.parse(new TextDecoder().decode(clair));
+  }catch(e){ return echec("Ce suivi n'est plus disponible, ou le lien a été modifié."); }
+}
+(async()=>{
+const brut = document.getElementById('donnees').textContent.trim();
+const D = brut.startsWith('{') ? JSON.parse(brut) : await dechiffrer();
+if(!D) return;
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove('on'),2000); }
+function copier(t){ (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast('Appréciation copiée')).catch(()=>toast('Sélectionnez le texte pour le copier')); }
+const dateFr = iso => new Date(iso+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+const initiales = n => n.replace(/\./g,'').split(/[\s-]+/).map(m=>m[0]).join('').slice(0,2).toUpperCase();
+
+/* Grille d'observation (familles et libellés), anciennes et nouvelles lignes */
+const FAMILLES = [
+ ["Les consignes",[["ecoute_oral","Écoute la consigne orale jusqu'au bout"],["lit_ecrit","Lit la consigne écrite jusqu'au bout"],["comprend_oral","Comprend une consigne orale sans reformulation"],["comprend_ecrit","Comprend une consigne écrite sans reformulation"],["ecoute","Écoute ou lit la consigne jusqu'au bout"],["comprend","Comprend la consigne sans reformulation"]]],
+ ["L'attention",[["attention","Reste attentif pendant la séance"]]],
+ ["La tâche",[["demarre","Se met au travail seul"],["persevere","Persévère jusqu'au bout de la tâche"],["rythme","Termine dans le temps prévu"],["organise","Organise son classeur et soigne ses productions"]]],
+ ["La relation à l'aide",[["cherche","Cherche avant d'appeler"],["demande","Demande de l'aide quand il bloque"],["seul","Reprend seul après un rappel"],["corrections","Tient compte des corrections et des conseils"]]],
+ ["L'oral et l'écrit",[["oral","Participe à l'oral, de lui-même"],["ecrit","Écrit lisiblement et dans le temps"]]],
+ ["La vie de classe",[["regles","Respecte les règles et le matériel"],["relation","Échange correctement avec camarades et adultes"],["groupe","Coopère dans un travail de groupe"]]]
+];
+const FREQ = [["toujours","Toujours","p"],["souvent","Souvent","p3"],["parfois","Parfois","e"],["jamais","Jamais","m"]];
+const CPS = [["confiance","Capacité à avoir confiance en soi"],["retenir","Capacité à se retenir (attendre son tour, ne pas interrompre)"],["objectif","Capacité à maintenir son objectif jusqu'au bout"],["aide","Capacité à demander de l'aide quand il en a besoin"],["difficultes","Capacité à repérer et dire ses difficultés"],["ressenti","Capacité à identifier et exprimer ce qu'il ressent"],["calme","Capacité à réguler ses émotions désagréables"],["stress","Capacité à gérer son stress (évaluation, prise de parole)"],["ecoute","Capacité à écouter ses camarades"],["cooperer","Capacité à coopérer et à aider"],["affirmer","Capacité à donner son avis et régler un désaccord sans agressivité"]];
+const NIV = {"1":"À accompagner","2":"En développement","3":"En progression","4":"Mobilisée régulièrement"};
+const COUL = {"1":"var(--alert)","2":"var(--warn)","3":"var(--l3)","4":"var(--good)"};
+const TEND = {"+":["En progrès","p"],"=":["Stable","e"],"-":["En recul","m"]};
+const C_IND = [["climat","Climat",{serein:["Serein","p"],variable:["Variable","e"],difficile:["Difficile","m"]}],["heterogeneite","Hétérogénéité",{faible:["Faible","p"],marquee:["Marquée","e"],tres_forte:["Très forte","m"]}],["absences","Absences",{faible:["Faibles","p"],modere:["Modérées","e"],eleve:["Élevées","m"]}],["retards","Retards",{rares:["Rares","p"],parfois:["Parfois","e"],frequents:["Fréquents","m"]}],["evolution","Évolution",{"+":["En progrès","p"],"=":["Stable","e"],"-":["En recul","m"]}]];
+
+/* En-tête */
+const nObs = D.eleves.reduce((a,e)=>a+e.fiches.length,0);
+const dates = [...new Set(D.eleves.flatMap(e=>e.fiches.map(f=>f.date)))].sort();
+document.title = 'Suivi de classe · ' + D.label;
+$('#hClasse').textContent = D.label;
+$('#hMeta').innerHTML = [D.conseil && `<span>${esc(D.conseil)}</span>`, D.maj && `<span>Mis à jour le <b>${esc(D.maj)}</b></span>`].filter(Boolean).join('');
+$('#chiffres').innerHTML = [[D.eleves.filter(e=>e.fiches.length).length+'/'+D.eleves.length,'élèves suivis'],[nObs,'observations notées'],[dates.length,'temps d\'observation']].map(([b,s])=>`<div class="chiffre"><b>${b}</b><span>${s}</span></div>`).join('');
+
+/* La classe */
+$('#cTexte').textContent = D.classeResume || 'Appréciation de la classe à venir.';
+$('#cMaj').textContent = D.maj ? 'Rédigée le '+D.maj : '';
+const CF = D.classeFiche || {};
+$('#cIndics').innerHTML = C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['Non renseigné','']; return `<div class="indic ${c}"><small>${esc(lab)}</small><b>${esc(t)}</b></div>`; }).join('');
+const puces = (l,cl) => l&&l.length ? `<div class="puces">${l.map(x=>`<span class="puce ${cl}">${esc(x)}</span>`).join('')}</div>` : '<span class="vide">Rien de noté.</span>';
+$('#cDetail').innerHTML = `
+  <div class="groupe"><small>Points d'appui</small>${puces(CF.appuis,'ok')}</div>
+  <div class="groupe"><small>Difficultés</small>${puces(CF.difficultes,'df')}</div>
+  <div class="groupe"><small>Ce qui est mis en place pour la classe</small>${puces(CF.propositions,'ac')}</div>`;
+$('#cDepN').textContent = `${(CF.appuis||[]).length+(CF.difficultes||[]).length+(CF.propositions||[]).length} éléments`;
+
+$('#cCopier').onclick=()=>copier(D.classeResume);
+$('#tout').onclick=()=>copier([D.label+' — appréciations de mi-parcours','',"La classe — "+D.classeResume,'',...D.eleves.filter(e=>e.resume).map(e=>'Élève '+e.nom+' — '+e.resume+'\n')].join('\n'));
+$('#pdfTout').onclick=()=>imprimer('page');
+/* PDF : la boîte d'impression du navigateur propose « Enregistrer en PDF ». */
+function imprimer(quoi){ document.body.dataset.impr=quoi; if(quoi==='fiche') document.querySelectorAll('#fiche details').forEach(d=>d.open=true); else document.querySelectorAll('#cDep').forEach(d=>d.open=true);
+  try{ window.print(); }catch(e){} setTimeout(()=>{ delete document.body.dataset.impr; },500); }
+/* Les élèves */
+const derniere = e => e.fiches.filter(f=>!f.pasVu).slice(-1)[0];
+const tendance = e => { const f=derniere(e); const p=f&&f.grille&&f.grille.progres; return TEND[p] || (e.fiches.length?['Observation limitée','n']:['Pas encore observé','n']); };
+function miniBarre(f){ if(!f) return ''; const vals=Object.entries(f.grille||{}).filter(([k,v])=>k!=='progres'&&FREQ.some(x=>x[0]===v)).map(([,v])=>FREQ.find(x=>x[0]===v)[2]); if(!vals.length) return ''; const ordre={p:0,p3:1,e:2,m:3}; vals.sort((a,b)=>ordre[a]-ordre[b]); return `<div class="mini" aria-hidden="true">${vals.map(c=>`<i class="${c}"></i>`).join('')}</div>`; }
+$('#eleves').innerHTML = D.eleves.map((e,i)=>{ const [t,c]=tendance(e); const n=e.fiches.length;
+  return `<article class="carte" data-i="${i}">
+    <div class="carte-h"><span class="av">${i+1}</span><span><b>Élève <span class="code">${esc(e.nom)}</span></b><small>${n} observation${n>1?'s':''}</small></span><span class="tend ${c}">${esc(t)}</span></div>
+    <p class="extrait">${esc(e.resume||'Appréciation à venir.')}</p>
+    ${miniBarre(derniere(e))}
+    <div class="actions"><button class="btn plein lire" type="button">Lire la fiche <span aria-hidden="true">→</span></button>${e.resume?'<button class="btn cp" type="button">Copier l\'appréciation</button>':''}</div></article>`; }).join('');
+document.querySelectorAll('.carte').forEach(a=>{ const i=+a.dataset.i;
+  a.onclick=ev=>{ if(ev.target.closest('.cp')){ copier(D.eleves[i].resume); return; } ouvrir(i); }; });
+
+function ligneFreq(lab, v, avant){
+  const cells = FREQ.map(([k,l,c])=>`<span class="${c} ${k===v?'on':''}">${l}</span>`).join('');
+  const note = avant && avant.v && avant.v!==v ? `<small>Le ${dateFr(avant.d)} : ${esc((FREQ.find(x=>x[0]===avant.v)||[0,'non observé'])[1].toLowerCase())}</small>` : '';
+  return `<div class="crit"><span class="lab">${esc(lab)}${note}</span><span class="freq">${v==='no'?'<span class="no">Non observé</span>':cells}</span></div>`;
+}
+function ouvrir(i){
+  const e=D.eleves[i]; const f=derniere(e)||{grille:{},cps:{}}; const prec=e.fiches.filter(x=>x!==f);
+  const [t,c]=tendance(e);
+  const avantDe = k => { for(let j=prec.length-1;j>=0;j--){ const v=(prec[j].grille||{})[k]; if(v) return {v,d:prec[j].date}; } return null; };
+  const grille = FAMILLES.map(([fam,crits])=>{ const lignes=crits.filter(([k])=>f.grille&&f.grille[k]).map(([k,lab])=>ligneFreq(lab,f.grille[k],avantDe(k))).join(''); return lignes?`<div class="groupe"><small>${esc(fam)}</small><div>${lignes}</div></div>`:''; }).join('');
+  const cpsL = CPS.filter(([k])=>f.cps&&f.cps[k]&&f.cps[k]!=='no').map(([k,lab])=>{ const n=f.cps[k]; return `<div class="cpsr"><span>${esc(lab)}</span><span class="niv"><span class="pts">${[1,2,3,4].map(x=>`<i class="${x<=+n?'on n'+n:''}"></i>`).join('')}</span><em style="color:${COUL[n]}">${n} · ${esc(NIV[n])}</em></span></div>`; }).join('');
+  const chrono = e.fiches.slice().reverse().map(x=>{ const nb=Object.keys(x.grille||{}).length+Object.keys(x.cps||{}).length+(x.forts||[]).length+(x.pistes||[]).length+(x.aide||[]).length+(x.mesures||[]).length; return `<li><b>${dateFr(x.date)}</b><small>${esc(x.source)} · ${x.pasVu?'élève trop peu vu pour être évalué':nb+' élément'+(nb>1?'s':'')+' noté'+(nb>1?'s':'')}</small></li>`; }).join('');
+  $('#fIn').innerHTML = `
+    <div class="p-h"><button class="fermer retour" type="button" aria-label="Revenir à la classe">←</button><span class="av">${i+1}</span><div><h2 id="fNom">Élève <span class="code">${esc(e.nom)}</span></h2><span class="tend ${c}" style="display:inline-block;margin-top:6px">${esc(t)}</span></div><button class="fermer" type="button" aria-label="Fermer la fiche">×</button></div>
+    <div class="bloc"><span class="eyebrow">Appréciation de mi-parcours${e.maj?` · ${esc(e.maj)}`:''}</span><p class="texte">${esc(e.resume||'Appréciation à venir.')}</p><div class="barre">${e.resume?'<button class="btn copier" type="button">Copier l\'appréciation</button>':''}<button class="btn pdf" type="button">Enregistrer en PDF</button></div></div>
+    <div class="approf">
+      <details class="dep"><summary><span class="pastille" style="background:var(--accent)"></span>Voir le détail des observations <small>${f.date?'au '+dateFr(f.date):''}</small><span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in">${grille||'<span class="vide">Aucun critère noté.</span>'}</div></details>
+      <details class="dep"><summary><span class="pastille" style="background:var(--cps)"></span>Compétences psychosociales <small>${cpsL?'échelle 1 à 4':'non renseignées'}</small><span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in"><div class="bloc cps" style="padding:8px 16px">${cpsL||'<span class="vide">Pas encore observées.</span>'}</div></div></details>
+      <details class="dep"><summary><span class="pastille" style="background:var(--good)"></span>Points forts et pistes de progrès<span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in">
+        <div class="groupe"><small>Points forts observés</small>${puces(f.forts,'ok')}</div>
+        <div class="groupe"><small>Pistes d'amélioration</small>${puces(f.pistes,'df')}</div></div></details>
+      <details class="dep"><summary><span class="pastille" style="background:var(--help)"></span>Ce qui l'aide et ce qui est proposé<span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in">
+        <div class="groupe"><small>Ce qui l'aide en classe</small>${puces(f.aide,'h')}</div>
+        <div class="groupe"><small>Proposé au conseil</small>${puces(f.mesures,'ac')}</div></div></details>
+      <details class="dep"><summary><span class="pastille" style="background:var(--muted)"></span>Historique des observations <small>${e.fiches.length} temps</small><span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in"><ol class="chrono">${chrono||'<li><small>Aucune observation.</small></li>'}</ol></div></details>
+    </div>`;
+  $('#fIn .fermer:not(.retour)').onclick=()=>$('#fiche').close(); $('#fIn .retour').onclick=()=>$('#fiche').close();
+  const cp=$('#fIn .copier'); if(cp) cp.onclick=()=>copier(e.resume);
+  $('#fIn .pdf').onclick=()=>imprimer('fiche');
+  $('#fiche').showModal(); $('#fiche').scrollTop=0;
+}
+$('#fiche').addEventListener('click',ev=>{ if(ev.target===$('#fiche')) $('#fiche').close(); });
+})();
+</script>
+</body></html>
