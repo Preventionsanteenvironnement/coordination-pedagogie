@@ -15,7 +15,7 @@
   --bg:#F3F5F2; --surface:#FFFFFF; --sunk:#E8ECE7; --line:#D5DCD4;
   --ink:#15302C; --muted:#5A6B66; --accent:#0E6B60; --accent-ink:#FFFFFF; --accent-soft:#D7ECE8;
   --good:#2F7D3B; --good-soft:#DDEFD9; --warn:#A86A00; --warn-soft:#F7E8C8; --alert:#B3361F; --alert-soft:#F6DDD6;
-  --help:#3D57A6; --help-soft:#DFE5F6; --scrim:rgba(10,20,18,.45); --cps:#6B3FB5; --cps-soft:#F1EBFA; --cps-line:#DDCDF3;
+  --help:#3D57A6; --help-soft:#DFE5F6; --scrim:rgba(10,20,18,.45); --cps:#6B3FB5; --cps-soft:#F1EBFA; --cps-line:#DDCDF3; --l3:#5E8A1F; --l3-soft:#E8F1D2;
   --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --body:"Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
   --r:14px; color-scheme:light;
@@ -24,7 +24,7 @@
   --bg:#0F1A18; --surface:#16231F; --sunk:#1D2C28; --line:#2C3D38;
   --ink:#E6EFEC; --muted:#9DB0AA; --accent:#3FB3A2; --accent-ink:#06211D; --accent-soft:#16413A;
   --good:#7BCB86; --good-soft:#1E3A22; --warn:#E9B44C; --warn-soft:#3A2E14; --alert:#F08A73; --alert-soft:#41201A;
-  --help:#9DB2F0; --help-soft:#222C4A; --scrim:rgba(0,0,0,.6); --cps:#C3A6F2; --cps-soft:#261D36; --cps-line:#3E2F57; color-scheme:dark }}
+  --help:#9DB2F0; --help-soft:#222C4A; --scrim:rgba(0,0,0,.6); --cps:#C3A6F2; --cps-soft:#261D36; --cps-line:#3E2F57; --l3:#B5D67A; --l3-soft:#2A3517; color-scheme:dark }}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px)}
@@ -147,6 +147,29 @@ summary::-webkit-details-marker{display:none}
 .cpsr .seg button[aria-pressed="true"][data-v="moyen"]{background:var(--warn);color:var(--surface)}
 .cpsr .seg button[aria-pressed="true"][data-v="non"]{background:var(--alert);color:var(--surface)}
 .cpsr .seg button[aria-pressed="true"][data-v="ne"]{background:var(--muted);color:var(--surface)}
+/* Couleurs visibles d'avance (14/11/2026) : teinte claire au repos, pleine une fois choisie. */
+.seg button.p{background:var(--good-soft);color:var(--good)}
+.seg button.p3{background:var(--l3-soft);color:var(--l3)}
+.seg button.e{background:var(--warn-soft);color:var(--warn)}
+.seg button.m{background:var(--alert-soft);color:var(--alert)}
+.seg button.n{font-weight:500;font-style:italic}
+.seg button[aria-pressed="true"].p{background:var(--good);color:var(--surface);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--good)}
+.seg button[aria-pressed="true"].p3{background:var(--l3);color:var(--surface);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--l3)}
+.seg button[aria-pressed="true"].e{background:var(--warn);color:var(--surface);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--warn)}
+.seg button[aria-pressed="true"].m{background:var(--alert);color:var(--surface);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--alert)}
+.seg button[aria-pressed="true"].n{background:var(--muted);color:var(--surface)}
+.seg:has(button[aria-pressed="true"]) button:not([aria-pressed="true"]){opacity:.55}
+.legcps{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:13px;padding:8px 10px;margin:6px 0 4px;border-radius:10px;background:var(--surface);border:1px solid var(--cps-line)}
+.legcps .pastille{display:inline-block;min-width:22px;text-align:center;border-radius:6px;font-weight:700;padding:2px 0;color:var(--surface)}
+.ligneCps{display:flex;align-items:center;gap:10px;width:100%;flex-wrap:wrap}.ligneCps .seg{flex:1;min-width:220px}
+.sens{font:600 12.5px/1.2 var(--body);font-style:italic;min-width:120px}
+.dim{display:flex;flex-direction:column;gap:7px}.dim+.dim{padding-top:10px;border-top:1px solid var(--line)}
+.dim>span{font:600 12px/1.2 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.chip.ok{border-color:var(--good-soft);background:color-mix(in srgb,var(--good-soft) 40%,var(--surface))}
+.chip.df{border-color:var(--warn);border-style:dashed;background:color-mix(in srgb,var(--warn-soft) 40%,var(--surface))}
+.chip.ok[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:var(--surface)}
+.chip.df[aria-pressed="true"]{background:var(--warn);border-color:var(--warn);color:var(--surface);border-style:solid}
+.legende{display:flex;gap:14px;font-size:12.5px;color:var(--muted)}.legende i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:5px;vertical-align:-1px}
 .vide{display:flex;flex-direction:column;gap:10px;padding-block:40px;text-align:center;align-items:center}
 @media (max-width:420px){.hero h1{font-size:26px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.big-check path{stroke-dashoffset:0}}
@@ -187,13 +210,20 @@ summary::-webkit-details-marker{display:none}
   </section>
 
   <section class="card" id="cVie">
-    <div class="sect-head"><h2>2 · La vie de classe</h2><span class="count" id="vieSt">0 / 4</span></div>
+    <div class="sect-head"><h2>2 · La vie de classe</h2><span class="count" id="vieSt">0 / 5</span></div>
+    <p class="hint">Votre regard sur le groupe depuis la rentrée. Tout est facultatif.</p>
+    <span class="lbl">En un coup d'œil</span>
     <div class="climat" id="climat"></div>
     <div class="grp">
-      <span class="lbl">Une piste pour le groupe ?</span>
+      <span class="lbl">Ce que j'observe</span>
+      <div class="legende"><span><i style="background:var(--good)"></i>point d'appui</span><span><i style="background:var(--warn)"></i>difficulté</span></div>
+      <div id="vieDim"></div>
+    </div>
+    <div class="grp">
+      <span class="lbl">Ce que je mets en place ou propose pour la classe</span>
       <div class="chips" id="pistesClasse"></div>
     </div>
-    <textarea id="vieTxt" maxlength="1500" placeholder="Un mot sur la dynamique du groupe (facultatif)"></textarea>
+    <textarea id="vieTxt" maxlength="1500" placeholder="Un mot sur la classe (facultatif, sans prénom)"></textarea>
     <p class="err" id="errVie" hidden></p>
   </section>
 
@@ -282,7 +312,8 @@ const PLUS = [
 /* « En classe, l'élève… » : capacités observables, SANS classement visible (choix de Brahim, 14/11/2026).
    Correspondance cachée avec le Référentiel national des CPS (Santé publique France, Tome 1, 2025) : 1er champ.
    Oui → appuis ; Non → besoins ; Moyennement → plus (« … : en partie ») ; Non évaluable ou rien → non enregistré. */
-const CPS = [["C2.2","Capacité à se retenir (attendre son tour, ne pas interrompre)"],
+const CPS = [["C1c","Capacité à avoir confiance en soi (s'engager dans la tâche, proposer une réponse)"],
+  ["C2.2","Capacité à se retenir (attendre son tour, ne pas interrompre)"],
   ["C2.1","Capacité à maintenir son objectif jusqu'au bout"],
   ["C2.4","Capacité à demander de l'aide quand il en a besoin"],
   ["C1.1","Capacité à repérer et dire ses difficultés"],
@@ -294,8 +325,31 @@ const CPS = [["C2.2","Capacité à se retenir (attendre son tour, ne pas interro
   ["S2","Capacité à donner son avis et régler un désaccord sans agressivité"]];
 const cpsTexte = c => c[1];
 const cpsMoyen = c => c[1] + ' : en partie';
-const CLIMAT = [["climat_travail","Climat de travail"],["cohesion","Cohésion du groupe"],["respect","Respect des règles"],["participation","Participation"]];
-const PISTES = ["Rappeler le cadre ensemble","Travaux de groupe","Changer le plan de classe","Valoriser les réussites","Heure de vie de classe"];
+/* Échelle de développement 1 à 4 (14/11/2026) — proposition pédagogique, pas un barème officiel.
+   Stockée dans choix.cps = { "<repère>": "1".."4" } (clé « . » remplacée par « _ »). */
+const NIV_CPS=[["1","1","m"],["2","2","e"],["3","3","p3"],["4","4","p"],["no","Non observée","n"]];
+const LEG_CPS={"1":"À accompagner","2":"En développement","3":"En progression","4":"Mobilisée régulièrement","no":"Non observée"};
+const COUL_CPS={"1":"var(--alert)","2":"var(--warn)","3":"var(--l3)","4":"var(--good)","no":"var(--muted)"};
+const cleCps = c => c[0].replace(/\./g,'_');
+/* Vie de classe enrichie (14/11/2026, même grille que la saisie de Brahim). Stockée dans les champs existants :
+   climat (5 lignes), choix.appuis / choix.difficultes (observations), pistes (ce qui est mis en place ou proposé). */
+const CLIMAT = [["climat","Climat général",[["serein","Serein","p"],["variable","Variable","e"],["difficile","Difficile","m"]]],
+  ["heterogeneite","Hétérogénéité",[["faible","Faible","p"],["marquee","Marquée","e"],["tres_forte","Très forte","m"]]],
+  ["absences","Taux d'absence",[["faible","Faible","p"],["modere","Modéré","e"],["eleve","Élevé","m"]]],
+  ["retards","Retards",[["rares","Rares","p"],["parfois","Parfois","e"],["frequents","Fréquents","m"]]],
+  ["evolution","Évolution depuis la rentrée",[["+","En progrès","p"],["=","Stable","e"],["-","En recul","m"]]]];
+const VIE_DIM = [
+ ["Climat de classe",["Ambiance sereine","Classe dynamique et agréable","Groupe bienveillant","Classe soudée"],["Classe agitée, difficile à canaliser","Climat tendu","Relations parfois conflictuelles","Groupe fragmenté en sous-groupes"]],
+ ["Mise au travail",["Mise au travail rapide","Travail régulier","Consignes rapidement appliquées"],["Mise au travail laborieuse","Sollicitations fréquentes nécessaires","Travail souvent inachevé"]],
+ ["Participation orale",["Participation active","Échanges constructifs","Bonne qualité d'écoute"],["Participation limitée","Participation concentrée sur quelques élèves","Prises de parole désorganisées, interruptions"]],
+ ["Attention et motivation",["Attention soutenue","Classe motivée et curieuse","Investissement constant"],["Attention fluctuante, distractions fréquentes","Fatigabilité importante","Investissement variable, découragement rapide"]],
+ ["Hétérogénéité et niveaux",["Diversité enrichissante","Entraide entre les niveaux","Progression collective"],["Écarts de niveau importants","Rythmes d'apprentissage très différents","Acquis fondamentaux fragiles (lecture, écriture)","Difficile de tenir un rythme commun","Besoins d'accompagnement individuel nombreux"]],
+ ["Travail en groupe",["Bonne coopération","Entraide spontanée","Répartition équitable des tâches"],["Petits groupes difficiles à constituer","Travail de groupe difficile à mener","Groupes affinitaires fermés","Investissement déséquilibré dans les groupes"]],
+ ["Autonomie et organisation",["Élèves autonomes","Matériel présent","Respect des échéances"],["Forte dépendance à l'adulte","Oublis de matériel fréquents","Manque de méthode"]],
+ ["Respect du cadre",["Respect des règles","Respect entre élèves","Respect de l'adulte"],["Bavardages récurrents","Rappels au cadre fréquents","Contestation des consignes","Moqueries ou tensions"]],
+ ["Rapport à l'erreur",["Ose essayer","Accepte les corrections","Persévère face à la difficulté"],["Crainte de se tromper","Abandon rapide face à la difficulté","Exploite peu les corrections"]],
+ ["Assiduité",["Groupe stable","Bonne ponctualité"],["Effectif fluctuant","Apprentissages perturbés par les absences","Présence sans réel engagement"]]];
+const PISTES = ["Travail en petits groupes encadrés","Différencier les supports et les consignes","Supports visuels, consignes courtes","Plan de classe","Rituels de début de séance","Binômes de tutorat entre élèves","Alterner oral, écrit et manipulation","Valoriser les réussites collectives","Rappel collectif du cadre","Point avec le professeur principal","Point avec la CPE sur l'assiduité","Information aux familles","Heure de vie de classe"];
 
 /* ═══════════════ outils ═══════════════ */
 const $ = s => document.querySelector(s);
@@ -439,31 +493,36 @@ function matiere(){ const v=$('#mat').value; return v==='Autre' ? $('#matAutre')
 /* ═══════════════ 2 · vie de classe ═══════════════ */
 function lireVie(){
   const climat={}; document.querySelectorAll('#climat .seg').forEach(s=>{ const b=s.querySelector('[aria-pressed=true]'); if(b) climat[s.dataset.k]=b.dataset.v; });
-  etat.vie = { climat, pistes:lus($('#pistesClasse')), commentaire:$('#vieTxt').value.trim() };
+  const pris=sel=>[...document.querySelectorAll(sel)].map(c=>c.dataset.v);
+  const choix={}; const ap=pris('#vieDim .chip.ok[aria-pressed=true]'), df=pris('#vieDim .chip.df[aria-pressed=true]'); if(ap.length) choix.appuis=ap; if(df.length) choix.difficultes=df;
+  etat.vie = { climat, choix, pistes:lus($('#pistesClasse')), commentaire:$('#vieTxt').value.trim() };
   delete etat.envoyes.VIE; sauver();
-  const n=Object.keys(climat).length; $('#vieSt').textContent=n+' / 4'; $('#vieSt').style.color=n===4?'var(--good)':''; $('#cVie').classList.toggle('ok', n===4); majRecap();
+  const n=Object.keys(climat).length; $('#vieSt').textContent=n+' / '+CLIMAT.length; $('#vieSt').style.color=n===CLIMAT.length?'var(--good)':''; $('#cVie').classList.toggle('ok', n>0||ap.length+df.length>0); majRecap();
 }
-CLIMAT.forEach(([k,t])=>{
+CLIMAT.forEach(([k,t,opts])=>{
   const r=document.createElement('div'); r.className='climat-row'; r.innerHTML=`<span>${esc(t)}</span>`;
   const s=document.createElement('div'); s.className='seg'; s.dataset.k=k; s.setAttribute('role','group'); s.setAttribute('aria-label',t);
-  [['bien','Bien'],['correct','Correct'],['a_travailler','À travailler']].forEach(([v,l])=>{
-    const b=document.createElement('button'); b.type='button'; b.dataset.v=v; b.textContent=l; b.setAttribute('aria-pressed', etat.vie.climat?.[k]===v?'true':'false');
+  opts.forEach(([v,l,c])=>{
+    const b=document.createElement('button'); b.type='button'; b.className=c; b.dataset.v=v; b.textContent=l; b.setAttribute('aria-pressed', etat.vie.climat?.[k]===v?'true':'false');
     b.onclick=()=>{ const deja=b.getAttribute('aria-pressed')==='true'; s.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false')); if(!deja) b.setAttribute('aria-pressed','true'); lireVie(); };
     s.appendChild(b);
   });
   r.appendChild(s); $('#climat').appendChild(r);
 });
+{ const pris=new Set([...(etat.vie.choix?.appuis||[]),...(etat.vie.choix?.difficultes||[])]);
+  VIE_DIM.forEach(([lab,ok,df])=>{ const d=document.createElement('div'); d.className='dim'; d.innerHTML=`<span>${esc(lab)}</span>`; const ch=document.createElement('div'); ch.className='chips';
+    ok.forEach(t=>chip(t,ch,pris.has(t),lireVie).classList.add('ok')); df.forEach(t=>chip(t,ch,pris.has(t),lireVie).classList.add('df')); d.appendChild(ch); $('#vieDim').appendChild(d); }); }
 autre($('#pistesClasse'), lireVie);
 PISTES.forEach(p=>chip(p, $('#pistesClasse'), (etat.vie.pistes||[]).includes(p), lireVie));
 (etat.vie.pistes||[]).filter(p=>!PISTES.includes(p)).forEach(p=>chip(p, $('#pistesClasse'), true, lireVie));
 $('#vieTxt').value = etat.vie.commentaire || '';
 $('#vieTxt').oninput = lireVie;
-{ const n=Object.keys(etat.vie.climat||{}).length; $('#vieSt').textContent=n+' / 4'; $('#cVie').classList.toggle('ok', n===4); }
+{ const n=Object.keys(etat.vie.climat||{}).length; $('#vieSt').textContent=n+' / '+CLIMAT.length; $('#cVie').classList.toggle('ok', n>0); }
 
 /* ═══════════════ 3 · élèves ═══════════════ */
 const ELEVES = L.eleves;
 const initiales = nom => nom.split(/\s+/).map(m=>m[0]).join('').slice(0,2).toUpperCase();
-function nbChoix(c){ return Object.values(c||{}).reduce((a,l)=>a+(l?.length||0),0); }
+function nbChoix(c){ return Object.values(c||{}).reduce((a,l)=>a+(Array.isArray(l)?l.length:(l&&typeof l==='object'?Object.keys(l).length:0)),0); }
 function renderListe(){
   const box=$('#liste'); box.innerHTML=''; let n=0;
   ELEVES.forEach((e,i)=>{
@@ -481,15 +540,19 @@ function renderListe(){
 document.querySelectorAll('.sheet .chips[data-k]').forEach(box=>{ autre(box); CHOIX[box.dataset.k].forEach(t=>chip(t, box)); });
 PLUS.forEach(([t,l])=>{ const g=document.createElement('div'); g.className='grp w'; g.innerHTML=`<span class="sub">${esc(t)}</span>`; const c=document.createElement('div'); c.className='chips'; c.dataset.k='plus'; l.forEach(x=>chip(x,c)); g.appendChild(c); $('#more').appendChild(g); });
 
+{ const lg=document.createElement('div'); lg.className='legcps'; lg.innerHTML=['1','2','3','4'].map(k=>`<span class="pastille" style="background:${COUL_CPS[k]}">${k}</span><span>${LEG_CPS[k]}</span>`).join(''); $('#cpsRows').appendChild(lg); }
+function majSens(s){ const sens=s.parentNode.querySelector('.sens'); const b=s.querySelector('[aria-pressed=true]'); sens.textContent=b?LEG_CPS[b.dataset.v]:''; sens.style.color=b?COUL_CPS[b.dataset.v]:''; }
 CPS.forEach(c=>{ const r=document.createElement('div'); r.className='cpsr'; r.innerHTML=`<span>${esc(c[1])}</span>`;
   const s=document.createElement('div'); s.className='seg'; s.dataset.cps=c[0];
-  [['oui','Oui'],['moyen','Moyennement'],['non','Non'],['ne','Non évaluable']].forEach(([v,l])=>{ const b=document.createElement('button'); b.type='button'; b.dataset.v=v; b.textContent=l; b.setAttribute('aria-pressed','false');
-    b.onclick=()=>{ const on=b.getAttribute('aria-pressed')==='true'; s.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false')); if(!on) b.setAttribute('aria-pressed','true'); }; s.appendChild(b); });
-  r.appendChild(s); $('#cpsRows').appendChild(r); });
-function lireCps(choix){ document.querySelectorAll('#cpsRows .seg').forEach(s=>{ const b=s.querySelector('[aria-pressed=true]'); if(!b||b.dataset.v==='ne') return; const c=CPS.find(x=>x[0]===s.dataset.cps);
-  const [k,t]=b.dataset.v==='oui'?['appuis',cpsTexte(c)]:b.dataset.v==='non'?['besoins',cpsTexte(c)]:['plus',cpsMoyen(c)]; (choix[k]=choix[k]||[]).push(t); }); }
+  NIV_CPS.forEach(([v,l,cl])=>{ const b=document.createElement('button'); b.type='button'; b.className=cl; b.dataset.v=v; b.textContent=l; b.title=LEG_CPS[v]; b.setAttribute('aria-label',LEG_CPS[v]); b.setAttribute('aria-pressed','false');
+    b.onclick=()=>{ const on=b.getAttribute('aria-pressed')==='true'; s.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false')); if(!on) b.setAttribute('aria-pressed','true'); majSens(s); }; s.appendChild(b); });
+  const ligne=document.createElement('div'); ligne.className='ligneCps'; ligne.appendChild(s); const sens=document.createElement('small'); sens.className='sens'; ligne.appendChild(sens);
+  r.appendChild(ligne); $('#cpsRows').appendChild(r); });
+function lireCps(choix){ const m={}; document.querySelectorAll('#cpsRows .seg').forEach(s=>{ const b=s.querySelector('[aria-pressed=true]'); if(!b||b.dataset.v==='no') return; m[cleCps(CPS.find(x=>x[0]===s.dataset.cps))]=b.dataset.v; }); if(Object.keys(m).length) choix.cps=m; }
 function remplirCps(r){ document.querySelectorAll('#cpsRows .seg').forEach(s=>{ const c=CPS.find(x=>x[0]===s.dataset.cps), t=cpsTexte(c), ch=r?.choix||{};
-  const v=(ch.appuis||[]).includes(t)?'oui':(ch.besoins||[]).includes(t)?'non':(ch.plus||[]).includes(cpsMoyen(c))?'moyen':''; s.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v?'true':'false')); }); }
+  /* anciennes réponses Oui / Moyennement / Non converties en 4 / 2 / 1 */
+  const v=(ch.cps||{})[cleCps(c)] || ((ch.appuis||[]).includes(t)?'4':(ch.besoins||[]).includes(t)?'1':(ch.plus||[]).includes(cpsMoyen(c))?'2':'');
+  s.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v?'true':'false')); majSens(s); }); }
 let cur=-1;
 function remplirFeuille(r){
   remplirCps(r);
@@ -532,9 +595,9 @@ $('#envoyer').onclick=()=>{
 
 /* ═══════════════ 4 · validation ═══════════════ */
 function majRecap(){
-  const mat=matiere(); const v=Object.keys(etat.vie.climat||{}).length; const viePleine=v>0||etat.vie.pistes?.length||etat.vie.commentaire;
+  const mat=matiere(); const v=Object.keys(etat.vie.climat||{}).length; const viePleine=v>0||etat.vie.pistes?.length||etat.vie.commentaire||nbChoix(etat.vie.choix);
   const faits=ELEVES.filter(e=>etat.eleves[e.c]).length; const vig=ELEVES.filter(e=>(etat.eleves[e.c]?.choix?.alerte||[]).length).length;
-  const items=[[!!mat, mat?`Matière : ${mat}`:'Matière à choisir'],[!!viePleine, v?`Vie de classe : ${v} point${v>1?'s':''} sur 4`:(viePleine?'Vie de classe : notée':'Vie de classe : pas encore notée')],[faits>0, `${faits} élève${faits>1?'s':''} renseigné${faits>1?'s':''}`],[vig>0, `${vig} signal${vig>1?'s':''} de vigilance`]];
+  const items=[[!!mat, mat?`Matière : ${mat}`:'Matière à choisir'],[!!viePleine, v?`Vie de classe : ${v} ligne${v>1?'s':''} sur ${CLIMAT.length}${nbChoix(etat.vie.choix)?`, ${nbChoix(etat.vie.choix)} observation${nbChoix(etat.vie.choix)>1?'s':''}`:''}`:(viePleine?'Vie de classe : notée':'Vie de classe : pas encore notée')],[faits>0, `${faits} élève${faits>1?'s':''} renseigné${faits>1?'s':''}`],[vig>0, `${vig} signal${vig>1?'s':''} de vigilance`]];
   $('#recapL').innerHTML=items.map(([ok,t])=>`<li><span class="tick ${ok?'on':''}">${ok?'✓':'·'}</span>${esc(t)}</li>`).join('');
   const pret=!!mat && (viePleine||faits>0); $('#valider').disabled=!pret; $('#recap').classList.toggle('ok',pret);
   $('#recapH').textContent = !mat ? 'Choisissez votre matière pour pouvoir valider.' : pret ? `Tout est prêt. Vous pourrez revenir compléter${L.limite?` jusqu'à ${L.limite}`:''}.` : 'Notez la vie de classe ou au moins un élève.';
@@ -543,7 +606,7 @@ $('#valider').onclick=async ()=>{
   const t=nomDans($('#vieTxt').value); if(t){ const er=$('#errVie'); er.textContent=`Retirez « ${t} » du mot sur la vie de classe : aucun nom en ligne.`; er.hidden=false; $('#vieTxt').focus(); return; }
   $('#errVie').hidden=true;
   const btn=$('#valider'); btn.disabled=true; btn.textContent='Envoi en cours…';
-  const cibles=[...(Object.keys(etat.vie.climat||{}).length||etat.vie.pistes?.length||etat.vie.commentaire ? ['VIE'] : []), ...ELEVES.filter(e=>etat.eleves[e.c]).map(e=>e.c)];
+  const cibles=[...(Object.keys(etat.vie.climat||{}).length||etat.vie.pistes?.length||etat.vie.commentaire||nbChoix(etat.vie.choix) ? ['VIE'] : []), ...ELEVES.filter(e=>etat.eleves[e.c]).map(e=>e.c)];
   const res=await Promise.all(cibles.map(envoyer));
   btn.textContent='Valider et envoyer mes regards';
   const ko=res.filter(x=>!x).length;
