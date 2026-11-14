@@ -15,7 +15,7 @@
   --bg:#F3F5F2; --surface:#FFFFFF; --sunk:#E8ECE7; --line:#D5DCD4;
   --ink:#15302C; --muted:#5A6B66; --accent:#0E6B60; --accent-ink:#FFFFFF; --accent-soft:#D7ECE8;
   --good:#2F7D3B; --good-soft:#DDEFD9; --warn:#A86A00; --warn-soft:#F7E8C8; --alert:#B3361F; --alert-soft:#F6DDD6;
-  --help:#3D57A6; --help-soft:#DFE5F6; --scrim:rgba(10,20,18,.45);
+  --help:#3D57A6; --help-soft:#DFE5F6; --scrim:rgba(10,20,18,.45); --cps:#6B3FB5; --cps-soft:#F1EBFA; --cps-line:#DDCDF3;
   --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --body:"Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
   --r:14px; color-scheme:light;
@@ -24,7 +24,7 @@
   --bg:#0F1A18; --surface:#16231F; --sunk:#1D2C28; --line:#2C3D38;
   --ink:#E6EFEC; --muted:#9DB0AA; --accent:#3FB3A2; --accent-ink:#06211D; --accent-soft:#16413A;
   --good:#7BCB86; --good-soft:#1E3A22; --warn:#E9B44C; --warn-soft:#3A2E14; --alert:#F08A73; --alert-soft:#41201A;
-  --help:#9DB2F0; --help-soft:#222C4A; --scrim:rgba(0,0,0,.6); color-scheme:dark }}
+  --help:#9DB2F0; --help-soft:#222C4A; --scrim:rgba(0,0,0,.6); --cps:#C3A6F2; --cps-soft:#261D36; --cps-line:#3E2F57; color-scheme:dark }}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);-webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0px)}
@@ -137,9 +137,12 @@ summary::-webkit-details-marker{display:none}
 .cpt-txt{grid-column:1/-1;margin:0;font-size:13px;color:var(--muted);text-align:center}
 .compte.urgent .cpt-bloc b{color:var(--warn)}
 .compte.fini .cpt-bloc b{color:var(--muted)}
+.cpsg{background:var(--cps-soft);border:1px solid var(--cps-line);border-radius:var(--r);padding:14px}
+.cpsg h3{color:var(--cps)}.cpsg h3 small{font:500 12px var(--body);color:var(--muted)}
+.cpsg .cpsr{border-top-color:var(--cps-line)}
 .cpsr{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}
 .cpsr span{flex:1;min-width:170px;font-size:14px}.cpsr small{display:block;color:var(--muted);font-size:12px}
-.cpsr .seg{flex-wrap:wrap}
+.cpsr .seg{width:100%;flex-wrap:nowrap}.cpsr .seg button{flex:1;padding:9px 4px;font-size:12.5px;white-space:nowrap}
 .cpsr .seg button[aria-pressed="true"][data-v="oui"]{background:var(--good);color:var(--surface)}
 .cpsr .seg button[aria-pressed="true"][data-v="moyen"]{background:var(--warn);color:var(--surface)}
 .cpsr .seg button[aria-pressed="true"][data-v="non"]{background:var(--alert);color:var(--surface)}
@@ -227,7 +230,6 @@ summary::-webkit-details-marker{display:none}
     <div class="grp h"><h3><span class="dot" style="background:var(--help)"></span>Ce qui l'aide<span class="n">0</span></h3><div class="chips" data-k="aide"></div></div>
     <div class="grp"><h3><span class="dot" style="background:var(--accent)"></span>Mesure à proposer au conseil<span class="n">0</span></h3><div class="chips" data-k="mesures"></div></div>
     <div class="grp a"><h3><span class="dot" style="background:var(--alert)"></span>Signal de décrochage<span class="n">0</span></h3><div class="chips" data-k="alerte"></div></div>
-    <div class="grp cpsg"><h3><span class="dot" style="background:#8A5CD0"></span>Compétences psychosociales <small style="font:500 12px var(--body);color:var(--muted)">(facultatif)</small></h3><div id="cpsRows"></div></div>
     <details>
       <summary>+ Plus de choix pour décrire précisément</summary>
       <div class="more" id="more"></div>
@@ -237,6 +239,7 @@ summary::-webkit-details-marker{display:none}
       <textarea id="txt" maxlength="1500" placeholder="Un fait observé, un exemple… sans prénom ni diagnostic."></textarea>
       <p class="err" id="errTxt" hidden></p>
     </div>
+    <div class="grp cpsg"><h3>Compétences psychosociales <small>(facultatif)</small></h3><div id="cpsRows"></div></div>
     <div class="foot">
       <button class="btn ghost" id="passer" type="button">Passer</button>
       <button class="btn" id="envoyer" type="button">Valider · élève suivant</button>
