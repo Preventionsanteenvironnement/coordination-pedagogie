@@ -13,7 +13,7 @@ prévention du décrochage. **Les résultats scolaires ne sont pas demandés.**
 La page ne s'ouvre que par le lien envoyé par le professeur principal :
 
 ```
-https://preventionsanteenvironnement.github.io/coordination-pedagogie/regards-croises/#d=<base64url(JSON)>
+https://preventionsanteenvironnement.github.io/coordination-pedagogie/regards-croises/#<base64url(JSON)>   (ancienne écriture « #d=… » toujours acceptée)
 ```
 
 Le JSON contient la classe, la date du conseil, la date limite (`fin`), le PP et la liste

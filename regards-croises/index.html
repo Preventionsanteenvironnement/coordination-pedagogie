@@ -287,7 +287,9 @@ function avecDelai(p, ms){ return Promise.race([p, new Promise((_,r)=>setTimeout
      heure:"13 h 30", limite:"jeudi 19 nov. midi", pp:"M. Mecheri",
      eleves:[["6T2EJ","Inès B.","ULIS · tâches courtes"], …] } */
 function lireLien(){
-  const m = location.hash.match(/[#&]d=([A-Za-z0-9_-]+)/);
+  // Deux écritures acceptées : « #d=… » (première version) et « #… » seul, sans « = » :
+  // Mail coupait le lien au « = » et n'en gardait que le début dans sa vignette (14/11/2026).
+  const m = location.hash.match(/[#&]d=([A-Za-z0-9_-]+)/) || location.hash.match(/^#([A-Za-z0-9_-]{20,})$/);
   if (!m) return null;
   try{
     const b = m[1].replace(/-/g,'+').replace(/_/g,'/');
