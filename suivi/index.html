@@ -200,6 +200,14 @@ dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
   .im-tete h1{font-size:22pt;line-height:1}
   .im-tete .eyebrow{font-size:12pt}
   .im-meta{font-size:12pt;color:var(--muted);text-align:right}
+  .im-encart{width:100%;border-collapse:separate;border-spacing:0;border:2px solid var(--accent);border-radius:8px;margin:0 0 12px}
+  .im-encart td{padding:8px 12px;vertical-align:bottom;border-right:1px solid var(--line)}
+  .im-encart td:last-child{border-right:0}
+  .im-encart td.cl{width:34%}.im-encart td.dt{width:22%}
+  .im-encart span{display:block;font-size:12pt;font-weight:600;color:var(--accent);margin-bottom:22px}
+  .im-encart td.cl span{font-size:14pt}
+  .im-encart i{display:block;border-bottom:1px dotted #7A8F89;height:1px}
+  .im-encart td.cl i{border-bottom:2px dotted #7A8F89}
   .im-methode{background:var(--accent-soft);border-radius:8px;padding:8px 12px;font-size:12pt;margin-bottom:14px}
   .im-methode b{color:var(--accent)}
   .im-h2{font:700 13pt/1.2 var(--display);color:var(--accent);margin:14px 0 8px;display:flex;align-items:center;gap:8px}
@@ -217,6 +225,9 @@ dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
   .im-t{margin-left:auto;font-size:12pt;font-weight:600;padding:2px 7px;border-radius:99px}
   .im-t.p{background:var(--good-soft);color:var(--good)}.im-t.e{background:var(--warn-soft);color:var(--warn)}.im-t.m{background:var(--alert-soft);color:var(--alert)}.im-t.n{background:var(--sunk);color:var(--muted)}
   .im-el p{font-size:12pt}
+  .im-groupe{break-inside:avoid}
+  .im-h2{break-after:avoid}
+  .im-meta{white-space:nowrap}
   .im-annexe{break-before:page}
   body[data-format="court"] .im-annexe{display:none}
   body[data-eleve] .im-annexe{break-before:auto}
@@ -450,6 +461,10 @@ function versWord(mode, code){
   let html = `<p style="${T}font-size:12pt;letter-spacing:1pt;color:#0E6B60;margin:0">SUIVI DES ÉLÈVES · CONSEIL DE MI-SEMESTRE</p>
     <p style="${T}font-size:22pt;font-weight:bold;margin:0 0 4pt">Suivi de la classe</p>
     <p style="${T}font-size:12pt;color:#566B65;margin:0 0 8pt">${esc(D.conseil||'')} · mis à jour le ${esc(D.maj||'')}</p>
+    <table style="width:100%;border-collapse:collapse;border:2pt solid #0E6B60;margin:0 0 8pt"><tr>
+      <td style="${T}width:34%;padding:6pt 8pt;border-right:1px solid #D3DDD9;vertical-align:top"><span style="font-size:14pt;font-weight:bold;color:#0E6B60">Classe :</span><br><span style="font-size:18pt">&nbsp;</span></td>
+      <td style="${T}padding:6pt 8pt;border-right:1px solid #D3DDD9;vertical-align:top"><span style="font-size:12pt;font-weight:bold;color:#0E6B60">Professeur principal (nom, prénom) :</span><br><span style="font-size:12pt">&nbsp;</span></td>
+      <td style="${T}width:22%;padding:6pt 8pt;vertical-align:top"><span style="font-size:12pt;font-weight:bold;color:#0E6B60">Date du conseil :</span><br><span style="font-size:12pt">&nbsp;</span></td></tr></table>
     <p style="${T}font-size:12pt;background:#D5EBE6;padding:6pt;margin:0 0 8pt"><b>Lecture.</b> Chaque élève est désigné par un code ; la correspondance figure dans le message reçu sur votre messagerie académique. <b>Méthode.</b> Observations régulières en classe, cumulées dans le temps : 18 comportements notés selon leur fréquence et les compétences psychosociales de 1 (à accompagner) à 4 (mobilisée régulièrement). Chaque appréciation part des progrès et fixe un objectif mesurable, sans les notes.</p>`;
   if(!code){
     const ind=C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['—','']; const bg={p:'#DDEFD9',e:'#F7E8C8',m:'#F6DDD6'}[c]||'#EEF2F0'; return `<td style="${T}background:${bg};padding:4pt 6pt;font-size:12pt;color:#566B65">${esc(lab)}<br><b style="font-size:12pt;color:#12302A">${esc(t)}</b></td>`; }).join('');
@@ -483,7 +498,7 @@ function versWord(mode, code){
   const ind=C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['—','']; return `<div class="${c}">${esc(lab)}<b>${esc(t)}</b></div>`; }).join('');
   const lib=Object.fromEntries(FREQ.map(([k,l])=>[k,l]));
   const eleves=D.eleves.map((e,i)=>{ const [t,c]=tendance(e);
-    return `<div class="im-el" data-code="${esc(e.nom)}" style="--ce:${PAL[i%PAL.length]}"><div class="im-el-h"><span class="im-n">${i+1}</span><b>Élève <span class="im-code">${esc(e.nom)}</span></b><span class="im-nom">Nom :</span><span class="im-t ${c}">${esc(t)}</span></div><p>${esc(e.resume||'Appréciation à venir.')}</p></div>`; }).join('');
+    return (i===0?'<div class="im-groupe"><div class="im-h2 seulement-classe">Appréciations des élèves</div>':'')+`<div class="im-el" data-code="${esc(e.nom)}" style="--ce:${PAL[i%PAL.length]}"><div class="im-el-h"><span class="im-n">${i+1}</span><b>Élève <span class="im-code">${esc(e.nom)}</span></b><span class="im-nom">Nom :</span><span class="im-t ${c}">${esc(t)}</span></div><p>${esc(e.resume||'Appréciation à venir.')}</p></div>`+(i===0?'</div>':''); }).join('');
   const details=D.eleves.map((e,i)=>{ const f=derniere(e)||{grille:{},cps:{}};
     const lignes=FAMILLES.map(([fam,crits])=>{ const r=crits.filter(([k])=>f.grille&&f.grille[k]&&f.grille[k]!=='no').map(([k,lab])=>`<tr><td>${esc(lab)}</td><td class="v ${f.grille[k]}">${esc(lib[f.grille[k]])}</td></tr>`).join(''); return r?`<tr class="fam"><td colspan="2">${esc(fam)}</td></tr>${r}`:''; }).join('');
     const cps=CPS.filter(([k])=>f.cps&&f.cps[k]&&f.cps[k]!=='no').map(([k,lab])=>`<div><span>${esc(lab)}</span><b style="color:${COUL[f.cps[k]]}">${f.cps[k]} · ${esc(NIV[f.cps[k]])}</b></div>`).join('');
@@ -494,12 +509,12 @@ function versWord(mode, code){
       <div>${cps?`<div class="im-cps"><b style="color:var(--cps)">Compétences psychosociales</b>${cps}</div>`:''}
         ${liste('Points forts',f.forts)}${liste("Pistes d'amélioration",f.pistes)}${liste("Ce qui l'aide",f.aide)}${liste('Proposé au conseil',f.mesures)}</div></div></div>`; }).join('');
   box.innerHTML=`
-  <div class="im-tete"><div><span class="eyebrow">Suivi des élèves · conseil de mi-semestre</span><h1>Suivi de la classe</h1></div><div class="im-meta">${esc(D.conseil||'')}<br>Mis à jour le ${esc(D.maj||'')}</div></div>
+  <div class="im-tete"><div><span class="eyebrow">Suivi des élèves</span><h1>Suivi de la classe</h1></div><div class="im-meta">${esc(D.conseil||'')}<br>Mis à jour le ${esc(D.maj||'')}</div></div>
+  <table class="im-encart"><tr><td class="cl"><span>Classe</span><i></i></td><td><span>Professeur principal (nom, prénom)</span><i></i></td><td class="dt"><span>Date du conseil</span><i></i></td></tr></table>
   <div class="im-methode"><b>Lecture.</b> Chaque élève est désigné par un code ; la correspondance figure dans le message reçu sur votre messagerie académique (ligne « Nom » à compléter à la main).<br><b>Méthode.</b> Observations régulières en classe, cumulées dans le temps : une grille de 18 comportements notés selon leur fréquence (toujours, souvent, parfois, jamais) et les compétences psychosociales sur une échelle de 1 (à accompagner) à 4 (mobilisée régulièrement). Chaque appréciation part des progrès et fixe un objectif mesurable, sans les notes.</div>
   <div class="seulement-classe">
     <div class="im-h2">La classe</div>
     <div class="im-classe"><p>${esc(D.classeResume||'')}</p><div class="im-ind">${ind}</div>${liste("Points d'appui",CF.appuis)}${liste('Difficultés',CF.difficultes)}${liste('Mis en place',CF.propositions)}</div>
-    <div class="im-h2">Appréciations des élèves</div>
   </div>
   ${eleves}
   <div class="im-annexe"><div class="im-h2">Annexe · détail des observations</div>${details}</div>
