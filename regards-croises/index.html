@@ -423,7 +423,14 @@ $('#hMeta').innerHTML = [L.date && new Date(L.date+'T12:00:00').toLocaleDateStri
 
 /* Garde-fou : aucun prénom ni nom de la classe dans un texte libre. */
 const MOTS_NOMS = [...new Set(L.eleves.flatMap(e => e.nomLien.split(/[\s.\-']+/)).filter(m => m.length >= 3))];
-function nomDans(t){ return MOTS_NOMS.find(p => new RegExp('(^|[^\\p{L}])'+p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^\\p{L}]|$)','iu').test(t||'')); }
+/* Lien sans prénom (v2) : le garde-fou reçoit seulement des empreintes des prénoms (h), jamais les prénoms. */
+function empreinte(m){ let x=0x811c9dc5; for(const ch of (L.classe+':'+m.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))){ x^=ch.codePointAt(0); x=Math.imul(x,16777619)>>>0; } return x.toString(36); }
+const EMPREINTES = new Set(Array.isArray(L.h) ? L.h.map(String) : []);
+function nomDans(t){
+  const direct = MOTS_NOMS.find(p => new RegExp('(^|[^\\p{L}])'+p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^\\p{L}]|$)','iu').test(t||''));
+  if (direct) return direct;
+  return EMPREINTES.size ? (String(t||'').match(/\p{L}{3,}/gu)||[]).find(m => EMPREINTES.has(empreinte(m))) : undefined;
+}
 
 /* ═══════════════ état local (reprise possible jusqu'à la date limite) ═══════════════ */
 const etat = stock.get(K) || { matiere:'', vie:{climat:{}, pistes:[], commentaire:''}, eleves:{}, envoyes:{} };
