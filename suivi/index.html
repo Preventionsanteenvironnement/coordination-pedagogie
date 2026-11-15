@@ -70,7 +70,7 @@ p{margin:0}
 /* Carte classe */
 .classe{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;gap:18px}
 .texte{font-size:17px;line-height:1.65;max-width:72ch}
-.indics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.indics{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
 .indic{border-radius:12px;padding:10px 12px;background:var(--sunk);display:flex;flex-direction:column;gap:4px;min-width:0}
 .indic small{font-size:12px;color:var(--muted);line-height:1.25}
 .indic b{font:700 15px/1.2 var(--display)}
@@ -168,6 +168,18 @@ dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .vide{color:var(--muted);font-style:italic;font-size:14px}
+/* Présence en PSE (relevé Pronote) */
+.anneau{position:relative;width:46px;height:46px;flex:none;margin-left:auto}
+.anneau svg{width:46px;height:46px;transform:rotate(-90deg)}
+.anneau b{position:absolute;inset:0;display:grid;place-items:center;font:700 12px/1 var(--display)}
+.carte-h .tend{margin-left:0}
+.pres{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.pres .grand{font:700 34px/1 var(--display)}
+.pres .barre-p{flex:1;min-width:160px;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden}
+.pres .barre-p i{display:block;height:100%;border-radius:5px}
+.pres-detail{font-size:14px;color:var(--muted)}
+.pfmp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13.5px;color:var(--muted)}
+.pfmp span{background:var(--help-soft);color:var(--help);padding:4px 10px;border-radius:99px;font-weight:600}
 /* Une couleur par élève (repère visuel), sur la carte, la fiche et le PDF */
 [data-ce]{--ce-t:color-mix(in srgb,var(--ce) calc(100% - var(--eclaircir)),#fff);--ce-f:color-mix(in srgb,var(--ce) 15%,var(--surface))}
 .carte[data-ce]{border-top:5px solid var(--ce)}
@@ -283,6 +295,7 @@ dialog[open]{animation:entre .25s cubic-bezier(.2,.8,.2,1)}
       <p class="texte" id="cTexte"></p>
       <div class="barre"><button class="btn" id="cCopier" type="button">Copier l'appréciation de la classe</button><button class="btn" id="tout" type="button">Copier toutes les appréciations</button><span class="export"><button class="btn plein" id="exp" type="button" aria-expanded="false" aria-haspopup="true">Exporter ▾</button></span></div>
       <div class="indics" id="cIndics"></div>
+      <div class="pfmp" id="cPfmp" hidden></div>
       <details class="dep" id="cDep">
         <summary>Voir le détail des observations <small id="cDepN"></small><span class="chev" aria-hidden="true">⌄</span></summary>
         <div class="dep-in" id="cDetail"></div>
@@ -344,6 +357,16 @@ const FAMILLES = [
 ];
 const FREQ = [["toujours","Toujours","p"],["souvent","Souvent","p3"],["parfois","Parfois","e"],["jamais","Jamais","m"]];
 const CPS = [["confiance","Capacité à avoir confiance en soi"],["retenir","Capacité à se retenir (attendre son tour, ne pas interrompre)"],["objectif","Capacité à maintenir son objectif jusqu'au bout"],["aide","Capacité à demander de l'aide quand il en a besoin"],["difficultes","Capacité à repérer et dire ses difficultés"],["ressenti","Capacité à identifier et exprimer ce qu'il ressent"],["calme","Capacité à réguler ses émotions désagréables"],["stress","Capacité à gérer son stress (évaluation, prise de parole)"],["ecoute","Capacité à écouter ses camarades"],["cooperer","Capacité à coopérer et à aider"],["affirmer","Capacité à donner son avis et régler un désaccord sans agressivité"]];
+/* Présence en PSE : couleur selon le taux, texte détaillé, motif de dispense non médical */
+const coulTaux = t => t==null ? 'var(--muted)' : t>=90 ? 'var(--good)' : t>=75 ? 'var(--l3)' : t>=60 ? 'var(--warn)' : 'var(--alert)';
+const detailPres = a => { if(!a) return ''; const p=[];
+  p.push(a.absences ? `${a.absences} absence${a.absences>1?'s':''}` : 'aucune absence');
+  if(a.retards && D.avecRetards) p.push(`${a.retards} retard${a.retards>1?'s':''}`);   // retards : seulement pour la classe dont Brahim est PP
+  if(a.dispenses) p.push(`${a.dispenses} séance${a.dispenses>1?'s':''} dispensée${a.dispenses>1?'s':''}${a.motif?' ('+a.motif+')':''}`);
+  return p.join(' · ') + ` · sur ${a.seances} séance${a.seances>1?'s':''}`; };
+const anneau = a => { if(!a) return ''; const t=a.taux, c=coulTaux(t), v=t==null?0:t;
+  return `<span class="anneau" title="Présence en PSE"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--sunk)" stroke-width="4"/><circle cx="18" cy="18" r="15.5" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${(v/100*97.4).toFixed(1)} 97.4"/></svg><b style="color:${c}">${t==null?'—':t+'%'}</b></span>`; };
+const dateC = iso => new Date(iso+'T12:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
 /* Une couleur par élève : 8 teintes bien distinctes, lisibles imprimées */
 const PAL = ['#2563A8','#7A3FB0','#B5446E','#C05A12','#0E7C86','#5B7A1E','#8A5A2B','#3F51B5','#A3367E','#2F7D6B'];
 const ce = i => `data-ce style="--ce:${PAL[i%PAL.length]}"`;
@@ -364,7 +387,8 @@ $('#chiffres').innerHTML = [[D.eleves.filter(e=>e.fiches.length).length+'/'+D.el
 $('#cTexte').textContent = D.classeResume || 'Appréciation de la classe à venir.';
 $('#cMaj').textContent = D.maj ? 'Rédigée le '+D.maj : '';
 const CF = D.classeFiche || {};
-$('#cIndics').innerHTML = C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['Non renseigné','']; return `<div class="indic ${c}"><small>${esc(lab)}</small><b>${esc(t)}</b></div>`; }).join('');
+const tauxClasse = (()=>{ const l=D.eleves.map(e=>e.assiduite&&e.assiduite.taux).filter(x=>x!=null); return l.length?Math.round(l.reduce((a,b)=>a+b,0)/l.length):null; })();
+$('#cIndics').innerHTML = (tauxClasse!=null?`<div class="indic" style="background:color-mix(in srgb,${coulTaux(tauxClasse)} 14%,var(--surface))"><small>Présence en PSE</small><b style="color:${coulTaux(tauxClasse)}">${tauxClasse} %</b></div>`:'') + C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['Non renseigné','']; return `<div class="indic ${c}"><small>${esc(lab)}</small><b>${esc(t)}</b></div>`; }).join('');
 const puces = (l,cl) => l&&l.length ? `<div class="puces">${l.map(x=>`<span class="puce ${cl}">${esc(x)}</span>`).join('')}</div>` : '<span class="vide">Rien de noté.</span>';
 $('#cDetail').innerHTML = `
   <div class="groupe"><small>Points d'appui</small>${puces(CF.appuis,'ok')}</div>
@@ -398,13 +422,14 @@ function imprimer(quoi, code){
   document.querySelectorAll('#impression .choisi').forEach(x=>x.classList.remove('choisi'));
   if(code){ document.body.dataset.eleve=code; document.querySelectorAll(`#impression [data-code="${code}"]`).forEach(x=>x.classList.add('choisi')); } else delete document.body.dataset.eleve;
   try{ window.print(); }catch(e){} }
+{ const pf=(D.pfmp||[]); if(pf.length){ const b=$('#cPfmp'); b.hidden=false; b.innerHTML='Périodes de PFMP : '+pf.map(x=>`<span>du ${dateC(x.du)} au ${dateC(x.au)}</span>`).join(''); } }
 /* Les élèves */
 const derniere = e => e.fiches.filter(f=>!f.pasVu).slice(-1)[0];
 const tendance = e => { const f=derniere(e); const p=f&&f.grille&&f.grille.progres; return TEND[p] || (e.fiches.length?['Observation limitée','n']:['Pas encore observé','n']); };
 function miniBarre(f){ if(!f) return ''; const vals=Object.entries(f.grille||{}).filter(([k,v])=>k!=='progres'&&FREQ.some(x=>x[0]===v)).map(([,v])=>FREQ.find(x=>x[0]===v)[2]); if(!vals.length) return ''; const ordre={p:0,p3:1,e:2,m:3}; vals.sort((a,b)=>ordre[a]-ordre[b]); return `<div class="mini" aria-hidden="true">${vals.map(c=>`<i class="${c}"></i>`).join('')}</div>`; }
 $('#eleves').innerHTML = D.eleves.map((e,i)=>{ const [t,c]=tendance(e); const n=e.fiches.length;
   return `<article class="carte" data-i="${i}" ${ce(i)}>
-    <div class="carte-h"><span class="av">${i+1}</span><span><b>Élève <span class="code">${esc(e.nom)}</span></b><small>${n} observation${n>1?'s':''}</small></span><span class="tend ${c}">${esc(t)}</span></div>
+    <div class="carte-h"><span class="av">${i+1}</span><span><b>Élève <span class="code">${esc(e.nom)}</span></b><small>${n} observation${n>1?'s':''} · <span class="tend ${c}" style="padding:2px 7px">${esc(t)}</span></small></span>${anneau(e.assiduite)}</div>
     <p class="extrait">${esc(e.resume||'Appréciation à venir.')}</p>
     ${miniBarre(derniere(e))}
     <div class="actions"><button class="btn plein lire" type="button">Lire la fiche <span aria-hidden="true">→</span></button>${e.resume?'<button class="btn cp" type="button">Copier l\'appréciation</button>':''}</div></article>`; }).join('');
@@ -426,6 +451,9 @@ function ouvrir(i){
   $('#fIn').innerHTML = `
     <div class="p-h" ${ce(i)}><button class="fermer retour" type="button" aria-label="Revenir à la classe">←</button><span class="av">${i+1}</span><div><h2 id="fNom">Élève <span class="code">${esc(e.nom)}</span></h2><span class="tend ${c}" style="display:inline-block;margin-top:6px">${esc(t)}</span></div><button class="fermer" type="button" aria-label="Fermer la fiche">×</button></div>
     <div class="bloc" ${ce(i)}><span class="eyebrow">Appréciation de mi-parcours${e.maj?` · ${esc(e.maj)}`:''}</span><p class="texte">${esc(e.resume||'Appréciation à venir.')}</p><div class="barre">${e.resume?'<button class="btn copier" type="button">Copier l\'appréciation</button>':''}<span class="export"><button class="btn pdf" type="button" aria-expanded="false" aria-haspopup="true">Exporter cet élève ▾</button></span></div></div>
+    ${e.assiduite?`<div class="bloc"><span class="eyebrow">Présence en PSE depuis la rentrée${D.assiduite_le?' · relevé du '+esc(dateFr(D.assiduite_le)):''}</span>
+      <div class="pres"><span class="grand" style="color:${coulTaux(e.assiduite.taux)}">${e.assiduite.taux==null?'—':e.assiduite.taux+' %'}</span><span class="barre-p"><i style="width:${e.assiduite.taux||0}%;background:${coulTaux(e.assiduite.taux)}"></i></span></div>
+      <p class="pres-detail">${esc(detailPres(e.assiduite))}${e.assiduite.taux==null?' · taux à vérifier':''}</p></div>`:''}
     <div class="approf">
       <details class="dep"><summary><span class="pastille" style="background:var(--accent)"></span>Voir le détail des observations <small>${f.date?'au '+dateFr(f.date):''}</small><span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in">${grille||'<span class="vide">Aucun critère noté.</span>'}</div></details>
       <details class="dep"><summary><span class="pastille" style="background:var(--cps)"></span>Compétences psychosociales <small>${cpsL?'échelle 1 à 4':'non renseignées'}</small><span class="chev" aria-hidden="true">⌄</span></summary><div class="dep-in"><div class="bloc cps" style="padding:8px 16px">${cpsL||'<span class="vide">Pas encore observées.</span>'}</div></div></details>
@@ -471,7 +499,7 @@ function versWord(mode, code){
     html += h2('La classe')+`<p style="${T}font-size:12pt;line-height:1.4">${esc(D.classeResume||'')}</p><table style="width:100%;border-collapse:separate;border-spacing:3pt"><tr>${ind}</tr></table>`
       + liste("Points d'appui",CF.appuis)+liste('Difficultés',CF.difficultes)+liste('Mis en place',CF.propositions) + h2('Appréciations des élèves');
   }
-  html += indices.map(i=>{ const e=D.eleves[i]; const [t]=tendance(e); return tete(e,i,` <span style="font-size:12pt;color:#566B65">· ${esc(t)}</span>`)+`<p style="${T}font-size:12pt;line-height:1.4;margin:4pt 0 0">${esc(e.resume||'Appréciation à venir.')}</p>`; }).join('');
+  html += indices.map(i=>{ const e=D.eleves[i]; const [t]=tendance(e); return tete(e,i,` <span style="font-size:12pt;color:#566B65">· ${esc(t)}${e.assiduite?' · présence en PSE '+(e.assiduite.taux==null?'—':e.assiduite.taux+' %'):''}</span>`)+(e.assiduite?`<p style="${T}font-size:12pt;color:#566B65;margin:2pt 0 0">${esc(detailPres(e.assiduite))}</p>`:'')+`<p style="${T}font-size:12pt;line-height:1.4;margin:4pt 0 0">${esc(e.resume||'Appréciation à venir.')}</p>`; }).join('');
   if(mode==='complet'){
     html += (code?'':h2('Annexe · détail des observations')) + indices.map(i=>{ const e=D.eleves[i]; const f=derniere(e)||{grille:{},cps:{}};
       const lignes=FAMILLES.map(([fam,crits])=>{ const r=crits.filter(([k])=>f.grille&&f.grille[k]&&f.grille[k]!=='no').map(([k,lab])=>`<tr><td style="${T}font-size:12pt;padding:1pt 4pt;border-bottom:1px solid #D3DDD9">${esc(lab)}</td><td style="${T}font-size:12pt;padding:1pt 4pt;border-bottom:1px solid #D3DDD9;font-weight:bold;color:${COUL_F[f.grille[k]]}">${esc(lib[f.grille[k]])}</td></tr>`).join(''); return r?`<tr><td colspan="2" style="${T}font-size:12pt;color:${PAL[i%PAL.length]};padding-top:4pt">${esc(fam.toUpperCase())}</td></tr>${r}`:''; }).join('');
@@ -498,7 +526,7 @@ function versWord(mode, code){
   const ind=C_IND.map(([k,lab,vals])=>{ const v=(CF.criteres||{})[k]; const [t,c]=vals[v]||['—','']; return `<div class="${c}">${esc(lab)}<b>${esc(t)}</b></div>`; }).join('');
   const lib=Object.fromEntries(FREQ.map(([k,l])=>[k,l]));
   const eleves=D.eleves.map((e,i)=>{ const [t,c]=tendance(e);
-    return (i===0?'<div class="im-groupe"><div class="im-h2 seulement-classe">Appréciations des élèves</div>':'')+`<div class="im-el" data-code="${esc(e.nom)}" style="--ce:${PAL[i%PAL.length]}"><div class="im-el-h"><span class="im-n">${i+1}</span><b>Élève <span class="im-code">${esc(e.nom)}</span></b><span class="im-nom">Nom :</span><span class="im-t ${c}">${esc(t)}</span></div><p>${esc(e.resume||'Appréciation à venir.')}</p></div>`+(i===0?'</div>':''); }).join('');
+    return (i===0?'<div class="im-groupe"><div class="im-h2 seulement-classe">Appréciations des élèves</div>':'')+`<div class="im-el" data-code="${esc(e.nom)}" style="--ce:${PAL[i%PAL.length]}"><div class="im-el-h"><span class="im-n">${i+1}</span><b>Élève <span class="im-code">${esc(e.nom)}</span></b><span class="im-nom">Nom :</span>${e.assiduite?`<span class="im-t" style="background:color-mix(in srgb,${coulTaux(e.assiduite.taux)} 15%,#fff);color:${coulTaux(e.assiduite.taux)}">Présence ${e.assiduite.taux==null?'—':e.assiduite.taux+' %'}</span>`:''}<span class="im-t ${c}">${esc(t)}</span></div><p>${esc(e.resume||'Appréciation à venir.')}</p></div>`+(i===0?'</div>':''); }).join('');
   const details=D.eleves.map((e,i)=>{ const f=derniere(e)||{grille:{},cps:{}};
     const lignes=FAMILLES.map(([fam,crits])=>{ const r=crits.filter(([k])=>f.grille&&f.grille[k]&&f.grille[k]!=='no').map(([k,lab])=>`<tr><td>${esc(lab)}</td><td class="v ${f.grille[k]}">${esc(lib[f.grille[k]])}</td></tr>`).join(''); return r?`<tr class="fam"><td colspan="2">${esc(fam)}</td></tr>${r}`:''; }).join('');
     const cps=CPS.filter(([k])=>f.cps&&f.cps[k]&&f.cps[k]!=='no').map(([k,lab])=>`<div><span>${esc(lab)}</span><b style="color:${COUL[f.cps[k]]}">${f.cps[k]} · ${esc(NIV[f.cps[k]])}</b></div>`).join('');
@@ -507,14 +535,14 @@ function versWord(mode, code){
     return `<div class="im-det" data-code="${esc(e.nom)}" style="--ce:${PAL[i%PAL.length]}"><div class="im-el-h"><span class="im-n">${i+1}</span><b>Élève <span class="im-code">${esc(e.nom)}</span></b><span class="im-nom">Nom :</span><span class="im-t n">Observé le ${esc(dates||'—')}</span></div>
       <div class="im-cols"><div>${lignes?`<table class="im-g">${lignes}</table>`:'<span class="vide">Présence trop irrégulière pour observer les critères de la grille.</span>'}${nNo?`<div class="im-liste"><i>Non observés :</i>${nNo} critère${nNo>1?'s':''}</div>`:''}</div>
       <div>${cps?`<div class="im-cps"><b style="color:var(--cps)">Compétences psychosociales</b>${cps}</div>`:''}
-        ${liste('Points forts',f.forts)}${liste("Pistes d'amélioration",f.pistes)}${liste("Ce qui l'aide",f.aide)}${liste('Proposé au conseil',f.mesures)}</div></div></div>`; }).join('');
+        ${e.assiduite?`<div class="im-liste"><i>Présence en PSE :</i>${e.assiduite.taux==null?'—':e.assiduite.taux+' %'} · ${esc(detailPres(e.assiduite))}</div>`:''}${liste('Points forts',f.forts)}${liste("Pistes d'amélioration",f.pistes)}${liste("Ce qui l'aide",f.aide)}${liste('Proposé au conseil',f.mesures)}</div></div></div>`; }).join('');
   box.innerHTML=`
   <div class="im-tete"><div><span class="eyebrow">Suivi des élèves</span><h1>Suivi de la classe</h1></div><div class="im-meta">${esc(D.conseil||'')}<br>Mis à jour le ${esc(D.maj||'')}</div></div>
   <table class="im-encart"><tr><td class="cl"><span>Classe</span><i></i></td><td><span>Professeur principal (nom, prénom)</span><i></i></td><td class="dt"><span>Date du conseil</span><i></i></td></tr></table>
   <div class="im-methode"><b>Lecture.</b> Chaque élève est désigné par un code ; la correspondance figure dans le message reçu sur votre messagerie académique (ligne « Nom » à compléter à la main).<br><b>Méthode.</b> Observations régulières en classe, cumulées dans le temps : une grille de 18 comportements notés selon leur fréquence (toujours, souvent, parfois, jamais) et les compétences psychosociales sur une échelle de 1 (à accompagner) à 4 (mobilisée régulièrement). Chaque appréciation part des progrès et fixe un objectif mesurable, sans les notes.</div>
   <div class="seulement-classe">
     <div class="im-h2">La classe</div>
-    <div class="im-classe"><p>${esc(D.classeResume||'')}</p><div class="im-ind">${ind}</div>${liste("Points d'appui",CF.appuis)}${liste('Difficultés',CF.difficultes)}${liste('Mis en place',CF.propositions)}</div>
+    <div class="im-classe"><p>${esc(D.classeResume||'')}</p>${tauxClasse!=null?`<div class="im-liste"><i>Présence moyenne en PSE :</i>${tauxClasse} %</div>`:''}${(D.pfmp||[]).length?`<div class="im-liste"><i>PFMP :</i>${D.pfmp.map(x=>'du '+dateC(x.du)+' au '+dateC(x.au)).join(' · ')}</div>`:''}<div class="im-ind">${ind}</div>${liste("Points d'appui",CF.appuis)}${liste('Difficultés',CF.difficultes)}${liste('Mis en place',CF.propositions)}</div>
   </div>
   ${eleves}
   <div class="im-annexe"><div class="im-h2">Annexe · détail des observations</div>${details}</div>
