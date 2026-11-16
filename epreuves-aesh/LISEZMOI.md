@@ -80,3 +80,25 @@ Accord de Brahim (« Oui, vas-y »). Les boutons Épreuve / CCF, Sortie, Autre b
   sortie : élèves prévus et enseignants accompagnateurs (séance : `mobilisation`, `effectifPrevu`, `enseignants`, comme l'ancien parcours).
 - Étape 6 : « Aperçu de ma demande », fiche propre (tableau des séances), puis « Envoyer ma demande ».
 Collection et champs de premier niveau inchangés.
+
+## Correction d'un horaire par la coordination (16/11/2026)
+
+Quand la coordination déplace un créneau, change une date, une salle ou le nombre d'AESH **après** le
+dépôt, l'application écrit un champ **à part**, `corrige`, et la date `corrigeLe`. La demande de
+l'enseignant n'est jamais modifiée : `renforts-aesh/` applique la correction à l'affichage et prévient
+l'AESH par un bandeau. Sans ce champ, la page se comporte exactement comme avant.
+
+`corrige` = `{ titre, seances: [ { n, date, debut, fin, salle, nbAesh } ] }` — des dates, des heures,
+des salles et des nombres. **Aucun nom**, et tout autre champ est écarté avant l'envoi.
+
+**Règle Firestore à ajouter** dans `match /coordination_demandes_aesh/{docId} { … }`, sans rien retirer
+(plusieurs `allow update` se cumulent) :
+
+```
+      // Correction d'horaire par la coordination : ces deux champs seulement
+      allow update: if resource.data.type == 'epreuve'
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['corrige','corrigeLe']);
+```
+
+Tant que la règle n'est pas en place, l'application enregistre la correction sur l'ordinateur et
+affiche : « Corrigé dans l'ordinateur, mais PAS publié en ligne… prévenez-les par mail. »
