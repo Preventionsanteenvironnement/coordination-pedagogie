@@ -155,6 +155,19 @@ ul.ok li::before{background:var(--vert)} ul.ko li::before{background:var(--rouge
 .mini svg{width:150px;flex:none}
 .mini .leg{display:grid;gap:8px;font-size:14px;font-weight:600}
 .mini .leg i{display:inline-block;width:18px;height:4px;border-radius:2px;margin-right:8px;vertical-align:middle}
+.intro{text-align:center;padding-top:6px}
+.intro .sur{margin-bottom:6px}
+.grand-cercle{display:block;width:100%;max-width:460px;margin:4px auto 0;touch-action:manipulation}
+.grand-cercle .noeud{cursor:pointer;transition:opacity .25s}
+.grand-cercle .trace{stroke-dasharray:240;stroke-dashoffset:240;animation:trace .5s ease-out forwards}
+@keyframes trace{to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion: reduce){.grand-cercle .trace{animation:none;stroke-dashoffset:0}}
+.legende{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;font-size:13.5px;font-weight:600;color:var(--doux)}
+.legende i,.fl2 i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.fl2 i{width:18px;height:4px;border-radius:2px}
+.choix{animation:entre .3s cubic-bezier(.2,.7,.2,1)}
+.fl2{display:grid;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid var(--trait);font-size:14.5px}
+.bandeau.court{margin-top:22px}
 @media print{.barre,.theme,.plus{display:none}}
 </style>
 </head>
@@ -287,18 +300,47 @@ function miniFleches(n, t){
 }
 
 /* ---------- Accueil ---------- */
-route(/^\/$/, () => ({ titre: "", html: `
-  <div class="sur">Ennéagramme · relations professionnelles</div>
-  <h1>Les neuf profils au travail</h1>
-  <p class="lead" style="margin-top:10px">Comment chacun perçoit, réagit, communique. Et comment lui parler.</p>
+function grandCercle(sel){
+  const R = 128, cx = 180, cy = 168;
+  const pos = (n, r=R) => { const a = (n % 9) * 40 * Math.PI / 180; return [cx + r * Math.sin(a), cy - r * Math.cos(a)]; };
+  const seq = [[1,4],[4,2],[2,8],[8,5],[5,7],[7,1],[3,9],[9,6],[6,3]];
+  const lignes = seq.map(([a,b]) => { const [x1,y1]=pos(a),[x2,y2]=pos(b); return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--trait2)" stroke-width="1" opacity="${sel?.35:1}"/>`; }).join("");
+  let fl = "";
+  if (sel){
+    const t = T(sel); const f = (a, b, col, id) => { const [x1,y1]=pos(a),[x2,y2]=pos(b); const d=Math.hypot(x2-x1,y2-y1); const ux=(x2-x1)/d, uy=(y2-y1)/d; return `<line class="trace" x1="${x1+ux*25}" y1="${y1+uy*25}" x2="${x2-ux*27}" y2="${y2-uy*27}" stroke="${col}" stroke-width="2.6" stroke-linecap="round" marker-end="url(#${id})"/>`; };
+    fl = f(sel, t.stress.vers, "var(--rouge)", "gr") + f(sel, t.confiance.vers, "var(--vert)", "gv");
+  }
+  const nds = [1,2,3,4,5,6,7,8,9].map(n => { const [x,y]=pos(n); const on = n===sel; const dim = sel && !on && n!==T(sel).stress.vers && n!==T(sel).confiance.vers; const nm = esc((T(n)||{}).nom||"").replace(/^(Le |L')/,""); const a=(n%9)*40*Math.PI/180; const [lx,ly]=pos(n,R+40); const anc=Math.abs(Math.sin(a))<.2?"middle":(Math.sin(a)>0?"start":"end");
+    return `<g class="noeud${on?" on":""}" data-sel="${n}" role="button" aria-label="Type ${n}, ${nm}" style="opacity:${dim?.45:1}"><circle cx="${x}" cy="${y}" r="30" fill="transparent"/>${on?`<circle cx="${x}" cy="${y}" r="29" fill="none" stroke="var(--${CENTRE_DE[n]})" stroke-width="2" opacity=".35"/>`:""}<circle cx="${x}" cy="${y}" r="${on?24:21}" fill="var(--${CENTRE_DE[n]})"/><text x="${x}" y="${y+6}" text-anchor="middle" font-family="Inter" font-weight="700" font-size="${on?19:17}" fill="#fff">${n}</text><text x="${lx}" y="${ly+4}" text-anchor="${anc}" font-size="12" font-weight="${on?700:600}" fill="${on?"var(--encre)":"var(--doux)"}">${nm}</text></g>`; }).join("");
+  const centre = sel ? "" : `<text x="${cx}" y="${cy-4}" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="17" fill="var(--encre)">Choisissez</text><text x="${cx}" y="${cy+17}" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="17" fill="var(--encre)">un profil</text>`;
+  return `<svg class="grand-cercle" viewBox="-50 -12 460 360"><defs><marker id="gr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--rouge)"/></marker><marker id="gv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--vert)"/></marker></defs><circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--trait2)" stroke-width="1.4"/>${lignes}${fl}${centre}${nds}</svg>`;
+}
+function panneau(sel){
+  if (!sel) return `<div class="legende"><span><i style="background:var(--coeur)"></i>Émotionnelle</span><span><i style="background:var(--tete)"></i>Mentale</span><span><i style="background:var(--ventre)"></i>Instinctive</span></div><p class="note" style="text-align:center;margin-top:6px">La couleur indique l'intelligence que chaque profil utilise en premier.</p>`;
+  const t = T(sel), c = CENTRE_DE[sel];
+  return `<div class="carte choix c-${c}"><div class="lien" style="align-items:flex-start">${puce(sel)}<div style="flex:1"><div class="sur" style="color:var(--c);margin:0 0 2px">Intelligence ${CENTRES[c].court}</div><h3 style="margin:0">${esc(t.nom)}</h3><p class="note" style="margin:4px 0 0;font-style:italic">« ${esc(t.devise)} »</p></div></div>
+    <div class="fl2"><div><i style="background:var(--rouge)"></i>Sous stress → <b>${t.stress.vers}</b> ${esc(nomT(t.stress.vers))}</div><div><i style="background:var(--vert)"></i>En confiance → <b>${t.confiance.vers}</b> ${esc(nomT(t.confiance.vers))}</div></div>
+    <button class="btn" data-go="/type/${sel}" style="width:100%;justify-content:center;margin-top:14px">Ouvrir le profil</button></div>`;
+}
+let SEL = 0;
+try { SEL = +(sessionStorage.getItem("sel") || 0); } catch(e){}
 
-  <div class="bandeau"><b>En mouvement, jamais figé.</b> Chacun a un profil de base, mais il bouge sans cesse : selon le stress ou la confiance, son état du moment, ses voisins sur le cercle, son instinct dominant. Et chacun peut aussi se relier à ce qu'il a de plus essentiel : ses qualités profondes, qui s'expriment quand il est en confiance. L'ennéagramme éclaire des motivations souvent inconscientes ; il ne dit rien de la psychologie, de la culture ni de l'histoire d'une personne.</div>
-  ${plus("/dynamique", "Approfondir : ce qui fait bouger un profil")}
+route(/^\/$/, () => ({ titre: "", html: `
+  <div class="intro">
+    <div class="sur">Ennéagramme · relations professionnelles</div>
+    <h1>Les neuf profils au travail</h1>
+    <p class="lead" style="margin-top:8px">Comment chacun perçoit, réagit, communique. Et comment lui parler.</p>
+  </div>
+  <div id="zone-cercle">${grandCercle(SEL)}</div>
+  <div id="zone-panneau">${panneau(SEL)}</div>
+
+  <div class="bandeau court"><b>En mouvement, jamais figé.</b> Un profil de base, qui bouge sans cesse avec le stress, la confiance et le moment. Et chacun peut se relier à ses qualités essentielles.</div>
+  ${plus("/dynamique", "Ce qui fait bouger un profil")}
 
   <h2>Les neuf profils</h2>
   ${["coeur","tete","ventre"].map(c => `
-    <div class="sur c-${c}" style="color:var(--c);margin-top:22px">${CENTRES[c].nom}</div>
-    ${CENTRES[c].types.map(n => `<button class="carte lien c-${c}" data-go="/type/${n}" style="margin:8px 0;padding:14px 16px">${puce(n)}<span style="flex:1"><b style="display:block;font-size:16px">${esc(nomT(n))}</b><small class="note">« ${esc((T(n)||{}).devise||"")} »</small></span><span class="chev">›</span></button>`).join("")}`).join("")}
+    <div class="sur c-${c}" style="color:var(--c);margin-top:20px">${CENTRES[c].nom}</div>
+    ${CENTRES[c].types.map(n => `<button class="carte lien c-${c}" data-go="/type/${n}" style="margin:8px 0;padding:13px 16px">${puce(n)}<span style="flex:1"><b style="display:block;font-size:16px">${esc(nomT(n))}</b><small class="note">« ${esc((T(n)||{}).devise||"")} »</small></span><span class="chev">›</span></button>`).join("")}`).join("")}
 
   <h2>Outils</h2>
   <div class="menu-outils">
@@ -307,7 +349,15 @@ route(/^\/$/, () => ({ titre: "", html: `
     <button class="lien" data-go="/ententes"><span style="flex:1"><b>Les ententes au travail</b><small>Les 45 duos, et qui dirige qui</small></span><span class="chev">›</span></button>
     <button class="lien" data-go="/test"><span style="flex:1"><b>Se situer</b><small>Un questionnaire professionnel, 5 minutes</small></span><span class="chev">›</span></button>
   </div>
-`}));
+`, apres(){
+  $("#zone-cercle").addEventListener("click", e => {
+    const g = e.target.closest("[data-sel]"); if (!g) return;
+    const n = +g.dataset.sel; SEL = (SEL === n) ? 0 : n;
+    try { sessionStorage.setItem("sel", SEL); } catch(err){}
+    $("#zone-cercle").innerHTML = grandCercle(SEL);
+    $("#zone-panneau").innerHTML = panneau(SEL);
+  });
+}}));
 
 /* ---------- Centre ---------- */
 route(/^\/centre\/(coeur|ventre|tete)$/, c => { const C = CENTRES[c]; return { titre: C.nom, html: `
