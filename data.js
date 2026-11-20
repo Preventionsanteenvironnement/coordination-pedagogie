@@ -221,6 +221,14 @@ const THEMATIQUES = [
         icon: "calendar",
         badge: "Nouveau",
       },
+      {
+        titre: "Questionnaire AESH — réunion du 23 novembre",
+        desc: "Accompagner les élèves : notre organisation, nos pratiques et nos besoins. Questionnaire anonyme, 16 questions, environ 12 à 15 minutes. Version de relecture : l'envoi des réponses n'est pas encore activé.",
+        lien: "questionnaire-aesh/",
+        type: "Formulaire",
+        icon: "users",
+        badge: "Nouveau",
+      },
     ],
   },
   {
