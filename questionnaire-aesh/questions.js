@@ -1,4 +1,4 @@
-/* Questions du questionnaire AESH (23/11/2026) — partagées par le questionnaire et la page projection. */
+/* Questions du questionnaire AESH (23/11/2026) — partagées par le questionnaire et la page projection. Si on les modifie : régénérer questions.json (lu par l’app iPhone). */
 window.QUESTIONNAIRE_AESH=[
 ['A. Votre organisation quotidienne',[
 ['Lorsque votre semaine type est modifiée ponctuellement (CCF, PFMP, sortie, absence…), comment en êtes-vous le plus souvent informé(e) ?','single',['À l’avance, suffisamment tôt pour m’organiser','Le jour même, avant mon intervention','Au moment où je dois intervenir','Je dois parfois rechercher moi-même l’information','Je ne suis pas toujours informé(e)','Je suis rarement concerné(e)','Autre (à préciser)']],
