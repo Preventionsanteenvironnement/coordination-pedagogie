@@ -43,6 +43,8 @@ nav button,.ico{all:unset;cursor:pointer;padding:9px 15px;border-radius:12px;fon
 nav button:hover,.ico:hover{color:var(--texte)}
 nav button.actif{background:var(--grad);color:#fff;box-shadow:0 8px 20px -8px rgba(59,139,235,.7)}
 .ico{background:var(--carte);border:1px solid var(--bord);padding:9px 12px;border-radius:14px}
+#bFerme.ferme{color:#ff8d99;border-color:rgba(255,107,122,.45)}
+.etat-codes{margin-top:10px;color:var(--doux);font-weight:600;font-size:.95rem}
 button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 main{flex:1;min-height:0;padding:4px 32px 10px;overflow:auto}
 .vue{display:none;height:100%;max-width:1500px;margin:auto}
@@ -143,6 +145,7 @@ footer.masque{visibility:hidden}
     <button id="bQ">Résultats</button>
     <button id="bS">Synthèse</button>
   </nav>
+  <button class="ico" id="bFerme" title="Fermer ou rouvrir le questionnaire (les codes personnels restent valables)">🔓 Ouvert</button>
   <button class="ico" id="bTheme" title="Thème clair / sombre (touche T)">◐</button>
   <button class="ico" id="bCSV" title="Télécharger les réponses (Excel)">⤓</button>
   <button class="ico" id="bPE" title="Plein écran (touche F)">⛶</button>
@@ -161,6 +164,7 @@ footer.masque{visibility:hidden}
       <span class="lien" id="lien"></span>
       <div class="vivant"><span class="gros" id="nb2">0</span><p id="nbmot2">réponse reçue<br><span style="font-weight:600">anonyme · 12 à 15 minutes</span></p></div>
       <div class="bulles" id="bulles"></div>
+      <p class="etat-codes" id="etatCodes"></p>
     </div>
   </section>
   <section id="vueQ" class="vue" aria-live="polite"></section>
@@ -301,6 +305,15 @@ try{
   const FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
   const db=FS.getFirestore(initializeApp({apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA",authDomain:"coordination-pedagogie.firebaseapp.com",projectId:"coordination-pedagogie",storageBucket:"coordination-pedagogie.firebasestorage.app",messagingSenderId:"526058585010",appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab"},'projection-aesh'));
   FS.onSnapshot(FS.collection(db,'coordination_sondages',SONDAGE,'reponses'),snap=>{const avant=reponses.length;reponses=snap.docs.map(d=>d.data());maj(avant);},err=>{$('erreur').style.display='block';$('erreur').textContent='Connexion aux réponses impossible : '+err.message;});
+  /* Ouverture du questionnaire sans code (les codes personnels restent toujours valables) */
+  const refSondage=FS.doc(db,'coordination_sondages',SONDAGE);let ouvert=true;
+  FS.onSnapshot(refSondage,d=>{ouvert=!(d.exists()&&d.data().ouvert===false);const b=$('bFerme');b.textContent=ouvert?'🔓 Ouvert':'🔒 Fermé';b.classList.toggle('ferme',!ouvert);});
+  $('bFerme').onclick=async()=>{
+    const msg=ouvert?'Fermer le questionnaire ?\n\nLe lien du QR code ne permettra plus de répondre. Les codes personnels envoyés par mail resteront valables.':'Rouvrir le questionnaire à tout le monde (sans code) ?';
+    if(!confirm(msg))return;
+    try{await FS.setDoc(refSondage,{ouvert:!ouvert,modifie:FS.serverTimestamp()},{merge:true});}catch(e){alert('Impossible : '+e.message);}
+  };
+  FS.onSnapshot(FS.collection(db,'coordination_sondages',SONDAGE,'codes'),s=>{const t=s.size,u=s.docs.filter(d=>d.data().utilise).length;$('etatCodes').textContent=t?`Codes personnels : ${u} utilisé${u>1?'s':''} sur ${t}`:'';});
 }catch(e){$('erreur').style.display='block';$('erreur').textContent='Connexion impossible : vérifiez Internet.';}
 </script>
 </body>

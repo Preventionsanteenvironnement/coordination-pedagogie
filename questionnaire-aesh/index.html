@@ -117,6 +117,20 @@ textarea{width:100%;min-height:170px;border:2px solid var(--ligne);border-radius
 const SONDAGE=(new URLSearchParams(location.search).get('s')||'aesh-2026-11-23').replace(/[^a-z0-9-]/gi,'').slice(0,40)||'aesh-2026-11-23';
 const firebaseConfig={apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA",authDomain:"coordination-pedagogie.firebaseapp.com",projectId:"coordination-pedagogie",storageBucket:"coordination-pedagogie.firebasestorage.app",messagingSenderId:"526058585010",appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab"};
 const DEJA='questionnaire-aesh-envoye-'+SONDAGE, BROUILLON='questionnaire-aesh-brouillon-'+SONDAGE;
+/* Code personnel à usage unique (?c=XXXXXX), pour les AESH absentes à la réunion.
+   Firestore : coordination_sondages/{sondage}/codes/{SHA-256("aesh:"+code)} = {utilise:false}. Le lien code ↔ réponse n'est jamais gardé.
+   Sans code, on peut répondre tant que coordination_sondages/{sondage}.ouvert n'est pas false (fermé depuis la page projection). */
+const CODE=(new URLSearchParams(location.search).get('c')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
+let acces={ok:true,raison:''};
+function fb(){if(!fb.p)fb.p=(async()=>{const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');const FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');return {FS,db:FS.getFirestore(initializeApp(firebaseConfig,'questionnaire-aesh'))};})();return fb.p;}
+async function hache(c){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('aesh:'+c));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function verifierAcces(){
+  try{const {FS,db}=await fb();
+    if(CODE){const d=await FS.getDoc(FS.doc(db,'coordination_sondages',SONDAGE,'codes',await hache(CODE)));
+      if(!d.exists())acces={ok:false,raison:'code-inconnu'};else if(d.data().utilise)acces={ok:false,raison:'code-utilise'};}
+    else{const d=await FS.getDoc(FS.doc(db,'coordination_sondages',SONDAGE));if(d.exists()&&d.data().ouvert===false)acces={ok:false,raison:'ferme'};}
+  }catch(e){console.warn(e);} /* hors ligne : on laisse répondre, l’envoi tranchera */
+}
 const Q=[];let n=0;for(const [section,items] of window.QUESTIONNAIRE_AESH)for(const [q,mode,opts] of items)Q.push({id:++n,section,q,mode,opts});
 const AIDE={single:'Une seule réponse',multi:'Plusieurs réponses possibles',max2:'Deux réponses maximum',max3:'Trois réponses maximum',text:'Réponse facultative'};
 const maxi=q=>q.mode==='single'?1:q.mode.startsWith('max')?Number(q.mode.slice(3)):99;
@@ -144,6 +158,7 @@ function animer(){const e=$('#ecran');e.className='ecran fixe';void e.offsetWidt
 function afficher(){
   animer();haut();window.scrollTo(0,0);
   if(L(DEJA)==='1')return merci(false);
+  if(!acces.ok)return bloque();
   if(pos<0)return accueil();
   if(pos>=Q.length)return recap();
   question(Q[pos]);
@@ -212,15 +227,24 @@ function getAnswers(){return Q.map(q=>{const r=rep[q.id];const liste=Array.isArr
 async function envoyer(){
   const b=$('#env');b.disabled=true;b.textContent='Envoi en cours…';$('#statut').textContent='';
   try{
-    const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
-    const FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
-    const db=FS.getFirestore(initializeApp(firebaseConfig,'questionnaire-aesh'));
-    await FS.addDoc(FS.collection(db,'coordination_sondages',SONDAGE,'reponses'),{
-      questionnaire:'AESH — 23 novembre 2026',version:3,cree:FS.serverTimestamp(),
-      reponses:getAnswers().map(a=>({question:a.question,reponses:a.reponses,precision_autre:(a.precision_autre||'').slice(0,600)}))
-    });
+    const {FS,db}=await fb();
+    const contenu={questionnaire:'AESH — 23 novembre 2026',version:3,par_code:!!CODE,cree:FS.serverTimestamp(),
+      reponses:getAnswers().map(a=>({question:a.question,reponses:a.reponses,precision_autre:(a.precision_autre||'').slice(0,600)}))};
+    const nouvelle=FS.doc(FS.collection(db,'coordination_sondages',SONDAGE,'reponses'));
+    if(CODE){
+      const ref=FS.doc(db,'coordination_sondages',SONDAGE,'codes',await hache(CODE));
+      await FS.runTransaction(db,async t=>{const s=await t.get(ref);
+        if(!s.exists())throw Error('code-inconnu');if(s.data().utilise)throw Error('code-utilise');
+        t.update(ref,{utilise:true});t.set(nouvelle,contenu);});
+    }else{
+      const etat=await FS.getDoc(FS.doc(db,'coordination_sondages',SONDAGE));
+      if(etat.exists()&&etat.data().ouvert===false)throw Error('ferme');
+      await FS.setDoc(nouvelle,contenu);
+    }
     S(DEJA,'1');S(BROUILLON,null);merci(true);
-  }catch(e){console.error(e);$('#statut').textContent='Envoi impossible pour le moment. Vérifiez la connexion Internet, puis réessayez.';b.disabled=false;b.textContent='Réessayer l’envoi';}
+  }catch(e){console.error(e);
+    if(['code-inconnu','code-utilise','ferme'].includes(e.message)){acces={ok:false,raison:e.message};return bloque();}
+    $('#statut').textContent='Envoi impossible pour le moment. Vérifiez la connexion Internet, puis réessayez.';b.disabled=false;b.textContent='Réessayer l’envoi';}
 }
 function merci(fete){
   $('#top').classList.add('cache');bas('');animer();
@@ -230,8 +254,17 @@ function merci(fete){
     for(let i=0;i<70;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'vw';p.style.background=col[i%col.length];p.style.animationDuration=(1.8+Math.random()*1.6)+'s';p.style.animationDelay=(Math.random()*.4)+'s';c.append(p);}
     document.body.append(c);setTimeout(()=>c.remove(),4200);}
 }
+function bloque(){
+  $('#top').classList.add('cache');bas('');animer();
+  const T={
+    'code-utilise':['Ce code a déjà été utilisé','Les réponses liées à ce code ont déjà été envoyées. Merci pour votre participation !'],
+    'code-inconnu':['Code non reconnu','Vérifiez que vous avez ouvert le lien exact reçu par mail. En cas de souci, contactez votre coordonnateur.'],
+    'ferme':['Le questionnaire est fermé','Merci à toutes et à tous pour vos réponses. Si vous avez reçu un code personnel par mail, utilisez le lien de ce mail.']}[acces.raison]||['Accès impossible',''];
+  $('#ecran').innerHTML=`<section class="merci"><div class="rond" style="background:linear-gradient(135deg,#5b6b80,#1d5fa8)"><svg viewBox="0 0 24 24" aria-hidden="true" style="stroke-dasharray:none;animation:none"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><h2>${T[0]}</h2><p>${T[1]}</p></section>`;
+}
 document.addEventListener('keydown',e=>{if(e.target.matches('textarea,input'))return;if(e.key==='ArrowRight'&&pos>=0&&pos<Q.length)aller(pos+1);if(e.key==='ArrowLeft'&&pos>-1)aller(pos-1);});
-afficher();
+$('#ecran').innerHTML='<p style="text-align:center;color:var(--doux);margin-top:40vh;font-weight:600">Chargement…</p>';
+(L(DEJA)==='1'?Promise.resolve():verifierAcces()).then(afficher);
 </script>
 </body>
 </html>
