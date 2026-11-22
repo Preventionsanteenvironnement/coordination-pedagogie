@@ -50,7 +50,7 @@ main{flex:1;position:relative}
 .puces b{display:block;font-size:1.2rem;margin-bottom:2px}
 .info{background:var(--carte);border-radius:var(--r);box-shadow:var(--ombre);padding:18px;margin:16px 0 0;line-height:1.6;color:#33465e;font-size:.95rem}
 .info strong{color:var(--texte)}
-.q-carte{background:var(--carte);border-radius:26px;box-shadow:var(--ombre);padding:22px 18px 18px;margin-top:6px}
+.q-carte{background:var(--carte);border-radius:26px;box-shadow:var(--ombre);padding:22px 18px 18px;margin-top:6px;margin-bottom:24px}
 .q-num{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:.8rem;color:var(--bleu);background:#eaf2fd;padding:6px 11px;border-radius:99px}
 .q-titre{font-size:clamp(1.2rem,4.8vw,1.45rem);line-height:1.35;margin:14px 0 6px;font-weight:800;letter-spacing:-.01em}
 .q-aide{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--doux);font-size:.88rem;font-weight:600;margin-bottom:14px}
@@ -70,9 +70,9 @@ main{flex:1;position:relative}
 .opt[aria-pressed="true"] .coche{border-color:transparent;background:var(--grad);transform:scale(1.06)}
 .opt[aria-pressed="true"] .coche svg{stroke-dashoffset:0}
 .opt.off{opacity:.45}
-.autre{width:100%;margin:2px 0 4px;border:2px solid var(--ligne);border-radius:14px;padding:12px 14px;font:inherit;font-size:1rem;background:#fff}
+.autre{min-height:54px;resize:none;overflow:hidden;line-height:1.4;width:100%;margin:2px 0 4px;border:2px solid var(--ligne);border-radius:14px;padding:12px 14px;font:inherit;font-size:1rem;background:#fff}
 .autre:focus,textarea:focus{outline:none;border-color:var(--ciel);box-shadow:0 0 0 4px rgba(59,139,235,.15)}
-textarea{width:100%;min-height:170px;border:2px solid var(--ligne);border-radius:16px;padding:14px;font:inherit;font-size:1.02rem;line-height:1.5;resize:vertical;background:#fbfcfe}
+textarea{width:100%;min-height:170px;border:2px solid var(--ligne);border-radius:16px;padding:14px;font:inherit;font-size:1.02rem;line-height:1.5;resize:none;overflow:hidden;background:#fbfcfe}
 .rappel{font-size:.85rem;color:var(--doux);margin:10px 2px 0;line-height:1.5}
 .bas{position:sticky;bottom:0;padding:14px 0 calc(env(safe-area-inset-bottom) + 14px);display:flex;gap:10px;background:linear-gradient(rgba(243,246,251,0),var(--fond) 35%);z-index:5}
 .bas:empty{display:none}
@@ -183,17 +183,22 @@ function question(q){
     const sel=rep[q.id]||[];const m=maxi(q);
     corps=`<div class="choix">`+q.opts.map((o,i)=>{const on=sel.includes(o);
       return `<button type="button" class="opt ${q.mode==='single'?'':'carre'} ${!on&&sel.length>=m&&m>1?'off':''}" aria-pressed="${on}" data-i="${i}"><span class="coche">${COCHE}</span><span>${esc(o)}</span></button>`+
-        (estAutre(o)&&on?`<input class="autre" id="autre" maxlength="600" aria-label="Précisez votre réponse" placeholder="Précisez…" value="${esc(autres[q.id]||'')}">`:'');}).join('')+`</div>`;
+        (estAutre(o)&&on?`<textarea class="autre" id="autre" rows="1" maxlength="600" aria-label="Précisez votre réponse" placeholder="Précisez…" >${esc(autres[q.id]||'')}</textarea>`:'');}).join('')+`</div>`;
   }
   const m=maxi(q),k=(rep[q.id]||[]).length;
   $('#ecran').innerHTML=`<article class="q-carte"><span class="q-num">Question ${q.id}</span><h2 class="q-titre">${esc(q.q)}</h2>
     <div class="q-aide"><span>${AIDE[q.mode]}</span>${q.mode.startsWith('max')?`<span class="compte ${k>=m?'plein':''}" id="cpt">${k} / ${m}</span>`:''}</div>${corps}</article>`;
   majBas(q);
-  if(q.mode==='text'){const t=$('#txt');t.oninput=()=>{rep[q.id]=t.value;sauver();majBas(q);};}
+  if(q.mode==='text'){const t=$('#txt');grandir(t);t.oninput=()=>{rep[q.id]=t.value;sauver();majBas(q);grandir(t);visible(t);};}
   else{
     document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>basculer(q,q.opts[+b.dataset.i]));
-    const a=$('#autre');if(a){a.oninput=()=>{autres[q.id]=a.value;sauver();};}
+    const a=$('#autre');if(a){grandir(a);a.oninput=()=>{autres[q.id]=a.value;sauver();grandir(a);visible(a);};a.onfocus=()=>setTimeout(()=>visible(a,true),250);}
   }
+}
+/* La zone de texte s'agrandit avec ce qu'on écrit, et reste au-dessus du bouton du bas (et du clavier). */
+function grandir(t){t.style.height='auto';t.style.height=Math.max(t.classList.contains('autre')?54:170,t.scrollHeight+4)+'px';}
+function visible(el,centre){const r=el.getBoundingClientRect(),h=(window.visualViewport?visualViewport.height:innerHeight)-100;
+  if(centre)el.scrollIntoView({block:'center',behavior:'smooth'});else if(r.bottom>h)window.scrollBy({top:r.bottom-h,behavior:'smooth'});
 }
 function majBas(q){
   const dernier=pos===Q.length-1;
@@ -208,7 +213,7 @@ function basculer(q,o){
   rep[q.id]=sel;if(!sel.some(estAutre))delete autres[q.id];sauver();
   const y=window.scrollY;$('#ecran').className='ecran fixe';question(q);window.scrollTo(0,y);
   const ici=document.querySelector(`.opt[data-i="${q.opts.indexOf(o)}"]`);if(ici)ici.focus({preventScroll:true});
-  if(estAutre(o)&&sel.includes(o)){const a=$('#autre');if(a)a.focus();}
+  if(estAutre(o)&&sel.includes(o)){const a=$('#autre');if(a){a.focus({preventScroll:true});setTimeout(()=>visible(a,true),60);}}
   if(q.mode==='single'&&sel.length&&!estAutre(o)){const p=pos;setTimeout(()=>{if(pos===p)aller(pos+1);},450);}
 }
 function aller(p){sens=p>=pos?1:-1;pos=Math.max(-1,Math.min(Q.length,p));afficher();}
