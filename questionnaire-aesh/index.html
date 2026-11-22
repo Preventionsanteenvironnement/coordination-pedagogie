@@ -198,7 +198,7 @@ function question(q){
 /* La zone de texte s'agrandit avec ce qu'on écrit, et reste au-dessus du bouton du bas (et du clavier). */
 function grandir(t){t.style.height='auto';t.style.height=Math.max(t.classList.contains('autre')?54:170,t.scrollHeight+4)+'px';}
 function visible(el,centre){const r=el.getBoundingClientRect(),h=(window.visualViewport?visualViewport.height:innerHeight)-100;
-  if(centre)el.scrollIntoView({block:'center',behavior:'smooth'});else if(r.bottom>h)window.scrollBy({top:r.bottom-h,behavior:'smooth'});
+  if(centre)el.scrollIntoView({block:'center'});else if(r.bottom>h)window.scrollBy(0,r.bottom-h);
 }
 function majBas(q){
   const dernier=pos===Q.length-1;
