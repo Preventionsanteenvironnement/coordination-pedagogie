@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Sondage AESH — projection</title>
+<style>
+:root{--bleu:#123a65;--bleu2:#125a93;--vert:#46b3a0;--fond:#f1f5fa;--carte:#fff;--bord:#d9e2ec;--texte:#17283a;--doux:#506378;--or:#e99d34}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--fond);color:var(--texte);display:flex;flex-direction:column}
+header{background:var(--bleu);color:#fff;display:flex;align-items:center;gap:14px;padding:12px 20px;flex-wrap:wrap}
+header h1{font-size:1.15rem;margin:0;flex:1;min-width:220px}
+.compteur{background:rgba(255,255,255,.14);border-radius:30px;padding:6px 16px;font-weight:700;font-size:1.05rem;white-space:nowrap}
+.compteur b{font-size:1.4rem}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;border:0;border-radius:10px;padding:9px 14px;font-weight:650;cursor:pointer;background:#e8f0f8;color:var(--bleu)}
+button.plein{background:var(--bleu2);color:#fff}
+header button{background:rgba(255,255,255,.16);color:#fff}
+header button.actif{background:#fff;color:var(--bleu)}
+button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+main{flex:1;padding:22px clamp(14px,3vw,40px);overflow:auto}
+.vue{display:none;max-width:1250px;margin:auto}.vue.on{display:block}
+/* Accueil QR */
+#vueQR.on{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,4vw,60px);align-items:center;min-height:100%}
+#qr{background:#fff;padding:22px;border-radius:22px;box-shadow:0 6px 30px rgba(18,58,101,.15)}
+#qr img,#qr canvas{display:block;width:min(52vh,460px)!important;height:min(52vh,460px)!important}
+.grand{font-size:clamp(2rem,4.4vw,3.6rem);font-weight:800;color:var(--bleu);margin:0 0 14px;line-height:1.1}
+.etapes{font-size:clamp(1.1rem,2vw,1.6rem);line-height:1.7;margin:0 0 20px;padding-left:1.2em}
+.lien{font-family:ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--bord);border-radius:10px;padding:10px 14px;display:inline-block;font-size:clamp(.85rem,1.3vw,1.05rem);word-break:break-all}
+.gros-compteur{margin-top:26px;font-size:clamp(1.4rem,2.6vw,2.2rem);font-weight:700;color:var(--bleu2)}
+.gros-compteur b{font-size:1.6em;color:var(--vert)}
+/* Question */
+.entete-q{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.pastille{background:#dbeaf7;color:var(--bleu);padding:6px 12px;border-radius:20px;font-weight:700;font-size:.95rem}
+.section-nom{color:var(--doux);font-weight:600}
+.question{font-size:clamp(1.45rem,2.7vw,2.3rem);line-height:1.25;margin:6px 0 6px;color:var(--bleu)}
+.consigne{color:var(--doux);font-size:1.05rem;margin:0 0 18px}
+.barres{display:flex;flex-direction:column;gap:11px}
+.barre{display:grid;grid-template-columns:minmax(200px,38%) 1fr 92px;gap:14px;align-items:center;font-size:clamp(1rem,1.5vw,1.3rem)}
+.barre .lib{line-height:1.25}
+.piste{background:#e3ebf4;border-radius:10px;height:clamp(26px,3.6vh,38px);overflow:hidden}
+.rempli{height:100%;width:0;background:var(--bleu2);border-radius:10px;transition:width .7s cubic-bezier(.2,.7,.2,1)}
+.barre.top .rempli{background:var(--vert)}
+.barre.top .lib{font-weight:700}
+.val{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.val small{display:block;font-weight:500;color:var(--doux);font-size:.72em}
+.cache .rempli{width:0!important}.cache .val{visibility:hidden}
+.note{margin-top:16px;color:var(--doux);font-size:1rem}
+.attente{background:#fff7e8;border:1px solid #f1d29b;border-radius:14px;padding:16px 18px;margin:12px 0;font-size:1.1rem}
+.precisions{margin-top:20px}
+.precisions h3{margin:0 0 8px;font-size:1.05rem;color:var(--doux)}
+.libres{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.libre{background:var(--carte);border:1px solid var(--bord);border-radius:14px;padding:14px 16px;font-size:1.12rem;line-height:1.45;cursor:pointer;position:relative}
+.libre.flou{color:transparent;text-shadow:0 0 12px rgba(23,40,58,.55);user-select:none}
+.libre.flou::after{content:"Cliquer pour afficher";position:absolute;inset:auto 12px 10px auto;font-size:.8rem;color:var(--doux);text-shadow:none}
+.bas{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:26px;flex-wrap:wrap}
+/* Synthèse */
+.synth{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
+.carte{background:var(--carte);border:1px solid var(--bord);border-radius:15px;padding:16px 18px}
+.carte h3{font-size:1rem;margin:0 0 10px;line-height:1.35;color:var(--bleu)}
+.carte ol{margin:0;padding-left:1.3em;line-height:1.55}
+.carte .pc{font-weight:800;color:var(--vert)}
+.vide{color:var(--doux)}
+#erreur{display:none;background:#fde8e4;color:#9b3a1e;padding:10px 20px;font-weight:600}
+@media (max-width:760px){#vueQR.on{grid-template-columns:1fr;justify-items:center;text-align:center}.barre{grid-template-columns:1fr 70px}.barre .piste{grid-column:1/-1;order:3}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Questionnaire AESH — réunion du 23 novembre 2026</h1>
+  <div class="compteur" aria-live="polite"><b id="nb">0</b> <span id="nbmot">réponse</span></div>
+  <nav>
+    <button id="bQR" class="actif">QR code</button>
+    <button id="bQ">Résultats</button>
+    <button id="bS">Synthèse</button>
+    <button id="bCSV" title="Télécharger toutes les réponses (tableur)">Exporter</button>
+    <button id="bPE" title="Plein écran (touche F)">⛶</button>
+  </nav>
+</header>
+<div id="erreur" role="alert"></div>
+<main>
+  <section id="vueQR" class="vue on">
+    <div id="qr" aria-label="QR code du questionnaire"></div>
+    <div>
+      <p class="grand">Scannez pour répondre</p>
+      <ol class="etapes">
+        <li>Ouvrez l’appareil photo de votre téléphone.</li>
+        <li>Visez le QR code, puis touchez le lien.</li>
+        <li>Répondez, puis touchez « Envoyer mes réponses ».</li>
+      </ol>
+      <span class="lien" id="lien"></span>
+      <p class="gros-compteur"><b id="nb2">0</b> <span id="nbmot2">réponse reçue</span></p>
+      <p class="note">Questionnaire anonyme · environ 12 minutes · une réponse par téléphone</p>
+    </div>
+  </section>
+  <section id="vueQ" class="vue" aria-live="polite"></section>
+  <section id="vueS" class="vue"></section>
+</main>
+<script src="../questions.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+const SEUIL=5;
+const params=new URLSearchParams(location.search);
+const SONDAGE=(params.get('s')||'aesh-2026-11-23').replace(/[^a-z0-9-]/gi,'').slice(0,40)||'aesh-2026-11-23';
+const URL_Q=new URL('../',location.href).href+(SONDAGE==='aesh-2026-11-23'?'':'?s='+SONDAGE);
+const $=id=>document.getElementById(id);
+
+/* Questions à plat */
+const Q=[];let n=0;
+for(const [section,items] of window.QUESTIONNAIRE_AESH)for(const [q,mode,opts] of items)Q.push({id:++n,section,q,mode,opts});
+const CONSIGNE={single:'Une seule réponse',multi:'Plusieurs réponses possibles',max2:'Deux réponses maximum',max3:'Trois réponses maximum',text:'Réponse libre'};
+
+/* QR code */
+$('lien').textContent=URL_Q;
+try{new QRCode($('qr'),{text:URL_Q,width:460,height:460,colorDark:'#123a65',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}
+catch(e){$('qr').textContent='QR code indisponible : utilisez le lien.';}
+
+/* État */
+let reponses=[];let iq=0;const reveles=new Set();const libresVus=new Set();let forcer=false;
+
+/* Vues */
+const vues={QR:$('vueQR'),Q:$('vueQ'),S:$('vueS')};
+function montrer(v){for(const k in vues){vues[k].classList.toggle('on',k===v);$('b'+k).classList.toggle('actif',k===v);}if(v==='Q')dessinerQ();if(v==='S')dessinerS();}
+$('bQR').onclick=()=>montrer('QR');$('bQ').onclick=()=>montrer('Q');$('bS').onclick=()=>montrer('S');
+$('bPE').onclick=()=>{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});};
+
+/* Calculs */
+function stats(q){
+  const lignes=reponses.map(r=>(r.reponses||[]).find(a=>a.question===q.id)).filter(Boolean);
+  if(q.mode==='text'){const t=lignes.map(a=>String(a.reponses||'').trim()).filter(Boolean);return {base:t.length,textes:t};}
+  const avec=lignes.filter(a=>Array.isArray(a.reponses)&&a.reponses.length);
+  const compte=new Map(q.opts.map(o=>[o,0]));
+  for(const a of avec)for(const v of a.reponses)compte.set(v,(compte.get(v)||0)+1);
+  const autres=avec.map(a=>String(a.precision_autre||'').trim()).filter(Boolean);
+  return {base:avec.length,compte,autres};
+}
+const pc=(k,b)=>b?Math.round(k*100/b):0;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function dessinerQ(){
+  const q=Q[iq];const s=stats(q);const vu=reveles.has(q.id);
+  let h=`<div class="entete-q"><span class="pastille">Question ${q.id} / ${Q.length}</span><span class="section-nom">${esc(q.section)}</span></div>
+  <h2 class="question">${esc(q.q)}</h2><p class="consigne">${CONSIGNE[q.mode]||''} · ${s.base} personne${s.base>1?'s':''} ${s.base>1?'ont':'a'} répondu à cette question</p>`;
+  const assez=reponses.length>=SEUIL||forcer;
+  if(!assez){h+=`<div class="attente">Les résultats s’affichent à partir de ${SEUIL} réponses, pour que personne ne soit reconnaissable. <button id="bForcer">Afficher quand même</button></div>`;}
+  else if(q.mode==='text'){
+    h+=s.textes.length?`<div class="libres">${s.textes.map((t,i)=>{const k=q.id+':'+i;return `<div class="libre ${libresVus.has(k)?'':'flou'}" data-k="${k}" tabindex="0">${esc(t)}</div>`}).join('')}</div><p class="note">Les réponses libres restent floues : cliquez sur une carte pour l’afficher après l’avoir lue.</p>`:`<p class="vide">Aucune réponse libre pour l’instant.</p>`;
+  }else{
+    const vals=[...s.compte.values()];const tri=[...vals].sort((a,b)=>b-a);const seuilTop=tri[Math.min(2,tri.length-1)]||0;
+    h+=`<div class="barres ${vu?'':'cache'}">`+q.opts.map(o=>{const k=s.compte.get(o)||0;const p=pc(k,s.base);const top=k>0&&k>=seuilTop&&k>=tri[0]*0.5;
+      return `<div class="barre ${top?'top':''}"><div class="lib">${esc(o)}</div><div class="piste"><div class="rempli" style="width:${p}%"></div></div><div class="val">${p} %<small>${k} pers.</small></div></div>`}).join('')+`</div>`;
+    if(q.mode!=='single')h+=`<p class="note">Pourcentage des personnes ayant répondu à la question. Plusieurs choix possibles : le total dépasse 100 %.</p>`;
+    if(vu&&s.autres.length)h+=`<div class="precisions"><h3>Précisions « Autre » (cliquer pour afficher)</h3><div class="libres">${s.autres.map((t,i)=>{const k='a'+q.id+':'+i;return `<div class="libre ${libresVus.has(k)?'':'flou'}" data-k="${k}" tabindex="0">${esc(t)}</div>`}).join('')}</div></div>`;
+  }
+  h+=`<div class="bas"><button id="bPrec" ${iq===0?'disabled':''}>← Précédente</button>${q.mode!=='text'&&assez?`<button class="plein" id="bRev">${vu?'Masquer les résultats':'Révéler les résultats'} (R)</button>`:''}<button id="bSuiv" ${iq===Q.length-1?'disabled':''}>Suivante →</button></div>`;
+  vues.Q.innerHTML=h;
+  if(vu){/* animation des barres */const r=vues.Q.querySelectorAll('.rempli');r.forEach(e=>{const w=e.style.width;e.style.width='0';requestAnimationFrame(()=>requestAnimationFrame(()=>e.style.width=w));});}
+  $('bPrec').onclick=()=>{if(iq>0){iq--;dessinerQ();}};$('bSuiv').onclick=()=>{if(iq<Q.length-1){iq++;dessinerQ();}};
+  if($('bRev'))$('bRev').onclick=basculer;if($('bForcer'))$('bForcer').onclick=()=>{forcer=true;dessinerQ();};
+  vues.Q.querySelectorAll('.libre').forEach(c=>{const f=()=>{libresVus.has(c.dataset.k)?libresVus.delete(c.dataset.k):libresVus.add(c.dataset.k);c.classList.toggle('flou');};c.onclick=f;c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f();}};});
+}
+function basculer(){const q=Q[iq];if(q.mode==='text')return;reveles.has(q.id)?reveles.delete(q.id):reveles.add(q.id);dessinerQ();}
+
+function dessinerS(){
+  if(reponses.length<SEUIL&&!forcer){vues.S.innerHTML=`<div class="attente">La synthèse s’affiche à partir de ${SEUIL} réponses. <button id="bForcer2">Afficher quand même</button></div>`;$('bForcer2').onclick=()=>{forcer=true;dessinerS();};return;}
+  vues.S.innerHTML=`<p class="consigne">Les trois réponses les plus choisies à chaque question (${reponses.length} questionnaire${reponses.length>1?'s':''} reçu${reponses.length>1?'s':''}).</p><div class="synth">`+Q.map(q=>{const s=stats(q);
+    if(q.mode==='text')return `<div class="carte"><h3>${q.id}. ${esc(q.q)}</h3><p class="vide">${s.textes.length} réponse${s.textes.length>1?'s':''} libre${s.textes.length>1?'s':''} — à lire dans « Résultats ».</p></div>`;
+    const top=[...s.compte].filter(([,k])=>k>0).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    return `<div class="carte"><h3>${q.id}. ${esc(q.q)}</h3>${top.length?`<ol>${top.map(([o,k])=>`<li><span class="pc">${pc(k,s.base)} %</span> ${esc(o)}</li>`).join('')}</ol>`:'<p class="vide">Pas encore de réponse.</p>'}</div>`}).join('')+`</div>`;
+}
+
+/* Export tableur (CSV, séparateur ;) */
+$('bCSV').onclick=()=>{
+  const tete=['Envoi',...Q.map(q=>'Q'+q.id),...Q.filter(q=>q.mode!=='text').map(q=>'Q'+q.id+' autre')];
+  const lignes=reponses.map(r=>{const d=r.cree&&r.cree.toDate?r.cree.toDate().toLocaleString('fr-FR'):'';const get=id=>(r.reponses||[]).find(a=>a.question===id)||{};
+    return [d,...Q.map(q=>{const v=get(q.id).reponses;return Array.isArray(v)?v.join(' | '):(v||'')}),...Q.filter(q=>q.mode!=='text').map(q=>get(q.id).precision_autre||'')];});
+  const csv='﻿'+[tete,...lignes].map(l=>l.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='sondage-'+SONDAGE+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+};
+
+/* Clavier : ← → questions, R révéler, F plein écran, Q QR code */
+document.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;
+  if(e.key==='ArrowRight'){if(!vues.Q.classList.contains('on'))montrer('Q');else if(iq<Q.length-1){iq++;dessinerQ();}}
+  else if(e.key==='ArrowLeft'&&vues.Q.classList.contains('on')&&iq>0){iq--;dessinerQ();}
+  else if((e.key==='r'||e.key==='R')&&vues.Q.classList.contains('on'))basculer();
+  else if(e.key==='f'||e.key==='F')$('bPE').click();
+  else if(e.key==='q'||e.key==='Q')montrer('QR');});
+
+/* Firebase : écoute en direct */
+function maj(){const k=reponses.length;$('nb').textContent=k;$('nb2').textContent=k;$('nbmot').textContent=k>1?'réponses':'réponse';$('nbmot2').textContent=k>1?'réponses reçues':'réponse reçue';
+  if(vues.Q.classList.contains('on'))dessinerQ();if(vues.S.classList.contains('on'))dessinerS();}
+try{
+  const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
+  const FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+  const db=FS.getFirestore(initializeApp({apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA",authDomain:"coordination-pedagogie.firebaseapp.com",projectId:"coordination-pedagogie",storageBucket:"coordination-pedagogie.firebasestorage.app",messagingSenderId:"526058585010",appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab"},'projection-aesh'));
+  FS.onSnapshot(FS.collection(db,'coordination_sondages',SONDAGE,'reponses'),snap=>{reponses=snap.docs.map(d=>d.data());maj();},err=>{$('erreur').style.display='block';$('erreur').textContent='Connexion aux réponses impossible : '+err.message;});
+}catch(e){$('erreur').style.display='block';$('erreur').textContent='Connexion impossible : vérifiez Internet.';}
+</script>
+</body>
+</html>
