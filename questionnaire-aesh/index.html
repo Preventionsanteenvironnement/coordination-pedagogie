@@ -178,12 +178,12 @@ function accueil(){
 function question(q){
   let corps='';
   if(q.mode==='text'){
-    corps=`<textarea id="txt" maxlength="1500" aria-label="${esc(q.q)}" placeholder="Écrivez ici, si vous le souhaitez…">${esc(rep[q.id]||'')}</textarea><p class="rappel">Ne mentionnez aucun nom d’élève ou de personnel.</p>`;
+    corps=`<textarea id="txt" maxlength="4000" aria-label="${esc(q.q)}" placeholder="Écrivez ici, si vous le souhaitez…">${esc(rep[q.id]||'')}</textarea><p class="rappel">Ne mentionnez aucun nom d’élève ou de personnel.</p>`;
   }else{
     const sel=rep[q.id]||[];const m=maxi(q);
     corps=`<div class="choix">`+q.opts.map((o,i)=>{const on=sel.includes(o);
       return `<button type="button" class="opt ${q.mode==='single'?'':'carre'} ${!on&&sel.length>=m&&m>1?'off':''}" aria-pressed="${on}" data-i="${i}"><span class="coche">${COCHE}</span><span>${esc(o)}</span></button>`+
-        (estAutre(o)&&on?`<input class="autre" id="autre" maxlength="300" aria-label="Précisez votre réponse" placeholder="Précisez…" value="${esc(autres[q.id]||'')}">`:'');}).join('')+`</div>`;
+        (estAutre(o)&&on?`<input class="autre" id="autre" maxlength="600" aria-label="Précisez votre réponse" placeholder="Précisez…" value="${esc(autres[q.id]||'')}">`:'');}).join('')+`</div>`;
   }
   const m=maxi(q),k=(rep[q.id]||[]).length;
   $('#ecran').innerHTML=`<article class="q-carte"><span class="q-num">Question ${q.id}</span><h2 class="q-titre">${esc(q.q)}</h2>
