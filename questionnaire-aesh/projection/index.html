@@ -91,6 +91,7 @@ main{flex:1;min-height:0;padding:4px 32px 10px;overflow:auto}
 .barre.top1 .rang,.barre.top2 .rang,.barre.top3 .rang{background:var(--grad);color:#fff}
 .barre.top1 .rempli{background:linear-gradient(90deg,#2fbfa0,#3b8beb 70%,#8b7bff)}
 .barre.top1 .lib{font-weight:800}
+.barres.serre{gap:7px}.barres.serre .barre{padding:6px 14px}.barres.serre .rang{width:34px;height:34px}.barres.serre .piste{height:clamp(18px,2.4vh,26px)}.barres.serre .lib{font-size:clamp(.95rem,1.25vw,1.15rem)}.barres.serre .val{font-size:clamp(1.2rem,1.8vw,1.6rem)}
 .cache .val,.cache .rang{visibility:hidden}
 .cache .rempli{width:0!important}
 .note{margin-top:14px;color:var(--doux);font-weight:600}
@@ -230,7 +231,7 @@ function dessinerQ(anim){
   }else{
     const ordre=q.opts.map((o,i)=>({o,i,k:s.compte.get(o)||0}));
     const tri=[...ordre].sort((a,b)=>b.k-a.k||a.i-b.i);const rangDe=new Map(tri.map((x,r)=>[x.o,r]));
-    h+=`<div class="barres ${vu?'':'cache'}" id="barres">`+ordre.map(x=>{const p=pc(x.k,s.base);const r=rangDe.get(x.o);const cls=vu&&x.k>0&&r<3?'top'+(r+1):'';
+    h+=`<div class="barres ${vu?'':'cache'} ${q.opts.length>7?'serre':''}" id="barres">`+ordre.map(x=>{const p=pc(x.k,s.base);const r=rangDe.get(x.o);const cls=vu&&x.k>0&&r<3?'top'+(r+1):'';
       return `<div class="barre ${cls}" data-o="${x.i}" data-r="${r}"><span class="rang">${r+1}</span><div class="lib">${esc(x.o)}</div><div class="piste"><div class="rempli" data-w="${p}"></div></div><div class="val"><span data-v="${p}" data-suf=" %">0 %</span><small>${x.k} pers.</small></div></div>`}).join('')+`</div>`;
     if(q.mode!=='single')h+=`<p class="note">Part des personnes ayant répondu à la question. Plusieurs choix possibles : le total dépasse 100 %.</p>`;
     if(vu&&s.autres.length)h+=`<p class="note" style="margin-top:22px">Précisions « Autre » — touchez pour afficher</p><div class="libres">${s.autres.map((t,i)=>{const k='a'+q.id+':'+i;return `<div class="libre ${libresVus.has(k)?'':'flou'}" data-k="${k}" tabindex="0" role="button">${esc(t)}</div>`}).join('')}</div>`;
