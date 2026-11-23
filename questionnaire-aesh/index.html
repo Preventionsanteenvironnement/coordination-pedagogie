@@ -48,6 +48,9 @@ main{flex:1;position:relative}
 .puces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0 0}
 .puces div{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:12px 6px;text-align:center;font-size:.78rem;line-height:1.3}
 .puces b{display:block;font-size:1.2rem;margin-bottom:2px}
+.compte{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0 0;padding:11px 14px;border-radius:16px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);font-size:.88rem;font-weight:600;text-align:center;line-height:1.35}
+.compte b{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.compte.urgent{background:rgba(242,165,65,.28);border-color:rgba(242,165,65,.6)}
 .info{background:var(--carte);border-radius:var(--r);box-shadow:var(--ombre);padding:18px;margin:16px 0 0;line-height:1.6;color:#33465e;font-size:.95rem}
 .info strong{color:var(--texte)}
 .q-carte{background:var(--carte);border-radius:26px;box-shadow:var(--ombre);padding:22px 18px 18px;margin-top:6px;margin-bottom:24px}
@@ -122,9 +125,17 @@ const DEJA='questionnaire-aesh-envoye-'+SONDAGE, BROUILLON='questionnaire-aesh-b
    Sans code, on peut répondre tant que coordination_sondages/{sondage}.ouvert n'est pas false (fermé depuis la page projection). */
 const CODE=(new URLSearchParams(location.search).get('c')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);
 let acces={ok:true,raison:''};
+/* Clôture automatique (23/11/2026, demande de Brahim) : le questionnaire se ferme seul le dimanche 29 novembre 2026 à 23 h 59 (heure de Paris).
+   Pour un essai sur un autre sondage (?s=essai-aesh), ?fin=AAAA-MM-JJTHH:MM permet de simuler une autre date. */
+const FIN=(()=>{const f=SONDAGE!=='aesh-2026-11-23'&&new URLSearchParams(location.search).get('fin');const d=f?new Date(f):null;return d&&!isNaN(d)?d:new Date('2026-11-29T23:59:59+01:00');})();
+const clos=()=>Date.now()>=FIN.getTime();
+function resteTxt(){const ms=FIN.getTime()-Date.now();if(ms<=0)return '';const j=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4);return j?`${j} j ${h} h`:h?`${h} h ${String(m).padStart(2,'0')} min`:`${Math.max(1,m)} min`;}
+const finTxt=FIN.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Paris'})+' à '+FIN.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}).replace(':',' h ');
+
 function fb(){if(!fb.p)fb.p=(async()=>{const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');const FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');return {FS,db:FS.getFirestore(initializeApp(firebaseConfig,'questionnaire-aesh'))};})();return fb.p;}
 async function hache(c){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('aesh:'+c));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function verifierAcces(){
+  if(clos()){acces={ok:false,raison:'clos'};return;}
   try{const {FS,db}=await fb();
     if(CODE){const d=await FS.getDoc(FS.doc(db,'coordination_sondages',SONDAGE,'codes',await hache(CODE)));
       if(!d.exists())acces={ok:false,raison:'code-inconnu'};else if(d.data().utilise)acces={ok:false,raison:'code-utilise'};}
@@ -170,7 +181,8 @@ function accueil(){
   $('#ecran').innerHTML=`<section class="hero"><span class="badge">Réunion du lundi 23 novembre</span>
     <h1>Accompagner les élèves : notre organisation, nos pratiques et nos besoins</h1>
     <p>Votre expérience compte. Vos réponses serviront de support aux échanges de la réunion.</p>
-    <div class="puces"><div><b>16</b>questions</div><div><b>12-15</b>minutes</div><div><b>100 %</b>anonyme</div></div></section>
+    <div class="puces"><div><b>16</b>questions</div><div><b>12-15</b>minutes</div><div><b>100 %</b>anonyme</div></div>
+    <div class="compte" id="compte" role="timer" aria-live="off"></div></section>
     <div class="info"><strong>Ce n’est pas une évaluation professionnelle.</strong> Aucune question ne demande votre nom ou votre pôle. Vous pouvez passer une question. Dans les réponses libres, ne mentionnez aucun nom d’élève ou de personnel.</div>`;
   bas(`<button class="btn prim" id="go">${deja?'Reprendre le questionnaire':'Commencer'} →</button>`);
   $('#go').onclick=()=>aller(deja?premiereVide():0);
@@ -235,6 +247,7 @@ async function envoyer(){
     const {FS,db}=await fb();
     const contenu={questionnaire:'AESH — 23 novembre 2026',version:3,par_code:!!CODE,cree:FS.serverTimestamp(),
       reponses:getAnswers().map(a=>({question:a.question,reponses:a.reponses,precision_autre:(a.precision_autre||'').slice(0,600)}))};
+    if(clos())throw Error('clos');
     const nouvelle=FS.doc(FS.collection(db,'coordination_sondages',SONDAGE,'reponses'));
     if(CODE){
       const ref=FS.doc(db,'coordination_sondages',SONDAGE,'codes',await hache(CODE));
@@ -248,7 +261,7 @@ async function envoyer(){
     }
     S(DEJA,'1');S(BROUILLON,null);merci(true);
   }catch(e){console.error(e);
-    if(['code-inconnu','code-utilise','ferme'].includes(e.message)){acces={ok:false,raison:e.message};return bloque();}
+    if(['code-inconnu','code-utilise','ferme','clos'].includes(e.message)){acces={ok:false,raison:e.message};return bloque();}
     $('#statut').textContent='Envoi impossible pour le moment. Vérifiez la connexion Internet, puis réessayez.';b.disabled=false;b.textContent='Réessayer l’envoi';}
 }
 function merci(fete){
@@ -264,12 +277,19 @@ function bloque(){
   const T={
     'code-utilise':['Ce code a déjà été utilisé','Les réponses liées à ce code ont déjà été envoyées. Merci pour votre participation !'],
     'code-inconnu':['Code non reconnu','Vérifiez que vous avez ouvert le lien exact reçu par mail. En cas de souci, contactez votre coordonnateur.'],
+    'clos':['Le questionnaire est clos','Il était ouvert jusqu’au '+finTxt+'. Merci à toutes et à tous pour vos réponses.'],
     'ferme':['Le questionnaire est fermé','Merci à toutes et à tous pour vos réponses. Si vous avez reçu un code personnel par mail, utilisez le lien de ce mail.']}[acces.raison]||['Accès impossible',''];
   $('#ecran').innerHTML=`<section class="merci"><div class="rond" style="background:linear-gradient(135deg,#5b6b80,#1d5fa8)"><svg viewBox="0 0 24 24" aria-hidden="true" style="stroke-dasharray:none;animation:none"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><h2>${T[0]}</h2><p>${T[1]}</p></section>`;
 }
 document.addEventListener('keydown',e=>{if(e.target.matches('textarea,input'))return;if(e.key==='ArrowRight'&&pos>=0&&pos<Q.length)aller(pos+1);if(e.key==='ArrowLeft'&&pos>-1)aller(pos-1);});
 $('#ecran').innerHTML='<p style="text-align:center;color:var(--doux);margin-top:40vh;font-weight:600">Chargement…</p>';
 (L(DEJA)==='1'?Promise.resolve():verifierAcces()).then(afficher);
+/* Compte à rebours de l'accueil, mis à jour toutes les 20 secondes */
+function compte(){const c=$('#compte');if(!c)return;const r=resteTxt();
+  if(!r){c.innerHTML='Le questionnaire est clos.';if(pos<0&&acces.ok){acces={ok:false,raison:'clos'};afficher();}return;}
+  c.classList.toggle('urgent',FIN.getTime()-Date.now()<864e5);
+  c.innerHTML=`<span>⏳ Plus que</span><b>${r}</b><span>pour répondre · jusqu’au ${finTxt}</span>`;}
+new MutationObserver(compte).observe($('#ecran'),{childList:true});compte();setInterval(compte,20000);
 </script>
 </body>
 </html>

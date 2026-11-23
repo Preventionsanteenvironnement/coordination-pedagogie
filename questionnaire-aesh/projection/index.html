@@ -44,6 +44,9 @@ nav button:hover,.ico:hover{color:var(--texte)}
 nav button.actif{background:var(--grad);color:#fff;box-shadow:0 8px 20px -8px rgba(59,139,235,.7)}
 .ico{background:var(--carte);border:1px solid var(--bord);padding:9px 12px;border-radius:14px}
 #bFerme.ferme{color:#ff8d99;border-color:rgba(255,107,122,.45)}
+.cloture{margin-top:14px;display:inline-flex;align-items:baseline;gap:10px;flex-wrap:wrap;background:var(--carte);border:1px solid var(--bord);padding:10px 16px;border-radius:16px;font-weight:700;color:var(--doux)}
+.cloture b{font-size:1.5rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.cloture.fini b{background:none;color:#ff8d99}
 .etat-codes{margin-top:10px;color:var(--doux);font-weight:600;font-size:.95rem}
 button:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 main{flex:1;min-height:0;padding:4px 32px 10px;overflow:auto}
@@ -164,6 +167,7 @@ footer.masque{visibility:hidden}
       <span class="lien" id="lien"></span>
       <div class="vivant"><span class="gros" id="nb2">0</span><p id="nbmot2">réponse reçue<br><span style="font-weight:600">anonyme · 12 à 15 minutes</span></p></div>
       <div class="bulles" id="bulles"></div>
+      <div class="cloture" id="cloture" role="timer"></div>
       <p class="etat-codes" id="etatCodes"></p>
     </div>
   </section>
@@ -184,6 +188,14 @@ const params=new URLSearchParams(location.search);
 const SONDAGE=(params.get('s')||'aesh-2026-11-23').replace(/[^a-z0-9-]/gi,'').slice(0,40)||'aesh-2026-11-23';
 const URL_Q=new URL('../',location.href).href+(SONDAGE==='aesh-2026-11-23'?'':'?s='+SONDAGE);
 const $=id=>document.getElementById(id);
+/* Clôture automatique (23/11/2026, demande de Brahim) : le questionnaire se ferme seul le dimanche 29 novembre 2026 à 23 h 59 (heure de Paris).
+   Pour un essai sur un autre sondage (?s=essai-aesh), ?fin=AAAA-MM-JJTHH:MM permet de simuler une autre date. */
+const FIN=(()=>{const f=SONDAGE!=='aesh-2026-11-23'&&new URLSearchParams(location.search).get('fin');const d=f?new Date(f):null;return d&&!isNaN(d)?d:new Date('2026-11-29T23:59:59+01:00');})();
+const clos=()=>Date.now()>=FIN.getTime();
+function resteTxt(){const ms=FIN.getTime()-Date.now();if(ms<=0)return '';const j=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4);return j?`${j} j ${h} h`:h?`${h} h ${String(m).padStart(2,'0')} min`:`${Math.max(1,m)} min`;}
+const finTxt=FIN.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',timeZone:'Europe/Paris'})+' à '+FIN.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'}).replace(':',' h ');
+function cloture(){const c=$('cloture'),r=resteTxt();c.classList.toggle('fini',!r);c.innerHTML=r?`⏳ Clôture automatique ${finTxt} · encore <b>${r}</b>`:`<b>Clos</b> depuis le ${finTxt}`;}
+cloture();setInterval(cloture,20000);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const pc=(k,b)=>b?Math.round(k*100/b):0;
 
