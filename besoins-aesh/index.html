@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f2a4d">
+<meta name="robots" content="noindex,nofollow">
+<title>Besoins en AESH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- 26/11/2026 — Besoins en AESH, une page par enseignant (lien individuel ?c=CODE).
+     Demande de Brahim : « un truc super simple, il clique les boutons, tac, tac, tac » ; « j'ai / il m'en faut » ; « on doit pouvoir modifier ».
+     En ligne : classe, matière, jour, heure et les réponses. AUCUN nom (enseignant, élève, AESH), aucune salle.
+     Données : coordination_sondages/besoins-aesh-2026/fiches/<empreinte du code>. La page ne lit et n'écrit que SA fiche. -->
+<style>
+:root{
+  --nuit:#0f2a4d;--bleu:#1d5fa8;--ciel:#3b8beb;--menthe:#2fbfa0;--violet:#7c6cf0;
+  --texte:#14243a;--doux:#5b6b80;--pale:#8a97a8;--ligne:#e3e9f2;--carte:#ffffff;--fond:#f3f6fb;--creux:#eef2f8;
+  --vert:#12805c;--vert-f:#e2f6ee;--rouge:#b42318;--rouge-f:#fdeceb;--ambre:#9a5b06;--ambre-f:#fdf1dc;--gris-f:#eceff4;
+  --grad:linear-gradient(120deg,#2fbfa0 0%,#3b8beb 55%,#7c6cf0 100%);
+  --ombre:0 10px 30px -14px rgba(15,42,77,.28),0 2px 6px -2px rgba(15,42,77,.08);
+  --r:18px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --texte:#e9eef6;--doux:#a9b6c8;--pale:#7f8da1;--ligne:#26354b;--carte:#152338;--fond:#0b1626;--creux:#1c2c44;
+  --vert:#5fd6a8;--vert-f:#10382b;--rouge:#ff8f85;--rouge-f:#421814;--ambre:#f3bd62;--ambre-f:#3e2c0c;--gris-f:#223149;
+  --ombre:0 10px 30px -14px rgba(0,0,0,.6);
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--texte);background:var(--fond);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+.page{max-width:520px;margin:0 auto;padding:0 16px calc(28px + env(safe-area-inset-bottom))}
+.tete{background:var(--nuit);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 16px 46px;position:relative;overflow:hidden}
+.tete:after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--grad)}
+.tete .in{max-width:520px;margin:0 auto}
+.tete small{display:block;font-size:12.5px;opacity:.75;letter-spacing:.02em}
+.tete h1{margin:4px 0 2px;font-size:23px;font-weight:800;letter-spacing:-.01em}
+.tete p{margin:0;font-size:14.5px;opacity:.88}
+.suivi{position:sticky;top:0;z-index:5;margin:-30px 0 0;padding:10px 0 8px}
+.jauge{background:var(--carte);border-radius:16px;box-shadow:var(--ombre);padding:12px 14px}
+.jauge .l{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--doux);margin-bottom:7px}
+.jauge .l b{color:var(--texte);font-weight:700}
+.rail{height:7px;border-radius:4px;background:var(--creux);overflow:hidden}
+.rail i{display:block;height:7px;width:0;border-radius:4px;background:var(--grad);transition:width .35s cubic-bezier(.2,.8,.2,1)}
+.etat{font-size:12px;font-weight:600;transition:opacity .3s}
+.etat.ok{color:var(--vert)}.etat.att{color:var(--pale)}.etat.ko{color:var(--rouge)}
+.jours{display:flex;gap:7px;margin:10px 0 14px}
+.jours button{flex:1;min-width:0;height:54px;border-radius:14px;border:1.5px solid var(--ligne);background:var(--carte);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:0;transition:transform .12s,background .2s,border-color .2s,color .2s}
+.jours button:active{transform:scale(.96)}
+.jours button b{font-size:14px;font-weight:700}
+.jours button span{font-size:11.5px;color:var(--pale);font-weight:600}
+.jours button.plein{background:var(--vert-f);border-color:transparent;color:var(--vert)}
+.jours button.plein span{color:var(--vert)}
+.jours button.on{background:var(--nuit);border-color:var(--nuit);color:#fff}
+.jours button.on span{color:rgba(255,255,255,.8)}
+@media (prefers-color-scheme:dark){.jours button.on{background:var(--ciel);border-color:var(--ciel)}}
+.carte{background:var(--carte);border-radius:var(--r);box-shadow:var(--ombre);padding:14px;margin-bottom:12px}
+.anime .carte{animation:monte .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes monte{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.carte .h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.carte .cl{font-size:16.5px;font-weight:800;letter-spacing:-.01em}
+.carte .hr{font-size:13px;color:var(--doux);white-space:nowrap;font-weight:600;padding-top:2px}
+.carte .ma{font-size:13.5px;color:var(--doux);margin-top:1px}
+.ab{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:9px;background:var(--creux);font-size:11.5px;font-weight:700;color:var(--doux)}
+.lib{font-size:12.5px;font-weight:700;color:var(--pale);margin:12px 0 6px;text-transform:none}
+.seg{display:flex;gap:4px;background:var(--creux);border-radius:13px;padding:4px}
+.seg button{flex:1;min-width:0;height:44px;border:0;border-radius:10px;background:transparent;font-size:15px;font-weight:700;color:var(--doux);padding:0;transition:background .16s,color .16s,transform .1s}
+.seg button.lg{flex:1.9;font-size:14px}
+.seg button:active{transform:scale(.94)}
+.seg.a button.on{background:var(--menthe);color:#fff;box-shadow:0 3px 10px -4px rgba(47,191,160,.9)}
+.seg.a button.on.p{background:#e0972a;box-shadow:0 3px 10px -4px rgba(224,151,42,.9)}
+.seg.f button.on{background:var(--ciel);color:#fff;box-shadow:0 3px 10px -4px rgba(59,139,235,.9)}
+.carte.repli{padding:12px 14px;cursor:pointer}
+.carte.repli .res{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px;font-size:13.5px;color:var(--doux)}
+.carte.repli .res u{text-decoration:none;color:var(--ciel);font-weight:700;font-size:13px}
+.pil{flex:none;font-size:12px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap}
+.pil.bon{background:var(--vert-f);color:var(--vert)}.pil.man{background:var(--rouge-f);color:var(--rouge)}.pil.irr{background:var(--ambre-f);color:var(--ambre)}.pil.tro{background:var(--gris-f);color:var(--doux)}
+.aide{font-size:12.5px;color:var(--pale);margin:2px 2px 0}
+.gros{display:block;width:100%;height:52px;border:0;border-radius:15px;background:var(--nuit);color:#fff;font-size:16px;font-weight:800;margin-top:14px;transition:transform .12s,opacity .2s}
+.gros:active{transform:scale(.98)}
+.gros.clair{background:var(--carte);color:var(--texte);border:1.5px solid var(--ligne)}
+@media (prefers-color-scheme:dark){.gros{background:var(--ciel)}}
+.tous{background:var(--carte);border-radius:var(--r);box-shadow:var(--ombre);padding:14px;margin-top:14px;border-left:0}
+.tous h2{margin:0 0 4px;font-size:15.5px;font-weight:800}
+.tous p{margin:0 0 8px;font-size:13px;color:var(--doux)}
+.coche{display:flex;gap:11px;align-items:flex-start;padding:10px 0;font-size:14.5px;border-top:1px solid var(--ligne);cursor:pointer}
+.coche input{flex:none;width:22px;height:22px;margin:0;accent-color:#2fbfa0}
+.fin{text-align:center;padding:34px 8px 10px;animation:monte .35s}
+.rond{width:84px;height:84px;border-radius:50%;margin:0 auto 16px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px -12px rgba(59,139,235,.8)}
+.rond svg{width:42px;height:42px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:trace .5s .15s forwards}
+@keyframes trace{to{stroke-dashoffset:0}}
+.fin h2{margin:0 0 6px;font-size:24px;font-weight:800}
+.fin p{margin:0 auto 6px;max-width:330px;color:var(--doux);font-size:15px}
+.info{background:var(--carte);border-radius:var(--r);box-shadow:var(--ombre);padding:22px 18px;margin-top:-26px;position:relative;text-align:center}
+.info h2{margin:0 0 6px;font-size:18px}.info p{margin:0;color:var(--doux);font-size:14.5px}
+.pied{text-align:center;font-size:11.5px;color:var(--pale);margin-top:22px;line-height:1.5}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="tete"><div class="in"><small>Lycée René Pellet · coordination</small><h1>Vos besoins en AESH</h1><p id="sous">Deux touches par cours, c’est tout.</p></div></header>
+<main class="page" id="app"><div class="info"><h2>Chargement…</h2><p>Un instant.</p></div></main>
+<script type="module">
+const firebaseConfig={apiKey:"AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA",authDomain:"coordination-pedagogie.firebaseapp.com",projectId:"coordination-pedagogie",storageBucket:"coordination-pedagogie.firebasestorage.app",messagingSenderId:"526058585010",appId:"1:526058585010:web:ba4dd6d9c8281ba5bf02ab"};
+const SONDAGE='besoins-aesh-2026';
+const P=new URLSearchParams(location.search), CODE=(P.get('c')||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,''), DEMO=P.has('demo');
+const JN=['Lundi','Mardi','Mercredi','Jeudi','Vendredi'], JC=['Lun','Mar','Mer','Jeu','Ven'];
+const $=s=>document.querySelector(s), app=$('#app');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const heure=t=>{const m=/^(\d\d?):(\d\d)$/.exec(t||'');return m?(+m[1])+' h'+(m[2]==='00'?'':' '+m[2]):String(t||'');};
+/* Les seules valeurs acceptées : rien d'autre n'est ni affiché ni enregistré. */
+const AI=[0,'p',1,2,3], FAUT=[0,1,2,3,4];
+const bonAi=v=>AI.indexOf(v)>=0, bonFaut=v=>FAUT.indexOf(v)>=0;
+
+let F=null, ref=null, FS=null;            // la fiche, sa référence
+let jour=0, ouvert={}, vue='cours', etat={t:'',c:'att'}, animer=true;   // animer : seulement à l'arrivée et au changement de jour, jamais à chaque touche
+
+function demo(){return {cours:[
+  {i:'0',j:0,d:'09:30',f:'10:30',m:'Maths',cls:['C2PSR'],sem:''},{i:'1',j:0,d:'10:30',f:'11:30',m:'Maths',cls:['BTMELEC'],sem:''},
+  {i:'2',j:1,d:'08:30',f:'09:30',m:'Maths-sciences',cls:['C1CAN'],sem:''},{i:'3',j:1,d:'10:30',f:'11:30',m:'Co-ens. maths',cls:['B1AGO1','B1AGO2'],sem:'A'},
+  {i:'4',j:1,d:'10:30',f:'11:30',m:'AP maths',cls:['B1AGO1','B1AGO2'],sem:'B'},{i:'5',j:3,d:'14:00',f:'16:00',m:'Sciences',cls:['B2MELEC'],sem:''}],rep:{},ponctuel:false,identique:false,termine:false};}
+
+async function empreinte(c){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('besoins-aesh:'+c));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+function nettoyer(d){
+  const cours=(Array.isArray(d.cours)?d.cours:[]).filter(c=>c&&c.i!=null&&c.j>=0&&c.j<=4).map(c=>({i:String(c.i),j:+c.j,d:String(c.d||''),f:String(c.f||''),m:String(c.m||''),cls:(Array.isArray(c.cls)?c.cls:[]).map(String),sem:c.sem==='A'||c.sem==='B'?c.sem:''}));
+  const rep={};Object.keys(d.rep||{}).forEach(k=>{const r=d.rep[k]||{},o={};if(bonAi(r.ai))o.ai=r.ai;if(bonFaut(r.faut))o.faut=r.faut;if('ai' in o||'faut' in o)rep[k]=o;});
+  return {cours,rep,ponctuel:!!d.ponctuel,identique:!!d.identique,termine:!!d.termine};
+}
+async function charger(){
+  if(DEMO){F=demo();return 'ok';}
+  if(CODE.length<8)return 'sans-code';
+  try{
+    const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
+    FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+    const db=FS.getFirestore(initializeApp(firebaseConfig,'besoins-aesh'));
+    ref=FS.doc(db,'coordination_sondages',SONDAGE,'fiches',await empreinte(CODE));
+    const d=await FS.getDoc(ref);
+    if(!d.exists())return 'inconnu';
+    F=nettoyer(d.data());
+    /* ce qui n'avait pas pu partir la dernière fois (téléphone sans réseau) */
+    try{const att=JSON.parse(localStorage.getItem('besoins-aesh:'+CODE)||'null');if(att&&att.rep){Object.keys(att.rep).forEach(k=>{F.rep[k]=Object.assign({},F.rep[k],att.rep[k]);});file=att;envoyer();}}catch(e){}
+    return 'ok';
+  }catch(e){console.warn(e);return 'hors-ligne';}
+}
+
+/* ---------- Enregistrement : chaque touche part tout de suite ; en cas d'échec on réessaie, rien n'est perdu ---------- */
+let file={rep:{}}, enVol=false, essais=0;
+function dire(t,c){etat={t,c};const e=$('#etat');if(e){e.textContent=t;e.className='etat '+c;}}
+function noter(champs){
+  if(champs.rep)Object.keys(champs.rep).forEach(k=>{file.rep[k]=Object.assign({},file.rep[k],champs.rep[k]);});
+  ['ponctuel','identique','termine'].forEach(k=>{if(k in champs)file[k]=champs[k];});
+  try{if(!DEMO)localStorage.setItem('besoins-aesh:'+CODE,JSON.stringify(file));}catch(e){}
+  envoyer();
+}
+async function envoyer(){
+  if(DEMO){dire('Démonstration','att');return;}
+  if(enVol||!ref)return;
+  const lot=file;if(!Object.keys(lot.rep).length&&!('ponctuel' in lot)&&!('identique' in lot)&&!('termine' in lot))return;
+  file={rep:{}};enVol=true;dire('Enregistrement…','att');
+  const maj={majLe:new Date().toISOString()};
+  Object.keys(lot.rep).forEach(k=>{const r=lot.rep[k];if('ai' in r)maj['rep.'+k+'.ai']=r.ai;if('faut' in r)maj['rep.'+k+'.faut']=r.faut;});
+  ['ponctuel','identique','termine'].forEach(k=>{if(k in lot)maj[k]=lot[k];});
+  try{
+    await FS.updateDoc(ref,maj);
+    enVol=false;essais=0;
+    const reste=Object.keys(file.rep).length||('ponctuel' in file)||('identique' in file)||('termine' in file);
+    if(reste)envoyer();else{try{localStorage.removeItem('besoins-aesh:'+CODE);}catch(e){}dire('Enregistré ✓','ok');}
+  }catch(e){
+    console.warn(e);enVol=false;
+    /* on remet le lot devant ce qui a été touché depuis */
+    const neuf=file;file=lot;Object.keys(neuf.rep).forEach(k=>{file.rep[k]=Object.assign({},file.rep[k],neuf.rep[k]);});['ponctuel','identique','termine'].forEach(k=>{if(k in neuf)file[k]=neuf[k];});
+    try{localStorage.setItem('besoins-aesh:'+CODE,JSON.stringify(file));}catch(x){}
+    essais++;dire('Pas de réseau : nouvel essai…','ko');setTimeout(envoyer,Math.min(15000,1500*essais));
+  }
+}
+window.addEventListener('online',()=>envoyer());
+
+/* ---------- Affichage ---------- */
+const fait=c=>{const r=F.rep[c.i];return !!r&&bonAi(r.ai)&&bonFaut(r.faut);};
+const joursUtiles=()=>[0,1,2,3,4].filter(j=>F.cours.some(c=>c.j===j));
+const duJour=j=>F.cours.filter(c=>c.j===j);
+const nbFaits=l=>l.filter(fait).length;
+const dit=v=>v===0?'aucune':v==='p'?'parfois':String(v);
+function bilan(r){
+  if(r.ai==='p')return r.faut>0?['Pas régulier','irr']:null;
+  const m=r.faut-r.ai;
+  if(m>0)return ['Il en manque '+m,'man'];
+  if(m<0)return [(-m)+' en trop','tro'];
+  return r.ai===0?null:['C’est bon','bon'];
+}
+function seg(c,cle,opts,cl){
+  const r=F.rep[c.i]||{};
+  return '<div class="seg '+cl+'" role="group">'+opts.map(o=>'<button type="button" class="'+(o[0].length>1?'lg ':'')+(o[1]==='p'?'p ':'')+(r[cle]===o[1]?'on':'')+'" data-c="'+esc(c.i)+'" data-k="'+cle+'" data-v="'+o[1]+'" aria-pressed="'+(r[cle]===o[1])+'">'+o[0]+'</button>').join('')+'</div>';
+}
+function carte(c){
+  const r=F.rep[c.i]||{}, titre=esc(c.cls.join(' + ')), hr=esc(heure(c.d)+' – '+heure(c.f)), ab=c.sem?'<span class="ab">Semaine '+c.sem+'</span>':'';
+  if(fait(c)&&ouvert[c.i]!==true){
+    const b=bilan(r);
+    return '<div class="carte repli" data-ouvrir="'+esc(c.i)+'" role="button" tabindex="0"><div class="h"><span class="cl">'+titre+'</span>'+(b?'<span class="pil '+b[1]+'">'+b[0]+'</span>':'<span class="hr">'+hr+'</span>')+'</div>'+
+      '<div class="res"><span>'+esc(c.m)+ab+' · j’ai '+dit(r.ai)+', il m’en faut '+dit(r.faut)+'</span><u>Modifier</u></div></div>';
+  }
+  return '<div class="carte"><div class="h"><span class="cl">'+titre+'</span><span class="hr">'+hr+'</span></div><div class="ma">'+esc(c.m)+ab+'</div>'+
+    '<div class="lib">J’ai</div>'+seg(c,'ai',[['Aucune',0],['Parfois','p'],['1',1],['2',2],['3',3]],'a')+
+    '<div class="lib">Il m’en faut</div>'+seg(c,'faut',[['Aucune',0],['1',1],['2',2],['3',3],['4',4]],'f')+'</div>';
+}
+function rendre(){
+  if(vue==='merci'){
+    $('#sous').textContent='Merci pour votre réponse.';
+    app.innerHTML='<div class="fin"><div class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2>Merci, c’est enregistré</h2>'+
+      '<p>Vos besoins sont transmis à la coordination.</p><p>Vous pouvez modifier vos réponses à tout moment avec ce même lien.</p>'+
+      '<button type="button" class="gros clair" id="revoir">Revoir ou modifier mes réponses</button></div>'+pied();
+    $('#revoir').onclick=()=>{vue='cours';animer=true;rendre();window.scrollTo(0,0);};
+    return;
+  }
+  $('#sous').textContent='Deux touches par cours, c’est tout.';
+  const J=joursUtiles(), total=F.cours.length, n=nbFaits(F.cours), tout=n===total;
+  if(J.indexOf(jour)<0)jour=J[0];
+  const liste=duJour(jour), plein=nbFaits(liste)===liste.length, suivant=J.filter(j=>j!==jour&&nbFaits(duJour(j))<duJour(j).length)[0];
+  let h='<div class="suivi"><div class="jauge"><div class="l"><span>'+(tout?'<b>Tout est renseigné</b>':'<b>'+n+'</b> cours sur '+total)+'</span><span id="etat" class="etat '+etat.c+'" role="status">'+esc(etat.t)+'</span></div><div class="rail"><i style="width:'+Math.round(n/total*100)+'%"></i></div></div></div>';
+  h+='<div class="jours" role="tablist">'+J.map(j=>{const l=duJour(j),k=nbFaits(l),p=k===l.length;return '<button type="button" role="tab" aria-selected="'+(j===jour)+'" class="'+(j===jour?'on':p?'plein':'')+'" data-jour="'+j+'" aria-label="'+JN[j]+', '+k+' cours sur '+l.length+'"><b>'+JC[j]+'</b><span>'+(p?'✓':k+'/'+l.length)+'</span></button>';}).join('')+'</div>';
+  h+='<h2 class="sr">'+JN[jour]+'</h2><div class="'+(animer?'anime':'')+'">'+liste.map(carte).join('')+'</div>';animer=false;
+  h+='<p class="aide">« Parfois » : une AESH vient, mais pas à chaque fois. · Touchez « Aucune » si vous n’en avez pas ou n’en voulez pas.</p>';
+  if(plein&&suivant!=null&&!tout)h+='<button type="button" class="gros" id="suite">'+JN[suivant]+' →</button>';
+  if(tout)h+='<div class="tous"><h2>Pour tous vos cours</h2><p>Facultatif. Vous pouvez cocher les deux.</p>'+
+    '<label class="coche"><input type="checkbox" id="ponctuel"'+(F.ponctuel?' checked':'')+'><span>J’accepte une AESH ponctuelle, même d’une autre filière</span></label>'+
+    '<label class="coche"><input type="checkbox" id="identique"'+(F.identique?' checked':'')+'><span>De préférence toujours la même AESH</span></label></div>'+
+    '<button type="button" class="gros" id="terminer">Terminer</button>';
+  app.innerHTML=h+pied();
+  app.querySelectorAll('[data-jour]').forEach(b=>b.onclick=()=>{jour=+b.dataset.jour;animer=true;rendre();});
+  app.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+    const i=b.dataset.c,k=b.dataset.k,v=b.dataset.v==='p'?'p':+b.dataset.v;
+    if((k==='ai'&&!bonAi(v))||(k==='faut'&&!bonFaut(v)))return;
+    F.rep[i]=Object.assign({},F.rep[i],{[k]:v});
+    const c=F.cours.find(x=>x.i===i);if(c&&fait(c))ouvert[i]=false;
+    noter({rep:{[i]:{[k]:v}}});rendre();
+  });
+  app.querySelectorAll('[data-ouvrir]').forEach(d=>{const o=()=>{ouvert[d.dataset.ouvrir]=true;rendre();};d.onclick=o;d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();o();}};});
+  const s=$('#suite');if(s)s.onclick=()=>{jour=suivant;animer=true;rendre();window.scrollTo({top:0,behavior:'smooth'});};
+  ['ponctuel','identique'].forEach(k=>{const z=$('#'+k);if(z)z.onchange=()=>{F[k]=z.checked;noter({[k]:z.checked});};});
+  const t=$('#terminer');if(t)t.onclick=()=>{F.termine=true;noter({termine:true});vue='merci';rendre();window.scrollTo(0,0);};
+}
+function pied(){return '<p class="pied">Aucun nom n’est enregistré en ligne : seulement vos classes, vos horaires et vos réponses.<br>Une question ? Adressez-vous au référent de votre pôle.</p>';}
+function message(t,p){$('#sous').textContent='';app.innerHTML='<div class="info"><h2>'+t+'</h2><p>'+p+'</p></div>';}
+
+const r=await charger();
+if(r==='ok'&&F.cours.length){if(F.termine&&nbFaits(F.cours)===F.cours.length)vue='merci';const J=joursUtiles();jour=J.filter(j=>nbFaits(duJour(j))<duJour(j).length)[0];if(jour==null)jour=J[0];if(DEMO)etat={t:'Démonstration',c:'att'};rendre();}
+else if(r==='ok')message('Aucun cours à renseigner','Votre emploi du temps ne contient pas de cours pour cette enquête.');
+else if(r==='sans-code')message('Lien incomplet','Ouvrez le lien reçu par mail, en entier. Il est personnel.');
+else if(r==='inconnu')message('Lien inconnu','Ce lien n’est pas reconnu. Vérifiez qu’il est complet, ou demandez-le au référent de votre pôle.');
+else message('Pas de connexion','Impossible de charger vos cours. Vérifiez votre connexion, puis rechargez la page.');
+</script>
+</body>
+</html>
