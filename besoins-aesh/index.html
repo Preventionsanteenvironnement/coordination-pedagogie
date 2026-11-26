@@ -72,7 +72,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .seg.a button.on.p{background:#e0972a;box-shadow:0 3px 10px -4px rgba(224,151,42,.9)}
 .seg.f button.on{background:var(--ciel);color:#fff;box-shadow:0 3px 10px -4px rgba(59,139,235,.9)}
 .carte.repli{padding:12px 14px;cursor:pointer}
-.carte.repli .res{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px;font-size:13.5px;color:var(--doux)}
+.carte.repli .res{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;font-size:13.5px;color:var(--texte);font-weight:600}
 .carte.repli .res u{text-decoration:none;color:var(--ciel);font-weight:700;font-size:13px}
 .pil{flex:none;font-size:12px;font-weight:700;padding:3px 9px;border-radius:10px;white-space:nowrap}
 .pil.bon{background:var(--vert-f);color:var(--vert)}.pil.man{background:var(--rouge-f);color:var(--rouge)}.pil.irr{background:var(--ambre-f);color:var(--ambre)}.pil.tro{background:var(--gris-f);color:var(--doux)}
@@ -111,71 +111,95 @@ const $=s=>document.querySelector(s), app=$('#app');
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const heure=t=>{const m=/^(\d\d?):(\d\d)$/.exec(t||'');return m?(+m[1])+' h'+(m[2]==='00'?'':' '+m[2]):String(t||'');};
 /* Les seules valeurs acceptées : rien d'autre n'est ni affiché ni enregistré. */
-const AI=[0,'p',1,2,3], FAUT=[0,1,2,3,4];
+const AI=[0,'p',1,2,3], FAUT=[0,1,2,3,4], DRAPEAUX=['ponctuel','identique','termine'];
 const bonAi=v=>AI.indexOf(v)>=0, bonFaut=v=>FAUT.indexOf(v)>=0;
+const BON_ID=/^[A-Za-z][A-Za-z0-9]{0,30}$/;      /* (relecture de Codex) un identifiant de cours sert de nom de champ : lettres et chiffres seulement */
 
-let F=null, ref=null, FS=null;            // la fiche, sa référence
+let F=null, ref=null, FS=null, serveurLe='';      // la fiche, sa référence, la date de sa dernière écriture en ligne
 let jour=0, ouvert={}, vue='cours', etat={t:'',c:'att'}, animer=true;   // animer : seulement à l'arrivée et au changement de jour, jamais à chaque touche
 
 function demo(){return {cours:[
-  {i:'0',j:0,d:'09:30',f:'10:30',m:'Maths',cls:['C2PSR'],sem:''},{i:'1',j:0,d:'10:30',f:'11:30',m:'Maths',cls:['BTMELEC'],sem:''},
-  {i:'2',j:1,d:'08:30',f:'09:30',m:'Maths-sciences',cls:['C1CAN'],sem:''},{i:'3',j:1,d:'10:30',f:'11:30',m:'Co-ens. maths',cls:['B1AGO1','B1AGO2'],sem:'A'},
-  {i:'4',j:1,d:'10:30',f:'11:30',m:'AP maths',cls:['B1AGO1','B1AGO2'],sem:'B'},{i:'5',j:3,d:'14:00',f:'16:00',m:'Sciences',cls:['B2MELEC'],sem:''}],rep:{},ponctuel:false,identique:false,termine:false};}
+  {i:'d0',j:0,d:'09:30',f:'10:30',m:'Maths',cls:['C2PSR'],sem:''},{i:'d1',j:0,d:'10:30',f:'11:30',m:'Maths',cls:['BTMELEC'],sem:''},
+  {i:'d2',j:1,d:'08:30',f:'09:30',m:'Maths-sciences',cls:['C1CAN'],sem:''},{i:'d3',j:1,d:'10:30',f:'11:30',m:'Co-ens. maths',cls:['B1AGO1','B1AGO2'],sem:'A'},
+  {i:'d4',j:1,d:'10:30',f:'11:30',m:'AP maths',cls:['B1AGO1','B1AGO2'],sem:'B'},{i:'d5',j:3,d:'14:00',f:'16:00',m:'Sciences',cls:['B2MELEC'],sem:''}],rep:{},ponctuel:false,identique:false,termine:false};}
 
 async function empreinte(c){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('besoins-aesh:'+c));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+/* (relecture de Codex) la fiche est relue STRICTEMENT : jour entier de 0 à 4, identifiant propre et unique, oui/non vrais. Le reste est ignoré. */
 function nettoyer(d){
-  const cours=(Array.isArray(d.cours)?d.cours:[]).filter(c=>c&&c.i!=null&&c.j>=0&&c.j<=4).map(c=>({i:String(c.i),j:+c.j,d:String(c.d||''),f:String(c.f||''),m:String(c.m||''),cls:(Array.isArray(c.cls)?c.cls:[]).map(String),sem:c.sem==='A'||c.sem==='B'?c.sem:''}));
-  const rep={};Object.keys(d.rep||{}).forEach(k=>{const r=d.rep[k]||{},o={};if(bonAi(r.ai))o.ai=r.ai;if(bonFaut(r.faut))o.faut=r.faut;if('ai' in o||'faut' in o)rep[k]=o;});
-  return {cours,rep,ponctuel:!!d.ponctuel,identique:!!d.identique,termine:!!d.termine};
+  const vus={}, cours=[];
+  (Array.isArray(d.cours)?d.cours:[]).forEach(c=>{
+    if(!c||typeof c!=='object'||!BON_ID.test(String(c.i))||vus[c.i]||!Number.isInteger(c.j)||c.j<0||c.j>4)return;
+    vus[c.i]=1;cours.push({i:String(c.i),j:c.j,d:String(c.d||''),f:String(c.f||''),m:String(c.m||''),cls:(Array.isArray(c.cls)?c.cls:[]).map(String),sem:c.sem==='A'||c.sem==='B'?c.sem:''});
+  });
+  const rep={}, brut=d.rep&&typeof d.rep==='object'?d.rep:{};
+  cours.forEach(c=>{const r=brut[c.i];if(!r||typeof r!=='object')return;const o={};if(bonAi(r.ai))o.ai=r.ai;if(bonFaut(r.faut))o.faut=r.faut;if('ai' in o||'faut' in o)rep[c.i]=o;});
+  return {cours,rep,ponctuel:d.ponctuel===true,identique:d.identique===true,termine:d.termine===true};
 }
+
+/* ---------- Ce qui n'est pas encore confirmé par la base ----------
+   (relecture de Codex) Un seul journal, gardé dans le téléphone : champ → { v: valeur, t: instant de la touche }.
+   Une ligne n'en sort que lorsque la base a confirmé CETTE valeur-là (même instant) : ni un rechargement en plein envoi, ni un second onglet,
+   ni une coupure ne font perdre une réponse. Au retour, une ligne plus ancienne que la dernière écriture en ligne n'est pas rejouée. */
+const CLE='besoins-aesh:'+CODE;
+let memoire={};                                   // repli si le téléphone refuse le stockage (navigation privée)
+function journal(){if(DEMO)return memoire;try{const j=JSON.parse(localStorage.getItem(CLE)||'{}');return j&&typeof j==='object'&&!Array.isArray(j)?j:{};}catch(e){return memoire;}}
+function garder(j){memoire=j;if(DEMO)return true;try{if(Object.keys(j).length)localStorage.setItem(CLE,JSON.stringify(j));else localStorage.removeItem(CLE);return true;}catch(e){return false;}}
+function champValide(k,v){
+  if(DRAPEAUX.indexOf(k)>=0)return typeof v==='boolean';
+  const m=/^rep\.([A-Za-z][A-Za-z0-9]{0,30})\.(ai|faut)$/.exec(k);
+  return !!m&&F.cours.some(c=>c.i===m[1])&&(m[2]==='ai'?bonAi(v):bonFaut(v));
+}
+function appliquer(k,v){if(DRAPEAUX.indexOf(k)>=0){F[k]=v;return;}const m=k.split('.');F.rep[m[1]]=Object.assign({},F.rep[m[1]],{[m[2]]:v});}
+const enAttente=()=>Object.keys(journal()).length>0;
+
 async function charger(){
   if(DEMO){F=demo();return 'ok';}
   if(CODE.length<8)return 'sans-code';
   try{
-    const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
-    FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
-    const db=FS.getFirestore(initializeApp(firebaseConfig,'besoins-aesh'));
-    ref=FS.doc(db,'coordination_sondages',SONDAGE,'fiches',await empreinte(CODE));
-    const d=await FS.getDoc(ref);
+    if(!FS){const {initializeApp}=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js');
+      FS=await import('https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js');
+      ref=FS.doc(FS.getFirestore(initializeApp(firebaseConfig,'besoins-aesh')),'coordination_sondages',SONDAGE,'fiches',await empreinte(CODE));}
+    const d=await FS.getDocFromServer(ref);
     if(!d.exists())return 'inconnu';
-    F=nettoyer(d.data());
-    /* ce qui n'avait pas pu partir la dernière fois (téléphone sans réseau) */
-    try{const att=JSON.parse(localStorage.getItem('besoins-aesh:'+CODE)||'null');if(att&&att.rep){Object.keys(att.rep).forEach(k=>{F.rep[k]=Object.assign({},F.rep[k],att.rep[k]);});file=att;envoyer();}}catch(e){}
+    const brut=d.data();F=nettoyer(brut);serveurLe=typeof brut.majLe==='string'?brut.majLe:'';
+    /* ce qui n'avait pas pu partir la dernière fois : rejoué seulement si c'est plus récent que la fiche en ligne */
+    const j=journal(), garde={};
+    Object.keys(j).forEach(k=>{const x=j[k];if(!x||typeof x.t!=='string'||!champValide(k,x.v))return;if(serveurLe&&x.t<=serveurLe)return;garde[k]={v:x.v,t:x.t};appliquer(k,x.v);});
+    garder(garde);
     return 'ok';
   }catch(e){console.warn(e);return 'hors-ligne';}
 }
 
-/* ---------- Enregistrement : chaque touche part tout de suite ; en cas d'échec on réessaie, rien n'est perdu ---------- */
-let file={rep:{}}, enVol=false, essais=0;
-function dire(t,c){etat={t,c};const e=$('#etat');if(e){e.textContent=t;e.className='etat '+c;}}
+/* ---------- Enregistrement : chaque touche part tout de suite ---------- */
+let enVol=false, essais=0, bloque=false;
+function dire(t,c){etat={t,c};const e=$('#etat');if(e){e.textContent=t;e.className='etat '+c;}if(vue==='merci')rendre();}
 function noter(champs){
-  if(champs.rep)Object.keys(champs.rep).forEach(k=>{file.rep[k]=Object.assign({},file.rep[k],champs.rep[k]);});
-  ['ponctuel','identique','termine'].forEach(k=>{if(k in champs)file[k]=champs[k];});
-  try{if(!DEMO)localStorage.setItem('besoins-aesh:'+CODE,JSON.stringify(file));}catch(e){}
+  const j=journal(), t=new Date().toISOString();
+  Object.keys(champs).forEach(k=>{j[k]={v:champs[k],t};});
+  if(!garder(j)&&!DEMO)console.warn('stockage local refusé');
   envoyer();
 }
+function attendre(p,ms){return Promise.race([p,new Promise((_,ko)=>setTimeout(()=>ko(Object.assign(new Error('délai'),{code:'delai'})),ms))]);}
 async function envoyer(){
-  if(DEMO){dire('Démonstration','att');return;}
-  if(enVol||!ref)return;
-  const lot=file;if(!Object.keys(lot.rep).length&&!('ponctuel' in lot)&&!('identique' in lot)&&!('termine' in lot))return;
-  file={rep:{}};enVol=true;dire('Enregistrement…','att');
-  const maj={majLe:new Date().toISOString()};
-  Object.keys(lot.rep).forEach(k=>{const r=lot.rep[k];if('ai' in r)maj['rep.'+k+'.ai']=r.ai;if('faut' in r)maj['rep.'+k+'.faut']=r.faut;});
-  ['ponctuel','identique','termine'].forEach(k=>{if(k in lot)maj[k]=lot[k];});
+  if(DEMO){garder({});dire('Démonstration','att');return;}
+  if(enVol||!ref||bloque)return;
+  const lot=journal(), cles=Object.keys(lot).filter(k=>champValide(k,lot[k]&&lot[k].v));
+  if(!cles.length){if(Object.keys(lot).length)garder({});return;}
+  enVol=true;dire('Enregistrement…','att');
+  const maj={majLe:new Date().toISOString()};cles.forEach(k=>{maj[k]=lot[k].v;});
   try{
-    await FS.updateDoc(ref,maj);
-    enVol=false;essais=0;
-    const reste=Object.keys(file.rep).length||('ponctuel' in file)||('identique' in file)||('termine' in file);
-    if(reste)envoyer();else{try{localStorage.removeItem('besoins-aesh:'+CODE);}catch(e){}dire('Enregistré ✓','ok');}
+    await attendre(FS.updateDoc(ref,maj),12000);
+    enVol=false;essais=0;serveurLe=maj.majLe;
+    const j=journal();cles.forEach(k=>{if(j[k]&&j[k].t===lot[k].t)delete j[k];});garder(j);   // seulement ce que la base vient de confirmer
+    if(Object.keys(j).length)envoyer();else dire('Enregistré ✓','ok');
   }catch(e){
     console.warn(e);enVol=false;
-    /* on remet le lot devant ce qui a été touché depuis */
-    const neuf=file;file=lot;Object.keys(neuf.rep).forEach(k=>{file.rep[k]=Object.assign({},file.rep[k],neuf.rep[k]);});['ponctuel','identique','termine'].forEach(k=>{if(k in neuf)file[k]=neuf[k];});
-    try{localStorage.setItem('besoins-aesh:'+CODE,JSON.stringify(file));}catch(x){}
+    if(['permission-denied','not-found','invalid-argument','failed-precondition'].indexOf(e&&e.code)>=0){bloque=true;dire('Enregistrement impossible : rechargez la page','ko');return;}
     essais++;dire('Pas de réseau : nouvel essai…','ko');setTimeout(envoyer,Math.min(15000,1500*essais));
   }
 }
-window.addEventListener('online',()=>envoyer());
+window.addEventListener('online',()=>{if(F)envoyer();else demarrer();});
+window.addEventListener('storage',e=>{if(e.key===CLE&&F)envoyer();});
 
 /* ---------- Affichage ---------- */
 const fait=c=>{const r=F.rep[c.i];return !!r&&bonAi(r.ai)&&bonFaut(r.faut);};
@@ -190,26 +214,31 @@ function bilan(r){
   if(m<0)return [(-m)+' en trop','tro'];
   return r.ai===0?null:['C’est bon','bon'];
 }
-function seg(c,cle,opts,cl){
+function seg(c,cle,opts,cl,nom){
   const r=F.rep[c.i]||{};
-  return '<div class="seg '+cl+'" role="group">'+opts.map(o=>'<button type="button" class="'+(o[0].length>1?'lg ':'')+(o[1]==='p'?'p ':'')+(r[cle]===o[1]?'on':'')+'" data-c="'+esc(c.i)+'" data-k="'+cle+'" data-v="'+o[1]+'" aria-pressed="'+(r[cle]===o[1])+'">'+o[0]+'</button>').join('')+'</div>';
+  return '<div class="seg '+cl+'" role="group" aria-label="'+esc(nom+' — '+c.cls.join(' + ')+', '+heure(c.d))+'">'+opts.map(o=>'<button type="button" class="'+(o[0].length>1?'lg ':'')+(o[1]==='p'?'p ':'')+(r[cle]===o[1]?'on':'')+'" data-c="'+esc(c.i)+'" data-k="'+cle+'" data-v="'+o[1]+'" aria-pressed="'+(r[cle]===o[1])+'">'+o[0]+'</button>').join('')+'</div>';
 }
 function carte(c){
   const r=F.rep[c.i]||{}, titre=esc(c.cls.join(' + ')), hr=esc(heure(c.d)+' – '+heure(c.f)), ab=c.sem?'<span class="ab">Semaine '+c.sem+'</span>':'';
   if(fait(c)&&ouvert[c.i]!==true){
     const b=bilan(r);
-    return '<div class="carte repli" data-ouvrir="'+esc(c.i)+'" role="button" tabindex="0"><div class="h"><span class="cl">'+titre+'</span>'+(b?'<span class="pil '+b[1]+'">'+b[0]+'</span>':'<span class="hr">'+hr+'</span>')+'</div>'+
-      '<div class="res"><span>'+esc(c.m)+ab+' · j’ai '+dit(r.ai)+', il m’en faut '+dit(r.faut)+'</span><u>Modifier</u></div></div>';
+    /* (relecture de Codex) l'heure reste visible sur la carte repliée : deux cours de la même classe le même jour se distinguent */
+    return '<div class="carte repli" data-ouvrir="'+esc(c.i)+'" role="button" tabindex="0" aria-label="'+esc('Modifier '+c.cls.join(' + ')+', '+heure(c.d))+'"><div class="h"><span class="cl">'+titre+'</span>'+(b?'<span class="pil '+b[1]+'">'+b[0]+'</span>':'')+'</div>'+
+      '<div class="ma">'+hr+' · '+esc(c.m)+ab+'</div><div class="res"><span>J’ai '+dit(r.ai)+' · il m’en faut '+dit(r.faut)+'</span><u>Modifier</u></div></div>';
   }
   return '<div class="carte"><div class="h"><span class="cl">'+titre+'</span><span class="hr">'+hr+'</span></div><div class="ma">'+esc(c.m)+ab+'</div>'+
-    '<div class="lib">J’ai</div>'+seg(c,'ai',[['Aucune',0],['Parfois','p'],['1',1],['2',2],['3',3]],'a')+
-    '<div class="lib">Il m’en faut</div>'+seg(c,'faut',[['Aucune',0],['1',1],['2',2],['3',3],['4',4]],'f')+'</div>';
+    '<div class="lib">J’ai</div>'+seg(c,'ai',[['Aucune',0],['Parfois','p'],['1',1],['2',2],['3',3]],'a','J’ai')+
+    '<div class="lib">Il m’en faut</div>'+seg(c,'faut',[['Aucune',0],['1',1],['2',2],['3',3],['4',4]],'f','Il m’en faut')+'</div>';
 }
-function rendre(){
+function rendre(retour){
   if(vue==='merci'){
-    $('#sous').textContent='Merci pour votre réponse.';
-    app.innerHTML='<div class="fin"><div class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2>Merci, c’est enregistré</h2>'+
-      '<p>Vos besoins sont transmis à la coordination.</p><p>Vous pouvez modifier vos réponses à tout moment avec ce même lien.</p>'+
+    /* (relecture de Codex) « Merci » n'est affirmé qu'une fois TOUT confirmé par la base ; avant, on dit que l'envoi est en cours */
+    const reste=enAttente()&&!DEMO;
+    $('#sous').textContent=reste?'Encore un instant…':'Merci pour votre réponse.';
+    app.innerHTML=reste?'<div class="fin"><h2>Envoi en cours…</h2><p role="status">'+esc(etat.c==='ko'?'Pas de réseau pour l’instant. Gardez cette page ouverte : l’envoi reprend tout seul.':'Vos réponses partent. Gardez cette page ouverte quelques secondes.')+'</p>'+
+      '<button type="button" class="gros clair" id="revoir">Revoir mes réponses</button></div>'+pied():
+      '<div class="fin"><div class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2>Merci, c’est enregistré</h2>'+
+      '<p role="status">Vos besoins sont transmis à la coordination.</p><p>Vous pouvez modifier vos réponses à tout moment avec ce même lien.</p>'+
       '<button type="button" class="gros clair" id="revoir">Revoir ou modifier mes réponses</button></div>'+pied();
     $('#revoir').onclick=()=>{vue='cours';animer=true;rendre();window.scrollTo(0,0);};
     return;
@@ -219,7 +248,7 @@ function rendre(){
   if(J.indexOf(jour)<0)jour=J[0];
   const liste=duJour(jour), plein=nbFaits(liste)===liste.length, suivant=J.filter(j=>j!==jour&&nbFaits(duJour(j))<duJour(j).length)[0];
   let h='<div class="suivi"><div class="jauge"><div class="l"><span>'+(tout?'<b>Tout est renseigné</b>':'<b>'+n+'</b> cours sur '+total)+'</span><span id="etat" class="etat '+etat.c+'" role="status">'+esc(etat.t)+'</span></div><div class="rail"><i style="width:'+Math.round(n/total*100)+'%"></i></div></div></div>';
-  h+='<div class="jours" role="tablist">'+J.map(j=>{const l=duJour(j),k=nbFaits(l),p=k===l.length;return '<button type="button" role="tab" aria-selected="'+(j===jour)+'" class="'+(j===jour?'on':p?'plein':'')+'" data-jour="'+j+'" aria-label="'+JN[j]+', '+k+' cours sur '+l.length+'"><b>'+JC[j]+'</b><span>'+(p?'✓':k+'/'+l.length)+'</span></button>';}).join('')+'</div>';
+  h+='<div class="jours">'+J.map(j=>{const l=duJour(j),k=nbFaits(l),p=k===l.length;return '<button type="button" aria-pressed="'+(j===jour)+'" class="'+(j===jour?'on':p?'plein':'')+'" data-jour="'+j+'" aria-label="'+JN[j]+', '+k+' cours sur '+l.length+'"><b>'+JC[j]+'</b><span>'+(p?'✓':k+'/'+l.length)+'</span></button>';}).join('')+'</div>';
   h+='<h2 class="sr">'+JN[jour]+'</h2><div class="'+(animer?'anime':'')+'">'+liste.map(carte).join('')+'</div>';animer=false;
   h+='<p class="aide">« Parfois » : une AESH vient, mais pas à chaque fois. · Touchez « Aucune » si vous n’en avez pas ou n’en voulez pas.</p>';
   if(plein&&suivant!=null&&!tout)h+='<button type="button" class="gros" id="suite">'+JN[suivant]+' →</button>';
@@ -228,28 +257,44 @@ function rendre(){
     '<label class="coche"><input type="checkbox" id="identique"'+(F.identique?' checked':'')+'><span>De préférence toujours la même AESH</span></label></div>'+
     '<button type="button" class="gros" id="terminer">Terminer</button>';
   app.innerHTML=h+pied();
-  app.querySelectorAll('[data-jour]').forEach(b=>b.onclick=()=>{jour=+b.dataset.jour;animer=true;rendre();});
+  app.querySelectorAll('[data-jour]').forEach(b=>b.onclick=()=>{jour=+b.dataset.jour;animer=true;rendre('[data-jour="'+jour+'"]');});
   app.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
     const i=b.dataset.c,k=b.dataset.k,v=b.dataset.v==='p'?'p':+b.dataset.v;
-    if((k==='ai'&&!bonAi(v))||(k==='faut'&&!bonFaut(v)))return;
+    if(!F.cours.some(x=>x.i===i)||(k==='ai'&&!bonAi(v))||(k==='faut'&&!bonFaut(v))||(k!=='ai'&&k!=='faut'))return;
     F.rep[i]=Object.assign({},F.rep[i],{[k]:v});
-    const c=F.cours.find(x=>x.i===i);if(c&&fait(c))ouvert[i]=false;
-    noter({rep:{[i]:{[k]:v}}});rendre();
+    const c=F.cours.find(x=>x.i===i), replie=c&&fait(c);if(replie)ouvert[i]=false;
+    noter({['rep.'+i+'.'+k]:v});
+    /* (relecture de Codex) le clavier et les lecteurs d'écran gardent leur place après le redessin */
+    rendre(replie?'[data-ouvrir="'+i+'"]':'.seg button[data-c="'+i+'"][data-k="'+k+'"][data-v="'+b.dataset.v+'"]');
   });
-  app.querySelectorAll('[data-ouvrir]').forEach(d=>{const o=()=>{ouvert[d.dataset.ouvrir]=true;rendre();};d.onclick=o;d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();o();}};});
+  app.querySelectorAll('[data-ouvrir]').forEach(d=>{const o=()=>{const i=d.dataset.ouvrir;ouvert[i]=true;rendre('.seg button[data-c="'+i+'"]');};d.onclick=o;d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();o();}};});
   const s=$('#suite');if(s)s.onclick=()=>{jour=suivant;animer=true;rendre();window.scrollTo({top:0,behavior:'smooth'});};
-  ['ponctuel','identique'].forEach(k=>{const z=$('#'+k);if(z)z.onchange=()=>{F[k]=z.checked;noter({[k]:z.checked});};});
-  const t=$('#terminer');if(t)t.onclick=()=>{F.termine=true;noter({termine:true});vue='merci';rendre();window.scrollTo(0,0);};
+  DRAPEAUX.slice(0,2).forEach(k=>{const z=$('#'+k);if(z)z.onchange=()=>{F[k]=z.checked;noter({[k]:z.checked});};});
+  const t=$('#terminer');if(t)t.onclick=()=>{F.termine=true;vue='merci';noter({termine:true});rendre();window.scrollTo(0,0);};
+  if(retour){const e=app.querySelector(retour);if(e)try{e.focus({preventScroll:true});}catch(x){}}
 }
 function pied(){return '<p class="pied">Aucun nom n’est enregistré en ligne : seulement vos classes, vos horaires et vos réponses.<br>Une question ? Adressez-vous au référent de votre pôle.</p>';}
-function message(t,p){$('#sous').textContent='';app.innerHTML='<div class="info"><h2>'+t+'</h2><p>'+p+'</p></div>';}
+function message(t,p,bouton){$('#sous').textContent='';app.innerHTML='<div class="info"><h2>'+t+'</h2><p>'+p+'</p>'+(bouton?'<button type="button" class="gros" id="encore">Réessayer</button>':'')+'</div>';const b=$('#encore');if(b)b.onclick=demarrer;}
 
-const r=await charger();
-if(r==='ok'&&F.cours.length){if(F.termine&&nbFaits(F.cours)===F.cours.length)vue='merci';const J=joursUtiles();jour=J.filter(j=>nbFaits(duJour(j))<duJour(j).length)[0];if(jour==null)jour=J[0];if(DEMO)etat={t:'Démonstration',c:'att'};rendre();}
-else if(r==='ok')message('Aucun cours à renseigner','Votre emploi du temps ne contient pas de cours pour cette enquête.');
-else if(r==='sans-code')message('Lien incomplet','Ouvrez le lien reçu par mail, en entier. Il est personnel.');
-else if(r==='inconnu')message('Lien inconnu','Ce lien n’est pas reconnu. Vérifiez qu’il est complet, ou demandez-le au référent de votre pôle.');
-else message('Pas de connexion','Impossible de charger vos cours. Vérifiez votre connexion, puis rechargez la page.');
+let enCours=false;
+async function demarrer(){
+  if(enCours)return;enCours=true;
+  try{
+    const r=await charger();
+    if(r==='ok'&&F.cours.length){
+      if(F.termine&&nbFaits(F.cours)===F.cours.length)vue='merci';
+      const J=joursUtiles();jour=J.filter(j=>nbFaits(duJour(j))<duJour(j).length)[0];if(jour==null)jour=J[0];
+      if(DEMO)etat={t:'Démonstration',c:'att'};
+      rendre();if(enAttente())envoyer();
+    }
+    else if(r==='ok')message('Aucun cours à renseigner','Votre emploi du temps ne contient pas de cours pour cette enquête.');
+    else if(r==='sans-code')message('Lien incomplet','Ouvrez le lien reçu par mail, en entier. Il est personnel.');
+    else if(r==='inconnu')message('Lien inconnu','Ce lien n’est pas reconnu. Vérifiez qu’il est complet, ou demandez-le au référent de votre pôle.');
+    /* (relecture de Codex) sans réseau, on peut réessayer : ce qui a déjà été touché est gardé dans le téléphone et repartira */
+    else message('Pas de connexion','Impossible de charger vos cours pour l’instant. Ce que vous avez déjà répondu est gardé. La page réessaie dès que le réseau revient.',true);
+  }finally{enCours=false;}
+}
+demarrer();
 </script>
 </body>
 </html>
