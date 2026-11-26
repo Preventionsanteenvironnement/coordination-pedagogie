@@ -86,6 +86,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tous p{margin:0 0 8px;font-size:13px;color:var(--doux)}
 .coche{display:flex;gap:11px;align-items:flex-start;padding:10px 0;font-size:14.5px;border-top:1px solid var(--ligne);cursor:pointer}
 .coche input{flex:none;width:22px;height:22px;margin:0;accent-color:#2fbfa0}
+.note{border-top:1px solid var(--ligne);padding-top:12px}
+.note label{display:block;font-size:14.5px;font-weight:700;margin-bottom:6px}.note label small{font-weight:500;color:var(--pale)}
+.note textarea{display:block;width:100%;border:1.5px solid var(--ligne);border-radius:12px;background:var(--creux);color:var(--texte);font:inherit;font-size:16px;padding:10px 12px;resize:vertical}
+.note textarea:focus{outline:2px solid var(--ciel);outline-offset:1px}
+.note p{margin:6px 0 0;font-size:12.5px;color:var(--pale)}
 .fin{text-align:center;padding:34px 8px 10px;animation:monte .35s}
 .rond{width:84px;height:84px;border-radius:50%;margin:0 auto 16px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px -12px rgba(59,139,235,.8)}
 .rond svg{width:42px;height:42px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:trace .5s .15s forwards}
@@ -121,7 +126,7 @@ let jour=0, ouvert={}, vue='cours', etat={t:'',c:'att'}, animer=true;   // anime
 function demo(){return {cours:[
   {i:'d0',j:0,d:'09:30',f:'10:30',m:'Maths',cls:['C2PSR'],sem:''},{i:'d1',j:0,d:'10:30',f:'11:30',m:'Maths',cls:['BTMELEC'],sem:''},
   {i:'d2',j:1,d:'08:30',f:'09:30',m:'Maths-sciences',cls:['C1CAN'],sem:''},{i:'d3',j:1,d:'10:30',f:'11:30',m:'Co-ens. maths',cls:['B1AGO1','B1AGO2'],sem:'A'},
-  {i:'d4',j:1,d:'10:30',f:'11:30',m:'AP maths',cls:['B1AGO1','B1AGO2'],sem:'B'},{i:'d5',j:3,d:'14:00',f:'16:00',m:'Sciences',cls:['B2MELEC'],sem:''}],rep:{},ponctuel:false,identique:false,termine:false};}
+  {i:'d4',j:1,d:'10:30',f:'11:30',m:'AP maths',cls:['B1AGO1','B1AGO2'],sem:'B'},{i:'d5',j:3,d:'14:00',f:'16:00',m:'Sciences',cls:['B2MELEC'],sem:''}],rep:{},ponctuel:false,identique:false,termine:false,note:''};}
 
 async function empreinte(c){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('besoins-aesh:'+c));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 /* (relecture de Codex) la fiche est relue STRICTEMENT : jour entier de 0 à 4, identifiant propre et unique, oui/non vrais. Le reste est ignoré. */
@@ -133,7 +138,7 @@ function nettoyer(d){
   });
   const rep={}, brut=d.rep&&typeof d.rep==='object'?d.rep:{};
   cours.forEach(c=>{const r=brut[c.i];if(!r||typeof r!=='object')return;const o={};if(bonAi(r.ai))o.ai=r.ai;if(bonFaut(r.faut))o.faut=r.faut;if('ai' in o||'faut' in o)rep[c.i]=o;});
-  return {cours,rep,ponctuel:d.ponctuel===true,identique:d.identique===true,termine:d.termine===true};
+  return {cours,rep,ponctuel:d.ponctuel===true,identique:d.identique===true,termine:d.termine===true,note:typeof d.note==='string'?d.note.slice(0,200):''};
 }
 
 /* ---------- Ce qui n'est pas encore confirmé par la base ----------
@@ -149,10 +154,11 @@ function garder(j){memoire=j;if(sansStockage)return;try{if(Object.keys(j).length
 function sousVerrou(fn){return navigator.locks&&navigator.locks.request?navigator.locks.request(CLE,fn):Promise.resolve().then(fn);}
 function champValide(k,v){
   if(DRAPEAUX.indexOf(k)>=0)return typeof v==='boolean';
+  if(k==='note')return typeof v==='string'&&v.length<=200;       /* 26/11/2026 (Brahim) : une précision libre, à la fin, facultative */
   const m=/^rep\.([A-Za-z][A-Za-z0-9]{0,30})\.(ai|faut)$/.exec(k);
   return !!m&&F.cours.some(c=>c.i===m[1])&&(m[2]==='ai'?bonAi(v):bonFaut(v));
 }
-function appliquer(k,v){if(DRAPEAUX.indexOf(k)>=0){F[k]=v;return;}const m=k.split('.');F.rep[m[1]]=Object.assign({},F.rep[m[1]],{[m[2]]:v});}
+function appliquer(k,v){if(DRAPEAUX.indexOf(k)>=0||k==='note'){F[k]=v;return;}const m=k.split('.');F.rep[m[1]]=Object.assign({},F.rep[m[1]],{[m[2]]:v});}
 /* l'instant de la dernière touche connue de la base, pour un champ */
 function instantEnBase(brut,k){let o=brut;const ch=(k+'Le').split('.');for(const x of ch){if(!o||typeof o!=='object')return '';o=o[x];}return typeof o==='string'?o:'';}
 const ligneBonne=(k,x)=>!!x&&typeof x.t==='string'&&typeof x.n==='string'&&champValide(k,x.v);
@@ -274,7 +280,8 @@ function rendre(retour){
   if(plein&&suivant!=null&&!tout)h+='<button type="button" class="gros" id="suite">'+JN[suivant]+' →</button>';
   if(tout)h+='<div class="tous"><h2>Pour tous vos cours</h2><p>Facultatif. Vous pouvez cocher les deux.</p>'+
     '<label class="coche"><input type="checkbox" id="ponctuel"'+(F.ponctuel?' checked':'')+'><span>J’accepte une AESH ponctuelle, même d’une autre filière</span></label>'+
-    '<label class="coche"><input type="checkbox" id="identique"'+(F.identique?' checked':'')+'><span>De préférence toujours la même AESH</span></label></div>'+
+    '<label class="coche"><input type="checkbox" id="identique"'+(F.identique?' checked':'')+'><span>De préférence toujours la même AESH</span></label>'+
+    '<div class="note"><label for="note">Une précision ? <small>(facultatif)</small></label><textarea id="note" rows="3" maxlength="200" placeholder="Par exemple : le jeudi, surtout pendant les TP">'+esc(F.note)+'</textarea><p>Sans nom d’élève ni d’AESH. <span id="reste">'+(200-F.note.length)+'</span> caractères restants.</p></div></div>'+
     '<button type="button" class="gros" id="terminer">Terminer</button>';
   app.innerHTML=h+pied();
   app.querySelectorAll('[data-jour]').forEach(b=>b.onclick=()=>{jour=+b.dataset.jour;animer=true;rendre('[data-jour="'+jour+'"]');});
@@ -290,7 +297,10 @@ function rendre(retour){
   app.querySelectorAll('[data-ouvrir]').forEach(d=>{const o=()=>{const i=d.dataset.ouvrir;ouvert[i]=true;rendre('.seg button[data-c="'+i+'"]');};d.onclick=o;d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();o();}};});
   const s=$('#suite');if(s)s.onclick=()=>{jour=suivant;animer=true;rendre();window.scrollTo({top:0,behavior:'smooth'});};
   DRAPEAUX.slice(0,2).forEach(k=>{const z=$('#'+k);if(z)z.onchange=()=>{F[k]=z.checked;noter({[k]:z.checked});};});
-  const t=$('#terminer');if(t)t.onclick=()=>{F.termine=true;vue='merci';noter({termine:true});rendre();window.scrollTo(0,0);};
+  const zn=$('#note');let tn=null;
+  const garderNote=()=>{clearTimeout(tn);const v=zn.value.slice(0,200);if(v!==F.note){F.note=v;noter({note:v});}};
+  if(zn){zn.oninput=()=>{$('#reste').textContent=200-zn.value.length;clearTimeout(tn);tn=setTimeout(garderNote,1200);};zn.onblur=garderNote;}
+  const t=$('#terminer');if(t)t.onclick=()=>{if(zn)garderNote();F.termine=true;vue='merci';noter({termine:true});rendre();window.scrollTo(0,0);};
   if(retour){const e=app.querySelector(retour);if(e)try{e.focus({preventScroll:true});}catch(x){}}
 }
 function pied(){return '<p class="pied">Aucun nom n’est enregistré en ligne : seulement vos classes, vos horaires et vos réponses.<br>Une question ? Adressez-vous au référent de votre pôle.</p>';}
