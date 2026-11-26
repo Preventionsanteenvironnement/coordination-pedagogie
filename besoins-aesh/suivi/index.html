@@ -34,6 +34,10 @@ button:active{transform:scale(.98)}button:disabled{opacity:.6}
 @media (prefers-color-scheme:dark){button{background:var(--ciel)}}
 .note{font-size:12.5px;color:var(--pale);text-align:center;line-height:1.5;margin:14px 4px 0}.err{color:var(--rouge)}
 h2{margin:0 0 10px;font-size:15.5px;font-weight:800}.ligne{display:flex;justify-content:space-between;font-size:14.5px;padding:7px 0;border-top:1px solid var(--ligne)}.ligne span{color:var(--doux)}
+.duo{display:flex;align-items:center;gap:14px;text-align:left}.duo svg{flex:none}
+.leg{flex:1;min-width:0;font-size:13.5px}.leg div{white-space:nowrap}.leg div{display:flex;align-items:center;gap:7px;padding:3px 0}.leg i{flex:none;width:11px;height:11px;border-radius:3px}.leg b{font-weight:800}.leg em{margin-left:auto;font-style:normal;color:var(--doux);font-weight:700;font-size:13px}.leg p{margin:6px 0 0;font-size:12.5px;color:var(--pale)}
+.bl{display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 0}.bn{flex:none;width:78px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bt{flex:1;height:14px;border-radius:7px;background:var(--creux);overflow:hidden}.bt i{display:block;height:14px;border-radius:7px;transition:width .4s}.bl b{flex:none;width:26px;text-align:right}
+.ligne:first-of-type{border-top:0}.rail{margin-top:2px}
 </style>
 </head>
 <body>
@@ -50,32 +54,57 @@ function tranches(c){const d=mn(c.d),f=mn(c.f);if(!(f-d>=60)||f-d>540)return 0;r
 function fait(c,r){if(!r||typeof r!=='object')return false;const n=tranches(c);
   if(r.detail===true&&n){for(let i=0;i<n;i++)if([0,1,2,3].indexOf(r['aiH'+i])<0||[0,1,2,3,4].indexOf(r['fautH'+i])<0)return false;return true;}
   return [0,'p',1,2,3].indexOf(r.ai)>=0&&[0,1,2,3,4].indexOf(r.faut)>=0;}
+const JN=['Lun','Mar','Mer','Jeu','Ven'];
+const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* Ce que dit une réponse : manque (nombre d'AESH), nature. Heure par heure : le plus grand manque du cours. */
+function lecture(c,r){const n=tranches(c);
+  if(r.detail===true&&n){let m=0,t=0,la=0;for(let i=0;i<n;i++){const d=r['fautH'+i]-r['aiH'+i];if(d>0)m=Math.max(m,d);if(d<0)t=Math.max(t,-d);la+=r['aiH'+i];}return {manque:m,nature:m?'man':t?'tro':la?'bon':'rien'};}
+  if(r.ai==='p')return {manque:0,nature:r.faut>0?'irr':'rien'};
+  const d=r.faut-r.ai;return {manque:Math.max(0,d),nature:d>0?'man':d<0?'tro':r.ai?'bon':'rien'};}
 async function compter(){
   let docs=[],jeton='';
   do{const r=await fetch(BASE+'?pageSize=300&key='+CLE+(jeton?'&pageToken='+encodeURIComponent(jeton):''),{cache:'no-store'});if(!r.ok)throw new Error('réponse '+r.status);const j=await r.json();docs=docs.concat(j.documents||[]);jeton=j.nextPageToken||'';}while(jeton);
-  const S={total:0,termine:0,encours:0,rien:0,coursFaits:0,coursTotal:0,dernier:''};
+  const S={total:0,termine:0,encours:0,rien:0,coursFaits:0,coursTotal:0,dernier:'',nat:{bon:0,man:0,irr:0,tro:0,rien:0},manque:0,jours:[0,0,0,0,0],classes:{},ponctuel:0,identique:0,notes:0};
   docs.forEach(d=>{if(ESSAIS.indexOf(d.name.split('/').pop())>=0)return;
     const f={};Object.keys(d.fields||{}).forEach(k=>f[k]=lire(d.fields[k]));
-    const cours=(Array.isArray(f.cours)?f.cours:[]).filter(c=>c&&typeof c==='object'&&c.i!=null),rep=f.rep&&typeof f.rep==='object'?f.rep:{};
+    const cours=(Array.isArray(f.cours)?f.cours:[]).filter(c=>c&&typeof c==='object'&&c.i!=null&&Number.isInteger(c.j)&&c.j>=0&&c.j<=4),rep=f.rep&&typeof f.rep==='object'?f.rep:{};
     if(!cours.length)return;
-    const n=cours.filter(c=>fait(c,rep[c.i])).length;
+    let n=0;
+    cours.forEach(c=>{const r=rep[c.i];if(!fait(c,r))return;n++;const L=lecture(c,r);S.nat[L.nature]++;
+      if(L.manque){S.manque+=L.manque;S.jours[c.j]+=L.manque;(Array.isArray(c.cls)?c.cls:[]).forEach(k=>{k=String(k).slice(0,12);S.classes[k]=(S.classes[k]||0)+L.manque;});}});
     S.total++;S.coursTotal+=cours.length;S.coursFaits+=n;
     if(f.termine===true&&n===cours.length)S.termine++;else if(n)S.encours++;else S.rien++;
+    if(n){if(f.ponctuel===true)S.ponctuel++;if(f.identique===true)S.identique++;if(typeof f.note==='string'&&f.note.trim())S.notes++;}
     if(n&&typeof f.majLe==='string'&&f.majLe>S.dernier)S.dernier=f.majLe;});
   return S;
 }
 const pct=(a,b)=>b?Math.round(a/b*100):0;
-function quand(iso){if(!iso)return 'aucune pour l’instant';const d=new Date(iso);if(isNaN(d))return '—';return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+function quand(iso){if(!iso)return 'aucune pour l’instant';const d=new Date(iso);if(isNaN(d))return '—';return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'})+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+/* Anneau : parts successives, dessinées en arcs (aucune bibliothèque). */
+function anneau(parts,centre,sous){const R=54,C=2*Math.PI*R,tot=parts.reduce((t,p)=>t+p[0],0);let dec=0,arcs='';
+  parts.forEach(p=>{if(!p[0]||!tot)return;const l=p[0]/tot*C;arcs+='<circle cx="70" cy="70" r="'+R+'" fill="none" stroke="'+p[1]+'" stroke-width="16" stroke-dasharray="'+l.toFixed(2)+' '+(C-l).toFixed(2)+'" stroke-dashoffset="'+(-dec).toFixed(2)+'" transform="rotate(-90 70 70)"/>';dec+=l;});
+  return '<svg viewBox="0 0 140 140" width="128" height="128" role="img" aria-label="'+esc(centre+' '+sous)+'"><circle cx="70" cy="70" r="'+R+'" fill="none" stroke="var(--creux)" stroke-width="16"/>'+arcs+
+    '<text x="70" y="68" text-anchor="middle" font-size="30" font-weight="800" fill="var(--texte)">'+esc(centre)+'</text><text x="70" y="88" text-anchor="middle" font-size="11" font-weight="600" fill="var(--doux)">'+esc(sous)+'</text></svg>';}
+function barres(lignes,coul){const max=Math.max(1,...lignes.map(l=>l[1]));return lignes.map(l=>'<div class="bl"><span class="bn">'+esc(l[0])+'</span><span class="bt"><i style="width:'+Math.round(l[1]/max*100)+'%;background:'+coul+'"></i></span><b>'+l[1]+'</b></div>').join('');}
 async function afficher(){
   const b=document.querySelector('#actu');if(b){b.disabled=true;b.textContent='Actualisation…';}
   try{
-    const S=await compter(), h=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    app.innerHTML='<div class="carte un"><div class="gros">'+S.termine+'<small> / '+S.total+'</small></div><p>enseignants ont terminé</p>'+
-      '<div class="rail" role="img" aria-label="'+S.termine+' terminées, '+S.encours+' en cours, '+S.rien+' sans réponse"><i style="width:'+pct(S.termine,S.total)+'%;background:#2fbfa0"></i><i style="width:'+pct(S.encours,S.total)+'%;background:#e0972a"></i></div></div>'+
-      '<div class="carte"><div class="trois"><div class="t"><b>'+S.termine+'</b><span>Terminé</span></div><div class="c"><b>'+S.encours+'</b><span>En cours</span></div><div class="r"><b>'+S.rien+'</b><span>Sans réponse</span></div></div></div>'+
-      '<div class="carte"><h2>En détail</h2><div class="ligne"><span>Cours renseignés</span><b>'+S.coursFaits+' sur '+S.coursTotal+'</b></div><div class="ligne"><span>Dernière réponse</span><b>'+quand(S.dernier)+'</b></div><div class="ligne"><span>Actualisé à</span><b>'+h+'</b></div></div>'+
-      '<button type="button" id="actu">Actualiser</button><p class="note">Des nombres seulement : aucun nom n’est en ligne.<br>Pour savoir qui n’a pas répondu, demandez la relève sur le Mac.</p>';
-  }catch(e){app.innerHTML='<div class="carte un"><p class="err" role="alert">Impossible de lire les réponses pour l’instant. Vérifiez la connexion.</p></div><button type="button" id="actu">Réessayer</button>';}
+    const S=await compter(), h=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}), rep=S.termine+S.encours, N=S.nat, nf=S.coursFaits;
+    const cl=Object.keys(S.classes).map(k=>[k,S.classes[k]]).sort((x,y)=>y[1]-x[1]||x[0].localeCompare(y[0])).slice(0,10);
+    let h1='<div class="carte un"><div class="duo">'+anneau([[S.termine,'#2fbfa0'],[S.encours,'#e0972a'],[S.rien,'transparent']],pct(S.termine,S.total)+' %','ont terminé')+
+      '<div class="leg"><div><i style="background:#2fbfa0"></i><b>'+S.termine+'</b> terminé'+(S.termine>1?'s':'')+' <em>'+pct(S.termine,S.total)+' %</em></div><div><i style="background:#e0972a"></i><b>'+S.encours+'</b> en cours <em>'+pct(S.encours,S.total)+' %</em></div><div><i style="background:var(--creux)"></i><b>'+S.rien+'</b> sans réponse <em>'+pct(S.rien,S.total)+' %</em></div><p>sur '+S.total+' enseignants</p></div></div></div>';
+    h1+='<div class="carte"><h2>Avancement</h2><div class="ligne"><span>Enseignants ayant commencé</span><b>'+rep+' sur '+S.total+' · '+pct(rep,S.total)+' %</b></div><div class="rail"><i style="width:'+pct(rep,S.total)+'%;background:var(--grad)"></i></div>'+
+      '<div class="ligne" style="margin-top:12px"><span>Cours renseignés</span><b>'+nf+' sur '+S.coursTotal+' · '+pct(nf,S.coursTotal)+' %</b></div><div class="rail"><i style="width:'+pct(nf,S.coursTotal)+'%;background:var(--grad)"></i></div>'+
+      '<div class="ligne" style="margin-top:12px"><span>Dernière réponse</span><b>'+quand(S.dernier)+'</b></div></div>';
+    if(nf){
+      h1+='<div class="carte"><h2>Ce que disent les réponses</h2><div class="duo">'+anneau([[N.man,'#d8443a'],[N.irr,'#e0972a'],[N.bon,'#2fbfa0'],[N.tro,'#8a97a8'],[N.rien,'#c9d3e0']],String(S.manque),'AESH manquantes')+
+        '<div class="leg"><div><i style="background:#d8443a"></i><b>'+N.man+'</b> il en manque <em>'+pct(N.man,nf)+' %</em></div><div><i style="background:#e0972a"></i><b>'+N.irr+'</b> pas régulier <em>'+pct(N.irr,nf)+' %</em></div><div><i style="background:#2fbfa0"></i><b>'+N.bon+'</b> c’est bon <em>'+pct(N.bon,nf)+' %</em></div><div><i style="background:#8a97a8"></i><b>'+N.tro+'</b> en trop <em>'+pct(N.tro,nf)+' %</em></div><div><i style="background:#c9d3e0"></i><b>'+N.rien+'</b> aucun besoin <em>'+pct(N.rien,nf)+' %</em></div><p>sur '+nf+' cours renseignés</p></div></div></div>';
+      h1+='<div class="carte"><h2>AESH manquantes par jour</h2>'+barres(JN.map((j,i)=>[j,S.jours[i]]),'#d8443a')+'</div>';
+      if(cl.length)h1+='<div class="carte"><h2>Classes où il en manque le plus</h2>'+barres(cl,'#3b8beb')+'<p class="note" style="text-align:left;margin:8px 0 0">Un cours à plusieurs classes compte pour chacune.</p></div>';
+      h1+='<div class="carte"><h2>Préférences</h2><div class="ligne"><span>Acceptent une AESH ponctuelle</span><b>'+S.ponctuel+' sur '+rep+'</b></div><div class="ligne"><span>Préfèrent toujours la même</span><b>'+S.identique+' sur '+rep+'</b></div><div class="ligne"><span>Ont écrit une précision</span><b>'+S.notes+'</b></div></div>';
+    }
+    app.innerHTML=h1+'<button type="button" id="actu">Actualiser</button><p class="note">Actualisé à '+h+'. Des nombres seulement : aucun nom n’est en ligne.<br>Pour savoir qui n’a pas répondu, demandez la relève sur le Mac.</p>';
+  }catch(e){console.warn(e);app.innerHTML='<div class="carte un"><p class="err" role="alert">Impossible de lire les réponses pour l’instant. Vérifiez la connexion.</p></div><button type="button" id="actu">Réessayer</button>';}
   document.querySelector('#actu').onclick=afficher;
 }
 afficher();
