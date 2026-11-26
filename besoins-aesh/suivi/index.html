@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f2a4d">
+<meta name="robots" content="noindex,nofollow">
+<title>Besoins en AESH — suivi des réponses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- 26/11/2026 — Suivi des réponses « Besoins en AESH » (demande de Brahim : « j'actualise, et tu me dis combien de réponses il y a eu »).
+     Des NOMBRES seulement : aucun nom n'est en ligne. Qui a répondu se lit sur le Mac (relever.js). Lecture seule. -->
+<style>
+:root{--nuit:#0f2a4d;--ciel:#3b8beb;--texte:#14243a;--doux:#5b6b80;--pale:#8a97a8;--ligne:#e3e9f2;--carte:#fff;--fond:#f3f6fb;--creux:#eef2f8;
+ --vert:#12805c;--vert-f:#e2f6ee;--ambre:#9a5b06;--ambre-f:#fdf1dc;--gris-f:#eceff4;--rouge:#b42318;
+ --grad:linear-gradient(120deg,#2fbfa0 0%,#3b8beb 55%,#7c6cf0 100%);--ombre:0 10px 30px -14px rgba(15,42,77,.28),0 2px 6px -2px rgba(15,42,77,.08)}
+@media (prefers-color-scheme:dark){:root{--texte:#e9eef6;--doux:#a9b6c8;--pale:#7f8da1;--ligne:#26354b;--carte:#152338;--fond:#0b1626;--creux:#1c2c44;--vert:#5fd6a8;--vert-f:#10382b;--ambre:#f3bd62;--ambre-f:#3e2c0c;--gris-f:#223149;--rouge:#ff8f85;--ombre:0 10px 30px -14px rgba(0,0,0,.6)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;min-height:100%}
+body{font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--texte);background:var(--fond);font-size:16px;line-height:1.45}
+.tete{background:var(--nuit);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 16px 46px;position:relative}
+.tete:after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--grad)}
+.tete .in,.page{max-width:520px;margin:0 auto}.tete small{display:block;font-size:12.5px;opacity:.75}.tete h1{margin:4px 0 2px;font-size:23px;font-weight:800}.tete p{margin:0;font-size:14.5px;opacity:.88}
+.page{padding:0 16px calc(28px + env(safe-area-inset-bottom))}
+.carte{background:var(--carte);border-radius:18px;box-shadow:var(--ombre);padding:18px;margin-bottom:12px}
+.un{margin-top:-30px;position:relative;text-align:center}
+.gros{font-size:54px;font-weight:800;line-height:1;letter-spacing:-.02em}.gros small{font-size:22px;font-weight:700;color:var(--doux)}
+.un p{margin:6px 0 14px;color:var(--doux);font-size:15px}
+.rail{height:10px;border-radius:5px;background:var(--creux);overflow:hidden;display:flex}.rail i{display:block;height:10px;transition:width .4s}
+.trois{display:flex;gap:8px}.trois div{flex:1;border-radius:14px;padding:12px 6px;text-align:center}
+.trois b{display:block;font-size:26px;font-weight:800;line-height:1.1}.trois span{font-size:12.5px;font-weight:700}
+.t{background:var(--vert-f);color:var(--vert)}.c{background:var(--ambre-f);color:var(--ambre)}.r{background:var(--gris-f);color:var(--doux)}
+button{font:inherit;display:block;width:100%;height:52px;border:0;border-radius:15px;background:var(--nuit);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
+button:active{transform:scale(.98)}button:disabled{opacity:.6}
+@media (prefers-color-scheme:dark){button{background:var(--ciel)}}
+.note{font-size:12.5px;color:var(--pale);text-align:center;line-height:1.5;margin:14px 4px 0}.err{color:var(--rouge)}
+h2{margin:0 0 10px;font-size:15.5px;font-weight:800}.ligne{display:flex;justify-content:space-between;font-size:14.5px;padding:7px 0;border-top:1px solid var(--ligne)}.ligne span{color:var(--doux)}
+</style>
+</head>
+<body>
+<header class="tete"><div class="in"><small>Lycée René Pellet · coordination</small><h1>Besoins en AESH</h1><p>Suivi des réponses des enseignants</p></div></header>
+<main class="page" id="app"><div class="carte un"><p>Chargement…</p></div></main>
+<script type="module">
+const CLE="AIzaSyBj_GXG8ln3GAxNXxiJkT2HPSWIHJpc1lA", BASE="https://firestore.googleapis.com/v1/projects/coordination-pedagogie/databases/(default)/documents/coordination_sondages/besoins-aesh-2026/fiches";
+const ESSAIS=["2f0a6f81d8d18e6a9e5239a3654fb6e55a24d0dfed05ec11f37756de354f3362"];                       // fiche d'essai du coordinateur : hors du compte
+const app=document.querySelector('#app');
+const lire=v=>{if(!v||typeof v!=='object')return null;if('stringValue' in v)return v.stringValue;if('integerValue' in v)return +v.integerValue;if('doubleValue' in v)return +v.doubleValue;if('booleanValue' in v)return v.booleanValue;
+  if('arrayValue' in v)return (v.arrayValue.values||[]).map(lire);if('mapValue' in v){const o={};Object.keys(v.mapValue.fields||{}).forEach(k=>o[k]=lire(v.mapValue.fields[k]));return o;}return null;};
+const mn=t=>{const m=/^(\d\d?):(\d\d)$/.exec(t||'');return m?+m[1]*60+ +m[2]:NaN;};
+function tranches(c){const d=mn(c.d),f=mn(c.f);if(!(f-d>=60)||f-d>540)return 0;return Math.ceil((f-d)/(f-d>60?60:30));}
+function fait(c,r){if(!r||typeof r!=='object')return false;const n=tranches(c);
+  if(r.detail===true&&n){for(let i=0;i<n;i++)if([0,1,2,3].indexOf(r['aiH'+i])<0||[0,1,2,3,4].indexOf(r['fautH'+i])<0)return false;return true;}
+  return [0,'p',1,2,3].indexOf(r.ai)>=0&&[0,1,2,3,4].indexOf(r.faut)>=0;}
+async function compter(){
+  let docs=[],jeton='';
+  do{const r=await fetch(BASE+'?pageSize=300&key='+CLE+(jeton?'&pageToken='+encodeURIComponent(jeton):''),{cache:'no-store'});if(!r.ok)throw new Error('réponse '+r.status);const j=await r.json();docs=docs.concat(j.documents||[]);jeton=j.nextPageToken||'';}while(jeton);
+  const S={total:0,termine:0,encours:0,rien:0,coursFaits:0,coursTotal:0,dernier:''};
+  docs.forEach(d=>{if(ESSAIS.indexOf(d.name.split('/').pop())>=0)return;
+    const f={};Object.keys(d.fields||{}).forEach(k=>f[k]=lire(d.fields[k]));
+    const cours=(Array.isArray(f.cours)?f.cours:[]).filter(c=>c&&typeof c==='object'&&c.i!=null),rep=f.rep&&typeof f.rep==='object'?f.rep:{};
+    if(!cours.length)return;
+    const n=cours.filter(c=>fait(c,rep[c.i])).length;
+    S.total++;S.coursTotal+=cours.length;S.coursFaits+=n;
+    if(f.termine===true&&n===cours.length)S.termine++;else if(n)S.encours++;else S.rien++;
+    if(n&&typeof f.majLe==='string'&&f.majLe>S.dernier)S.dernier=f.majLe;});
+  return S;
+}
+const pct=(a,b)=>b?Math.round(a/b*100):0;
+function quand(iso){if(!iso)return 'aucune pour l’instant';const d=new Date(iso);if(isNaN(d))return '—';return d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+' à '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+async function afficher(){
+  const b=document.querySelector('#actu');if(b){b.disabled=true;b.textContent='Actualisation…';}
+  try{
+    const S=await compter(), h=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    app.innerHTML='<div class="carte un"><div class="gros">'+S.termine+'<small> / '+S.total+'</small></div><p>enseignants ont terminé</p>'+
+      '<div class="rail" role="img" aria-label="'+S.termine+' terminées, '+S.encours+' en cours, '+S.rien+' sans réponse"><i style="width:'+pct(S.termine,S.total)+'%;background:#2fbfa0"></i><i style="width:'+pct(S.encours,S.total)+'%;background:#e0972a"></i></div></div>'+
+      '<div class="carte"><div class="trois"><div class="t"><b>'+S.termine+'</b><span>Terminé</span></div><div class="c"><b>'+S.encours+'</b><span>En cours</span></div><div class="r"><b>'+S.rien+'</b><span>Sans réponse</span></div></div></div>'+
+      '<div class="carte"><h2>En détail</h2><div class="ligne"><span>Cours renseignés</span><b>'+S.coursFaits+' sur '+S.coursTotal+'</b></div><div class="ligne"><span>Dernière réponse</span><b>'+quand(S.dernier)+'</b></div><div class="ligne"><span>Actualisé à</span><b>'+h+'</b></div></div>'+
+      '<button type="button" id="actu">Actualiser</button><p class="note">Des nombres seulement : aucun nom n’est en ligne.<br>Pour savoir qui n’a pas répondu, demandez la relève sur le Mac.</p>';
+  }catch(e){app.innerHTML='<div class="carte un"><p class="err" role="alert">Impossible de lire les réponses pour l’instant. Vérifiez la connexion.</p></div><button type="button" id="actu">Réessayer</button>';}
+  document.querySelector('#actu').onclick=afficher;
+}
+afficher();
+</script>
+</body>
+</html>
