@@ -127,7 +127,9 @@ const bonAi=v=>AI.indexOf(v)>=0, bonFaut=v=>FAUT.indexOf(v)>=0;
 const AIH=[0,1,2,3];
 const mnDe=t=>{const m=/^(\d\d?):(\d\d)$/.exec(t||'');return m?+m[1]*60+ +m[2]:NaN;};
 const hDe=m=>Math.floor(m/60)+' h'+(m%60?' '+String(m%60).padStart(2,'0'):'');
-function tranches(c){const d=mnDe(c.d),f=mnDe(c.f),l=[];if(!(f-d>60)||f-d>600)return l;for(let t=d;t<f;t+=60)l.push([t,Math.min(f,t+60)]);return l;}
+/* 26/11/2026 (Brahim : « tu dois le mettre pour tout le monde ») : le découpage existe sur TOUS les cours d'au moins une heure.
+   Un cours d'une heure se découpe en deux demi-heures ; un cours plus long, heure par heure. */
+function tranches(c){const d=mnDe(c.d),f=mnDe(c.f),l=[];if(!(f-d>=60)||f-d>540)return l;const pas=f-d>60?60:30;for(let t=d;t<f;t+=pas)l.push([t,Math.min(f,t+pas)]);return l;}
 const BON_ID=/^[A-Za-z][A-Za-z0-9]{0,30}$/;      /* (relecture de Codex) un identifiant de cours sert de nom de champ : lettres et chiffres seulement */
 
 let F=null, ref=null, FS=null;                    // la fiche, sa référence
@@ -277,7 +279,7 @@ function carte(c){
       (fait(c)?'<button type="button" class="gros petit" data-fermer="'+esc(c.i)+'">C’est bon pour ce cours</button>':'');
   else h+='<div class="lib">J’ai</div>'+seg(c,'ai',[['Aucune',0],['Parfois','p'],['1',1],['2',2],['3',3]],'a','J’ai')+
     '<div class="lib">Il m’en faut</div>'+seg(c,'faut',[['Aucune',0],['1',1],['2',2],['3',3],['4',4]],'f','Il m’en faut');
-  if(T.length)h+='<button type="button" class="lien" data-detail="'+esc(c.i)+'">'+(det?'Revenir à une seule réponse pour tout le cours':'Ce n’est pas pareil pendant tout le cours ? Répondre heure par heure')+'</button>';
+  if(T.length)h+='<button type="button" class="lien" data-detail="'+esc(c.i)+'">'+(det?'Revenir à une seule réponse pour tout le cours':'Ce n’est pas pareil pendant tout le cours ? Répondre '+(T.length&&T[0][1]-T[0][0]<60?'par demi-heure':'heure par heure'))+'</button>';
   return h+'</div>';
 }
 function rendre(retour){
