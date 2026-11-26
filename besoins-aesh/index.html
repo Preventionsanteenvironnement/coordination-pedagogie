@@ -193,17 +193,21 @@ async function envoyer(){
   const lot=journal(), cles=Object.keys(lot).filter(k=>ligneBonne(k,lot[k]));
   if(!cles.length){if(Object.keys(lot).length)await sousVerrou(()=>{const j=journal();Object.keys(j).forEach(k=>{if(!ligneBonne(k,j[k]))delete j[k];});garder(j);});return;}
   enVol=true;dire('Enregistrement…','att');
+  let gardees={};          /* (relecture de Codex) les champs où la base avait déjà une réponse plus récente : c'est ELLE qu'on affiche ensuite */
   try{
     /* Lecture puis écriture dans une même opération de la base : un champ n'est écrit que si cette touche est plus récente que celle en base. */
     await attendre(FS.runTransaction(db,async tx=>{
       const d=await tx.get(ref);if(!d.exists())throw Object.assign(new Error('fiche absente'),{code:'not-found'});
-      const brut=d.data(), maj={};
-      cles.forEach(k=>{if(instantEnBase(brut,k)<lot[k].t){maj[k]=lot[k].v;maj[k+'Le']=lot[k].t;}});
+      const brut=d.data(), maj={};gardees={};
+      cles.forEach(k=>{if(instantEnBase(brut,k)<lot[k].t){maj[k]=lot[k].v;maj[k+'Le']=lot[k].t;}else gardees[k]=k.split('.').reduce((o,x)=>o&&typeof o==='object'?o[x]:undefined,brut);});
       if(Object.keys(maj).length){maj.majLe=new Date().toISOString();tx.update(ref,maj);}
     }),15000);
     enVol=false;essais=0;
     await sousVerrou(()=>{const j=journal();cles.forEach(k=>{if(j[k]&&j[k].n===lot[k].n)delete j[k];});garder(j);});   // seulement les touches que la base vient de traiter
-    if(enAttente())envoyer();else dire('Enregistré ✓','ok');
+    const repris=Object.keys(gardees).filter(k=>champValide(k,gardees[k])&&!journal()[k]);
+    repris.forEach(k=>appliquer(k,gardees[k]));
+    if(enAttente())envoyer();else dire(repris.length?'À jour ✓ (modifié ailleurs)':'Enregistré ✓','ok');
+    if(repris.length&&vue!=='merci')rendre();
   }catch(e){
     console.warn(e);enVol=false;
     if(['permission-denied','not-found','invalid-argument'].indexOf(e&&e.code)>=0){bloque=true;dire('Enregistrement impossible : rechargez la page','ko');return;}
@@ -249,13 +253,14 @@ function rendre(retour){
     /* (relecture de Codex) « Merci » n'est affirmé qu'une fois TOUT confirmé par la base ; avant, on dit que l'envoi est en cours */
     const reste=enAttente()&&!DEMO;
     $('#sous').textContent=reste?'Encore un instant…':'Merci pour votre réponse.';
-    app.innerHTML=reste&&bloque?'<div class="fin"><h2>Envoi impossible</h2><p role="status">Vos dernières réponses n’ont pas pu être enregistrées. Rechargez la page : elles sont gardées dans votre téléphone et repartiront.</p><button type="button" class="gros" id="recharger">Recharger la page</button><button type="button" class="gros clair" id="revoir">Revoir mes réponses</button></div>'+pied():reste?'<div class="fin"><h2>Envoi en cours…</h2><p role="status">'+esc(etat.c==='ko'?'Pas de réseau pour l’instant. Gardez cette page ouverte : l’envoi reprend tout seul.':'Vos réponses partent. Gardez cette page ouverte quelques secondes.')+'</p>'+
+    app.innerHTML=reste&&bloque?'<div class="fin"><h2>Envoi impossible</h2><p role="status">'+(sansStockage?'Vos dernières réponses n’ont pas pu être enregistrées, et ce téléphone ne peut pas les garder. Ne fermez pas cette page : réessayez, ou notez vos réponses et prévenez le référent de votre pôle.':'Vos dernières réponses n’ont pas pu être enregistrées. Elles sont gardées dans ce téléphone : réessayez, ou rechargez la page.')+'</p><button type="button" class="gros" id="reessayer">Réessayer l’envoi</button>'+(sansStockage?'':'<button type="button" class="gros clair" id="recharger">Recharger la page</button>')+'<button type="button" class="gros clair" id="revoir">Revoir mes réponses</button></div>'+pied():reste?'<div class="fin"><h2>Envoi en cours…</h2><p role="status">'+esc(etat.c==='ko'?'Pas de réseau pour l’instant. Gardez cette page ouverte : l’envoi reprend tout seul.':'Vos réponses partent. Gardez cette page ouverte quelques secondes.')+'</p>'+
       '<button type="button" class="gros clair" id="revoir">Revoir mes réponses</button></div>'+pied():
       '<div class="fin"><div class="rond"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2>Merci, c’est enregistré</h2>'+
       '<p role="status">Vos besoins sont transmis à la coordination.</p><p>Vous pouvez modifier vos réponses à tout moment avec ce même lien.</p>'+
       '<button type="button" class="gros clair" id="revoir">Revoir ou modifier mes réponses</button></div>'+pied();
     $('#revoir').onclick=()=>{vue='cours';animer=true;rendre();window.scrollTo(0,0);};
     const rc=$('#recharger');if(rc)rc.onclick=()=>location.reload();
+    const re=$('#reessayer');if(re)re.onclick=()=>{bloque=false;essais=0;envoyer();};
     return;
   }
   $('#sous').textContent='Deux touches par cours, c’est tout.';
