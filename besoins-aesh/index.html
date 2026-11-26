@@ -91,6 +91,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .note textarea{display:block;width:100%;border:1.5px solid var(--ligne);border-radius:12px;background:var(--creux);color:var(--texte);font:inherit;font-size:16px;padding:10px 12px;resize:vertical}
 .note textarea:focus{outline:2px solid var(--ciel);outline-offset:1px}
 .note p{margin:6px 0 0;font-size:12.5px;color:var(--pale)}
+.lien{display:block;border:0;background:transparent;color:var(--ciel);font-size:13.5px;font-weight:700;padding:12px 0 0;text-align:left}
+.tr{border-top:1px solid var(--ligne);margin-top:12px;padding-top:10px}.trh{font-size:14px;font-weight:800}
+.seg.pt button{height:40px;font-size:14.5px}.tr .lib{margin:8px 0 5px}
+.gros.petit{height:44px;font-size:15px;margin-top:12px}
 .fin{text-align:center;padding:34px 8px 10px;animation:monte .35s}
 .rond{width:84px;height:84px;border-radius:50%;margin:0 auto 16px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 30px -12px rgba(59,139,235,.8)}
 .rond svg{width:42px;height:42px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:trace .5s .15s forwards}
@@ -118,6 +122,12 @@ const heure=t=>{const m=/^(\d\d?):(\d\d)$/.exec(t||'');return m?(+m[1])+' h'+(m[
 /* Les seules valeurs acceptées : rien d'autre n'est ni affiché ni enregistré. */
 const AI=[0,'p',1,2,3], FAUT=[0,1,2,3,4], DRAPEAUX=['ponctuel','identique','termine'];
 const bonAi=v=>AI.indexOf(v)>=0, bonFaut=v=>FAUT.indexOf(v)>=0;
+/* 26/11/2026 (Brahim, d'après le cours de 3 h où l'AESH n'arrive qu'à la 2e heure) : un cours de plus d'une heure peut se renseigner HEURE PAR HEURE.
+   C'est facultatif : par défaut, une seule réponse pour tout le cours. À l'heure près, « parfois » n'existe pas. */
+const AIH=[0,1,2,3];
+const mnDe=t=>{const m=/^(\d\d?):(\d\d)$/.exec(t||'');return m?+m[1]*60+ +m[2]:NaN;};
+const hDe=m=>Math.floor(m/60)+' h'+(m%60?' '+String(m%60).padStart(2,'0'):'');
+function tranches(c){const d=mnDe(c.d),f=mnDe(c.f),l=[];if(!(f-d>60)||f-d>600)return l;for(let t=d;t<f;t+=60)l.push([t,Math.min(f,t+60)]);return l;}
 const BON_ID=/^[A-Za-z][A-Za-z0-9]{0,30}$/;      /* (relecture de Codex) un identifiant de cours sert de nom de champ : lettres et chiffres seulement */
 
 let F=null, ref=null, FS=null;                    // la fiche, sa référence
@@ -126,7 +136,7 @@ let jour=0, ouvert={}, vue='cours', etat={t:'',c:'att'}, animer=true;   // anime
 function demo(){return {cours:[
   {i:'d0',j:0,d:'09:30',f:'10:30',m:'Maths',cls:['C2PSR'],sem:''},{i:'d1',j:0,d:'10:30',f:'11:30',m:'Maths',cls:['BTMELEC'],sem:''},
   {i:'d2',j:1,d:'08:30',f:'09:30',m:'Maths-sciences',cls:['C1CAN'],sem:''},{i:'d3',j:1,d:'10:30',f:'11:30',m:'Co-ens. maths',cls:['B1AGO1','B1AGO2'],sem:'A'},
-  {i:'d4',j:1,d:'10:30',f:'11:30',m:'AP maths',cls:['B1AGO1','B1AGO2'],sem:'B'},{i:'d5',j:3,d:'14:00',f:'16:00',m:'Sciences',cls:['B2MELEC'],sem:''}],rep:{},ponctuel:false,identique:false,termine:false,note:''};}
+  {i:'d4',j:1,d:'10:30',f:'11:30',m:'AP maths',cls:['B1AGO1','B1AGO2'],sem:'B'},{i:'d5',j:3,d:'09:30',f:'12:30',m:'Ens. pro',cls:['B1AGO2'],sem:''}],rep:{},ponctuel:false,identique:false,termine:false,note:''};}
 
 async function empreinte(c){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('besoins-aesh:'+c));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 /* (relecture de Codex) la fiche est relue STRICTEMENT : jour entier de 0 à 4, identifiant propre et unique, oui/non vrais. Le reste est ignoré. */
@@ -137,7 +147,9 @@ function nettoyer(d){
     vus[c.i]=1;cours.push({i:String(c.i),j:c.j,d:String(c.d||''),f:String(c.f||''),m:String(c.m||''),cls:(Array.isArray(c.cls)?c.cls:[]).map(String),sem:c.sem==='A'||c.sem==='B'?c.sem:''});
   });
   const rep={}, brut=d.rep&&typeof d.rep==='object'?d.rep:{};
-  cours.forEach(c=>{const r=brut[c.i];if(!r||typeof r!=='object')return;const o={};if(bonAi(r.ai))o.ai=r.ai;if(bonFaut(r.faut))o.faut=r.faut;if('ai' in o||'faut' in o)rep[c.i]=o;});
+  cours.forEach(c=>{const r=brut[c.i];if(!r||typeof r!=='object')return;const o={};if(bonAi(r.ai))o.ai=r.ai;if(bonFaut(r.faut))o.faut=r.faut;
+    if(r.detail===true)o.detail=true;tranches(c).forEach((t,n)=>{if(AIH.indexOf(r['aiH'+n])>=0)o['aiH'+n]=r['aiH'+n];if(bonFaut(r['fautH'+n]))o['fautH'+n]=r['fautH'+n];});
+    if(Object.keys(o).length)rep[c.i]=o;});
   return {cours,rep,ponctuel:d.ponctuel===true,identique:d.identique===true,termine:d.termine===true,note:typeof d.note==='string'?d.note.slice(0,200):''};
 }
 
@@ -155,8 +167,11 @@ function sousVerrou(fn){return navigator.locks&&navigator.locks.request?navigato
 function champValide(k,v){
   if(DRAPEAUX.indexOf(k)>=0)return typeof v==='boolean';
   if(k==='note')return typeof v==='string'&&v.length<=200;       /* 26/11/2026 (Brahim) : une précision libre, à la fin, facultative */
-  const m=/^rep\.([A-Za-z][A-Za-z0-9]{0,30})\.(ai|faut)$/.exec(k);
-  return !!m&&F.cours.some(c=>c.i===m[1])&&(m[2]==='ai'?bonAi(v):bonFaut(v));
+  const m=/^rep\.([A-Za-z][A-Za-z0-9]{0,30})\.(ai|faut|detail|aiH\d|fautH\d)$/.exec(k);if(!m)return false;
+  const c=F.cours.find(x=>x.i===m[1]);if(!c)return false;
+  if(m[2]==='ai')return bonAi(v);if(m[2]==='faut')return bonFaut(v);
+  const n=tranches(c).length;if(m[2]==='detail')return typeof v==='boolean'&&n>0;
+  return +m[2].slice(-1)<n&&(m[2].charAt(0)==='a'?AIH.indexOf(v)>=0:bonFaut(v));
 }
 function appliquer(k,v){if(DRAPEAUX.indexOf(k)>=0||k==='note'){F[k]=v;return;}const m=k.split('.');F.rep[m[1]]=Object.assign({},F.rep[m[1]],{[m[2]]:v});}
 /* l'instant de la dernière touche connue de la base, pour un champ */
@@ -226,7 +241,8 @@ let resync=null;
 window.addEventListener('storage',e=>{if(e.key!==CLE||!F||DEMO)return;clearTimeout(resync);resync=setTimeout(async()=>{const r=await charger();if(r==='ok'){rendre();if(enAttente())envoyer();}},700);});
 
 /* ---------- Affichage ---------- */
-const fait=c=>{const r=F.rep[c.i];return !!r&&bonAi(r.ai)&&bonFaut(r.faut);};
+const enDetail=c=>{const r=F.rep[c.i];return !!r&&r.detail===true&&tranches(c).length>0;};
+const fait=c=>{const r=F.rep[c.i];if(!r)return false;if(enDetail(c))return tranches(c).every((t,n)=>AIH.indexOf(r['aiH'+n])>=0&&bonFaut(r['fautH'+n]));return bonAi(r.ai)&&bonFaut(r.faut);};
 const joursUtiles=()=>[0,1,2,3,4].filter(j=>F.cours.some(c=>c.j===j));
 const duJour=j=>F.cours.filter(c=>c.j===j);
 const nbFaits=l=>l.filter(fait).length;
@@ -238,21 +254,31 @@ function bilan(r){
   if(m<0)return [(-m)+' en trop','tro'];
   return r.ai===0?null:['C’est bon','bon'];
 }
+function bilanDetail(c){
+  const r=F.rep[c.i], T=tranches(c);let manque=0,trop=0,la=0;
+  T.forEach((t,n)=>{const m=r['fautH'+n]-r['aiH'+n];if(m>0)manque=Math.max(manque,m);if(m<0)trop=Math.max(trop,-m);la+=r['aiH'+n];});
+  return manque?['Il en manque '+manque,'man']:trop?[trop+' en trop','tro']:la?['C’est bon','bon']:null;
+}
 function seg(c,cle,opts,cl,nom){
   const r=F.rep[c.i]||{};
   return '<div class="seg '+cl+'" role="group" aria-label="'+esc(nom+' — '+c.cls.join(' + ')+', '+heure(c.d))+'">'+opts.map(o=>'<button type="button" class="'+(o[0].length>1?'lg ':'')+(o[1]==='p'?'p ':'')+(r[cle]===o[1]?'on':'')+'" data-c="'+esc(c.i)+'" data-k="'+cle+'" data-v="'+o[1]+'" aria-pressed="'+(r[cle]===o[1])+'">'+o[0]+'</button>').join('')+'</div>';
 }
 function carte(c){
-  const r=F.rep[c.i]||{}, titre=esc(c.cls.join(' + ')), hr=esc(heure(c.d)+' – '+heure(c.f)), ab=c.sem?'<span class="ab">Semaine '+c.sem+'</span>':'';
+  const r=F.rep[c.i]||{}, titre=esc(c.cls.join(' + ')), hr=esc(heure(c.d)+' – '+heure(c.f)), ab=c.sem?'<span class="ab">Semaine '+c.sem+'</span>':'', T=tranches(c), det=enDetail(c);
   if(fait(c)&&ouvert[c.i]!==true){
-    const b=bilan(r);
+    const b=det?bilanDetail(c):bilan(r);
     /* (relecture de Codex) l'heure reste visible sur la carte repliée : deux cours de la même classe le même jour se distinguent */
     return '<div class="carte repli" data-ouvrir="'+esc(c.i)+'" role="button" tabindex="0" aria-label="'+esc('Modifier '+c.cls.join(' + ')+', '+heure(c.d))+'"><div class="h"><span class="cl">'+titre+'</span>'+(b?'<span class="pil '+b[1]+'">'+b[0]+'</span>':'')+'</div>'+
-      '<div class="ma">'+hr+' · '+esc(c.m)+ab+'</div><div class="res"><span>J’ai '+dit(r.ai)+' · il m’en faut '+dit(r.faut)+'</span><u>Modifier</u></div></div>';
+      '<div class="ma">'+hr+' · '+esc(c.m)+ab+'</div><div class="res"><span>'+(det?T.map((t,n)=>hDe(t[0])+' : '+r['aiH'+n]+' sur '+r['fautH'+n]).join(' · '):'J’ai '+dit(r.ai)+' · il m’en faut '+dit(r.faut))+'</span><u>Modifier</u></div></div>';
   }
-  return '<div class="carte"><div class="h"><span class="cl">'+titre+'</span><span class="hr">'+hr+'</span></div><div class="ma">'+esc(c.m)+ab+'</div>'+
-    '<div class="lib">J’ai</div>'+seg(c,'ai',[['Aucune',0],['Parfois','p'],['1',1],['2',2],['3',3]],'a','J’ai')+
-    '<div class="lib">Il m’en faut</div>'+seg(c,'faut',[['Aucune',0],['1',1],['2',2],['3',3],['4',4]],'f','Il m’en faut')+'</div>';
+  let h='<div class="carte"><div class="h"><span class="cl">'+titre+'</span><span class="hr">'+hr+'</span></div><div class="ma">'+esc(c.m)+ab+'</div>';
+  if(det)h+=T.map((t,n)=>'<div class="tr"><div class="trh">'+hDe(t[0])+' – '+hDe(t[1])+'</div><div class="lib">J’ai</div>'+seg(c,'aiH'+n,[['Aucune',0],['1',1],['2',2],['3',3]],'a pt','J’ai, '+hDe(t[0]))+
+      '<div class="lib">Il m’en faut</div>'+seg(c,'fautH'+n,[['Aucune',0],['1',1],['2',2],['3',3],['4',4]],'f pt','Il m’en faut, '+hDe(t[0]))+'</div>').join('')+
+      (fait(c)?'<button type="button" class="gros petit" data-fermer="'+esc(c.i)+'">C’est bon pour ce cours</button>':'');
+  else h+='<div class="lib">J’ai</div>'+seg(c,'ai',[['Aucune',0],['Parfois','p'],['1',1],['2',2],['3',3]],'a','J’ai')+
+    '<div class="lib">Il m’en faut</div>'+seg(c,'faut',[['Aucune',0],['1',1],['2',2],['3',3],['4',4]],'f','Il m’en faut');
+  if(T.length)h+='<button type="button" class="lien" data-detail="'+esc(c.i)+'">'+(det?'Revenir à une seule réponse pour tout le cours':'Ce n’est pas pareil pendant tout le cours ? Répondre heure par heure')+'</button>';
+  return h+'</div>';
 }
 function rendre(retour){
   if(vue==='merci'){
@@ -286,14 +312,26 @@ function rendre(retour){
   app.innerHTML=h+pied();
   app.querySelectorAll('[data-jour]').forEach(b=>b.onclick=()=>{jour=+b.dataset.jour;animer=true;rendre('[data-jour="'+jour+'"]');});
   app.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
-    const i=b.dataset.c,k=b.dataset.k,v=b.dataset.v==='p'?'p':+b.dataset.v;
-    if(!F.cours.some(x=>x.i===i)||(k==='ai'&&!bonAi(v))||(k==='faut'&&!bonFaut(v))||(k!=='ai'&&k!=='faut'))return;
+    const i=b.dataset.c,k=b.dataset.k,v=b.dataset.v==='p'?'p':+b.dataset.v, c=F.cours.find(x=>x.i===i);
+    if(!c||!/^(ai|faut)(H\d)?$/.test(k)||!champValide('rep.'+i+'.'+k,v))return;
     F.rep[i]=Object.assign({},F.rep[i],{[k]:v});
-    const c=F.cours.find(x=>x.i===i), replie=c&&fait(c);if(replie)ouvert[i]=false;
+    /* une réponse unique : la carte se replie dès qu'elle est complète ; heure par heure, c'est le bouton « C'est bon pour ce cours » qui la replie */
+    const replie=!enDetail(c)&&fait(c);if(replie)ouvert[i]=false;
     noter({['rep.'+i+'.'+k]:v});
     /* (relecture de Codex) le clavier et les lecteurs d'écran gardent leur place après le redessin */
     rendre(replie?'[data-ouvrir="'+i+'"]':'.seg button[data-c="'+i+'"][data-k="'+k+'"][data-v="'+b.dataset.v+'"]');
   });
+  app.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>{
+    const i=b.dataset.detail, c=F.cours.find(x=>x.i===i);if(!c)return;
+    const r=Object.assign({},F.rep[i]), vers=!enDetail(c), champs={['rep.'+i+'.detail']:vers};
+    r.detail=vers;
+    /* en passant heure par heure, on repart de la réponse déjà donnée pour tout le cours : il ne reste qu'à corriger l'heure qui diffère */
+    if(vers)tranches(c).forEach((t,n)=>{
+      if(AIH.indexOf(r['aiH'+n])<0&&AIH.indexOf(r.ai)>=0){r['aiH'+n]=r.ai;champs['rep.'+i+'.aiH'+n]=r.ai;}
+      if(!bonFaut(r['fautH'+n])&&bonFaut(r.faut)){r['fautH'+n]=r.faut;champs['rep.'+i+'.fautH'+n]=r.faut;}});
+    F.rep[i]=r;ouvert[i]=true;noter(champs);rendre('[data-detail="'+i+'"]');
+  });
+  app.querySelectorAll('[data-fermer]').forEach(b=>b.onclick=()=>{const i=b.dataset.fermer;ouvert[i]=false;rendre('[data-ouvrir="'+i+'"]');});
   app.querySelectorAll('[data-ouvrir]').forEach(d=>{const o=()=>{const i=d.dataset.ouvrir;ouvert[i]=true;rendre('.seg button[data-c="'+i+'"]');};d.onclick=o;d.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();o();}};});
   const s=$('#suite');if(s)s.onclick=()=>{jour=suivant;animer=true;rendre();window.scrollTo({top:0,behavior:'smooth'});};
   DRAPEAUX.slice(0,2).forEach(k=>{const z=$('#'+k);if(z)z.onchange=()=>{F[k]=z.checked;noter({[k]:z.checked});};});
