@@ -1,0 +1,54 @@
+CONSULTATION DES BESOINS EN AESH — première étape
+
+Étape du 28 novembre 2026 : consultation publique, initialisation des semaines
+du 30 novembre et du 7 décembre depuis la copie UBEO préparée.
+La transmission automatique du poste reste distincte de cette initialisation.
+
+Ouvrir index.html depuis un serveur HTTP local. Ajouter ?demo=1 pour la
+démonstration fictive, qui ne contacte pas Firebase. Les fichiers demo.json
+et contrat.js sont aussi utilisés par les essais de raccordement.
+
+Sans demo=1, la page écoute uniquement le document de la semaine choisie :
+projet Firebase coordination-pedagogie,
+collection coordination_besoins_semaine, document AAAA-MM-JJ (lundi).
+Elle n'écrit aucune donnée distante, ne charge aucun annuaire et n'accède
+ni au sondage besoins-aesh, ni aux fiches élèves.
+
+Le producteur UBEO envoie une projection reconstruite : dates, heures,
+codes des classes, pôle, catégorie, matière parmi des libellés fixes,
+origine du besoin, nombres et acceptation du ponctuel. Les commentaires,
+titres libres, noms, coordonnées, adresses de stage et identifiants élèves
+sont exclus. Le format est strict, partagé avec le programme principal.
+
+Un document absent signifie « aucune semaine publiée reçue », et non
+« aucun besoin au lycée ». Une date source ancienne reste signalée.
+Le service worker est limité à ce dossier ; après une première visite
+réussie, il conserve les fichiers de la page. Les six dernières semaines
+reçues sont gardées sur cet appareil et signalées comme copies si besoin.
+La réouverture hors connexion sur téléphone physique reste à vérifier.
+
+AVANT ACTIVATION :
+- vérifier les règles réellement déployées dans le bon projet Firebase ;
+- réserver la publication à un émetteur authentifié ; ne pas autoriser
+  les écritures anonymes pour débloquer le fonctionnement ;
+- vérifier les règles génériques existantes, dont les autorisations
+  s'additionnent avec celles de cette collection ;
+- prévoir la connexion durable et le renouvellement du jeton du poste ;
+- publier et tester d'abord avec des données entièrement fictives ;
+- tester sur Windows du lycée et téléphone, puis créer le QR définitif.
+
+Le transport prototype UBEO utilise un ID token Firebase temporaire dans
+son processus principal. Il n'est ni configuré, ni diffusé dans cette page.
+Ce mécanisme de recette ne constitue pas encore la connexion durable
+du poste Windows. La publication automatique est facultative, limitée à
+une semaine choisie et à une session de gestion ouverte ; elle s'arrête
+sur erreur ou conflit. Les positionnements en ligne ne sont pas inclus.
+
+Le sondage et le portail d’accueil ne sont pas modifiés. Un seul bloc de règles
+Firebase a été ajouté pour cette collection. L’initialisation via la console
+utilise des créneaux sérialisés ; le lecteur accepte aussi la liste structurée
+écrite par le connecteur. La date affichée reste celle de la préparation UBEO,
+et ne doit pas être remplacée par la simple heure d’ouverture de la page.
+Le QR mène à cette page sans date fixe. Le week-end, la semaine suivante
+est sélectionnée ; du lundi au vendredi, la semaine courante.
+Affiche imprimable : affiche.html.
